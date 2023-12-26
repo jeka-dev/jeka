@@ -12,7 +12,7 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.*;
@@ -288,7 +288,7 @@ final class Engine {
                     ") does not provide compiler (javac). Please provide a JDK java platform by pointing JAVA_HOME" +
                     " or JEKA_JDK environment variable to a JDK directory.");
         }
-        boolean success = wrapCompile(() -> JkJavaCompiler.of().compile(javaCompileSpec), failOnCompileError);
+        boolean success = wrapCompile(() -> JkJavaCompilerToolChain.of().compile(javaCompileSpec), failOnCompileError);
         if (!success) {
             return new SingleCompileResult(false, JkPathSequence.of());
         }

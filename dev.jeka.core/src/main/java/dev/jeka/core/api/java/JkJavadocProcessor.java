@@ -125,7 +125,7 @@ public final class JkJavadocProcessor {
     }
 
     private LinkedHashSet<String> computePackages(JkPathTreeSet srcDirs) {
-        srcDirs = srcDirs.withMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+        srcDirs = srcDirs.withMatcher(JkJavaCompilerToolChain.JAVA_SOURCE_MATCHER);
         LinkedHashSet<String> result = new LinkedHashSet<>();
         for (Path relFile: srcDirs.getRelativeFiles()) {
             Path packageDir = relFile.getParent();

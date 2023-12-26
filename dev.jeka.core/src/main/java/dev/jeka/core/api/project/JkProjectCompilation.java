@@ -6,7 +6,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
- * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
+ * They also can modify {@link JkJavaCompilerToolChain} and {@link JkJavaCompileSpec} to use.
  */
 public class JkProjectCompilation {
 
@@ -170,7 +170,7 @@ public class JkProjectCompilation {
     }
 
     private void compileJava() {
-        boolean success = project.compiler.setJdkVersion(project.getJvmTargetVersion() ).compile(compileSpec());
+        boolean success = project.compiler.compile(project.getJvmTargetVersion(), compileSpec());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }

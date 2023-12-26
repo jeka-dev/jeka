@@ -5,7 +5,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
@@ -326,7 +326,7 @@ public final class JkKotlinCompiler {
     }
 
     private Result run(JkKotlinJvmCompileSpec compileSpec) {
-        JkPathMatcher filter = KOTLIN_SOURCE_MATCHER.or(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+        JkPathMatcher filter = KOTLIN_SOURCE_MATCHER.or(JkJavaCompilerToolChain.JAVA_SOURCE_MATCHER);
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSources().andMatcher(filter).getFiles()) {
             sourcePaths.add(file.toString());

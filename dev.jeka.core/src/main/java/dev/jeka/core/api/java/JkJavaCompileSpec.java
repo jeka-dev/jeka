@@ -3,11 +3,15 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,7 +54,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompiler} except
+     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompilerToolChain} except
      * sourcepath
      */
     public List<String> getOptions() {
@@ -80,6 +84,27 @@ public final class JkJavaCompileSpec {
 
     public String getTargetVersion() {
         return getNextValue(TARGET_OPTS);
+    }
+
+    /**
+     * Returns the minimum version of Java suitable for compiling, according
+     * <i>source</i>, <i>target</i> and <i>release</i> options. <p>
+     * Returns <code>null</code> if none of these options is present.
+     */
+    public JkJavaVersion minJavaVersion() {
+        String releaseArg = getReleaseVersion();
+        if (!JkUtilsString.isBlank(releaseArg)) {
+            return JkJavaVersion.of(releaseArg);
+        }
+        String targetArg = getTargetVersion();
+        if (!JkUtilsString.isBlank(targetArg)) {
+            return JkJavaVersion.of(targetArg);
+        }
+        String sourceArg = getSourceVersion();
+        if (!JkUtilsString.isBlank(sourceArg)) {
+            return JkJavaVersion.of(sourceArg);
+        }
+        return null;
     }
 
     /**
@@ -246,7 +271,7 @@ public final class JkJavaCompileSpec {
         while (it.hasNext()) {
             final String optionItem = it.next();
             if (optionItem.equals(optionName) && it.hasNext()) {
-                return it.next();
+                return it.next().trim();
             }
         }
         return null;

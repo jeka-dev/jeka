@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -30,7 +31,7 @@ import java.util.stream.Stream;
  *         among the ones specified in jdkHomes</ul>
  * </li>
  */
-public final class JkJavaCompiler {
+public final class JkJavaCompilerToolChain {
 
     /**
      * Filter to consider only Java source
@@ -45,16 +46,16 @@ public final class JkJavaCompiler {
 
     private JdkHints jdkHints = JdkHints.ofDefault();
 
-    private JkJavaCompiler() {
+    private JkJavaCompilerToolChain() {
     }
 
     /**
-     * Creates a {@link JkJavaCompiler} without specifying a {@link JavaCompiler} instance or an external process.
+     * Creates a {@link JkJavaCompilerToolChain} without specifying a {@link JavaCompiler} instance or an external process.
      * When nothing is specified, this compiler will try the default {@link JavaCompiler} instance provided
      * by the running JDK.
      */
-    public static JkJavaCompiler of() {
-        return new JkJavaCompiler();
+    public static JkJavaCompilerToolChain of() {
+        return new JkJavaCompilerToolChain();
     }
 
     /**
@@ -62,7 +63,7 @@ public final class JkJavaCompiler {
      * Since in-process compilers cannot be run in forking process mode, this method disables any
      * previous fork options that may have been set.
      */
-    public JkJavaCompiler setCompileTool(JavaCompiler tool, String... params) {
+    public JkJavaCompilerToolChain setCompileTool(JavaCompiler tool, String... params) {
         this.toolOrProcess = new ToolOrProcess(tool, null);
         this.toolParams = params;
         return this;
@@ -72,12 +73,12 @@ public final class JkJavaCompiler {
     /**
      * Sets the underlying compiler with the specified process. The process is typically a 'javac' command.
      */
-    public JkJavaCompiler setJavacProcess(JkProcess compileProcess) {
+    public JkJavaCompilerToolChain setJavacProcess(JkProcess compileProcess) {
         this.toolOrProcess = new ToolOrProcess(null, compileProcess);
         return this;
     }
 
-    public JkJavaCompiler setJavacProcessJavaHome(Path javaHome) {
+    public JkJavaCompilerToolChain setJavacProcessJavaHome(Path javaHome) {
         return this.setJavacProcess(JkProcess.of(javaHome.resolve("bin/javac").toString()));
     }
 
@@ -87,27 +88,19 @@ public final class JkJavaCompiler {
      * The forked process will be a javac command taken from the running jdk or
      * an extra-one according the source version.
      */
-    public JkJavaCompiler setForkedWithDefaultProcess(String... processParams) {
+    public JkJavaCompilerToolChain setForkedWithDefaultProcess(String... processParams) {
         this.forkParams = processParams;
         return this;
     }
 
-    public JkJavaCompiler setJdkHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
-        JdkHints jdkHints = new JdkHints(jdks, javaVersion, preferTool);
+    public JkJavaCompilerToolChain setJdkHints(JkJdks jdks, boolean preferTool) {
+        JdkHints jdkHints = new JdkHints(jdks, preferTool);
         this.jdkHints = jdkHints;
         return this;
     }
 
-    // TODO version of JDK for compiling may not be part of this class.
-    // May this class has to be understood as a compilerToolchain.
-    public JkJavaCompiler setJdkVersion(JkJavaVersion javaVersion) {
-        JdkHints jdkHints = new JdkHints(this.jdkHints.jdks, javaVersion, this.jdkHints.preferTool);
-        this.jdkHints = jdkHints;
-        return this;
-    }
-
-    private ToolOrProcess guess() {
-        if (jdkHints.javaVersion == null) {
+    private ToolOrProcess guess(JkJavaVersion javaVersion) {
+        if (javaVersion == null) {
             if (jdkHints.preferTool && ToolProvider.getSystemJavaCompiler() != null) {
                 JkLog.trace("Use current JDK tool to compile.");
                 return new ToolOrProcess(compileToolOrFail());
@@ -121,20 +114,20 @@ public final class JkJavaCompiler {
         }
         Path currentJavaHome = Paths.get(System.getProperty("java.home"));
         boolean hasJavac = Files.exists(currentJavaHome.resolve("bin/java"));
-        boolean currentVersionMatch = jdkHints.javaVersion.equals(JkJavaVersion.ofCurrent());
+        boolean currentVersionMatch = javaVersion.equals(JkJavaVersion.ofCurrent());
         if (currentVersionMatch) {
             if (jdkHints.preferTool || !hasJavac) {
                 return new ToolOrProcess(compileToolOrFail());
             }
             return new ToolOrProcess(currentJavaHome);
         }
-        Path specificJavaHome = jdkHints.jdks.getHome(jdkHints.javaVersion);
+        Path specificJavaHome = jdkHints.jdks.getHome(javaVersion);
         if (specificJavaHome != null) {
-            JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, jdkHints.javaVersion);
+            JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, javaVersion);
             return new ToolOrProcess(specificJavaHome);
         }
         JkLog.warn("No JDK path defined for version %s. Will use embedded compiler %s",
-                jdkHints.javaVersion, JkJavaVersion.ofCurrent());
+                javaVersion, JkJavaVersion.ofCurrent());
         return new ToolOrProcess(compileToolOrFail());
     }
 
@@ -152,14 +145,21 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Actually compile the source files to the output directory.
+     * Actually compile the source files to the output directory. <br/>
+     * This toolchain will try to find the most suitable JDK for performing
+     * compilation.
+     *
+     * @param javaVersion Can be <code>null</code>. Provides the version of JDK
+     *                    to use for <i>javac</i>. If <code>null</code>, it will try
+     *                    to infer JDK version from #compileSpec.
+     * @param compileSpec Contains options to pass to the Java compiler. It includes sources,
+     *                    versions, and other options specified for the compiler.
      *
      * @return <code>false</code> if a compilation error occurred.
      *
      * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
      */
-    @SuppressWarnings("unchecked")
-    public boolean compile(JkJavaCompileSpec compileSpec) {
+    public boolean compile(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
@@ -176,9 +176,18 @@ public final class JkJavaCompiler {
             message = message + " using options : \n" + printableOptions(options);
         }
         JkLog.startTask(message);
-        final boolean result = runCompiler(compileSpec);
+        JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
+                .orElse(compileSpec.minJavaVersion());
+        final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
         JkLog.endTask();
         return result;
+    }
+
+    /**
+     * @see #compile(JkJavaVersion, JkJavaCompileSpec)
+     */
+    public boolean compile(JkJavaCompileSpec compileSpec) {
+        return compile(null, compileSpec);
     }
 
     private static String printableOptions(List<String> options) {
@@ -189,11 +198,11 @@ public final class JkJavaCompiler {
         return sb.toString();
     }
 
-    private boolean runCompiler(JkJavaCompileSpec compileSpec) {
+    private boolean runCompiler(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {
         if (toolOrProcess.isSpecified()) {
             return toolOrProcess.run(compileSpec);
         }
-        return guess().run(compileSpec);
+        return guess(javaVersion).run(compileSpec);
     }
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
@@ -270,27 +279,25 @@ public final class JkJavaCompiler {
 
     private static class JdkHints {
         final JkJdks jdks;
-        final JkJavaVersion javaVersion;
         final boolean preferTool;
 
-        JdkHints(JkJdks jdks, JkJavaVersion javaVersion, boolean preferTool) {
+        JdkHints(JkJdks jdks, boolean preferTool) {
             this.jdks = jdks;
-            this.javaVersion = javaVersion;
             this.preferTool = preferTool;
         }
 
         static JdkHints ofDefault() {
-            return new JdkHints(JkJdks.of(), null, true);
+            return new JdkHints(JkJdks.of(), true);
         }
     }
 
     private class ToolOrProcess {
 
-        final JkProcess compileProcess;
+        final JkProcess<?> compileProcess;
 
         final JavaCompiler compileTool;
 
-        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess) {
+        ToolOrProcess(JavaCompiler compileTool, JkProcess<?> compileProcess) {
             this.compileProcess = compileProcess;
             this.compileTool = compileTool;
         }

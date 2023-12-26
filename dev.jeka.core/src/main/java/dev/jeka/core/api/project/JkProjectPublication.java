@@ -24,7 +24,7 @@ public class JkProjectPublication {
 
     public final JkMavenPublication maven;
 
-    public final JkIvyPublication<JkProjectPublication> ivy;
+    public final JkIvyPublication ivy;
 
     public final JkRunnables preActions;
 
@@ -41,8 +41,8 @@ public class JkProjectPublication {
                         project.compilation.getDependencies(),
                         project.packaging.getRuntimeDependencies(),
                         project.getDuplicateConflictStrategy()))
-                .setBomResolutionRepos(() -> project.dependencyResolver.getRepos());
-        ivy = JkIvyPublication.of(this)
+                .setBomResolutionRepos(project.dependencyResolver::getRepos);
+        ivy = JkIvyPublication.of()
                 .addArtifacts(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
                         project.compilation.getDependencies(),

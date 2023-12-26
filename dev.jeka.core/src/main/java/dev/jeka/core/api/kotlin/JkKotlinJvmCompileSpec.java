@@ -2,7 +2,7 @@ package dev.jeka.core.api.kotlin;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
@@ -46,7 +46,7 @@ public final class JkKotlinJvmCompileSpec {
     }
 
     /**
-     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompiler} except
+     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompilerToolChain} except
      * sourcepath
      */
     public List<String> getOptions() {
@@ -78,7 +78,7 @@ public final class JkKotlinJvmCompileSpec {
     /**
      * Sets the target Java version for compiled classes. Normally it is the same as the
      * platform compileRunner shipped with, but you can set it explicitly. Also, when set explicitly
-     * {@link JkJavaCompiler} can choose to use the appropriate compileRunner to compile to the
+     * {@link JkJavaCompilerToolChain} can choose to use the appropriate compileRunner to compile to the
      * specified target.
      */
     public JkKotlinJvmCompileSpec setTargetVersion(JkJavaVersion version) {
@@ -130,7 +130,7 @@ public final class JkKotlinJvmCompileSpec {
     // ------------------ classpath --------------------------------
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
+     * Creates a copy of this {@link JkJavaCompilerToolChain} but with the specified
      * classpath.
      */
     public JkKotlinJvmCompileSpec setClasspath(Iterable<Path> files) {

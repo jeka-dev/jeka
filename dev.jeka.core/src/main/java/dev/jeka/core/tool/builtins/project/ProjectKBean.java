@@ -6,7 +6,7 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.java.JkJdks;
@@ -342,9 +342,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (layout.mixSourcesAndResources) {
             project.flatFacade().mixResourcesAndSources();
         }
-        JkJavaCompiler compiler = project.compiler;
+        JkJavaCompilerToolChain compiler = project.compiler;
         if (!compiler.isToolOrProcessSpecified()) {
-            compiler.setJdkHints(jdks(), project.getJvmTargetVersion(), true);
+            compiler.setJdkHints(jdks(), true);
         }
         final JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
         JkArtifactId sources = JkProject.SOURCES_ARTIFACT_ID;
@@ -389,7 +389,5 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
                     JkUtilsString.translateCommandline(compilation.compilerExtraArgs));
         }
     }
-
-
 
 }

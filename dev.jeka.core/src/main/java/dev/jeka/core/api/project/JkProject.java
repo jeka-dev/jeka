@@ -11,7 +11,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
@@ -80,7 +80,7 @@ public class JkProject implements JkIdeSupportSupplier {
     /**
      * The compiler for compiling Java sources for this project.
      */
-    public final JkJavaCompiler compiler;
+    public final JkJavaCompilerToolChain compiler;
 
     public final JkProjectPackaging packaging;
 
@@ -99,7 +99,7 @@ public class JkProject implements JkIdeSupportSupplier {
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
     private JkProject() {
-        compiler = JkJavaCompiler.of();
+        compiler = JkJavaCompilerToolChain.of();
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);

@@ -58,7 +58,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
 
     public void compile() {
         JkPathTree javaSources = JkPathTree.of(src).andMatching(false, "**/*.java");
-        JkJavaCompiler.of().compile(JkJavaCompileSpec.of()
+        JkJavaCompilerToolChain.of().compile(JkJavaCompileSpec.of()
                 .setOutputDir(classDir)
                 .setClasspath(prodClasspath)
                 .setSourceVersion("8")

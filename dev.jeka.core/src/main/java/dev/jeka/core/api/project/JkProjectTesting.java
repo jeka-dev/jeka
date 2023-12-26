@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
@@ -18,7 +18,7 @@ import java.util.function.UnaryOperator;
 /**
  * Handles project testing step. This involves both test compilation and run.
  * Users can configure inner phases by chaining runnables.
- * They also can modify {@link JkJavaCompiler}, {@link JkJavaCompileSpec} for test compilation and
+ * They also can modify {@link JkJavaCompilerToolChain}, {@link JkJavaCompileSpec} for test compilation and
  * {@link JkTestProcessor}, {@link JkTestSelection} for test run.
  */
 public class JkProjectTesting {
