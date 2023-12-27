@@ -40,7 +40,9 @@ public class Build extends JkClass {
     @Override
     protected void init() {
         JkProject project = ...
-        JkProtobuf.of().configure(project); // Adds the default protobuf source generator to the project.
+        JkProtobuf.of()
+                .setProtobufVersion("3.25.1")
+                .configure(project); // Adds the default protobuf source generator to the project.
     }
 }
 

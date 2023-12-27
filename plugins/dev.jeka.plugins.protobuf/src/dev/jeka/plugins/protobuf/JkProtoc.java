@@ -68,6 +68,15 @@ public class JkProtoc {
 
     /**
      * Compiles the specified proto files.
+     * @param protoFileDir The repository where lies proto files to compile.
+     * @param extraOptions Extra options to path to the protoc compiler.
+     */
+    public void compile(Path protoFileDir, String ... extraOptions) {
+        compile(JkPathTreeSet.ofRoots(protoFileDir), extraOptions);
+    }
+
+    /**
+     * Compiles the specified proto files.
      * @param protoFiles The proto files to compile.
      * @param extraOptions Extra options to path to the protoc compiler.
      */

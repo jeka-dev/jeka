@@ -114,10 +114,10 @@ final class Engine {
         JkLog.endTask();
         JkLog.endTask();
         JkLog.endTask();
-        //JkRuntime.initAll();
+        JkRuntime.initAll();
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
-        if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {
+        if (!result.compileFailedProjects.getEntries().isEmpty()) {
             JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
                     .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");

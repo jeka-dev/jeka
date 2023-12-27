@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
  */
 public final class JkRuntime {
 
+    private static final boolean LATE_INIT = false;
+
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
     private static final Map<Path, JkRuntime> RUNTIMES = new LinkedHashMap<>();
@@ -63,7 +65,10 @@ public final class JkRuntime {
 
     /// TODO experimental
     static void initAll() {
-        RUNTIMES.values().forEach(JkRuntime::injectFieldsThenInit);
+        List<JkRuntime> runtimes = new LinkedList<>();
+        runtimes.addAll(RUNTIMES.values());
+        Collections.reverse(runtimes);
+        runtimes.forEach(JkRuntime::injectFieldsThenInit);
     }
 
     private static Path getBaseDirContext() {
@@ -196,12 +201,17 @@ public final class JkRuntime {
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
-        injectFieldValues(bean);
-        bean.init();
+        if (!LATE_INIT) {
+            injectFieldValues(bean);
+            bean.init();
+        }
         return bean;
     }
 
     private void injectFieldsThenInit() {
+        if (!LATE_INIT) {
+            return;
+        }
         for (KBean kBean : this.getBeans()) {
             JkLog.info("Inject field values in %s", kBean);
             injectFieldValues(kBean);
