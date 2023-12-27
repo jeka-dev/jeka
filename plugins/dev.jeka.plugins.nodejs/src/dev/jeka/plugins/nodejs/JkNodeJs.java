@@ -128,7 +128,7 @@ public class JkNodeJs {
      * Configures the specified project to include a nodeJs build right after main compilation.
      * @param project The project to configure
      * @param clientBaseDir The path, relative to project base dir, of the nodeJs subproject.
-     * @param clientBuildDir The path, relative to @clientBuildDir, of the directory containing the build result.
+     * @param clientBuildDir The path, relative to @clientBaseDir of the directory containing the build result.
      * @param buildCommands The commands (npm o npx) to execute to build the nodeJs project.
      */
     public JkNodeJs configure(JkProject project, String clientBaseDir, String clientBuildDir,
@@ -232,6 +232,5 @@ public class JkNodeJs {
     private static Path getDistribPath(String version) {
         return JkLocator.getCacheDir().resolve("nodejs").resolve(version);
     }
-
 
 }

@@ -64,7 +64,7 @@ public final class JkInit {
             jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             jkRuntime.init(commands);
             final T jkBean = jkRuntime.load(clazz);
-            //JkRuntime.initAll();
+            JkRuntime.initAll();
             JkLog.info(jkBean + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();

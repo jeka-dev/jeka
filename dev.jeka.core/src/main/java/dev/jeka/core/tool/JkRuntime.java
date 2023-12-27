@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +26,9 @@ import java.util.stream.Collectors;
  */
 public final class JkRuntime {
 
+    // Experiment for invoking 'KBean#init()' method lately, once all KBean has been instantiated
+    // Note : Calling all KBeans init() methods in a later stage then inside 'load' methods
+    //        leads in difficult problems as the order the KBeans should be initialized.
     private static final boolean LATE_INIT = false;
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
@@ -63,12 +67,26 @@ public final class JkRuntime {
         BASE_DIR_CONTEXT.set(baseDir);
     }
 
-    /// TODO experimental
+    /// TODO experimental late init
     static void initAll() {
-        List<JkRuntime> runtimes = new LinkedList<>();
-        runtimes.addAll(RUNTIMES.values());
+        if (!LATE_INIT) {
+            return;
+        }
+        List<JkRuntime> runtimes = new LinkedList<>(RUNTIMES.values());
         Collections.reverse(runtimes);
-        runtimes.forEach(JkRuntime::injectFieldsThenInit);
+        runtimes.forEach(runtime -> {
+            for (KBean kBean : runtime.getBeans()) {
+                JkLog.info("Inject field values in %s", kBean);
+                runtime.injectFieldValues(kBean);
+            }
+            List<KBean> reversedBeans = runtime.getBeans();
+            Collections.reverse(reversedBeans);
+            for (KBean kBean : reversedBeans) {
+                JkLog.startTask("Invoke init() on %s", kBean);
+                kBean.init();
+                JkLog.endTask();
+            }
+        });
     }
 
     private static Path getBaseDirContext() {
@@ -107,9 +125,12 @@ public final class JkRuntime {
      * Instantiates the specified KBean into this runtime, if it is not already present. <p>
      * As KBeans are singleton within a runtime, this method has no effect if the bean is already loaded.
      * @param beanClass The class of the KBean to load.
+     * @param consumer Give a chance to inject default values in the returned instance. It has only effect
+     *                 when creating the singleton. If the singleton in cached, then the consumer
+     *                 won't be applied.
      * @return This object for call chaining.
      */
-    public <T extends KBean> T load(Class<T> beanClass) {
+    public <T extends KBean> T load(Class<T> beanClass, Consumer<T> consumer) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         T result = (T) beans.get(beanClass);
         if (result == null) {
@@ -119,11 +140,18 @@ public final class JkRuntime {
             JkLog.startTask("Instantiate KBean %s in project '%s'", beanClass, projectDisplayName);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
-            result = this.instantiate(beanClass);
+            result = this.instantiate(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
             JkLog.endTask();
         }
         return result;
+    }
+
+    /**
+     * @see JkRuntime#load(Class, Consumer)
+     */
+    public <T extends KBean> T load(Class<T> beanClass) {
+        return load(beanClass, bean -> {});
     }
 
 
@@ -163,12 +191,11 @@ public final class JkRuntime {
 
         // Instantiate & register beans
         JkLog.startTask("Register KBeans");
-        List<? extends KBean> beans = commands.stream()
+        commands.stream()
                 //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
-                .map(this::load)
-                .collect(Collectors.toList());
+                .forEach(this::load);
         JkLog.endTask();
     }
 
@@ -192,12 +219,13 @@ public final class JkRuntime {
         beans.put(kbeanClass, kbean);
     }
 
-    private <T extends KBean> T instantiate(Class<T> beanClass) {
+    private <T extends KBean> T instantiate(Class<T> beanClass, Consumer<T> consumer) {
         if (Modifier.isAbstract(beanClass.getModifiers())) {
             throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
         T bean = JkUtilsReflect.newInstance(beanClass);
+        consumer.accept(bean);
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
@@ -206,21 +234,6 @@ public final class JkRuntime {
             bean.init();
         }
         return bean;
-    }
-
-    private void injectFieldsThenInit() {
-        if (!LATE_INIT) {
-            return;
-        }
-        for (KBean kBean : this.getBeans()) {
-            JkLog.info("Inject field values in %s", kBean);
-            injectFieldValues(kBean);
-        }
-        for (KBean kBean : this.getBeans()) {
-            JkLog.startTask("Invoke init() on %s", kBean);
-            kBean.init();
-            JkLog.endTask();
-        }
     }
 
     // inject values in fields from command-line and properties.
@@ -283,7 +296,6 @@ public final class JkRuntime {
         if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))
                 & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
             result = result.withFallback(readProjectPropertiesRecursively(parentProject));
-
         }
         return result;
     }

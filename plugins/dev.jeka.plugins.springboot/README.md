@@ -1,6 +1,6 @@
 # Spring-Boot Plugin for JeKa
 
-[Jeka](https://jeka.dev) plugin to build Spring-Boot applications with minimal effort. <br/>
+Plugin to build Spring-Boot applications with minimal effort. <br/>
 
 This plugin contains a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) and a library to handle the build of Spring-Boot applications, and specially 
 the creation of a bootable jar.

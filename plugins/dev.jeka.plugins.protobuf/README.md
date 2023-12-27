@@ -48,7 +48,6 @@ public class Build extends JkClass {
 
 ```
 
-
 ### Example
 
 See example [here](../../samples/dev.jeka.samples.sonarqube)

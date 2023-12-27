@@ -37,5 +37,4 @@ class ProtobufBuild extends KBean {
         projectKBean.cleanPack();
     }
 
-
 }

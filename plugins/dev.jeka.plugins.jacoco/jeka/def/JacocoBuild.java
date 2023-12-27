@@ -42,7 +42,7 @@ public class JacocoBuild extends KBean {
     public static void main(String[] args) {
         JacocoBuild jacocoBuild = JkInit.instanceOf(JacocoBuild.class, args);
         jacocoBuild.cleanPack();
-        jacocoBuild.projectKBean.publishLocal();
+        //jacocoBuild.projectKBean.publishLocal();
     }
 
 }

@@ -6,12 +6,24 @@
         <exclude-output/>
         <content url="file://$MODULE_DIR$">
             <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/jeka/def"/>
+            <sourceFolder url="file://$MODULE_DIR$/src"/>
+            <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/test"/>
+            <sourceFolder url="file://$MODULE_DIR$/jeka/output/generated_sources/java/protobuf"/>
             <excludeFolder url="file://$MODULE_DIR$/jeka/output"/>
             <excludeFolder url="file://$MODULE_DIR$/jeka/.work"/>
             <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
         </content>
         <orderEntry type="inheritedJdk"/>
         <orderEntry forTests="false" type="sourceFolder"/>
+        <orderEntry exported="" scope="COMPILE" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.protobuf/protobuf-java/jars/protobuf-java-3.21.12.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>

@@ -31,7 +31,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkDoc;
 
 @JkDefClasspath("dev.jeka:sonarqube-plugin")
-public class Build extends JkClass {
+public class Build extends KBean {
 
     @JkDoc("Run Sonarqube analysis.")
     public void runSonarqube() {
