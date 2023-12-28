@@ -52,7 +52,7 @@ public class GitKBean extends KBean {
     @JkDoc("Handle versioning of the project managed in the projectKBean. " +
             "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
     public void handleProjectVersioning() {
-        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean ->
+        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean ->
                 versionFromGit().handleVersioning(projectKBean.project));
     }
 

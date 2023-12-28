@@ -33,7 +33,6 @@ final class FieldInjector {
     static void injectAnnotatedProperties(Object target, JkProperties properties) {
         JkLog.traceStartTask("Injecting field values into %s", target);
         for (final Field field : getPropertyFields(target.getClass())) {
-            JkLog.trace("Looking for value to inject in field %s", field);
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty == null) {
                 return;

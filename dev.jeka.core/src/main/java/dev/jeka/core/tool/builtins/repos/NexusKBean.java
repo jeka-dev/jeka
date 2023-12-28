@@ -21,7 +21,7 @@ public class NexusKBean extends KBean {
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
     protected void init() {
-        ProjectKBean projectKBean = getRuntime().getOptionalKBean(ProjectKBean.class).orElse(null);
+        ProjectKBean projectKBean = getRuntime().find(ProjectKBean.class).orElse(null);
         if (projectKBean == null) {
             JkLog.warn("No project KBean present to configure repos for.");
         } else {
@@ -31,7 +31,7 @@ public class NexusKBean extends KBean {
 
     @JkDoc("Closes and releases the nexus repositories used by project KBean to publish artifacts.")
     public void closeAndRelease() {
-        Optional<ProjectKBean> projectKBean = getRuntime().getOptionalKBean(ProjectKBean.class);
+        Optional<ProjectKBean> projectKBean = getRuntime().find(ProjectKBean.class);
         if (!projectKBean.isPresent()) {
             JkLog.warn("No project plugin configured here.");
             return;

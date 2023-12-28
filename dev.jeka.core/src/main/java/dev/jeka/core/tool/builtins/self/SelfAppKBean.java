@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.self;
 
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
@@ -18,6 +19,7 @@ import dev.jeka.core.tool.KBean;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +48,10 @@ public abstract class SelfAppKBean extends KBean {
 
     private String mainClass;
 
+    private Consumer<Path> jarMaker = this::fatJar;
+
+    public final JkConsumers<JkDockerBuild> dockerBuildCustomizers = JkConsumers.of();
+
     // We can not just run Application#main cause Spring-Boot seems
     // requiring that the Java process is launched using Spring-Boot application class
     @JkDoc("Launch application")
@@ -70,11 +76,12 @@ public abstract class SelfAppKBean extends KBean {
 
     @JkDoc("Build Docker image (Need Docker).")
     public void buildImage() {
-        JkDockerBuild.of()
+        JkDockerBuild dockerBuild = JkDockerBuild.of()
                 .setClasses(classTree())
                 .setClasspath(libs())
-                .setMainClass(effectiveMainClass())
-                .buildImage(dockerImageTag);
+                .setMainClass(effectiveMainClass());
+        dockerBuildCustomizers.accept(dockerBuild);
+        dockerBuild.buildImage(dockerImageTag);
     }
 
     @JkDoc("Run Docker image and wait until termination (Need Docker).")
@@ -86,11 +93,8 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     @JkDoc("Create runnable fat jar.")
-    public void packJar() {
-        JkJarPacker.of(classTree())
-                .withManifest(manifest())
-                .makeFatJar(jarPath(), libs(), JkPathMatcher.of());
-        JkLog.info("Jar created at : " + jarPath());
+    public void buildJar() {
+        jarMaker.accept(jarPath());
     }
 
     @JkDoc("Run fat jar.")
@@ -106,6 +110,11 @@ public abstract class SelfAppKBean extends KBean {
 
     public Path jarPath() {
         return getBaseDir().resolve(JkConstants.OUTPUT_PATH).resolve(getBaseDirName() + ".jar");
+    }
+
+    public SelfAppKBean setJarMaker(Consumer<Path> jarMaker) {
+        this.jarMaker = jarMaker;
+        return this;
     }
 
     protected void setMainClass(Class<?> mainClass) {
@@ -129,14 +138,14 @@ public abstract class SelfAppKBean extends KBean {
         return getRuntime().getClasspath().getEntries();
     }
 
-    protected List<Path> libs() {
+    public List<Path> libs() {
         return appClasspath().stream()
                 .filter(entry -> !entry.toAbsolutePath().normalize()
                         .equals(classTree().getRoot().toAbsolutePath().normalize()))
                 .collect(Collectors.toList());
     }
 
-    protected JkPathTree<?> classTree() {
+    public JkPathTree<?> classTree() {
         return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR));
     }
 
@@ -149,6 +158,13 @@ public abstract class SelfAppKBean extends KBean {
 
     private String effectiveMainClass() {
         return Optional.ofNullable(mainClass).orElse(findMainClass());
+    }
+
+    private void fatJar(Path jarPath) {
+        JkJarPacker.of(classTree())
+                .withManifest(manifest())
+                .makeFatJar(jarPath, libs(), JkPathMatcher.of());
+        JkLog.info("Jar created at : " + jarPath);
     }
 
 }

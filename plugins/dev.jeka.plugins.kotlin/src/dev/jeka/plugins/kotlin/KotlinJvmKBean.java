@@ -59,7 +59,7 @@ public class KotlinJvmKBean extends KBean {
         kotlinVersion = Optional.ofNullable(getRuntime().getProperties().get("jeka.kotlin.version"))
                 .orElse(DEFAULT_VERSION);
         downloadRepos = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos();
-        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean -> {
+        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean -> {
             if (configureProject) {
                 configure(projectKBean.project);
             }

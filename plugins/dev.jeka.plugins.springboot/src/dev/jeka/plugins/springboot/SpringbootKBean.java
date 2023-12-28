@@ -45,7 +45,7 @@ public final class SpringbootKBean extends KBean {
 
     @JkDoc("Scaffold a basic example application in package org.example")
     public void scaffoldSample() {
-        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean ->
+        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean ->
                 JkSpringbootProject.of(projectKBean.project).scaffoldSample());
     }
 
@@ -54,18 +54,22 @@ public final class SpringbootKBean extends KBean {
 
         // Spring-Boot KBean is intended to enhance either ProjectKBean nor SelfAppKBean.
         // If none is present yet in the runtime, we assume that ProjectKBean should be instantiated implicitly
-        Optional<SelfAppKBean> optionalSelfAppKBean = getRuntime().getOptionalKBean(SelfAppKBean.class);
+        Optional<SelfAppKBean> optionalSelfAppKBean = getRuntime().findInstanceOf(SelfAppKBean.class);
         if (!optionalSelfAppKBean.isPresent()) {
             JkLog.trace("No SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring JkProject.");
             load(ProjectKBean.class);
         } else {
             JkLog.trace("SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring SelfApp. ");
+            SelfAppKBean selfApp = optionalSelfAppKBean.get();
+            selfApp.setJarMaker(path -> JkSpringbootJars.createBootJar(
+                    selfApp.classTree(), selfApp.libs(), getRuntime().getDependencyResolver().getRepos(), path)
+            );
         }
 
-        Optional<ProjectKBean> optionalProjectKBean = getRuntime().getOptionalKBean(ProjectKBean.class);
+        Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);
         optionalProjectKBean.ifPresent(projectKBean ->
                 configure(projectKBean.project));
-        getRuntime().getOptionalKBean(ScaffoldKBean.class).ifPresent(scaffoldKBean ->
+        getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean ->
                 configureScaffold(scaffoldKBean.scaffold));
     }
 
@@ -78,7 +82,7 @@ public final class SpringbootKBean extends KBean {
     }
 
     private void configureScaffold(JkScaffold scaffold) {
-        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean ->
+        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean ->
             JkSpringbootProject.of(projectKBean.project)
                     .configureScaffold(
                             scaffold,

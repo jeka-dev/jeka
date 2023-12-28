@@ -52,7 +52,7 @@ public final class JkImportedKBeans {
     public <T extends KBean> List<T> get(Class<T> beanClass, boolean includeTransitives) {
         return get(includeTransitives).stream()
                 .map(KBean::getRuntime)
-                .map(runtime -> runtime.getOptionalKBean(beanClass))
+                .map(runtime -> runtime.find(beanClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());

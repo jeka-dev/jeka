@@ -2,12 +2,14 @@ import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
-import dev.jeka.plugins.springboot.JkSpringbootJars;
+import dev.jeka.plugins.springboot.SpringbootKBean;
 
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class SelfAppBuild extends SelfAppKBean {
 
     SelfAppBuild() {
+
+        load(SpringbootKBean.class);  // Needed only to produce Spring-Boot jar.
 
         // setup intellij project to depends on module sources instead of jar
         // Only relevant for developing JeKa itself
@@ -16,15 +18,12 @@ class SelfAppBuild extends SelfAppKBean {
                 .replaceLibByModule("springboot-plugin-selfApp-SNAPSHOT.jar", "dev.jeka.plugins.springboot")
                 .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null)
                 .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null);
-    }
 
-    @Override
-    public void packJar() {
-        JkSpringbootJars.createBootJar(
-                classTree(),
-                libs(),
-                getRuntime().getDependencyResolver().getRepos(),
-                jarPath());
+        dockerBuildCustomizers.append(dockerBuild -> dockerBuild
+                .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
+                .addExtraFile(getBaseDir().resolve("jeka/local.properties"), "/toto.txt")
+                .addAgent(getBaseDir().resolve("jeka/opentelemetry-javaagent.jar"), "")
+        );
     }
 
     public void clean() {

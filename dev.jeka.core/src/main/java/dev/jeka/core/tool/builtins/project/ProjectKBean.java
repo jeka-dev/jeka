@@ -77,7 +77,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         configureProject();
 
         // configure ScaffoldKBean
-        getRuntime().getOptionalKBean(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
+        getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
 
             // Scaffold project structure including build class
             JkScaffoldOptions scaffoldOptions = this.scaffold;

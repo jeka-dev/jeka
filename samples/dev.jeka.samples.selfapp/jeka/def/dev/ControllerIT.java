@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @JkInjectClasspath("org.springframework.boot:spring-boot-starter-test")
 
-
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         classes = {Application.class})

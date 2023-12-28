@@ -155,8 +155,20 @@ public final class JkRuntime {
     }
 
 
-    public <T extends KBean> Optional<T> getOptionalKBean(Class<T> beanClass) {
+    /**
+     * Returns the KBean of the exact specified class, present in this runtime.
+     */
+    public <T extends KBean> Optional<T> find(Class<T> beanClass) {
         return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
+    }
+
+    /**
+     * Returns the first KBean being an instance of the specified class, present in this runtime.
+     */
+    public <T extends KBean> Optional<T> findInstanceOf(Class<T> beanClass) {
+        return (Optional<T>) beans.values().stream()
+                .filter(beanClass::isInstance)
+                .findFirst();
     }
 
     /**

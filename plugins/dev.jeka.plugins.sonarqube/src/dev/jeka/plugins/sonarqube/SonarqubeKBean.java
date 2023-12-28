@@ -30,7 +30,7 @@ public class SonarqubeKBean extends KBean {
             "Properties prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to sonarQube properties.")
     public void run() {
-        getRuntime().getOptionalKBean(ProjectKBean.class).ifPresent(projectKBean -> {
+        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean -> {
             sonarqube.configureFor(projectKBean.project, provideProductionLibs, provideTestLibs);
         });
         sonarqube.run();
