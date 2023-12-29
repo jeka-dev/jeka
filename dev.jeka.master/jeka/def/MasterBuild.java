@@ -168,7 +168,7 @@ class MasterBuild extends KBean {
 
     private void applyToSlave(ProjectKBean projectKBean) {
         if (!JkVersion.of(versionFromGit.version()).isSnapshot()) {     // Produce javadoc only for release
-            projectKBean.pack.javadoc = true;
+            projectKBean.project.flatFacade().includeJavadocAndSources(true, true);
         }
         JkProject project = projectKBean.project;
         versionFromGit.handleVersioning(project);

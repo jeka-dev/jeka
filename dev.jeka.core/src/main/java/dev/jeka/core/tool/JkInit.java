@@ -34,13 +34,13 @@ public final class JkInit {
         Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
         if (!Files.isDirectory(Paths.get("jeka")) ) {
             throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
-                    + " does not seem to be a Jeka project as " +
+                    + " does not seem to be a JeKa project as " +
                     "it does not contain a 'jeka' folder.");
         }
         JkLog.setDecorator(Environment.standardOptions.logStyle);
         if (Environment.standardOptions.logRuntimeInformation) {
             displayRuntimeInfo();
-            JkLog.info("Jeka Classpath : ");
+            JkLog.info("JeKa Classpath : ");
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
         }
         boolean memoryBufferLogActivated = false;

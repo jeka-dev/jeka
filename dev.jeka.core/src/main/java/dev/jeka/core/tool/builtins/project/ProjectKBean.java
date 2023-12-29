@@ -3,8 +3,6 @@ package dev.jeka.core.tool.builtins.project;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -28,7 +26,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkProperties}.
@@ -40,7 +37,8 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
-    public final JkPackOptions pack = new JkPackOptions();
+    @JkDoc("") // injectable field, but it has no impact after init() call
+    private final JkPackOptions pack = new JkPackOptions();
 
     /**
      * Options for run tasks
@@ -50,7 +48,8 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring testing tasks.
      */
-    public final JkTestOptions tests = new JkTestOptions();
+    @JkDoc("")
+    private final JkTestOptions tests = new JkTestOptions();
 
     /**
      * Options for configuring scaffold.
@@ -60,12 +59,14 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring directory layout.
      */
-    public final JkLayoutOptions layout = new JkLayoutOptions();
+    @JkDoc("")
+    private final JkLayoutOptions layout = new JkLayoutOptions();
 
     /**
      * Options for configuring compilation.
      */
-    public final JkCompilationOptions compilation = new JkCompilationOptions();
+    @JkDoc("")
+    private final JkCompilationOptions compilation = new JkCompilationOptions();
 
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
@@ -184,11 +185,11 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         /** When true, javadoc is created and packed in a jar file.*/
         @JkDoc("If true, javadoc jar is added in the list of artifact to produce/publish.")
-        public Boolean javadoc;
+        public boolean javadoc = true;
 
         /** When true, sources are packed in a jar file.*/
         @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
-        public Boolean sources;
+        public Boolean sources = true;
 
         @JkDoc("Set the type of jar to produce for the main artifact.")
         public JkProjectPackaging.JarType jarType;
@@ -268,10 +269,14 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public static class JkScaffoldOptions {
 
         @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
-        public boolean generateLocalLibsFolders = false;
+        private final boolean generateLocalLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
-        public JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.SIMPLE_FACADE;
+        private final JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.SIMPLE_FACADE;
+
+        public JkProjectScaffold.BuildClassTemplate getTemplate() {
+            return template;
+        }
 
         public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
 
@@ -336,9 +341,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.setJvmTargetVersion(version);
         }
         applyRepoConfigOn(project);
-        if (layout.style != null) {
-            project.flatFacade().setLayoutStyle(layout.style);
-        }
+        project.flatFacade().setLayoutStyle(layout.style);
         if (layout.mixSourcesAndResources) {
             project.flatFacade().mixResourcesAndSources();
         }
@@ -346,21 +349,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (!compiler.isToolOrProcessSpecified()) {
             compiler.setJdkHints(jdks(), true);
         }
-        final JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
-        JkArtifactId sources = JkProject.SOURCES_ARTIFACT_ID;
-        if (pack.sources != null && !pack.sources) {
-            artifactProducer.removeArtifact(sources);
-        } else if (pack.sources != null && pack.sources && !artifactProducer.getArtifactIds().contains(sources)) {
-            Consumer<Path> sourceJar = project.packaging::createSourceJar;
-            artifactProducer.putArtifact(sources, sourceJar);
-        }
-        JkArtifactId javadoc = JkProject.JAVADOC_ARTIFACT_ID;
-        if (pack.javadoc != null && !pack.javadoc) {
-            artifactProducer.removeArtifact(javadoc);
-        } else if (pack.javadoc != null && pack.javadoc && !artifactProducer.getArtifactIds().contains(javadoc)) {
-            Consumer<Path> javadocJar = project.packaging::createJavadocJar;
-            artifactProducer.putArtifact(javadoc, javadocJar);
-        }
+        project.flatFacade().includeJavadocAndSources(pack.javadoc, pack.sources);
         if (pack.jarType != null) {
             project.flatFacade().setMainArtifactJarType(pack.jarType);
         }

@@ -44,37 +44,15 @@ public class JkProjectPackaging {
 
     private JkResolveResult cachedJkResolveResult;
 
-    /**
-     * For parent chaining
-     */
-    public final JkProject __;
-
      JkProjectPackaging(JkProject project) {
         this.project = project;
         this.manifest = JkManifest.of();
-        this.__ = project;
-        javadocProcessor = JkJavadocProcessor.of();
+        this.javadocProcessor = JkJavadocProcessor.of();
     }
 
     public JkProjectPackaging apply(Consumer<JkProjectPackaging> consumer) {
          consumer.accept(this);
          return this;
-    }
-
-    /**
-     * Generates javadoc files (files + zip)
-     */
-    private boolean createJavadocFiles() {
-        JkProjectCompilation compilation = project.compilation;
-        Iterable<Path> classpath = project.dependencyResolver
-                .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
-        Path dir = project.getOutputDir().resolve(javadocDir);
-        JkPathTreeSet sources = compilation.layout.resolveSources();
-        if (!sources.containFiles()) {
-            return false;
-        }
-        javadocProcessor.make(classpath, sources, dir);
-        return true;
     }
 
     public Path getJavadocDir() {
@@ -223,6 +201,22 @@ public class JkProjectPackaging {
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null && version != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         }
+    }
+
+    /**
+     * Generates javadoc files (files + zip)
+     */
+    private boolean createJavadocFiles() {
+        JkProjectCompilation compilation = project.compilation;
+        Iterable<Path> classpath = project.dependencyResolver
+                .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
+        Path dir = project.getOutputDir().resolve(javadocDir);
+        JkPathTreeSet sources = compilation.layout.resolveSources();
+        if (!sources.containFiles()) {
+            return false;
+        }
+        javadocProcessor.make(classpath, sources, dir);
+        return true;
     }
 
 }

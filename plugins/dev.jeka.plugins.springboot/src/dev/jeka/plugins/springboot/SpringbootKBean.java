@@ -65,6 +65,7 @@ public final class SpringbootKBean extends KBean {
                     selfApp.classTree(), selfApp.libs(), getRuntime().getDependencyResolver().getRepos(), path)
             );
             selfApp.dockerBuildCustomizers.add(dockerBuild -> dockerBuild.setExposedPorts(8080));
+            selfApp.dockerRunParams = "-p 8080:8080";
         }
 
         Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);
@@ -89,7 +90,7 @@ public final class SpringbootKBean extends KBean {
                             scaffold,
                             scaffoldKind,
                             scaffoldDefClasspath,
-                            projectKBean.scaffold.template));
+                            projectKBean.scaffold.getTemplate()));
     }
 
     private void configure(JkProject project) {

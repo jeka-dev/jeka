@@ -9,7 +9,6 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.docker.JkDocker;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -44,7 +43,7 @@ public abstract class SelfAppKBean extends KBean {
     public String args = "";
 
     @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage")
-    public String dockerRunParams = "-p 8080:8080";
+    public String dockerRunParams = "";
 
     private String mainClass;
 
@@ -130,12 +129,7 @@ public abstract class SelfAppKBean extends KBean {
             return mainClass;
         }
         JkUrlClassLoader ucl = JkUrlClassLoader.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR));
-        List<String> candidates = ucl.toJkClassLoader().findClassesHavingMainMethod();
-        JkUtilsAssert.state(!candidates.isEmpty(), "No class with main method found. Add one to " +
-                "def folder in order to run.");
-        JkUtilsAssert.state(candidates.size() == 1, "Multiple classes with main method found %s, please pickup " +
-                "one and mention it in #setMainClass.", candidates);
-        return candidates.get(0);
+        return ucl.toJkClassLoader().findUniqueMainClass();
     }
 
     protected List<Path> appClasspath() {

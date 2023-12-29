@@ -458,6 +458,10 @@ public class JkProject implements JkIdeSupportSupplier {
         return document;
     }
 
+    public void runMain() {
+
+    }
+
     /**
      * Executes the jar having the specified artifact name. This method assumes that the jar is already built and
      * declare a main method in its manifest.
