@@ -255,7 +255,7 @@ public final class JkRuntime {
         Map<String, String> props = new HashMap<>();
 
         // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
-        if (bean.isMatchingName(Environment.standardOptions.kBeanName())) {
+        if (bean.isMatchingName(Environment.standardOptions.kbeanName())) {
             props.putAll(properties.getAllStartingWith(Environment.KB_KEYWORD + "#", false));
         }
         props.putAll(properties.getAllStartingWith(beanName + "#", false));

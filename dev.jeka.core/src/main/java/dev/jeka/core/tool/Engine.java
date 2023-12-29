@@ -108,7 +108,7 @@ final class Engine {
                 && Environment.standardOptions.ignoreCompileFail;
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
-                Environment.standardOptions.kBeanName(), ignoreDefaultBeanNotFound);
+                Environment.standardOptions.kbeanName(), ignoreDefaultBeanNotFound);
         JkLog.startTask("Init runtime");
         runtime.init(resolvedCommands);
         JkLog.endTask();
@@ -148,7 +148,7 @@ final class Engine {
         }
         return "help".equals(Environment.originalCmdLineAsString())
                         && beanClassesResolver.getSourceFiles().isEmpty()
-                        && Environment.standardOptions.kBeanName() == null;
+                        && Environment.standardOptions.kbeanName() == null;
 
     }
 

@@ -150,7 +150,8 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     public JkPathTree<?> classTree() {
-        return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR));
+        return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR))
+                .andMatching(false, "_*", "_*/**");
     }
 
     protected JkManifest manifest() {
