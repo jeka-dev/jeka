@@ -14,7 +14,10 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -66,6 +69,8 @@ public class JkProject implements JkIdeSupportSupplier {
     private JkJavaVersion jvmTargetVersion;
 
     private String sourceEncoding = DEFAULT_ENCODING;
+
+    private String mainClass;
 
     private final JkRunnables cleanExtraActions = JkRunnables.of();
 
@@ -151,7 +156,6 @@ public class JkProject implements JkIdeSupportSupplier {
         return cleanExtraActions;
     }
 
-
     /**
      * Returns path of the directory under which are produced build files
      */
@@ -164,11 +168,6 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public JkProject setOutputDir(String relativePath) {
         this.outputDir = relativePath;
-        return this;
-    }
-
-    JkProject setDependencyTxtUrl(URL url) {
-        this.dependencyTxtUrl = url;
         return this;
     }
 
@@ -205,6 +204,14 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
+     * Sets the main class name to use in #runXxx and {@link #dockerImage()} methods.
+     */
+    public JkProject setMainClass(String mainClass) {
+        this.mainClass = mainClass;
+        return this;
+    }
+
+    /**
      * Returns the strategy to use when twi dependencies with distinct versions
      * are declared in the project dependencies.
      */
@@ -219,6 +226,72 @@ public class JkProject implements JkIdeSupportSupplier {
     public JkProject setDuplicateConflictStrategy(JkCoordinate.ConflictStrategy duplicateConflictStrategy) {
         this.duplicateConflictStrategy = duplicateConflictStrategy;
         return this;
+    }
+
+    // ------------------------- Run ---------------------------
+
+    /**
+     * Creates {@link JkProcess} to execute the main method for this project.
+     */
+    public JkProcess<?> runMain(String jvmOptions, String ... programArgs) {
+        compilation.runIfNeeded();
+        return JkJavaProcess.ofJava(actualMainClass())
+                .setClasspath(this.packaging.resolveRuntimeDependencies().getFiles())
+                .setInheritIO(true)
+                .setInheritSystemProperties(true)
+                .setDestroyAtJvmShutdown(true)
+                .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
+                .addParams(programArgs);
+    }
+
+    /**
+     * Creates {@link JkProcess} to execute the jar having the specified artifact name.
+     * The jar is created on the fly if it is not already present.
+     *
+     * @param artifactName       The name of the artifact to run. In a project producing a side 'fat' jar, you can use
+     *                           'fat' as artifact name. If you want to run the main artifact, just use '' as artifact name.
+     * @param includeRuntimeDeps if <code>true</code>, the runtime dependencies will be added to the classpath. This should
+     *                           values <code>false</code> in case of <i>fat</i> jar.
+     * @param jvmOptions        options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
+     * @param args               program arguments to be passed in command line, as <code>--print --verbose myArg</code>
+     */
+    public JkProcess<?> runJar(String artifactName, boolean includeRuntimeDeps, String jvmOptions, String args) {
+        JkArtifactId artifactId = JkArtifactId.of(artifactName, "jar");
+        Path artifactPath = artifactProducer.getArtifactPath(artifactId);
+        if (!Files.exists(artifactPath)) {
+            artifactProducer.makeArtifacts(artifactId);
+        }
+        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
+                .setDestroyAtJvmShutdown(true)
+                .setLogCommand(true)
+                .setLogOutput(true)
+                .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
+                .addParams(JkUtilsString.translateCommandline(args));
+        if (includeRuntimeDeps) {
+            JkPathSequence pathSequence = packaging.resolveRuntimeDependencies().getFiles();
+            javaProcess.setClasspath(pathSequence.getEntries());
+        }
+        return javaProcess;
+    }
+
+    /**
+     * Same as {@link #runJar(String, boolean, String, String)} but specific for the main artefact.
+     *
+     * @see #runJar(String, boolean, String, String)
+     */
+    public JkProcess<?> runJar(boolean includeRuntimeDeps, String jvmOptions, String programArgs) {
+        return runJar(JkArtifactId.MAIN_ARTIFACT_NAME, includeRuntimeDeps, jvmOptions, programArgs);
+    }
+
+    /**
+     * Creates a {@link JkDockerBuild} to build a docker image of the application.
+     */
+    public JkDockerBuild dockerImage() {
+        compilation.runIfNeeded();
+        return JkDockerBuild.of()
+                .setClasses(JkPathTree.of(compilation.layout.resolveClassDir()))
+                .setClasspath(packaging.resolveRuntimeDependencies().getFiles().getEntries())
+                .setMainClass(actualMainClass());
     }
 
     // -------------------------- Other -------------------------
@@ -299,24 +372,6 @@ public class JkProject implements JkIdeSupportSupplier {
         displayDependencyTree("test", testing.compilation.getDependencies());
     }
 
-    private void displayDependencyTree(String purpose, JkDependencySet deps) {
-        JkLog.info("-----------------------------------------------------------");
-        JkLog.info("Resolving Dependencies for " + purpose + " : ");
-        JkLog.info("-----------------------------------------------------------");
-        final JkResolveResult resolveResult = dependencyResolver.resolve(deps);
-        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        JkLog.info("-----------------------------------------");
-        JkLog.info("Dependency tree for " + purpose + " : ");
-        JkLog.info("-----------------------------------------");
-        JkLog.info(String.join("\n", tree.toStrings()));
-        JkLog.info("");
-        JkLog.info("-----------------------------------------");
-        JkLog.info("Classpath for " + purpose + " : ");
-        JkLog.info("-----------------------------------------");
-        resolveResult.getFiles().getEntries().forEach(path -> JkLog.info(path.getFileName().toString()));
-        JkLog.info("");
-    }
-
     /**
      * Returns an ideSupport for this project.
      */
@@ -372,24 +427,11 @@ public class JkProject implements JkIdeSupportSupplier {
                 .withTransitivity(transitivity);
     }
 
-    private Path getArtifactPath(JkArtifactId artifactId) {
-        JkModuleId jkModuleId = publication.getModuleId();
-        String fileBaseName = jkModuleId != null ? jkModuleId.getDotNotation()
-                : baseDir.toAbsolutePath().getFileName().toString();
-        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
-    }
-
     /**
      * Shorthand to build all missing artifacts for publication.
      */
     public void pack() {
         artifactProducer.makeAllMissingArtifacts();
-    }
-
-    private void registerArtifacts() {
-        artifactProducer.putMainArtifact(packaging::createBinJar);
-        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
-        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
     }
 
     /**
@@ -425,20 +467,6 @@ public class JkProject implements JkIdeSupportSupplier {
         return this;
     }
 
-    LocalAndTxtDependencies textAndLocalDeps() {
-        if (cachedTextAndLocalDeps != null) {
-            return cachedTextAndLocalDeps;
-        }
-        LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
-                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_LIBS_DIR));
-        LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
-                ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))
-                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
-        cachedTextAndLocalDeps = localDeps.and(textDeps);
-        return cachedTextAndLocalDeps;
-    }
-
     /**
      * Returns an XML document containing the dependency trees of this project.
      * Mainly intended for 3rd party tools.
@@ -458,45 +486,6 @@ public class JkProject implements JkIdeSupportSupplier {
         return document;
     }
 
-    public void runMain() {
-
-    }
-
-    /**
-     * Executes the jar having the specified artifact name. This method assumes that the jar is already built and
-     * declare a main method in its manifest.
-     *
-     * @param artifactName       The name of the artifact to run. In a project producing a side 'fat' jar, you can use
-     *                           'fat' as artifact name. If you want to run the main artifact, just use '' as artifact name.
-     * @param includeRuntimeDeps if <code>true</code>, the runtime dependencies will be added to the classpath. This should
-     *                           values <code>false</code> in case of <i>fat</i> jar.
-     * @param javaOptions        options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
-     * @param args               program arguments to be passed in command line, as <code>--print --verbose myArg</code>
-     */
-    public void runJar(String artifactName, boolean includeRuntimeDeps, String javaOptions, String args) {
-        Path artifactPath = artifactProducer.getArtifactPath(JkArtifactId.of(artifactName, "jar"));
-        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
-                .setDestroyAtJvmShutdown(true)
-                .setLogCommand(true)
-                .setLogOutput(true)
-                .addJavaOptions(JkUtilsString.translateCommandline(javaOptions))
-                .addParams(JkUtilsString.translateCommandline(args));
-        if (includeRuntimeDeps) {
-            JkPathSequence pathSequence = packaging.resolveRuntimeDependencies().getFiles();
-            javaProcess.setClasspath(pathSequence.getEntries());
-        }
-        javaProcess.exec();
-    }
-
-    /**
-     * Same as {@link #runJar(String, boolean, String, String)} but specific for the main artefact.
-     *
-     * @see #runJar(String, boolean, String, String)
-     */
-    public void runMainJar(boolean includeRuntimeDeps, String javaOptions, String args) {
-        runJar(JkArtifactId.MAIN_ARTIFACT_NAME, includeRuntimeDeps, javaOptions, args);
-    }
-
     /**
      * Convenient method to get the path of the main built artifact (generally the
      * jar file containing the java classes of the application/library).
@@ -505,12 +494,71 @@ public class JkProject implements JkIdeSupportSupplier {
         return artifactProducer.getMainArtifactPath();
     }
 
+    LocalAndTxtDependencies textAndLocalDeps() {
+        if (cachedTextAndLocalDeps != null) {
+            return cachedTextAndLocalDeps;
+        }
+        LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
+                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_LIBS_DIR));
+        LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
+                ? LocalAndTxtDependencies.ofOptionalTextDescription(
+                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))
+                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
+        cachedTextAndLocalDeps = localDeps.and(textDeps);
+        return cachedTextAndLocalDeps;
+    }
+
+    JkProject setDependencyTxtUrl(URL url) {
+        this.dependencyTxtUrl = url;
+        return this;
+    }
+
     private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
         JkResolveResult resolveResult = dependencyResolver.resolve(deps);
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         Element element = tree.toDomElement(document, true);
         element.setAttribute("purpose", purpose);
         return element;
+    }
+
+    private void displayDependencyTree(String purpose, JkDependencySet deps) {
+        JkLog.info("-----------------------------------------------------------");
+        JkLog.info("Resolving Dependencies for " + purpose + " : ");
+        JkLog.info("-----------------------------------------------------------");
+        final JkResolveResult resolveResult = dependencyResolver.resolve(deps);
+        final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+        JkLog.info("-----------------------------------------");
+        JkLog.info("Dependency tree for " + purpose + " : ");
+        JkLog.info("-----------------------------------------");
+        JkLog.info(String.join("\n", tree.toStrings()));
+        JkLog.info("");
+        JkLog.info("-----------------------------------------");
+        JkLog.info("Classpath for " + purpose + " : ");
+        JkLog.info("-----------------------------------------");
+        resolveResult.getFiles().getEntries().forEach(path -> JkLog.info(path.getFileName().toString()));
+        JkLog.info("");
+    }
+
+    private Path getArtifactPath(JkArtifactId artifactId) {
+        JkModuleId jkModuleId = publication.getModuleId();
+        String fileBaseName = jkModuleId != null ? jkModuleId.getDotNotation()
+                : baseDir.toAbsolutePath().getFileName().toString();
+        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
+    }
+
+    private void registerArtifacts() {
+        artifactProducer.putMainArtifact(packaging::createBinJar);
+        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
+        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
+    }
+
+    private String actualMainClass() {
+        if (mainClass != null) {
+            return mainClass;
+        }
+        compilation.runIfNeeded();
+        JkUrlClassLoader ucl = JkUrlClassLoader.of(this.compilation.layout.resolveClassDir());
+        return ucl.toJkClassLoader().findUniqueMainClass();
     }
 
 }

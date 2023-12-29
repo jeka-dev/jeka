@@ -73,7 +73,6 @@ public class JkProjectFlatFacade {
         return setBaseDir(Paths.get(baseDir));
     }
 
-
     public JkProjectFlatFacade setLayoutStyle(JkCompileLayout.Style style) {
         if (style == JkCompileLayout.Style.SIMPLE) {
             project.compilation.layout.setSourceSimpleStyle(PROD);
@@ -86,8 +85,6 @@ public class JkProjectFlatFacade {
         }
         return this;
     }
-
-
 
     /**
      * The resources will be located in same dirs than sources.

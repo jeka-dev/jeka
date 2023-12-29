@@ -21,7 +21,6 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
 import org.w3c.dom.Document;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,27 +75,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @Override
     protected void init() {
         configureProject();
-
-        // configure ScaffoldKBean
-        getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
-
-            // Scaffold project structure including build class
-            JkScaffoldOptions scaffoldOptions = this.scaffold;
-            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffoldKBean.scaffold);
-            projectScaffold.configureScaffold(scaffoldOptions.template);
-
-            // Create 'project-dependencies.txt' file if needed
-            JkScaffoldOptions.DependenciesTxt dependenciesTxt = scaffoldOptions.dependenciesTxt;
-            List<String> compileDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
-            List<String> runtimeDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
-            List<String> testDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
-            projectScaffold.createProjectDependenciesTxt(compileDeps, runtimeDeps, testDeps);
-
-            // Create local lib folder structure if needed
-            if (scaffoldOptions.generateLocalLibsFolders) {
-                projectScaffold.generateLocalLibsFolders();
-            }
-        });
+        configureScaffold();
     }
 
     // ------------------------------- command line methods -----------------------------
@@ -249,20 +228,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public boolean useRuntimeDepsForClasspath;
 
         void runJar() {
-            Path jarPath = ProjectKBean.this.project.artifactProducer.getMainArtifactPath();
-            if (!Files.exists(jarPath)) {
-                ProjectKBean.this.project.artifactProducer.makeMainArtifact();
-            }
-            JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(jarPath, null)
-                    .setLogCommand(JkLog.isVerbose())
-                    .setDestroyAtJvmShutdown(true)
-                    .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
-                    .addParams(JkUtilsString.translateCommandline(programArgs));
-            if (useRuntimeDepsForClasspath) {
-                javaProcess
-                        .setClasspath(ProjectKBean.this.project.packaging.resolveRuntimeDependencies().getFiles());
-            }
-            javaProcess.exec();
+            project.runJar(useRuntimeDepsForClasspath, jvmOptions, programArgs).exec();
         }
     }
 
@@ -377,6 +343,28 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.compilation.addJavaCompilerOptions(
                     JkUtilsString.translateCommandline(compilation.compilerExtraArgs));
         }
+    }
+
+    private void configureScaffold() {
+        getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
+
+            // Scaffold project structure including build class
+            JkScaffoldOptions scaffoldOptions = this.scaffold;
+            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffoldKBean.scaffold);
+            projectScaffold.configureScaffold(scaffoldOptions.template);
+
+            // Create 'project-dependencies.txt' file if needed
+            JkScaffoldOptions.DependenciesTxt dependenciesTxt = scaffoldOptions.dependenciesTxt;
+            List<String> compileDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
+            List<String> runtimeDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
+            List<String> testDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
+            projectScaffold.createProjectDependenciesTxt(compileDeps, runtimeDeps, testDeps);
+
+            // Create local lib folder structure if needed
+            if (scaffoldOptions.generateLocalLibsFolders) {
+                projectScaffold.generateLocalLibsFolders();
+            }
+        });
     }
 
 }

@@ -17,7 +17,6 @@ import dev.jeka.core.tool.KBean;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,7 @@ public abstract class SelfAppKBean extends KBean {
     @JkDoc("Space separated list of program arguments to pass to the command line running the program.")
     public String args = "";
 
-    @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage")
+    @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage'")
     public String dockerRunParams = "";
 
     private String mainClass;
@@ -59,7 +58,7 @@ public abstract class SelfAppKBean extends KBean {
     // requiring that the Java process is launched using Spring-Boot application class
     @JkDoc("Launch application")
     public void runMain() {
-        JkJavaProcess.ofJava(effectiveMainClass())
+        JkJavaProcess.ofJava(actualMainClass())
                 .setClasspath(appClasspath())
                 .setInheritIO(true)
                 .setInheritSystemProperties(true)
@@ -82,7 +81,7 @@ public abstract class SelfAppKBean extends KBean {
         JkDockerBuild dockerBuild = JkDockerBuild.of()
                 .setClasses(classTree())
                 .setClasspath(libs())
-                .setMainClass(effectiveMainClass());
+                .setMainClass(actualMainClass());
         dockerBuildCustomizers.accept(dockerBuild);
         dockerBuild.buildImage(dockerImageTag);
     }
@@ -124,7 +123,7 @@ public abstract class SelfAppKBean extends KBean {
         this.mainClass = mainClass.getName();
     }
 
-    private String findMainClass() {
+    private String actualMainClass() {
         if (mainClass != null) {
             return mainClass;
         }
@@ -151,12 +150,8 @@ public abstract class SelfAppKBean extends KBean {
     protected JkManifest manifest() {
         return JkManifest.of()
                 .addMainAttribute(JkManifest.CREATED_BY, "JeKa")
-                .addMainClass(effectiveMainClass())
+                .addMainClass(actualMainClass())
                 .addMainAttribute(JkManifest.BUILD_JDK, "" + JkUtilsJdk.runningMajorVersion());
-    }
-
-    private String effectiveMainClass() {
-        return Optional.ofNullable(mainClass).orElse(findMainClass());
     }
 
     private void fatJar(Path jarPath) {
