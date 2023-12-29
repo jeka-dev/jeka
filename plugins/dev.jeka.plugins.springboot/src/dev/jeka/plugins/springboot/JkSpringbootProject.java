@@ -10,10 +10,10 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.builtins.scaffold.JkScaffold;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -155,7 +155,7 @@ public final class JkSpringbootProject {
      * Scaffolds a sample Spring-Boot application at sources and test location.
      */
     public void scaffoldSample() {
-        String basePackage = "your/basepackage";
+        String basePackage = "app";  // Applications are not consumed as dependency, therefore we do not need to use a unique identified packages.
         Path sourceDir = project.compilation.layout
                 .getSources().getRootDirsOrZipFiles().get(0);
         Path pack = sourceDir.resolve(basePackage);

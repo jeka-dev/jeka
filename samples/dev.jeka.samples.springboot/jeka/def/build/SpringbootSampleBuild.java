@@ -10,7 +10,6 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
-
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
 public class SpringbootSampleBuild extends KBean {
 
@@ -25,7 +24,8 @@ public class SpringbootSampleBuild extends KBean {
                 .replaceLibByModule("dev.jeka.springboot-plugin.jar", "dev.jeka.plugins.springboot")
                 .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null)
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
-                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null)
+                .setSuggestedJdk("17");
     }
 
     @Override
@@ -47,8 +47,6 @@ public class SpringbootSampleBuild extends KBean {
         JkSpringbootProject.of(projectKBean.project)
                 .configure()
                 .includeParentBom("3.2.0");
-        System.out.println("-----------------");
-        System.out.println(projectKBean.project.compilation.getExtraJavaCompilerOptions());
     }
 
 

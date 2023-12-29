@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import static dev.jeka.core.api.depmanagement.JkQualifiedDependencySet.*;
 
 @JkDoc("Provides method to help migration from Maven.")
-public class MavenKBean extends KBean {
+public class MavenMigrationKBean extends KBean {
 
     @JkDoc("whitespace count to indentSpri dependency code.")
     public int codeIndent = 4;

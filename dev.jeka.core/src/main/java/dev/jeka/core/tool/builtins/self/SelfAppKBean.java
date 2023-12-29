@@ -50,6 +50,10 @@ public abstract class SelfAppKBean extends KBean {
 
     private Consumer<Path> jarMaker = this::fatJar;
 
+    /**
+     * {@link JkDockerBuild} customizer to control the effective docker build.
+     * Use this field to add your own customizer.
+     */
     public final JkConsumers<JkDockerBuild> dockerBuildCustomizers = JkConsumers.of();
 
     // We can not just run Application#main cause Spring-Boot seems

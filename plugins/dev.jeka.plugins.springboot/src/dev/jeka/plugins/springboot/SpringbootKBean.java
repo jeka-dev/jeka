@@ -2,11 +2,11 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.scaffold.JkScaffold;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
 
@@ -64,6 +64,7 @@ public final class SpringbootKBean extends KBean {
             selfApp.setJarMaker(path -> JkSpringbootJars.createBootJar(
                     selfApp.classTree(), selfApp.libs(), getRuntime().getDependencyResolver().getRepos(), path)
             );
+            selfApp.dockerBuildCustomizers.add(dockerBuild -> dockerBuild.setExposedPorts(8080));
         }
 
         Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);

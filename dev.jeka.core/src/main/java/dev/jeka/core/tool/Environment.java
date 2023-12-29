@@ -104,7 +104,7 @@ class Environment {
 
         boolean ignoreCompileFail;
 
-        private final String jkBeanName;
+        private final String kbeanName;
 
         private final boolean cleanWork;
 
@@ -122,7 +122,7 @@ class Environment {
             this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
-            this.jkBeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
+            this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
             this.noHelp = valueOf(boolean.class, map, false, "no.help");
@@ -132,8 +132,8 @@ class Environment {
             return map.containsKey(KB_KEYWORD) || map.containsKey("kbean");
         }
 
-        String kBeanName() {
-            return jkBeanName;
+        String kbeanName() {
+            return kbeanName;
         }
 
         boolean workClean() {
@@ -142,7 +142,7 @@ class Environment {
 
         @Override
         public String toString() {
-            return "JkBean" + JkUtilsObject.toString(jkBeanName) + ", LogVerbose=" + logVerbose
+            return "JkBean" + JkUtilsObject.toString(kbeanName) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logBanner;
         }
 

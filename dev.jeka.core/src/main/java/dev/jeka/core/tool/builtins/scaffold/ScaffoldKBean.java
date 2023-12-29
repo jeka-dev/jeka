@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
@@ -21,28 +22,31 @@ public class ScaffoldKBean extends KBean {
     public String wrapDelegatePath;
 
     @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
-    public String wrapperJekaVersion;
+    private String wrapperJekaVersion;
 
     /**
      * In windows, we cannot pass arguments with breaking lines.
-     * Uses
+     * Use {@link #localPropsExtraContentPath} instead.
      */
     @JkDoc("Deprecated - Add extra content at the end of the template local.properties file.")
-    public String localPropsExtraContent = "";
+    private final String localPropsExtraContent = "";
 
     @JkDoc("Add extra content at the end of the template local.properties file.")
-    public Path localPropsExtraContentPath;
+    private Path localPropsExtraContentPath;
 
-    public final JkScaffold scaffold = new JkScaffold(getBaseDir());
+    public final JkScaffold scaffold = JkScaffold.of(getBaseDir());
 
     @Override
     protected void init() {
         this.scaffold.setJekaClassCodeProvider(
-                () -> JkUtilsIO.read(ScaffoldKBean.class.getResource("buildclass.snippet")));
+
+                // todo : Sample code should be encapsulated
+                () -> JkUtilsIO.read(JkScaffold.class.getResource("buildclass.snippet")));
         JkRepoSet repos = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos();
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
         this.scaffold.setDependencyResolver(dependencyResolver);
         this.scaffold.addLocalPropsFileContent(this.localPropsExtraContent);
+        this.scaffold.setWrapperJekaVersion(this.wrapperJekaVersion);
         if (this.localPropsExtraContentPath != null) {
             String content = JkPathFile.of(localPropsExtraContentPath).readAsString();
             this.scaffold.addLocalPropsFileContent(content);
@@ -59,7 +63,7 @@ public class ScaffoldKBean extends KBean {
         if (JkUtilsString.isBlank(wrapDelegatePath)) {
             scaffold.createStandardWrapperStructure();
         } else {
-            scaffold.createWrapperStructureWithDelagation(wrapDelegatePath);
+            scaffold.createWrapperStructureWithDelegate(wrapDelegatePath);
         }
     }
 

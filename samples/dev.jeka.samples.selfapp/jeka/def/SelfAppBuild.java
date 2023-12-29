@@ -19,10 +19,11 @@ class SelfAppBuild extends SelfAppKBean {
                 .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null)
                 .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null);
 
-        dockerBuildCustomizers.append(dockerBuild -> dockerBuild
+        dockerBuildCustomizers.add(dockerBuild -> dockerBuild
                 .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
                 .addExtraFile(getBaseDir().resolve("jeka/local.properties"), "/toto.txt")
                 .addAgent(getBaseDir().resolve("jeka/opentelemetry-javaagent.jar"), "")
+
         );
     }
 

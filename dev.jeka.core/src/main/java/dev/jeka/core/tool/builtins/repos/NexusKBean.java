@@ -20,6 +20,7 @@ public class NexusKBean extends KBean {
 
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
+    @Override
     protected void init() {
         ProjectKBean projectKBean = getRuntime().find(ProjectKBean.class).orElse(null);
         if (projectKBean == null) {
@@ -46,8 +47,8 @@ public class NexusKBean extends KBean {
     /**
      * Adds a JkNexusRepos consumer that will be executed just in time.
      */
-    public NexusKBean lazily(Consumer<JkNexusRepos> nexusReposConfigurator) {
-        this.nexusReposConfigurators.append(nexusReposConfigurator);
+    public NexusKBean configureNexusRepo(Consumer<JkNexusRepos> nexusReposConfigurator) {
+        this.nexusReposConfigurators.add(nexusReposConfigurator);
         return this;
     }
 

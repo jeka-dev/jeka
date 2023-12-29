@@ -125,7 +125,7 @@ public class KotlinJvmKBean extends KBean {
                     "Use this method in the constructor of your KBean in order to configure the kompiler " +
                     "at creation time.");
         }
-        this.compilerConfigurators.append(compilerConsumer);
+        this.compilerConfigurators.add(compilerConsumer);
         return this;
     }
 

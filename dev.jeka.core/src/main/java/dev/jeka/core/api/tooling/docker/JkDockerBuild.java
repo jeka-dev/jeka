@@ -47,6 +47,8 @@ public class JkDockerBuild {
 
     private final List<String> extraBuildSteps = new LinkedList<>();
 
+    private final List<Integer> exposedPorts = new LinkedList<>();
+
     private JkDockerBuild() {
     }
 
@@ -137,6 +139,15 @@ public class JkDockerBuild {
     }
 
     /**
+     * Adds a port to be exposed by the container.
+     */
+    public JkDockerBuild setExposedPorts(Integer ...ports) {
+        this.exposedPorts.clear();
+        this.exposedPorts.addAll(Arrays.asList(ports));
+        return this;
+    }
+
+    /**
      * Builds the docker image with the specified image name.
      * @param imageName The name of the image to be build. It may contains or not a tag name.
      */
@@ -160,8 +171,14 @@ public class JkDockerBuild {
         String agentCopy = createAgentCopyInstruction(agentBuildDirMap);
         String agentInstructions = createAgentOptions(agentBuildDirMap);
 
+        // Handle exposed ports
+        String exposedPortStatements = exposedPorts.isEmpty() ? "" :
+                "EXPOSE " + exposedPorts.stream().map(i -> Integer.toString(i))
+                        .collect(Collectors.joining(" ")) + "\n";
+
         String dockerBuildTemplate =
                 "FROM ${baseImage}\n" +
+                exposedPortStatements +
                 extraStatements +
                 "WORKDIR /app\n" +
                 extraFileCopy +
@@ -209,7 +226,13 @@ public class JkDockerBuild {
         JkProcess.of("docker", "build", "-t", imageName, "./" + tempBuildDir).setInheritIO(true)
                 .setLogCommand(true).exec();
 
-        JkLog.info("Run docker image : docker run -it --rm %s", imageName);
+        String portMapping = "";
+        if (!this.exposedPorts.isEmpty()) {
+            portMapping = this.exposedPorts.stream()
+                    .map(Object::toString)
+                    .reduce("-p ", (init, port) -> init  + port + ":" + port + " ");
+        }
+        JkLog.info("Run docker image : docker run -it --rm %s%s", portMapping, imageName);
     }
 
     private String createClasspathArs(List<Path> sanitizedLibs) {

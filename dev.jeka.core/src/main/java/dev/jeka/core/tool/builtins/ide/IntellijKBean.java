@@ -26,27 +26,27 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("Add a iml dependency on the specified module (hosting Jeka) instead of adding a direct dependency on Jeka jar." +
             "This is desirable on multi-module projects to share a single Jeka version.")
-    public String jekaModuleName;
+    private String jekaModuleName;
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
-    public boolean useVarPath = true;
+    private final boolean useVarPath = true;
 
     @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
             "(only a warning will be notified).")
-    public boolean failOnDepsResolutionError = true;
+    private final boolean failOnDepsResolutionError = true;
 
-    @JkDoc("When true, .iml file will be generated assuming JeKa folder as a specific module. " +
+    @JkDoc("When true, .iml file will be generated assuming that 'jeka'' folder is the root of a specific module. " +
             "This is useful for working with tool as Maven or Gradle that manage the intellij dependencies by their own.")
-    public boolean dedicatedJekaModule;
+    private boolean dedicatedJekaModule;
 
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
 
     @JkDoc("If mentioned, and jdkName is null, the generated iml will specify this jdkName")
-    public String suggestedJdkName;
+    private String suggestedJdkName;
 
     @JkDoc("If mentioned, the generated iml will specify this jdkName")
-    public String jdkName;
+    private String jdkName;
 
     /**
      * Underlying imlGenerator used to generate Iml. <p>
@@ -168,6 +168,18 @@ public final class IntellijKBean extends KBean {
      */
     public IntellijKBean setModuleAttributes(String moduleName, JkIml.Scope scope, Boolean exported) {
         return configureIml(iml -> iml.component.setModuleAttributes(moduleName, scope, exported));
+    }
+
+    /**
+     * Sets the Jdk to be referenced in the generated <i>iml</i> file, if none is specified
+     * by {@link IntellijKBean#jdkName}.
+     * @param sdkName The JDK name as exists in Intellij SDKs.
+     */
+    public IntellijKBean setSuggestedJdk(String sdkName) {
+        if (JkUtilsString.isBlank(jdkName)) {
+            return configureIml(iml -> iml.component.setJdkName(sdkName));
+        }
+        return this;
     }
 
     public IntellijKBean addProjectLibrary(String xml) {

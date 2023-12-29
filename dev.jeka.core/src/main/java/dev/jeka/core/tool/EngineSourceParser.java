@@ -23,7 +23,7 @@ final class EngineSourceParser {
         return of(baseDir, JkUtilsPath.toUrl(code));
     }
 
-    static EngineSourceParser of(Path baseDir, Iterable<Path>  files) {
+    static EngineSourceParser of(Path baseDir, Iterable<Path> files) {
         EngineSourceParser result = new EngineSourceParser(JkDependencySet.of(), new LinkedHashSet<>(), new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
@@ -70,7 +70,7 @@ final class EngineSourceParser {
         return this.dependencies;
     }
 
-    LinkedHashSet<Path>  projects() {
+    LinkedHashSet<Path> projects() {
         return this.dependencyProjects;
     }
 

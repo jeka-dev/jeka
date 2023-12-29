@@ -34,7 +34,7 @@ public class JkConsumers<T> implements Consumer<T> {
      * Chains this underlying {@link Consumer} with the specified one. The specified element will
      * be executed at the end.
      */
-    public JkConsumers<T> append(Consumer<T> appendedConsumer) {
+    public JkConsumers<T> add(Consumer<T> appendedConsumer) {
         consumer = consumer.andThen(appendedConsumer);
         return this;
     }

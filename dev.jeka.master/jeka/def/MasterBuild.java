@@ -74,7 +74,7 @@ class MasterBuild extends KBean {
         jacocoForCore = JkJacoco.ofVersion(getRuntime().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
         jacocoForCore.configureForAndApplyTo(coreBuild.load(ProjectKBean.class).project);
 
-        load(NexusKBean.class).lazily(this::configureNexus);
+        load(NexusKBean.class).configureNexusRepo(this::configureNexus);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")

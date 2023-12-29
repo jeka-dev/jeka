@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.scaffold;
+package dev.jeka.core.api.scaffold;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkVersion;
@@ -40,11 +40,15 @@ public final class JkScaffold {
 
     private String localPropsExtraContent = "";
 
-    JkScaffold(Path baseDir) {
+    private JkScaffold(Path baseDir) {
         super();
         this.jkClassCodeProvider = () -> "";
         this.baseDir= baseDir;
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+    }
+
+    public static JkScaffold of(Path baseDir) {
+        return new JkScaffold(baseDir);
     }
 
     public JkScaffold setWrapperJekaVersion(String wrapperJekaVersion) {
@@ -63,12 +67,16 @@ public final class JkScaffold {
     }
 
     /**
-     * Runs the scaffolding.
+     * Runs the scaffolding, meaning folder structure, build class, props file and .gitignore
      */
     public void run() {
+
+        // Create 'def' dir
         final Path def = baseDir.resolve(JkConstants.DEF_DIR);
-        JkUtilsPath.createDirectories(def);
         JkLog.info("Create " + def);
+        JkUtilsPath.createDirectories(def);
+
+        // Create build class if needed
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
         String code = jkClassCodeProvider.get();
@@ -79,19 +87,27 @@ public final class JkScaffold {
             }
             JkUtilsPath.write(buildClass, code.getBytes(StandardCharsets.UTF_8));
         }
-        JkPathFile projectPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE))
+
+        // Create 'local.properties' file
+        JkPathFile localPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE))
                 .fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
         if (!JkUtilsString.isBlank(this.localPropsExtraContent)) {
             String content = localPropsExtraContent.replace("\\n", "\n");
-            projectPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            localPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
+
+        // Create .gitignore
         JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(".gitignore"))
                         .fetchContentFrom(JkScaffold.class.getResource("gitignore.snippet"));
         extraActions.run();
     }
 
+    /**
+     * Creates wrapper files, meaning shell scripts, jar, and configuration file.
+     */
     public void createStandardWrapperStructure() {
 
+        // shell scripts
         JkLog.info("Create shell files.");
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
         JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
@@ -102,6 +118,7 @@ public final class JkScaffold {
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         JkPathFile.of(jekawPath).setPosixExecPermissions(true, true, true);
 
+        // jar file
         final Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
         final Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
         JkUtilsPath.createDirectories(wrapperFolder);
@@ -109,6 +126,8 @@ public final class JkScaffold {
         JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
         JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
         final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
+
+        // wrapper.properties file
         Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
         Path jekaPropertiesPath = wrapperFolder.resolve("wrapper.properties");
         if (!Files.exists(jekaPropertiesPath)) {
@@ -120,7 +139,14 @@ public final class JkScaffold {
         }
     }
 
-    public void createWrapperStructureWithDelagation(String delegateFolder) {
+    /**
+     * Creates the files needed to delegate the wrapper to another module.
+     * This is generally used in multi-modules projects to have a single
+     * shared wrapper (and version) to manage.
+     * It consists in creating shell files that simply invoke the wrapper from
+     * another directory.
+     */
+    public void createWrapperStructureWithDelegate(String delegateFolder) {
         JkPathFile newBatFile = JkPathFile.of(baseDir.resolve("jekaw.bat"));
         JkPathFile newShellFile = JkPathFile.of(baseDir.resolve("jekaw"));
         Path batDelegate = baseDir.resolve(delegateFolder).resolve("jekaw.bat");

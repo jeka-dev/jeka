@@ -11,7 +11,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.maven.MavenKBean;
+import dev.jeka.core.tool.builtins.maven.MavenMigrationKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 
@@ -94,7 +94,7 @@ public class SimpleProjectKBean extends KBean {
     }
 
     public void printMvn() {
-        MavenKBean pluginPom = getRuntime().load(MavenKBean.class);
+        MavenMigrationKBean pluginPom = getRuntime().load(MavenMigrationKBean.class);
         pluginPom.migrateToCode();
     }
 
