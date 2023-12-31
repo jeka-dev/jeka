@@ -17,65 +17,32 @@ import java.util.*;
  *
  * @author Jerome Angibaud
  */
-final class EngineSourceParser {
+// TODO remove as it has bbeen replaced by sourceParser2
+final class SourceParser {
 
-    private static EngineSourceParser of(Path baseDir, Path code) {
-        return of(baseDir, JkUtilsPath.toUrl(code));
+    private static ParsedSourceInfo parse(Path baseDir, Path code) {
+        return parse(baseDir, JkUtilsPath.toUrl(code));
     }
 
-    static EngineSourceParser of(Path baseDir, Iterable<Path> files) {
-        EngineSourceParser result = new EngineSourceParser(JkDependencySet.of(), new LinkedHashSet<>(), new LinkedList<>());
+    static ParsedSourceInfo parse(Path baseDir, Iterable<Path> files) {
+        ParsedSourceInfo result = new ParsedSourceInfo(JkDependencySet.of(), new LinkedHashSet<>(), new LinkedList<>());
         for (final Path code : files) {
-            result = result.and(of(baseDir, code));
+            result = result.merge(parse(baseDir, code));
         }
         return result;
     }
 
-    static EngineSourceParser of(Path baseDir, URL codeUrl) {
+    // non-private for testing
+    static ParsedSourceInfo parse(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
             final String uncommentedCode = removeComments(inputStream);
             final JkDependencySet deps = dependencies(uncommentedCode, baseDir, codeUrl);
             final LinkedHashSet<Path> projects = projects(uncommentedCode, baseDir, codeUrl);
             final List<String> compileOptions = compileOptions(uncommentedCode, codeUrl);
-            return new EngineSourceParser(deps, projects, compileOptions);
+            return new ParsedSourceInfo(deps, projects, compileOptions);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
-    }
-
-    private final JkDependencySet dependencies;
-
-    private final LinkedHashSet<Path> dependencyProjects;
-
-    private final List<String> compileOptions;
-
-    private EngineSourceParser(JkDependencySet deps, LinkedHashSet<Path>  dependencyProjects,
-                               List<String> compileOptions) {
-        super();
-        this.dependencies = deps;
-        this.dependencyProjects = dependencyProjects;
-        this.compileOptions = compileOptions;
-    }
-
-    @SuppressWarnings("unchecked")
-    private EngineSourceParser and(EngineSourceParser other) {
-        LinkedHashSet<Path> allDependencyProjects = new LinkedHashSet<>(this.dependencyProjects);
-        allDependencyProjects.addAll(other.dependencyProjects);
-        return new EngineSourceParser(this.dependencies.and(other.dependencies),
-                allDependencyProjects,
-                JkUtilsIterable.concatLists(this.compileOptions, other.compileOptions));
-    }
-
-    JkDependencySet dependencies() {
-        return this.dependencies;
-    }
-
-    LinkedHashSet<Path> projects() {
-        return this.dependencyProjects;
-    }
-
-    List<String> compileOptions() {
-        return this.compileOptions;
     }
 
     private static JkDependencySet dependencies(String code, Path baseDir, URL url) {

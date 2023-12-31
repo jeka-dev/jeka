@@ -147,26 +147,28 @@ final class Engine {
             return true;
         }
         return "help".equals(Environment.originalCmdLineAsString())
-                        && beanClassesResolver.getSourceFiles().isEmpty()
+                        && beanClassesResolver.getSourceTree().getFiles().isEmpty()
                         && Environment.standardOptions.kbeanName() == null;
-
     }
 
     private CompilationContext preCompile() {
-        final List<Path> sourceFiles = beanClassesResolver.getSourceFiles();
+        JkPathTree<?> sourceTree = beanClassesResolver.getSourceTree();
+        final List<Path> sourceFiles = sourceTree.getFiles();
         JkLog.traceStartTask("Parse source code of " + sourceFiles);
-        final EngineSourceParser parser = EngineSourceParser.of(this.projectBaseDir, sourceFiles);
+        final ParsedSourceInfo parsedSourceInfo =
+                SourceParser2.of(this.projectBaseDir, sourceTree).parse();
+               //SourceParser.parse(this.projectBaseDir, sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
         JkDependencySet defDependencies = JkDependencySet.of()
                 .and(Environment.commandLine.getDefDependencies())
-                .and(parser.dependencies())
+                .and(parsedSourceInfo.dependencies)
                 .and(dependenciesFromLocalProps());
         EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(defDependencies);
         JkLog.traceEndTask();
         return new CompilationContext(
                 jekaClasspath().and(cacheResult.resolvedClasspath),
-                new LinkedList<>(parser.projects()),
-                parser.compileOptions(),
+                new LinkedList<>(parsedSourceInfo.dependencyProjects),
+                parsedSourceInfo.compileOptions,
                 cacheResult.changed
         );
     }
@@ -448,5 +450,7 @@ final class Engine {
         }
         return JkDependencySet.of(dependencies);
     }
+
+
 
 }

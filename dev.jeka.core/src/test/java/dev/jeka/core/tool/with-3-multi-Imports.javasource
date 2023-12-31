@@ -7,5 +7,5 @@ import dev.jeka.core.java.testing.junit.JkUnit;
  */
 @JkInjectClasspath("com.google:guava:18.0")
 @JkInjectClasspath("toto:titi:12")
-@JkInjectClasspath("foo:bar:6")
+@JkInjectClasspath("foo:bar")
 public class FullBuild extends Build {

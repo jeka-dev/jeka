@@ -267,9 +267,9 @@ final class EngineBeanClassResolver {
         return JkUtilsPath.readAllLines(store);
     }
 
-    List<Path> getSourceFiles() {
+    JkPathTree<?> getSourceTree() {
         return JkPathTree.of(defSourceDir)
-                .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER).getFiles();
+                .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
 }
