@@ -156,7 +156,7 @@ final class Engine {
         final List<Path> sourceFiles = sourceTree.getFiles();
         JkLog.traceStartTask("Parse source code of " + sourceFiles);
         final ParsedSourceInfo parsedSourceInfo =
-                SourceParser2.of(this.projectBaseDir, sourceTree).parse();
+                SourceParser.of(this.projectBaseDir, sourceTree).parse();
                //SourceParser.parse(this.projectBaseDir, sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
         JkDependencySet defDependencies = JkDependencySet.of()
@@ -212,11 +212,11 @@ final class Engine {
             JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
         }
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
-            boolean missingBinayFiles = compilationTracker.isMissingBinaryFiles();
-            if (missingBinayFiles) {
+            boolean missingBinaryFiles = compilationTracker.isMissingBinaryFiles();
+            if (missingBinaryFiles) {
                 JkLog.trace("Some binary files seem missing.");
             }
-            if (outdated || missingBinayFiles) {
+            if (outdated || missingBinaryFiles) {
                 JkLog.trace("Compile classpath : \n" + classpath.toPathMultiLine("  "));
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
