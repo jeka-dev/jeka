@@ -3,13 +3,13 @@ package dev.jeka.plugins.protobuf;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkSourceGenerator;
+import dev.jeka.core.api.project.JkProjectSourceGenerator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 
-public class JkProtocSourceGenerator extends JkSourceGenerator {
+public class JkProtocSourceGenerator extends JkProjectSourceGenerator {
 
     private final String protoFilePath;
 

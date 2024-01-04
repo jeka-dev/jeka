@@ -53,7 +53,7 @@ public class JkProjectCompilation {
 
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
-    private final List<JkSourceGenerator> sourceGenerators = new LinkedList<>();
+    private final List<JkProjectSourceGenerator> sourceGenerators = new LinkedList<>();
 
     private boolean done;
 
@@ -84,7 +84,7 @@ public class JkProjectCompilation {
 
 
     public void generateSources() {
-        for (JkSourceGenerator sourceGenerator : sourceGenerators) {
+        for (JkProjectSourceGenerator sourceGenerator : sourceGenerators) {
             JkLog.startTask("Generate sources with " + sourceGenerator);
             Path path = layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName());
             sourceGenerator.generate(this.project, path);
@@ -153,7 +153,7 @@ public class JkProjectCompilation {
         return dependenciesModifier.apply(baseDependencies());
     }
 
-    public JkProjectCompilation addSourceGenerator(JkSourceGenerator sourceGenerator) {
+    public JkProjectCompilation addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {
         this.sourceGenerators.add(sourceGenerator);
         return this;
     }

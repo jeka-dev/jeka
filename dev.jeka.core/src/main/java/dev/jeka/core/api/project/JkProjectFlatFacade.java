@@ -230,7 +230,7 @@ public class JkProjectFlatFacade {
        return this;
     }
 
-    public JkProjectFlatFacade addSourceGenerator(JkSourceGenerator sourceGenerator) {
+    public JkProjectFlatFacade addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {
         project.compilation.addSourceGenerator(sourceGenerator);
         return this;
     }

@@ -5,7 +5,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkSourceGenerator;
+import dev.jeka.core.api.project.JkProjectSourceGenerator;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -148,7 +148,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
         return project().getJavaIdeSupport();
     }
 
-    public static class MySourceGenerator extends JkSourceGenerator {
+    public static class MySourceGenerator extends JkProjectSourceGenerator {
 
         @Override
         protected String getDirName() {

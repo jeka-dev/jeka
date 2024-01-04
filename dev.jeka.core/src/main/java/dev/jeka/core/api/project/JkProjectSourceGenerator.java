@@ -2,9 +2,9 @@ package dev.jeka.core.api.project;
 
 import java.nio.file.Path;
 
-public abstract class JkSourceGenerator {
+public abstract class JkProjectSourceGenerator {
 
-    protected JkSourceGenerator() {
+    protected JkProjectSourceGenerator() {
     }
 
     /**
