@@ -615,7 +615,7 @@ public class JkProject implements JkIdeSupportSupplier {
     private static JkMavenPublication mavenPublication(JkProject project) {
         return JkMavenPublication.of()
                 .setModuleIdSupplier(project::getModuleId)
-                .setVersionSupplier(project.versionSupplier)
+                .setVersionSupplier(project::getVersion)
                 .setArtifactLocatorSupplier(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                         project.compilation.getDependencies(),

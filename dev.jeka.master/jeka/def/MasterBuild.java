@@ -107,6 +107,8 @@ class MasterBuild extends KBean {
         String branch = JkGit.of().getCurrentBranch();
         JkLog.trace("Current build branch: %s", branch);
         JkLog.trace("current ossrhUser:  %s", ossrhUser);
+
+        // Publish artifacts only if we are on 'master' branch
         if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedKBeans().get(ProjectKBean.class, false).forEach(ProjectKBean::publish);
@@ -114,9 +116,11 @@ class MasterBuild extends KBean {
             JkLog.endTask();
             JkLog.startTask("Creating GitHub Release");
             Github github = new Github();
-            github.ghToken =githubToken;
+            github.ghToken = githubToken;
             github.publishGhRelease();
             JkLog.endTask();
+
+            // If not on 'master' branch, publish only locally
         } else {
             JkLog.startTask("Publish locally");
             publishLocal();

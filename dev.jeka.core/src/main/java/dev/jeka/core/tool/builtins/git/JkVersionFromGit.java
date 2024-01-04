@@ -1,7 +1,6 @@
 package dev.jeka.core.tool.builtins.git;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGit;
@@ -65,13 +64,16 @@ public class JkVersionFromGit  {
         return cachedVersion;
     }
 
+    public JkVersion versionAsJkVersion() {
+        return JkVersion.of(version());
+    }
+
     /**
      * Configures the specified project to use git version for publishing and adds git info to the manifest..
      */
     public void handleVersioning(JkProject project) {
-        String version = version();
-        project.setVersion(version);
-        project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
+        project.setVersionSupplier(this::versionAsJkVersion);
+        //project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         JkGit git = JkGit.of(project.getBaseDir());
         String commit = git.getCurrentCommit();
         if (git.isWorkspaceDirty()) {

@@ -190,8 +190,9 @@ final class Engine {
             JkLog.info("Clean .work directory " + workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
+
         String msg = "Scanning sources and compiling def classes for project '"
-                + this.projectBaseDir.getFileName() + "'";
+                + projectBaseDirName() + "'";
         JkLog.startTask(msg);
         CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
@@ -449,6 +450,14 @@ final class Engine {
             dependencies.add(CommandLine.toDependency(projectBaseDir, depString.trim()));
         }
         return JkDependencySet.of(dependencies);
+    }
+
+    private String projectBaseDirName() {
+        String rawDirName = this.projectBaseDir.getFileName().toString();
+        if (rawDirName.isEmpty()) {
+            return this.projectBaseDir.toAbsolutePath().getFileName().toString();
+        }
+        return rawDirName;
     }
 
 
