@@ -1,6 +1,7 @@
 package dev.jeka.core.integrationtest.javaproject;
 
 import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkZipTree;
@@ -63,13 +64,13 @@ public class JavaProjectBuildIT {
                 .configureTestDependencies(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion-snapshot")
-                .setPublishedVersion("1-SNAPSHOT")
+                .setModuleId("my:project").setVersion("MyVersion-snapshot")
+                .setVersion("1-SNAPSHOT")
                 .getProject();
         project.artifactProducer.makeAllArtifacts();
-        project.publication.maven.publishLocal();
+        project.mavenPublication.publishLocal();
         System.out.println(project.getInfo());
-        Assert.assertEquals(JkTransitivity.COMPILE, project.publication.maven.getDependencies()
+        Assert.assertEquals(JkTransitivity.COMPILE, project.mavenPublication.getDependencies()
                 .get("com.google.guava:guava").getTransitivity());
 
     }
@@ -89,14 +90,13 @@ public class JavaProjectBuildIT {
                 .configureTestDependencies(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 ).getProject();
-        project.publication.ivy
-                .setModuleId("my:module")
+
+        JkIvyPublication ivyPublication = project.createIvyPublication()
+                .setModuleIdSupplier("my:module")
                 .setVersion("0.1");
         project.artifactProducer.makeAllArtifacts();
-        project.publication.ivy.publishLocal();
+        ivyPublication.publishLocal();
         System.out.println(project.getInfo());
-
-
     }
 
 }

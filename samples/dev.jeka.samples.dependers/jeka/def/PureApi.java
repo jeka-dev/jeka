@@ -17,10 +17,10 @@ public class PureApi {
                 .configureCompileDependencies(deps -> deps
                     .and("com.google.guava:guava:30.0-jre")
                     .and(coreProject.toDependency()))
-                .setPublishedModuleId("mygroup:depender")
-                .setPublishedVersion("1.0-SNAPSHOT").getProject();
+                .setModuleId("mygroup:depender")
+                .setVersion("1.0-SNAPSHOT").getProject();
 
         dependerProject.artifactProducer.makeAllArtifacts();
-        dependerProject.publication.publish();
+        dependerProject.mavenPublication.publish();
     }
 }

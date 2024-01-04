@@ -327,7 +327,7 @@ public final class JkSonarqube {
             libs = project.dependencyResolver.resolve(deps).getFiles();
         }
         final Path testReportDir = project.testing.getReportDir();
-        JkModuleId jkModuleId = project.publication.getModuleId();
+        JkModuleId jkModuleId = project.getModuleId();
         if (jkModuleId == null) {
             String baseDirName = baseDir.getFileName().toString();
             if (JkUtilsString.isBlank(baseDirName)) {
@@ -335,7 +335,7 @@ public final class JkSonarqube {
             }
             jkModuleId = JkModuleId.of(baseDirName, baseDirName);
         }
-        final String version = project.publication.getVersion().getValue();
+        final String version = project.getVersion().getValue();
         final String fullName = jkModuleId.getDotNotation();
         final String name = jkModuleId.getName();
         this

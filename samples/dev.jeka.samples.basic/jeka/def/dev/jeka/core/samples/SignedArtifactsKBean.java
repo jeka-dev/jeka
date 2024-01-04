@@ -4,9 +4,9 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectPublication;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.KBean;
@@ -60,29 +60,27 @@ public class SignedArtifactsKBean extends KBean {
             )
             .configureTestDependencies(deps -> deps
                 .and(SimpleProjectKBean.JUNIT5)
-            )
-            .getProject()
-            .publication
-                .apply(this::configForLocalRepo)
+            );
+        project.mavenPublication
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion("1.3.1")
                 .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
-                .maven
-                    .pomMetadata
+                .pomMetadata
                         .setProjectName("my project")
                         .setProjectDescription("My description")
                         .setProjectUrl("https://github.com/jerkar/jeka/samples")
                         .setScmConnection("https://github.com/jerkar/sample.git")
                         .addApache2License()
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
+        configForLocalRepo(project.mavenPublication);
     }
 
-    private void configForOssrh(JkProjectPublication publication) {
+    private void configForOssrh(JkMavenPublication publication) {
         UnaryOperator<Path> signer = JkGpg.ofSecretRing(secringPath, secringPassword).getSigner("");
         publication.setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 
-    private void configForLocalRepo(JkProjectPublication publication) {
+    private void configForLocalRepo(JkMavenPublication publication) {
         JkRepo repo = JkRepo.of(dummyRepoPath);
         repo.publishConfig
                 .setChecksumAlgos("sha1", "md5")
@@ -92,7 +90,7 @@ public class SignedArtifactsKBean extends KBean {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        cleanOutput(); projectKBean.pack(); projectKBean.project.publication.publish();
+        cleanOutput(); projectKBean.pack(); projectKBean.project.mavenPublication.publish();
     }
 
     public static void main(String[] args) {

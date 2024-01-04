@@ -1,8 +1,6 @@
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.depmanagement.JkDepSuggest;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGit;
@@ -154,29 +152,29 @@ public class JkProjectFlatFacade {
         return configureTestDependencies(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
 
-    public JkProjectFlatFacade setPublishedVersion(Supplier<String> versionSupplier) {
-        project.publication.setVersion(versionSupplier);
+    public JkProjectFlatFacade setVersionSupplier(Supplier<String> versionSupplier) {
+        project.setVersionSupplier(() -> JkVersion.of(versionSupplier.get()));
         return this;
     }
 
-    public JkProjectFlatFacade setPublishedVersion(String version) {
-        return setPublishedVersion(() -> version);
+    public JkProjectFlatFacade setVersion(String version) {
+        return setVersionSupplier(() -> version);
     }
 
     /**
      * The published version will be computed according the current git tag.
      * @see JkGit#getVersionFromTag()
      */
-    public JkProjectFlatFacade setPublishedVersionFromGitTag() {
-        return setPublishedVersion(() -> JkGit.of(getProject().getBaseDir()).getVersionFromTag());
+    public JkProjectFlatFacade setVersionFromGitTag() {
+        return setVersionSupplier(() -> JkGit.of(getProject().getBaseDir()).getVersionFromTag());
     }
 
     /**
      * The published version will be computed according the git last commit message.
      * @see JkGit#getVersionFromCommitMessage(String)
      */
-    public JkProjectFlatFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
-        return setPublishedVersion(() -> JkGit.of(getProject().getBaseDir())
+    public JkProjectFlatFacade setVersionFromGitTagCommitMessage(String suffixKeyword) {
+        return setVersionSupplier(() -> JkGit.of(getProject().getBaseDir())
                 .getVersionFromCommitMessage(suffixKeyword));
     }
 
@@ -184,8 +182,8 @@ public class JkProjectFlatFacade {
      * @param moduleId group + artifactId to use when publishing on a binary repository.
      *                 Must be formatted as 'group:artifactId'
      */
-    public JkProjectFlatFacade setPublishedModuleId(String moduleId) {
-        project.publication.setModuleId(moduleId);
+    public JkProjectFlatFacade setModuleId(String moduleId) {
+        project.setModuleId(JkModuleId.of(moduleId));
         return this;
     }
 
@@ -193,7 +191,7 @@ public class JkProjectFlatFacade {
      * Configures the dependencies to be published in a Maven repository.
      */
     public JkProjectFlatFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.publication.maven.configureDependencies(dependencyModifier);
+        project.mavenPublication.configureDependencies(dependencyModifier);
         return this;
     }
 

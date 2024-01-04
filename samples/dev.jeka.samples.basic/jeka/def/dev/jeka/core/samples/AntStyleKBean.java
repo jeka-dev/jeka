@@ -4,6 +4,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.depmanagement.artifact.JkSuppliedFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
@@ -15,7 +16,6 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
@@ -35,10 +35,11 @@ import java.util.List;
 @JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
 public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
 
-    final IntellijKBean intellijKBean = load(IntellijKBean.class)
-            .configureIml(jkIml -> {
-                jkIml.component.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-            });
+    AntStyleKBean() {
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+
+    }
 
     Path src = getBaseDir().resolve("src/main/java");
     Path test = getBaseDir().resolve("src/test/java");
@@ -106,7 +107,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
         JkCoordinateDependency versionedModule = JkCoordinateDependency.of("myGroup:myName:0.2.2-SNAPSHOT");
         JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
                 .putMainArtifact(jarFile, this::jar)
-                .putArtifact(JkProject.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
+                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
         artifactProducer.makeAllMissingArtifacts();
         mavenRepo.publishConfig.setSigner(pgp.getSigner(""));
         JkMavenPublication.of()
@@ -117,7 +118,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
                 .addRepos(mavenRepo)
                 .publish();
         JkIvyPublication.of()
-                .setModuleId(versionedModule.getCoordinate().getModuleId().toString())
+                .setModuleIdSupplier(versionedModule.getCoordinate().getModuleId().toString())
                 .setVersion(versionedModule.getCoordinate().getVersion().getValue())
                 .setDependencies(prodDependencies, prodDependencies, testDependencies)
                 .addArtifacts(artifactProducer)

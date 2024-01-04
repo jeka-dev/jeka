@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -41,6 +42,10 @@ public final class JkIvyPublication {
 
     private Supplier<JkRepoSet> bomResolverRepoSupplier = () -> JkRepoSet.of();
 
+    public final JkRunnables preActions = JkRunnables.of();
+
+    public final JkRunnables postActions = JkRunnables.of();
+
     private JkIvyPublication() {
     }
 
@@ -48,7 +53,7 @@ public final class JkIvyPublication {
         return new JkIvyPublication();
     }
 
-    public JkIvyPublication setModuleId(String moduleId) {
+    public JkIvyPublication setModuleIdSupplier(String moduleId) {
         this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
@@ -58,18 +63,18 @@ public final class JkIvyPublication {
         return this;
     }
 
-    public JkIvyPublication setModuleId(Supplier<String> groupAndNAmeSupplier) {
-        this.moduleIdSupplier = () -> JkModuleId.of(groupAndNAmeSupplier.get());
+    public JkIvyPublication setModuleIdSupplier(Supplier<JkModuleId> moduleIdSupplier) {
+        this.moduleIdSupplier = moduleIdSupplier;
         return this;
     }
 
-    public JkIvyPublication setVersion(Supplier<String> versionSupplier) {
-        this.versionSupplier = () -> JkVersion.of(versionSupplier.get());
+    public JkIvyPublication setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+        this.versionSupplier = versionSupplier;
         return this;
     }
 
     public JkIvyPublication setVersion(String version) {
-        return setVersion(() -> version);
+        return setVersionSupplier(() -> JkVersion.of(version));
     }
 
     public JkModuleId getModuleId() {
@@ -220,12 +225,18 @@ public final class JkIvyPublication {
         return result;
     }
 
-    public void publish() {
+    public JkIvyPublication publish() {
+        preActions.run();
         publish(repos);
+        postActions.run();
+        return this;
     }
 
-    public void publishLocal() {
+    public JkIvyPublication publishLocal() {
+        preActions.run();
         publish(JkRepo.ofLocalIvy().toSet());
+        postActions.run();
+        return this;
     }
 
     private void publish(JkRepoSet repos) {
@@ -302,6 +313,26 @@ public final class JkIvyPublication {
         }
         return JkQualifiedDependencySet.of(result);
 
+    }
+
+    /**
+     * Shorthand to get the first declared publication repository.
+     */
+    public JkRepo findFirstNonLocalRepo() {
+        return getRepos().getRepos().stream()
+                    .filter(repo1 -> !repo1.isLocal())
+                    .findFirst().orElse(null);
+    }
+
+    public String info() {
+        StringBuilder builder = new StringBuilder();
+        builder
+                .append("\nPublish Ivy repositories : " + getRepos() + "\n")
+                .append("Published Ivy Module & version : " +
+                        getModuleId().toCoordinate(getVersion()) + "\n")
+                .append("Published Ivy Dependencies :");
+        getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
+        return builder.toString();
     }
 
 }

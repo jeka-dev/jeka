@@ -70,7 +70,7 @@ public class JkVersionFromGit  {
      */
     public void handleVersioning(JkProject project) {
         String version = version();
-        project.publication.setVersion(version);
+        project.setVersion(version);
         project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         JkGit git = JkGit.of(project.getBaseDir());
         String commit = git.getCurrentCommit();

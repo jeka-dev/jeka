@@ -2,6 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import org.junit.Assert;
@@ -81,7 +82,7 @@ public class JkProjectTest {
                 .configureTestDependencies(deps -> deps
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setModuleId("my:project").setVersion("MyVersion")
                 .getProject();
         JkDependencySet testDependencies = project.testing.compilation.getDependencies();
         System.out.println(project.getInfo());
@@ -119,7 +120,7 @@ public class JkProjectTest {
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setModuleId("my:project").setVersion("MyVersion")
                 .getProject();
         JkDependencySet testDependencies = project.testing.compilation.getDependencies();
         System.out.println(project.getInfo());
@@ -145,10 +146,10 @@ public class JkProjectTest {
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 )
-                .setPublishedModuleId("my:project").setPublishedVersion("MyVersion")
+                .setModuleId("my:project").setVersion("MyVersion")
                 .configurePublishedDeps(deps -> deps.minus("org.postgresql:postgresql"))
                 .getProject();
-        JkDependencySet publishDeps = project.publication.maven.getDependencies();
+        JkDependencySet publishDeps = project.mavenPublication.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
         Assert.assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
     }
@@ -167,11 +168,11 @@ public class JkProjectTest {
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
-        project.publication.ivy
-                .setModuleId("my:module")
+        JkIvyPublication ivyPublication = project.createIvyPublication()
+                .setModuleIdSupplier("my:module")
                 .setVersion("0.1");
         System.out.println(project.compilation.getDependencies());
-        JkQualifiedDependencySet publishDeps = project.publication.ivy.getDependencies();
+        JkQualifiedDependencySet publishDeps = ivyPublication.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
     }
 

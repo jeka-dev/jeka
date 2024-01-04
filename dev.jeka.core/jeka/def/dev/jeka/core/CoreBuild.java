@@ -25,8 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static dev.jeka.core.api.project.JkProject.JAVADOC_ARTIFACT_ID;
-import static dev.jeka.core.api.project.JkProject.SOURCES_ARTIFACT_ID;
+import static dev.jeka.core.api.depmanagement.artifact.JkArtifactId.JAVADOC_ARTIFACT_ID;
+import static dev.jeka.core.api.depmanagement.artifact.JkArtifactId.SOURCES_ARTIFACT_ID;
 
 /**
  * Run main method to create full distrib.
@@ -46,6 +46,7 @@ public class CoreBuild extends KBean {
         JkProject project = projectKBean.project;
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
+            .setModuleId("dev.jeka:jeka-core")
             .artifactProducer
                 .putMainArtifact(this::doPackWithEmbeddedJar)
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
@@ -83,14 +84,12 @@ public class CoreBuild extends KBean {
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp");
         project
-            .publication
-                .setModuleId("dev.jeka:jeka-core")
-                .maven
-                    .pomMetadata
-                        .setProjectName("jeka")
-                        .addApache2License()
-                        .setProjectDescription("Automate with plain Java code and nothing else.")
-                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+            .mavenPublication
+                .pomMetadata
+                    .setProjectName("jeka")
+                    .addApache2License()
+                    .setProjectDescription("Automate with plain Java code and nothing else.")
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     private Path distribFolder() {

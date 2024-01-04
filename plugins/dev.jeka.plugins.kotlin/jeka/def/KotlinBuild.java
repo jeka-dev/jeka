@@ -20,6 +20,7 @@ class KotlinBuild extends KBean {
     protected void init() {
         JkProject project = projectKBean.project;
         project.flatFacade()
+            .setModuleId("dev.jeka:kotlin-plugin")
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
             .mixResourcesAndSources()
@@ -27,9 +28,7 @@ class KotlinBuild extends KBean {
                     .andFiles(JkLocator.getJekaJarPath())
             );
         // This section is necessary to publish on a public repository
-        project.publication
-                .setModuleId("dev.jeka:kotlin-plugin")
-                .maven
+        project.mavenPublication
                     .pomMetadata
                     .setProjectName("Jeka plugin for Kotlin")
                     .setProjectDescription("A Jeka plugin for Kotlin language support")

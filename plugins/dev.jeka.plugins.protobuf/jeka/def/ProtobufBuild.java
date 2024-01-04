@@ -21,16 +21,15 @@ class ProtobufBuild extends KBean {
     protected void init() {
         JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
+                .setModuleId("dev.jeka:protobuf-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.publication
-                .setModuleId("dev.jeka:protobuf-plugin")
-                .maven.pomMetadata
-                    .setProjectName("Jeka plugin for NodeJs")
-                    .setProjectDescription("A Jeka plugin to integrate with NodeJs")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+        project.mavenPublication.pomMetadata
+                .setProjectName("Jeka plugin for NodeJs")
+                .setProjectDescription("A Jeka plugin to integrate with NodeJs")
+                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     public void cleanPack() {

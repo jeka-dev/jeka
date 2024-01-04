@@ -28,8 +28,8 @@ class ProjectApiSimple extends KBean implements JkIdeSupportSupplier {
                         "org.junit.jupiter:junit-jupiter:5.10.1",
                         "org.mockito:mockito-core:5.7.0"
                 )
-                .setPublishedModuleId("org.examples:my-lib")
-                .setPublishedVersion("0.1.0");
+                .setModuleId("org.examples:my-lib")
+                .setVersion("0.1.0");
         return project;
     }
 
@@ -50,7 +50,7 @@ class ProjectApiSimple extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Publish the built artifact (jar, sources and javadoc)")
     public void publish() {
-        project().publication.publish();
+        project().mavenPublication.publish();
     }
 
     @Override

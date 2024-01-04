@@ -22,16 +22,15 @@ class Build extends KBean {
                 "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
 
         // This section is necessary to publish on a public repository
-        project.publication
-                .setModuleId("your.org:plugin-name")
-                .setVersion("0.0.1-SNAPSHOT")
-                .maven
-                    .pomMetadata
-                        .addApache2License()
-                        .setProjectName("Jeka plugin for ....")
-                        .setProjectDescription("A Jeka plugin for ...")
-                        .setProjectUrl("https://github.com/your_org/your_repo")
-                        .setScmUrl("https://github.com/your_org/your_repo");
+        project
+            .setModuleId("your.org:plugin-name")
+            .setVersion("0.0.1-SNAPSHOT")
+        project.mavenPublication.pomMetadata
+            .addApache2License()
+            .setProjectName("Jeka plugin for ....")
+            .setProjectDescription("A Jeka plugin for ...")
+            .setProjectUrl("https://github.com/your_org/your_repo")
+            .setScmUrl("https://github.com/your_org/your_repo");
     }
 
 }

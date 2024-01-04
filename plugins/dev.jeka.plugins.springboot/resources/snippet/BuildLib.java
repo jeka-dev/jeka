@@ -1,8 +1,5 @@
-import dev.jeka.core.api.project.JkIdeSupport;
-import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
@@ -28,7 +25,7 @@ class Build extends KBean {
                 .addTestDeps(
                         "org.springframework.boot:spring-boot-starter-test"
                 )
-                .setPublishedVersionFromGitTag();  // Infer version from Git
+                .setVersionFromGitTag();  // Infer version from Git
     }
 
 }

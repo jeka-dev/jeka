@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven _POM_ but
@@ -44,7 +45,7 @@ import java.util.function.Function;
  *    <li>{@link JkProjectCompilation} : responsible to generate compile prod sources</li>
  *    <li>{@link JkProjectTesting} : responsible to compile test sources and run tests </li>
  *    <li>{@link JkProjectPackaging} : responsible to creates javadoc, sources and jars</li>
- *    <li>{@link JkProjectPublication} : responsible to publish the artifacts on binary repositories (Maven or Ivy)</li>
+ *    <li>{@link JkMavenPublication} : responsible to publish the artifacts on Maven repositories</li>
  * </ul>
  * Each of these parts are optional. This mean that you don't have to set the publication part if the project is not
  * supposed to be published. Or you don't have to set the <i>construction</i> part if the project publishes artifacts
@@ -54,17 +55,13 @@ import java.util.function.Function;
  */
 public class JkProject implements JkIdeSupportSupplier {
 
-    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
-
-    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
-
     private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V17;
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     private Path baseDir = Paths.get("");
 
-    private String outputDir = "jeka/output";
+    private String outputDir = JkConstants.OUTPUT_PATH;
 
     private JkJavaVersion jvmTargetVersion;
 
@@ -72,11 +69,13 @@ public class JkProject implements JkIdeSupportSupplier {
 
     private String mainClass;
 
+    private JkModuleId moduleId;
+
+    private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
+
     private final JkRunnables cleanExtraActions = JkRunnables.of();
 
-    public final JkStandardFileArtifactProducer artifactProducer =
-            JkStandardFileArtifactProducer.of()
-                    .setArtifactFilenameComputation(this::getArtifactPath);
+    public final JkStandardFileArtifactProducer artifactProducer;
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
@@ -89,11 +88,11 @@ public class JkProject implements JkIdeSupportSupplier {
 
     public final JkProjectPackaging packaging;
 
-    public final JkProjectPublication publication;
-
     public final JkProjectCompilation compilation;
 
     public final JkProjectTesting testing;
+
+    public final JkMavenPublication mavenPublication;
 
     private boolean includeTextAndLocalDependencies = true;
 
@@ -108,9 +107,9 @@ public class JkProject implements JkIdeSupportSupplier {
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
+        artifactProducer = artifactProducer();
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseCache(true);
-        registerArtifacts();
-        publication = new JkProjectPublication(this);
+        mavenPublication = mavenPublication(this);
     }
 
     /**
@@ -248,15 +247,15 @@ public class JkProject implements JkIdeSupportSupplier {
      * Creates {@link JkProcess} to execute the jar having the specified artifact name.
      * The jar is created on the fly if it is not already present.
      *
-     * @param artifactName       The name of the artifact to run. In a project producing a side 'fat' jar, you can use
-     *                           'fat' as artifact name. If you want to run the main artifact, just use '' as artifact name.
-     * @param includeRuntimeDeps if <code>true</code>, the runtime dependencies will be added to the classpath. This should
+     * @param artifactQualifier  The name of the artifact to run. In a project producing a side 'fat' jar, you can use
+     *                           'fat'. If you want to run the main artifact, just use ''.
+     * @param includeRuntimeDeps If <code>true</code>, the runtime dependencies will be added to the classpath. This should
      *                           values <code>false</code> in case of <i>fat</i> jar.
-     * @param jvmOptions        options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
-     * @param args               program arguments to be passed in command line, as <code>--print --verbose myArg</code>
+     * @param jvmOptions         Options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
+     * @param args               Program arguments to be passed in command line, as <code>--print --verbose myArg</code>
      */
-    public JkProcess<?> runJar(String artifactName, boolean includeRuntimeDeps, String jvmOptions, String args) {
-        JkArtifactId artifactId = JkArtifactId.of(artifactName, "jar");
+    public JkProcess<?> runJar(String artifactQualifier, boolean includeRuntimeDeps, String jvmOptions, String args) {
+        JkArtifactId artifactId = JkArtifactId.of(artifactQualifier, "jar");
         Path artifactPath = artifactProducer.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
             artifactProducer.makeArtifacts(artifactId);
@@ -338,27 +337,8 @@ public class JkProject implements JkIdeSupportSupplier {
         runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder.append("Declared Test Dependencies : " + testDependencies.getEntries().size() + " elements.\n");
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
-        builder.append("Defined Artifacts : " + artifactProducer.getArtifactIds());
-        JkMavenPublication mavenPublication = publication.maven;
-        builder
-                .append("\nPublished ModuleId  " + publication.getModuleId())
-                .append("\nPublished Version : " + publication.getVersion());
         if (mavenPublication.getModuleId() != null) {
-            builder
-                    .append("\nPublish Maven repositories : " + mavenPublication.getPublishRepos() + "\n")
-                .append("Published Maven Module & version : " +
-                        mavenPublication.getModuleId().toCoordinate(mavenPublication.getVersion()) + "\n")
-                .append("Published Maven Dependencies :");
-            mavenPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
-        }
-        JkIvyPublication ivyPublication = publication.ivy;
-        if (ivyPublication.getModuleId() != null) {
-            builder
-                    .append("\nPublish Ivy repositories : " + ivyPublication.getRepos() + "\n")
-                    .append("Published Ivy Module & version : " +
-                            ivyPublication.getModuleId().toCoordinate(mavenPublication.getVersion()) + "\n")
-                    .append("Published Ivy Dependencies :");
-            ivyPublication.getDependencies().getEntries().forEach(dep -> builder.append("\n  " + dep));
+            builder.append(mavenPublication.info());
         }
         return builder.toString();
     }
@@ -439,14 +419,14 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public JkProject includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
         if (includeJavaDoc) {
-            artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
+            artifactProducer.putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
         } else {
-            artifactProducer.removeArtifact(JAVADOC_ARTIFACT_ID);
+            artifactProducer.removeArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID);
         }
         if (includeSources) {
-            artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
+            artifactProducer.putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, packaging::createSourceJar);
         } else {
-            artifactProducer.removeArtifact(SOURCES_ARTIFACT_ID);
+            artifactProducer.removeArtifact(JkArtifactId.SOURCES_ARTIFACT_ID);
         }
         return this;
     }
@@ -494,6 +474,78 @@ public class JkProject implements JkIdeSupportSupplier {
         return artifactProducer.getMainArtifactPath();
     }
 
+    /**
+     * Creates a Ivy publication from this project.
+     */
+    public JkIvyPublication createIvyPublication() {
+        return JkIvyPublication.of()
+                .setVersionSupplier(this::getVersion)
+                .setModuleIdSupplier(this::getModuleId)
+                .addArtifacts(() -> artifactProducer)
+                .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
+                        compilation.getDependencies(),
+                        packaging.getRuntimeDependencies(),
+                        getDuplicateConflictStrategy()));
+    }
+
+    /**
+     * Returns the moduleId of this project. The moduleId is used to :
+     * <ul>
+     *     <li>Publish artifact to Maven/Ivy repository</li>
+     *     <li>Populate Manifest</li>
+     *     <li>Reference additional reports</li>
+     *     <li>Infer produced artifact file name</li>
+     *     <li>Name Docker images</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    public JkModuleId getModuleId() {
+        return moduleId;
+    }
+
+    /**
+     * Sets the moduleId for this project.
+     */
+    public JkProject setModuleId(JkModuleId moduleId) {
+        this.moduleId = moduleId;
+        return this;
+    }
+
+    public JkProject setModuleId(String moduleId) {
+        return setModuleId(JkModuleId.of(moduleId));
+    }
+
+    /**
+     * Returns the version of the projects. The version is used to :
+     * <ul>
+     *     <li>Publish artifact to Maven/Ivy repository</li>
+     *     <li>Populate Manifest</li>
+     *     <li>Reference additional reports</li>
+     *     <li>Name Docker images</li>
+     *     <li>...</li>
+     * </ul>
+     */
+    public JkVersion getVersion() {
+        return versionSupplier.get();
+    }
+
+    /**
+     * Sets the supplier for computing the project version. It can consist in returning an
+     * hard-coded version or computing a version number from VCS.
+     */
+    public JkProject setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+        this.versionSupplier = versionSupplier;
+        return this;
+    }
+
+    /**
+     * Convenient method to set a static version on this project.
+     */
+    public JkProject setVersion(String version) {
+        this.versionSupplier = () -> JkVersion.of(version);
+        return this;
+    }
+
     LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
             return cachedTextAndLocalDeps;
@@ -539,17 +591,16 @@ public class JkProject implements JkIdeSupportSupplier {
         JkLog.info("");
     }
 
-    private Path getArtifactPath(JkArtifactId artifactId) {
-        JkModuleId jkModuleId = publication.getModuleId();
-        String fileBaseName = jkModuleId != null ? jkModuleId.getDotNotation()
-                : baseDir.toAbsolutePath().getFileName().toString();
-        return baseDir.resolve(outputDir).resolve(artifactId.toFileName(fileBaseName));
-    }
-
-    private void registerArtifacts() {
+    private JkStandardFileArtifactProducer artifactProducer() {
+        JkStandardFileArtifactProducer artifactProducer = JkStandardFileArtifactProducer.of(
+                () -> baseDir.resolve(outputDir),
+                () -> moduleId != null ? moduleId.getDotNotation()
+                        : baseDir.toAbsolutePath().getFileName().toString()
+        );
         artifactProducer.putMainArtifact(packaging::createBinJar);
-        artifactProducer.putArtifact(SOURCES_ARTIFACT_ID, packaging::createSourceJar);
-        artifactProducer.putArtifact(JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
+        artifactProducer.putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, packaging::createSourceJar);
+        artifactProducer.putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
+        return artifactProducer;
     }
 
     private String actualMainClass() {
@@ -560,5 +611,18 @@ public class JkProject implements JkIdeSupportSupplier {
         JkUrlClassLoader ucl = JkUrlClassLoader.of(this.compilation.layout.resolveClassDir());
         return ucl.toJkClassLoader().findUniqueMainClass();
     }
+
+    private static JkMavenPublication mavenPublication(JkProject project) {
+        return JkMavenPublication.of()
+                .setModuleIdSupplier(project::getModuleId)
+                .setVersionSupplier(project.versionSupplier)
+                .setArtifactLocatorSupplier(() -> project.artifactProducer)
+                .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
+                        project.compilation.getDependencies(),
+                        project.packaging.getRuntimeDependencies(),
+                        project.getDuplicateConflictStrategy()))
+                .setBomResolutionRepos(project.dependencyResolver::getRepos);
+    }
+
 
 }

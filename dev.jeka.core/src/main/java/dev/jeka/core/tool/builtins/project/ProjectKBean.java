@@ -142,12 +142,12 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Publishes produced artifacts to configured repository.")
     public void publish() {
         JkLog.info("Publish " + project + " ...");
-        project.publication.publish();
+        project.mavenPublication.publish();
     }
 
     @JkDoc("Publishes produced artifacts to local repository.")
     public void publishLocal() {
-        project.publication.publishLocal();
+        project.mavenPublication.publishLocal();
     }
 
     @Override
@@ -282,12 +282,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (mavenPublishRepos.getRepos().isEmpty()) {
             mavenPublishRepos = mavenPublishRepos.and(JkRepo.ofLocal());
         }
-        project.publication.maven.setPublishRepos(mavenPublishRepos);
-        JkRepoSet ivyPulishRepos = repoProperties.getPublishRepository();
-        if (ivyPulishRepos.getRepos().isEmpty()) {
-            ivyPulishRepos = ivyPulishRepos.and(JkRepo.ofLocal());
-        }
-        project.publication.ivy.setRepos(ivyPulishRepos);
+        project.mavenPublication.setRepos(mavenPublishRepos);
 
         // set dependency resolver
         final JkRepoSet downloadRepos = repoProperties.getDownloadRepos();

@@ -22,13 +22,12 @@ public class JacocoBuild extends KBean {
     protected void init() {
         JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
+                .setModuleId("dev.jeka:jacoco-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.publication
-                .setModuleId("dev.jeka:jacoco-plugin")
-                .maven
+        project.mavenPublication
                     .pomMetadata
                         .setProjectName("Jeka plugin for Jacoco")
                         .setProjectDescription("A Jeka plugin for Jacoco coverage tool")

@@ -77,8 +77,8 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                 .addTestIncludeFilterSuffixedBy("IT", runIT)
 
                 // Control on published artifact and versions
-                .setPublishedModuleId("org.jerkar:examples-java-flat-facade")
-                .setPublishedVersionFromGitTag();
+                .setModuleId("org.jerkar:examples-java-flat-facade")
+                .setVersionFromGitTag();
 
         // Here we are modifying the dependencies mentioned in the published POM
         project.publication.maven

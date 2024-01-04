@@ -21,14 +21,13 @@ public class NodeJsBuild extends KBean {
     protected void init() {
         JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
+                .setModuleId("dev.jeka:nodejs-plugin")
                 .mixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .configureCompileDependencies(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.publication
-                .setModuleId("dev.jeka:nodejs-plugin")
-                .maven
+        project.mavenPublication
                     .pomMetadata
                         .setProjectName("Jeka plugin for NodeJs")
                         .setProjectDescription("A Jeka plugin to integrate with NodeJs")

@@ -34,8 +34,8 @@ public class SimpleWarKBean extends KBean {
                    .configureCompileDependencies(deps -> deps
                            .and("com.google.guava:guava:30.0-jre")
                            .and("javax.servlet:javax.servlet-api:4.0.1"))
-                   .setPublishedModuleId("dev.jeka.samples:war-project")
-                   .setPublishedVersion("1.0-SNAPSHOT")
+                   .setModuleId("dev.jeka.samples:war-project")
+                   .setVersion("1.0-SNAPSHOT")
                    .configureRuntimeDependencies(compileDeps -> compileDeps
                            .minus("javax.servlet:javax.servlet-api"))
                    .setJvmTargetVersion(JkJavaVersion.V8)

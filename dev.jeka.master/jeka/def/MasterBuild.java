@@ -174,9 +174,8 @@ class MasterBuild extends KBean {
         versionFromGit.handleVersioning(project);
         project.compilation
                         .addJavaCompilerOptions("-g");
-        project.publication
-            .setRepos(this.publishRepo())
-            .maven
+        project.mavenPublication
+                .setRepos(this.publishRepo())
                 .pomMetadata
                     .setProjectUrl("https://jeka.dev")
                     .setScmUrl("https://github.com/jerkar/jeka.git")

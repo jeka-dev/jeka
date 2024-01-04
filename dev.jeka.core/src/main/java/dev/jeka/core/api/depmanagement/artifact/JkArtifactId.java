@@ -3,6 +3,8 @@ package dev.jeka.core.api.depmanagement.artifact;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.util.Objects;
+
 /**
  * Artifacts are files produced by projects in order to be published and reused by other projects. {@link JkArtifactId}
  * identifies artifacts within a project. <p>
@@ -12,6 +14,8 @@ import dev.jeka.core.api.utils.JkUtilsString;
 public final class JkArtifactId {
 
     public static final String MAIN_ARTIFACT_NAME = "";
+    public static final JkArtifactId SOURCES_ARTIFACT_ID = of("sources", "jar");
+    public static final JkArtifactId JAVADOC_ARTIFACT_ID = of("javadoc", "jar");
 
     private final String name;
 
@@ -73,8 +77,8 @@ public final class JkArtifactId {
 
         JkArtifactId that = (JkArtifactId) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        return extension != null ? extension.equals(that.extension) : that.extension == null;
+        if (!Objects.equals(name, that.name)) return false;
+        return Objects.equals(extension, that.extension);
     }
 
     @Override
@@ -87,7 +91,7 @@ public final class JkArtifactId {
     @Override
     public String toString() {
         String classif = name == null ? "[main-artifact]" : "-" + name;
-        return "" + classif + '.' + extension;
+        return classif + '.' + extension;
     }
 
 

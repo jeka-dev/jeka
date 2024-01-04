@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement.artifact;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -9,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * This {@link JkArtifactProducer} produces artifacts files at a standardized path
@@ -21,19 +20,21 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
 
     private final Map<JkArtifactId, Consumer<Path>> consumers = new LinkedHashMap<>();
 
-    private Function<JkArtifactId, Path> artifactFileFunction;
-
     private String mainArtifactExt = "jar";
 
-    private JkStandardFileArtifactProducer() {
+    private final Supplier<Path> outputDirSupplier;
+
+    private final Supplier<String> baseNameSupplier;
+
+    private JkStandardFileArtifactProducer(Supplier<Path> outputDirSupplier,
+                                           Supplier<String> baseNameSupplier) {
+        this.outputDirSupplier = outputDirSupplier;
+        this.baseNameSupplier = baseNameSupplier;
     }
 
-    public static JkStandardFileArtifactProducer of() {
-        return new JkStandardFileArtifactProducer();
-    }
-
-    public static JkStandardFileArtifactProducer of(Function<JkArtifactId, Path> artifactPathFunction) {
-        return new JkStandardFileArtifactProducer().setArtifactFilenameComputation(artifactPathFunction);
+    public static JkStandardFileArtifactProducer of(Supplier<Path> outputDirSupplier,
+                                                    Supplier<String> baseNameSupplier) {
+        return new JkStandardFileArtifactProducer(outputDirSupplier, baseNameSupplier);
     }
 
     @Override
@@ -51,24 +52,12 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
 
     @Override
     public Path getArtifactPath(JkArtifactId artifactId) {
-        JkUtilsAssert.state(artifactFileFunction != null, "artifactFileFunction has not been set.");
-        return artifactFileFunction.apply(artifactId);
+        return outputDirSupplier.get().resolve(artifactId.toFileName(baseNameSupplier.get()));
     }
 
     @Override
     public List<JkArtifactId> getArtifactIds() {
         return new LinkedList<>(consumers.keySet());
-    }
-
-    /**
-     * Specifies how the location and names or artifact files will be computed.
-     * Artifact files are generated on a given directory provided by the specified supplier. The name of the
-     * artifact files will be composed as [partName](-[artifactId.name]).[artifactId.ext].
-     */
-    public JkStandardFileArtifactProducer setArtifactFilenameComputation(Function<JkArtifactId, Path> artifactFileFunction) {
-        JkUtilsAssert.argument(artifactFileFunction != null, "artifactFileFunction cannot be null.");
-        this.artifactFileFunction = artifactFileFunction;
-        return this;
     }
 
     public JkStandardFileArtifactProducer putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
@@ -108,5 +97,7 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
         this.mainArtifactExt = mainArtifactExt;
         return this;
     }
+
+
 
 }

@@ -1,8 +1,8 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
@@ -38,6 +38,10 @@ public final class JkMavenPublication {
 
     private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
 
+    public final JkRunnables preActions = JkRunnables.of();
+
+    public final JkRunnables postActions = JkRunnables.of();
+
     private JkMavenPublication() {
     }
 
@@ -64,8 +68,8 @@ public final class JkMavenPublication {
         return this;
     }
 
-    public JkMavenPublication setModuleId(Supplier<String> moduleIdSupplier) {
-        this.moduleIdSupplier = () -> JkModuleId.of(moduleIdSupplier.get());
+    public JkMavenPublication setModuleIdSupplier(Supplier<JkModuleId> moduleIdSupplier) {
+        this.moduleIdSupplier = moduleIdSupplier;
         return this;
     }
 
@@ -74,8 +78,8 @@ public final class JkMavenPublication {
         return this;
     }
 
-    public JkMavenPublication setVersion(Supplier<String> versionSupplier) {
-        this.versionSupplier = () -> JkVersion.of(versionSupplier.get());
+    public JkMavenPublication setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+        this.versionSupplier = versionSupplier;
         return this;
     }
 
@@ -119,7 +123,7 @@ public final class JkMavenPublication {
         return publishRepos;
     }
 
-    public JkMavenPublication setPublishRepos(JkRepoSet repoSet) {
+    public JkMavenPublication setRepos(JkRepoSet repoSet) {
         this.publishRepos = repoSet;
         return this;
     }
@@ -133,7 +137,9 @@ public final class JkMavenPublication {
      * Publishes this publication to its defined repositories
      */
     public JkMavenPublication publish() {
+        preActions.run();
         publish(this.publishRepos.withDefaultSigner(defaultSigner));
+        postActions.run();
         return this;
     }
 
@@ -141,7 +147,9 @@ public final class JkMavenPublication {
      * Publishes this publication on the local repository
      */
     public JkMavenPublication publishLocal() {
+        preActions.run();
         publish(JkRepoSet.ofLocal());
+        postActions.run();
         return this;
     }
 
@@ -185,6 +193,29 @@ public final class JkMavenPublication {
             result.add(coordinateDependency.withTransitivity(transitivity));
         }
         return JkDependencySet.of(result).withVersionProvider(mergeResult.getVersionProvider());
+    }
+
+    /**
+     * Shorthand to get the first declared publication repository.
+     */
+    public JkRepo findFirstNonLocalRepo() {
+        return this.getPublishRepos().getRepos().stream()
+                .filter(repo1 -> !repo1.isLocal())
+                .findFirst()
+                .orElse(null);
+    }
+
+    public String info() {
+        StringBuilder builder = new StringBuilder();
+        builder
+                .append("\nPublish Maven repositories : ")
+                .append(getPublishRepos()).append("\n")
+                .append("Published Maven Module & version : ")
+                .append(getModuleId().toCoordinate(getVersion()))
+                .append("\n")
+                .append("Published Maven Dependencies :");
+        getDependencies().getEntries().forEach(dep -> builder.append("\n  ").append(dep));
+        return builder.toString();
     }
 
 

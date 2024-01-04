@@ -85,7 +85,7 @@ public class JkNexusRepos {
      * Creates a {@link JkNexusRepos} from the publishing repo of the specified {@link JkProject}
      */
     public static JkNexusRepos ofPublishRepo(JkProject project) {
-        JkRepo repo = project.publication.findFirstNonLocalRepo();
+        JkRepo repo = project.mavenPublication.findFirstNonLocalRepo();
         JkUtilsAssert.argument(repo != null, "No remote publish repo found on project " + project);
         return JkNexusRepos.ofRepo(repo);
     }
@@ -198,7 +198,7 @@ public class JkNexusRepos {
     }
 
     public void autoReleaseAfterPublication(JkProject project) {
-        project.publication.postActions.append(TASK_NAME, this::closeAndReleaseOpenRepositories);
+        project.mavenPublication.postActions.append(TASK_NAME, this::closeAndReleaseOpenRepositories);
     }
 
     private List<JkStagingRepo> doFindStagingRepositories() throws IOException {

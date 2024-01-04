@@ -64,12 +64,10 @@ public class SimpleProjectKBean extends KBean {
                     .setForkingProcess(false)
                     .engineBehavior
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
-       project
-           .publication
+       project.mavenPublication
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion("1.0-SNAPSHOT")
-               .maven
-                    .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
+               .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
 
                // Published dependencies can be modified here from the ones declared in dependency management.
                // Here jersey-server is not supposed to be part of the API but only needed at runtime.

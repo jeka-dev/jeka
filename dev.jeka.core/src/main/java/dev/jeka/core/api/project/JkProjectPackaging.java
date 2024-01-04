@@ -75,7 +75,7 @@ public class JkProjectPackaging {
     }
 
     public void createJavadocJar() {
-        createJavadocJar(project.artifactProducer.getArtifactPath(JkProject.JAVADOC_ARTIFACT_ID));
+        createJavadocJar(project.artifactProducer.getArtifactPath(JkArtifactId.JAVADOC_ARTIFACT_ID));
     }
 
     public void createSourceJar(Path target) {
@@ -136,7 +136,7 @@ public class JkProjectPackaging {
     }
 
     public void createSourceJar() {
-        createSourceJar(project.artifactProducer.getArtifactPath(JkProject.SOURCES_ARTIFACT_ID));
+        createSourceJar(project.artifactProducer.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID));
     }
 
     public void createBinJar(Path target) {
@@ -190,8 +190,8 @@ public class JkProjectPackaging {
     }
 
     private void addManifestDefaults() {
-        JkModuleId jkModuleId = project.publication.getModuleId();
-        String version = project.publication.getVersion().getValue();
+        JkModuleId jkModuleId = project.getModuleId();
+        String version = project.getVersion().getValue();
         if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && jkModuleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, jkModuleId.getName());
         }

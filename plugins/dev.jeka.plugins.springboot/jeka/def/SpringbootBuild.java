@@ -34,9 +34,8 @@ public class SpringbootBuild extends KBean {
                 );
         project.compilation.layout.setResources(JkPathTreeSet.ofRoots("resources"));
         project.testing.setSkipped(true);
-        project.publication
-                .setModuleId("dev.jeka:springboot-plugin")
-                .maven
+        project.setModuleId("dev.jeka:springboot-plugin");
+        project.mavenPublication
                 .pomMetadata
                 .setProjectName("Jeka plugin for Spring Boot")
                 .setProjectDescription("A Jeka plugin for Spring boot application")

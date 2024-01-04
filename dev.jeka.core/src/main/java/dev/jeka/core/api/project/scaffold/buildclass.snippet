@@ -29,10 +29,10 @@ class Build extends KBean {
                 .and("org.junit.jupiter:junit-jupiter:5.9.2")
         );
 
-        // Publication is only necessary if your project is being deployed to a binary repository.
-        project.publication
+        // This info may only be necessary if your project is being published to a binary repository.
+        project
                 .setModuleId("your.org:project-name")
-                .setVersion("0.0.1-SNAPSHOT");  // Version inferred from Git
+                .setVersion("0.0.1-SNAPSHOT");
     }
 
 }
