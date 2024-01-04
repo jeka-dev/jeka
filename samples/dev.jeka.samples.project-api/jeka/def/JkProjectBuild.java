@@ -47,7 +47,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
 
         // Control on overall compiler
         project
-            .compiler
+            .compilerToolChain
                 .setCompileTool(new EclipseCompiler(), "-warn:nullDereference,unusedPrivate");
 
         // Control on 'production code' compilation
@@ -112,13 +112,12 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                 .putArtifact("fat", "jar", project.packaging::createFatJar); // create a fat jar
 
         // Control on publication
-        project
-            .publication
+        project.mavenPublication
                 .setModuleId("dev.jeka.examples:my-sample")
-                .setVersion(() -> "1.0.0")
+                .setVersion("1.0.0")
                 .setDefaultSigner(path -> path)   // sign published artifact
                 .setRepos(JkRepoSet.of("https://my.org.repository/internal"))
-                .maven
+
                     .configureDependencies(deps -> deps  // Fine tune published transitive dependencies
                             .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                     )
@@ -130,9 +129,8 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                         .setProjectUrl("https://my.project.url")
                         .setScmConnection("git://my.git.repo/for.project")
                         .setScmDeveloperConnection("https://my.scn.dev.connectyion");
-        project
-            .publication
-                .ivy
+
+        project.createIvyPublication()
                     .setRepos(JkRepoSet.of("https://my.ivy.repo"));
                 //... similar to Maven
 
@@ -165,6 +163,5 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                 .getBytes(StandardCharsets.UTF_8));
         }
     }
-
 
 }

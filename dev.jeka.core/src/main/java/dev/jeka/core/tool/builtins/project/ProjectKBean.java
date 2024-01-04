@@ -266,8 +266,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         }
 
-
-
     }
 
     // ------- private methods
@@ -306,9 +304,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (layout.mixSourcesAndResources) {
             project.flatFacade().mixResourcesAndSources();
         }
-        JkJavaCompilerToolChain compiler = project.compiler;
-        if (!compiler.isToolOrProcessSpecified()) {
-            compiler.setJdkHints(jdks(), true);
+        JkJavaCompilerToolChain compilerToolChain = project.compilerToolChain;
+        if (!compilerToolChain.isToolOrProcessSpecified()) {
+            compilerToolChain.setJdkHints(jdks(), true);
         }
         project.flatFacade().includeJavadocAndSources(pack.javadoc, pack.sources);
         if (pack.jarType != null) {

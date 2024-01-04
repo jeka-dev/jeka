@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Responsible to create Javadoc and Source jar.
+ * Responsible to create binary, Javadoc and Source jars.
  */
 public class JkProjectPackaging {
 
@@ -50,20 +50,21 @@ public class JkProjectPackaging {
         this.javadocProcessor = JkJavadocProcessor.of();
     }
 
-    public JkProjectPackaging apply(Consumer<JkProjectPackaging> consumer) {
-         consumer.accept(this);
-         return this;
-    }
-
     public Path getJavadocDir() {
         return project.getOutputDir().resolve(javadocDir);
     }
 
+    /**
+     * Sets the directory, relative to 'jeka/output', where Javadoc will be generated. Initial value is 'javadoc'.
+     */
     public JkProjectPackaging setJavadocDir(String javadocDir) {
         this.javadocDir = javadocDir;
         return this;
     }
 
+    /**
+     * Creates a Javadoc jar at the specified location.
+     */
     public void createJavadocJar(Path target) {
         boolean created = createJavadocFiles();
         if (!created) {
@@ -74,10 +75,16 @@ public class JkProjectPackaging {
         JkPathTree.of(javadocDir).zipTo(target);
     }
 
+    /**
+     * Creates a Javadoc jar at conventional location.
+     */
     public void createJavadocJar() {
         createJavadocJar(project.artifactProducer.getArtifactPath(JkArtifactId.JAVADOC_ARTIFACT_ID));
     }
 
+    /**
+     * Creates a source jar at specified location.
+     */
     public void createSourceJar(Path target) {
         JkProjectCompilation compilation = project.compilation;
         JkPathTreeSet allSources = compilation.layout.resolveSources().and(compilation
@@ -90,55 +97,16 @@ public class JkProjectPackaging {
                 .layout.resolveGeneratedSourceDir()).zipTo(target);
     }
 
-    public void createBinJar() {
-        createBinJar(project.artifactProducer.getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
-    }
-
-    public JkPathTreeSet getFatJarExtraContent() {
-        return this.fatJarExtraContent;
-    }
-
     /**
-     * Allows customizing thz content of produced fat jar.
+     * Creates a source jar at the specified location.
      */
-    public JkProjectPackaging customizeFatJarContent(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
-        this.fatJarExtraContent = customizer.apply(fatJarExtraContent);
-        return this;
-    }
-
-    /**
-     * Specify the dependencies to add or remove from the production compilation dependencies to
-     * get the runtime dependencies.
-     * @param modifier A function that define the runtime dependencies from the compilation ones.
-     */
-    public JkProjectPackaging configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        this.dependencySetModifier = modifier;
-        return this;
-    }
-
-    public JkDependencySet getRuntimeDependencies() {
-        JkDependencySet baseDependencies = project.compilation.getDependencies();
-        if (project.isIncludeTextAndLocalDependencies()) {
-            baseDependencies = baseDependencies
-                    .minus(project.textAndLocalDeps().getCompile().getEntries())
-                    .and(project.textAndLocalDeps().getRuntime());
-        }
-        return dependencySetModifier.apply(baseDependencies);
-    }
-
-    public JkResolveResult resolveRuntimeDependencies() {
-        if (cachedJkResolveResult != null) {
-            return cachedJkResolveResult;
-        }
-        cachedJkResolveResult = project.dependencyResolver.resolve(getRuntimeDependencies()
-                .normalised(project.getDuplicateConflictStrategy()));
-        return cachedJkResolveResult;
-    }
-
     public void createSourceJar() {
         createSourceJar(project.artifactProducer.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID));
     }
 
+    /**
+     * Creates a binary jar (without dependencies) at the specified location.
+     */
     public void createBinJar(Path target) {
         project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
@@ -152,6 +120,80 @@ public class JkProjectPackaging {
                 .withManifest(manifest)
                 .withExtraFiles(getFatJarExtraContent())
                 .makeJar(target);
+    }
+
+    /**
+     * Creates a binary jar at conventional location.
+     */
+    public void createBinJar() {
+        createBinJar(project.artifactProducer.getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
+    }
+
+    /**
+     * Creates a fat jar (jar containing all dependencies) at the specified location.
+     */
+    public void createFatJar(Path target) {
+        project.compilation.runIfNeeded();
+        project.testing.runIfNeeded();
+        JkLog.startTask("Packing fat jar...");
+        Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
+        addManifestDefaults();
+        JkJarPacker.of(project.compilation.layout.resolveClassDir())
+                .withManifest(manifest)
+                .withExtraFiles(getFatJarExtraContent())
+                .makeFatJar(target, classpath, this.fatJarFilter);
+        JkLog.endTask();
+    }
+
+    /**
+     * Creates a fat jar at conventional location.
+     */
+    public void createFatJar() {
+        createFatJar(project.artifactProducer.getArtifactPath(JkArtifactId.of("fat", "jar")));
+    }
+
+    /**
+     * Allows customizing thz content of produced fat jar.
+     */
+    public JkProjectPackaging customizeFatJarContent(Function<JkPathTreeSet, JkPathTreeSet> customizer) {
+        this.fatJarExtraContent = customizer.apply(fatJarExtraContent);
+        return this;
+    }
+
+    /**
+     * Specifies the dependencies to add or remove from the production compilation dependencies to
+     * get the runtime dependencies.
+     * @param modifier A function that define the runtime dependencies from the compilation ones.
+     */
+    public JkProjectPackaging configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+        this.dependencySetModifier = modifier;
+        return this;
+    }
+
+    /**
+     * Returns the runtime dependencies computed from 'compile' dependencies and modified
+     * through {@link #configureRuntimeDependencies(Function)}
+     */
+    public JkDependencySet getRuntimeDependencies() {
+        JkDependencySet baseDependencies = project.compilation.getDependencies();
+        if (project.isIncludeTextAndLocalDependencies()) {
+            baseDependencies = baseDependencies
+                    .minus(project.textAndLocalDeps().getCompile().getEntries())
+                    .and(project.textAndLocalDeps().getRuntime());
+        }
+        return dependencySetModifier.apply(baseDependencies);
+    }
+
+    /**
+     * Returns the resolved (and cached) dependencies for the runtime.
+     */
+    public JkResolveResult resolveRuntimeDependencies() {
+        if (cachedJkResolveResult != null) {
+            return cachedJkResolveResult;
+        }
+        cachedJkResolveResult = project.dependencyResolver.resolve(getRuntimeDependencies()
+                .normalised(project.getDuplicateConflictStrategy()));
+        return cachedJkResolveResult;
     }
 
     /**
@@ -172,21 +214,8 @@ public class JkProjectPackaging {
         manifest.writeToStandardLocation(project.compilation.layout.resolveClassDir());
     }
 
-    public void createFatJar(Path target) {
-        project.compilation.runIfNeeded();
-        project.testing.runIfNeeded();
-        JkLog.startTask("Packing fat jar...");
-        Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
-        addManifestDefaults();
-        JkJarPacker.of(project.compilation.layout.resolveClassDir())
-                .withManifest(manifest)
-                .withExtraFiles(getFatJarExtraContent())
-                .makeFatJar(target, classpath, this.fatJarFilter);
-        JkLog.endTask();
-    }
-
-    public void createFatJar() {
-        createFatJar(project.artifactProducer.getArtifactPath(JkArtifactId.of("fat", "jar")));
+    private JkPathTreeSet getFatJarExtraContent() {
+        return this.fatJarExtraContent;
     }
 
     private void addManifestDefaults() {
@@ -203,7 +232,7 @@ public class JkProjectPackaging {
         }
     }
 
-    /**
+    /*
      * Generates javadoc files (files + zip)
      */
     private boolean createJavadocFiles() {

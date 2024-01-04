@@ -55,8 +55,6 @@ import java.util.function.Supplier;
  */
 public class JkProject implements JkIdeSupportSupplier {
 
-    private static final JkJavaVersion DEFAULT_JAVA_VERSION = JkJavaVersion.V17;
-
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     private Path baseDir = Paths.get("");
@@ -84,7 +82,7 @@ public class JkProject implements JkIdeSupportSupplier {
     /**
      * The compiler for compiling Java sources for this project.
      */
-    public final JkJavaCompilerToolChain compiler;
+    public final JkJavaCompilerToolChain compilerToolChain;
 
     public final JkProjectPackaging packaging;
 
@@ -103,7 +101,7 @@ public class JkProject implements JkIdeSupportSupplier {
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
     private JkProject() {
-        compiler = JkJavaCompilerToolChain.of();
+        compilerToolChain = JkJavaCompilerToolChain.of();
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);

@@ -47,7 +47,7 @@ public class SimpleProjectKBean extends KBean {
                .addTestExcludeFilterSuffixedBy("IT", skipIT);
        project
            .setJvmTargetVersion(JkJavaVersion.V8)
-           .compiler
+           .compilerToolChain
                 .setForkedWithDefaultProcess();
        project
            .dependencyResolver

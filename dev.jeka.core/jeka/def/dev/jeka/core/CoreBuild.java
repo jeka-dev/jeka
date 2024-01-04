@@ -52,7 +52,7 @@ public class CoreBuild extends KBean {
                 .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
                 .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
         project
-            .compiler
+            .compilerToolChain
                 .setForkedWithDefaultProcess();
         project
             .compilation

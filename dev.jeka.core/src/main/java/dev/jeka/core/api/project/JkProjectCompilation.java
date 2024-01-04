@@ -170,7 +170,7 @@ public class JkProjectCompilation {
     }
 
     private void compileJava() {
-        boolean success = project.compiler.compile(project.getJvmTargetVersion(), compileSpec());
+        boolean success = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }
