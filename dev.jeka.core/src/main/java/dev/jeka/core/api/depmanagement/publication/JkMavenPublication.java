@@ -163,8 +163,10 @@ public final class JkMavenPublication {
         JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
         JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
+
         List<Path> missingFiles = getArtifactLocator().getMissingFiles();
         JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
+
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
         internalPublisher.publishMaven(coordinate, getArtifactLocator(), pomMetadata, dependencySet);

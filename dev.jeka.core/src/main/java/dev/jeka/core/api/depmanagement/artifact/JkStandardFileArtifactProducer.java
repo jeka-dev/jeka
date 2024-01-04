@@ -37,6 +37,10 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
         return new JkStandardFileArtifactProducer(outputDirSupplier, baseNameSupplier);
     }
 
+    public static JkStandardFileArtifactProducer of(Path outputDir, String artifactBaseName) {
+        return of(() ->outputDir, () -> artifactBaseName);
+    }
+
     @Override
     public void makeArtifact(JkArtifactId artifactId) {
         Consumer<Path> consumer = consumers.get(artifactId);
@@ -76,7 +80,7 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
 
     public JkStandardFileArtifactProducer removeArtifact(String artifactName) {
         for (JkArtifactId artifactId : consumers.keySet()) {
-            if (artifactName.equals(artifactId.getName())) {
+            if (artifactName.equals(artifactId.getQualifier())) {
                 consumers.remove(artifactId);
             }
         }

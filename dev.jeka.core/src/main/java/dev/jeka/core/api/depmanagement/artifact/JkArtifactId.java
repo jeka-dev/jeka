@@ -8,53 +8,53 @@ import java.util.Objects;
 /**
  * Artifacts are files produced by projects in order to be published and reused by other projects. {@link JkArtifactId}
  * identifies artifacts within a project. <p>
- * The identifier is compound of a name and a file extension. The name maps with the Maven 'classifier' concept.<br/>
- * In a project, we distinguish the <i>main artifact</i> from the others : the main artifact name values to empty string.
+ * The identifier is compound of a qualifier and a file extension. The qualifier maps with the Maven 'classifier' concept.<br/>
+ * In a project, we distinguish the <i>main artifact</i> from the others : the main artifact qualifier values to empty string.
  */
 public final class JkArtifactId {
 
-    public static final String MAIN_ARTIFACT_NAME = "";
+    public static final String MAIN_ARTIFACT_QUALIFIER = "";
     public static final JkArtifactId SOURCES_ARTIFACT_ID = of("sources", "jar");
     public static final JkArtifactId JAVADOC_ARTIFACT_ID = of("javadoc", "jar");
 
-    private final String name;
+    private final String qualifier;
 
     private final String extension;
 
-    private JkArtifactId(String name, String extension) {
-        this.name = name.toLowerCase();
+    private JkArtifactId(String qualifier, String extension) {
+        this.qualifier = qualifier.toLowerCase();
         this.extension = extension == null || extension.trim().length() == 0 ? null : extension.trim().toLowerCase();
     }
 
     /**
-     * Creates an artifact id with the specified name and extension. <p>
-     * The name cannot be null or be a string composed of spaces.
+     * Creates an artifact id with the specified qualifier and extension. <p>
+     * The qualifier cannot be null or be a string composed of spaces.
      * An empty string extension generally means that the file has no extension.<br/>
      */
-    public static JkArtifactId of(String name, String extension) {
-        JkUtilsAssert.argument(name != null, "Artifact name cannot be null");
+    public static JkArtifactId of(String qualifier, String extension) {
+        JkUtilsAssert.argument(qualifier != null, "Artifact qualifier cannot be null");
         JkUtilsAssert.argument(extension != null, "Artifact extension cannot be null (but blank is ok).");
-        JkUtilsAssert.argument(MAIN_ARTIFACT_NAME.equals(name) || !JkUtilsString.isBlank(name),
-                "Artifact name cannot be a blank string.");
-        return new JkArtifactId(name, extension);
+        JkUtilsAssert.argument(MAIN_ARTIFACT_QUALIFIER.equals(qualifier) || !JkUtilsString.isBlank(qualifier),
+                "Artifact qualifier cannot be a blank string.");
+        return new JkArtifactId(qualifier, extension);
     }
 
     /**
      * Shorthand for <code>of(MAIN_ARTIFACT_NAME, String)</code>.
      */
     public static JkArtifactId ofMainArtifact(String extension) {
-        return JkArtifactId.of(MAIN_ARTIFACT_NAME, extension);
+        return JkArtifactId.of(MAIN_ARTIFACT_QUALIFIER, extension);
     }
 
     public boolean isMainArtifact() {
-        return MAIN_ARTIFACT_NAME.equals(this.name);
+        return MAIN_ARTIFACT_QUALIFIER.equals(this.qualifier);
     }
 
     /**
      * Returns the classifier of this object.
      */
-    public String getName() {
-        return name;
+    public String getQualifier() {
+        return qualifier;
     }
 
     /**
@@ -64,8 +64,14 @@ public final class JkArtifactId {
         return extension;
     }
 
+    /**
+     * Returns the filename of this artifactId, specifying the base filename for computing
+     * the final name.
+     * @param namePart The base name for computing the complete filename of the artifact.
+     *                 This is generally the name (or moduleId) of the project generating this artifact.
+     */
     public String toFileName(String namePart) {
-        String classifier = isMainArtifact() ? "" : "-" + getName();
+        String classifier = isMainArtifact() ? "" : "-" + getQualifier();
         String ext = JkUtilsString.isBlank(extension) ? "" : "." + getExtension();
         return namePart + classifier + ext;
     }
@@ -77,20 +83,20 @@ public final class JkArtifactId {
 
         JkArtifactId that = (JkArtifactId) o;
 
-        if (!Objects.equals(name, that.name)) return false;
+        if (!Objects.equals(qualifier, that.qualifier)) return false;
         return Objects.equals(extension, that.extension);
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
+        int result = qualifier != null ? qualifier.hashCode() : 0;
         result = 31 * result + (extension != null ? extension.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        String classif = name == null ? "[main-artifact]" : "-" + name;
+        String classif = qualifier == null ? "[main-artifact]" : "-" + qualifier;
         return classif + '.' + extension;
     }
 

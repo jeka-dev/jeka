@@ -277,7 +277,7 @@ public class JkProject implements JkIdeSupportSupplier {
      * @see #runJar(String, boolean, String, String)
      */
     public JkProcess<?> runJar(boolean includeRuntimeDeps, String jvmOptions, String programArgs) {
-        return runJar(JkArtifactId.MAIN_ARTIFACT_NAME, includeRuntimeDeps, jvmOptions, programArgs);
+        return runJar(JkArtifactId.MAIN_ARTIFACT_QUALIFIER, includeRuntimeDeps, jvmOptions, programArgs);
     }
 
     /**

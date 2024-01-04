@@ -162,7 +162,7 @@ public final class JkIvyPublication {
                 continue;
             }
             final Path file = artifactLocator.getArtifactPath(artifactId);
-            result.add(toPublishedArtifact(null, file, artifactId.getName(), configurationFor(artifactId.getName())));
+            result.add(toPublishedArtifact(null, file, artifactId.getQualifier(), configurationFor(artifactId.getQualifier())));
         }
         return result;
     }

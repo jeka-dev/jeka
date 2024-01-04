@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata;
@@ -83,14 +83,14 @@ final class IvyPublisherForMaven {
             final JkMavenMetadata.Versioning.JkSnapshot snap = mavenMetadata.currentSnapshot();
             version = versionForUniqueSnapshot(coordinate.getVersion().getValue(), snap.timestamp,
                     snap.buildNumber);
-            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME,
+            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_QUALIFIER,
                     version);
             putInRepo(pomXml, pomDest, true);
-            mavenMetadata.addSnapshotVersion("pom", JkArtifactId.MAIN_ARTIFACT_NAME);
+            mavenMetadata.addSnapshotVersion("pom", JkArtifactId.MAIN_ARTIFACT_QUALIFIER);
             push(mavenMetadata, path);
         } else {
             version = coordinate.getVersion().getValue();
-            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME, version);
+            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_QUALIFIER, version);
             putInRepo(pomXml, pomDest, true);
         }
         if (this.descriptorOutputDir == null) {
@@ -127,13 +127,13 @@ final class IvyPublisherForMaven {
             final String versionUniqueSnapshot = versionForUniqueSnapshot(coordinate.getVersion()
                     .getValue(), timestamp, buildNumber);
             for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-                publishUniqueSnapshot(coordinate, artifactId.getName(),
+                publishUniqueSnapshot(coordinate, artifactId.getQualifier(),
                     artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
             for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-                publishNormal(coordinate, artifactId.getName(), artifactLocator.getArtifactPath(artifactId));
+                publishNormal(coordinate, artifactId.getQualifier(), artifactLocator.getArtifactPath(artifactId));
             }
             return null;
         }
@@ -172,7 +172,7 @@ final class IvyPublisherForMaven {
     }
 
     private String checkNotExist(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
-        final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME);
+        final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_QUALIFIER);
         if (existOnRepo(pomDest)) {
             throw new IllegalArgumentException("The main artifact already exist for " + coordinate);
         }
@@ -230,7 +230,7 @@ final class IvyPublisherForMaven {
         final StringBuilder result = new StringBuilder(moduleBasePath(jkModuleId)).append("/")
                 .append(version).append("/").append(jkModuleId.getName()).append("-")
                 .append(uniqueVersion);
-        if (!JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
+        if (!JkArtifactId.MAIN_ARTIFACT_QUALIFIER.equals(classifier)) {
             result.append("-").append(classifier);
         }
         result.append(".").append(ext);

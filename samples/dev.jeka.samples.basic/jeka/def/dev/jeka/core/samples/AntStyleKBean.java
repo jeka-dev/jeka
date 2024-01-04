@@ -5,8 +5,7 @@ import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
-import dev.jeka.core.api.depmanagement.artifact.JkSuppliedFileArtifactProducer;
+import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -44,9 +43,15 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
     Path src = getBaseDir().resolve("src/main/java");
     Path test = getBaseDir().resolve("src/test/java");
     JkPathTree baseTree = JkPathTree.of(getBaseDir());
-    Path srcJar = getOutputDir().resolve("jar/" + baseTree.getRoot().getFileName() + "-sources.jar");
+
     Path classDir = getOutputDir().resolve("classes");
-    Path jarFile = getOutputDir().resolve("jar/" + baseTree.getRoot().getFileName() + ".jar");
+
+    JkStandardFileArtifactProducer artifactProducer = JkStandardFileArtifactProducer.of(getOutputDir(), "sample-ant-style");
+
+    Path jarFile = artifactProducer.getMainArtifactPath();
+
+    Path srcJarFile = artifactProducer.getArtifactPath("source", "jar");
+
     JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
     JkDependencySet prodDependencies = JkDependencySet.of()
             .and("com.google.guava:guava:30.0-jre")
@@ -65,18 +70,18 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
                 .setSourceVersion("8")
                 .setTargetVersion("8")
                 .setSources(javaSources.toSet()));
-        JkPathTree resources =   JkPathTree.of(src).andMatching(false, "**/*.java");
+        JkPathTree resources = JkPathTree.of(src).andMatching(false, "**/*.java");
         resources.copyTo(classDir);
     }
 
-    public void jarSources() {
-        JkPathTree.of(src).zipTo(srcJar);
+    public void jarSources(Path target) {
+        JkPathTree.of(src).zipTo(target);
     }
 
-    public void jar() {
+    public void makeJar(Path target) {
         compile();
         JkManifest.of().addMainClass("RunClass").writeToStandardLocation(classDir);
-        JkPathTree.of(classDir).zipTo(jarFile);
+        JkPathTree.of(classDir).zipTo(target);
     }
 
     public void javadoc() {
@@ -85,7 +90,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
     }
 
     public void run() {
-        jar();
+        makeJar(jarFile);
         JkJavaProcess.ofJavaJar(jarFile, null)
                 .setWorkingDir(jarFile.getParent())
                 .setClasspath(prodClasspath)
@@ -94,7 +99,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
 
     public void cleanPackPublish() {
         cleanOutput();
-        jar();
+        makeJar(jarFile);
         javadoc();
         publish();
     }
@@ -105,11 +110,14 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
         JkRepo ivyRepo = JkRepo.of(getOutputDir().resolve("test-output/ivy-repo"));
         JkRepo mavenRepo = JkRepo.of(getOutputDir().resolve("test-output/maven-repo"));
         JkCoordinateDependency versionedModule = JkCoordinateDependency.of("myGroup:myName:0.2.2-SNAPSHOT");
-        JkArtifactProducer artifactProducer = JkSuppliedFileArtifactProducer.of()
-                .putMainArtifact(jarFile, this::jar)
-                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, srcJar, this::jarSources);
+
+        artifactProducer
+                .putMainArtifact(this::makeJar)
+                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, this::jarSources);
+
         artifactProducer.makeAllMissingArtifacts();
         mavenRepo.publishConfig.setSigner(pgp.getSigner(""));
+
         JkMavenPublication.of()
                 .setArtifactLocator(artifactProducer)
                 .configureDependencies(deps -> prodDependencies)
@@ -117,6 +125,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
                 .setVersion(versionedModule.getCoordinate().getVersion().getValue())
                 .addRepos(mavenRepo)
                 .publish();
+
         JkIvyPublication.of()
                 .setModuleIdSupplier(versionedModule.getCoordinate().getModuleId().toString())
                 .setVersion(versionedModule.getCoordinate().getVersion().getValue())

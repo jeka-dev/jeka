@@ -1,7 +1,7 @@
 package dev.jeka.core.api.depmanagement.publication;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata.Versioning.JkSnapshot;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -108,7 +108,7 @@ public final class JkMavenMetadata {
 
     public void addSnapshotVersion(String extension, String classifier) {
         final Versioning.SnapshotVersion snapshotVersion = new Versioning.SnapshotVersion();
-        snapshotVersion.classifier = JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier) ? null : classifier;
+        snapshotVersion.classifier = JkArtifactId.MAIN_ARTIFACT_QUALIFIER.equals(classifier) ? null : classifier;
         snapshotVersion.extension = extension;
         snapshotVersion.updated = this.versioning.lastUpdate;
         final String version = this.version.replace("-SNAPSHOT", "");

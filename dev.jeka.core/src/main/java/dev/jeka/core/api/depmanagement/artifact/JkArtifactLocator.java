@@ -18,12 +18,16 @@ public interface JkArtifactLocator {
      */
     Path getArtifactPath(JkArtifactId artifactId);
 
+    default Path getArtifactPath(String qualifier, String extension) {
+        return getArtifactPath(JkArtifactId.of(qualifier, extension));
+    }
+
     /**
      * Returns the main artifact file id for this producer. By default, it returns an artifact file id with no
      * classifier and 'jar' getExtension.
      */
     default JkArtifactId getMainArtifactId() {
-        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_NAME, getMainArtifactExt());
+        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_QUALIFIER, getMainArtifactExt());
     }
 
     /**
