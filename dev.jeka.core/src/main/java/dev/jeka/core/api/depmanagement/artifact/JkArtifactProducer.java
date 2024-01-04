@@ -13,13 +13,6 @@ import java.util.Arrays;
  */
 public interface JkArtifactProducer extends JkArtifactLocator {
 
-    @FunctionalInterface
-    interface JkSupplier {
-
-        JkArtifactProducer getArtifactProducer();
-
-    }
-
     /**
      * Produces the specified artifact file. This method is supposed to create it from scratch (should be working after
      * a clean) but implementations can cache already processed phase result as compilation result or so.

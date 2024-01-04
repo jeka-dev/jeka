@@ -133,7 +133,6 @@ public class JkProjectPackaging {
      * Creates a fat jar (jar containing all dependencies) at the specified location.
      */
     public void createFatJar(Path target) {
-        project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
         JkLog.startTask("Packing fat jar...");
         Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
