@@ -1,10 +1,8 @@
 package dev.jeka.core.api.j2e;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -41,37 +39,19 @@ public class JkJ2eWarProjectAdapter {
     }
 
     /**
-     * Configures a project in order it publishes war archive.
-     * @param publishedAsMainArtifact if true, war will be published as the main artifact, so without any dependencies.
-     * @param keepJar if false, no jar archive will be created/deployed.
+     * Configures the specified project to produce and publish WAR archive.
      */
-    public void configure(JkProject project, boolean publishedAsMainArtifact, boolean keepJar) {
-        JkUtilsAssert.argument(publishedAsMainArtifact || keepJar,
-                "Both publishedAsMainArtifact and keepJar cannot be false.");
-        Path staticResourceDir = project.getBaseDir().resolve("src/main/webapp/static");
-        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
-        Consumer<Path> originalJarMaker = path -> artifactProducer.makeMainArtifact();
-        Consumer<Path> warMaker = path -> generateWar(path, project);
-        if (publishedAsMainArtifact) {
-            JkArtifactId originalMainArtifactId = artifactProducer.getMainArtifactId();
-            artifactProducer
-                    .setMainArtifactExt("war")
-                    .putMainArtifact(warMaker);
-            if (!keepJar) {
-                artifactProducer
-                        .removeArtifact(originalMainArtifactId);
-            }
-        } else {
-            artifactProducer
-                    .putArtifact(JkArtifactId.of("", ".war"), warMaker);
-        }
-    }
-
     public void configure(JkProject project) {
-        configure(project, true, false);
+        JkArtifactId warArtifact = JkArtifactId.ofMainArtifact("war");
+        Path warFile = project.artifactLocator.getArtifactPath(warArtifact);
+        Consumer<Path> warMaker = path -> generateWar(project, path);
+        project.setPackAction(() -> warMaker.accept(warFile));
+        project.mavenPublication
+                .removeArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
+                .putArtifact(warArtifact, warMaker);
     }
 
-    public void generateWar(Path dist, JkProject project) {
+    public void generateWar(JkProject project, Path targetPath) {
         final Path effectiveWebappPath;
         if (webappPath != null) {
             effectiveWebappPath = project.getBaseDir().resolve(webappPath);
@@ -79,10 +59,10 @@ public class JkJ2eWarProjectAdapter {
             Path src =  project.compilation.layout.getSources().toList().get(0).getRoot();
             effectiveWebappPath = src.resolveSibling("webapp");
         }
-        generateWar(project, dist, effectiveWebappPath, extraStaticResourcePath, generateExploded);
+        generateWar(project, targetPath, effectiveWebappPath, extraStaticResourcePath, generateExploded);
     }
 
-    private static void generateWar(JkProject project, Path destFile, Path webappPath, Path extraStaticResourcePath,
+    private static void generateWar(JkProject project, Path targetFile, Path webappPath, Path extraStaticResourcePath,
                                     boolean generateDir) {
 
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
@@ -95,9 +75,9 @@ public class JkJ2eWarProjectAdapter {
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
             archiver.generateWarDir(dirPath);
-            JkPathTree.of(dirPath).zipTo(destFile);
+            JkPathTree.of(dirPath).zipTo(targetFile);
         } else {
-            archiver.generateWarFile(destFile);
+            archiver.generateWarFile(targetFile);
         }
     }
 

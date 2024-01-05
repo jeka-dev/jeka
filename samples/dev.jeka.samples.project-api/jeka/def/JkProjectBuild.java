@@ -108,7 +108,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                     .addMainAttribute("Build-by", "JeKa")
                     .addMainAttribute("BBuild-time", LocalDateTime.now().toString());
         project
-            .artifactProducer
+            .artifactLocator
                 .putArtifact("fat", "jar", project.packaging::createFatJar); // create a fat jar
 
         // Control on publication

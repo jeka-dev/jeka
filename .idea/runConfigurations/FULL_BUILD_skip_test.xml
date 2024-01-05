@@ -2,7 +2,7 @@
   <configuration default="false" name="FULL BUILD skip test" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="MasterBuild" />
     <module name="dev.jeka.master" />
-    <option name="PROGRAM_PARAMETERS" value="-ls=BRACE -lsu -lri -cw -Dproject#tests.skip=true runSamples=false -lv" />
+    <option name="PROGRAM_PARAMETERS" value="-ls=BRACE -lsu -lri -cw -Dproject#tests.skip=true runSamples=false" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

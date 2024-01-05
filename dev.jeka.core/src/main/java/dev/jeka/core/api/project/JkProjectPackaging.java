@@ -15,7 +15,6 @@ import dev.jeka.core.api.system.JkLog;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -68,7 +67,7 @@ public class JkProjectPackaging {
      * Creates a Javadoc jar at conventional location.
      */
     public Path createJavadocJar() {
-        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.JAVADOC_ARTIFACT_ID);
+        Path path = project.artifactLocator.getArtifactPath(JkArtifactId.JAVADOC_ARTIFACT_ID);
         createJavadocJar(path);
         return path;
     }
@@ -92,7 +91,7 @@ public class JkProjectPackaging {
      * Creates a source jar at the specified location.
      */
     public Path createSourceJar() {
-        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID);
+        Path path = project.artifactLocator.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID);
         createSourceJar(path);
         return path;
     }
@@ -119,7 +118,7 @@ public class JkProjectPackaging {
      * Creates a binary jar at conventional location.
      */
     public Path createBinJar() {
-        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.ofMainArtifact("jar"));
+        Path path = project.artifactLocator.getArtifactPath(JkArtifactId.ofMainArtifact("jar"));
         createBinJar(path);
         return path;
     }
@@ -143,7 +142,7 @@ public class JkProjectPackaging {
      * Creates a fat jar at conventional location.
      */
     public Path createFatJar() {
-        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.of("fat", "jar"));
+        Path path = project.artifactLocator.getArtifactPath(JkArtifactId.of("fat", "jar"));
         createFatJar(path);
         return path;
     }
@@ -196,10 +195,8 @@ public class JkProjectPackaging {
      * This method is meant to be consumed by an artifact producer that does not
      * produce artifact file itself (that's why the <code>target</code> parameter is not used.
      * It Just copies the manifest in the classDir director.
-     *
-     * @param target Not used. Just here co be used as a {@link Consumer<Path>}
      */
-    public void includeManifestInClassDir(Path target) {
+    public void includeManifestInClassDir() {
         project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
         Path classDir = project.compilation.layout.resolveClassDir();

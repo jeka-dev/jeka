@@ -169,7 +169,7 @@ public class JkProjectTest {
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
         JkIvyPublication ivyPublication = project.createIvyPublication()
-                .setModuleIdSupplier("my:module")
+                .setModuleId("my:module")
                 .setVersion("0.1");
         System.out.println(project.compilation.getDependencies());
         JkQualifiedDependencySet publishDeps = ivyPublication.getDependencies();
@@ -218,7 +218,7 @@ public class JkProjectTest {
                             .emptySources().addSource("src")
                             .emptyResources().addResource("res")
                             .mixResourcesAndSources();
-        baseProject.artifactProducer.makeAllArtifacts();
+        baseProject.pack();
 
         final Path core = top.resolve("core");
         final JkProject coreProject = JkProject.of();
@@ -232,7 +232,7 @@ public class JkProjectTest {
                             .setSourceSimpleStyle(JkCompileLayout.Concern.PROD);
 
         //Desktop.getDesktop().open(core.toFile());
-        coreProject.artifactProducer.makeAllArtifacts();
+        coreProject.pack();
 
         final Path desktop = top.resolve("desktop");
         final JkProject desktopProject = JkProject.of();

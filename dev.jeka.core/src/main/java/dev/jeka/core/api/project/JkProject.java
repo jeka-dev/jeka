@@ -2,7 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -40,13 +40,15 @@ import java.util.function.Supplier;
  * A complete overview is available <a href="https://jeka-dev.github.io/jeka/reference-guide/build-library-project-build/#project-api">here</a>.
  * <p/>
  *
- * A <code>JkProject</code> consists in 4 parts : <ul>
+ * A <code>JkProject</code> consists in 4 main parts : <ul>
  *    <li>{@link JkProjectCompilation} : responsible to generate compile production sources</li>
  *    <li>{@link JkProjectTesting} : responsible to compile test sources and run tests </li>
  *    <li>{@link JkProjectPackaging} : responsible to creates javadoc, sources and jars</li>
  *    <li>{@link JkMavenPublication} : responsible to publish the artifacts on Maven repositories</li>
  * </ul>
- * <p>
+ * The {@link JkProject#pack()} method is supposed to generates the artifacts
+ * (or simply perform actions as deploying docker image) locally. By default, it generates
+ * a regular binary jar, but it can be customized for your needs.
  */
 public class JkProject implements JkIdeSupportSupplier {
 
@@ -66,11 +68,9 @@ public class JkProject implements JkIdeSupportSupplier {
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
-    private final Runnable buildAction;
+    private Runnable packAction;
 
-    private final JkRunnables cleanExtraActions = JkRunnables.of();
-
-    public final JkStandardFileArtifactProducer artifactProducer;
+    public final JkArtifactLocator artifactLocator;
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
@@ -116,15 +116,20 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
+    /**
+     * Defines extra actions to execute when {@link JkProject#clean()} is invoked.
+     */
+    public final JkRunnables cleanExtraActions = JkRunnables.of();
+
     private JkProject() {
+        artifactLocator = artifactLocator();
         compilerToolChain = JkJavaCompilerToolChain.of();
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
-        artifactProducer = artifactProducer();
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseCache(true);
         mavenPublication = mavenPublication(this);
-        buildAction = packaging::createBinJar;
+        packAction = packaging::createBinJar;
     }
 
     /**
@@ -168,11 +173,7 @@ public class JkProject implements JkIdeSupportSupplier {
         this.baseDir = JkUtilsPath.relativizeFromWorkingDir(baseDir);
         return this;
     }
-
-    public JkRunnables getCleanExtraActions() {
-        return cleanExtraActions;
-    }
-
+    
     /**
      * Returns path of the directory under which are produced build files
      */
@@ -221,6 +222,17 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
+     * Sets the action to execute when {@link JkProject#pack()} is invoked.<p>
+     * By default, the build action creates a regular binary jar. It can be 
+     * replaced by an action creating other jars/artifacts or doing special 
+     * action as publishing a Docker image, for example.
+     */
+    public JkProject setPackAction(Runnable ... packActions) {
+        this.packAction = JkRunnables.of().append(packActions);
+        return this;
+    }
+
+    /**
      * Sets the main class name to use in #runXxx and {@link #dockerImage()} methods.
      */
     public JkProject setMainClass(String mainClass) {
@@ -265,18 +277,18 @@ public class JkProject implements JkIdeSupportSupplier {
      * Creates {@link JkProcess} to execute the jar having the specified artifact name.
      * The jar is created on the fly if it is not already present.
      *
-     * @param artifactQualifier  The name of the artifact to run. In a project producing a side 'fat' jar, you can use
+     * @param artifactClassifier  The classifier of the artifact to run. In a project producing a side 'fat' jar, you can use
      *                           'fat'. If you want to run the main artifact, just use ''.
      * @param includeRuntimeDeps If <code>true</code>, the runtime dependencies will be added to the classpath. This should
      *                           values <code>false</code> in case of <i>fat</i> jar.
      * @param jvmOptions         Options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
      * @param args               Program arguments to be passed in command line, as <code>--print --verbose myArg</code>
      */
-    public JkProcess<?> runJar(String artifactQualifier, boolean includeRuntimeDeps, String jvmOptions, String args) {
-        JkArtifactId artifactId = JkArtifactId.of(artifactQualifier, "jar");
-        Path artifactPath = artifactProducer.getArtifactPath(artifactId);
+    public JkProcess<?> runJar(String artifactClassifier, boolean includeRuntimeDeps, String jvmOptions, String args) {
+        JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
+        Path artifactPath = artifactLocator.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
-            artifactProducer.makeArtifacts(artifactId);
+            pack();
         }
         JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
                 .setDestroyAtJvmShutdown(true)
@@ -391,13 +403,6 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Modifies the IdeSupport for this project.
-     */
-    public void setJavaIdeSupport(Function<JkIdeSupport, JkIdeSupport> ideSupport) {
-        this.ideSupportModifier = ideSupportModifier.andThen(ideSupport);
-    }
-
-    /**
      * Creates a dependency o the regular bin jar created by this project. <p/>
      * @see #toDependency(JkTransitivity)
      */
@@ -412,7 +417,7 @@ public class JkProject implements JkIdeSupportSupplier {
      * @see #toDependency(Runnable, Path, JkTransitivity)
      */
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
-        return toDependency(packaging::createBinJar, artifactProducer.getMainArtifactPath(), transitivity);
+        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath(), transitivity);
     }
 
     /**
@@ -427,27 +432,11 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Shorthand to build all missing artifacts for publication.
+     * Executes the pack action defined for this project.
+     * @see JkProject#setPackAction(Runnable...)
      */
     public void pack() {
-        artifactProducer.makeAllMissingArtifacts();
-    }
-
-    /**
-     * Specifies if Javadoc and sources jars should be included in pack/publish. Default is true;
-     */
-    public JkProject includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        if (includeJavaDoc) {
-            artifactProducer.putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
-        } else {
-            artifactProducer.removeArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID);
-        }
-        if (includeSources) {
-            artifactProducer.putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, packaging::createSourceJar);
-        } else {
-            artifactProducer.removeArtifact(JkArtifactId.SOURCES_ARTIFACT_ID);
-        }
-        return this;
+        this.packAction.run();
     }
 
     /**
@@ -486,21 +475,13 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Convenient method to get the path of the main built artifact (generally the
-     * jar file containing the java classes of the application/library).
-     */
-    public Path getMainArtifactPath() {
-        return artifactProducer.getMainArtifactPath();
-    }
-
-    /**
      * Creates a Ivy publication from this project.
      */
     public JkIvyPublication createIvyPublication() {
         return JkIvyPublication.of()
+                .putMainArtifact(artifactLocator.getMainArtifactPath())
                 .setVersionSupplier(this::getVersion)
                 .setModuleIdSupplier(this::getModuleId)
-                .addArtifacts(() -> artifactProducer)
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
                         compilation.getDependencies(),
                         packaging.getRuntimeDependencies(),
@@ -610,16 +591,12 @@ public class JkProject implements JkIdeSupportSupplier {
         JkLog.info("");
     }
 
-    private JkStandardFileArtifactProducer artifactProducer() {
-        JkStandardFileArtifactProducer artifactProducer = JkStandardFileArtifactProducer.of(
+    private JkArtifactLocator artifactLocator() {
+        return JkArtifactLocator.of(
                 () -> baseDir.resolve(outputDir),
                 () -> moduleId != null ? moduleId.getDotNotation()
                         : baseDir.toAbsolutePath().getFileName().toString()
         );
-        artifactProducer.putMainArtifact(packaging::createBinJar);
-        artifactProducer.putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, packaging::createSourceJar);
-        artifactProducer.putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, packaging::createJavadocJar);
-        return artifactProducer;
     }
 
     private String actualMainClass() {
@@ -632,16 +609,17 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     private static JkMavenPublication mavenPublication(JkProject project) {
-        return JkMavenPublication.of()
+        return JkMavenPublication.of(project.artifactLocator)
                 .setModuleIdSupplier(project::getModuleId)
                 .setVersionSupplier(project::getVersion)
-                .setArtifactLocatorSupplier(() -> project.artifactProducer)
                 .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                         project.compilation.getDependencies(),
                         project.packaging.getRuntimeDependencies(),
                         project.getDuplicateConflictStrategy()))
-                .setBomResolutionRepos(project.dependencyResolver::getRepos);
+                .setBomResolutionRepos(project.dependencyResolver::getRepos)
+                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
+                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, project.packaging::createSourceJar)
+                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, project.packaging::createJavadocJar);
     }
-
 
 }

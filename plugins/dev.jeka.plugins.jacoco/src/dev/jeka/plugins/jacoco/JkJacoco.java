@@ -137,7 +137,7 @@ public final class JkJacoco {
      */
     public void applyTo(JkTestProcessor testProcessor) {
         JkUtilsAssert.state(execFile != null, "The exec file has not been specified.");
-        testProcessor.preActions.append(() -> {
+        testProcessor.preActions.append("", () -> {
             String agentOptions = agentOptions();
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));

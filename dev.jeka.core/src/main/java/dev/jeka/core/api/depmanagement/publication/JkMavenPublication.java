@@ -1,14 +1,17 @@
 package dev.jeka.core.api.depmanagement.publication;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -30,11 +33,11 @@ public final class JkMavenPublication {
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
-    private Supplier<JkArtifactLocator> artifactLocatorSupplier;
+    private final JkArtifactPublisher artifactPublisher;
 
-    private JkRepoSet publishRepos = JkRepoSet.ofLocal();
+    private JkRepoSet repos = JkRepoSet.ofLocal();
 
-    private Supplier<JkRepoSet> bomResolverRepoSupplier = () -> JkRepoSet.of();
+    private Supplier<JkRepoSet> bomResolverRepoSupplier = JkRepoSet::of;
 
     private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
 
@@ -42,11 +45,16 @@ public final class JkMavenPublication {
 
     public final JkRunnables postActions = JkRunnables.of();
 
-    private JkMavenPublication() {
+    private JkMavenPublication(JkArtifactLocator artifactLocator) {
+        this.artifactPublisher = JkArtifactPublisher.of(artifactLocator);
     }
 
-    public static JkMavenPublication of() {
-        return new JkMavenPublication();
+    /**
+     * Creates a {@link JkMavenPublication} with the specified artifact locator.
+     * @param artifactLocator The artifact locator for locating the artifact files to publish.
+     */
+    public static JkMavenPublication of(JkArtifactLocator artifactLocator) {
+        return new JkMavenPublication(artifactLocator);
     }
 
     /**
@@ -59,77 +67,138 @@ public final class JkMavenPublication {
         return this;
     }
 
+    /**
+     * Returns the dependencies to be included in POM as transitive dependencies.
+     */
     public JkDependencySet getDependencies() {
         return dependencies.apply(JkDependencySet.of());
     }
 
+    /**
+     * Sets the supplier providing the moduleId (group + artifactName) for this publication.
+     */
+    public JkMavenPublication setModuleIdSupplier(Supplier<JkModuleId> moduleIdSupplier) {
+        JkUtilsAssert.argument(moduleIdSupplier != null, " moduleId supplier can't be null.");
+        this.moduleIdSupplier = moduleIdSupplier;
+        return this;
+    }
+
+    /**
+     * Sets the moduleId (group + artifactName) for this publication.
+     * @see #setModuleIdSupplier(Supplier)
+     */
     public JkMavenPublication setModuleId(String moduleId) {
         this.moduleIdSupplier = () -> JkModuleId.of(moduleId);
         return this;
     }
 
-    public JkMavenPublication setModuleIdSupplier(Supplier<JkModuleId> moduleIdSupplier) {
-        this.moduleIdSupplier = moduleIdSupplier;
-        return this;
-    }
-
-    public JkMavenPublication setVersion(String version) {
-        this.versionSupplier = () -> JkVersion.of(version);
-        return this;
-    }
-
+    /**
+     * Sets the supplier providing the version of the artifacts to publish.
+     */
     public JkMavenPublication setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+        JkUtilsAssert.argument(versionSupplier != null, " version supplier can't be null.");
         this.versionSupplier = versionSupplier;
         return this;
     }
 
+    /**
+     * Sets the version of the artifacts to publish.
+     * @see #setVersionSupplier(Supplier)
+     */
+    public JkMavenPublication setVersion(String version) {
+        JkUtilsAssert.argument(!JkUtilsString.isBlank(version), "Version can't be blank. Was '%s'.", version);
+        this.versionSupplier = () -> JkVersion.of(version);
+        return this;
+    }
+
+    /**
+     * Sets the supplier providing the download repositories used to resolve BOMs.
+     */
     public JkMavenPublication setBomResolutionRepos(Supplier<JkRepoSet> repoSupplier) {
         this.bomResolverRepoSupplier = repoSupplier;
         return this;
     }
 
+    /**
+     * Returns the moduleId (group + artifact name) for this publication.
+     */
     public JkModuleId getModuleId() {
         return moduleIdSupplier.get();
     }
 
+    /**
+     * Returns the version of the artifacts for this publication.
+     */
     public JkVersion getVersion() {
         return versionSupplier.get();
     }
 
+    /**
+     * Returns the default file signer for this publication.<p>
+     * Normally, each publish repository can define its own signer.
+     * Conveniently we can specify a file signer for repositories which don't have.
+     */
     public UnaryOperator<Path> getDefaultSigner() {
         return defaultSigner;
     }
 
+    /**
+     * Sets the default file signer to use for this publication.
+     * @see #getDefaultSigner()
+     */
     public JkMavenPublication setDefaultSigner(UnaryOperator<Path> defaultSigner) {
         this.defaultSigner = defaultSigner;
         return this;
     }
 
-    public JkArtifactLocator getArtifactLocator() {
-        return artifactLocatorSupplier.get();
+    /**
+     * Returns the repositories where this publication will be published.
+     */
+    public JkRepoSet getRepos() {
+        return repos;
     }
 
-    public JkMavenPublication setArtifactLocatorSupplier(Supplier<JkArtifactLocator> artifactLocatorSupplier) {
-        this.artifactLocatorSupplier = artifactLocatorSupplier;
-        return this;
-    }
-
-    public JkMavenPublication setArtifactLocator(JkArtifactLocator artifactLocatorArg) {
-        this.artifactLocatorSupplier = () -> artifactLocatorArg;
-        return this;
-    }
-
-    public JkRepoSet getPublishRepos() {
-        return publishRepos;
-    }
-
+    /**
+     * Sets the repositories where this publication will be published.
+     */
     public JkMavenPublication setRepos(JkRepoSet repoSet) {
-        this.publishRepos = repoSet;
+        this.repos = repoSet;
         return this;
     }
 
+    /**
+     * Adds the specified repositories to the publication repositories.
+     * @see #setRepos(JkRepoSet)
+     */
     public JkMavenPublication addRepos(JkRepo ...repoArgs) {
-        Arrays.stream(repoArgs).forEach(repo -> publishRepos = publishRepos.and(repo));
+        Arrays.stream(repoArgs).forEach(repo -> repos = repos.and(repo));
+        return this;
+    }
+
+    /**
+     * Adds the specified artifact to the publication. If the artifact file is not present,
+     * this one will be created using the specified artifact file maker.
+     * @param artifactId The artifactId to add to publication.
+     * @param artifactFileMaker  A {@link Consumer} creating the artifact file at the provided location.
+     */
+    public JkMavenPublication putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
+        this.artifactPublisher.putArtifact(artifactId, artifactFileMaker);
+        return this;
+    }
+
+    /**
+     * Adds the specified artifact to the publication assuming the artifact file will exist when {@link #publish()}
+     * will be invoked . If the artifact file is not present, an exception will be raised.
+     */
+    public JkMavenPublication putArtifact(JkArtifactId artifactId) {
+        return this.putArtifact(artifactId, null);
+    }
+
+    /**
+     * Removes the specified artifact from this publication.
+     */
+    public JkMavenPublication removeArtifact(JkArtifactId artifactId) {
+        this.artifactPublisher.removeArtifact(artifactId);
         return this;
     }
 
@@ -138,7 +207,7 @@ public final class JkMavenPublication {
      */
     public JkMavenPublication publish() {
         preActions.run();
-        publish(this.publishRepos.withDefaultSigner(defaultSigner));
+        publish(this.repos.withDefaultSigner(defaultSigner));
         postActions.run();
         return this;
     }
@@ -156,14 +225,44 @@ public final class JkMavenPublication {
     @Override
     public String toString() {
         return "JkMavenPublication{" +
-                "artifactFileLocator=" + artifactLocatorSupplier +
+                "artifactFileLocator=" + artifactPublisher +
                 ", extraInfo=" + pomMetadata +
                 '}';
     }
 
+    /**
+     * Shorthand to get the first declared publication repository.
+     */
+    public JkRepo findFirstNonLocalRepo() {
+        return this.getRepos().getRepos().stream()
+                .filter(repo1 -> !repo1.isLocal())
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Provides information about this publication.
+     */
+    public String info() {
+        StringBuilder builder = new StringBuilder();
+        builder
+                .append("\nPublish Maven repositories : ")
+                .append(getRepos()).append("\n")
+                .append("Published Maven Module & version : ")
+                .append(getModuleId().toCoordinate(getVersion()))
+                .append("\n")
+                .append("Published Maven Dependencies :");
+        getDependencies().getEntries().forEach(dep -> builder.append("\n  ").append(dep));
+        return builder.toString();
+    }
+
+    /**
+     * Computes the published transitive dependencies from the specified <i>compile</i> and <i>runtime</i>
+     * dependencies of the project that we are publishing artifacts for.
+     */
     public static JkDependencySet computeMavenPublishDependencies(JkDependencySet compileDeps,
-                                                                          JkDependencySet runtimeDeps,
-                                                                          JkCoordinate.ConflictStrategy strategy) {
+                                                                  JkDependencySet runtimeDeps,
+                                                                  JkCoordinate.ConflictStrategy strategy) {
         JkDependencySetMerge merge = runtimeDeps.merge(compileDeps);
         JkDependencySet mergeResult = merge.getResult().normalised(strategy);
         List<JkDependency> result = new LinkedList<>();
@@ -177,35 +276,8 @@ public final class JkMavenPublication {
         return JkDependencySet.of(result).withVersionProvider(mergeResult.getVersionProvider());
     }
 
-    /**
-     * Shorthand to get the first declared publication repository.
-     */
-    public JkRepo findFirstNonLocalRepo() {
-        return this.getPublishRepos().getRepos().stream()
-                .filter(repo1 -> !repo1.isLocal())
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
-     * Provides information about this publication.
-     */
-    public String info() {
-        StringBuilder builder = new StringBuilder();
-        builder
-                .append("\nPublish Maven repositories : ")
-                .append(getPublishRepos()).append("\n")
-                .append("Published Maven Module & version : ")
-                .append(getModuleId().toCoordinate(getVersion()))
-                .append("\n")
-                .append("Published Maven Dependencies :");
-        getDependencies().getEntries().forEach(dep -> builder.append("\n  ").append(dep));
-        return builder.toString();
-    }
-
     private JkMavenPublication publish(JkRepoSet repos) {
 
-        JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
         JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
 
@@ -215,15 +287,12 @@ public final class JkMavenPublication {
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
 
-        List<Path> missingFiles = getArtifactLocator().getMissingFiles();
-        JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
+        artifactPublisher.makeMissingArtifacts();
 
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
-        internalPublisher.publishMaven(coordinate, getArtifactLocator(), pomMetadata, dependencySet);
+        internalPublisher.publishMaven(coordinate, artifactPublisher, pomMetadata, dependencySet);
         return this;
     }
-
-
 
 }

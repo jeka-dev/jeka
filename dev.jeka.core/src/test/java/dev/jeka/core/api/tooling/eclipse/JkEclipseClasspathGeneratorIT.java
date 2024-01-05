@@ -66,7 +66,7 @@ public class JkEclipseClasspathGeneratorIT {
             .setBaseDir(top.resolve("desktop"))
             .compilation
                     .configureDependencies(deps -> deps.and(coreProject.toDependency()));
-        desktopProject.artifactProducer.makeAllArtifacts();
+        desktopProject.pack();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();

@@ -35,6 +35,7 @@ final class FieldInjector {
         for (final Field field : getPropertyFields(target.getClass())) {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty == null) {
+                JkLog.traceEndTask();
                 return;
             }
             String injectedPropName = injectProperty.value();

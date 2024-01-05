@@ -1,6 +1,7 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.JkGit;
@@ -48,9 +49,9 @@ public class JkProjectFlatFacade {
 
     public JkProjectFlatFacade setMainArtifactJarType(JkProjectPackaging.JarType jarType) {
         if (jarType == JkProjectPackaging.JarType.REGULAR) {
-            project.artifactProducer.putMainArtifact(project.packaging::createBinJar);
+            project.setPackAction(project.packaging::createBinJar);
         } else if (jarType == JkProjectPackaging.JarType.FAT) {
-            project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
+            project.setPackAction(() -> project.packaging.createFatJar(project.artifactLocator.getMainArtifactPath()));
         } else {
             throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
         }
@@ -93,8 +94,13 @@ public class JkProjectFlatFacade {
         return this;
     }
 
-    public JkProjectFlatFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        project.includeJavadocAndSources(includeJavaDoc, includeSources);
+    public JkProjectFlatFacade publishJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
+        if (!includeJavaDoc) {
+            project.mavenPublication.removeArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID);
+        }
+        if (!includeSources) {
+            project.mavenPublication.removeArtifact(JkArtifactId.SOURCES_ARTIFACT_ID);
+        }
         return this;
     }
 

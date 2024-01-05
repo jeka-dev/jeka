@@ -1,4 +1,5 @@
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.samples.SimpleProjectKBean;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectProject;
@@ -32,7 +33,7 @@ public class NormalJarKBean extends KBean {
     @Override
     protected void init() {
         JkProject project = projectKBean.project;
-        project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
+        project.flatFacade().setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
         project.compilation.configureDependencies(deps -> deps
                 .and(sampleBuild.projectKBean.project.toDependency())
         );

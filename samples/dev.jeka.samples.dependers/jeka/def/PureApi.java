@@ -20,7 +20,7 @@ public class PureApi {
                 .setModuleId("mygroup:depender")
                 .setVersion("1.0-SNAPSHOT").getProject();
 
-        dependerProject.artifactProducer.makeAllArtifacts();
+        dependerProject.pack();
         dependerProject.mavenPublication.publish();
     }
 }

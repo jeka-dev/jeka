@@ -1,7 +1,10 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 
 import java.io.IOException;
@@ -27,8 +30,9 @@ public class IvyInternalPublisherRunner {
         final JkCoordinate coordinate =
                 JkModuleId.of("mygroup:mymodule").toCoordinate("myVersion");
         final JkIvyPublication ivyPublication = JkIvyPublication.of()
-                .setMainArtifact(sampleJarfile(), "compile", "test");
-        final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of().of()
+                .putMainArtifact(sampleJarfile(), "compile", "test");
+        JkQualifiedDependencySet.of();
+        final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile", "org.springframework:spring-jdbc:3.0.+");
         jkIvyInternalPublisher.publishIvy(coordinate, ivyPublication.getAllArtifacts(), deps);
     }

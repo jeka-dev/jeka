@@ -2,7 +2,6 @@ import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
@@ -149,7 +148,6 @@ class MasterBuild extends KBean {
     public void buildFast() {
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
             bean.project.flatFacade().skipTests(true);
-            bean.project.includeJavadocAndSources(false, false);
             bean.clean();
             bean.project.pack();
         });
@@ -171,9 +169,6 @@ class MasterBuild extends KBean {
     }
 
     private void applyToSlave(ProjectKBean projectKBean) {
-        if (!JkVersion.of(versionFromGit.version()).isSnapshot()) {     // Produce javadoc only for release
-            projectKBean.project.flatFacade().includeJavadocAndSources(true, true);
-        }
         JkProject project = projectKBean.project;
         versionFromGit.handleVersioning(project);
         project.compilation

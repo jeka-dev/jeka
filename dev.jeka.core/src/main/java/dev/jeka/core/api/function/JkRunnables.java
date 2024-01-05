@@ -44,8 +44,11 @@ public class JkRunnables implements Runnable {
      * Chains this underlying {@link Runnable} with the specified one. The specified runnable will
      * be executed at the end.
      */
-    public JkRunnables append(Runnable runnable) {
-        return append(runnable.toString(), runnable);
+    public JkRunnables append(Runnable ... runnables) {
+        for (Runnable runnable : runnables) {
+            append(runnable.toString(), runnable);
+        }
+        return this;
     }
 
 

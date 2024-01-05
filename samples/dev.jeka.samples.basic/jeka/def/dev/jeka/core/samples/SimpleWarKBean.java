@@ -1,7 +1,6 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -38,8 +37,7 @@ public class SimpleWarKBean extends KBean {
                    .setVersion("1.0-SNAPSHOT")
                    .configureRuntimeDependencies(compileDeps -> compileDeps
                            .minus("javax.servlet:javax.servlet-api"))
-                   .setJvmTargetVersion(JkJavaVersion.V8)
-                   .includeJavadocAndSources(false, false);
+                   .setJvmTargetVersion(JkJavaVersion.V8);
 
         project.compilation.layout.emptySources().addSource("src/main/javaweb");
         project.testing.setSkipped(true);
@@ -55,12 +53,11 @@ public class SimpleWarKBean extends KBean {
     }
 
     public void runWarWithJetty() {
-        JkArtifactProducer artifactProducer = projectKBean.project.artifactProducer;
-        artifactProducer.makeMissingArtifacts();
+        projectKBean.pack();
         Path jettyRunner = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
-                .exec(artifactProducer.getMainArtifactPath().toString(), "--port", port);
+                .exec(projectKBean.project.artifactLocator.getMainArtifactPath().toString(), "--port", port);
     }
     
     public static void main(String[] args) {

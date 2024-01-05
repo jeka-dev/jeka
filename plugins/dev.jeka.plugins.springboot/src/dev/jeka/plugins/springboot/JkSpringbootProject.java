@@ -2,11 +2,11 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
@@ -63,31 +63,38 @@ public final class JkSpringbootProject {
         // run tests in forked mode
         project.testing.testProcessor.setForkingProcess(true);
 
-        // Do not publish javadoc and sources
-        project.includeJavadocAndSources(false, false);
-
-        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
+        JkRunnables packAction = JkRunnables.of();
 
         // define bootable jar as main artifact
         if (createBootJar) {
-            Consumer<Path> bootJarMaker = this::createBootJar;
-            artifactProducer.putMainArtifact(bootJarMaker);
+            JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
+            Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
+            packAction.append("Make bootable jar", () -> createBootJar(artifactFile));
+            project.mavenPublication.putArtifact(artifactId, this::createBootJar);
         }
         if (createWarFile) {
-            Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
-            artifactProducer.putArtifact(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, "war", warMaker);
+            JkArtifactId artifactId = JkArtifactId.ofMainArtifact("war");
+            Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
+            Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(project, path);
+            packAction.append("Make war file", () -> warMaker.accept(artifactFile) );
+            project.mavenPublication.putArtifact(artifactId, warMaker);
         }
         if (createOriginalJar) {
+            JkArtifactId artifactId = ORIGINAL_ARTIFACT;
+            Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
-            artifactProducer.putArtifact(ORIGINAL_ARTIFACT, makeBinJar);
+            packAction.append("Make original jar", () -> makeBinJar.accept(artifactFile));
+            project.mavenPublication.putArtifact(artifactId, makeBinJar);
         }
 
         // To deploy spring-Boot app in a container, we don't need to create a jar
         // This is more efficient to keep the structure exploded to have efficient image layering.
         // In this case, just copy manifest in class dir is enough.
         if (!createBootJar && !createOriginalJar && !createWarFile) {
-            artifactProducer.putMainArtifact(project.packaging::includeManifestInClassDir);
+            packAction.append("Include manifest", project.packaging::includeManifestInClassDir);
         }
+
+        project.setPackAction(packAction);
 
         return this;
     }
@@ -127,8 +134,7 @@ public final class JkSpringbootProject {
      * @see #createBootJar(Path)
      */
     public Path createBootJar() {
-        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
-        Path target = artifactProducer.getMainArtifactPath();
+        Path target = project.artifactLocator.getMainArtifactPath();
         createBootJar(target);
         return target;
     }

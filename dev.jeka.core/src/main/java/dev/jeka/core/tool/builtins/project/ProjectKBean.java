@@ -67,6 +67,12 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("")
     private final JkCompilationOptions compilation = new JkCompilationOptions();
 
+    /**
+     * Options for Maven publication
+     */
+    @JkDoc("")
+    private final JkPublishOptions mavenPublication = new JkPublishOptions();
+
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
 
@@ -103,7 +109,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Generates from scratch artifacts defined through 'pack' options if not yet generated. " +
             "Use #cleanPack to force re-generation.")
     public void pack() {   //NOSONAR
-        project.artifactProducer.makeAllMissingArtifacts();
+        project.pack();
     }
 
     @JkDoc("Convenient method to perform a 'clean' followed by a 'pack'.")
@@ -161,14 +167,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
      * Standard options for packaging java projects.
      */
     public static class JkPackOptions {
-
-        /** When true, javadoc is created and packed in a jar file.*/
-        @JkDoc("If true, javadoc jar is added in the list of artifact to produce/publish.")
-        public boolean javadoc = true;
-
-        /** When true, sources are packed in a jar file.*/
-        @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
-        public Boolean sources = true;
 
         @JkDoc("Set the type of jar to produce for the main artifact.")
         public JkProjectPackaging.JarType jarType;
@@ -230,6 +228,18 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         void runJar() {
             project.runJar(useRuntimeDepsForClasspath, jvmOptions, programArgs).exec();
         }
+    }
+
+    public static class JkPublishOptions {
+
+        /** When true, javadoc is created and packed in a jar file.*/
+        @JkDoc("If true, javadoc jar is added in the list of artifact to produce/publish.")
+        public boolean javadoc = true;
+
+        /** When true, sources are packed in a jar file.*/
+        @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
+        public Boolean sources = true;
+
     }
 
     public static class JkScaffoldOptions {
@@ -308,7 +318,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (!compilerToolChain.isToolOrProcessSpecified()) {
             compilerToolChain.setJdkHints(jdks(), true);
         }
-        project.flatFacade().includeJavadocAndSources(pack.javadoc, pack.sources);
+        project.flatFacade().publishJavadocAndSources(mavenPublication.javadoc, mavenPublication.sources);
         if (pack.jarType != null) {
             project.flatFacade().setMainArtifactJarType(pack.jarType);
         }

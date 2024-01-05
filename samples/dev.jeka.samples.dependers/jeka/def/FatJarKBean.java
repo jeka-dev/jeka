@@ -1,4 +1,5 @@
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.samples.SimpleProjectKBean;
 import dev.jeka.core.tool.JkInjectProject;
 import dev.jeka.core.tool.KBean;
@@ -24,7 +25,7 @@ public class FatJarKBean extends KBean {
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
 
         JkProject project = load(ProjectKBean.class).project;
-        project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
+        project.flatFacade().setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
         project.flatFacade()
                 .configureCompileDependencies(deps -> deps
                         .and("com.google.guava:guava:22.0")

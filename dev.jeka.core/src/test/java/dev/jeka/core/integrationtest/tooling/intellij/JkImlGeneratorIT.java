@@ -76,7 +76,7 @@ public class JkImlGeneratorIT {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        desktopProject.artifactProducer.makeAllArtifacts();
+        desktopProject.pack();
         JkPathTree.of(top).deleteContent();
     }
 

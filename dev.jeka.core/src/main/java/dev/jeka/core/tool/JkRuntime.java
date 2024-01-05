@@ -142,7 +142,7 @@ public final class JkRuntime {
             BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
-            JkLog.endTask();
+            JkLog.endTask("KBean " + beanClass + " instantiated.");
         }
         return result;
     }

@@ -67,7 +67,7 @@ public class JavaProjectBuildIT {
                 .setModuleId("my:project").setVersion("MyVersion-snapshot")
                 .setVersion("1-SNAPSHOT")
                 .getProject();
-        project.artifactProducer.makeAllArtifacts();
+        project.pack();
         project.mavenPublication.publishLocal();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.COMPILE, project.mavenPublication.getDependencies()
@@ -92,9 +92,9 @@ public class JavaProjectBuildIT {
                 ).getProject();
 
         JkIvyPublication ivyPublication = project.createIvyPublication()
-                .setModuleIdSupplier("my:module")
+                .setModuleId("my:module")
                 .setVersion("0.1");
-        project.artifactProducer.makeAllArtifacts();
+        project.pack();
         ivyPublication.publishLocal();
         System.out.println(project.getInfo());
     }

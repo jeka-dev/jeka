@@ -1,7 +1,6 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactProducer;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -25,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static dev.jeka.core.api.depmanagement.artifact.JkArtifactId.JAVADOC_ARTIFACT_ID;
 import static dev.jeka.core.api.depmanagement.artifact.JkArtifactId.SOURCES_ARTIFACT_ID;
 
 /**
@@ -47,10 +45,7 @@ public class CoreBuild extends KBean {
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setModuleId("dev.jeka:jeka-core")
-            .artifactProducer
-                .putMainArtifact(this::doPackWithEmbeddedJar)
-                .putArtifact(DISTRIB_FILE_ID, this::doDistrib)
-                .putArtifact(WRAPPER_ARTIFACT_ID, this::doWrapper);
+            .setPackAction(this::doPackWithEmbeddedJar, this::doWrapper, this::doDistrib);
         project
             .compilerToolChain
                 .setForkedWithDefaultProcess();
@@ -85,6 +80,8 @@ public class CoreBuild extends KBean {
                     .addOptions("-notimestamp");
         project
             .mavenPublication
+                .putArtifact(DISTRIB_FILE_ID)
+                .putArtifact(WRAPPER_ARTIFACT_ID)
                 .pomMetadata
                     .setProjectName("jeka")
                     .addApache2License()
@@ -96,13 +93,12 @@ public class CoreBuild extends KBean {
         return projectKBean.project.getOutputDir().resolve("distrib");
     }
 
-    private void doDistrib(Path distribFile) {
-        final JkArtifactProducer artifactProducer = projectKBean.project.artifactProducer;
-        if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
-            artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(),
-                    SOURCES_ARTIFACT_ID, WRAPPER_ARTIFACT_ID);
-        } else {
-            artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), WRAPPER_ARTIFACT_ID);
+    private void doDistrib() {
+        JkProject project = projectKBean.project;
+        Path distribFile = project.artifactLocator.getArtifactPath(DISTRIB_FILE_ID);
+        project.packaging.createSourceJar(); // Sources should be included in distrib
+        if (!Files.exists(project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID))) {
+            doWrapper();
         }
         final JkPathTree<?> distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
@@ -110,16 +106,10 @@ public class CoreBuild extends KBean {
         distrib
             .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"))
             .importDir(getBaseDir().resolve("src/main/shell"))
-            .importFiles(artifactProducer.getArtifactPath(artifactProducer.getMainArtifactId()))
-            .importFiles(artifactProducer.getArtifactPath(WRAPPER_ARTIFACT_ID));
+            .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.MAIN_JAR_ARTIFACT_ID))
+            .importFiles(project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID))
+            .importFiles(project.artifactLocator.getArtifactPath(SOURCES_ARTIFACT_ID));
 
-        if (artifactProducer.getArtifactIds().contains(SOURCES_ARTIFACT_ID)) {
-            distrib.importFiles(artifactProducer.getArtifactPath(SOURCES_ARTIFACT_ID));
-        }
-
-        if (artifactProducer.getArtifactIds().contains(JAVADOC_ARTIFACT_ID)) {
-            artifactProducer.makeMissingArtifacts(artifactProducer.getMainArtifactId(), JAVADOC_ARTIFACT_ID);
-        }
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
         if (!projectKBean.project.testing.isSkipped() && runIT) {
@@ -170,7 +160,9 @@ public class CoreBuild extends KBean {
         JkLog.endTask();
     }
 
-    private void doPackWithEmbeddedJar(Path targetJar) {
+    private void doPackWithEmbeddedJar() {
+
+        Path targetJar = projectKBean.project.artifactLocator.getMainArtifactPath();
 
         // Main jar
         JkProject project = projectKBean.project;
@@ -200,7 +192,8 @@ public class CoreBuild extends KBean {
         JkUtilsPath.deleteIfExists(embeddedJar);
     }
 
-    private void doWrapper(Path wrapperJar) {
+    private void doWrapper() {
+        Path wrapperJar = projectKBean.project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID);
         projectKBean.project.compilation.runIfNeeded();
         JkPathTree.of(projectKBean.project.compilation.layout
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);

@@ -14,6 +14,9 @@ import java.util.Objects;
 public final class JkArtifactId {
 
     public static final String MAIN_ARTIFACT_CLASSIFIER = "";
+
+    public static final JkArtifactId MAIN_JAR_ARTIFACT_ID = of(MAIN_ARTIFACT_CLASSIFIER, "jar");
+
     public static final JkArtifactId SOURCES_ARTIFACT_ID = of("sources", "jar");
     public static final JkArtifactId JAVADOC_ARTIFACT_ID = of("javadoc", "jar");
 
