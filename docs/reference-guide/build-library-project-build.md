@@ -70,13 +70,13 @@ The API contains a lot of extension points to add specific behaviors.
 project
 +- baseDir
 +- outputDir
-+- artifactProducer (define artifacts procuded by the build)
++- artifactLocator (define where artifact files are supposed to be created)
 +- duplicateDependencyConflictStrategy
 +- jvmTargetVersion
 +- sourceEncoding
-+- javaCompiler
++- javaCompileToolChain
 +- dependencyResolver
-+- prodCompilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
++- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
 |  +- layout (where are located source and resource files)
 |  +- source generators (plugin mechanism for generating source files)
 |  +- dependencies   (stands for compile dependencies)
@@ -109,19 +109,14 @@ project
 |  +- manifest
 |  +- fatJar (customize produced fat/uber jar if any)
 |  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
-+- publication (define information about module and artifacts to be published)
++- mavenPublication (define what to be published on Maven repositoty)
 |  +- moduleId (group:name)
 |  +- version
-|  +- maven (maven specific information to be published in a Maven Repositoty)
-|  |  +- dependencyCustomizer (customize the dependencies to be published)
-|  |  +- mavenSpecificInfo
-|  |  +- method : publish()
-|  +- ivy (Ivy specific information to be published in a Ivy Repositoty)
-|  |  +- dependencyCustomizer (customize the dependencies to be published)
-|  |  +- ivySpecifictInfo
-|  |  +- method : publish()
+|  +- artifacts ( which artifact to publish)
+|  +- dependencyCustomizer (customize the transitive dependencies to be published)
+|  +- mavenSpecificInfo
 |  +- methods : publish(), getVersion(), getModuleId()
-+ methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack(), +- methods : getDependenciesAsXml(), includeLocalAndTextDependencies()           
++ methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
 
 For convenience, `JkProject` provides a facade in order to make common settings friendly,

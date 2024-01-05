@@ -11,7 +11,7 @@ class SelfAppBuild extends SelfAppKBean {
 
     SelfAppBuild() {
 
-        load(SpringbootKBean.class);  // Needed only to produce Spring-Boot jar.
+        load(SpringbootKBean.class);  // Needed only to produce bootable Spring-Boot jar.
 
         // setup intellij project to depends on module sources instead of jar
         // Only relevant for developing JeKa itself
@@ -20,11 +20,17 @@ class SelfAppBuild extends SelfAppKBean {
                 .replaceLibByModule("springboot-plugin-selfApp-SNAPSHOT.jar", "dev.jeka.plugins.springboot")
                 .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null)
                 .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null);
+    }
 
-        // Customise docker file
+    @Override
+    protected void init() {
+
         dockerBuildCustomizers.add(dockerBuild -> dockerBuild
                 .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
                 .addExtraFile(getBaseDir().resolve("jeka/local.properties"), "/toto.txt")
+
+                // The complete agent with all dependencies hasn't been found on
+                // Maven central, so we use a local file.
                 .addAgent(getBaseDir().resolve("jeka/opentelemetry-javaagent.jar"), "")
         );
     }
