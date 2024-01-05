@@ -62,7 +62,7 @@ final class IvyPublisherForMaven {
         this.checksumAlgos = checksumAlgos;
     }
 
-    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactPublisher artifactProducer, JkPomMetadata metadata) {
+    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactPublisher artifactPublisher, JkPomMetadata metadata) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         try {
             resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -72,10 +72,10 @@ final class IvyPublisherForMaven {
 
         // publish artifacts
         final JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(ivyModuleRevisionId);
-        final JkMavenMetadata returnedMetaData = publish(coordinate, artifactProducer);
+        final JkMavenMetadata returnedMetaData = publish(coordinate, artifactPublisher);
 
         // publish pom
-        final Path pomXml = makePom(moduleDescriptor, artifactProducer.artifactLocator, metadata);
+        final Path pomXml = makePom(moduleDescriptor, artifactPublisher.artifactLocator, metadata);
         final String version;
         if (coordinate.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(coordinate);
@@ -107,9 +107,9 @@ final class IvyPublisherForMaven {
         commitPublication(resolver);
     }
 
-    private JkMavenMetadata publish(JkCoordinate coordinate, JkArtifactPublisher artifactProducer) {
+    private JkMavenMetadata publish(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher) {
         if (!coordinate.getVersion().isSnapshot()) {
-            final String existing = checkNotExist(coordinate, artifactProducer);
+            final String existing = checkNotExist(coordinate, artifactPublisher);
             if (existing != null) {
                 throw new IllegalArgumentException("Artifact " + existing
                         + " already exists on repo.");
@@ -127,15 +127,15 @@ final class IvyPublisherForMaven {
             final int buildNumber = mavenMetadata.currentBuildNumber();
             final String versionUniqueSnapshot = versionForUniqueSnapshot(coordinate.getVersion()
                     .getValue(), timestamp, buildNumber);
-            for (final JkArtifactId artifactId : artifactProducer.getArtifactIds()) {
+            for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
                 publishUniqueSnapshot(coordinate, artifactId.getClassifier(),
-                    artifactProducer.artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
+                    artifactPublisher.artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
-            for (final JkArtifactId artifactId : artifactProducer.getArtifactIds()) {
+            for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
                 publishNormal(coordinate, artifactId.getClassifier(),
-                        artifactProducer.artifactLocator.getArtifactPath(artifactId));
+                        artifactPublisher.artifactLocator.getArtifactPath(artifactId));
             }
             return null;
         }
@@ -173,13 +173,13 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkCoordinate coordinate, JkArtifactPublisher artifactProducer) {
+    private String checkNotExist(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher) {
         final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_CLASSIFIER);
         if (existOnRepo(pomDest)) {
             throw new IllegalArgumentException("The main artifact already exist for " + coordinate);
         }
-        for (final JkArtifactId artifactId : artifactProducer.getArtifactIds()) {
-            Path artifactFile = artifactProducer.artifactLocator.getArtifactPath(artifactId);
+        for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
+            Path artifactFile = artifactPublisher.artifactLocator.getArtifactPath(artifactId);
             final String ext = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
             final String dest = destination(coordinate, ext, null);
             if (existOnRepo(dest)) {

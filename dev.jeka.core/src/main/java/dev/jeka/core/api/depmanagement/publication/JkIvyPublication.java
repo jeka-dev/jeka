@@ -342,14 +342,14 @@ public final class JkIvyPublication {
                 JkUtilsIterable.setOf(configurationNames).stream().collect(Collectors.toSet()));
     }
 
-    private static List<JkIvyPublishedArtifact> toIvyPublishedArtifacts(JkArtifactPublisher artifactProducer) {
+    private static List<JkIvyPublishedArtifact> toIvyPublishedArtifacts(JkArtifactPublisher artifactPublisher) {
         List<JkIvyPublishedArtifact> result = new LinkedList<>();
-        result.add(toPublishedArtifact(null, artifactProducer.artifactLocator.getMainArtifactPath(), null, "compile"));
-        for (final JkArtifactId artifactId : artifactProducer.getArtifactIds()) {
+        result.add(toPublishedArtifact(null, artifactPublisher.artifactLocator.getMainArtifactPath(), null, "compile"));
+        for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
             if (artifactId.isMainArtifact()) {
                 continue;
             }
-            final Path file = artifactProducer.artifactLocator.getArtifactPath(artifactId);
+            final Path file = artifactPublisher.artifactLocator.getArtifactPath(artifactId);
             result.add(toPublishedArtifact(null, file, artifactId.getClassifier(), configurationFor(artifactId.getClassifier())));
         }
         return result;

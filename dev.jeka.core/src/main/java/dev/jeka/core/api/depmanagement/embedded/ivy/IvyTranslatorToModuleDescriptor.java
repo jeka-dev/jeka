@@ -53,7 +53,7 @@ class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkCoordinate coordinate,
                                                                   JkDependencySet dependencies,
-                                                                  JkArtifactPublisher artifactProducer) {
+                                                                  JkArtifactPublisher artifactPublisher) {
         List<JkQualifiedDependency> qualifiedDependencies = dependencies.getEntries().stream()
                 .filter(JkCoordinateDependency.class::isInstance)
                 .map(JkCoordinateDependency.class::cast)
@@ -65,7 +65,7 @@ class IvyTranslatorToModuleDescriptor {
                 .collect(Collectors.toList());
         DefaultModuleDescriptor result = toResolveModuleDescriptor(coordinate,
                 JkQualifiedDependencySet.of(qualifiedDependencies));
-        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(coordinate, artifactProducer);
+        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(coordinate, artifactPublisher);
         IvyTranslatorToArtifact.bind(result, artifactMap);
         return result;
     }

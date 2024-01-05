@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 /**
- * A {@link JkPathTree} for zip path tress located in a zip file.
+ * A {@link JkPathTree} for zip path tree located in a zip file.
  *  Instances are supposed to be closed by the user code, in a <i>try-with-resource</i> statement or
  *  in a <i>finally</i> clause.
  */
@@ -20,7 +20,6 @@ public class JkZipTree extends JkPathTree<JkZipTree> implements Closeable {
 
     /**
      * Creates a path tree from a zip file. The zip file content will be seen as a regular folder.
-     *
      * Warn : Don't forget to close this resource when you are finished with.
      */
     public static JkZipTree of(Path zipFile) {

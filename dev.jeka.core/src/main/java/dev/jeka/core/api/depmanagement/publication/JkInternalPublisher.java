@@ -31,7 +31,7 @@ public interface JkInternalPublisher {
     void publishIvy(JkCoordinate coordinate, List<JkIvyPublication.JkIvyPublishedArtifact> publishedArtifacts,
                     JkQualifiedDependencySet dependencies);
 
-    void publishMaven(JkCoordinate coordinate, JkArtifactPublisher artifactProducer, JkPomMetadata pomMetadata,
+    void publishMaven(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher, JkPomMetadata pomMetadata,
                       JkDependencySet dependencySet);
 
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {

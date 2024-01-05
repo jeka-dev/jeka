@@ -36,6 +36,8 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
     private JkProject project() {
         JkProject project = JkProject.of().setBaseDir(getBaseDir());
 
+        project.setPackAction(project.packaging::createBinJar, project.packaging::createFatJar);
+
         // Control on how dependency resolver behavior
         project
             .dependencyResolver
@@ -88,11 +90,6 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                     .engineBehavior
                         //...
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
-
-
-
-        // Control on produced artifacts (jars)
-        project.includeJavadocAndSources(true, true);
         project
             .packaging
                 .javadocProcessor.addOptions("--enable-preview");
@@ -107,9 +104,6 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                 .manifest
                     .addMainAttribute("Build-by", "JeKa")
                     .addMainAttribute("BBuild-time", LocalDateTime.now().toString());
-        project
-            .artifactLocator
-                .putArtifact("fat", "jar", project.packaging::createFatJar); // create a fat jar
 
         // Control on publication
         project.mavenPublication

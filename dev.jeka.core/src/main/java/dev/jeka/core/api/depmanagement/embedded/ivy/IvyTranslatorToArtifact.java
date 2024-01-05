@@ -2,6 +2,7 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.publication.JkArtifactPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -20,11 +21,11 @@ class IvyTranslatorToArtifact {
 
     private static final String EXTRA_PREFIX = "e";
 
-    static Map<String, Artifact> toMavenArtifacts(JkCoordinate coordinate, JkArtifactPublisher artifactProducer) {
+    static Map<String, Artifact> toMavenArtifacts(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher) {
         Map<String, Artifact> result = new HashMap<>();
         Instant now = Instant.now();
-        for (JkArtifactId artifactId : artifactProducer.getArtifactIds()) {
-            Path file = artifactProducer.artifactLocator.getArtifactPath(artifactId);
+        for (JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
+            Path file = artifactPublisher.artifactLocator.getArtifactPath(artifactId);
             ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(coordinate);
             String classifier = artifactId.getClassifier();
             final Artifact artifact = toMavenArtifact(file, classifier, moduleRevisionId, now);
