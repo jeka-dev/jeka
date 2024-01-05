@@ -153,26 +153,6 @@ public final class JkMavenPublication {
         return this;
     }
 
-
-    private JkMavenPublication publish(JkRepoSet repos) {
-        JkRepoSet bomRepos = this.bomResolverRepoSupplier.get().and(repos);
-        JkDependencySet dependencySet = this.getDependencies()
-                .withResolvedBoms(bomRepos)
-                .assertNoUnspecifiedVersion()
-                .toResolvedModuleVersions();
-        JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
-        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
-        JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
-
-        List<Path> missingFiles = getArtifactLocator().getMissingFiles();
-        JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
-
-        JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
-        JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
-        internalPublisher.publishMaven(coordinate, getArtifactLocator(), pomMetadata, dependencySet);
-        return this;
-    }
-
     @Override
     public String toString() {
         return "JkMavenPublication{" +
@@ -207,6 +187,9 @@ public final class JkMavenPublication {
                 .orElse(null);
     }
 
+    /**
+     * Provides information about this publication.
+     */
     public String info() {
         StringBuilder builder = new StringBuilder();
         builder
@@ -218,6 +201,27 @@ public final class JkMavenPublication {
                 .append("Published Maven Dependencies :");
         getDependencies().getEntries().forEach(dep -> builder.append("\n  ").append(dep));
         return builder.toString();
+    }
+
+    private JkMavenPublication publish(JkRepoSet repos) {
+
+        JkUtilsAssert.state(artifactLocatorSupplier != null, "artifact locator cannot be null.");
+        JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
+        JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
+
+        JkRepoSet bomRepos = this.bomResolverRepoSupplier.get().and(repos);
+        JkDependencySet dependencySet = this.getDependencies()
+                .withResolvedBoms(bomRepos)
+                .assertNoUnspecifiedVersion()
+                .toResolvedModuleVersions();
+
+        List<Path> missingFiles = getArtifactLocator().getMissingFiles();
+        JkUtilsAssert.argument(missingFiles.isEmpty(), "One or several files to publish do not exist : " + missingFiles);
+
+        JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
+        JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
+        internalPublisher.publishMaven(coordinate, getArtifactLocator(), pomMetadata, dependencySet);
+        return this;
     }
 
 

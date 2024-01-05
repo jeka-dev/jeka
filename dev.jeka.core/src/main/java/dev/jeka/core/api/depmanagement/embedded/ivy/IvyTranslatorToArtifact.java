@@ -27,7 +27,7 @@ class IvyTranslatorToArtifact {
         for (JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
             Path file = artifactLocator.getArtifactPath(artifactId);
             ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(coordinate);
-            String classifier = artifactId.getQualifier();
+            String classifier = artifactId.getClassifier();
             final Artifact artifact = toMavenArtifact(file, classifier, moduleRevisionId, now);
             result.put(classifier, artifact);
         }
@@ -48,7 +48,7 @@ class IvyTranslatorToArtifact {
 
     static void bind(DefaultModuleDescriptor descriptor, Map<String, Artifact> artifactMap) {
         artifactMap.forEach((classifier, artifact) -> {
-            String conf = JkArtifactId.MAIN_ARTIFACT_QUALIFIER.equals(classifier) ? "default" : classifier;
+            String conf = JkArtifactId.MAIN_ARTIFACT_CLASSIFIER.equals(classifier) ? "default" : classifier;
             if (descriptor.getConfiguration(conf) == null) {
                 descriptor.addConfiguration(new Configuration(conf));
             }
@@ -84,7 +84,7 @@ class IvyTranslatorToArtifact {
     private static Artifact toMavenArtifact(Path artifactFile, String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraAttribute;
-        if (JkArtifactId.MAIN_ARTIFACT_QUALIFIER.equals(classifier)) {
+        if (JkArtifactId.MAIN_ARTIFACT_CLASSIFIER.equals(classifier)) {
             extraAttribute = new HashMap<>();
         } else {
             extraAttribute = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);

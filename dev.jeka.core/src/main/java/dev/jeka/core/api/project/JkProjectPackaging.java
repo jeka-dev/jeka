@@ -39,9 +39,6 @@ public class JkProjectPackaging {
 
     private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
 
-    // relative to output path
-    private String javadocDir = "javadoc";
-
     private JkResolveResult cachedJkResolveResult;
 
      JkProjectPackaging(JkProject project) {
@@ -51,15 +48,7 @@ public class JkProjectPackaging {
     }
 
     public Path getJavadocDir() {
-        return project.getOutputDir().resolve(javadocDir);
-    }
-
-    /**
-     * Sets the directory, relative to 'jeka/output', where Javadoc will be generated. Initial value is 'javadoc'.
-     */
-    public JkProjectPackaging setJavadocDir(String javadocDir) {
-        this.javadocDir = javadocDir;
-        return this;
+        return project.getOutputDir().resolve("javadoc");
     }
 
     /**
@@ -78,8 +67,10 @@ public class JkProjectPackaging {
     /**
      * Creates a Javadoc jar at conventional location.
      */
-    public void createJavadocJar() {
-        createJavadocJar(project.artifactProducer.getArtifactPath(JkArtifactId.JAVADOC_ARTIFACT_ID));
+    public Path createJavadocJar() {
+        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.JAVADOC_ARTIFACT_ID);
+        createJavadocJar(path);
+        return path;
     }
 
     /**
@@ -100,8 +91,10 @@ public class JkProjectPackaging {
     /**
      * Creates a source jar at the specified location.
      */
-    public void createSourceJar() {
-        createSourceJar(project.artifactProducer.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID));
+    public Path createSourceJar() {
+        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID);
+        createSourceJar(path);
+        return path;
     }
 
     /**
@@ -125,8 +118,10 @@ public class JkProjectPackaging {
     /**
      * Creates a binary jar at conventional location.
      */
-    public void createBinJar() {
-        createBinJar(project.artifactProducer.getArtifactPath(JkArtifactId.ofMainArtifact("jar")));
+    public Path createBinJar() {
+        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.ofMainArtifact("jar"));
+        createBinJar(path);
+        return path;
     }
 
     /**
@@ -147,8 +142,10 @@ public class JkProjectPackaging {
     /**
      * Creates a fat jar at conventional location.
      */
-    public void createFatJar() {
-        createFatJar(project.artifactProducer.getArtifactPath(JkArtifactId.of("fat", "jar")));
+    public Path createFatJar() {
+        Path path = project.artifactProducer.getArtifactPath(JkArtifactId.of("fat", "jar"));
+        createFatJar(path);
+        return path;
     }
 
     /**
@@ -238,12 +235,11 @@ public class JkProjectPackaging {
         JkProjectCompilation compilation = project.compilation;
         Iterable<Path> classpath = project.dependencyResolver
                 .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
-        Path dir = project.getOutputDir().resolve(javadocDir);
         JkPathTreeSet sources = compilation.layout.resolveSources();
         if (!sources.containFiles()) {
             return false;
         }
-        javadocProcessor.make(classpath, sources, dir);
+        javadocProcessor.make(classpath, sources, getJavadocDir());
         return true;
     }
 

@@ -75,7 +75,7 @@ public final class JkSpringbootProject {
         }
         if (createWarFile) {
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(path, project);
-            artifactProducer.putArtifact(JkArtifactId.MAIN_ARTIFACT_QUALIFIER, "war", warMaker);
+            artifactProducer.putArtifact(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, "war", warMaker);
         }
         if (createOriginalJar) {
             Consumer<Path> makeBinJar = project.packaging::createBinJar;

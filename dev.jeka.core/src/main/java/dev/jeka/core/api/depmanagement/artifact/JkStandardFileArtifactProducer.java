@@ -80,7 +80,7 @@ public class JkStandardFileArtifactProducer implements JkArtifactProducer {
 
     public JkStandardFileArtifactProducer removeArtifact(String artifactName) {
         for (JkArtifactId artifactId : consumers.keySet()) {
-            if (artifactName.equals(artifactId.getQualifier())) {
+            if (artifactName.equals(artifactId.getClassifier())) {
                 consumers.remove(artifactId);
             }
         }

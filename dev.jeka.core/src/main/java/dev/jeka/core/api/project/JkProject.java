@@ -35,23 +35,18 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven _POM_ but
- * it also holds methods to actually perform builds.
- *
+ * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven <i>POM</i> but
+ * it also holds methods to actually perform builds.<br/>
  * A complete overview is available <a href="https://jeka-dev.github.io/jeka/reference-guide/build-library-project-build/#project-api">here</a>.
  * <p/>
  *
  * A <code>JkProject</code> consists in 4 parts : <ul>
- *    <li>{@link JkProjectCompilation} : responsible to generate compile prod sources</li>
+ *    <li>{@link JkProjectCompilation} : responsible to generate compile production sources</li>
  *    <li>{@link JkProjectTesting} : responsible to compile test sources and run tests </li>
  *    <li>{@link JkProjectPackaging} : responsible to creates javadoc, sources and jars</li>
  *    <li>{@link JkMavenPublication} : responsible to publish the artifacts on Maven repositories</li>
  * </ul>
- * Each of these parts are optional. This mean that you don't have to set the publication part if the project is not
- * supposed to be published. Or you don't have to set the <i>construction</i> part if the project publishes artifacts
- * that are created by other means.
  * <p>
- * {@link JkProject} defines <i>base</i> and <i>output</i> directories as they are shared with the 3 parts.
  */
 public class JkProject implements JkIdeSupportSupplier {
 
@@ -71,26 +66,13 @@ public class JkProject implements JkIdeSupportSupplier {
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
+    private final Runnable buildAction;
+
     private final JkRunnables cleanExtraActions = JkRunnables.of();
 
     public final JkStandardFileArtifactProducer artifactProducer;
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
-
-    public final JkDependencyResolver dependencyResolver;
-
-    /**
-     * The compiler for compiling Java sources for this project.
-     */
-    public final JkJavaCompilerToolChain compilerToolChain;
-
-    public final JkProjectPackaging packaging;
-
-    public final JkProjectCompilation compilation;
-
-    public final JkProjectTesting testing;
-
-    public final JkMavenPublication mavenPublication;
 
     private boolean includeTextAndLocalDependencies = true;
 
@@ -98,6 +80,40 @@ public class JkProject implements JkIdeSupportSupplier {
 
     private URL dependencyTxtUrl;
 
+    /**
+     * Object responsible for resolving dependencies.
+     */
+    public final JkDependencyResolver dependencyResolver;
+
+    /**
+     * Defines the tool for compiling both production and test Java sources for this project.
+     */
+    public final JkJavaCompilerToolChain compilerToolChain;
+
+    /**
+     * Object responsible for generating and compiling production sources.
+     */
+    public final JkProjectCompilation compilation;
+
+    /**
+     * Object responsible for creating binary, fat, javadoc and sources jars.
+     * It also defines the runtime dependencies of this project.
+     */
+    public final JkProjectPackaging packaging;
+
+    /**
+     * Object responsible for compiling and running tests.
+     */
+    public final JkProjectTesting testing;
+
+    /**
+     * Object responsible for publishing artifacts to a Maven repository.
+     */
+    public final JkMavenPublication mavenPublication;
+
+    /**
+     * Function to modify the {@link JkIdeSupport} used for configuring IDEs.
+     */
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
 
     private JkProject() {
@@ -108,6 +124,7 @@ public class JkProject implements JkIdeSupportSupplier {
         artifactProducer = artifactProducer();
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseCache(true);
         mavenPublication = mavenPublication(this);
+        buildAction = packaging::createBinJar;
     }
 
     /**
@@ -117,6 +134,9 @@ public class JkProject implements JkIdeSupportSupplier {
         return new JkProject();
     }
 
+    /**
+     * Applies the specified configuration consumer to this project.
+     */
     public JkProject apply(Consumer<JkProject> projectConsumer) {
         projectConsumer.accept(this);
         return this;
@@ -277,7 +297,7 @@ public class JkProject implements JkIdeSupportSupplier {
      * @see #runJar(String, boolean, String, String)
      */
     public JkProcess<?> runJar(boolean includeRuntimeDeps, String jvmOptions, String programArgs) {
-        return runJar(JkArtifactId.MAIN_ARTIFACT_QUALIFIER, includeRuntimeDeps, jvmOptions, programArgs);
+        return runJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps, jvmOptions, programArgs);
     }
 
     /**
@@ -378,30 +398,31 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Creates a dependency o the main artifact created by this project.
+     * Creates a dependency o the regular bin jar created by this project. <p/>
+     * @see #toDependency(JkTransitivity)
      */
     public JkLocalProjectDependency toDependency() {
-        return toDependency(artifactProducer.getMainArtifactId(), null);
+        return toDependency(JkTransitivity.RUNTIME);
     }
 
     /**
-     * Creates a dependency o the main artifact created by this project, with the specified transitivity.
-     * @see #toDependency(JkArtifactId, JkTransitivity)
+     * Creates a dependency o the regular bin jar of this project, with the specified transitivity. <p/>
+     * If the project produces a fat jar, you may prefer to use {@link #toDependency(Runnable, Path, JkTransitivity)}
+      * to have more control on the provided dependency artifact.
+     * @see #toDependency(Runnable, Path, JkTransitivity)
      */
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
-        return toDependency(artifactProducer.getMainArtifactId(), transitivity);
+        return toDependency(packaging::createBinJar, artifactProducer.getMainArtifactPath(), transitivity);
     }
 
     /**
      * Creates a dependency on an artifact created by this project. The created dependency
      * is meant to be consumed by an external project.
      */
-    public JkLocalProjectDependency toDependency(JkArtifactId artifactId, JkTransitivity transitivity) {
-       Runnable maker = () -> artifactProducer.makeArtifact(artifactId);
-       Path artifactPath = artifactProducer.getArtifactPath(artifactId);
+    public JkLocalProjectDependency toDependency(Runnable artifactMaker, Path artifactPath, JkTransitivity transitivity) {
        JkDependencySet exportedDependencies = compilation.getDependencies()
                .merge(packaging.getRuntimeDependencies()).getResult();
-        return JkLocalProjectDependency.of(maker, artifactPath, this.baseDir, exportedDependencies)
+        return JkLocalProjectDependency.of(artifactMaker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }
 

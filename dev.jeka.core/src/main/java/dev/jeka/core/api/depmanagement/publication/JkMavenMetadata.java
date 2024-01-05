@@ -108,7 +108,7 @@ public final class JkMavenMetadata {
 
     public void addSnapshotVersion(String extension, String classifier) {
         final Versioning.SnapshotVersion snapshotVersion = new Versioning.SnapshotVersion();
-        snapshotVersion.classifier = JkArtifactId.MAIN_ARTIFACT_QUALIFIER.equals(classifier) ? null : classifier;
+        snapshotVersion.classifier = JkArtifactId.MAIN_ARTIFACT_CLASSIFIER.equals(classifier) ? null : classifier;
         snapshotVersion.extension = extension;
         snapshotVersion.updated = this.versioning.lastUpdate;
         final String version = this.version.replace("-SNAPSHOT", "");

@@ -27,7 +27,7 @@ public interface JkArtifactLocator {
      * classifier and 'jar' getExtension.
      */
     default JkArtifactId getMainArtifactId() {
-        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_QUALIFIER, getMainArtifactExt());
+        return JkArtifactId.of(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, getMainArtifactExt());
     }
 
     /**
