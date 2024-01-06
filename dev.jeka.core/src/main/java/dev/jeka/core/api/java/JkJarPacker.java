@@ -4,9 +4,14 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsZip;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.jar.JarFile;
 
 /**
  * Utilities class to produce Jar files.
@@ -74,14 +79,23 @@ public final class JkJarPacker {
      *               dependencies or not.
      */
     public void makeFatJar(Path resultFile, Iterable<Path> otherJars, PathMatcher filter) {
+        Path originalJar = JkUtilsPath.createTempFile("jk-jar-original", ".jar");
+        JkUtilsPath.deleteFile(originalJar);
+        classtrees.andMatcher(filter).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(originalJar);
+        JkJarWriter jarWriter = JkJarWriter.of(resultFile);
         if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classtrees.toList().get(0).getRoot());
+            jarWriter.writeManifest(manifest.getManifest());
         }
-        JkPathTreeSet.ofEmpty().andZips(otherJars).and(classtrees).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
-                .andMatcher(filter)
-                .zipTo(resultFile)  // main jar files must take precedence over files coming form dependencies
-                .close();
+        jarWriter.writeEntries(JkUtilsZip.jarFile(originalJar));
+        for (Path extraZip : otherJars) {
+            try (JarFile jarFile = JkUtilsZip.jarFile(extraZip)) {
+                jarWriter.writeEntries(jarFile);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        jarWriter.close();
+        JkUtilsPath.deleteIfExists(originalJar);
     }
-
 
 }

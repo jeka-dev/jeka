@@ -1,4 +1,6 @@
-package dev.jeka.plugins.springboot;
+package dev.jeka.core.api.java;
+
+import dev.jeka.core.api.utils.JkUtilsIO;
 
 import java.io.*;
 import java.net.URL;
@@ -20,7 +22,7 @@ import java.util.zip.ZipEntry;
  * @author Phillip Webb
  * @author Andy Wilkinson
  */
-class JarWriter {
+ public class JkJarWriter {
 
     private static final String NESTED_LOADER_JAR = "META-INF/loader/spring-boot-loader.jar";
 
@@ -30,19 +32,26 @@ class JarWriter {
 
     private final Set<String> writtenEntries = new HashSet<>();
 
+
+    private JkJarWriter(Path target) {
+        try {
+            OutputStream fileOutputStream = Files.newOutputStream(target);
+            this.jarOutput = new JarOutputStream(fileOutputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /**
-     * Create a new {@link JarWriter} instance.
-     * 
+     * Create a new {@link JkJarWriter} instance.
+     *
      * @param target
      *            the file to write
-     * @throws IOException
-     *             if the file cannot be opened
-     * @throws FileNotFoundException
-     *             if the file cannot be found
+     * @throws UncheckedIOException
+     *             if the file cannot be opened or if the file cannot be found
      */
-    public JarWriter(Path target) throws FileNotFoundException, IOException {
-        OutputStream fileOutputStream = Files.newOutputStream(target);
-        this.jarOutput = new JarOutputStream(fileOutputStream);
+    public static JkJarWriter of(Path target) {
+        return new JkJarWriter(target);
     }
 
     /**
@@ -50,12 +59,16 @@ class JarWriter {
      * 
      * @param manifest
      *            the manifest to write
-     * @throws IOException
+     * @throws UncheckedIOException
      *             of the manifest cannot be written
      */
-    public void writeManifest(final Manifest manifest) throws IOException {
+    public void writeManifest(final Manifest manifest) {
         JarEntry entry = new JarEntry("META-INF/MANIFEST.MF");
-        writeEntry(entry, outputStream -> manifest.write(outputStream));
+        try {
+            writeEntry(entry, manifest::write);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -63,15 +76,16 @@ class JarWriter {
      * 
      * @param jarFile
      *            the source jar file
-     * @throws IOException
+     * @throws UncheckedIOException
      *             if the entries cannot be written
      */
-    public void writeEntries(JarFile jarFile) throws IOException {
+    public void writeEntries(JarFile jarFile)  {
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
-            ZipHeaderPeekInputStream inputStream = new ZipHeaderPeekInputStream(jarFile.getInputStream(entry));
+            ZipHeaderPeekInputStream inputStream = null;
             try {
+                inputStream = new ZipHeaderPeekInputStream(jarFile.getInputStream(entry));
                 if (inputStream.hasZipHeader() && entry.getMethod() != ZipEntry.STORED) {
                     new CrcAndSize(inputStream).setupStoredEntry(entry);
                     inputStream.close();
@@ -79,8 +93,10 @@ class JarWriter {
                 }
                 EntryWriter entryWriter = new InputStreamEntryWriter(inputStream, true);
                 writeEntry(entry, entryWriter);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             } finally {
-                inputStream.close();
+                JkUtilsIO.closeQuietly(inputStream);
             }
         }
     }
@@ -93,12 +109,16 @@ class JarWriter {
      *            The name of the entry
      * @param inputStream
      *            The stream from which the entry's data can be read
-     * @throws IOException
+     * @throws UncheckedIOException
      *             if the write fails
      */
-    public void writeEntry(String entryName, InputStream inputStream) throws IOException {
+    public void writeEntry(String entryName, InputStream inputStream) {
         JarEntry entry = new JarEntry(entryName);
-        writeEntry(entry, new InputStreamEntryWriter(inputStream, true));
+        try {
+            writeEntry(entry, new InputStreamEntryWriter(inputStream, true));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -108,14 +128,19 @@ class JarWriter {
      *            the destination of the library
      * @param library
      *            the library
-     * @throws IOException
+     * @throws UncheckedIOException
      *             if the write fails
      */
-    public void writeNestedLibrary(String destination, Path library) throws IOException {
+    public void writeNestedLibrary(String destination, Path library) {
         JarEntry entry = new JarEntry(destination + library.getFileName().toString());
         entry.setTime(getNestedLibraryTime(library));
-        new CrcAndSize(library).setupStoredEntry(entry);
-        writeEntry(entry, new InputStreamEntryWriter(Files.newInputStream(library), true));
+        try {
+            new CrcAndSize(library).setupStoredEntry(entry);
+            writeEntry(entry, new InputStreamEntryWriter(Files.newInputStream(library), true));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
     }
 
     private long getNestedLibraryTime(Path path) {
@@ -138,28 +163,36 @@ class JarWriter {
     /**
      * Write the required spring-boot-loader classes to the JAR.
      * 
-     * @throws IOException
+     * @throws UncheckedIOException
      *             if the classes cannot be written
      */
-    public void writeLoaderClasses(URL loaderJar) throws IOException {
-        JarInputStream inputStream = new JarInputStream(new BufferedInputStream(loaderJar.openStream()));
-        JarEntry entry;
-        while ((entry = inputStream.getNextJarEntry()) != null) {
-            if (entry.getName().endsWith(".class")) {
-                writeEntry(entry, new InputStreamEntryWriter(inputStream, false));
+    public void writeLoaderClasses(URL loaderJar)  {
+        try {
+            JarInputStream inputStream = new JarInputStream(new BufferedInputStream(loaderJar.openStream()));
+            JarEntry entry;
+            while ((entry = inputStream.getNextJarEntry()) != null) {
+                if (entry.getName().endsWith(".class")) {
+                    writeEntry(entry, new InputStreamEntryWriter(inputStream, false));
+                }
             }
+            inputStream.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        inputStream.close();
     }
 
     /**
      * Close the writer.
      * 
-     * @throws IOException
+     * @throws UncheckedIOException
      *             if the file cannot be closed
      */
-    public void close() throws IOException {
-        this.jarOutput.close();
+    public void close() {
+        try {
+            this.jarOutput.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -324,7 +357,7 @@ class JarWriter {
         }
     }
     
-    void setExecutableFilePermission(Path path) {
+    public void setExecutableFilePermission(Path path) {
         try {
             Set<PosixFilePermission> permissions = new HashSet<>(
                     Files.getPosixFilePermissions(path));

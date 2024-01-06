@@ -3,6 +3,7 @@ package dev.jeka.plugins.springboot;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkJarWriter;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -72,7 +73,7 @@ class SpringbootPacker {
 
     private void makeBootJarChecked(JkPathTree<?> classTree, Path target) throws IOException {
 
-        JarWriter jarWriter = new JarWriter(target);
+        JkJarWriter jarWriter = JkJarWriter.of(target);
 
         // Manifest
         Path path = classTree.getRoot().resolve("META-INF/MANIFEST.MF");
@@ -104,7 +105,7 @@ class SpringbootPacker {
         JkLog.info("Bootable jar created at " + target);
     }
 
-    private void writeClasses(JkPathTree<?> classTree, JarWriter jarWriter) {
+    private void writeClasses(JkPathTree<?> classTree, JkJarWriter jarWriter) {
         classTree.stream()
                 .filter(path -> !path.toString().endsWith("/"))
                 .filter(path -> !Files.isDirectory(path))

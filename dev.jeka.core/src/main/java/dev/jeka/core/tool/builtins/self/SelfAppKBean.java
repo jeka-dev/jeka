@@ -148,6 +148,7 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     protected JkManifest manifest() {
+        System.out.println("---------- main class = " + actualMainClass());
         return JkManifest.of()
                 .addMainAttribute(JkManifest.CREATED_BY, "JeKa")
                 .addMainClass(actualMainClass())
@@ -155,9 +156,11 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     private void fatJar(Path jarPath) {
+        JkLog.startTask("Making fat jar");
         JkJarPacker.of(classTree())
                 .withManifest(manifest())
                 .makeFatJar(jarPath, libs(), JkPathMatcher.of());
+        JkLog.endTask();
         JkLog.info("Jar created at : " + jarPath);
     }
 

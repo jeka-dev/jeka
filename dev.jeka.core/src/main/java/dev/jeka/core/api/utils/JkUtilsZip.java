@@ -1,9 +1,13 @@
 package dev.jeka.core.api.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -40,4 +44,11 @@ public final class JkUtilsZip {
         }
     }
 
+    public static JarFile jarFile(Path path) {
+        try {
+            return new JarFile(path.toFile());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 }
