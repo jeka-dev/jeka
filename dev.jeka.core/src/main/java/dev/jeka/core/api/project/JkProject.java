@@ -68,10 +68,6 @@ public class JkProject implements JkIdeSupportSupplier {
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
-    private Runnable packAction;
-
-    public final JkArtifactLocator artifactLocator;
-
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
     private boolean includeTextAndLocalDependencies = true;
@@ -79,6 +75,19 @@ public class JkProject implements JkIdeSupportSupplier {
     private LocalAndTxtDependencies cachedTextAndLocalDeps;
 
     private URL dependencyTxtUrl;
+
+    /**
+     * Provides conventional path where artifact files are supposed to be generated.
+     */
+    public final JkArtifactLocator artifactLocator;
+
+    /**
+     * Actions to execute when {@link JkProject#pack()} is invoked.<p>
+     * By default, the build action creates a regular binary jar. It can be
+     * replaced by an action creating other jars/artifacts or doing special
+     * action as publishing a Docker image, for example.
+     */
+    public final JkRunnables packActions = JkRunnables.of();
 
     /**
      * Object responsible for resolving dependencies.
@@ -129,7 +138,7 @@ public class JkProject implements JkIdeSupportSupplier {
         packaging = new JkProjectPackaging(this);
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseCache(true);
         mavenPublication = mavenPublication(this);
-        packAction = packaging::createBinJar;
+        packActions.set(packaging::createBinJar);
     }
 
     /**
@@ -218,17 +227,6 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public JkProject setSourceEncoding(String sourceEncoding) {
         this.sourceEncoding = sourceEncoding;
-        return this;
-    }
-
-    /**
-     * Sets the action to execute when {@link JkProject#pack()} is invoked.<p>
-     * By default, the build action creates a regular binary jar. It can be 
-     * replaced by an action creating other jars/artifacts or doing special 
-     * action as publishing a Docker image, for example.
-     */
-    public JkProject setPackAction(Runnable ... packActions) {
-        this.packAction = JkRunnables.of().append(packActions);
         return this;
     }
 
@@ -433,10 +431,10 @@ public class JkProject implements JkIdeSupportSupplier {
 
     /**
      * Executes the pack action defined for this project.
-     * @see JkProject#setPackAction(Runnable...)
+     * @see JkProject#packActions
      */
     public void pack() {
-        this.packAction.run();
+        this.packActions.run();
     }
 
     /**

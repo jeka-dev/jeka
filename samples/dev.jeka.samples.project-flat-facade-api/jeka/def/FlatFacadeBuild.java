@@ -37,7 +37,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                 .mixResourcesAndSources()  // java sources and resources are located in same folder
 
                 // Control on produced artifacts
-                .includeJavadocAndSources(false, true)
+                .publishJavadocAndSources(false, true)
                 .setMainArtifactJarType(JkProjectPackaging.JarType.FAT)
 
                 // Simple declaration of project dependencies

@@ -86,11 +86,11 @@ public class KotlinJvmKBean extends KBean {
         prodCompile
                 .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
                 .preCompileActions
-                    .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
+                    .insertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
                             () -> compileKotlin(getCompiler(), project));
         testCompile
                 .preCompileActions
-                .appendBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
+                .insertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
                         () -> compileTestKotlin(getCompiler(), project));
         testCompile
                 .layout

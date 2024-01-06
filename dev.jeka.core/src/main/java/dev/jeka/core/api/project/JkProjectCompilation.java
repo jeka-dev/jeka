@@ -63,13 +63,13 @@ public class JkProjectCompilation {
         this.project = project;
         resourceProcessor = JkResourceProcessor.of();
         preCompileActions = JkRunnables.of()
-                .setLogRunnableName(true)
+                .setLogTasks(true)
                 .append(RESOURCES_PROCESS_ACTION, this::processResources);
         compileActions = JkRunnables.of()
-                .setLogRunnableName(true)
+                .setLogTasks(true)
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
         postCompileActions = JkRunnables.of()
-                .setLogRunnableName(true);
+                .setLogTasks(true);
         layout = initialLayout();
     }
 

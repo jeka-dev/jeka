@@ -16,6 +16,9 @@ public class JkRunnables implements Runnable {
 
     private boolean log;
 
+    private JkRunnables() {
+    }
+
     /**
      * Creates a {@link JkRunnables} delegating to a no-op runnable.
      */
@@ -23,26 +26,22 @@ public class JkRunnables implements Runnable {
         return new JkRunnables();
     }
 
-
-    private JkRunnables() {
-    }
-
-    private JkRunnables append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
-        JkUtilsAssert.argument(!this.contains(name), "runnable container contains already an entry named '"
-                + name + "'");
-        Entry entry = new Entry(name, runnable, relativePlace);
-        entries.add(entry);
-        Collections.sort(entries);
-        return this;
-    }
-
+    /**
+     * Adds the specified {@link Runnable} at the end of the execution chain.
+     * @param name The name referencing the runnable. The name can be used to
+     *             remove the runnable form the chain or add others with place
+     *             relative to this one.
+     * @see #remove(String)
+     * @see #insertBefore(String, String, Runnable)
+     * @see #insertAfter(String, String, Runnable)
+     * @see #contains(String)
+     */
     public JkRunnables append(String name, Runnable runnable) {
         return append(name, runnable, null);
     }
 
     /**
-     * Chains this underlying {@link Runnable} with the specified one. The specified runnable will
-     * be executed at the end.
+     * Adds the specified {@link Runnable}s at the end of the execution chain.
      */
     public JkRunnables append(Runnable ... runnables) {
         for (Runnable runnable : runnables) {
@@ -51,19 +50,39 @@ public class JkRunnables implements Runnable {
         return this;
     }
 
+    /**
+     * Sets the specified {@link Runnable}s as the execution chain. <p>
+     * This removes all pre-existing runnables from the chain.
+     */
+    public JkRunnables set(Runnable ... runnables) {
+        this.entries.clear();
+        return this.append(runnables);
+    }
 
-    public JkRunnables appendBefore(String name, String beforeRunnableName, Runnable runnable) {
+    /**
+     * Inserts the specified runnable in the execution chain, just before another one.
+     * @param name The name of the runnable to insert.
+     * @param beforeRunnableName The name of the runnable that we must insert before.
+     * @param runnable The runnable to insert.
+     */
+    public JkRunnables insertBefore(String name, String beforeRunnableName, Runnable runnable) {
         return append(name, runnable, new Entry.RelativePlace(beforeRunnableName, Entry.Where.BEFORE));
     }
 
-    public JkRunnables appendAfter(String name, String afterRunnableName, Runnable runnable) {
+    /**
+     * Inserts the specified runnable in the execution chain, just after another one.
+     * @param name The name of the runnable to insert.
+     * @param afterRunnableName The name of the runnable that we must insert after.
+     * @param runnable The runnable to insert.
+     */
+    public JkRunnables insertAfter(String name, String afterRunnableName, Runnable runnable) {
         return append(name, runnable, new Entry.RelativePlace(afterRunnableName, Entry.Where.AFTER));
     }
 
-    public List<String> getRunnableNames() {
-        return entries.stream().map(entry -> entry.name).collect(Collectors.toList());
-    }
-
+    /**
+     * Removes the runnable having the specified name, from the execution list.
+     * @param runnableName The name of the runnable to remove.
+     */
     public JkRunnables remove(String runnableName) {
         for (Iterator<Entry> it = entries.iterator(); it.hasNext();) {
             if (it.next().name.equals(runnableName)) {
@@ -73,10 +92,32 @@ public class JkRunnables implements Runnable {
         return this;
     }
 
+    /**
+     * Returns the name of the {@link Runnable}s, in the order of execution chain.
+     */
+    public List<String> getRunnableNames() {
+        return entries.stream().map(entry -> entry.name).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns <code>true</code> if the execution chain contains a runnable with the
+     * specified name.
+     */
     public boolean contains(String runnableName) {
         return entries.stream().anyMatch(entry -> entry.name.equals(runnableName));
     }
 
+    /**
+     * Sets if each runnable execution should be wrapped in a log task.
+     */
+    public JkRunnables setLogTasks(boolean log) {
+        this.log = log;
+        return this;
+    }
+
+    /**
+     * Executes the {@link Runnable}s, in the order of the execution chain.
+     */
     @Override
     public void run() {
         final boolean doLog = log;
@@ -89,6 +130,15 @@ public class JkRunnables implements Runnable {
                 JkLog.endTask();
             }
         });
+    }
+
+    private JkRunnables append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
+        JkUtilsAssert.argument(!this.contains(name), "runnable container contains already an entry named '"
+                + name + "'");
+        Entry entry = new Entry(name, runnable, relativePlace);
+        entries.add(entry);
+        Collections.sort(entries);
+        return this;
     }
 
     private static class Entry implements Comparable<Entry> {
@@ -181,11 +231,6 @@ public class JkRunnables implements Runnable {
             }
         }
 
-    }
-
-    public JkRunnables setLogRunnableName(boolean log) {
-        this.log = log;
-        return this;
     }
 
 }

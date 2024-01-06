@@ -6,7 +6,6 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- *  Configurator for {@link JkProject} to add Spring-Boot configuration.
+ * Class for adding Spring-Boot configuration to  {@link JkProject}s.
  */
 public final class JkSpringbootProject {
 
@@ -63,27 +62,27 @@ public final class JkSpringbootProject {
         // run tests in forked mode
         project.testing.testProcessor.setForkingProcess(true);
 
-        JkRunnables packAction = JkRunnables.of();
+        project.packActions.set();
 
         // define bootable jar as main artifact
         if (createBootJar) {
             JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
-            packAction.append("Make bootable jar", () -> createBootJar(artifactFile));
+            project.packActions.append("Make bootable jar", () -> createBootJar(artifactFile));
             project.mavenPublication.putArtifact(artifactId, this::createBootJar);
         }
         if (createWarFile) {
             JkArtifactId artifactId = JkArtifactId.ofMainArtifact("war");
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(project, path);
-            packAction.append("Make war file", () -> warMaker.accept(artifactFile) );
+            project.packActions.append("Make war file", () -> warMaker.accept(artifactFile) );
             project.mavenPublication.putArtifact(artifactId, warMaker);
         }
         if (createOriginalJar) {
             JkArtifactId artifactId = ORIGINAL_ARTIFACT;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
-            packAction.append("Make original jar", () -> makeBinJar.accept(artifactFile));
+            project.packActions.append("Make original jar", () -> makeBinJar.accept(artifactFile));
             project.mavenPublication.putArtifact(artifactId, makeBinJar);
         }
 
@@ -91,10 +90,8 @@ public final class JkSpringbootProject {
         // This is more efficient to keep the structure exploded to have efficient image layering.
         // In this case, just copy manifest in class dir is enough.
         if (!createBootJar && !createOriginalJar && !createWarFile) {
-            packAction.append("Include manifest", project.packaging::includeManifestInClassDir);
+            project.packActions.append("Include manifest", project.packaging::includeManifestInClassDir);
         }
-
-        project.setPackAction(packAction);
 
         return this;
     }
@@ -184,6 +181,7 @@ public final class JkSpringbootProject {
             String scaffoldDefClasspath,  // nullable
             JkProjectScaffold.BuildClassTemplate projectBuildClassTemplate) {
 
+        // Generate Build class
         if (scaffoldBuildKind == ScaffoldBuildKind.LIB) {
             String buildClassSource = "BuildLib.java";
             String code = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
@@ -206,6 +204,8 @@ public final class JkSpringbootProject {
                     Collections.emptyList(),
                     Collections.singletonList("org.springframework.boot:spring-boot-starter-test"));
         }
+
+        // Scaffold application sample
         scaffold.extraActions.append(this::scaffoldSample);
         String readmeContent = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/README.md"));
         scaffold.extraActions.append(() -> {
@@ -215,7 +215,7 @@ public final class JkSpringbootProject {
 
     }
 
-    /**
+    /*
      * Returns the latest GA Spring-Boot version
      */
     private String latestSpringbootVersion() {

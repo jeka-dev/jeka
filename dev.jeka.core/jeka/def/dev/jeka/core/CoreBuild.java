@@ -45,7 +45,7 @@ public class CoreBuild extends KBean {
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setModuleId("dev.jeka:jeka-core")
-            .setPackAction(this::doPackWithEmbeddedJar, this::doWrapper, this::doDistrib);
+            .packActions.set(this::doPackWithEmbeddedJar, this::doWrapper, this::doDistrib);
         project
             .compilerToolChain
                 .setForkedWithDefaultProcess();

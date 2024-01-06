@@ -45,7 +45,7 @@ public class JkJ2eWarProjectAdapter {
         JkArtifactId warArtifact = JkArtifactId.ofMainArtifact("war");
         Path warFile = project.artifactLocator.getArtifactPath(warArtifact);
         Consumer<Path> warMaker = path -> generateWar(project, path);
-        project.setPackAction(() -> warMaker.accept(warFile));
+        project.packActions.set(() -> warMaker.accept(warFile));
         project.mavenPublication
                 .removeArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
                 .putArtifact(warArtifact, warMaker);
