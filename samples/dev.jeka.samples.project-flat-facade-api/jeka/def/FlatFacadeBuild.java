@@ -53,7 +53,7 @@ class FlatFacadeBuild extends JkBean implements JkIdeSupportSupplier {
                         .and("com.github.djeang:vincer-dom:1.4.0")
                         .and("org.projectlombok:lombok:1.18.30")
 
-                        .andBom("com.fasterxml.jackson:jackson-bom:2.16.0")
+                        .and("com.fasterxml.jackson:jackson-bom::pom:2.16.0")
                         .and("com.fasterxml.jackson.core:jackson-core", JkTransitivity.NONE)
                         .and("com.fasterxml.jackson.core:jackson-databind", JkTransitivity.RUNTIME)
                 )
