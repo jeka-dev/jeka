@@ -310,17 +310,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * current output.
      */
     public JkProcResult exec() {
-        JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
-        customizeCommand();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
-        final List<String> commands = new LinkedList<>();
-        commands.add(command);
-        commands.addAll(parameters);
+        final List<String> commands = computeEffectiveCommands();
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
             JkLog.startTask("Start program : " + workingDirName + commands);
         }
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
         int exitCode = runProcess(commands,collectOs);
         if (logCommand) {
             JkLog.endTask();
@@ -328,7 +325,30 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         return new JkProcResult(exitCode, collectOutput ? byteArrayOutputStream.toString() : null);
     }
 
-    private int runProcess(List<String> commands, OutputStream collectOs) {
+    /**
+     * Executes the process asynchronously and returns a {@link JkProcHandler} object
+     * which can be used to interact with the running process.
+     */
+    public JkProcHandler execAsync() {
+        final List<String> commands = computeEffectiveCommands();
+        if (logCommand) {
+            String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
+            JkLog.info("Start program asynchronously : " + workingDirName + commands);
+        }
+        Process process = runProcessAsync(commands);
+        return new JkProcHandler(process);
+    }
+
+    private List<String> computeEffectiveCommands() {
+        JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
+        customizeCommand();
+        final List<String> commands = new LinkedList<>();
+        commands.add(command);
+        commands.addAll(parameters);
+        return commands;
+    }
+
+    private Process runProcessAsync(List<String> commands) {
         final ProcessBuilder processBuilder = processBuilder(commands);
         final Process process;
         try {
@@ -343,6 +363,11 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
                 }
             }));
         }
+        return process;
+    }
+
+    private int runProcess(List<String> commands, OutputStream collectOs) {
+        final Process process = runProcessAsync(commands);
 
         // Initialize stream globber so output stream of subprocess does not bybass decorators 
         // set in place in JkLog
@@ -355,7 +380,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             OutputStream consoleOutputStream = logOutputWithLogDecorator ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
             OutputStream consoleErrStream = logOutputWithLogDecorator ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
             outputStreamGobbler = JkUtilsIO.newStreamGobbler(process.getInputStream(), consoleOutputStream, collectOs);
-            errorStreamGobbler = JkUtilsIO.newStreamGobbler(process.getErrorStream(), consoleErrStream, collectOs);
+            errorStreamGobbler = JkUtilsIO.newStreamGobbler(process.getErrorStream(), consoleErrStream, JkUtilsIO.nopOutputStream());
         }
 
         int exitCode;

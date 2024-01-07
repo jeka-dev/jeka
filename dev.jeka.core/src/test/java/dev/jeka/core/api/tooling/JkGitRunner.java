@@ -20,6 +20,6 @@ public class JkGitRunner {
 
         System.out.println("--------");
         System.out.println(JkGit.of().getCommitMessagesSinceLastTag());
-
     }
+
 }
