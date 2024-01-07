@@ -327,7 +327,7 @@ public final class JkUtilsIO {
      */
     public static <T> T deserialize(Path file) {
         try {
-            return (T) deserialize(Files.newInputStream(file));
+            return deserialize(Files.newInputStream(file));
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -382,15 +382,15 @@ public final class JkUtilsIO {
         serialize(objectToClone, arrayOutputStream);
         final byte[] bytes = arrayOutputStream.toByteArray();
         final ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
-        return (T) deserialize(bin, targetClassLoader);
+        return deserialize(bin, targetClassLoader);
     }
 
     /**
      * Returns a thread that write each data read to the specified input
      * getOutputStream to the specified output getOutputStream.
      */
-    public static JkStreamGobbler newStreamGobbler(InputStream is, OutputStream ... outputStreams) {
-        return new JkStreamGobbler(is, outputStreams);
+    public static JkStreamGobbler newStreamGobbler(Process process, InputStream is, OutputStream ... outputStreams) {
+        return new JkStreamGobbler(process, is, outputStreams);
     }
 
     /**
@@ -404,8 +404,8 @@ public final class JkUtilsIO {
 
         private final Thread thread;
 
-        private JkStreamGobbler(InputStream is, OutputStream... outputStreams) {
-            this.innerRunnable = new InnerRunnable(is, outputStreams);
+        private JkStreamGobbler(Process process, InputStream is, OutputStream... outputStreams) {
+            this.innerRunnable = new InnerRunnable(process, is, outputStreams);
             thread = new Thread(innerRunnable);
             thread.start();
         }
@@ -421,7 +421,7 @@ public final class JkUtilsIO {
             try {
                 thread.join();
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();;
+                Thread.currentThread().interrupt();
                 throw new IllegalStateException(e);
             }
         }
@@ -434,15 +434,21 @@ public final class JkUtilsIO {
 
             private final AtomicBoolean stop = new AtomicBoolean(false);
 
-            private InnerRunnable(InputStream is, OutputStream[] outputStreams) {
+            // This runnable must stop when the process dies.
+            private final Process process;
+
+            public long lastCheckAliveTs = 0;
+
+            private InnerRunnable(Process process, InputStream is, OutputStream[] outputStreams) {
                 this.in = is;
                 this.outs = outputStreams;
+                this.process = process;
             }
 
             @Override
             public void run() {
                 try (InputStreamReader isr = new InputStreamReader(in); BufferedReader br = new BufferedReader(isr)) {
-                    while (!stop.get()) {
+                    while (!stop.get() && isProcessAlive()) {
                         int c = br.read();
                         if (c == -1) {
                             break;
@@ -455,6 +461,16 @@ public final class JkUtilsIO {
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 }
+            }
+
+            // Avoid checking for process alive at every round.
+            private boolean isProcessAlive() {
+                long ts = System.currentTimeMillis();
+                if ((ts - lastCheckAliveTs) < 1000) {
+                    return true;
+                }
+                lastCheckAliveTs = ts;
+                return process.isAlive();
             }
         }
     }

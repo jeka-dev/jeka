@@ -336,7 +336,15 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             JkLog.info("Start program asynchronously : " + workingDirName + commands);
         }
         Process process = runProcessAsync(commands);
-        return new JkProcHandler(process);
+
+        // Collect the output of sub-process if it has been required to.
+        ByteArrayOutputStream baos = null;
+        if (!inheritIO && this.collectOutput) {
+            baos = new ByteArrayOutputStream();
+            JkUtilsIO.newStreamGobbler(process, process.getInputStream(), JkUtilsIO.nopOutputStream(), baos);
+        }
+
+        return new JkProcHandler(process, baos);
     }
 
     private List<String> computeEffectiveCommands() {
@@ -377,10 +385,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         // TODO find a better criteria to turn off the globber
         // Apparently, the globber is needed to return result
         if (!inheritIO) {
-            OutputStream consoleOutputStream = logOutputWithLogDecorator ? JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
-            OutputStream consoleErrStream = logOutputWithLogDecorator ? JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
-            outputStreamGobbler = JkUtilsIO.newStreamGobbler(process.getInputStream(), consoleOutputStream, collectOs);
-            errorStreamGobbler = JkUtilsIO.newStreamGobbler(process.getErrorStream(), consoleErrStream, JkUtilsIO.nopOutputStream());
+            OutputStream consoleOutputStream = logOutputWithLogDecorator ?
+                    JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
+            OutputStream consoleErrStream = logOutputWithLogDecorator ?
+                    JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
+            outputStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getInputStream(),
+                    consoleOutputStream, collectOs);
+            errorStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getErrorStream(),
+                    consoleErrStream, JkUtilsIO.nopOutputStream());
         }
 
         int exitCode;

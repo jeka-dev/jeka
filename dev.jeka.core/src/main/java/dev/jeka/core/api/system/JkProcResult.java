@@ -10,9 +10,9 @@ import java.util.List;
  */
 public class JkProcResult {
 
-    private static final String NO_COLLECT_MSG = "The process has been launched without collecting output, " +
+    static final String NO_COLLECT_MSG = "The process has been launched without collecting output, or with inheritIO=true, " +
             "therefore the output result can't be retrieved.\n" +
-            "Execute the process using #setCollectOutput(true) to retrieve the output";
+            "Execute the process using #setCollectOutput(true), and/or disable inheritIO, to retrieve the output.";
 
     private final int exitCode;
 
