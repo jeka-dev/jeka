@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
  */
 public class JkDockerBuild {
 
+    private static final String BASE_IMAGE = "eclipse-temurin:21.0.1_12-jdk-jammy";
+
     private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
 
     private static final Predicate<Path> IS_CLASS = path -> path.toString().endsWith(".class");
@@ -30,7 +32,7 @@ public class JkDockerBuild {
 
     private JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
 
-    private String baseImage = "eclipse-temurin:21.0.1_12-jdk-jammy";
+    private String baseImage = BASE_IMAGE;
 
     private JkPathTree classes;
 
