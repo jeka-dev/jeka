@@ -132,11 +132,11 @@ final class EngineBeanClassResolver {
     private JkException beanClassNotFound(String name) {
         return new JkException("Can not find a KBean named '" + name
                 + "'.\nThe name to identify a KBean can be :"
-                + "\n  - The fully qualified class name of the KBean (e.g. org.foo.BarJkBean)"
-                + "\n  - The simple class name (e.g. BarJkBean)"
-                + "\n  - The uncapitalized simple class name (e.g. barJkBean)"
-                + "\n  - The simple class name minus the 'JkBean' suffix. (e.g. Bar)"
-                + "\n  - The uncapitalized simple class name minus the 'JkBean' suffix.(e.g. bar)"
+                + "\n  - The fully qualified class name of the KBean (e.g. org.foo.BarKBean)"
+                + "\n  - The simple class name (e.g. BarKBean)"
+                + "\n  - The uncapitalized simple class name (e.g. barKBean)"
+                + "\n  - The simple class name minus the 'KBean' suffix. (e.g. Bar)"
+                + "\n  - The uncapitalized simple class name minus the 'KBean' suffix.(e.g. bar)"
                 + "\nAvailable KBeans :\n  " + String.join("\n  ", globalBeanClassNames())
                 + "\nCurrent classloader :\n"
                 + JkClassLoader.ofCurrent());
