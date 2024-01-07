@@ -153,7 +153,7 @@ public final class JkKotlinCompiler {
         if (cachedVersion != null) {
             return cachedVersion;
         }
-        List<String> lines = JkProcess.of(command, "-version").execAndReturnOutput();
+        List<String> lines = JkProcess.of(command, "-version").setCollectOutput(true).exec().getOutputMultiline();
         String line = lines.get(0);
         cachedVersion=  line.split(" ")[2].trim();
         return cachedVersion;
@@ -363,8 +363,8 @@ public final class JkKotlinCompiler {
                     .setFailOnError(this.failOnError)
                     .setLogCommand(this.logCommand)
                     .setLogOutput(this.logOutput);
-        final int result = kotlincProcess.exec();
-        return new Result(result == 0, kotlincProcess.getParams());
+        final JkProcResult result = kotlincProcess.exec();
+        return new Result(result.hasSucceed(), kotlincProcess.getParams());
     }
 
     private static class Result {

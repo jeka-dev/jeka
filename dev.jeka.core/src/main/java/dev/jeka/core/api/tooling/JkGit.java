@@ -53,7 +53,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         List<String> branches = this.copy()
                 .addParams("rev-parse", "--abbrev-ref", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput();
+                .setCollectOutput(true)
+                .exec().getOutputMultiline();
         if (branches.isEmpty()) {
             return null;
         }
@@ -64,8 +65,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Checks if the local branch is in sync with the remote branch.
      */
     public boolean isSyncWithRemote() {
-        Object local = copy().setParams("rev-parse", "@").execAndReturnOutput();
-        Object remote = copy().setParams("rev-parse", "@{u}").execAndReturnOutput();
+        String local = copy().setParams("rev-parse", "@").setCollectOutput(true).exec().getOutput();
+        String remote = copy().setParams("rev-parse", "@{u}").setCollectOutput(true).exec().getOutput();
         return local.equals(remote);
     }
 
@@ -79,7 +80,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return !copy()
                 .setParams("diff", "HEAD", "--stat")
                 .setLogOutput(false)
-                .execAndReturnOutput().isEmpty();
+                .setCollectOutput(true)
+                .exec().getOutput().isEmpty();
     }
 
     /**
@@ -89,7 +91,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         List<String> commits =  copy()
                 .setParams("rev-parse", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput();
+                .setCollectOutput(true)
+                .exec().getOutputMultiline();
         return commits.isEmpty() ? null : commits.get(0);
     }
 
@@ -100,7 +103,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return copy()
                 .setParams("tag", "-l", "--points-at", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput();
+                .setCollectOutput(true)
+                .exec().getOutputMultiline();
     }
 
     /**
@@ -111,7 +115,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return copy()
                 .setParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
                 .setLogOutput(false)
-                .execAndReturnOutput();
+                .setCollectOutput(true)
+                .exec().getOutputMultiline();
     }
 
     /**
@@ -246,7 +251,11 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public List<String> getCommitMessagesSinceLastTag() {
         String latestTag = getLatestTag();
         JkUtilsAssert.state(latestTag != null, "Latest tag not found");
-        List<String> rawResults = copy().setParams("log", "--oneline", getLatestTag() + "..HEAD").execAndReturnOutput();
+        List<String> rawResults = copy()
+                .setParams("log", "--oneline", getLatestTag() + "..HEAD")
+                .setCollectOutput(true)
+                .exec()
+                .getOutputMultiline();
         List<String> result = new LinkedList<>();
         for (String line : rawResults) {
             String cleaned = JkUtilsString.substringAfterFirst(line, " "); // remove commit hash
@@ -262,7 +271,10 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Returns the latest tag in the Git repository.
      */
     public String getLatestTag() {
-        List<String> tags = copy().setParams("describe", "--tags", "--abbrev=0").execAndReturnOutput();
+        List<String> tags = copy().setParams("describe", "--tags", "--abbrev=0")
+                .setCollectOutput(true)
+                .exec()
+                .getOutputMultiline();
         return tags.isEmpty() ? null : tags.get(0);
     }
 

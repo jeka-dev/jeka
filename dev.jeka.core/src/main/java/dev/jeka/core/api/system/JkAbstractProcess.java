@@ -11,7 +11,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -40,12 +39,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     private boolean redirectErrorStream = true;
 
+    private boolean collectOutput;
+
     // By default, streams are redirected with gobbler mechanism to not bypass JkLog decorator.
     private boolean inheritIO = false;
 
     protected JkAbstractProcess() {}
 
-    protected JkAbstractProcess(JkAbstractProcess other) {
+    protected JkAbstractProcess(JkAbstractProcess<?> other) {
         this.command = other.command;
         this.parameters = new LinkedList(other.parameters);
         this.env = new HashMap(other.env);
@@ -56,6 +57,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         this.destroyAtJvmShutdown = other.destroyAtJvmShutdown;
         this.inheritIO = other.inheritIO;
         this.redirectErrorStream = other.redirectErrorStream;
+        this.collectOutput = other.collectOutput;
     }
 
     protected abstract T copy();
@@ -65,6 +67,19 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      */
     public T setCommand(String command) {
         this.command = command;
+        return (T) this;
+    }
+
+    /**
+     * Sets the flag to indicate whether the output of the process should be collected.
+     * <p>
+     * This is mandatory to collect output if we want to get the get the {@link JkProcResult#getOutput()}
+     * after process execution.
+     * <p>
+     * Initial value is <code>false</code>.
+     */
+    public T setCollectOutput(boolean collectOutput) {
+        this.collectOutput = collectOutput;
         return (T) this;
     }
 
@@ -246,49 +261,6 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
-     * Same as {@link #exec()} () but only effective if the specified condition is <code>true</code>.
-     */
-    public void execIf(boolean condition) {
-        if (condition) {
-            exec();
-        }
-    }
-
-    /**
-     * Starts this process and wait for the process has finished prior
-     * returning. The output of the created process will be redirected on the
-     * current output.
-     */
-    public int exec() {
-        return exec(false, process -> {}).exitCode;
-    }
-
-    /**
-     * Same as {@link #exec()} but the provided process consumer will be called right after
-     * the process is started. It can be used to get th process pid.
-     */
-    public int exec(Consumer<Process> processConsumer) {
-        return exec(false, processConsumer).exitCode;
-    }
-
-    /**
-     * Executes a command and returns the output as a list of strings.
-     * @return the output of the command as a list of strings
-     */
-    public List<String> execAndReturnOutput() {
-        Result result = exec(true, process -> {});
-        if (result.output.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return Arrays.asList(result.output.split("\\r?\n"));
-    }
-
-    @Override
-    public void run() {
-        this.exec();
-    }
-
-    /**
      * Returns the working directory of this process.
      */
     public Path getWorkingDir() {
@@ -327,7 +299,17 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     protected void customizeCommand() {
     }
 
-    private Result exec(boolean collectOutput, Consumer<Process> processConsumer) {
+    @Override
+    public void run() {
+        this.exec();
+    }
+
+    /**
+     * Starts this process and wait for the process has finished prior
+     * returning. The output of the created process will be redirected on the
+     * current output.
+     */
+    public JkProcResult exec() {
         JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
         customizeCommand();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -339,17 +321,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
             JkLog.startTask("Start program : " + workingDirName + commands);
         }
-        int exitCode = runProcess(commands,processConsumer, collectOs);
+        int exitCode = runProcess(commands,collectOs);
         if (logCommand) {
             JkLog.endTask();
         }
-        Result out = new Result();
-        out.exitCode = exitCode;
-        out.output = collectOutput ? byteArrayOutputStream.toString() : null;
-        return out;
+        return new JkProcResult(exitCode, collectOutput ? byteArrayOutputStream.toString() : null);
     }
 
-    private int runProcess(List<String> commands, Consumer<Process> processConsumer, OutputStream collectOs) {
+    private int runProcess(List<String> commands, OutputStream collectOs) {
         final ProcessBuilder processBuilder = processBuilder(commands);
         final Process process;
         try {
@@ -364,7 +343,6 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
                 }
             }));
         }
-        processConsumer.accept(process);
 
         // Initialize stream globber so output stream of subprocess does not bybass decorators 
         // set in place in JkLog
@@ -393,24 +371,19 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             errorStreamGobbler.join();
         }
         if (exitCode != 0 && failOnError) {
-            throw new IllegalStateException("Process " + String.join(" ", ellipsed(commands))
+            throw new IllegalStateException("Process " + String.join(" ", ellipse(commands))
                     + "\nhas returned with error code " + exitCode);
         }
         return exitCode;
     }
 
-    private static List<String> ellipsed(List<String> options) {
+    private static List<String> ellipse(List<String> options) {
         if (JkLog.isVerbose()) {
             return options;
         }
         return options.stream()
                 .map(option -> JkUtilsString.ellipse(option, 120))
                 .collect(Collectors.toList());
-    }
-
-    private static class Result {
-        int exitCode;
-        String output;
     }
 
     private ProcessBuilder processBuilder(List<String> command) {
@@ -429,6 +402,5 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         }
         return builder;
     }
-
 
 }

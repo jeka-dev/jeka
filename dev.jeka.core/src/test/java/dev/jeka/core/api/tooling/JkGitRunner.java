@@ -10,7 +10,8 @@ public class JkGitRunner {
     public static void main(String[] args) {
         String line = JkGit.of()
                 .addParams("show", "-s", "--pretty=%d", "HEAD")
-                .execAndReturnOutput().get(0);
+                .setCollectOutput(true)
+                .exec().getOutputMultiline().get(0);
         System.out.println(line);
         List<String> allItems = Arrays.asList(line.split(","));
         System.out.println(allItems.get(0));

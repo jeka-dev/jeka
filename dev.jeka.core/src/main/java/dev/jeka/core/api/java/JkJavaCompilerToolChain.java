@@ -228,8 +228,7 @@ public final class JkJavaCompilerToolChain {
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));
         process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
         JkLog.info(sourcePaths.size() + " files to compile.");
-        final int result = process.exec();
-        return (result == 0);
+        return process.exec().hasSucceed();
     }
 
     private static JavaCompiler getDefaultCompilerToolOrFail() {
