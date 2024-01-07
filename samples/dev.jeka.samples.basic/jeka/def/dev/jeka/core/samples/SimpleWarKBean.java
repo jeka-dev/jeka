@@ -57,7 +57,7 @@ public class SimpleWarKBean extends KBean {
         Path jettyRunner = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
                 + jettyRunnerVersion);
         JkJavaProcess.ofJavaJar(jettyRunner, null)
-                .exec(projectKBean.project.artifactLocator.getMainArtifactPath().toString(), "--port", port);
+                .setParams(projectKBean.project.artifactLocator.getMainArtifactPath().toString(), "--port", port).exec();
     }
     
     public static void main(String[] args) {

@@ -111,28 +111,37 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
         return this.addJavaOptions("-cp", classpath.toPath());
     }
 
+    /**
+     * Adds a system property to the command line parameters.
+     */
     public JkJavaProcess addSystemProperty(String key, String value) {
-        addParams("-D" + key + "=" + value);
+        addParamsFirst("-D" + key + "=" + value);
         return this;
     }
 
+    /**
+     * Sets whether the process should inherit system properties from the parent process.
+     */
     public JkJavaProcess setInheritSystemProperties(boolean inheritSystemProperties) {
         this.inheritSystemProperties = inheritSystemProperties;
         return this;
     }
 
+    /**
+     * Creates a copy of the current JkJavaProcess instance with the same properties.
+     */
     public JkJavaProcess copy() {
         return new JkJavaProcess(this)
                 .setInheritSystemProperties(this.inheritSystemProperties);
     }
 
     @Override
-    protected void customizeCommand(List<String> commands) {
+    protected void customizeCommand() {
         Properties props = System.getProperties();
         for (Object key : props.keySet()) {
             String name = (String) key;
             String prefix = "-D" + name + "=";
-            if (commands.stream().anyMatch(command -> command.startsWith(prefix))) {
+            if (getParams().stream().anyMatch(parameter -> parameter.startsWith(prefix))) {
                 continue;
             }
             if (inheritSystemProperties || PROXY_PROPS.contains(name)) {

@@ -30,7 +30,7 @@ public class GitKBean extends KBean {
     public void tagRemote() {
         JkGit aGit = git.copy().setLogCommand(false).setLogOutput(false);
         JkLog.info("Existing tags on origin :");
-        aGit.copy().setLogOutput(true).exec("ls-remote", "--tag", "--sort=creatordate", "origin");
+        aGit.copy().setLogOutput(true).setParams("ls-remote", "--tag", "--sort=creatordate", "origin").exec();
         if (aGit.isWorkspaceDirty()) {
             JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
             return;

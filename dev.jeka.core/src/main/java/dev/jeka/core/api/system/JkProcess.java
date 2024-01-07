@@ -19,6 +19,15 @@ public class JkProcess extends JkAbstractProcess<JkProcess> {
 
     protected JkProcess() {}
 
+    protected JkProcess(JkProcess other) {
+        super(other);
+    }
+
+    @Override
+    protected JkProcess copy() {
+        return new JkProcess(this);
+    }
+
     /**
      * Creates a <code>JkProcess</code> using the specified command and
      * parameters.

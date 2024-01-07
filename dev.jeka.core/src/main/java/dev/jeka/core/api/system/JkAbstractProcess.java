@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * The JkProcess class represents a process that can be executed on the system.
  * It provides various methods for configuring and executing the process.
  */
-public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable {
+public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable {
 
     protected static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
 
@@ -58,9 +58,7 @@ public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable 
         this.redirectErrorStream = other.redirectErrorStream;
     }
 
-    public T copy()  {
-        return (T) new JkAbstractProcess<T>(this);
-    }
+    protected abstract T copy();
 
     /**
      * Specify the command to execute
@@ -70,8 +68,19 @@ public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable 
         return (T) this;
     }
 
+    /**
+     * Sets the flag to destroy the process at JVM shutdown.
+     */
     public T setDestroyAtJvmShutdown(boolean destroy) {
         this.destroyAtJvmShutdown = destroy;
+        return (T) this;
+    }
+
+    /**
+     * Sets the specified parameters to the command line.
+     */
+    public T setParams(String ...parameters) {
+        this.parameters = Arrays.asList(parameters);
         return (T) this;
     }
 
@@ -101,7 +110,9 @@ public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable 
     }
 
     /**
-     * @see #addParams(String...)
+     * Adds the specified parameters to the command line.
+     *
+     * @see  #addParams(String...)
      */
     public T addParams(Collection<String> parameters) {
         List<String> params = new LinkedList<>(parameters);
@@ -235,9 +246,9 @@ public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable 
     }
 
     /**
-     * Same as {@link #exec(String...)} () but only effective if the specified condition is <code>true</code>.
+     * Same as {@link #exec()} () but only effective if the specified condition is <code>true</code>.
      */
-    public void execIf(boolean condition, String ... extraParams) {
+    public void execIf(boolean condition) {
         if (condition) {
             exec();
         }
@@ -248,32 +259,24 @@ public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable 
      * returning. The output of the created process will be redirected on the
      * current output.
      */
-    public int exec(String ... extraParams) {
-        if (extraParams.length == 1) {
-            extraParams = JkUtilsString.parseCommandline(extraParams[0]);
-        }
-        return exec(false, process -> {}, extraParams).exitCode;
+    public int exec() {
+        return exec(false, process -> {}).exitCode;
     }
 
     /**
-     * Same as {@link #exec(String...)} but the provided process consumer will be called right after
+     * Same as {@link #exec()} but the provided process consumer will be called right after
      * the process is started. It can be used to get th process pid.
      */
-    public int exec(Consumer<Process> processConsumer, String ... extraParams) {
-        if (extraParams.length == 1) {
-            extraParams = JkUtilsString.parseCommandline(extraParams[0]);
-        }
-        return exec(false, processConsumer, extraParams).exitCode;
+    public int exec(Consumer<Process> processConsumer) {
+        return exec(false, processConsumer).exitCode;
     }
 
     /**
      * Executes a command and returns the output as a list of strings.
-     *
-     * @param extraParams additional parameters to add to the command line
      * @return the output of the command as a list of strings
      */
-    public List<String> execAndReturnOutput(String ... extraParams) {
-        Result result = exec(true, process -> {}, extraParams);
+    public List<String> execAndReturnOutput() {
+        Result result = exec(true, process -> {});
         if (result.output.isEmpty()) {
             return Collections.emptyList();
         }
@@ -316,19 +319,22 @@ public class JkAbstractProcess<T extends JkAbstractProcess> implements Runnable 
         return this.command + " " + String.join(" ", parameters);
     }
 
-    protected void customizeCommand(List<String> commands) {
+    /**
+     * Modifies the command and its execution parameters.
+     * <p>
+     * This method provides a way for subclasses to adjust the process before it is run.
+     */
+    protected void customizeCommand() {
     }
 
-    private Result exec(boolean collectOutput, Consumer<Process> processConsumer, String ... extraParams) {
+    private Result exec(boolean collectOutput, Consumer<Process> processConsumer) {
         JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
-        final List<String> commands = new LinkedList<>();
-        commands.add(this.command);
-        commands.addAll(parameters);
-        commands.addAll(Arrays.asList(extraParams));
-        commands.removeAll(Collections.singleton(null));
-        customizeCommand(commands);
+        customizeCommand();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
+        final List<String> commands = new LinkedList<>();
+        commands.add(command);
+        commands.addAll(parameters);
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
             JkLog.startTask("Start program : " + workingDirName + commands);

@@ -91,7 +91,8 @@ public class JkNodeJs {
      */
     public JkNodeJs npm(String commandLine) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "bin/npm";
-        createProcess(workingDir, cmd).exec(JkUtilsString.parseCommandline(commandLine));
+        String[] params = JkUtilsString.parseCommandline(commandLine);
+        createProcess(workingDir, cmd).setParams(params).exec();
         return this;
     }
 
@@ -102,7 +103,8 @@ public class JkNodeJs {
      */
     public JkNodeJs npx(String commandLine) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npx.cmd" : "bin/npx";
-        createProcess(workingDir, cmd).exec(JkUtilsString.parseCommandline(commandLine));
+        String[] params = JkUtilsString.parseCommandline(commandLine);
+        createProcess(workingDir, cmd).setParams(params).exec();
         return this;
     }
 

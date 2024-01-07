@@ -116,24 +116,21 @@ public final class JkSonarqube {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), scannerVersion);
     }
 
+    /**
+     * Sets the version of the SonarQube scanner and the repositories from which to download it.
+     *
+     * @param downloadRepos The repositories from which to download the SonarQube scanner.
+     * @param scannerVersion The version of the SonarQube scanner. It should be in the format "org.sonarsource.scanner.cli:sonar-scanner-cli:VERSION".
+     */
     public JkSonarqube setVersion(JkRepoSet downloadRepos, @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         this.repos = downloadRepos;
         this.scannerVersion = scannerVersion;
         return this;
     }
 
-    private static String workDir(Path baseDir) {
-        return baseDir.resolve(JkConstants.JEKA_DIR + "/.sonarscannerworks").toString();
-    }
-
     /**
-     * @see #configureFor(JkProject, boolean, boolean)
+     * Sets the project ID for SonarQube analysis.
      */
-    public JkSonarqube configureFor(JkProject project) {
-        return configureFor(project, true, false);
-    }
-
-
     public JkSonarqube setProjectId(String projectKey, String projectName, String version) {
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
@@ -150,22 +147,31 @@ public final class JkSonarqube {
         return this;
     }
 
+    /**
+     * Determines whether SonarQube scanner logs should be displayed.
+     *
+     * @param logOutput 'true' if the logs should be displayed, 'false' otherwise.
+     * @return an instance of JkSonarqube with the updated logOutput setting.
+     */
     public JkSonarqube setLogOutput(boolean logOutput) {
         this.logOutput = logOutput;
         return this;
     }
 
+    /**
+     * Executes SonarQube analysis.
+     */
     public void run() {
         String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("localhost");
         JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
         Path jar = getToolJar();
         String[] args = JkLog.isVerbose() ? new String[] {"-e", "-X"} : new String[] {"-e"};
-        javaProcess(jar, "org.sonarsource.scanner.cli.Main").exec(args);
+        javaProcess(jar).addParams(args).exec();
         JkLog.endTask();
     }
 
     /**
-     * Set a sonarqube property (aka analysis parameter) as listed <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">here</a>. <p/>
+     * Sets a sonarqube property (aka analysis parameter) as listed <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">here</a>. <p/>
      *
      * Sonarqube properties all start with prefix 'sonar.' but you can omit it, as it will be
      * prepended at launch time, if missing.
@@ -176,16 +182,19 @@ public final class JkSonarqube {
     }
 
     /**
-     * Convenient method to pass a list of path, as property value.
-     * @see #setProperty(String, String)
+     * Sets a sonarqube property (aka analysis parameter) with a list of paths.
+     *
+     * @param key   The key of the property.
+     * @param value The iterable collection of paths.
+     * @return An instance of JkSonarqube with the updated property.
+     * @see <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">SonarQube Analysis Parameters</a>
      */
     public JkSonarqube setProperty(String key, Iterable<Path> value) {
         return setProperty(key, toPaths(value));
     }
 
     /**
-     * Convenient method to pass a bulk of sonar properties..
-     * @see #setProperty(String, String)
+     * Adds SonarQube analysis properties.
      */
     public JkSonarqube setProperties(Map<String, String> props) {
         this.params.putAll(props);
@@ -200,6 +209,7 @@ public final class JkSonarqube {
         this.setProperties(properties.getAllStartingWith("sonar.", false));
         return this;
     }
+
 
     public JkSonarqube setProjectBaseDir(Path baseDir) {
         return setProperty(PROJECT_BASE_DIR, baseDir.toAbsolutePath().toString());
@@ -234,8 +244,72 @@ public final class JkSonarqube {
         return setProperty(JDBC_PASSWORD, pwd);
     }
 
-    private JkJavaProcess javaProcess(Path jar, String mainClassName) {
-        return JkJavaProcess.ofJava(mainClassName)
+    /**
+     * Configures Sonarqube for the supplied {@link JkProject}.
+     * @param provideProdLibs If true, the list of production dependency files will be provided to sonarqube.
+     * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
+     */
+    public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
+        final JkCompileLayout prodLayout = project.compilation.layout;
+        final JkCompileLayout testLayout = project.testing.compilation.layout;
+        final Path baseDir = project.getBaseDir();
+        JkPathSequence libs = JkPathSequence.of();
+        if (provideProdLibs) {
+            JkDependencySet deps = project.compilation.getDependencies()
+                    .merge(project.packaging.getRuntimeDependencies()).getResult();
+            libs = project.dependencyResolver.resolve(deps).getFiles();
+        }
+        final Path testReportDir = project.testing.getReportDir();
+        JkModuleId jkModuleId = project.getModuleId();
+        if (jkModuleId == null) {
+            String baseDirName = baseDir.getFileName().toString();
+            if (JkUtilsString.isBlank(baseDirName)) {
+                baseDirName = baseDir.toAbsolutePath().getFileName().toString();
+            }
+            jkModuleId = JkModuleId.of(baseDirName, baseDirName);
+        }
+        final String version = project.getVersion().getValue();
+        final String fullName = jkModuleId.getDotNotation();
+        final String name = jkModuleId.getName();
+        this
+                .setLogOutput(JkLog.isVerbose())
+                .setProjectId(fullName, name, version)
+                .setProjectBaseDir(baseDir)
+                .setBinaries(project.compilation.layout.resolveClassDir())
+                .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
+                .setProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
+                .setProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
+                .setProperty(WORKING_DIRECTORY, workDir(baseDir))
+                .setProperty(JUNIT_REPORTS_PATH,
+                        baseDir.relativize( testReportDir.resolve("junit")).toString())
+                .setProperty(SUREFIRE_REPORTS_PATH,
+                        baseDir.relativize(testReportDir.resolve("junit")).toString())
+                .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
+                .setProperty(JACOCO_XML_REPORTS_PATHS,
+                        baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
+                .setProperty(JAVA_LIBRARIES, libs)
+                .setProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+        if (provideTestLibs) {
+            JkDependencySet deps = project.testing.compilation.getDependencies();
+            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
+            this.setProperty(JAVA_TEST_LIBRARIES, testLibs);
+        }
+        return this;
+    }
+
+    /**
+     * @see #configureFor(JkProject, boolean, boolean)
+     */
+    public JkSonarqube configureFor(JkProject project) {
+        return configureFor(project, true, false);
+    }
+
+    private static String workDir(Path baseDir) {
+        return baseDir.resolve(JkConstants.JEKA_DIR + "/.sonarscannerworks").toString();
+    }
+
+    private JkJavaProcess javaProcess(Path jar) {
+        return JkJavaProcess.ofJava("org.sonarsource.scanner.cli.Main")
                 .setClasspath(jar)
                 .setFailOnError(true)
                 .addParams(toProperties())
@@ -311,57 +385,6 @@ public final class JkSonarqube {
         return resolveResult.getFiles().getEntries().get(0);
     }
 
-    /**
-     * Configures Sonarqube for the supplied {@link JkProject}.
-     * @param provideProdLibs If true, the list of production dependency files will be provided to sonarqube.
-     * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
-     */
-    public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
-        final JkCompileLayout prodLayout = project.compilation.layout;
-        final JkCompileLayout testLayout = project.testing.compilation.layout;
-        final Path baseDir = project.getBaseDir();
-        JkPathSequence libs = JkPathSequence.of();
-        if (provideProdLibs) {
-            JkDependencySet deps = project.compilation.getDependencies()
-                    .merge(project.packaging.getRuntimeDependencies()).getResult();
-            libs = project.dependencyResolver.resolve(deps).getFiles();
-        }
-        final Path testReportDir = project.testing.getReportDir();
-        JkModuleId jkModuleId = project.getModuleId();
-        if (jkModuleId == null) {
-            String baseDirName = baseDir.getFileName().toString();
-            if (JkUtilsString.isBlank(baseDirName)) {
-                baseDirName = baseDir.toAbsolutePath().getFileName().toString();
-            }
-            jkModuleId = JkModuleId.of(baseDirName, baseDirName);
-        }
-        final String version = project.getVersion().getValue();
-        final String fullName = jkModuleId.getDotNotation();
-        final String name = jkModuleId.getName();
-        this
-            .setLogOutput(JkLog.isVerbose())
-            .setProjectId(fullName, name, version)
-            .setProjectBaseDir(baseDir)
-            .setBinaries(project.compilation.layout.resolveClassDir())
-                .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
-                .setProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(WORKING_DIRECTORY, workDir(baseDir))
-                .setProperty(JUNIT_REPORTS_PATH,
-                    baseDir.relativize( testReportDir.resolve("junit")).toString())
-                .setProperty(SUREFIRE_REPORTS_PATH,
-                    baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
-                .setProperty(JACOCO_XML_REPORTS_PATHS,
-                    baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
-                .setProperty(JAVA_LIBRARIES, libs)
-                .setProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
-        if (provideTestLibs) {
-            JkDependencySet deps = project.testing.compilation.getDependencies();
-            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
-            this.setProperty(JAVA_TEST_LIBRARIES, testLibs);
-        }
-        return this;
-    }
+
 
 }
