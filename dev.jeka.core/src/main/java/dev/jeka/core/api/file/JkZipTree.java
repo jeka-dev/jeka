@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  *  Instances are supposed to be closed by the user code, in a <i>try-with-resource</i> statement or
  *  in a <i>finally</i> clause.
  */
-public class JkZipTree extends JkPathTree<JkZipTree> implements Closeable {
+public class JkZipTree extends JkAbstractPathTree<JkZipTree> implements Closeable {
 
     private JkZipTree(JkUtilsPath.JkZipRoot zipRoot, JkPathMatcher pathMatcher) {
         super(zipRoot, pathMatcher);

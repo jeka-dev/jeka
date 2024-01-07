@@ -11,6 +11,12 @@ import java.util.function.Function;
  */
 public final class JkUtilsString {
 
+    /**
+     * Joins the elements of the given iterable into a single string using the specified separator.
+     *
+     * @param items     the iterable containing the elements to be joined
+     * @param separator the string to be used as separator between the elements
+     */
     static String join(Iterable<?> items, String separator) {
         final StringBuilder builder = new StringBuilder();
         final Iterator<?> it = items.iterator();
@@ -147,9 +153,9 @@ public final class JkUtilsString {
      */
     public static String pluralize(int count, String singular, String plural) {
         if (count > 1) {
-            return "" + count + " " + plural;
+            return count + " " + plural;
         }
-        return "" + count + " " + singular;
+        return count + " " + singular;
     }
 
     /**
@@ -217,6 +223,9 @@ public final class JkUtilsString {
         return string.isEmpty() || " ".equals(string);
     }
 
+    /**
+     * Checks if the provided string consists only of digits.
+     */
     public static boolean isDigits(String string) {
         try {
             Double.parseDouble(string);
@@ -226,6 +235,13 @@ public final class JkUtilsString {
         }
     }
 
+    /**
+     * Extracts variable tokens from the given string.
+     * <p>
+     * Variable tokens are string embedded within <code>${}</code>.
+     *
+     * @param string The input string.
+     */
     public static List<String> extractVariableToken(String string) {
         boolean onDollar = false;
         boolean inToken = false;
@@ -251,6 +267,14 @@ public final class JkUtilsString {
         return result;
     }
 
+    /**
+     * Interpolates a string by replacing variable tokens with their corresponding values.
+     *
+     * @param string   The string to interpolate.
+     * @param replacer The function used to retrieve the value for each variable token.
+     *
+     * @return The interpolated string.
+     */
     public static String interpolate(String string, Function<String, String> replacer) {
         List<String> variableTokens = JkUtilsString.extractVariableToken(string);
         String result = string;
@@ -275,10 +299,17 @@ public final class JkUtilsString {
     }
 
     /**
-     * Kindly borrowed from ANT
+     * Parses a command line string and splits it into an array of individual command line arguments.
+     * <p>
+     * Borrowed from ANT.
+     *
+     * @param commandline the command line string to parse
+     * @return an array of individual command line arguments
+     *
+     * @throws IllegalArgumentException if there are unbalanced quotes in the command line string
      */
-    public static String[] translateCommandline(String toProcess) {
-        if (toProcess == null || toProcess.length() == 0) {
+    public static String[] parseCommandline(String commandline) {
+        if (commandline == null || commandline.isEmpty()) {
             // no command? no string
             return new String[0];
         }
@@ -288,7 +319,7 @@ public final class JkUtilsString {
         final int inQuote = 1;
         final int inDoubleQuote = 2;
         int state = normal;
-        final StringTokenizer tok = new StringTokenizer(toProcess, "\"\' ", true);
+        final StringTokenizer tok = new StringTokenizer(commandline, "\"' ", true);
         final ArrayList<String> result = new ArrayList<>();
         final StringBuilder current = new StringBuilder();
         boolean lastTokenHasBeenQuoted = false;
@@ -297,7 +328,7 @@ public final class JkUtilsString {
             final String nextTok = tok.nextToken();
             switch (state) {
             case inQuote:
-                if ("\'".equals(nextTok)) {
+                if ("'".equals(nextTok)) {
                     lastTokenHasBeenQuoted = true;
                     state = normal;
                 } else {
@@ -313,7 +344,7 @@ public final class JkUtilsString {
                 }
                 break;
             default:
-                if ("\'".equals(nextTok)) {
+                if ("'".equals(nextTok)) {
                     state = inQuote;
                 } else if ("\"".equals(nextTok)) {
                     state = inDoubleQuote;
@@ -333,11 +364,20 @@ public final class JkUtilsString {
             result.add(current.toString());
         }
         if (state == inQuote || state == inDoubleQuote) {
-            throw new IllegalArgumentException("unbalanced quotes in " + toProcess);
+            throw new IllegalArgumentException("unbalanced quotes in " + commandline);
         }
-        return result.toArray(new String[result.size()]);
+        return result.toArray(new String[0]);
     }
 
+    /**
+     * Pads the given string with the specified pad character to ensure it reaches the minimum length.
+     *
+     * @param string The string to pad.
+     * @param minLength The minimum length the resulting string should have.
+     * @param padChar The character to use for padding.
+     *
+     * @return The padded string.
+     */
     public static String padEnd(String string, int minLength, char padChar) {
         if (string.length() >= minLength) {
             return string;
@@ -350,6 +390,15 @@ public final class JkUtilsString {
         return sb.toString();
     }
 
+    /**
+     * Pads the given string with the specified pad character to ensure it reaches the minimum length.
+     *
+     * @param string     The string to pad.
+     * @param minLength  The minimum length the resulting string should have.
+     * @param padChar    The character to use for padding.
+     *
+     * @return The padded string.
+     */
     public static String padStart(String string, int minLength, char padChar) {
         if (string.length() >= minLength) {
             return string;
@@ -362,11 +411,24 @@ public final class JkUtilsString {
         return sb.toString();
     }
 
+    /**
+     * Converts a blank string to null. If the input string is null, empty, or consists only of whitespaces,
+     * this method returns null. Otherwise, it returns the input string.
+     *
+     * @param in the input string
+     */
     public static String blankToNull(String in) {
         return isBlank(in) ? null : in;
     }
 
+    /**
+     * Converts a null string to an empty string. If the input string is null, it returns an empty string.
+     * If the input string is not null, it returns the input string as is.
+     *
+     * @param in the input string
+     */
     public static String nullToEmpty(String in) {
         return in == null ? "" : in;
     }
+
 }

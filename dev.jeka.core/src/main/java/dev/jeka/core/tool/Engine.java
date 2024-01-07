@@ -152,7 +152,7 @@ final class Engine {
     }
 
     private CompilationContext preCompile() {
-        JkPathTree<?> sourceTree = beanClassesResolver.getSourceTree();
+        JkPathTree sourceTree = beanClassesResolver.getSourceTree();
         final List<Path> sourceFiles = sourceTree.getFiles();
         JkLog.traceStartTask("Parse source code of " + sourceFiles);
         final ParsedSourceInfo parsedSourceInfo =

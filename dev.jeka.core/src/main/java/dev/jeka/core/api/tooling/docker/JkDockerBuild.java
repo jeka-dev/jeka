@@ -32,7 +32,7 @@ public class JkDockerBuild {
 
     private String baseImage = "eclipse-temurin:21.0.1_12-jdk-jammy";
 
-    private JkPathTree<?> classes;
+    private JkPathTree classes;
 
     private List<Path> classpath;
 
@@ -70,7 +70,7 @@ public class JkDockerBuild {
     /**
      * Sets the compiled Java classes that constitute the Java program to be executed.
      */
-    public JkDockerBuild setClasses(JkPathTree<?> classes) {
+    public JkDockerBuild setClasses(JkPathTree classes) {
         this.classes = classes;
         return this;
     }

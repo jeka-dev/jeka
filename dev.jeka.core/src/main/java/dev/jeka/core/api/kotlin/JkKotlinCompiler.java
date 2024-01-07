@@ -7,10 +7,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -338,7 +335,7 @@ public final class JkKotlinCompiler {
         }
         JkLog.info(sourcePaths.size() + " files to compile.");
         JkLog.info("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
-        JkProcess kotlincProcess;
+        JkAbstractProcess<?> kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
         JkKotlinJvmCompileSpec effectiveSpec = compileSpec.copy();
         for (Plugin plugin : this.plugins) {

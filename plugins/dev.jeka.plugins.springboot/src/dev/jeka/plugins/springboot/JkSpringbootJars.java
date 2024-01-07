@@ -23,7 +23,7 @@ public class JkSpringbootJars {
     /**
      * Creates a bootable jar from class files and libraries to include in the bootable jar.
      */
-    public static void createBootJar(JkPathTree<?> classTree, List<Path> libsToInclude, JkRepoSet downloadRepo,
+    public static void createBootJar(JkPathTree classTree, List<Path> libsToInclude, JkRepoSet downloadRepo,
                                      Path targetJar) {
         JkUtilsAssert.argument(classTree.exists(), "class dir not found " + classTree.getRoot());
         String mainClassName = findMainClassName(classTree.getRoot());

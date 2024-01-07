@@ -71,7 +71,7 @@ class SpringbootPacker {
         }
     }
 
-    private void makeBootJarChecked(JkPathTree<?> classTree, Path target) throws IOException {
+    private void makeBootJarChecked(JkPathTree classTree, Path target) throws IOException {
 
         JkJarWriter jarWriter = JkJarWriter.of(target);
 
@@ -105,7 +105,7 @@ class SpringbootPacker {
         JkLog.info("Bootable jar created at " + target);
     }
 
-    private void writeClasses(JkPathTree<?> classTree, JkJarWriter jarWriter) {
+    private void writeClasses(JkPathTree classTree, JkJarWriter jarWriter) {
         classTree.stream()
                 .filter(path -> !path.toString().endsWith("/"))
                 .filter(path -> !Files.isDirectory(path))

@@ -34,7 +34,7 @@ class Environment {
         List<String> appendedArgs = props.getAllStartingWith(CMD_APPEND_PROP, true).keySet().stream()
                 .sorted()
                 .map(props::get)
-                .flatMap(value -> Arrays.stream(JkUtilsString.translateCommandline(value)))
+                .flatMap(value -> Arrays.stream(JkUtilsString.parseCommandline(value)))
                 .collect(Collectors.toList());
         effectiveCommandLineArgs.addAll(appendedArgs);
 
@@ -46,7 +46,7 @@ class Environment {
                 String propName = CMD_PROP_PREFIX + token;
                 String presetValue = props.get(propName);
                 if (presetValue != null) {
-                    String[] replacingItems = JkUtilsString.translateCommandline(presetValue);
+                    String[] replacingItems = JkUtilsString.parseCommandline(presetValue);
                     it.remove();
                     Arrays.stream(replacingItems).forEach(item -> it.add(item));
                 }

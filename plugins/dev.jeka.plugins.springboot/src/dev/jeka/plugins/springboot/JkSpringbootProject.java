@@ -140,7 +140,7 @@ public final class JkSpringbootProject {
      * Creates the bootable jar at the specified location.
      */
     public void createBootJar(Path target) {
-        JkPathTree<?> classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
+        JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
         if (!classTree.exists()) {
             project.compilation.runIfNeeded();
             project.testing.runIfNeeded();

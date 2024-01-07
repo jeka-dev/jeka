@@ -293,11 +293,11 @@ public final class JkJavaCompilerToolChain {
 
     private class ToolOrProcess {
 
-        final JkProcess<?> compileProcess;
+        final JkProcess compileProcess;
 
         final JavaCompiler compileTool;
 
-        ToolOrProcess(JavaCompiler compileTool, JkProcess<?> compileProcess) {
+        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess) {
             this.compileProcess = compileProcess;
             this.compileTool = compileTool;
         }

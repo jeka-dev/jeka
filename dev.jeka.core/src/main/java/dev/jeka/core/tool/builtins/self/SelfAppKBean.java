@@ -63,8 +63,8 @@ public abstract class SelfAppKBean extends KBean {
                 .setInheritIO(true)
                 .setInheritSystemProperties(true)
                 .setDestroyAtJvmShutdown(true)
-                .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
-                .addParams(JkUtilsString.translateCommandline(args))
+                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
+                .addParams(JkUtilsString.parseCommandline(args))
                 .exec();
     }
 
@@ -105,8 +105,8 @@ public abstract class SelfAppKBean extends KBean {
                 .setLogCommand(true)
                 .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true)
-                .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
-                .addParams(JkUtilsString.translateCommandline(args))
+                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
+                .addParams(JkUtilsString.parseCommandline(args))
                 .run();
     }
 
@@ -142,7 +142,7 @@ public abstract class SelfAppKBean extends KBean {
                 .collect(Collectors.toList());
     }
 
-    public JkPathTree<?> classTree() {
+    public JkPathTree classTree() {
         return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR))
                 .andMatching(false, "_*", "_*/**");
     }

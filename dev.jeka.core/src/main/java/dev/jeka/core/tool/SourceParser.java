@@ -9,16 +9,16 @@ import java.util.Arrays;
 
 class SourceParser {
 
-    private final JkPathTree<?> sources;
+    private final JkPathTree sources;
 
     private final Path baseDir;
 
-   private SourceParser(Path baseDir, JkPathTree<?> sources) {
+   private SourceParser(Path baseDir, JkPathTree sources) {
         this.sources = sources;
         this.baseDir = baseDir;
    }
 
-   static SourceParser of(Path baseDir, JkPathTree<?> sources) {
+   static SourceParser of(Path baseDir, JkPathTree sources) {
        return new SourceParser(baseDir, sources);
    }
 
@@ -65,7 +65,7 @@ class SourceParser {
         annotationParser = new AnnotationParser(line, JkInjectCompileOption.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.compileOptions.addAll(Arrays.asList(JkUtilsString.translateCommandline(value)));
+            info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkAbstractPathTree;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLog;
@@ -115,7 +116,7 @@ public final class JkClasspath implements Iterable<Path> {
     Set<Path> getAllPathMatching(Iterable<String> globPatterns) {
         final Set<Path> result = new LinkedHashSet<>();
         for (final Path classpathEntry : this.entries) {
-            final JkPathTree tree = Files.isDirectory(classpathEntry) ?
+            final JkAbstractPathTree<?> tree = Files.isDirectory(classpathEntry) ?
                     JkPathTree.of(classpathEntry) : JkZipTree.of(classpathEntry);
                     result.addAll(tree.andMatching(true, globPatterns).getRelativeFiles());
         }
@@ -170,7 +171,7 @@ public final class JkClasspath implements Iterable<Path> {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
-            builder.append(it.next().toAbsolutePath().toString());
+            builder.append(it.next().toAbsolutePath());
             if (it.hasNext()) {
                 builder.append(File.pathSeparator);
             }
@@ -217,7 +218,7 @@ public final class JkClasspath implements Iterable<Path> {
             } else if (Files.isRegularFile(file)) {
                 if (!JkUtilsString.endsWithAny(file.getFileName().toString().toLowerCase(), ".jar", ".zip")) {
                     throw new IllegalArgumentException("Classpath file element "
-                            + file.toAbsolutePath().toString()
+                            + file.toAbsolutePath()
                             + " is invalid. It must be either a folder either a jar or zip file.");
                 }
                 result.add(file);

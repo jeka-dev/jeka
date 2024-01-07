@@ -260,19 +260,19 @@ public class JkProject implements JkIdeSupportSupplier {
     /**
      * Creates {@link JkProcess} to execute the main method for this project.
      */
-    public JkProcess<?> runMain(String jvmOptions, String ... programArgs) {
+    public JkJavaProcess prepareRunMain(String jvmOptions, String ... programArgs) {
         compilation.runIfNeeded();
         return JkJavaProcess.ofJava(actualMainClass())
                 .setClasspath(this.packaging.resolveRuntimeDependencies().getFiles())
                 .setInheritIO(true)
                 .setInheritSystemProperties(true)
                 .setDestroyAtJvmShutdown(true)
-                .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
+                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
                 .addParams(programArgs);
     }
 
     /**
-     * Creates {@link JkProcess} to execute the jar having the specified artifact name.
+     * Creates {@link JkJavaProcess} to execute the jar having the specified artifact name.
      * The jar is created on the fly if it is not already present.
      *
      * @param artifactClassifier  The classifier of the artifact to run. In a project producing a side 'fat' jar, you can use
@@ -282,7 +282,7 @@ public class JkProject implements JkIdeSupportSupplier {
      * @param jvmOptions         Options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
      * @param args               Program arguments to be passed in command line, as <code>--print --verbose myArg</code>
      */
-    public JkProcess<?> runJar(String artifactClassifier, boolean includeRuntimeDeps, String jvmOptions, String args) {
+    public JkJavaProcess prepareRunJar(String artifactClassifier, boolean includeRuntimeDeps, String jvmOptions, String args) {
         JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
         Path artifactPath = artifactLocator.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
@@ -292,8 +292,8 @@ public class JkProject implements JkIdeSupportSupplier {
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setLogOutput(true)
-                .addJavaOptions(JkUtilsString.translateCommandline(jvmOptions))
-                .addParams(JkUtilsString.translateCommandline(args));
+                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
+                .addParams(JkUtilsString.parseCommandline(args));
         if (includeRuntimeDeps) {
             JkPathSequence pathSequence = packaging.resolveRuntimeDependencies().getFiles();
             javaProcess.setClasspath(pathSequence.getEntries());
@@ -302,18 +302,18 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Same as {@link #runJar(String, boolean, String, String)} but specific for the main artefact.
+     * Same as {@link #prepareRunJar(String, boolean, String, String)} but specific for the main artefact.
      *
-     * @see #runJar(String, boolean, String, String)
+     * @see #prepareRunJar(String, boolean, String, String)
      */
-    public JkProcess<?> runJar(boolean includeRuntimeDeps, String jvmOptions, String programArgs) {
-        return runJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps, jvmOptions, programArgs);
+    public JkJavaProcess prepareRunJar(boolean includeRuntimeDeps, String jvmOptions, String programArgs) {
+        return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps, jvmOptions, programArgs);
     }
 
     /**
      * Creates a {@link JkDockerBuild} to build a docker image of the application.
      */
-    public JkDockerBuild dockerImage() {
+    public JkDockerBuild prepareDockerImage() {
         compilation.runIfNeeded();
         return JkDockerBuild.of()
                 .setClasses(JkPathTree.of(compilation.layout.resolveClassDir()))

@@ -1,7 +1,7 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
@@ -20,7 +20,7 @@ import static dev.jeka.core.api.utils.JkUtilsIterable.listOf;
  *
  * @author Jerome Angibaud
  */
-public class JkJavaProcess extends JkProcess<JkJavaProcess> {
+public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
 
     public static final Path CURRENT_JAVA_HOME = Paths.get(System.getProperty("java.home"));
 
@@ -32,7 +32,8 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
     private boolean inheritSystemProperties = false;
 
     protected JkJavaProcess() {
-        super(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
+        super();
+        this.setCommand(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
     }
 
     protected JkJavaProcess(JkJavaProcess other) {
@@ -138,6 +139,6 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
                 this.addSystemProperty(name, props.getProperty(name));
             }
         }
-
     }
+
 }

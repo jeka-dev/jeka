@@ -35,7 +35,7 @@ public class GitKBean extends KBean {
             JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
             return;
         }
-        if (!aGit.isRemoteEqual()) {
+        if (!aGit.isSyncWithRemote()) {
             JkLog.info("The current tracking branch is not aligned with the remote. Please update/push and retry.");
             return;
         }

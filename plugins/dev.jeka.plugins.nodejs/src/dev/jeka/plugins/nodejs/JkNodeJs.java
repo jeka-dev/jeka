@@ -91,7 +91,7 @@ public class JkNodeJs {
      */
     public JkNodeJs npm(String commandLine) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "bin/npm";
-        createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
+        createProcess(workingDir, cmd).exec(JkUtilsString.parseCommandline(commandLine));
         return this;
     }
 
@@ -102,7 +102,7 @@ public class JkNodeJs {
      */
     public JkNodeJs npx(String commandLine) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npx.cmd" : "bin/npx";
-        createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
+        createProcess(workingDir, cmd).exec(JkUtilsString.parseCommandline(commandLine));
         return this;
     }
 
@@ -153,7 +153,7 @@ public class JkNodeJs {
         return installDir;
     }
 
-    private JkProcess<?> createProcess(Path workingDir, String cmdName) {
+    private JkProcess createProcess(Path workingDir, String cmdName) {
         String path = System.getenv("PATH");
         Path commandFile = installDir().resolve(cmdName);
         Path nodeDir = commandFile.getParent();

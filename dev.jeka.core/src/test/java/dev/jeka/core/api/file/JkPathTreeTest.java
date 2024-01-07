@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,7 +98,7 @@ public class JkPathTreeTest {
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
         JkZipTree.of(zip).zipTo(zip2);
-        JkPathTree zip2Tree = JkZipTree.of(zip2);
+        JkZipTree zip2Tree = JkZipTree.of(zip2);
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(zip2Tree.get("emptyfolder")));
@@ -110,7 +111,7 @@ public class JkPathTreeTest {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
-        JkPathTree zip2Tree = JkZipTree.of(zip2);
+        JkZipTree zip2Tree = JkZipTree.of(zip2);
         zip2Tree.importTree(JkZipTree.of(zip));
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
@@ -150,7 +151,7 @@ public class JkPathTreeTest {
         }
     }
 
-    private void testImportFile(JkPathTree treeSample) throws URISyntaxException {
+    private void testImportFile(JkAbstractPathTree<?> treeSample) throws URISyntaxException {
         Path sampleTxt = Paths.get(JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt").toURI());
 
@@ -165,7 +166,7 @@ public class JkPathTreeTest {
     @Test
     public void testZipGet() throws Exception {
         Path zipFile = createSampleZip();
-        JkPathTree zipTree = JkZipTree.of(zipFile);
+        JkZipTree zipTree = JkZipTree.of(zipFile);
         Path zipEntry = zipTree.get("/subfolder/sample.txt");
         assertTrue(Files.exists(zipEntry));
         assertFalse(Files.exists(zipTree.get("/opopkhjkjkjh")));
@@ -178,7 +179,7 @@ public class JkPathTreeTest {
         Path bar = foo.resolve("bar");
         Files.createDirectories(bar);
         Path txt = bar.resolve("file.txt");
-        Files.write(txt, "toto".getBytes(Charset.forName("UTF8")));
+        Files.write(txt, "toto".getBytes(StandardCharsets.UTF_8));
         Path txt2 = foo.resolve("file2.txt");
         Files.copy(txt, txt2);
         assertTrue(Files.exists(txt));

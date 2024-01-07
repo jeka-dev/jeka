@@ -41,7 +41,7 @@ public final class JkJarPacker {
         return new JkJarPacker(classTrees, null, null);
     }
 
-    public static JkJarPacker of(JkPathTree<?> classTree) {
+    public static JkJarPacker of(JkPathTree classTree) {
         return of(classTree.toSet());
     }
 

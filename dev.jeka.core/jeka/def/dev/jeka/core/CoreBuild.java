@@ -100,7 +100,7 @@ public class CoreBuild extends KBean {
         if (!Files.exists(project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID))) {
             doWrapper();
         }
-        final JkPathTree<?> distrib = JkPathTree.of(distribFolder());
+        final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
         distrib

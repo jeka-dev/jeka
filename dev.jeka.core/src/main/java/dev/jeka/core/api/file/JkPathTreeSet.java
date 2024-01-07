@@ -2,10 +2,8 @@ package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
@@ -17,15 +15,13 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * A set of {@link JkPathTree}.
- *
- * @author Jerome Angibaud
+ * See {@link JkPathTree#getRoot()}
  */
-public final class JkPathTreeSet implements Closeable {
+public final class JkPathTreeSet {
 
-    private final List<JkPathTree<?>> pathTrees;
+    private final List<JkPathTree> pathTrees;
 
-    private JkPathTreeSet(List<JkPathTree<?>> dirs) {
+    private JkPathTreeSet(List<JkPathTree> dirs) {
         if (dirs == null) {
             throw new IllegalArgumentException("dirs can't be null.");
         }
@@ -35,7 +31,7 @@ public final class JkPathTreeSet implements Closeable {
     /**
      * Creates a {@link JkPathTreeSet} from an iterable of {@link JkPathTree}.
      */
-    public static JkPathTreeSet of(Iterable<JkPathTree<?>> dirs) {
+    public static JkPathTreeSet of(Iterable<JkPathTree> dirs) {
         return new JkPathTreeSet(JkUtilsIterable.listOf(dirs));
     }
 
@@ -49,7 +45,7 @@ public final class JkPathTreeSet implements Closeable {
     /**
      * Creates a {@link JkPathTreeSet} to an array of {@link JkPathTree}.
      */
-    public static JkPathTreeSet of(JkPathTree<?>... trees) {
+    public static JkPathTreeSet of(JkPathTree... trees) {
         return new JkPathTreeSet(Arrays.asList(trees));
     }
 
@@ -57,13 +53,19 @@ public final class JkPathTreeSet implements Closeable {
      * Creates a {@link JkPathTreeSet} from an array of folder.
      */
     public static JkPathTreeSet ofRoots(Path... folders) {
-        final List<JkPathTree<?>> dirs = new ArrayList<>(folders.length);
+        final List<JkPathTree> dirs = new ArrayList<>(folders.length);
         for (final Path folder : folders) {
             dirs.add(JkPathTree.of(folder));
         }
         return new JkPathTreeSet(dirs);
     }
 
+    /**
+     * Creates a {@link JkPathTreeSet} from an array of folder paths.
+     *
+     * @param folders the array of folder paths
+     * @return the {@link JkPathTreeSet} created from the folder paths
+     */
     public static JkPathTreeSet ofRoots(String folder, String... folders) {
         return ofRoots(JkUtilsIterable.listOf1orMore(folder, folders).stream()
                 .map(Paths::get).toArray(Path[]::new));
@@ -83,28 +85,10 @@ public final class JkPathTreeSet implements Closeable {
      * {@link JkPathTreeSet} and the {@link JkPathTree} array passed as
      * parameter.
      */
-    public JkPathTreeSet and(JkPathTree<?>... trees) {
-        final List<JkPathTree<?>> list = new LinkedList<>(this.pathTrees);
+    public JkPathTreeSet and(JkPathTree... trees) {
+        final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         list.addAll(Arrays.asList(trees));
         return new JkPathTreeSet(list);
-    }
-
-    /**
-     * Creates a {@link JkPathTreeSet} which is a concatenation of this
-     * {@link JkPathTreeSet} and zip files passed as parameter.
-     */
-    public JkPathTreeSet andZips(Iterable<Path> zipFiles) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(zipFiles);
-        final List<JkPathTree<?>> list = new LinkedList<>(this.pathTrees);
-        paths.forEach(zipFile -> list.add(JkZipTree.of(zipFile)));
-        return new JkPathTreeSet(list);
-    }
-
-    /**
-     * @see #andZips(Iterable)
-     */
-    public JkPathTreeSet andZip(Path... zips) {
-        return andZips(Arrays.asList(zips));
     }
 
     /**
@@ -112,7 +96,7 @@ public final class JkPathTreeSet implements Closeable {
      * {@link JkPathTreeSet} and the folder array passed as parameter.
      */
     public JkPathTreeSet and(Path... folders) {
-        final List<JkPathTree<?>> dirs = new ArrayList<>(folders.length);
+        final List<JkPathTree> dirs = new ArrayList<>(folders.length);
         for (final Path folder : folders) {
             dirs.add(JkPathTree.of(folder));
         }
@@ -125,7 +109,7 @@ public final class JkPathTreeSet implements Closeable {
      * parameter.
      */
     public JkPathTreeSet and(JkPathTreeSet... otherDirSets) {
-        final List<JkPathTree<?>> list = new LinkedList<>(this.pathTrees);
+        final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         for (final JkPathTreeSet otherDirSet : otherDirSets) {
             list.addAll(otherDirSet.pathTrees);
         }
@@ -139,8 +123,8 @@ public final class JkPathTreeSet implements Closeable {
      * augmented with the specified {@link JkPathMatcher}
      */
     public JkPathTreeSet andMatcher(PathMatcher matcher) {
-        final List<JkPathTree<?>> list = new LinkedList<>();
-        for (final JkPathTree<?> tree : this.pathTrees) {
+        final List<JkPathTree> list = new LinkedList<>();
+        for (final JkPathTree tree : this.pathTrees) {
             list.add(tree.andMatcher(matcher));
         }
         return new JkPathTreeSet(list);
@@ -153,8 +137,8 @@ public final class JkPathTreeSet implements Closeable {
      * replacing matcher by the specified one.
      */
     public JkPathTreeSet withMatcher(PathMatcher matcher) {
-        final List<JkPathTree<?>> list = new LinkedList<>();
-        for (final JkPathTree<?> tree : this.pathTrees) {
+        final List<JkPathTree> list = new LinkedList<>();
+        for (final JkPathTree tree : this.pathTrees) {
             list.add(JkPathTree.of(tree.getRoot()).withMatcher(JkPathMatcher.of(matcher)));
         }
         return new JkPathTreeSet(list);
@@ -167,7 +151,7 @@ public final class JkPathTreeSet implements Closeable {
      */
     public List<Path> getFiles() {
         final LinkedList<Path> result = new LinkedList<>();
-        for (final JkPathTree<?> dirView : this.pathTrees) {
+        for (final JkPathTree dirView : this.pathTrees) {
             if (dirView.exists()) {
                 result.addAll(dirView.getFiles());
             }
@@ -180,7 +164,7 @@ public final class JkPathTreeSet implements Closeable {
      */
     public List<Path> getRelativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
-        for (final JkPathTree<?> dir : this.pathTrees) {
+        for (final JkPathTree dir : this.pathTrees) {
             if (dir.exists()) {
                 result.addAll(dir.getRelativeFiles());
             }
@@ -193,7 +177,7 @@ public final class JkPathTreeSet implements Closeable {
      */
     public List<Path> getExistingFiles(String relativePath) {
         List<Path> result = new LinkedList<>();
-        for (JkPathTree<?> pathTree : this.pathTrees) {
+        for (JkPathTree pathTree : this.pathTrees) {
             Path candidate = pathTree.get(relativePath);
             if (Files.exists(candidate)) {
                 result.add(candidate);
@@ -226,7 +210,7 @@ public final class JkPathTreeSet implements Closeable {
     /**
      * Returns {@link JkPathTree} instances constituting this {@link JkPathTreeSet}.
      */
-    public List<JkPathTree<?>> toList() {
+    public List<JkPathTree> toList() {
         return pathTrees;
     }
 
@@ -236,7 +220,7 @@ public final class JkPathTreeSet implements Closeable {
      */
     public List<Path> getRootDirsOrZipFiles() {
         final List<Path> result = new LinkedList<>();
-        for (final JkPathTree<?> tree : pathTrees) {
+        for (final JkPathTree tree : pathTrees) {
             result.add(tree.getRoot());
         }
         return result;
@@ -248,7 +232,7 @@ public final class JkPathTreeSet implements Closeable {
      * Returns <code>true</code> if no tree of this set has an existing baseTree.
      */
     public boolean hasNoExistingRoot() {
-        for (final JkPathTree<?> tree : pathTrees) {
+        for (final JkPathTree tree : pathTrees) {
             if (tree.exists()) {
                 return false;
             }
@@ -260,7 +244,7 @@ public final class JkPathTreeSet implements Closeable {
      * @see JkPathTree#resolvedTo(Path)
      */
     public JkPathTreeSet resolvedTo(Path newRoot) {
-        List<JkPathTree<?>> trees = new LinkedList<>();
+        List<JkPathTree> trees = new LinkedList<>();
         this.toList().forEach(tree -> trees.add(tree.resolvedTo(newRoot)));
         return JkPathTreeSet.of(trees);
     }
@@ -270,7 +254,7 @@ public final class JkPathTreeSet implements Closeable {
      */
     public int count(int max, boolean includeFolder) {
         int result = 0;
-        for (final JkPathTree<?> dirView : pathTrees) {
+        for (final JkPathTree dirView : pathTrees) {
             result += dirView.count(max - result, includeFolder);
         }
         return result;
@@ -284,12 +268,12 @@ public final class JkPathTreeSet implements Closeable {
      * Merges trees having same root by comparing their respective matcher.
      */
     public JkPathTreeSet mergeDuplicateRoots() {
-        List<JkPathTree<?>> result = new ArrayList<>();
-        for (JkPathTree<?> tree : pathTrees) {
+        List<JkPathTree> result = new ArrayList<>();
+        for (JkPathTree tree : pathTrees) {
             Path root = tree.getRoot();
             boolean found = false;
             for (int i = 0; i < result.size(); i++) {
-                JkPathTree<?> resultTree = result.get(i);
+                JkPathTree resultTree = result.get(i);
                 if (root.equals(resultTree.getRoot())) {
                     result.remove(i);
                     found = true;
@@ -334,14 +318,6 @@ public final class JkPathTreeSet implements Closeable {
         if (pathTrees == null) {
             return other.pathTrees == null;
         } else return pathTrees.equals(other.pathTrees);
-    }
-
-    @Override
-    public void close()  {
-        this.pathTrees.stream()
-                .filter(JkZipTree.class::isInstance)
-                .map(JkZipTree.class::cast)
-                .forEach(JkZipTree::close);
     }
 
     /**

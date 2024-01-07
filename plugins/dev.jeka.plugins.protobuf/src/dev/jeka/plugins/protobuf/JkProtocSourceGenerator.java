@@ -60,7 +60,7 @@ public class JkProtocSourceGenerator extends JkProjectSourceGenerator {
     public void generate(JkProject project, Path generatedSourceDir) {
         JkLog.startTask("Compiling protocol buffer files from " + protoFilePath);
         JkPathTree protoFiles = JkPathTree.of(project.getBaseDir()).goTo(protoFilePath);
-        String[] extraOptions = JkUtilsString.translateCommandline(extraProtocOptions);
+        String[] extraOptions = JkUtilsString.parseCommandline(extraProtocOptions);
         JkProtoc protoc = JkProtoc.ofJava(generatedSourceDir)
                 .setRepos(repos)
                 .addOptions(extraOptions);
