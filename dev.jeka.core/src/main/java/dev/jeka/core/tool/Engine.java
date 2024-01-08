@@ -449,11 +449,7 @@ final class Engine {
     }
 
     private JkProperties localProperties() {
-        Path localPropFile = projectBaseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
-        if (!Files.exists(localPropFile)) {
-            return JkProperties.EMPTY;
-        }
-        return JkProperties.ofFile(localPropFile);
+        return JkRuntime.localProperties(projectBaseDir);
     }
 
     private String projectBaseDirName() {

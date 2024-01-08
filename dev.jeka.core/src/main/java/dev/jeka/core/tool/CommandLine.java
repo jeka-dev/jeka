@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 final class CommandLine {
 
-    private static final String KBEAN_SYMBOL = "#";
+    static final String KBEAN_SYMBOL = "#";
 
     private static final String AT_SYMBOL_CHAR = "@";
 
@@ -129,6 +129,10 @@ final class CommandLine {
         }
     }
 
+    /**
+     * Represents an action to be taken on a bean, such as invoking a method,
+     * injecting a property, or instantiating a bean.
+     */
     static class JkBeanAction {
 
         final EngineCommand.Action action;
@@ -139,6 +143,9 @@ final class CommandLine {
 
         final String value; // if property
 
+        /*
+         * Creates a JkActionBean by parsing its textual representation, such as 'someBean#someValue=bar'.
+         */
         JkBeanAction(String expression) {
             final String beanExpression;
             if (expression.contains(KBEAN_SYMBOL)) {

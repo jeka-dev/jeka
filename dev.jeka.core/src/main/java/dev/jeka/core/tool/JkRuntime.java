@@ -287,12 +287,12 @@ public final class JkRuntime {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "JkRuntime{" +
-                "projectBaseDir=" + projectBaseDir +
-                ", beans=" + beans.keySet() +
-                '}';
+    static JkProperties localProperties(Path baseDir) {
+        Path localPropFile = baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
+        if (!Files.exists(localPropFile)) {
+            return JkProperties.EMPTY;
+        }
+        return JkProperties.ofFile(localPropFile);
     }
 
     // Reads the properties from the baseDir/jeka/local.properties
@@ -310,6 +310,14 @@ public final class JkRuntime {
             result = result.withFallback(readProjectPropertiesRecursively(parentProject));
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "JkRuntime{" +
+                "projectBaseDir=" + projectBaseDir +
+                ", beans=" + beans.keySet() +
+                '}';
     }
 
 }

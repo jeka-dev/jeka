@@ -6,8 +6,10 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +40,8 @@ final class EngineBeanClassResolver {
 
     private List<String> cachedGlobalBeanClassName;
 
+    private final JkProperties localProperties;
+
     private boolean useStoredCache;
 
     EngineBeanClassResolver(Path baseDir) {
@@ -45,12 +49,15 @@ final class EngineBeanClassResolver {
         this.baseDir = baseDir;
         this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
         this.defClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
+        this.localProperties = JkRuntime.localProperties(baseDir);
     }
 
     List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName, boolean ignoreDefaultBeanNotFound) {
         JkLog.startTask("Resolve KBean classes");
         Map<String, Class<? extends KBean>> beanClasses = new HashMap<>();
-        for (String beanName : commandLine.involvedBeanNames()) {
+        Set<String> involvedKBeanNames = new HashSet<>(commandLine.involvedBeanNames());
+        involvedKBeanNames.addAll(getInvolvedKBeanNamesFromProperties());
+        for (String beanName : involvedKBeanNames) {
             List<String> beanClassNames = JkUtilsIterable.concatLists(defBeanClassNames(), globalBeanClassNames())
                     .stream().distinct().collect(Collectors.toList());
             List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
@@ -82,8 +89,12 @@ final class EngineBeanClassResolver {
             result.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, defaultBeanClass,
                     null, null));
         }
-        commandLine.getBeanActions().stream()
-                .map(action -> toEngineCommand(action, beanClasses)).forEach(result::add);
+
+        List<CommandLine.JkBeanAction> beanActions = new LinkedList<>(getBeanActionFromProperties());
+        beanActions.addAll(commandLine.getBeanActions());
+        beanActions.stream()
+                .map(action -> toEngineCommand(action, beanClasses))
+                .forEach(result::add);
         JkLog.endTask();
         JkLog.info("Default KBean : " + defaultBeanClass);
         return Collections.unmodifiableList(result);
@@ -172,7 +183,7 @@ final class EngineBeanClassResolver {
             JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
             cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
         }
-        storeGlobalKbeanClasses(cachedGlobalBeanClassName);
+        storeGlobalKBeanClasses(cachedGlobalBeanClassName);
     }
 
     List<Class<? extends KBean>> defBeanClasses() {
@@ -194,6 +205,19 @@ final class EngineBeanClassResolver {
     boolean hasClassesInWorkDir() {
         return JkPathTree.of(defClassDir).andMatching(true, "**.class")
                 .count(0, false) > 0;
+    }
+
+    List<String> readKbeanClasses() {
+        Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(JkConstants.KBEAN_CLASSES_CACHE_FILE_NAME);
+        if (!Files.exists(store)) {
+            return Collections.emptyList();
+        }
+        return JkUtilsPath.readAllLines(store);
+    }
+
+    JkPathTree getSourceTree() {
+        return JkPathTree.of(defSourceDir)
+                .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
     private List<String> defBeanClassNames() {
@@ -250,7 +274,7 @@ final class EngineBeanClassResolver {
         return JkPathTree.of(this.defSourceDir).withMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
-    private void storeGlobalKbeanClasses(List<String> classNames) {
+    private void storeGlobalKBeanClasses(List<String> classNames) {
         Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(JkConstants.KBEAN_CLASSES_CACHE_FILE_NAME);
         if (!Files.exists(store.getParent().getParent())) {
             return;
@@ -259,17 +283,31 @@ final class EngineBeanClassResolver {
         JkPathFile.of(store).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
     }
 
-    List<String> readKbeanClasses() {
-        Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(JkConstants.KBEAN_CLASSES_CACHE_FILE_NAME);
-        if (!Files.exists(store)) {
-            return Collections.emptyList();
-        }
-        return JkUtilsPath.readAllLines(store);
+    // get involved KBean names from local properties
+    private List<String> getInvolvedKBeanNamesFromProperties() {
+        Map<String, String> props = localProperties.getAllStartingWith("", true);
+        return props.keySet().stream()
+                .filter(key -> key.contains(CommandLine.KBEAN_SYMBOL))
+                .map(key -> JkUtilsString.substringBeforeFirst(key, CommandLine.KBEAN_SYMBOL))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
-    JkPathTree getSourceTree() {
-        return JkPathTree.of(defSourceDir)
-                .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
+    // get actionKBean from local properties
+    private List<CommandLine.JkBeanAction> getBeanActionFromProperties() {
+        Map<String, String> props = localProperties.getAllStartingWith("", true);
+        return props.entrySet().stream()
+                .filter(entry -> entry.getKey().contains(CommandLine.KBEAN_SYMBOL))
+                .map(entry -> {
+
+                    // 'someBean#=' should be interpreted as 'someBean#'
+                    if (entry.getKey().endsWith(CommandLine.KBEAN_SYMBOL)) {
+                        return entry.getKey() + CommandLine.KBEAN_SYMBOL;
+                    }
+                    return entry.getKey() + "=" + entry.getValue();
+                })
+                .map(CommandLine.JkBeanAction::new)
+                .collect(Collectors.toList());
     }
 
 }

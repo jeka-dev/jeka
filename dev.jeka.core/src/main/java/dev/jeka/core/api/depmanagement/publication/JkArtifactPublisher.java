@@ -61,11 +61,9 @@ public final class JkArtifactPublisher {
                 throw new IllegalArgumentException("No artifact file and artifact maker found for " + artifactId + ". " +
                         "Artifact maker are defined for : " + consumers.entrySet());
             }
-            JkLog.startTask("Artifact file missing for %s : generating artifact...", artifactId);
+            JkLog.startTask("Artifact file missing %s : generating artifact...", path.getFileName());
             consumer.accept(path);
             JkLog.endTask();
-
         }
     }
-
 }
