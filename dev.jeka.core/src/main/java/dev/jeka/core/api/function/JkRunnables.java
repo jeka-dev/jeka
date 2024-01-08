@@ -70,6 +70,23 @@ public class JkRunnables implements Runnable {
     }
 
     /**
+     * Replaces a Runnable with the same name in the execution chain if exists,
+     * otherwise inserts it before a specified runnable.
+     *
+     * @param name              The name referencing the runnable.
+     * @param beforeRunnableName The name of the runnable that the new runnable should be inserted before.
+     * @param runnable          The runnable to replace or insert.
+     *
+     * @throws IllegalArgumentException if the Runnable is null.
+     */
+    public JkRunnables replaceOrInsertBefore(String name, String beforeRunnableName, Runnable runnable) {
+        if (this.contains(name)) {
+            return replaceOrAppend(name, runnable);
+        }
+        return insertBefore(name, beforeRunnableName, runnable);
+    }
+
+    /**
      * Inserts the specified runnable in the execution chain, just after another one.
      * @param name The name of the runnable to insert.
      * @param afterRunnableName The name of the runnable that we must insert after.
@@ -88,6 +105,32 @@ public class JkRunnables implements Runnable {
             if (it.next().name.equals(runnableName)) {
                 it.remove();
             }
+        }
+        return this;
+    }
+
+    /**
+     * Replaces the specified {@link Runnable} with the same name in the execution chain, or appends it if not found.
+     *
+     * @param name     The name referencing the runnable.
+     * @param runnable The {@link Runnable} to replace or append.
+     *
+     * @throws IllegalArgumentException If the {@link Runnable} is null.
+     */
+    public JkRunnables replaceOrAppend(String name, Runnable runnable) {
+        JkUtilsAssert.argument(runnable != null, "Runnable can't be null.");
+        boolean found = false;
+        for (ListIterator<Entry> it = this.entries.listIterator(); it.hasNext();) {
+            Entry entry = it.next();
+            if (name.equals(entry.name)) {
+                it.remove();
+                it.add(entry.withRunnable(runnable));
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            append(name, runnable);
         }
         return this;
     }
@@ -179,6 +222,10 @@ public class JkRunnables implements Runnable {
 
         Entry(Runnable runnable) {
             this(runnable.toString(), runnable, null);
+        }
+
+        Entry withRunnable(Runnable runnable) {
+            return new Entry(this.name, runnable, this.relativePlace);
         }
 
         boolean isRelativeTo(String entryName) {

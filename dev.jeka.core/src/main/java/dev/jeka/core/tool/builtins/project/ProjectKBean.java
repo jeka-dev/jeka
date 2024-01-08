@@ -226,7 +226,10 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public boolean useRuntimeDepsForClasspath;
 
         void runJar() {
-            project.prepareRunJar(useRuntimeDepsForClasspath, jvmOptions, programArgs).exec();
+            project.prepareRunJar(useRuntimeDepsForClasspath)
+                    .addJavaOptions(jvmOptions)
+                    .addParams(programArgs)
+                    .exec();
         }
     }
 

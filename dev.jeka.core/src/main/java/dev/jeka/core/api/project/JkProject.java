@@ -19,7 +19,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -231,7 +230,7 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Sets the main class name to use in #runXxx and {@link #dockerImage()} methods.
+     * Sets the main class name to use in #runXxx and for building docker images.
      */
     public JkProject setMainClass(String mainClass) {
         this.mainClass = mainClass;
@@ -260,15 +259,13 @@ public class JkProject implements JkIdeSupportSupplier {
     /**
      * Creates {@link JkProcess} to execute the main method for this project.
      */
-    public JkJavaProcess prepareRunMain(String jvmOptions, String ... programArgs) {
+    public JkJavaProcess prepareRunMain() {
         compilation.runIfNeeded();
         return JkJavaProcess.ofJava(actualMainClass())
                 .setClasspath(this.packaging.resolveRuntimeDependencies().getFiles())
-                .setInheritIO(true)
-                .setInheritSystemProperties(true)
                 .setDestroyAtJvmShutdown(true)
-                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
-                .addParams(programArgs);
+                .setLogCommand(true)
+                .setInheritIO(true);
     }
 
     /**
@@ -279,10 +276,8 @@ public class JkProject implements JkIdeSupportSupplier {
      *                           'fat'. If you want to run the main artifact, just use ''.
      * @param includeRuntimeDeps If <code>true</code>, the runtime dependencies will be added to the classpath. This should
      *                           values <code>false</code> in case of <i>fat</i> jar.
-     * @param jvmOptions         Options to be passed to the jvm, as <code>-Dxxx=1 -Dzzzz=abbc -Xmx=256m</code>.
-     * @param args               Program arguments to be passed in command line, as <code>--print --verbose myArg</code>
      */
-    public JkJavaProcess prepareRunJar(String artifactClassifier, boolean includeRuntimeDeps, String jvmOptions, String args) {
+    public JkJavaProcess prepareRunJar(String artifactClassifier, boolean includeRuntimeDeps) {
         JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
         Path artifactPath = artifactLocator.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
@@ -291,9 +286,7 @@ public class JkProject implements JkIdeSupportSupplier {
         JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
-                .setLogOutput(true)
-                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
-                .addParams(JkUtilsString.parseCommandline(args));
+                .setInheritIO(true);
         if (includeRuntimeDeps) {
             JkPathSequence pathSequence = packaging.resolveRuntimeDependencies().getFiles();
             javaProcess.setClasspath(pathSequence.getEntries());
@@ -302,12 +295,12 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Same as {@link #prepareRunJar(String, boolean, String, String)} but specific for the main artefact.
+     * Same as {@link #prepareRunJar(String, boolean)} but specific for the main artefact.
      *
-     * @see #prepareRunJar(String, boolean, String, String)
+     * @see #prepareRunJar(String, boolean)
      */
-    public JkJavaProcess prepareRunJar(boolean includeRuntimeDeps, String jvmOptions, String programArgs) {
-        return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps, jvmOptions, programArgs);
+    public JkJavaProcess prepareRunJar(boolean includeRuntimeDeps) {
+        return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps);
     }
 
     /**

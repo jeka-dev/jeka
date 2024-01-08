@@ -52,7 +52,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public String getCurrentBranch() {
         List<String> branches = this.copy()
                 .addParams("rev-parse", "--abbrev-ref", "HEAD")
-                .setLogOutput(false)
+                .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
                 .exec().getOutputMultiline();
         if (branches.isEmpty()) {
@@ -79,7 +79,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public boolean isWorkspaceDirty() {
         return !copy()
                 .setParams("diff", "HEAD", "--stat")
-                .setLogOutput(false)
+                .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
                 .exec().getOutput().isEmpty();
     }
@@ -90,7 +90,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public String getCurrentCommit() {
         List<String> commits =  copy()
                 .setParams("rev-parse", "HEAD")
-                .setLogOutput(false)
+                .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
                 .exec().getOutputMultiline();
         return commits.isEmpty() ? null : commits.get(0);
@@ -102,7 +102,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public List<String> getTagsOfCurrentCommit() {
         return copy()
                 .setParams("tag", "-l", "--points-at", "HEAD")
-                .setLogOutput(false)
+                .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
                 .exec().getOutputMultiline();
     }
@@ -114,7 +114,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public List<String> getLastCommitMessageMultiLine() {
         return copy()
                 .setParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
-                .setLogOutput(false)
+                .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
                 .exec().getOutputMultiline();
     }

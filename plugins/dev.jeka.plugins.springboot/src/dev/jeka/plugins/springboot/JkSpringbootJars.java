@@ -18,7 +18,7 @@ public class JkSpringbootJars {
 
     static final String LOADER_COORDINATE = "org.springframework.boot:spring-boot-loader:";
 
-    static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.0";
+    static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.1";
 
     /**
      * Creates a bootable jar from class files and libraries to include in the bootable jar.

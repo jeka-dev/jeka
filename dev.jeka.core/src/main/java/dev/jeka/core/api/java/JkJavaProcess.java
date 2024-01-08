@@ -83,12 +83,16 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
 
     /**
      * Adds the specified java options to the command line.
-     * Options are command line parameters prepending the Java class to launch (e.g. 'cp', '/mylibs/foo.jar')
+     * Options are command line parameters prepending the Java class parameter.
      */
     public JkJavaProcess addJavaOptions(Collection<String> options) {
         return addParamsFirst(options);
     }
 
+    /**
+     * Adds the specified Java options to the command line if the given condition is true.
+     * @see #addJavaOptions(Collection)
+     */
     public JkJavaProcess addJavaOptionsIf(boolean condition, String... options) {
         if (condition) {
             return addJavaOptions(options);
@@ -96,6 +100,10 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
         return this;
     }
 
+    /**
+     * Adds the specified java options to the command line.
+     * @see #addJavaOptions(Collection)
+     */
     public JkJavaProcess addJavaOptions(String... options) {
         return this.addJavaOptions(Arrays.asList(options));
     }

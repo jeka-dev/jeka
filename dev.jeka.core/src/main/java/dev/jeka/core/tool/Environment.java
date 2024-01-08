@@ -73,8 +73,6 @@ class Environment {
         }
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
-
-
     }
 
     /**

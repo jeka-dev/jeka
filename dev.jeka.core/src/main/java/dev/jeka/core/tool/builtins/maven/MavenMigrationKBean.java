@@ -29,7 +29,7 @@ public class MavenMigrationKBean extends KBean {
         JkMvn.of(getBaseDir(), "help:effective-pom", "-Doutput=" + effectivePom.toString())
                 .toProcess()
                 .setLogCommand(true)
-                .setLogOutput(JkLog.isVerbose())
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .run();
         //Path pomPath = getBaseDir().resolve("pom.xml");
         //JkUtilsAssert.state(Files.exists(pomPath), "No pom file found at " + pomPath);
@@ -59,7 +59,7 @@ public class MavenMigrationKBean extends KBean {
         JkMvn.of(getBaseDir(), "help:effective-pom", "-Doutput=" + effectivePom.toString())
                 .toProcess()
                 .setLogCommand(true)
-                .setLogOutput(JkLog.isVerbose())
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .run();
         JkPom pom = JkPom.of(effectivePom);
         System.out.println("\n==== COMPILE ====");

@@ -71,7 +71,7 @@ final class Engine {
      * Execute the specified command line in Jeka engine.
      */
     void execute(CommandLine commandLine) {
-        JkLog.startTask("Compile def and initialise KBeans");
+        JkLog.startTask("Compile def and initialize KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getDefDependencies());
         JkLog.trace("Dependencies injected in classpath from command line : " + commandLineDependencies);
         JkDependencySet localPropDependencies = dependenciesFromLocalProps();
@@ -434,11 +434,7 @@ final class Engine {
     }
 
     private JkDependencySet dependenciesFromLocalProps() {
-        Path localPropFile = projectBaseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
-        if (!Files.exists(localPropFile)) {
-            return JkDependencySet.of();
-        }
-        String depsString = JkProperties.ofFile(localPropFile).get(JkConstants.CLASSPATH_INJECT_PROP);
+        String depsString = localProperties().get(JkConstants.CLASSPATH_INJECT_PROP);
         if (depsString == null) {
             return JkDependencySet.of();
         }
@@ -450,6 +446,14 @@ final class Engine {
             dependencies.add(CommandLine.toDependency(projectBaseDir, depString.trim()));
         }
         return JkDependencySet.of(dependencies);
+    }
+
+    private JkProperties localProperties() {
+        Path localPropFile = projectBaseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
+        if (!Files.exists(localPropFile)) {
+            return JkProperties.EMPTY;
+        }
+        return JkProperties.ofFile(localPropFile);
     }
 
     private String projectBaseDirName() {

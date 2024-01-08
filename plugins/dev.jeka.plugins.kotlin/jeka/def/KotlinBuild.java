@@ -9,7 +9,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 class KotlinBuild extends KBean {
 
-    final ProjectKBean projectKBean = load(ProjectKBean.class);
+    final JkProject project = load(ProjectKBean.class).project;
 
     KotlinBuild() {
         load(IntellijKBean.class)
@@ -18,7 +18,6 @@ class KotlinBuild extends KBean {
     }
 
     protected void init() {
-        JkProject project = projectKBean.project;
         project.flatFacade()
             .setModuleId("dev.jeka:kotlin-plugin")
             .setJvmTargetVersion(JkJavaVersion.V8)
@@ -27,16 +26,12 @@ class KotlinBuild extends KBean {
             .configureCompileDependencies(deps -> deps
                     .andFiles(JkLocator.getJekaJarPath())
             );
-        // This section is necessary to publish on a public repository
+
         project.mavenPublication
                     .pomMetadata
-                    .setProjectName("Jeka plugin for Kotlin")
-                    .setProjectDescription("A Jeka plugin for Kotlin language support")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
-    }
-
-    public void cleanPack() {
-        cleanOutput(); projectKBean.pack();
+                        .setProjectName("Jeka plugin for Kotlin")
+                        .setProjectDescription("A Jeka plugin for Kotlin language support")
+                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
 }

@@ -56,7 +56,7 @@ public final class SpringbootKBean extends KBean {
         // If none is present yet in the runtime, we assume that ProjectKBean should be instantiated implicitly
         Optional<SelfAppKBean> optionalSelfAppKBean = getRuntime().findInstanceOf(SelfAppKBean.class);
         if (!optionalSelfAppKBean.isPresent()) {
-            JkLog.trace("No SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring JkProject.");
+            JkLog.trace("No SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring Project.");
             load(ProjectKBean.class);
         } else {
             JkLog.trace("SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring SelfApp. ");
@@ -70,9 +70,11 @@ public final class SpringbootKBean extends KBean {
 
         Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);
         optionalProjectKBean.ifPresent(projectKBean ->
-                configure(projectKBean.project));
+                configure(projectKBean.project)
+        );
         getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean ->
-                configureScaffold(scaffoldKBean.scaffold));
+                configureScaffold(scaffoldKBean.scaffold)
+        );
     }
 
     @JkDoc("Provides info about this plugin configuration")

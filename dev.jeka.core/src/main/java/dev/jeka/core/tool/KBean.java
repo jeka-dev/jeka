@@ -136,12 +136,13 @@ public abstract class KBean {
     /**
      * Cleans output directory.
      */
-    protected void cleanOutput() {
+    public KBean cleanOutput() {
         Path output = getOutputDir();
         JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
         if (Files.exists(output)) {
             JkPathTree.of(output).deleteContent();
         }
+        return this;
     }
 
     static String name(String fullyQualifiedClassName) {

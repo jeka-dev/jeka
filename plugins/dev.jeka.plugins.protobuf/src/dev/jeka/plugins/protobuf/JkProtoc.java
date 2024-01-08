@@ -89,7 +89,7 @@ public class JkProtoc {
                 .addParams(protocOptions)
                 .addParams(extraOptions)
                 .setLogCommand(logCommand)
-                .setLogOutput(logOutput);
+                .setLogWithJekaDecorator(logOutput);
         for (Path file : protoFiles) {
             javaProcess.addParams(file.toString());
         }

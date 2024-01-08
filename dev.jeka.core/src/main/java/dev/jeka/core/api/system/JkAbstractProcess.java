@@ -33,7 +33,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     private boolean logCommand;
 
-    private boolean logOutputWithLogDecorator = true;
+    private boolean logWithJekaDecorator = true;
 
     private boolean destroyAtJvmShutdown;
 
@@ -52,7 +52,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         this.env = new HashMap(other.env);
         this.failOnError = other.failOnError;
         this.logCommand = other.logCommand;
-        this.logOutputWithLogDecorator = other.logOutputWithLogDecorator;
+        this.logWithJekaDecorator = other.logWithJekaDecorator;
         this.workingDir = other.workingDir;
         this.destroyAtJvmShutdown = other.destroyAtJvmShutdown;
         this.inheritIO = other.inheritIO;
@@ -201,7 +201,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
-     * Set if the output streams of the process must bbe logged keeping the JkLog decorator.
+     * Set if the output streams of the process must be logged keeping the JkLog decorator.
      * <p>
      * This is generally desirable, as the output will honor the indentation and visibility
      * set by JeKa log decorator.
@@ -212,16 +212,15 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * consists in invoking <code>setInheritIO(true)</code>
      * <p>
      * Initial value is <code>true</code>..
-     *
      */
-    public T setLogOutput(boolean logOutputWithLogDecorator) {
-        this.logOutputWithLogDecorator = logOutputWithLogDecorator;
+    public T setLogWithJekaDecorator(boolean logOutputWithLogDecorator) {
+        this.logWithJekaDecorator = logOutputWithLogDecorator;
         return (T) this;
     }
 
     /**
      * Makes the process use the same streams as its parent. <p>
-     * This can not be used in conjunction of {@link #logOutputWithLogDecorator}, so this one is disabled forcibly when invoking this method.
+     * This can not be used in conjunction of {@link #logWithJekaDecorator}, so this one is disabled forcibly when invoking this method.
      * <br/>
      * Initial value is <code>false</code>
      *
@@ -229,7 +228,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      */
     public T setInheritIO(boolean value) {
         if (value) {
-            this.logOutputWithLogDecorator = false;
+            this.logWithJekaDecorator = false;
         }
         this.inheritIO = value;
         return (T) this;
@@ -385,9 +384,9 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         // TODO find a better criteria to turn off the globber
         // Apparently, the globber is needed to return result
         if (!inheritIO) {
-            OutputStream consoleOutputStream = logOutputWithLogDecorator ?
+            OutputStream consoleOutputStream = logWithJekaDecorator ?
                     JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
-            OutputStream consoleErrStream = logOutputWithLogDecorator ?
+            OutputStream consoleErrStream = logWithJekaDecorator ?
                     JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
             outputStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getInputStream(),
                     consoleOutputStream, collectOs);
@@ -424,8 +423,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     private ProcessBuilder processBuilder(List<String> command) {
-        if (inheritIO && logOutputWithLogDecorator) {
-            throw new IllegalStateException("inheritIO and logOutput can not be used in conjunction. " +
+        if (inheritIO && logWithJekaDecorator) {
+            throw new IllegalStateException("inheritIO and logWithJekaDecorator can not be used in conjunction. " +
                     "You have to choose between one of them.");
         }
         final ProcessBuilder builder = new ProcessBuilder(command);

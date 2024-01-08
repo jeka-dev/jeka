@@ -1,204 +1,90 @@
 package dev.jeka.plugins.kotlin;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.function.JkConsumers;
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
-import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
-import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectCompilation;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
- * A Jeka plugin cain contains zero, one or many KBeans.
- * If your plugin does not require one, fell free to delete this class.
+ * Provides options for configuring the compiler, setting the Kotlin version,
+ * specifying the locations of Kotlin sources and test sources,
+ * and including the standard library in the compilation process.
  */
 @JkDoc("Explain here what your plugin is doing.\n" +
     "No need to list methods or options here has you are supposed to annotate them directly.")
 public class KotlinJvmKBean extends KBean {
 
-    public static final String KOTLIN_JVM_SOURCES_COMPILE_ACTION = "kotlin-jvm-sources-compile";
-
     private static final String DEFAULT_VERSION = "1.8.0";
 
     @JkDoc("The Kotlin version for compiling and running")
-    public String kotlinVersion;
+    private String kotlinVersion;
 
-    public String kotlinSourceDir = "src/main/kotlin";
+    @JkDoc("Location of Kotlin sources")
+    private final String kotlinSourceDir = "src/main/kotlin";
 
-    public String kotlinTestSourceDir = "src/test/kotlin";
+    @JkDoc("Location of Kotlin sources for tests")
+    private final String kotlinTestSourceDir = "src/test/kotlin";
 
     @JkDoc("Include standard lib in for compiling")
-    public boolean addStdlib = true;
+    private final boolean addStdlib = true;
 
     @JkDoc("If true, the project KBean will be automatically configured to use Kotlin.")
-    public boolean configureProject = true;
+    private final boolean autoConfigureProject = false;
 
-    private JkKotlinCompiler kotlinCompiler;
-
-    private JkRepoSet downloadRepos;
-
-    private final JkConsumers<JkKotlinCompiler> compilerConfigurators = JkConsumers.of();
+    private JkKotlinJvmProject kotlinJvmProject;
 
     @Override
     protected void init() {
-        kotlinVersion = Optional.ofNullable(getRuntime().getProperties().get("jeka.kotlin.version"))
-                .orElse(DEFAULT_VERSION);
-        downloadRepos = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos();
-        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean -> {
-            if (configureProject) {
-                configure(projectKBean.project);
-            }
-        });
+        if (autoConfigureProject) {
+            load(ProjectKBean.class);
+            getKotlinJvmProject().configure();
+        }
     }
 
     /**
-     * Sets the download repositories to download Kotlin compilers and plugins
+     * Retrieves the Kotlin JVM project. If the project has already been created, it is returned.
+     * Otherwise, it creates a new Kotlin JVM project using the projectKBean found in runtime..
+     * If no projectKean is found in the runtime, an IllegalStateException is thrown.
+     *
+     * @throws IllegalStateException if no projectKean is found in the runtime
      */
-    public KotlinJvmKBean setDownloadRepos(JkRepoSet downloadRepos) {
-        this.downloadRepos = downloadRepos;
-        return this;
-    }
-
-    public void configure(JkProject project) {
-        if (!JkUtilsString.isBlank(kotlinSourceDir)) {
-            project.compilation.layout.setSources(kotlinTestSourceDir);
+    public JkKotlinJvmProject getKotlinJvmProject() {
+        if (kotlinJvmProject != null) {
+            return kotlinJvmProject;
         }
-        if (!JkUtilsString.isBlank(kotlinTestSourceDir)) {
-            project.testing.compilation.layout.setSources(kotlinTestSourceDir);
-        }
-        JkProjectCompilation prodCompile = project.compilation;
-        JkProjectCompilation testCompile = project.testing.compilation;
-        prodCompile
-                .configureDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
-                .preCompileActions
-                    .insertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
-                            () -> compileKotlin(getCompiler(), project));
-        testCompile
-                .preCompileActions
-                .insertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileTestKotlin(getCompiler(), project));
-        testCompile
-                .layout
-                    .addSource(kotlinTestSourceDir);
-        JkPathTree javaInKotlinDir = JkPathTree.of(project.getBaseDir().resolve(kotlinSourceDir));
-        JkPathTree javaInKotlinTestDir = JkPathTree.of(project.getBaseDir().resolve(kotlinTestSourceDir));
-        prodCompile.layout.setSources(javaInKotlinDir);
-        testCompile.layout.setSources(javaInKotlinTestDir);
-        if (addStdlib) {
-            prodCompile.configureDependencies(this::addStdLibsToProdDeps);
-            testCompile.configureDependencies(this::addStdLibsToTestDeps);
-        }
-
-        /*
-        project.setJavaIdeSupport(ideSupport -> {
-            ideSupport.getProdLayout().addSource(project.getBaseDir().resolve(kotlinSourceDir));
-            if (kotlinTestSourceDir != null) {
-                ideSupport.getTestLayout().addSource(project.getBaseDir().resolve(kotlinTestSourceDir));
-            }
-            return ideSupport;
-        });
-
-         */
+        ProjectKBean projectKBean = getRuntime().find(ProjectKBean.class).orElseThrow(() ->
+                new IllegalStateException("No projectKean found in runtime. " +
+                        "Use #createKotlinJvmProject(JkProject) instead."));
+        kotlinJvmProject = createKotlinJvmProject(projectKBean.project);
+        return kotlinJvmProject;
     }
 
     /**
-     * Register a configurator to be applied at the first call of {@link #getCompiler()}
+     * Creates a {@link JkKotlinJvmProject} object with the configured options..
      */
-    public KotlinJvmKBean lazilyConfigureCompiler(Consumer<JkKotlinCompiler> compilerConsumer) {
-        if (this.kotlinCompiler != null) {
-            throw new IllegalStateException("The compiler has already been instantiated. " +
-                    "Use this method in the constructor of your KBean in order to configure the kompiler " +
-                    "at creation time.");
-        }
-        this.compilerConfigurators.add(compilerConsumer);
-        return this;
+    public JkKotlinJvmProject createKotlinJvmProject(JkProject project) {
+
+        String jvmVersion = getRuntime().getProperties().get(JkConstants.JAVA_VERSION_PROP);
+        kotlinJvmProject = JkKotlinJvmProject.of(project)
+                .setKotlinCompiler(getRuntime().getDependencyResolver().getRepos(), getKotlinVersion())
+                .setKotlinSourceDir(this.kotlinSourceDir)
+                .setKotlinTestSourceDir(this.kotlinTestSourceDir)
+                .setAddStdlib(this.addStdlib)
+                .setJvmVersion(jvmVersion);
+        return kotlinJvmProject;
     }
 
-    private JkDependencySet addStdLibsToProdDeps(JkDependencySet deps) {
-        return getCompiler().isProvidedCompiler()
-                ? deps.andFiles(getCompiler().getStdLib())
-                : deps.and(JkKotlinModules.STDLIB_JDK8).and(JkKotlinModules.REFLECT);
-    }
-
-    private JkDependencySet addStdLibsToTestDeps(JkDependencySet deps) {
-        return getCompiler().isProvidedCompiler() ? deps.and(JkKotlinModules.TEST) : deps;
-    }
-
-    private JkVersionProvider kotlinVersionProvider() {
-        return JkKotlinModules.versionProvider(getCompiler().getVersion());
-    }
-
-
-    public JkKotlinCompiler getCompiler() {
-        if (kotlinCompiler != null) {
-            return kotlinCompiler;
+    private String getKotlinVersion() {
+        String result = kotlinVersion;
+        if (result == null) {
+            result = Optional.ofNullable(getRuntime().getProperties()
+                    .get(JkKotlinCompiler.KOTLIN_VERSION_OPTION)).orElse(DEFAULT_VERSION);
         }
-        if (JkUtilsString.isBlank(kotlinVersion)) {
-            kotlinCompiler = JkKotlinCompiler.ofKotlinHomeCommand("kotlinc");
-            JkLog.warn("No version of kotlin has been specified, will use the version installed on KOTLIN_HOME : "
-                    + kotlinCompiler.getVersion());
-        } else {
-            kotlinCompiler = JkKotlinCompiler.ofJvm(downloadRepos, kotlinVersion);
-        }
-        kotlinCompiler.setLogOutput(true);
-        compilerConfigurators.accept(kotlinCompiler);
-        return kotlinCompiler;
-    }
-
-    private void compileKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
-        JkProjectCompilation compilation = javaProject.compilation;
-        JkPathTreeSet sources = compilation.layout.resolveSources()
-                .and(javaProject.getBaseDir().resolve(kotlinSourceDir));
-        if (sources.count(1, false) == 0) {
-            JkLog.info("No source to compile in " + sources);
-            return;
-        }
-        JkJavaVersion targetVersion = javaProject.getJvmTargetVersion();
-        if (targetVersion == null) {
-            targetVersion = JkJavaVersion.of(
-                    getRuntime().getProperties().get("jeka.java.version"));
-        }
-        JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
-                .setClasspath(compilation.resolveDependencies().getFiles())
-                .setOutputDir(compilation.layout.getOutputDir().resolve("classes"))
-                .setTargetVersion(targetVersion)
-                .setSources(sources);
-        kotlinCompiler.compile(compileSpec);
-    }
-
-    private void compileTestKotlin(JkKotlinCompiler kotlinCompiler, JkProject javaProject) {
-        JkProjectCompilation compilation = javaProject.testing.compilation;
-        JkPathTreeSet sources = compilation.layout.resolveSources();
-        if (kotlinTestSourceDir == null) {
-            sources = sources.and(javaProject.getBaseDir().resolve(kotlinTestSourceDir));
-        }
-        if (sources.count(1, false) == 0) {
-            JkLog.info("No source to compile in " + sources);
-            return;
-        }
-        JkPathSequence classpath = compilation.resolveDependencies().getFiles()
-                .and(compilation.layout.getClassDirPath());
-        JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
-                .setSources(compilation.layout.resolveSources())
-                .setClasspath(classpath)
-                .setOutputDir(compilation.layout.getOutputDir().resolve("test-classes"))
-                .setTargetVersion(javaProject.getJvmTargetVersion());
-        kotlinCompiler.compile(compileSpec);
+        return result;
     }
 
 }

@@ -1,6 +1,7 @@
 package dev.jeka.plugins.nodejs;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -25,6 +26,12 @@ public class NodeJsKBean extends KBean {
     @JkDoc("The directory path, relative to 'clientDir', containing the client build result.")
     public String clientBuildDir = "build";
 
+    @JkDoc("If not empty, the result of client build will be copied to this dir relative to class dir (e.g. 'static')")
+    public String copyToDir;
+
+    @JkDoc("If true, the project wrapped by ProjectKBean will be configured automatically to build the nodeJs project.")
+    public boolean autoConfigureProject = false;
+
     @JkDoc("Execute npm using the command line specified in 'cmdLine' property.")
     public void exec() {
         Stream.of(commandLines()).forEach(getJkNodeJs()::exec);
@@ -32,10 +39,11 @@ public class NodeJsKBean extends KBean {
 
     @Override
     protected void init() {
-        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean -> {
+        if (autoConfigureProject) {
+            JkProject project = load(ProjectKBean.class).project;
             JkNodeJs.ofVersion(this.version)
-                    .configure(projectKBean.project, clientDir, clientBuildDir, commandLines());
-        });
+                    .configure(project, clientDir, clientBuildDir, copyToDir, commandLines());
+        }
     }
 
     private JkNodeJs getJkNodeJs() {

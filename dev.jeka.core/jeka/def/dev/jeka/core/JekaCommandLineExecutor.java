@@ -94,7 +94,7 @@ public abstract class JekaCommandLineExecutor {
         JkProcess result = JkProcess.of(cmd)
                 .setWorkingDir(workingDir)
                 .setLogCommand(true)
-                .setLogOutput(true)
+                .setLogWithJekaDecorator(true)
                 .setFailOnError(true);
         if (jacocoAgentPath != null) {
             String arg = "-javaagent:" + jacocoAgentPath + "=destfile=" + jacocoReportFile + ",append=true";

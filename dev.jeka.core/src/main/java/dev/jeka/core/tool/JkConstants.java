@@ -44,6 +44,8 @@ public final class JkConstants {
 
     public static final String DEFAULT_KBEAN_PROP = "jeka.default.kbean";
 
+    public static final String JAVA_VERSION_PROP = "jeka.java.version";
+
     public static final String CMD_APPEND_PROP = CMD_PROP_PREFIX + CMD_APPEND_SUFFIX_PROP;
 
     public static final String CMD_SUBSTITUTE_SYMBOL = ":";

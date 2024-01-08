@@ -115,7 +115,7 @@ public final class JkJavadocProcessor {
         JkProcess process = JkProcess.of(javadocExe.toString())
                 .addParams(computeOptions(classpath, srcDirs, outputDir))
                 .addParams(computePackages(srcDirs))
-                .setLogOutput(verbose)
+                .setLogWithJekaDecorator(verbose)
                 .setLogCommand(verbose)
                 .setFailOnError(false);
         JkProcResult result = process.exec();

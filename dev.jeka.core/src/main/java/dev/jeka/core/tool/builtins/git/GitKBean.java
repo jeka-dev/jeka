@@ -28,9 +28,9 @@ public class GitKBean extends KBean {
     @JkDoc("Performs a dirty check first, put a tag at the HEAD and push it to remote." +
             " The user will be prompted to enter the tag name.")
     public void tagRemote() {
-        JkGit aGit = git.copy().setLogCommand(false).setLogOutput(false);
+        JkGit aGit = git.copy().setLogCommand(false).setLogWithJekaDecorator(false);
         JkLog.info("Existing tags on origin :");
-        aGit.copy().setLogOutput(true).setParams("ls-remote", "--tag", "--sort=creatordate", "origin").exec();
+        aGit.copy().setLogWithJekaDecorator(true).setParams("ls-remote", "--tag", "--sort=creatordate", "origin").exec();
         if (aGit.isWorkspaceDirty()) {
             JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
             return;
@@ -58,12 +58,12 @@ public class GitKBean extends KBean {
 
     @JkDoc("Display last git tag in current branch")
     public void lastTag() {
-        System.out.println(JkGit.of(getBaseDir()).setLogOutput(false).getLatestTag());
+        System.out.println(JkGit.of(getBaseDir()).setLogWithJekaDecorator(false).getLatestTag());
     }
 
     @JkDoc("Display all commit messages since last tag")
     public void lastCommitMessages() {
-        JkGit.of(getBaseDir()).setLogOutput(false)
+        JkGit.of(getBaseDir()).setLogWithJekaDecorator(false)
                 .getCommitMessagesSinceLastTag().forEach(msg -> System.out.println("- " + msg));
     }
 

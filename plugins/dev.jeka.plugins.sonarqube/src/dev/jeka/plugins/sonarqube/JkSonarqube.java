@@ -73,7 +73,7 @@ public final class JkSonarqube {
 
     private String scannerVersion;
 
-    private boolean logOutput;
+    private boolean logOutput = true;
 
     private JkSonarqube(JkRepoSet repos,
                         @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
@@ -314,7 +314,7 @@ public final class JkSonarqube {
                 .setFailOnError(true)
                 .addParams(toProperties())
                 .setLogCommand(JkLog.isVerbose() || logOutput)
-                .setLogOutput(JkLog.isVerbose() || logOutput);
+                .setLogWithJekaDecorator(JkLog.isVerbose() || logOutput);
     }
 
     private List<String> toProperties() {
