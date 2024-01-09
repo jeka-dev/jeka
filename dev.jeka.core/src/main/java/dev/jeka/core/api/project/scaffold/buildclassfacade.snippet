@@ -6,14 +6,15 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 class Build extends KBean {
 
-    final ProjectKBean projectKBean = load(ProjectKBean.class);
+    final JkProject project = load(ProjectKBean.class).project;
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
      * fields have already been injected from command line.
      */
+    @Override
     protected void init() {
-        JkProject project = projectKBean.project;
+
         project.flatFacade()
                 .addCompileDeps(
                         "com.google.guava:guava:21.0",

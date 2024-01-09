@@ -8,11 +8,10 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 class Build extends KBean {
 
-    final ProjectKBean projectKBean = load(ProjectKBean.class);
+    final JkProject project = load(ProjectKBean.class).project;
 
     @Override
     protected void init() {
-        JkProject project = projectKBean.project;
         project.compilation.configureDependencies(deps -> deps
                 .andFiles(JkLocator.getJekaJarPath())
         );
