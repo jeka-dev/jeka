@@ -159,6 +159,7 @@ final class Engine {
                 SourceParser.of(this.projectBaseDir, sourceTree).parse();
                //SourceParser.parse(this.projectBaseDir, sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
+
         JkDependencySet defDependencies = JkDependencySet.of()
                 .and(Environment.commandLine.getDefDependencies())
                 .and(parsedSourceInfo.dependencies)

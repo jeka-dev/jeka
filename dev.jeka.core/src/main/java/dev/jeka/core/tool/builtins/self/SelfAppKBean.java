@@ -39,9 +39,9 @@ public abstract class SelfAppKBean extends KBean {
     public String jvmOptions = "";
 
     @JkDoc("Space separated list of program arguments to pass to the command line running the program.")
-    public String args = "";
+    public String programArgs = "";
 
-    @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage'")
+    @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")
     public String dockerRunParams = "";
 
     private String mainClass;
@@ -52,6 +52,7 @@ public abstract class SelfAppKBean extends KBean {
      * {@link JkDockerBuild} customizer to control the effective docker build.
      * Use this field to add your own customizer.
      */
+    @JkDoc(value = "", hide = true)
     public final JkConsumers<JkDockerBuild> dockerBuildCustomizers = JkConsumers.of();
 
     // We can not just run Application#main cause Spring-Boot seems
@@ -64,7 +65,7 @@ public abstract class SelfAppKBean extends KBean {
                 .setInheritSystemProperties(true)
                 .setDestroyAtJvmShutdown(true)
                 .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
-                .addParams(JkUtilsString.parseCommandline(args))
+                .addParams(JkUtilsString.parseCommandline(programArgs))
                 .exec();
     }
 
@@ -90,7 +91,7 @@ public abstract class SelfAppKBean extends KBean {
     public void runImage() {
         String containerName = "jeka-" + dockerImageTag;
         JkDocker.run("-it --rm -e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" " + dockerRunParams + " --name %s %s",
-                jvmOptions, args,
+                jvmOptions, programArgs,
                 containerName, dockerImageTag);
     }
 
@@ -106,7 +107,7 @@ public abstract class SelfAppKBean extends KBean {
                 .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true)
                 .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
-                .addParams(JkUtilsString.parseCommandline(args))
+                .addParams(JkUtilsString.parseCommandline(programArgs))
                 .run();
     }
 
@@ -148,7 +149,6 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     protected JkManifest manifest() {
-        System.out.println("---------- main class = " + actualMainClass());
         return JkManifest.of()
                 .addMainAttribute(JkManifest.CREATED_BY, "JeKa")
                 .addMainClass(actualMainClass())
@@ -156,7 +156,7 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     private void fatJar(Path jarPath) {
-        JkLog.startTask("Making fat jar");
+        JkLog.startTask("Making fat jar. It may takes a while ... ");
         JkJarPacker.of(classTree())
                 .withManifest(manifest())
                 .makeFatJar(jarPath, libs(), JkPathMatcher.of());

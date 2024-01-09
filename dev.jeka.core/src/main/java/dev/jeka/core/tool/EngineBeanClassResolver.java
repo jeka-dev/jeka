@@ -54,6 +54,8 @@ final class EngineBeanClassResolver {
 
     List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName, boolean ignoreDefaultBeanNotFound) {
         JkLog.startTask("Resolve KBean classes");
+
+        // Resolve involved KBean classes
         Map<String, Class<? extends KBean>> beanClasses = new HashMap<>();
         Set<String> involvedKBeanNames = new HashSet<>(commandLine.involvedBeanNames());
         involvedKBeanNames.addAll(getInvolvedKBeanNamesFromProperties());
@@ -73,6 +75,8 @@ final class EngineBeanClassResolver {
                     !ignoreDefaultBeanNotFound);
             beanClasses.put(KBean.name(selected), selected);
         }
+
+        // Resolve default KBean
         Class<? extends KBean> defaultBeanClass = defaultBeanClass(defaultBeanName, !ignoreDefaultBeanNotFound);
         List<EngineCommand> result = new LinkedList<>();
         List<CommandLine.JkBeanAction> defaultBeanActions = commandLine.getDefaultBeanActions();
@@ -90,11 +94,13 @@ final class EngineBeanClassResolver {
                     null, null));
         }
 
+        // Resolve KBean actions
         List<CommandLine.JkBeanAction> beanActions = new LinkedList<>(getBeanActionFromProperties());
         beanActions.addAll(commandLine.getBeanActions());
         beanActions.stream()
                 .map(action -> toEngineCommand(action, beanClasses))
                 .forEach(result::add);
+
         JkLog.endTask();
         JkLog.info("Default KBean : " + defaultBeanClass);
         return Collections.unmodifiableList(result);
@@ -224,14 +230,11 @@ final class EngineBeanClassResolver {
         if (cachedDefBeanClassNames == null) {
             long t0 = System.currentTimeMillis();
             ClassLoader classLoader = JkClassLoader.ofCurrent().get();
-            boolean ignoreParent = false;
+            boolean ignoreParent = false; //  We should not ignore parents if we want to detect KBea classes that do not directly extend KBean class.
             if (classpath != null) {
 
                 // If classpath is set, then sources has been compiled in work dir
                 classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls());
-                ignoreParent = true;
-                //classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls(),  classLoader);
-                //ignoreParent = false;
             }
             cachedDefBeanClassNames = JkInternalClasspathScanner.of().findClassedExtending(classLoader,
                     KBean.class, EngineBeanClassResolver::shouldScan, true, ignoreParent);
