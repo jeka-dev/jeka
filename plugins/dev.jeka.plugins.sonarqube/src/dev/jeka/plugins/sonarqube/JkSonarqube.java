@@ -165,8 +165,9 @@ public final class JkSonarqube {
         String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("localhost");
         JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
         Path jar = getToolJar();
-        String[] args = JkLog.isVerbose() ? new String[] {"-e", "-X"} : new String[] {"-e"};
-        javaProcess(jar).addParams(args).exec();
+        javaProcess(jar)
+                .addParamsIf(JkLog.isVerbose(), "-X")
+                .exec();
         JkLog.endTask();
     }
 
@@ -272,7 +273,6 @@ public final class JkSonarqube {
         final String fullName = jkModuleId.getDotNotation();
         final String name = jkModuleId.getName();
         this
-                .setLogOutput(JkLog.isVerbose())
                 .setProjectId(fullName, name, version)
                 .setProjectBaseDir(baseDir)
                 .setBinaries(project.compilation.layout.resolveClassDir())
@@ -313,7 +313,7 @@ public final class JkSonarqube {
                 .setClasspath(jar)
                 .setFailOnError(true)
                 .addParams(toProperties())
-                .setLogCommand(JkLog.isVerbose() || logOutput)
+                .setLogCommand(JkLog.isVerbose())
                 .setLogWithJekaDecorator(JkLog.isVerbose() || logOutput);
     }
 

@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 
 final class FieldInjector {
 
-    private static final String UNHANDLED_TYPE = "";
+    // Unlikely value meaning we cannot recognize the field type
+    private static final String UNHANDLED_TYPE = "-- UNHANDLED TYPE °ê%76§ù><$$";
 
     static Set<String> inject(Object target, Map<String, String> props) {
         return inject(target, props, "");
@@ -91,7 +92,7 @@ final class FieldInjector {
             }
             if (value == UNHANDLED_TYPE) {
                 throw new IllegalArgumentException("Class " + target.getClass().getName()
-                        + ", field " + name + ", can't handle type " + type);
+                        + ", field " + name + ", can't handle type " + type + ". Raw value was [" + stringValue + "]." );
             }
             if (Modifier.isFinal(field.getModifiers())) {
                 throw new JkException("Can not set value on final " + field.getDeclaringClass().getName()
@@ -123,8 +124,7 @@ final class FieldInjector {
     }
 
     @SuppressWarnings("unchecked")
-    static Object parse(Class<?> type, String stringValue)
-            throws IllegalArgumentException {
+    static Object parse(Class<?> type, String stringValue) throws IllegalArgumentException {
         if (type.equals(String.class)) {
             return stringValue;
         }

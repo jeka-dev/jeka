@@ -287,7 +287,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     @Override
     public String toString() {
-        return this.command + " " + String.join(" ", parameters);
+        return this.command + "\n" + String.join("\n", parameters);
     }
 
     /**
@@ -312,7 +312,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         final List<String> commands = computeEffectiveCommands();
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
-            JkLog.startTask("Start program : " + workingDirName + commands);
+            JkLog.startTask("Start program : " + workingDirName + " " + this);
         }
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
