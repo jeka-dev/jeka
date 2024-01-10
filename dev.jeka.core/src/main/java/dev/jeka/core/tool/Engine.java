@@ -54,12 +54,12 @@ final class Engine {
 
     private final JkDependencyResolver dependencyResolver;
 
-    private final EngineBeanClassResolver beanClassesResolver;
+    private final EngineKBeanClassResolver beanClassesResolver;
 
     Engine(Path baseDir) {
         super();
         this.projectBaseDir = baseDir;
-        this.beanClassesResolver = new EngineBeanClassResolver(baseDir);
+        this.beanClassesResolver = new EngineKBeanClassResolver(baseDir);
         JkRepoSet repos = JkRepoProperties.of(JkRuntime.constructProperties(baseDir)).getDownloadRepos();
         this.dependencyResolver = JkDependencyResolver.of(repos);
         this.dependencyResolver
@@ -219,7 +219,6 @@ final class Engine {
                 JkLog.trace("Some binary files seem missing.");
             }
             if (outdated || missingBinaryFiles) {
-                JkLog.trace("Compile classpath : \n" + classpath.toPathMultiLine("  "));
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
                     failedProjects.add(projectBaseDir);

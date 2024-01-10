@@ -269,7 +269,7 @@ public class JkClassLoader {
      * Returns all class names having a <code>main</code> method.
      */
     public List<String> findClassesHavingMainMethod() {
-        return JkInternalClasspathScanner.of().findClassesHavingMainMethod(this.delegate);
+        return JkInternalClasspathScanner.of().findClassesWithMainMethod(this.delegate);
     }
 
     /**

@@ -5,6 +5,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /*
@@ -24,9 +26,11 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-final class EngineBeanClassResolver {
+final class EngineKBeanClassResolver {
 
     private static final String JAVA_HOME = JkUtilsPath.toUrl(Paths.get(System.getProperty("java.home"))).toString();
+
+    private static final JkInternalClasspathScanner CLASSPATH_SCANNER = JkInternalClasspathScanner.of();
 
     private final Path baseDir;
 
@@ -44,7 +48,8 @@ final class EngineBeanClassResolver {
 
     private boolean useStoredCache;
 
-    EngineBeanClassResolver(Path baseDir) {
+
+    EngineKBeanClassResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
         this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
@@ -176,17 +181,20 @@ final class EngineBeanClassResolver {
     private void reloadGlobalBeanClassNames() {
         long t0 = System.currentTimeMillis();
         ClassLoader classLoader = JkClassLoader.ofCurrent().get();
-        boolean ignoreParent = false;
         if (classpath != null) {
 
             // If classpath is set, then sources has been compiled in work dir
             classLoader = new URLClassLoader(classpath.toUrls());
-            ignoreParent = true;
         }
-        cachedGlobalBeanClassName = JkInternalClasspathScanner.of()
-                .findClassedExtending(classLoader, KBean.class, path -> true, true, ignoreParent);
+        cachedGlobalBeanClassName = CLASSPATH_SCANNER.findClassesInheritingOrAnnotatesWith(
+                classLoader,
+                KBean.class,
+                path -> true,
+                path -> true,
+                true,
+                true);
         if (JkLog.isVerbose()) {
-            JkLog.trace("All JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+            JkLog.trace("All KBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
             cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
         }
         storeGlobalKBeanClasses(cachedGlobalBeanClassName);
@@ -230,16 +238,28 @@ final class EngineBeanClassResolver {
         if (cachedDefBeanClassNames == null) {
             long t0 = System.currentTimeMillis();
             ClassLoader classLoader = JkClassLoader.ofCurrent().get();
-            boolean ignoreParent = false; //  We should not ignore parents if we want to detect KBea classes that do not directly extend KBean class.
+
+            // Should return only classes located in  'def class dir' folder.
+            Predicate<Path> shouldInclude = pathElement ->
+                    pathElement.equals(this.defClassDir.toAbsolutePath().normalize());
+
             if (classpath != null) {
 
                 // If classpath is set, then sources has been compiled in work dir
-                classLoader = new URLClassLoader(JkPathSequence.of().and(this.defClassDir).toUrls());
+                classLoader = new URLClassLoader(
+                        JkPathSequence.of().and(this.defClassDir).and(JkLocator.getJekaJarPath()).toUrls(),
+                        ClassLoader.getSystemClassLoader());
             }
-            cachedDefBeanClassNames = JkInternalClasspathScanner.of().findClassedExtending(classLoader,
-                    KBean.class, EngineBeanClassResolver::shouldScan, true, ignoreParent);
+            cachedDefBeanClassNames = CLASSPATH_SCANNER.findClassesInheritingOrAnnotatesWith(
+                    classLoader,
+                    KBean.class,
+                    EngineKBeanClassResolver::shouldScan,
+                    shouldInclude,
+                    true,
+                    true,
+                    JkDoc.class);
             if (JkLog.isVerbose()) {
-                JkLog.trace("Def JkBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+                JkLog.trace("Def KBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
                 cachedDefBeanClassNames.forEach(className -> JkLog.trace("  " + className ));
             }
         }

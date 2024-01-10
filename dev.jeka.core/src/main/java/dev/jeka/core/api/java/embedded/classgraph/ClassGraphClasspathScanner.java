@@ -6,6 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import io.github.classgraph.*;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,7 +67,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     }
 
     @Override
-    public List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader) {
+    public List<String> findClassesWithMainMethod(ClassLoader extraClassLoader) {
         final ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .enableMethodInfo()
@@ -115,17 +116,23 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         return result;
     }
 
-    @Override
-    public List<String> findClassedExtending(ClassLoader classLoader, Class<?> baseClass,
-                                             Predicate<String> classpathElementFilter, boolean ignoreVisibility,
-                                             boolean ignoreParentClassLoaders) {
+    public List<String> findClassesInheritingOrAnnotatesWith(ClassLoader classLoader,
+                                                            Class<?> baseClass,
+                                                            Predicate<String> scanElementFilter,
+                                                            Predicate<Path> returnElementFilter,
+                                                            boolean ignoreVisibility,
+                                                            boolean ignoreParentClassLoaders,
+                                                            Class<?> ... annotations) {
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
                 .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
                         "org.commonmark", "io.github.classgraph")
                 .disableNestedJarScanning()
                 .disableModuleScanning()
-                .filterClasspathElements(classpathElementFilter::test);
+                .filterClasspathElements(scanElementFilter::test);
+        if (annotations.length > 0) {
+            classGraph.enableAnnotationInfo();
+        }
         if (ignoreParentClassLoaders) {
             classGraph
             .ignoreParentClassLoaders()
@@ -137,7 +144,9 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         try (ScanResult scanResult = classGraph.scan()) {
             return scanResult.getAllClasses().stream()
                     .filter(classInfo -> !classInfo.isAbstract())
-                    .filter(classInfo -> inheritOf(classInfo, baseClass.getName()))
+                    .filter(classInfo -> inheritOf(classInfo, baseClass.getName())
+                            || hasAnnotation(classInfo, annotations))
+                    .filter(classInfo -> returnElementFilter.test(classInfo.getClasspathElementFile().toPath()))
                     .map(ClassInfo::getName)
                     .collect(Collectors.toList());
         }
@@ -156,5 +165,13 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                 .anyMatch(parentClassInfo -> parentClassInfo.getName().equals(parentClassName));
     }
 
+    public static boolean hasAnnotation(ClassInfo classInfo, Class<?>[] annotations) {
+        for (Class<?> annotation  : annotations) {
+            if (classInfo.hasAnnotation(annotation.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

@@ -36,7 +36,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
-    @JkDoc("") // injectable field, but it has no impact after init() call
+    @JkDoc
     private final JkPackOptions pack = new JkPackOptions();
 
     /**
@@ -47,7 +47,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring testing tasks.
      */
-    @JkDoc("")
+    @JkDoc
     private final JkTestOptions tests = new JkTestOptions();
 
     /**
@@ -58,19 +58,20 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring directory layout.
      */
-    @JkDoc("")
+    @JkDoc
     private final JkLayoutOptions layout = new JkLayoutOptions();
 
     /**
      * Options for configuring compilation.
      */
     @JkDoc("")
+    @JkInjectProperty // nested prop-injectable fields
     private final JkCompilationOptions compilation = new JkCompilationOptions();
 
     /**
      * Options for Maven publication
      */
-    @JkDoc("")
+    @JkDoc
     private final JkPublishOptions mavenPublication = new JkPublishOptions();
 
     @JkDoc("The output file for the xml dependency description.")

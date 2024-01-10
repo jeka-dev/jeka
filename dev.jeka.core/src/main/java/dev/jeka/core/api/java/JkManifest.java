@@ -150,7 +150,7 @@ public final class JkManifest{
      */
     public JkManifest addAutodetectMain(Path classDir) {
         ClassLoader classLoader = JkUrlClassLoader.of(classDir).get();
-        List<String> classes = JkInternalClasspathScanner.of().findClassesHavingMainMethod(classLoader);
+        List<String> classes = JkInternalClasspathScanner.of().findClassesWithMainMethod(classLoader);
         if (!classes.isEmpty()) {
             this.addMainClass(classes.get(0));
         } else {

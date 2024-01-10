@@ -66,7 +66,7 @@ public final class JkUrlClassLoader {
     }
 
     /**
-     * Returns a {@link JkUrlClassLoader} wrapping the ofSystem class loader.
+     * Returns a {@link JkUrlClassLoader} wrapping the system class loader.
      *
      * @see ClassLoader#getSystemClassLoader()
      */

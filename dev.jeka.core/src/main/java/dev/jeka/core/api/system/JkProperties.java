@@ -129,6 +129,20 @@ public final class JkProperties {
         return interpolate(rawValue);
     }
 
+    /**
+     * Checks if the given property name exists in the properties.
+     */
+    public boolean containsKey(String propName) {
+        boolean result = props.containsKey(propName);
+        if (result) {
+            return result;
+        }
+        if (fallback != null) {
+            return fallback.containsKey(propName);
+        }
+        return false;
+    }
+
     private String getRawValue(String propName) {
         String result =  props.get(propName);
         if (result != null) {

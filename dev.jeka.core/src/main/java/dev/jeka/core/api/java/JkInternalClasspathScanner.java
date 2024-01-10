@@ -6,6 +6,7 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -19,13 +20,18 @@ public interface JkInternalClasspathScanner {
         return Cache.get(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
     }
 
-    List<String> findClassesHavingMainMethod(ClassLoader extraClassLoader);
+    List<String> findClassesWithMainMethod(ClassLoader extraClassLoader);
 
-    List<String> findClassesMatchingAnnotations(ClassLoader classloader, Predicate<List<String>> annotationPredicate);
+    List<String> findClassesMatchingAnnotations(ClassLoader classloader,
+                                                Predicate<List<String>> annotationPredicate);
 
-    List<String> findClassedExtending(ClassLoader classLoader, Class<?> baseClass,
-                                      Predicate<String> classpathElementFilter, boolean ignoreVisibility,
-                                      boolean ignoreParentClassloaders);
+    List<String> findClassesInheritingOrAnnotatesWith(ClassLoader classLoader,
+                                                      Class<?> baseClass,
+                                                      Predicate<String> scanElementFilter,
+                                                      Predicate<Path> returnElementFilter,
+                                                      boolean ignoreVisibility,
+                                                      boolean ignoreParentClassloaders,
+                                                      Class<?> ... annotations);
 
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 

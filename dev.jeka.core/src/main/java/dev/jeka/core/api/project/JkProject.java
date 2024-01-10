@@ -346,7 +346,7 @@ public class JkProject implements JkIdeSupportSupplier {
         StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir().toAbsolutePath().normalize() + "\n")
             .append("Production sources : " + compilation.layout.getInfo()).append("\n")
             .append("Test sources : " + testing.compilation.layout.getInfo()).append("\n")
-            .append("Java Source Version : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
+            .append("Java Version : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
             .append("Source Encoding : " + sourceEncoding + "\n")
             .append("Source file count : " + compilation.layout.resolveSources()
                     .count(Integer.MAX_VALUE, false) + "\n")

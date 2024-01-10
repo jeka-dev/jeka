@@ -25,7 +25,7 @@ public final class JkExternalToolApi {
     }
 
     public static List<String> getCachedBeanClassNames(Path projectRoot) {
-        return new EngineBeanClassResolver(projectRoot).readKbeanClasses();
+        return new EngineKBeanClassResolver(projectRoot).readKbeanClasses();
     }
 
     public static JkRepoSet getDownloadRepos(Path projectDir) {

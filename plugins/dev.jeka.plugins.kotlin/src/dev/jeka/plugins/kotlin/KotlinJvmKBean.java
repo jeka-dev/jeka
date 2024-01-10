@@ -2,7 +2,6 @@ package dev.jeka.plugins.kotlin;
 
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -35,13 +34,13 @@ public class KotlinJvmKBean extends KBean {
     @JkDoc("If true, the project KBean will be automatically configured to use Kotlin.")
     private final boolean autoConfigureProject = false;
 
-    private JkKotlinJvmProject kotlinJvmProject;
+    private JkKotlinJvm kotlinJvmProject;
 
     @Override
     protected void init() {
         if (autoConfigureProject) {
-            load(ProjectKBean.class);
-            getKotlinJvmProject().configure();
+            JkProject project = load(ProjectKBean.class).project;
+            getKotlinJvm().configure(project, kotlinSourceDir, kotlinTestSourceDir);
         }
     }
 
@@ -52,29 +51,13 @@ public class KotlinJvmKBean extends KBean {
      *
      * @throws IllegalStateException if no projectKean is found in the runtime
      */
-    public JkKotlinJvmProject getKotlinJvmProject() {
+    public JkKotlinJvm getKotlinJvm() {
         if (kotlinJvmProject != null) {
             return kotlinJvmProject;
         }
-        ProjectKBean projectKBean = getRuntime().find(ProjectKBean.class).orElseThrow(() ->
-                new IllegalStateException("No projectKean found in runtime. " +
-                        "Use #createKotlinJvmProject(JkProject) instead."));
-        kotlinJvmProject = createKotlinJvmProject(projectKBean.project);
-        return kotlinJvmProject;
-    }
-
-    /**
-     * Creates a {@link JkKotlinJvmProject} object with the configured options..
-     */
-    public JkKotlinJvmProject createKotlinJvmProject(JkProject project) {
-
-        String jvmVersion = getRuntime().getProperties().get(JkConstants.JAVA_VERSION_PROP);
-        kotlinJvmProject = JkKotlinJvmProject.of(project)
-                .setKotlinCompiler(getRuntime().getDependencyResolver().getRepos(), getKotlinVersion())
-                .setKotlinSourceDir(this.kotlinSourceDir)
-                .setKotlinTestSourceDir(this.kotlinTestSourceDir)
-                .setAddStdlib(this.addStdlib)
-                .setJvmVersion(jvmVersion);
+        JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getRuntime().getDependencyResolver().getRepos(),
+                getKotlinVersion());
+        kotlinJvmProject = JkKotlinJvm.of(kotlinCompiler).setAddStdlib(this.addStdlib);
         return kotlinJvmProject;
     }
 

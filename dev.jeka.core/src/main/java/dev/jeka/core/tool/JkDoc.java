@@ -16,7 +16,7 @@ public @interface JkDoc {
     /**
      * The text to display when help is requested.
      */
-    String[] value();
+    String[] value() default "";
 
     /**
      * If true, the method/field won't be displayed in 'help' command.

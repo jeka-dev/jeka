@@ -1,6 +1,5 @@
 package build;
 
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -31,7 +30,7 @@ public class SpringbootSampleBuild extends KBean {
     @Override
     protected void init() {
         projectKBean.project.flatFacade()
-                .setJvmTargetVersion(JkJavaVersion.V17)
+                //.setJvmTargetVersion(JkJavaVersion.V17)
                 .addCompileDeps(
                         "org.springframework.boot:spring-boot-starter-web",
                         "org.springframework.boot:spring-boot-starter-data-jpa"

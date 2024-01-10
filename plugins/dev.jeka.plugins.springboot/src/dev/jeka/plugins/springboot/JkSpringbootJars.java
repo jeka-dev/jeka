@@ -34,8 +34,11 @@ public class JkSpringbootJars {
                 .makeExecJar(classTree, targetJar);
     }
 
-    private static String findMainClassName(Iterable<Path> jarOrFolder) {
-        JkClassLoader classLoader = JkUrlClassLoader.of(jarOrFolder, ClassLoader.getSystemClassLoader().getParent())
+    /**
+     * Finds the name of the Springboot application main class in the given class directory.
+     */
+    public static String findMainClassName(Path classDir) {
+        JkClassLoader classLoader = JkUrlClassLoader.of(classDir, ClassLoader.getSystemClassLoader().getParent())
                 .toJkClassLoader();
         List<String> mainClasses = classLoader.findClassesHavingMainMethod();
         List<String> classWithSpringbootAppAnnotation = classLoader.findClassesMatchingAnnotations(

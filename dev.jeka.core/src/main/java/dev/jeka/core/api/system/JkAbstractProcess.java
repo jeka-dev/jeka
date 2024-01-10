@@ -287,7 +287,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     @Override
     public String toString() {
-        return this.command + "\n" + String.join("\n", parameters);
+        String joinChar = parameters.size() > 10 ? "\n" : " ";
+        return this.command + joinChar + String.join(joinChar, parameters);
     }
 
     /**

@@ -50,10 +50,10 @@ public final class JkInit {
             memoryBufferLogActivated = true;
         }
         try {
-            EngineBeanClassResolver engineBeanClassResolver = new EngineBeanClassResolver(Paths.get(""));
+            EngineKBeanClassResolver engineKBeanClassResolver = new EngineKBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
-            commands.addAll(engineBeanClassResolver.resolve(Environment.commandLine, KBean.name(clazz), false));
+            commands.addAll(engineKBeanClassResolver.resolve(Environment.commandLine, KBean.name(clazz), false));
             JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
             jkRuntime.setImportedProjects(getImportedProjects(clazz));
             JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
