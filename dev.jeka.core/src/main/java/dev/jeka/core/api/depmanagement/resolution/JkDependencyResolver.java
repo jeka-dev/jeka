@@ -1,9 +1,17 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.tool.JkConstants;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +22,12 @@ import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
 
 /**
  * Class to resolve dependencies to files or dependency tree. Resolution is made upon binary repositories.
+ *
+ * This cache results at 2 levels
+ * <ul>
+ *     <li>In Memory : stores the complete result tree in memory to not compute twice the same dependencies in a run.</li>
+ *     <li>On Filesystem : stores the path sequence result on file system and persist to one run to another.</li>
+ * </ul>
  *
  * @author Jerome Angibaud
  */
@@ -28,9 +42,11 @@ public final class JkDependencyResolver  {
 
     private final Map<JkQualifiedDependencySet, JkResolveResult> cachedResults = new HashMap<>();
 
-    private boolean useCache;
+    private boolean useInMemoryCache;
 
-    private final boolean includeLocalRepo = true;
+    private boolean useFileSystemCache;
+
+    private Path fileSystemCacheDir = Paths.get(JkConstants.WORK_PATH).resolve("dep-cache");
 
     private JkDependencyResolver() {
         parameters = JkResolutionParameters.of();
@@ -43,10 +59,16 @@ public final class JkDependencyResolver  {
         return new JkDependencyResolver();
     }
 
+    /**
+     * Creates a JkDependencyResolver using the specified JkRepoSet.
+     */
     public static JkDependencyResolver of(JkRepoSet repos) {
         return of().setRepos(repos);
     }
 
+    /**
+     * Creates a JkDependencyResolver using the specified JkRepo.
+     */
     public static JkDependencyResolver of(JkRepo repo) {
         return of().setRepos(repo.toSet());
     }
@@ -58,6 +80,9 @@ public final class JkDependencyResolver  {
         return this.repos;
     }
 
+    /**
+     * Sets the repositories for the dependency resolver.
+     */
     public JkDependencyResolver  setRepos(JkRepoSet repos) {
         JkUtilsAssert.argument(repos != null, "repos cannot be null");
         this.repos = repos;
@@ -65,25 +90,66 @@ public final class JkDependencyResolver  {
         return this;
     }
 
+    /**
+     * Adds the given repositories to the dependency resolver.
+     */
     public JkDependencyResolver  addRepos(JkRepoSet repos) {
         return setRepos(this.repos.and(repos));
     }
 
+    /**
+     * Adds the given repositories to the dependency resolver.
+     */
     public JkDependencyResolver  addRepos(JkRepo... repos) {
         return addRepos(JkRepoSet.of(Arrays.asList(repos)));
     }
 
-    public JkDependencyResolver  setUseCache(boolean useCache) {
-        this.useCache = useCache;
+    /**
+     * Sets whether to use an in-memory cache for dependency resolution.
+     */
+    public JkDependencyResolver setUseInMemoryCache(boolean useInMemoryCache) {
+        this.useInMemoryCache = useInMemoryCache;
         return this;
     }
 
-    public boolean isUseCache() {
-        return this.useCache;
+    /**
+     * Sets whether to use a file system cache for this dependency resolver.
+     */
+    public JkDependencyResolver setUseFileSystemCache(boolean useFileSystemCache) {
+        this.useFileSystemCache = useFileSystemCache;
+        return this;
     }
 
+    /**
+     * Sets the file system cache directory for this dependency resolver.
+     */
+    public JkDependencyResolver setFileSystemCacheDir(Path cacheDir) {
+        this.fileSystemCacheDir = cacheDir;
+        return this;
+    }
+
+    /**
+     * Returns whether the in-memory cache is used.se.
+     */
+    public boolean isUseInMemoryCache() {
+        return this.useInMemoryCache;
+    }
+
+    /**
+     * Returns a boolean indicating whether the file system cache is used by the dependency resolver.
+     */
+    public boolean isUseFileSystemCache() {
+        return useFileSystemCache;
+    }
+
+    /**
+     * Removes all cached results and deletes the contents of the file system cache directory, if it exists.
+     */
     public JkDependencyResolver cleanCache() {
         this.cachedResults.clear();
+        if (Files.exists(fileSystemCacheDir)) {
+            JkPathTree.of(fileSystemCacheDir).deleteContent();
+        }
         return this;
     }
 
@@ -105,22 +171,39 @@ public final class JkDependencyResolver  {
         return this;
     }
 
+    /**
+     * Resolves the specified JkCoordinateDependency by calling the resolve method with it,
+     * using the default resolution parameters of this dependency resolver.
+     */
     public JkResolveResult resolve(JkCoordinateDependency coordinateDependency) {
         return resolve(coordinateDependency, parameters);
     }
 
+    /**
+     * Resolves the specified dependency by converting it
+     * to JkCoordinateDependency and calling the resolve method with it.
+     */
     public JkResolveResult resolve(String dependencyDescription) {
         return resolve(JkCoordinateDependency.of(dependencyDescription));
     }
 
+    /**
+     * Resolves the specified coordinate dependency using the given resolution parameters.
+     */
     public JkResolveResult resolve(JkCoordinateDependency coordinateDependency, JkResolutionParameters params) {
         return resolve(JkDependencySet.of(coordinateDependency), params);
     }
 
+    /**
+     * Resolves the specified dependencies and returns the resolve result with default params.
+     */
     public JkResolveResult resolve(JkDependencySet dependencies) {
         return resolve(dependencies, parameters);
     }
 
+    /**
+     * Resolves the specified dependencies with specified resolution params.
+     */
     public JkResolveResult resolve(JkDependencySet dependencies, JkResolutionParameters params) {
         return resolve(JkQualifiedDependencySet.of(
                 dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL)
@@ -137,7 +220,7 @@ public final class JkDependencyResolver  {
         if (qualifiedDependencies.getEntries().isEmpty()) {
             return JkResolveResult.ofRoot(moduleHolder);
         }
-        if (useCache) {
+        if (useInMemoryCache) {
             JkResolveResult result = cachedResults.get(qualifiedDependencies);
             if (result != null) {
                 return result;
@@ -185,10 +268,51 @@ public final class JkDependencyResolver  {
             JkLog.warn(report.toString());
         }
         JkLog.endTask();
-        if (useCache) {
+        if (useInMemoryCache) {
             this.cachedResults.put(bomResolvedDependencies, resolveResult);
         }
         return resolveResult;
+    }
+
+    /**
+     * Resolves the specified qualified dependencies and returns a sequence of resolved files.
+     * <p>
+     * This methods can leverage of direct resolution caching, while <code>resolve</code> methods can not.
+     */
+    public JkPathSequence resolveFiles(
+            JkQualifiedDependencySet qualifiedDependencies,
+            JkResolutionParameters params) {
+
+        if (!useFileSystemCache) {
+            return resolve(qualifiedDependencies, params).getFiles();
+        }
+
+        Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
+        if (Files.exists(cacheFile)) {
+            JkPathSequence cachedPathSequence = JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
+            JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
+            if (!cachedPathSequence.hasNonExisting()) {
+                return cachedPathSequence;
+            }
+        }
+        JkLog.trace("Cached resolved-classpath %s not found or have non existing entries -> need resolving.");
+        JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
+        JkPathFile.of(cacheFile).createIfNotExist()
+                .write(result.toPath().getBytes(StandardCharsets.UTF_8));
+        return result;
+    }
+
+    /**
+     * Resolves the specified qualified dependencies and returns a sequence of resolved files.
+     * <p>
+     * This methods can leverage of direct resolution caching, while <code>resolve</code> methods can not.
+     */
+    public JkPathSequence resolveFiles(
+            JkDependencySet dependencies,
+            JkResolutionParameters params) {
+        return resolveFiles(JkQualifiedDependencySet.of(
+                dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL)
+                        .mergeLocalProjectExportedDependencies()), params);
     }
 
     /**
@@ -198,6 +322,9 @@ public final class JkDependencyResolver  {
         return JkInternalDependencyResolver.of(effectiveRepos()).searchGroups();
     }
 
+    /**
+     * Searches for dependencies based on the specified criteria.
+     */
     public List<String> search(String groupCriteria, String moduleNameCriteria, String versionCriteria) {
         return JkInternalDependencyResolver.of(effectiveRepos()).search(groupCriteria, moduleNameCriteria, versionCriteria);
     }
@@ -217,6 +344,9 @@ public final class JkDependencyResolver  {
                 .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
     }
 
+    /**
+     * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
+     */
     public List<String> searchVersions(String moduleId) {
         return searchVersions(JkModuleId.of(moduleId));
     }
@@ -231,6 +361,7 @@ public final class JkDependencyResolver  {
     }
 
     private JkRepoSet effectiveRepos() {
+        boolean includeLocalRepo = true;
         return includeLocalRepo ? repos.and(JkRepo.ofLocal()) : repos;
     }
 

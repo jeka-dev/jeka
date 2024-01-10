@@ -2,7 +2,6 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.tooling.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.*;
@@ -14,11 +13,11 @@ import java.util.*;
  */
 public final class JkVersionProvider {
 
-    private final Map<JkModuleId, JkVersion> map;
+    private final LinkedHashMap<JkModuleId, JkVersion> map;
 
     private final LinkedHashSet<JkCoordinate> boms;
 
-    private JkVersionProvider(Map<JkModuleId, JkVersion> map, LinkedHashSet<JkCoordinate> boms) {
+    private JkVersionProvider(LinkedHashMap<JkModuleId, JkVersion> map, LinkedHashSet<JkCoordinate> boms) {
         super();
         this.map = map;
         this.boms = boms;
@@ -42,7 +41,8 @@ public final class JkVersionProvider {
      * Creates a {@link JkVersionProvider} holding a single version providing.
      */
     public static JkVersionProvider of(JkModuleId jkModuleId, JkVersion version) {
-        final Map<JkModuleId, JkVersion> result = JkUtilsIterable.mapOf(jkModuleId, version);
+        final LinkedHashMap<JkModuleId, JkVersion> result = new LinkedHashMap<>();
+        result.put(jkModuleId, version);
         return new JkVersionProvider(result, new LinkedHashSet<>());
     }
 
@@ -50,14 +50,14 @@ public final class JkVersionProvider {
      * Creates an empty version provider.
      */
     public static JkVersionProvider of() {
-        return new JkVersionProvider(Collections.emptyMap(), new LinkedHashSet<>());
+        return new JkVersionProvider(new LinkedHashMap<>(), new LinkedHashSet<>());
     }
 
     /**
      * Creates a version provider from the specified versioned modules.
      */
     public static JkVersionProvider of(Iterable<JkCoordinate> coordinates) {
-        final Map<JkModuleId, JkVersion> result = new HashMap<>();
+        final LinkedHashMap<JkModuleId, JkVersion> result = new LinkedHashMap<>();
         for (final JkCoordinate coordinate : coordinates) {
             result.put(coordinate.getModuleId(), coordinate.getVersion());
         }
@@ -111,7 +111,7 @@ public final class JkVersionProvider {
      * The versions present in the specified one will override versions specified in this one.
      */
     public JkVersionProvider and(JkVersionProvider other) {
-        final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
+        final LinkedHashMap<JkModuleId, JkVersion> newMap = new LinkedHashMap<>(this.map);
         newMap.putAll(other.map);
         LinkedHashSet<JkCoordinate> newBoms = new LinkedHashSet<>(this.boms);
         newBoms.addAll(other.boms);
@@ -122,7 +122,7 @@ public final class JkVersionProvider {
      * Returns a {@link JkVersionProvider} that is the union of this provider and the specified one.
      */
     public JkVersionProvider and(JkModuleId jkModuleId, JkVersion version) {
-        final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
+        final LinkedHashMap<JkModuleId, JkVersion> newMap = new LinkedHashMap<>(this.map);
         newMap.put(jkModuleId, version);
         return new JkVersionProvider(newMap, this.boms);
     }

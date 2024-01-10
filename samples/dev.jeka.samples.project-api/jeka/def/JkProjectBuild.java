@@ -41,7 +41,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
         // Control on how dependency resolver behavior
         project
             .dependencyResolver
-                .setUseCache(true)
+                .setUseInMemoryCache(true)
                 .getDefaultParams()
                     .setRefreshed(true)
                     .setFailOnDependencyResolutionError(false)

@@ -135,7 +135,7 @@ public class JkProject implements JkIdeSupportSupplier {
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
-        dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseCache(true);
+        dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseInMemoryCache(true);
         mavenPublication = mavenPublication(this);
         packActions.set(packaging::createBinJar);
     }

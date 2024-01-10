@@ -22,15 +22,15 @@ public class JkDependencySet {
 
     private final List<JkDependency> entries;
 
-    private final Set<JkDependencyExclusion> globalExclusions;
+    private final LinkedHashSet<JkDependencyExclusion> globalExclusions;
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(List<? extends JkDependency> dependencies, Set<JkDependencyExclusion> exclusions,
+    private JkDependencySet(List<? extends JkDependency> dependencies, LinkedHashSet<JkDependencyExclusion> exclusions,
                             JkVersionProvider explicitVersions) {
         super();
         this.entries = Collections.unmodifiableList(dependencies);
-        this.globalExclusions = Collections.unmodifiableSet(exclusions);
+        this.globalExclusions = exclusions;
         this.versionProvider = explicitVersions;
     }
 
@@ -52,7 +52,7 @@ public class JkDependencySet {
      * Creates a {@link JkDependencySet} to the specified scoped dependencies.
      */
     public static JkDependencySet of(List<? extends JkDependency> dependencies) {
-        return new JkDependencySet(dependencies, Collections.emptySet(), JkVersionProvider.of());
+        return new JkDependencySet(dependencies, new LinkedHashSet<>(), JkVersionProvider.of());
     }
 
     public static JkDependencySet of(JkDependency dependency) {
@@ -122,7 +122,7 @@ public class JkDependencySet {
 
     public JkDependencySet and(JkDependencySet other) {
         final List<JkDependency> deps = JkUtilsIterable.concatLists(this.entries, other.entries);
-        Set<JkDependencyExclusion> newGlobalExcludes = new HashSet<>(this.globalExclusions);
+        LinkedHashSet<JkDependencyExclusion> newGlobalExcludes = new LinkedHashSet<>(this.globalExclusions);
         newGlobalExcludes.addAll(other.globalExclusions);
         JkVersionProvider newVersionProvider = this.versionProvider.and(other.versionProvider);
         return new JkDependencySet(deps, newGlobalExcludes, newVersionProvider);
@@ -569,12 +569,12 @@ public class JkDependencySet {
     /**
      * Returns the dependencies to be excluded to the transitive chain when using this dependency.
      */
-    public Set<JkDependencyExclusion> getGlobalExclusions() {
+    public LinkedHashSet<JkDependencyExclusion> getGlobalExclusions() {
         return this.globalExclusions;
     }
 
     public JkDependencySet andGlobalExclusion(JkDependencyExclusion exclusion) {
-        final Set<JkDependencyExclusion> depExclusion = new HashSet<>(this.globalExclusions);
+        final LinkedHashSet<JkDependencyExclusion> depExclusion = new LinkedHashSet<>(this.globalExclusions);
         depExclusion.add(exclusion);
         return new JkDependencySet(this.entries, depExclusion, this.versionProvider);
     }
@@ -584,16 +584,16 @@ public class JkDependencySet {
         return andGlobalExclusion(depExclusion);
     }
 
-    public JkDependencySet withGlobalExclusions(Set<JkDependencyExclusion> excludes) {
-        final Set<JkDependencyExclusion> depExcludes = new HashSet<>(excludes);
-        return new JkDependencySet(this.entries, Collections.unmodifiableSet(depExcludes), this.versionProvider);
+    public JkDependencySet withGlobalExclusions(List<JkDependencyExclusion> excludes) {
+        final LinkedHashSet<JkDependencyExclusion> depExcludes = new LinkedHashSet<>(excludes);
+        return new JkDependencySet(this.entries, depExcludes, this.versionProvider);
     }
 
     public JkDependencySet withGlobalExclusions(@JkDepSuggest String ...moduleIds) {
-        final Set<JkDependencyExclusion> depExcludes = Arrays.stream(moduleIds)
+        final List<JkDependencyExclusion> depExcludes = Arrays.stream(moduleIds)
                 .map(JkModuleId::of)
                 .map(JkDependencyExclusion::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         return withGlobalExclusions(depExcludes);
     }
 

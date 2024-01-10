@@ -2,7 +2,9 @@ package dev.jeka.core.api.depmanagement;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -13,9 +15,9 @@ public class JkLocalProjectDependency extends JkComputedDependency
         implements JkTransitivityDependency {
 
     // exported dependencies
-    private JkDependencySet exportedDependencies;
+    private final JkDependencySet exportedDependencies;
 
-    private JkTransitivity transitivity;
+    private final JkTransitivity transitivity;
 
     /*
      * Constructs a {@link JkLocalProjectDependency} from an artifact producer and the artifact file id
@@ -29,7 +31,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                 .map(dep -> dep.withIdeProjectDir(ideProjectDir))
                 .collect(Collectors.toList());
         this.exportedDependencies = JkDependencySet.of(relocatedDependencies)
-                .withGlobalExclusions(exportedDependencies.getGlobalExclusions())
+                .withGlobalExclusions(new LinkedList<>(exportedDependencies.getGlobalExclusions()))
                 .withVersionProvider(exportedDependencies.getVersionProvider());
         this.transitivity = transitivity;
     }
@@ -65,7 +67,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                     .collect(Collectors.toList());
             return JkDependencySet.of(filteredDependencies)
                     .withVersionProvider(exportedDependencies.getVersionProvider())
-                    .withGlobalExclusions(exportedDependencies.getGlobalExclusions());
+                    .withGlobalExclusions(new LinkedList<>(exportedDependencies.getGlobalExclusions()));
         }
         return JkDependencySet.of();
     }
@@ -104,7 +106,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
         JkLocalProjectDependency that = (JkLocalProjectDependency) o;
 
         if (!exportedDependencies.equals(that.exportedDependencies)) return false;
-        return transitivity != null ? transitivity.equals(that.transitivity) : that.transitivity == null;
+        return Objects.equals(transitivity, that.transitivity);
     }
 
     @Override

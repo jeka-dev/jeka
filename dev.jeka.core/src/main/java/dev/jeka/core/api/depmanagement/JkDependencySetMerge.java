@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public final class JkDependencySetMerge {
             }
         }
         JkVersionProvider mergedVersionProvider = left.getVersionProvider().and(right.getVersionProvider());
-        HashSet<JkDependencyExclusion> mergedExcludes = new HashSet<>(left.getGlobalExclusions());
+        List<JkDependencyExclusion> mergedExcludes = new LinkedList<>(left.getGlobalExclusions());
         mergedExcludes.addAll(right.getGlobalExclusions());
         JkDependencySet mergedDependencySet = JkDependencySet.of(result).withGlobalExclusions(mergedExcludes)
                 .withVersionProvider(mergedVersionProvider);

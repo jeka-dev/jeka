@@ -5,6 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
 import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
@@ -185,12 +186,12 @@ public final class JkCoordinate {
      *                    linux and mac classifier. ',mac' stands for the default classifier +
      *                    mac classifier
      */
-    public JkCoordinate withClassifierAndType(String classifier, String type) {
-        return new JkCoordinate(moduleId, version, JkArtifactSpecification.of(classifier, type));
+    public JkCoordinate withClassifierAndType(String classifiers, String type) {
+        return new JkCoordinate(moduleId, version, JkArtifactSpecification.of(classifiers, type));
     }
 
     /**
-     * @see #andClassifierAndType(String, String)
+     * @see #withClassifierAndType(String, String)
      */
     public JkCoordinate withClassifier(String classifier) {
         return withClassifierAndType(classifier, null);
@@ -259,10 +260,8 @@ public final class JkCoordinate {
 
             JkArtifactSpecification that = (JkArtifactSpecification) o;
 
-            if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
-            if (type != null ? !type.equals(that.type) : that.type != null) return false;
-
-            return true;
+            if (!Objects.equals(classifier, that.classifier)) return false;
+            return Objects.equals(type, that.type);
         }
 
         @Override

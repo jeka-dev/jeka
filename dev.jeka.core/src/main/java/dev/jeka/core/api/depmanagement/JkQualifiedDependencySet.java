@@ -2,6 +2,8 @@ package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,19 +41,20 @@ public class JkQualifiedDependencySet {
     private final List<JkQualifiedDependency> entries;
 
     // Transitive dependencies globally excluded
-    private final Set<JkDependencyExclusion> globalExclusions;
+    private final LinkedHashSet<JkDependencyExclusion> globalExclusions;
 
     private final JkVersionProvider versionProvider;
 
-    private JkQualifiedDependencySet(List<JkQualifiedDependency> qualifiedDependencies, Set<JkDependencyExclusion>
+    private JkQualifiedDependencySet(List<JkQualifiedDependency> qualifiedDependencies,
+                                     LinkedHashSet<JkDependencyExclusion>
             globalExclusions, JkVersionProvider versionProvider) {
         this.entries = Collections.unmodifiableList(qualifiedDependencies);
-        this.globalExclusions = Collections.unmodifiableSet(globalExclusions);
+        this.globalExclusions = globalExclusions;
         this.versionProvider = versionProvider;
     }
 
     public static JkQualifiedDependencySet of() {
-        return new JkQualifiedDependencySet(Collections.emptyList(), Collections.emptySet(), JkVersionProvider.of());
+        return new JkQualifiedDependencySet(Collections.emptyList(), new LinkedHashSet<>(), JkVersionProvider.of());
     }
 
     public static JkQualifiedDependencySet ofDependencies(List<JkDependency> dependencies) {
@@ -59,7 +62,7 @@ public class JkQualifiedDependencySet {
     }
 
     public static JkQualifiedDependencySet of(List<JkQualifiedDependency> qualifiedDependencies) {
-        return new JkQualifiedDependencySet(qualifiedDependencies, Collections.emptySet(), JkVersionProvider.of());
+        return new JkQualifiedDependencySet(qualifiedDependencies,new LinkedHashSet<>(), JkVersionProvider.of());
     }
 
     public static JkQualifiedDependencySet of(JkDependencySet dependencySet) {
@@ -166,8 +169,7 @@ public class JkQualifiedDependencySet {
     public JkQualifiedDependencySet withGlobalExclusions(Set<JkDependencyExclusion> exclusions) {
         Set<JkDependencyExclusion> newExclusions = new HashSet<>(this.globalExclusions);
         newExclusions.addAll(exclusions);
-        return new JkQualifiedDependencySet(entries, Collections.unmodifiableSet(newExclusions),
-                versionProvider);
+        return new JkQualifiedDependencySet(entries, new LinkedHashSet<>(newExclusions), versionProvider);
     }
 
     /**
@@ -216,6 +218,7 @@ public class JkQualifiedDependencySet {
             result.add(JkQualifiedDependency.of(scope, versionedDependency));
 
         }
+        LinkedHashSet linkedHashSet = new LinkedHashSet(testMerge.getResult().getGlobalExclusions());
         return new JkQualifiedDependencySet(result, testMerge.getResult().getGlobalExclusions(),
                 testMerge.getResult().getVersionProvider());
     }
@@ -329,5 +332,24 @@ public class JkQualifiedDependencySet {
         result = 31 * result + globalExclusions.hashCode();
         result = 31 * result + versionProvider.hashCode();
         return result;
+    }
+
+    public String md5() {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("md5");
+            this.entries.forEach(dep -> digest.update(toHashByteArray(dep)));
+            this.globalExclusions.forEach(exclusion -> digest.update(toHashByteArray(exclusion)));
+            digest.digest(toHashByteArray(this.versionProvider));
+            return new String(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static byte[] toHashByteArray(Object object) {
+        if (object == null) {
+            return new byte[0];
+        }
+        return Integer.toString(object.hashCode()).getBytes();
     }
 }
