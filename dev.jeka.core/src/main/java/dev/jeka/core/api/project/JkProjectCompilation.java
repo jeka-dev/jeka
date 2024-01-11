@@ -149,6 +149,10 @@ public class JkProjectCompilation {
         return cachedResolveResult;
     }
 
+    public List<Path> resolveDependenciesAsFiles() {
+        return project.dependencyResolver.resolveFiles(getDependencies());
+    }
+
     public JkDependencySet getDependencies() {
         return dependenciesModifier.apply(baseDependencies());
     }
@@ -194,7 +198,7 @@ public class JkProjectCompilation {
     }
 
     protected JkPathSequence classpath() {
-        return resolveDependencies().getFiles();
+        return JkPathSequence.of(resolveDependenciesAsFiles());
     }
 
     protected JkDependencySet baseDependencies() {

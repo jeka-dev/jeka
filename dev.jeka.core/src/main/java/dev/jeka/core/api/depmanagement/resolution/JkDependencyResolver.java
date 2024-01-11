@@ -8,7 +8,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkConstants;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -229,7 +228,7 @@ public final class JkDependencyResolver  {
         JkQualifiedDependencySet bomResolvedDependencies = replacePomDependencyByVersionProvider(qualifiedDependencies);
         List<JkDependency> allDependencies = bomResolvedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies
-                .withModuleDependenciesOnly()
+                .withCoordinateDependenciesOnly()
                 .withResolvedBoms(effectiveRepos())
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
@@ -279,27 +278,36 @@ public final class JkDependencyResolver  {
      * <p>
      * This methods can leverage of direct resolution caching, while <code>resolve</code> methods can not.
      */
-    public JkPathSequence resolveFiles(
+    public List<Path> resolveFiles(
             JkQualifiedDependencySet qualifiedDependencies,
             JkResolutionParameters params) {
 
         if (!useFileSystemCache) {
-            return resolve(qualifiedDependencies, params).getFiles();
+            return resolve(qualifiedDependencies, params).getFiles().getEntries();
         }
 
         Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
+        boolean nonExistingEntryOnFs = false;
         if (Files.exists(cacheFile)) {
-            JkPathSequence cachedPathSequence = JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
+            JkLog.trace("Found cached resolve-classpath file %s for resolving %s", cacheFile, qualifiedDependencies);
+            JkPathSequence cachedPathSequence =
+                    JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
             JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
             if (!cachedPathSequence.hasNonExisting()) {
-                return cachedPathSequence;
+                return cachedPathSequence.getEntries();
+            } else {
+                nonExistingEntryOnFs = true;
+                JkLog.trace("Cached resolved-classpath %s has non existing entries on local file system " +
+                        ": need resolving %s", cacheFile, qualifiedDependencies);
             }
         }
-        JkLog.trace("Cached resolved-classpath %s not found or have non existing entries -> need resolving.");
+        if (!nonExistingEntryOnFs) {
+            JkLog.trace("Cached resolved-classpath %s not found : need resolving %s", cacheFile, qualifiedDependencies);
+        }
         JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
-        JkPathFile.of(cacheFile).createIfNotExist()
-                .write(result.toPath().getBytes(StandardCharsets.UTF_8));
-        return result;
+        JkLog.trace("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
+        JkPathFile.of(cacheFile).createIfNotExist().write(result.toPath());
+        return result.getEntries();
     }
 
     /**
@@ -307,12 +315,19 @@ public final class JkDependencyResolver  {
      * <p>
      * This methods can leverage of direct resolution caching, while <code>resolve</code> methods can not.
      */
-    public JkPathSequence resolveFiles(
+    public List<Path> resolveFiles(
             JkDependencySet dependencies,
             JkResolutionParameters params) {
         return resolveFiles(JkQualifiedDependencySet.of(
                 dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL)
                         .mergeLocalProjectExportedDependencies()), params);
+    }
+
+    /**
+     * Resolves the specified dependencies and returns a sequence of resolved files.
+     */
+    public List<Path> resolveFiles(JkDependencySet dependencies) {
+        return resolveFiles(dependencies, this.parameters);
     }
 
     /**

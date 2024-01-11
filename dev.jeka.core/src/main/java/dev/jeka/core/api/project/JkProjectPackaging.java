@@ -15,6 +15,7 @@ import dev.jeka.core.api.system.JkLog;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -129,7 +130,7 @@ public class JkProjectPackaging {
     public void createFatJar(Path target) {
         project.testing.runIfNeeded();
         JkLog.startTask("Packing fat jar...");
-        Iterable<Path> classpath = resolveRuntimeDependencies().getFiles();
+        Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
         addManifestDefaults();
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(manifest)
@@ -189,6 +190,13 @@ public class JkProjectPackaging {
         cachedJkResolveResult = project.dependencyResolver.resolve(getRuntimeDependencies()
                 .normalised(project.getDuplicateConflictStrategy()));
         return cachedJkResolveResult;
+    }
+
+    /**
+     * Retrieves the runtime dependencies as a sequence of files.
+     */
+    public List<Path> resolveRuntimeDependenciesAsFiles() {
+        return project.compilation.resolveDependenciesAsFiles();
     }
 
     /**

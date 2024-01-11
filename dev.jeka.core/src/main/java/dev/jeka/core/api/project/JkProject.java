@@ -8,7 +8,6 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
@@ -262,7 +261,7 @@ public class JkProject implements JkIdeSupportSupplier {
     public JkJavaProcess prepareRunMain() {
         compilation.runIfNeeded();
         return JkJavaProcess.ofJava(actualMainClass())
-                .setClasspath(this.packaging.resolveRuntimeDependencies().getFiles())
+                .setClasspath(this.packaging.resolveRuntimeDependenciesAsFiles())
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setInheritIO(true);
@@ -288,8 +287,7 @@ public class JkProject implements JkIdeSupportSupplier {
                 .setLogCommand(true)
                 .setInheritIO(true);
         if (includeRuntimeDeps) {
-            JkPathSequence pathSequence = packaging.resolveRuntimeDependencies().getFiles();
-            javaProcess.setClasspath(pathSequence.getEntries());
+            javaProcess.setClasspath(packaging.resolveRuntimeDependenciesAsFiles());
         }
         return javaProcess;
     }
@@ -310,7 +308,7 @@ public class JkProject implements JkIdeSupportSupplier {
         compilation.runIfNeeded();
         return JkDockerBuild.of()
                 .setClasses(JkPathTree.of(compilation.layout.resolveClassDir()))
-                .setClasspath(packaging.resolveRuntimeDependencies().getFiles().getEntries())
+                .setClasspath(packaging.resolveRuntimeDependenciesAsFiles())
                 .setMainClass(actualMainClass());
     }
 

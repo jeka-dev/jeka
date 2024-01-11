@@ -16,8 +16,8 @@ public class JkQualifiedDependencySetTest {
                 .and (JAVAX_SERVLET_API.toCoordinate("4.0.1").toString());
         JkDependencySet runtime = compile.minus(JAVAX_SERVLET_API);
         JkQualifiedDependencySet qdeps = JkQualifiedDependencySet.computeIdeDependencies(compile, runtime, JkDependencySet.of());
-        JkQualifiedDependency guava = qdeps.findByModule(GUAVA.toString()).get(0);
-        JkQualifiedDependency servlet = qdeps.findByModule(JAVAX_SERVLET_API.toString()).get(0);
+        JkQualifiedDependency guava = qdeps.findByCoordinateGroupId(GUAVA.toString()).get(0);
+        JkQualifiedDependency servlet = qdeps.findByCoordinateGroupId(JAVAX_SERVLET_API.toString()).get(0);
         Assert.assertEquals("compile", guava.getQualifier() );
         Assert.assertEquals("provided", servlet.getQualifier() );
     }

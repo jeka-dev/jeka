@@ -27,10 +27,10 @@ class EngineClasspathCache {
         this.dependencyResolver = dependencyResolver;
     }
 
-    Result resolvedClasspath(JkDependencySet dependencySet) {
-        boolean changed = compareAndStore(dependencySet);
+    Result resolvedClasspath(JkDependencySet allDependencies) {
+        boolean changed = compareAndStore(allDependencies);
         if (changed) {
-            JkResolveResult resolveResult = dependencyResolver.resolve(dependencySet);
+            JkResolveResult resolveResult = dependencyResolver.resolve(allDependencies);
             JkLog.info("Dependency tree of jeka/def :");
             JkLog.info(resolveResult.getDependencyTree().toStringTree());
             JkPathSequence pathSequence = resolveResult.getFiles();
@@ -42,11 +42,11 @@ class EngineClasspathCache {
                 JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
                 if (cachedPathSequence.hasNonExisting()) {
                     JkLog.trace("Cached classpath contains some non-existing element -> need resolve.");
-                    dependencyResolver.resolve(dependencySet);
+                    dependencyResolver.resolve(allDependencies);
                 }
                 return new Result(false, cachedPathSequence);
             }
-            JkPathSequence resolved = dependencyResolver.resolve(dependencySet).getFiles();
+            JkPathSequence resolved = dependencyResolver.resolve(allDependencies).getFiles();
             storeResolvedClasspath(resolved);
             return new Result(false, resolved);
         }

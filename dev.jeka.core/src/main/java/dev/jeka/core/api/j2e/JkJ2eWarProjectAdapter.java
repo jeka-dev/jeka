@@ -68,7 +68,7 @@ public class JkJ2eWarProjectAdapter {
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
                 .setClassDir(project.compilation.layout.resolveClassDir())
                 .setExtraStaticResourceDir(extraStaticResourcePath)
-                .setLibs(project.packaging.resolveRuntimeDependencies().getFiles().getEntries())
+                .setLibs(project.packaging.resolveRuntimeDependenciesAsFiles())
                 .setWebappDir(webappPath);
         project.compilation.runIfNeeded();
         project.testing.runIfNeeded();

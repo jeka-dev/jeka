@@ -125,7 +125,7 @@ public class JkKotlinJvm {
             targetVersion = JkJavaVersion.of(jvmVersion);
         }
         JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
-                .setClasspath(compilation.resolveDependencies().getFiles())
+                .setClasspath(compilation.resolveDependenciesAsFiles())
                 .setOutputDir(compilation.layout.getOutputDir().resolve("classes"))
                 .setTargetVersion(targetVersion)
                 .setSources(sources);
@@ -142,7 +142,7 @@ public class JkKotlinJvm {
             JkLog.info("No source to compile in " + sources);
             return;
         }
-        JkPathSequence classpath = compilation.resolveDependencies().getFiles()
+        JkPathSequence classpath = JkPathSequence.of(compilation.resolveDependenciesAsFiles())
                 .and(compilation.layout.getClassDirPath());
         JkKotlinJvmCompileSpec compileSpec = JkKotlinJvmCompileSpec.of()
                 .setSources(compilation.layout.resolveSources())

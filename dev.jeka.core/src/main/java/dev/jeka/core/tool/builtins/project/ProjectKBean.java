@@ -15,6 +15,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.KBean;
@@ -309,6 +310,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
+        project.dependencyResolver.setFileSystemCacheDir(getBaseDir().resolve(JkConstants.WORK_PATH)
+                .resolve("project-dep-resolution-cache"));
+        project.dependencyResolver.setUseFileSystemCache(true);
         if (!JkUtilsString.isBlank(compilation.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(compilation.javaVersion);
             project.setJvmTargetVersion(version);

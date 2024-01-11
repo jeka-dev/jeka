@@ -154,12 +154,11 @@ final class Engine {
     private CompilationContext preCompile() {
         JkPathTree sourceTree = beanClassesResolver.getSourceTree();
         final List<Path> sourceFiles = sourceTree.getFiles();
-        JkLog.traceStartTask("Parse source code of " + sourceFiles);
-        final ParsedSourceInfo parsedSourceInfo =
-                SourceParser.of(this.projectBaseDir, sourceTree).parse();
-               //SourceParser.parse(this.projectBaseDir, sourceFiles);
+        JkLog.traceStartTask("Parsing source code of " + sourceFiles);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
 
+        final ParsedSourceInfo parsedSourceInfo =
+                SourceParser.of(this.projectBaseDir, sourceTree).parse();
         JkDependencySet defDependencies = JkDependencySet.of()
                 .and(Environment.commandLine.getDefDependencies())
                 .and(parsedSourceInfo.dependencies)

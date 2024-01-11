@@ -46,19 +46,17 @@ public class JkProjectTesting {
 
     private boolean breakOnFailures = true;
 
-    /**
-     * For parent chaining
-     */
-    public final JkProject __;
-
     JkProjectTesting(JkProject project) {
         this.project = project;
-        this.__ = project;
         compilation = new JkProjectTestCompilation();
         testProcessor = defaultTestProcessor();
         testSelection = defaultTestSelection();
     }
 
+    /**
+     * Applies the given consumer to the current instance of JkProjectTesting.
+     * This method allows you to modify the JkProjectTesting object using the provided consumer.
+     */
     public JkProjectTesting apply(Consumer<JkProjectTesting> consumer) {
         consumer.accept(this);
         return this;
@@ -73,9 +71,9 @@ public class JkProjectTesting {
         JkProjectCompilation prodCompilation = project.compilation;
         return JkPathSequence.of()
                 .and(compilation.initialLayout().resolveClassDir())
-                .and(compilation.resolveDependencies().getFiles())
+                .and(compilation.resolveDependenciesAsFiles())
                 .and(prodCompilation.layout.resolveClassDir())
-                .and(project.packaging.resolveRuntimeDependencies().getFiles())
+                .and(project.packaging.resolveRuntimeDependenciesAsFiles())
                 .withoutDuplicates();
     }
 
@@ -101,15 +99,25 @@ public class JkProjectTesting {
         return breakOnFailures;
     }
 
+    /**
+     * Sets whether the execution of tests should break (throw an IllegalArgumentException)
+     * if there are test failures.
+     */
     public JkProjectTesting setBreakOnFailures(boolean breakOnFailures) {
         this.breakOnFailures = breakOnFailures;
         return this;
     }
 
+    /**
+     * Returns the directory path where the test reports are stored.
+     */
     public Path getReportDir() {
         return project.getOutputDir().resolve(reportDir);
     }
 
+    /**
+     * Sets the directory path where the test reports are stored.
+     */
     public JkProjectTesting setReportDir(String reportDir) {
         this.reportDir = reportDir;
         return this;
