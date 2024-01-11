@@ -133,7 +133,7 @@ public abstract class SelfAppKBean extends KBean {
     }
 
     protected List<Path> appClasspath() {
-        return getRuntime().getClasspath().getEntries();
+        return getRuntime().getExportedClasspath().getEntries();
     }
 
     public List<Path> libs() {

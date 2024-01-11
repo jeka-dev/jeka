@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLocator;
@@ -41,6 +42,10 @@ public final class JkRuntime {
 
     private JkPathSequence classpath;
 
+    private JkPathSequence exportedClasspath;
+
+    private JkDependencySet exportedDependencies;
+
     private JkPathSequence importedProjects = JkPathSequence.of();
 
     private List<EngineCommand> fieldInjections = Collections.emptyList();
@@ -54,6 +59,9 @@ public final class JkRuntime {
         this.properties = constructProperties(projectBaseDir);
     }
 
+    /**
+     * Returns the JkRuntime instance associated with the specified project base directory.
+     */
     public static JkRuntime get(Path projectBaseDir) {
         return RUNTIMES.computeIfAbsent(projectBaseDir, path -> new JkRuntime(path));
     }
@@ -115,11 +123,35 @@ public final class JkRuntime {
     }
 
     /**
+     * Returns the exported classpath used by the JkRuntime instance.
+     * <p>
+     * The exported classpath is the classpath minus 'private' dependencies. Private dependencies
+     * are declared using <code>@JkInjectClasspath</code> in a class that is in package with root
+     * folder name stating with <code>_</code>.
+     */
+    public JkPathSequence getExportedClasspath() {
+        return this.exportedClasspath;
+    }
+
+    /**
+     * Returns the exported dependencies of the JkRuntime instance.
+     * <p>
+     * The exported dependencies is the dependencies minus 'private' dependencies. Private dependencies
+     * are declared using <code>@JkInjectClasspath</code> in a class that is in package with root
+     * folder name stating with <code>_</code>.
+     */
+    public JkDependencySet getExportedDependencies() {
+        return this.exportedDependencies;
+    }
+
+    /**
      * Returns root path of imported projects.
      */
     public JkPathSequence getImportedProjects() {
         return importedProjects;
     }
+
+
 
     /**
      * Instantiates the specified KBean into this runtime, if it is not already present. <p>
@@ -193,6 +225,14 @@ public final class JkRuntime {
 
     void setImportedProjects(JkPathSequence importedProjects) {
         this.importedProjects = importedProjects;
+    }
+
+    void setExportedClassPath(JkPathSequence exportedClassPath) {
+        this.exportedClasspath = exportedClassPath;
+    }
+
+    void setExportedDependencies(JkDependencySet exportedDependencies) {
+        this.exportedDependencies = exportedDependencies;
     }
 
     void init(List<EngineCommand> commands) {

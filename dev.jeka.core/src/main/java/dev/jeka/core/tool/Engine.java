@@ -48,6 +48,8 @@ final class Engine {
     private static final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
            .and(false, "**/_*", "_*");
 
+    private static final JkPathMatcher PRIVATE_FOLDER = JkPathMatcher.of(true, "_*", "_*/**");
+
     static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER);
 
     private final Path projectBaseDir;
@@ -55,6 +57,8 @@ final class Engine {
     private final JkDependencyResolver dependencyResolver;
 
     private final EngineKBeanClassResolver beanClassesResolver;
+
+
 
     Engine(Path baseDir) {
         super();
@@ -82,8 +86,7 @@ final class Engine {
                 || commandLine.involvedBeanNames().contains("scaffold");
         if (hasJekaDir) {
             boolean failOnError = !Environment.standardOptions.ignoreCompileFail && !commandLine.isHelp();
-            result = resolveAndCompile(new HashMap<>(), true,
-                    failOnError);
+            result = resolveAndCompile(new HashMap<>(), true, failOnError);
             computedClasspath = result.classpath;
                     // the command deps has been included in cache for classpath resolution
                     //.andPrepend(dependencyResolver.resolve(commandLineDependencies).getFiles());
@@ -152,21 +155,34 @@ final class Engine {
     }
 
     private CompilationContext preCompile() {
-        JkPathTree sourceTree = beanClassesResolver.getSourceTree();
-        final List<Path> sourceFiles = sourceTree.getFiles();
-        JkLog.traceStartTask("Parsing source code of " + sourceFiles);
-        EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
 
+        JkPathTree sourceTree = beanClassesResolver.getSourceTree();
+        JkLog.traceStartTask("Parsing source code of " + sourceTree);
+        EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
         final ParsedSourceInfo parsedSourceInfo =
                 SourceParser.of(this.projectBaseDir, sourceTree).parse();
+        JkLog.traceEndTask();
+
         JkDependencySet defDependencies = JkDependencySet.of()
                 .and(Environment.commandLine.getDefDependencies())
-                .and(parsedSourceInfo.dependencies)
+                .and(parsedSourceInfo.getDependencies())
                 .and(dependenciesFromLocalProps());
-        EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(defDependencies);
-        JkLog.traceEndTask();
+        JkDependencySet exportedDependencies = defDependencies;
+        boolean hasPrivateDependencies = parsedSourceInfo.hasPrivateDependencies();
+        if (hasPrivateDependencies) {
+            exportedDependencies = JkDependencySet.of()
+                    .and(Environment.commandLine.getDefDependencies())
+                    .and(parsedSourceInfo.getExportedDependencies())
+                    .and(dependenciesFromLocalProps());
+        }
+
+        EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(
+                defDependencies, exportedDependencies, !hasPrivateDependencies);
+
         return new CompilationContext(
-                jekaClasspath().and(cacheResult.resolvedClasspath),
+                jekaClasspath().and(cacheResult.classpath),
+                cacheResult.exportedClasspath,
+                exportedDependencies,
                 new LinkedList<>(parsedSourceInfo.dependencyProjects),
                 parsedSourceInfo.compileOptions,
                 cacheResult.changed
@@ -254,6 +270,8 @@ final class Engine {
         runtime.setDependencyResolver(dependencyResolver);
         runtime.setImportedProjects(compilationResult.importedProjects);
         runtime.setClasspath(compilationResult.classpath);
+        runtime.setExportedClassPath(compilationContext.exportedClasspath);
+        runtime.setExportedDependencies(compilationContext.exportedDependencies);
         return compilationResult;
     }
 
@@ -365,15 +383,28 @@ final class Engine {
 
         private final JkPathSequence classpath;
 
+        // classpath used for consumption by other project or to package jeka/def as an application
+        private final JkPathSequence exportedClasspath;
+
+        private final JkDependencySet exportedDependencies;
+
         private final List<Path> importedProjectDirs;
 
         private final List<String> compileOptions;
 
         private final boolean classpathChanged;
 
-        CompilationContext(JkPathSequence classpath, List<Path> importedProjectDirs,
-                           List<String> compileOptions, boolean classpathChanged) {
+        CompilationContext(
+                JkPathSequence classpath,
+                JkPathSequence exportedClasspath,
+                JkDependencySet exportedDependencies,
+                List<Path> importedProjectDirs,
+                List<String> compileOptions,
+                boolean classpathChanged) {
+
             this.classpath = classpath;
+            this.exportedClasspath = exportedClasspath;
+            this.exportedDependencies = exportedDependencies;
             this.importedProjectDirs = Collections.unmodifiableList(importedProjectDirs);
             this.compileOptions = Collections.unmodifiableList(compileOptions);
             this.classpathChanged = classpathChanged;

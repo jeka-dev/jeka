@@ -91,7 +91,8 @@ public final class JkExternalToolApi {
     }
 
     public static List<Path> getDefDependenciesClasspath(Path projectDir) {
-        return new EngineClasspathCache(projectDir, null).readCachedResolvedClasspath().getEntries();
+        return new EngineClasspathCache(projectDir, null).readCachedResolvedClasspath(EngineClasspathCache.Scope.ALL)
+                .getEntries();
     }
 
     public static boolean kbeanNameMatches(String className, String candidate) {

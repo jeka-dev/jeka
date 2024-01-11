@@ -22,41 +22,59 @@ class EngineClasspathCache {
 
     private final JkDependencyResolver dependencyResolver;
 
+    enum Scope {
+        ALL, EXPORTED;
+
+        String prefix() {
+            return this == ALL ?  "" : "exported-";
+        }
+
+    }
+
     EngineClasspathCache(Path baseDir, JkDependencyResolver dependencyResolver) {
         this.baseDir = baseDir;
         this.dependencyResolver = dependencyResolver;
     }
 
-    Result resolvedClasspath(JkDependencySet allDependencies) {
-        boolean changed = compareAndStore(allDependencies);
+    Result resolvedClasspath(JkDependencySet allDependencies, JkDependencySet exportedDependencies, boolean same) {
+        PartialResult all = resolvedClasspath(Scope.ALL, allDependencies);
+        PartialResult exported = all;
+        if (!same) {
+            exported = resolvedClasspath(Scope.EXPORTED, exportedDependencies);
+        }
+        return new Result(all, exported);
+    }
+
+    private PartialResult resolvedClasspath(Scope scope, JkDependencySet dependencies) {
+        boolean changed = compareAndStore(scope, dependencies);
         if (changed) {
-            JkResolveResult resolveResult = dependencyResolver.resolve(allDependencies);
+            JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
             JkLog.info("Dependency tree of jeka/def :");
             JkLog.info(resolveResult.getDependencyTree().toStringTree());
             JkPathSequence pathSequence = resolveResult.getFiles();
-            storeResolvedClasspath(pathSequence);
-            return new Result(true, pathSequence);
+            storeResolvedClasspath(scope, pathSequence);
+            return new PartialResult(true, pathSequence);
         } else {
-            if (Files.exists(resolvedClasspathCache())) {
-                JkPathSequence cachedPathSequence = readCachedResolvedClasspath();
+            if (Files.exists(resolvedClasspathCache(scope))) {
+                JkPathSequence cachedPathSequence = readCachedResolvedClasspath(scope);
                 JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
                 if (cachedPathSequence.hasNonExisting()) {
                     JkLog.trace("Cached classpath contains some non-existing element -> need resolve.");
-                    dependencyResolver.resolve(allDependencies);
+                    dependencyResolver.resolve(dependencies);
                 }
-                return new Result(false, cachedPathSequence);
+                return new PartialResult(false, cachedPathSequence);
             }
-            JkPathSequence resolved = dependencyResolver.resolve(allDependencies).getFiles();
-            storeResolvedClasspath(resolved);
-            return new Result(false, resolved);
+            JkPathSequence resolved = dependencyResolver.resolve(dependencies).getFiles();
+            storeResolvedClasspath(scope, resolved);
+            return new PartialResult(false, resolved);
         }
     }
 
     /**
      * Returns true if cached unresolved-classpath is not equals to current one.
      */
-    private boolean compareAndStore(JkDependencySet dependencySet) {
-        Path cacheFile = unresolvedClasspathCache();
+    private boolean compareAndStore(Scope scope, JkDependencySet dependencySet) {
+        Path cacheFile = unresolvedClasspathCache(scope);
         String content = dependencySet.getEntries().toString();
         if (Files.exists(cacheFile)) {
             String cachedContent = new String(JkUtilsPath.readAllBytes(cacheFile));
@@ -72,33 +90,48 @@ class EngineClasspathCache {
         return true;
     }
 
-    private void storeResolvedClasspath(JkPathSequence pathSequence) {
-        if (!Files.exists(resolvedClasspathCache().getParent().getParent())) {
+    private void storeResolvedClasspath(Scope scope, JkPathSequence pathSequence) {
+        if (!Files.exists(resolvedClasspathCache(scope).getParent().getParent())) {
             return;  // if project dir has no 'jeka' folder, don't store this file.
         }
-        JkPathFile.of(resolvedClasspathCache()).createIfNotExist()
+        JkPathFile.of(resolvedClasspathCache(scope)).createIfNotExist()
                 .write(pathSequence.toPath().getBytes(StandardCharsets.UTF_8));
     }
 
-    JkPathSequence readCachedResolvedClasspath() {
-        return JkPathSequence.ofPathString(JkPathFile.of(resolvedClasspathCache()).readAsString());
-    }
-
-    private Path unresolvedClasspathCache() {
-        return baseDir.resolve(JkConstants.WORK_PATH).resolve(UNRESOLVED_CLASSPATH_FILE);
-    }
-
-    private Path resolvedClasspathCache() {
-        return baseDir.resolve(JkConstants.WORK_PATH).resolve(RESOLVED_CLASSPATH_FILE);
+    JkPathSequence readCachedResolvedClasspath(Scope scope) {
+        return JkPathSequence.ofPathString(JkPathFile.of(resolvedClasspathCache(scope)).readAsString());
     }
 
     static class Result {
 
         final boolean changed;
 
+        final JkPathSequence classpath;
+
+        final JkPathSequence exportedClasspath;
+
+        Result(PartialResult all, PartialResult exported) {
+            this.changed = all.changed || exported.changed;
+            this.classpath = all.resolvedClasspath;
+            this.exportedClasspath = exported.resolvedClasspath;
+        }
+    }
+
+    private Path unresolvedClasspathCache(Scope scope) {
+        return baseDir.resolve(JkConstants.WORK_PATH).resolve(scope.prefix() + UNRESOLVED_CLASSPATH_FILE);
+    }
+
+    private Path resolvedClasspathCache(Scope scope) {
+        return baseDir.resolve(JkConstants.WORK_PATH).resolve(scope.prefix() + RESOLVED_CLASSPATH_FILE);
+    }
+
+    private static class PartialResult {
+
+        final boolean changed;
+
         final JkPathSequence resolvedClasspath;
 
-        public Result(boolean changed, JkPathSequence resolvedClasspath) {
+        public PartialResult(boolean changed, JkPathSequence resolvedClasspath) {
             this.changed = changed;
             this.resolvedClasspath = resolvedClasspath;
         }

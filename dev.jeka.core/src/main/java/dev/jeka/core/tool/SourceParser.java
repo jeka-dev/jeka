@@ -29,14 +29,25 @@ class SourceParser {
                 .reduce(new ParsedSourceInfo(), ParsedSourceInfo::merge);
     }
 
-    // non-private for tesing purpose
+    // non-private for testing purpose
     static ParsedSourceInfo parse(Path file, Path baseDir) {
         ParsedSourceInfo result = new ParsedSourceInfo();
-        JkUtilsPath.readAllLines(file).forEach(line -> augment(result, line, baseDir));
+        boolean privateFile = isInPrivateFolder(file, baseDir);
+        JkUtilsPath.readAllLines(file).forEach(line -> augment(result, line, baseDir, privateFile));
         return result;
     }
 
-    private static void augment(ParsedSourceInfo info, String rawLine, Path baseDir) {
+    private static boolean isInPrivateFolder(Path file, Path baseDir) {
+        Path jekaDef = baseDir.resolve(JkConstants.DEF_DIR);
+        if (!file.startsWith(jekaDef)) {  // Make testable in Junit
+            return false;
+        }
+        Path relativeToJekaDef = jekaDef.relativize(file);
+        Path relativeRoot = relativeToJekaDef.subpath(0, 1);
+        return relativeRoot.toString().startsWith("_");
+    }
+
+    private static void augment(ParsedSourceInfo info, String rawLine, Path baseDir, boolean privateFolder) {
         if (!rawLine.contains("@")) {
             return; // fast return
         }
@@ -49,7 +60,7 @@ class SourceParser {
         AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.addDep(CommandLine.toDependency(baseDir, value));
+            info.addDep(!privateFolder, CommandLine.toDependency(baseDir, value));
             return;
         }
 
@@ -67,10 +78,6 @@ class SourceParser {
             String value = annotationParser.readUniqueStringValue();
             info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));
         }
-    }
-
-    private static boolean isDeclaringAnnotation(String candidate, Class<?> annotationClass) {
-        return candidate.startsWith("@" + annotationClass.getSimpleName());
     }
 
     static class AnnotationParser {

@@ -17,13 +17,13 @@ public class SourceParserTest {
 
     @Test
     public void withOneImport() {
-        final JkDependencySet dependencies = parseResource("with-1-inject-classpath.javasource").dependencies;
+        final JkDependencySet dependencies = parseResource("with-1-inject-classpath.javasource").getDependencies();
         Assert.assertEquals(1, JkUtilsIterable.listOf(dependencies).size());
     }
 
     @Test
     public void with3MultiAnnoImports() {
-        final JkDependencySet dependencies = parseResource("with-3-inject-classpath.javasource").dependencies;
+        final JkDependencySet dependencies = parseResource("with-3-inject-classpath.javasource").getDependencies();
         Assert.assertEquals(3, dependencies.getEntries().size());
         JkCoordinateDependency fooBBarDep = dependencies.get("foo:bar");
         System.out.println(fooBBarDep);
@@ -31,7 +31,7 @@ public class SourceParserTest {
 
     @Test
     public void withoutImport() {
-        final JkDependencySet dependencies = parseResource("without-iannotations.javasource").dependencies;
+        final JkDependencySet dependencies = parseResource("without-iannotations.javasource").getExportedDependencies();
         Assert.assertEquals(0, dependencies.getEntries().size());
     }
 
