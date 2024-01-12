@@ -93,6 +93,10 @@ public final class JkSpringbootProject {
             project.packActions.append("Include manifest", project.packaging::includeManifestInClassDir);
         }
 
+        if (project.getMainClass() == null) {
+            project.setMainClass(JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir()));
+        }
+
         return this;
     }
 

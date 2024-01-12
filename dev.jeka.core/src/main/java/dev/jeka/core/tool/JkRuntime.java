@@ -30,7 +30,7 @@ public final class JkRuntime {
     // Experiment for invoking 'KBean#init()' method lately, once all KBean has been instantiated
     // Note : Calling all KBeans init() methods in a later stage then inside 'load' methods
     //        leads in difficult problems as the order the KBeans should be initialized.
-    private static final boolean LATE_INIT = false;
+    ///private static final boolean LATE_INIT = false;
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
@@ -73,28 +73,6 @@ public final class JkRuntime {
     static void setBaseDirContext(Path baseDir) {
         JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Project " + baseDir + " not found.");
         BASE_DIR_CONTEXT.set(baseDir);
-    }
-
-    /// TODO experimental late init
-    static void initAll() {
-        if (!LATE_INIT) {
-            return;
-        }
-        List<JkRuntime> runtimes = new LinkedList<>(RUNTIMES.values());
-        Collections.reverse(runtimes);
-        runtimes.forEach(runtime -> {
-            for (KBean kBean : runtime.getBeans()) {
-                JkLog.info("Inject field values in %s", kBean);
-                runtime.injectFieldValues(kBean);
-            }
-            List<KBean> reversedBeans = runtime.getBeans();
-            Collections.reverse(reversedBeans);
-            for (KBean kBean : reversedBeans) {
-                JkLog.startTask("Invoke init() on %s", kBean);
-                kBean.init();
-                JkLog.endTask();
-            }
-        });
     }
 
     private static Path getBaseDirContext() {
@@ -174,7 +152,7 @@ public final class JkRuntime {
             BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
-            JkLog.endTask("KBean " + beanClass + " instantiated.");
+            JkLog.endTask();
         }
         return result;
     }
@@ -281,10 +259,10 @@ public final class JkRuntime {
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
-        if (!LATE_INIT) {
+
             injectFieldValues(bean);
             bean.init();
-        }
+
         return bean;
     }
 

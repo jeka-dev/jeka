@@ -36,7 +36,7 @@ public class JkDockerBuild {
 
     private JkPathTree classes;
 
-    private List<Path> classpath;
+    private List<Path> classpath = Collections.emptyList();
 
     private String mainClass;
 
@@ -144,6 +144,7 @@ public class JkDockerBuild {
      * Adds a port to be exposed by the container.
      */
     public JkDockerBuild setExposedPorts(Integer ...ports) {
+        System.out.println("------------- setExposed ports" + Arrays.asList(ports) );
         this.exposedPorts.clear();
         this.exposedPorts.addAll(Arrays.asList(ports));
         return this;
@@ -228,13 +229,43 @@ public class JkDockerBuild {
         JkProcess.of("docker", "build", "-t", imageName, "./" + tempBuildDir).setInheritIO(true)
                 .setLogCommand(true).exec();
 
+        String portMapping = portMappingArgs();
+        JkLog.info("Run docker image : docker run -it --rm %s%s", portMapping, imageName);
+    }
+
+    /**
+     * Returns a formatted string that contains information about this Docker build.
+     */
+    public String info() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Base Image Name  : " + this.baseImage).append("\n");
+        sb.append("Main class       : " + this.mainClass).append("\n");
+        sb.append("Classes          : " + this.classes).append("\n");
+        sb.append("Classpath        : " ).append("\n");
+        this.classpath.forEach(item -> sb.append("  " + item + "\n"));
+        sb.append("Extra Files      :").append("\n");
+        this.extraFiles.entrySet().forEach(entry
+                -> sb.append("  " + entry.getValue()  + " -> " + entry.getKey()+ "\n"));
+        sb.append("Agents            : ").append("\n");
+        this.agents.entrySet().forEach(entry
+                -> sb.append("  " + entry.getKey()  + "=" + entry.getValue() + "\n"));
+        sb.append("Exposed Ports     : " + this.exposedPorts).append("\n");
+        sb.append("Extra Build Steps : ").append("\n");
+        this.extraBuildSteps.forEach(item -> sb.append("  " + item).append("\n"));
+        return sb.toString();
+    }
+
+    /**
+     * Returns a string representation of the command line arguments for port mapping in the Docker image.
+     */
+    public String portMappingArgs() {
         String portMapping = "";
         if (!this.exposedPorts.isEmpty()) {
             portMapping = this.exposedPorts.stream()
                     .map(Object::toString)
                     .reduce("-p ", (init, port) -> init  + port + ":" + port + " ");
         }
-        JkLog.info("Run docker image : docker run -it --rm %s%s", portMapping, imageName);
+        return portMapping;
     }
 
     private String createClasspathArs(List<Path> sanitizedLibs) {

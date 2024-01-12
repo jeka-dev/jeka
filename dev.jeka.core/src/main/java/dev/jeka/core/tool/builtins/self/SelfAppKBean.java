@@ -2,13 +2,10 @@ package dev.jeka.core.tool.builtins.self;
 
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.docker.JkDocker;
-import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -41,19 +38,9 @@ public abstract class SelfAppKBean extends KBean {
     @JkDoc("Space separated list of program arguments to pass to the command line running the program.")
     public String programArgs = "";
 
-    @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")
-    public String dockerRunParams = "";
-
     private String mainClass;
 
     private Consumer<Path> jarMaker = this::fatJar;
-
-    /**
-     * {@link JkDockerBuild} customizer to control the effective docker build.
-     * Use this field to add your own customizer.
-     */
-    @JkDoc(value = "", hide = true)
-    public final JkConsumers<JkDockerBuild> dockerBuildCustomizers = JkConsumers.of();
 
     // We can not just run Application#main cause Spring-Boot seems
     // requiring that the Java process is launched using Spring-Boot application class
@@ -77,24 +64,6 @@ public abstract class SelfAppKBean extends KBean {
                 .launch(JkClassLoader.ofCurrent().getClasspath(), testSelection);
     }
 
-    @JkDoc("Build Docker image (Need Docker).")
-    public void buildImage() {
-        JkDockerBuild dockerBuild = JkDockerBuild.of()
-                .setClasses(classTree())
-                .setClasspath(libs())
-                .setMainClass(actualMainClass());
-        dockerBuildCustomizers.accept(dockerBuild);
-        dockerBuild.buildImage(dockerImageTag);
-    }
-
-    @JkDoc("Run Docker image and wait until termination (Need Docker).")
-    public void runImage() {
-        String containerName = "jeka-" + dockerImageTag;
-        JkDocker.run("-it --rm -e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" " + dockerRunParams + " --name %s %s",
-                jvmOptions, programArgs,
-                containerName, dockerImageTag);
-    }
-
     @JkDoc("Create runnable fat jar.")
     public void buildJar() {
         jarMaker.accept(jarPath());
@@ -111,6 +80,21 @@ public abstract class SelfAppKBean extends KBean {
                 .run();
     }
 
+    @JkDoc("Displays info about this SelfApp")
+    public void info() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Main Class   : " + this.actualMainClass()).append("\n");
+        sb.append("Class Files  : ").append("\n");
+        this.classTree().getRelativeFiles().stream()
+                .filter(path -> !path.getFileName().toString().startsWith("."))  // Avoid .DS_Store appears
+                .forEach(path -> sb.append("  " + path + "\n"));
+        sb.append("Classpath    : ").append("\n");
+        this.appClasspath().forEach(path -> sb.append("  " + path + "\n"));
+        sb.append("JVM Options  : " + jvmOptions).append("\n");
+        sb.append("Program Args : " + programArgs);
+        JkLog.info(sb.toString());
+    }
+
     public Path jarPath() {
         return getBaseDir().resolve(JkConstants.OUTPUT_PATH).resolve(getBaseDirName() + ".jar");
     }
@@ -124,7 +108,7 @@ public abstract class SelfAppKBean extends KBean {
         this.mainClass = mainClass.getName();
     }
 
-    private String actualMainClass() {
+    public String actualMainClass() {
         if (mainClass != null) {
             return mainClass;
         }
@@ -132,7 +116,7 @@ public abstract class SelfAppKBean extends KBean {
         return ucl.toJkClassLoader().findUniqueMainClass();
     }
 
-    protected List<Path> appClasspath() {
+    public List<Path> appClasspath() {
         return getRuntime().getExportedClasspath().getEntries();
     }
 

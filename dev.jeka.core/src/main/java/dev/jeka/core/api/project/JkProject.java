@@ -237,6 +237,14 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
+     * Returns the main class name of the project. This might be <code>null</code> for
+     * library projects.
+     */
+    public String getMainClass() {
+        return this.mainClass;
+    }
+
+    /**
      * Returns the strategy to use when twi dependencies with distinct versions
      * are declared in the project dependencies.
      */
@@ -316,7 +324,7 @@ public class JkProject implements JkIdeSupportSupplier {
 
     @Override
     public String toString() {
-        return "project " + getBaseDir().getFileName();
+        return "project " + getBaseDir().toAbsolutePath().getFileName();
     }
 
     /**

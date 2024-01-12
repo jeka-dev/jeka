@@ -9,6 +9,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
+import dev.jeka.core.tool.builtins.tools.DockerKBean;
 
 import java.util.Optional;
 
@@ -55,6 +56,7 @@ public final class SpringbootKBean extends KBean {
         // Spring-Boot KBean is intended to enhance either ProjectKBean nor SelfAppKBean.
         // If none is present yet in the runtime, we assume that ProjectKBean should be instantiated implicitly
         Optional<SelfAppKBean> optionalSelfAppKBean = getRuntime().findInstanceOf(SelfAppKBean.class);
+
         if (!optionalSelfAppKBean.isPresent()) {
             JkLog.trace("No SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring Project.");
             load(ProjectKBean.class);
@@ -64,17 +66,26 @@ public final class SpringbootKBean extends KBean {
             selfApp.setJarMaker(path -> JkSpringbootJars.createBootJar(
                     selfApp.classTree(), selfApp.libs(), getRuntime().getDependencyResolver().getRepos(), path)
             );
-            selfApp.dockerBuildCustomizers.add(dockerBuild -> dockerBuild.setExposedPorts(8080));
-            selfApp.dockerRunParams = "-p 8080:8080";
         }
 
-        Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);
-        optionalProjectKBean.ifPresent(projectKBean ->
-                configure(projectKBean.project)
-        );
+        // Configure KBean Project if no selfApp KBean is present.
+        if (!optionalSelfAppKBean.isPresent()) {
+            configure(load(ProjectKBean.class).project);
+        }
+
+        // Configure Scaffold KBean
         getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean ->
                 configureScaffold(scaffoldKBean.scaffold)
         );
+
+        // Configure Docker KBean to add port mapping on run
+        // We need to force loading, cause dockerKBean may not be present in runtime when springboot Kean is initialized
+        // This breaks docker configuration for projectKBean, sowe enable this only for selfKBean
+        if (optionalSelfAppKBean.isPresent()) {
+            DockerKBean dockerKBean = load(DockerKBean.class);
+            dockerKBean.dockerBuild.setExposedPorts(8080);
+        }
+
     }
 
     @JkDoc("Provides info about this plugin configuration")
