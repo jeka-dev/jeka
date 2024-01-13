@@ -10,7 +10,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
-import dev.jeka.core.tool.builtins.tools.DockerKBean;
+import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
 import java.util.Optional;
 

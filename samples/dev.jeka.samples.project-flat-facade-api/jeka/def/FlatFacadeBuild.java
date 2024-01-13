@@ -7,23 +7,25 @@ import dev.jeka.core.api.project.*;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 /**
  * This build illustrate partially what is doable to configure through the project flat facade.
- *
+ * <p>
  * The dependencies declared here are only for demonstration purpose and not necessary to build.
  * the project.
  */
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")
 class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
-    IntellijKBean intelliKBean = load(IntellijKBean.class)
-            .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
-            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-
     @JkDoc("Tell if the Integration Tests should be run.")
     public boolean runIT = true;
+
+    FlatFacadeBuild() {
+        load(IntellijKBean.class)
+                .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    }
 
     private JkProject project() {
         JkProject project =JkProject.of();
@@ -90,6 +92,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
         return project;
     }
 
+    @JkDoc("Clean and pack")
     public void cleanPack() {
         project().clean().pack();
     }

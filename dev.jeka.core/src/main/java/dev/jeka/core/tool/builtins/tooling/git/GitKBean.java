@@ -1,7 +1,8 @@
-package dev.jeka.core.tool.builtins.git;
+package dev.jeka.core.tool.builtins.tooling.git;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.api.tooling.git.JkGit;
+import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;

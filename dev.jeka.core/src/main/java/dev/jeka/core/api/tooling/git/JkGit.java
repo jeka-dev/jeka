@@ -1,4 +1,4 @@
-package dev.jeka.core.api.tooling;
+package dev.jeka.core.api.tooling.git;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkAbstractProcess;

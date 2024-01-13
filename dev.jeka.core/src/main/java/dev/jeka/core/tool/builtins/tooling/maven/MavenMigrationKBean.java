@@ -1,9 +1,9 @@
-package dev.jeka.core.tool.builtins.maven;
+package dev.jeka.core.tool.builtins.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkMvn;
-import dev.jeka.core.api.tooling.JkPom;
+import dev.jeka.core.api.tooling.maven.JkMvn;
+import dev.jeka.core.api.tooling.maven.JkPom;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;

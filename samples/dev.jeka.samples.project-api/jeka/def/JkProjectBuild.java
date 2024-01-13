@@ -11,7 +11,7 @@ import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 import java.nio.charset.StandardCharsets;
@@ -100,10 +100,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                 .configureRuntimeDependencies(deps -> deps
                         .minus("org.codehaus.plexus:plexus-container-default")
                         .and("com.h2database:h2:2.2.224")
-                )
-                .manifest
-                    .addMainAttribute("Build-by", "JeKa")
-                    .addMainAttribute("BBuild-time", LocalDateTime.now().toString());
+                );
 
         // Control on publication
         project.mavenPublication

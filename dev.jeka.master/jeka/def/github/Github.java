@@ -1,7 +1,7 @@
 package github;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
@@ -25,7 +25,7 @@ public class Github extends KBean {
             "which describe content of all releases.")
     public void publishGhRelease() throws IOException {
         JkGit git = JkGit.of();
-        if (git.getCurrentBranch().equals("master")) {
+        if ("master".equals(git.getCurrentBranch())) {
             JkLog.trace("Current branch is not master. Don't release.");
             return;  // only publish release from master branch
         }

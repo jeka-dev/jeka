@@ -1,6 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.tooling.JkPom;
+import dev.jeka.core.api.tooling.maven.JkPom;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -237,7 +237,7 @@ public final class JkVersionProvider {
                     JkCoordinateFileProxy bomFile = JkCoordinateFileProxy.of(repos, bom);
                     return JkPom.of(bomFile.get()).getVersionProvider();
                 })
-                .reduce(this, (versionProvider1, versionProvider2) -> versionProvider1.and(versionProvider2));
+                .reduce(this, JkVersionProvider::and);
         return new JkVersionProvider(provider.map, new LinkedHashSet<>());
     }
 

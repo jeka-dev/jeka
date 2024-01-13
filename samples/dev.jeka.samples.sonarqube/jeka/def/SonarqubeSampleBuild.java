@@ -1,12 +1,12 @@
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.sonarqube.JkSonarqube;
 
 /**

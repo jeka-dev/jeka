@@ -1,11 +1,10 @@
 package dev.jeka.core.api.depmanagement;
 
-import dev.jeka.core.api.tooling.JkMvn;
+import dev.jeka.core.api.tooling.maven.JkMvn;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@SuppressWarnings("javadoc")
 public class JkProjectDependencyRunner {
 
     public void test() {

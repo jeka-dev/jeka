@@ -1,7 +1,7 @@
-package dev.jeka.core.api.tooling;
+package dev.jeka.core.api.tooling.maven;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkDependencyExclusion;
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.util.*;

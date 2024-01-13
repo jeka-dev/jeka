@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.api.tooling.git.JkGit;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.PROD;
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.TEST;
@@ -140,9 +139,8 @@ public class JkProjectFlatFacade {
         configureCompileDependencies(addFun);
         String[] groupAndNames = Arrays.stream(moduleDescriptors)
                 .map(JkCoordinate::of)
-                .map(coodinate -> coodinate.getModuleId().getColonNotation())
-                .collect(Collectors.toList())
-                .toArray(new String[0]);
+                .map(coordinate -> coordinate.getModuleId().getColonNotation())
+                .toArray(String[]::new);
         UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, groupAndNames);
         return configureRuntimeDependencies(minusFun);
     }

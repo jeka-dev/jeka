@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.ide;
+package dev.jeka.core.tool.builtins.tooling.ide;
 
 
 import dev.jeka.core.api.depmanagement.JkDependency;
@@ -70,12 +70,8 @@ public final class EclipseKBean extends KBean {
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);
             classpathGenerator.setUsePathVariables(this.useVarPath);
-            this.attributes.entrySet().forEach(entry -> {
-                classpathGenerator.addAttributes(entry.getKey(), entry.getValue());
-            });
-            this.accessRules.entrySet().forEach(entry -> {
-                classpathGenerator.addAccessRules(entry.getKey(), entry.getValue());
-            });
+            this.attributes.forEach(classpathGenerator::addAttributes);
+            this.accessRules.forEach(classpathGenerator::addAccessRules);
             final String result = classpathGenerator.generate();
             final Path dotClasspath = getBaseDir().resolve(".classpath");
             JkUtilsPath.write(dotClasspath, result.getBytes(StandardCharsets.UTF_8));

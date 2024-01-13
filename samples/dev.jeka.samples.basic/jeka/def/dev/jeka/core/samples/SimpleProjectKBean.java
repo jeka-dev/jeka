@@ -11,8 +11,8 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.maven.MavenMigrationKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenMigrationKBean;
 
 
 /**
@@ -20,7 +20,6 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
  * is not meant to be consumed by end-user but as a dependency of other Java projects.<p>
  *
  * @author Jerome Angibaud
- * @formatter:off
  */
 public class SimpleProjectKBean extends KBean {
 

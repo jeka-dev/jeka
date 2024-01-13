@@ -1,4 +1,4 @@
-package dev.jeka.core.api.tooling;
+package dev.jeka.core.api.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.utils.JkUtilsIterable;

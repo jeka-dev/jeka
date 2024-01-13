@@ -1,5 +1,6 @@
 package dev.jeka.core.api.tooling;
 
+import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public class JkGitRunner {
         System.out.println("*" + result + "*");
 
         System.out.println("--------");
-        System.out.println(JkGit.of().getCommitMessagesSinceLastTag());
+        System.out.println(dev.jeka.core.api.tooling.git.JkGit.of().getCommitMessagesSinceLastTag());
     }
 
 }

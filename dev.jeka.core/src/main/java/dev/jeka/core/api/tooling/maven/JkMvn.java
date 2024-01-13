@@ -1,4 +1,4 @@
-package dev.jeka.core.api.tooling;
+package dev.jeka.core.api.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
@@ -20,6 +20,7 @@ public final class JkMvn implements Runnable {
     private final static String MVN_CMD = mvnCmd();
 
     /** Returns <code>true</code> if Maven is installed on the machine running this code. */
+    // TODO rework
     public static final boolean INSTALLED = MVN_CMD != null;
 
     private static String mvnCmd() {
@@ -74,21 +75,21 @@ public final class JkMvn implements Runnable {
      * in different strings, don't use white space to separate words. Ex :
      * withCommand("deleteArtifacts", "install", "-U").
      */
-    public final JkMvn commands(String... args) {
+    public JkMvn commands(String... args) {
         return new JkMvn(jkProcess.addParams(args));
     }
 
     /**
      * Shorthand for #withCommand("deleteArtifacts", "package").
      */
-    public final JkMvn cleanPackage() {
+    public JkMvn cleanPackage() {
         return commands("deleteArtifacts", "package");
     }
 
     /**
      * Shorthand for #withCommand("deleteArtifacts", "install").
      */
-    public final JkMvn cleanInstall() {
+    public JkMvn cleanInstall() {
         return commands("deleteArtifacts", "install");
     }
 
@@ -106,7 +107,7 @@ public final class JkMvn implements Runnable {
     /**
      * Append a "-U" force update to the list of parameters
      */
-    public final JkMvn withForceUpdate(boolean flag) {
+    public JkMvn withForceUpdate(boolean flag) {
         if (flag) {
             return new JkMvn(this.jkProcess.addParams("-U"));
         }
@@ -116,7 +117,7 @@ public final class JkMvn implements Runnable {
     /**
      * Append or remove a "-X" verbose to the list of parameters
      */
-    public final JkMvn withVerbose(boolean flag) {
+    public JkMvn withVerbose(boolean flag) {
         if (flag) {
             return new JkMvn(this.jkProcess.addParams("-X"));
         }

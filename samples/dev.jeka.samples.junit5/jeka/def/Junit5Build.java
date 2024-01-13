@@ -4,8 +4,8 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
@@ -15,13 +15,13 @@ import java.nio.file.Path;
 
 /**
  * This build class illustrates how to use directly JUnit5 Platform API.
- *
+ * <p>
  * To use JUnit5 Platform API in the build class, you need to declare *plateform-launcher* library on
  * the def classpath as done below.
- *
+ * <p>
  * Normally, for most of cases, you won't need it has the Jeka API are yet powerful enough to customize
  * most of the testing scenario.
- *
+ * <p>
  * There is 2 points where you can add *junit5 native* instructions from a {@link JkTestProcessor} :
  * <ul>
  *     <li>getEngineBehavior().setLauncherConfigurer()</li>

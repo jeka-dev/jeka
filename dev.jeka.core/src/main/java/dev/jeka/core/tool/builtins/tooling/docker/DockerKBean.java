@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.tools;
+package dev.jeka.core.tool.builtins.tooling.docker;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
@@ -91,10 +91,9 @@ public class DockerKBean extends KBean {
 
     private void configureForSelfApp(SelfAppKBean selfAppKBean) {
         JkLog.info("Configure DockerKBean for SelAppKBean " + selfAppKBean);
-        final String effectiveName = !JkUtilsString.isBlank(dockerImageName)
+        this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
                 : computeImageName(selfAppKBean.getModuleId(), selfAppKBean.getVersion(), selfAppKBean.getBaseDir());
-        this.dockerImageName = effectiveName;
         this.jvmOptions = JkUtilsString.nullToEmpty(selfAppKBean.jvmOptions);
         this.programArgs = JkUtilsString.nullToEmpty(selfAppKBean.programArgs);
 
@@ -108,10 +107,9 @@ public class DockerKBean extends KBean {
     private void configureForProject(ProjectKBean projectKBean) {
         JkLog.info("Configure DockerKBean for ProjectKBean " + projectKBean.project);
         JkProject project = projectKBean.project;
-        final String effectiveName = !JkUtilsString.isBlank(dockerImageName)
+        this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
                 : computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
-        this.dockerImageName = effectiveName;
         this.jvmOptions = JkUtilsString.nullToEmpty(projectKBean.run.jvmOptions);
         this.programArgs = JkUtilsString.nullToEmpty(projectKBean.run.programArgs);
         this.customize(dockerBuild -> dockerBuild.adaptTo(project));

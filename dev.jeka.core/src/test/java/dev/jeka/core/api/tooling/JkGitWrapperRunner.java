@@ -1,6 +1,7 @@
 package dev.jeka.core.api.tooling;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.git.JkGit;
 
 import java.nio.file.Paths;
 
@@ -8,7 +9,7 @@ public class JkGitWrapperRunner {
 
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.INDENT);
-        JkGit git = JkGit.of(Paths.get(""));
+        JkGit git = dev.jeka.core.api.tooling.git.JkGit.of(Paths.get(""));
         System.out.println(git.getCurrentBranch());
         //git.exec("rev-parse --abbrev-ref HEAD");
         System.out.println(git.isWorkspaceDirty());

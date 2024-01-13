@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.repos;
+package dev.jeka.core.tool.builtins.tooling.nexus;
 
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.function.JkConsumers;

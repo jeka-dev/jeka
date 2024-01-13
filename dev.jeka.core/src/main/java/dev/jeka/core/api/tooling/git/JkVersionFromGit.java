@@ -1,9 +1,8 @@
-package dev.jeka.core.tool.builtins.git;
+package dev.jeka.core.api.tooling.git;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.JkGit;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
 
 import java.nio.file.Path;
@@ -61,7 +60,7 @@ public class JkVersionFromGit  {
         } else {
             cachedVersion =  git.getVersionFromTag(versionTagPrefix);
         }
-        JkLog.info("Version inferred from Git:" + cachedVersion);
+        JkLog.trace("Version inferred from Git : " + cachedVersion);
         return cachedVersion;
     }
 

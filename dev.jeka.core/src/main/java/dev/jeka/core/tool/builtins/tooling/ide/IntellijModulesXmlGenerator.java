@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.ide;
+package dev.jeka.core.tool.builtins.tooling.ide;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
