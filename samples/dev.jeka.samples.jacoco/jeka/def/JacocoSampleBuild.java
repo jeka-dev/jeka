@@ -47,5 +47,4 @@ public class JacocoSampleBuild extends KBean {
         build.projectKBean.test();
     }
 
-
 }
