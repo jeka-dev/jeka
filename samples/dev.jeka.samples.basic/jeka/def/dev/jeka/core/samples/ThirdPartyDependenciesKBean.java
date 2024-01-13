@@ -28,12 +28,12 @@ public class ThirdPartyDependenciesKBean extends KBean {
     @Override
     protected void init() {
         projectKBean.project.flatFacade()
-            .configureCompileDependencies(deps -> deps
+            .customizeCompileDeps(deps -> deps
                 .and(JAVAX_SERVLET_API.toCoordinate("3.1.0"))
                 .and(GUAVA.toCoordinate("30.0-jre")))
-            .configureRuntimeDependencies(compileDeps -> compileDeps
+            .customizeRuntimeDeps(compileDeps -> compileDeps
                 .minus(JAVAX_SERVLET_API))
-            .configureTestDependencies(deps -> deps
+            .customizeTestDeps(deps -> deps
                 .and(SimpleProjectKBean.JUNIT5)
                 .and(MOCKITO_ALL.toCoordinate("1.10.19")));
     }

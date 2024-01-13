@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -24,15 +25,13 @@ public class JkSpringbootJars {
      * Creates a bootable jar from class files and libraries to include in the bootable jar.
      */
     public static void createBootJar(JkPathTree classTree, List<Path> libsToInclude, JkRepoSet downloadRepo,
-                                     Path targetJar) {
+                                     Path targetJar, JkManifest originalManifest) {
         JkUtilsAssert.argument(classTree.exists(), "class dir not found " + classTree.getRoot());
         String mainClassName = findMainClassName(classTree.getRoot());
         JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(downloadRepo,
                 LOADER_COORDINATE + DEFAULT_SPRINGBOOT_VERSION);
 
-
-
-        SpringbootPacker.of(libsToInclude, loaderProxy.get(), mainClassName)
+        SpringbootPacker.of(libsToInclude, loaderProxy.get(), mainClassName, originalManifest)
                 .makeExecJar(classTree, targetJar);
     }
 

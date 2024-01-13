@@ -9,7 +9,6 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
@@ -17,6 +16,7 @@ import dev.jeka.core.tool.KBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -63,7 +63,7 @@ public abstract class SelfAppKBean extends KBean {
     @JkDoc("Launch application")
     public void runMain() {
         JkJavaProcess.ofJava(getMainClass())
-                .setClasspath(appClasspath())
+                .setClasspath(getAppClasspath())
                 .setInheritIO(true)
                 .setInheritSystemProperties(true)
                 .setDestroyAtJvmShutdown(true)
@@ -74,7 +74,7 @@ public abstract class SelfAppKBean extends KBean {
 
     @JkDoc("Launch test suite")
     public void test() {
-        JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(classTree().getRoot());
+        JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getClassTree().getRoot());
         JkTestProcessor.of()
                 .setForkingProcess(true)
                 .launch(JkClassLoader.ofCurrent().getClasspath(), testSelection);
@@ -106,13 +106,17 @@ public abstract class SelfAppKBean extends KBean {
         sb.append("Module Id    : " + this.moduleId).append("\n");
         sb.append("Version      : " + this.getVersion()).append("\n");
         sb.append("Main Class   : " + this.getMainClass()).append("\n");
+        sb.append("JVM Options  : " + jvmOptions).append("\n");
+        sb.append("Program Args : " + programArgs).append("\n");
         sb.append("Class Files  : ").append("\n");
-        this.classTree().getRelativeFiles().stream()
+        this.getClassTree().getRelativeFiles().stream()
                 .forEach(path -> sb.append("  " + path + "\n"));
         sb.append("Classpath    : ").append("\n");
-        this.appClasspath().forEach(path -> sb.append("  " + path + "\n"));
-        sb.append("JVM Options  : " + jvmOptions).append("\n");
-        sb.append("Program Args : " + programArgs);
+        this.getAppClasspath().forEach(path -> sb.append("  " + path + "\n"));
+        sb.append("Manifest     : ").append("\n");
+        Arrays.stream(getManifest().asString().split("\n"))
+                .forEach(line -> sb.append("  " + line + "\n"));
+
         JkLog.info(sb.toString());
     }
 
@@ -210,7 +214,7 @@ public abstract class SelfAppKBean extends KBean {
     /**
      * Returns the application classpath. This contains class dir + libraries.
      */
-    public List<Path> appClasspath() {
+    public List<Path> getAppClasspath() {
         return getRuntime().getExportedClasspath().getEntries();
     }
 
@@ -218,10 +222,10 @@ public abstract class SelfAppKBean extends KBean {
      * Returns a List of Path objects representing the libraries used by the application.
      * It contains the classpath minus the class dir.
      */
-    public List<Path> libs() {
-        return appClasspath().stream()
+    public List<Path> getLibs() {
+        return getAppClasspath().stream()
                 .filter(entry -> !entry.toAbsolutePath().normalize()
-                        .equals(classTree().getRoot().toAbsolutePath().normalize()))
+                        .equals(getClassTree().getRoot().toAbsolutePath().normalize()))
                 .collect(Collectors.toList());
     }
 
@@ -230,7 +234,7 @@ public abstract class SelfAppKBean extends KBean {
      * The tree includes all files in the root directory and its subdirectories,
      * except for files matching the specified patterns.
      */
-    public JkPathTree classTree() {
+    public JkPathTree getClassTree() {
         return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR))
                 .andMatching(false, "_*", "_*/**", ".*", "**/.*");
     }
@@ -240,11 +244,11 @@ public abstract class SelfAppKBean extends KBean {
      * The manifest includes the created by attribute,
      * the main class attribute, and the build JDK attribute.
      */
-    protected JkManifest manifest() {
+    public JkManifest getManifest() {
         JkManifest manifest = JkManifest.of()
-                .addMainAttribute(JkManifest.CREATED_BY, "JeKa")
+                .addImplementationInfo(getModuleId(), getVersion())
                 .addMainClass(getMainClass())
-                .addMainAttribute(JkManifest.BUILD_JDK, "" + JkUtilsJdk.runningMajorVersion());
+                .addBuildInfo();
         manifestCustomizers.accept(manifest);
         return manifest;
     }
@@ -256,9 +260,9 @@ public abstract class SelfAppKBean extends KBean {
 
     private void fatJar(Path jarPath) {
         JkLog.startTask("Making fat jar. It may takes a while ... ");
-        JkJarPacker.of(classTree())
-                .withManifest(manifest())
-                .makeFatJar(jarPath, libs(), JkPathMatcher.of());
+        JkJarPacker.of(getClassTree())
+                .withManifest(getManifest())
+                .makeFatJar(jarPath, getLibs(), JkPathMatcher.of());
         JkLog.endTask();
         JkLog.info("Jar created at : " + jarPath);
     }

@@ -26,10 +26,10 @@ public class SpringbootBuild extends KBean {
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .flatFacade()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 )
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
                 );
         project.compilation.layout.setResources(JkPathTreeSet.ofRoots("resources"));

@@ -160,7 +160,8 @@ public final class JkSpringbootProject {
         JkLog.startTask("Packaging bootable jar");
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
         final List<Path> embeddedJars = project.packaging.resolveRuntimeDependenciesAsFiles();
-        JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target);
+        JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target,
+                project.packaging.getManifest());
         JkLog.endTask();
     }
 

@@ -24,7 +24,7 @@ class SonarqubeBuild extends KBean {
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .mixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.mavenPublication

@@ -22,8 +22,8 @@ public class JkProjectTest {
     public void getTestDependencies_containsCompileDependencies() {
         JkProject javaProject = JkProject.of()
                 .flatFacade()
-                .configureCompileDependencies(deps -> deps.and("a:a"))
-                .configureTestDependencies(deps -> deps.and("b:b"))
+                .customizeCompileDeps(deps -> deps.and("a:a"))
+                .customizeTestDeps(deps -> deps.and("b:b"))
                 .getProject();
         JkDependencySet compileDeps = javaProject
                 .compilation.getDependencies();
@@ -72,14 +72,14 @@ public class JkProjectTest {
     @Test
     public void getTestDependencies_usingSetTestDependency_ok() {
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
                 .setModuleId("my:project").setVersion("MyVersion")
@@ -97,7 +97,7 @@ public class JkProjectTest {
         JkVersionProvider versionProvider = JkVersionProvider.of()
                 .and("javax.servlet:javax.servlet-api", "4.0.1");
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .andVersionProvider(versionProvider)
                         .and("javax.servlet:javax.servlet-api")
                 ).getProject();
@@ -109,14 +109,14 @@ public class JkProjectTest {
     @Test
     public void getTestDependencies_usingAddTestDependency_ok() {
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
@@ -135,14 +135,14 @@ public class JkProjectTest {
     @Test
     public void getPublishMavenDependencies_ok() {
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 )
@@ -157,14 +157,14 @@ public class JkProjectTest {
     @Test
     public void getPublishIvyDependencies_ok() {
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
@@ -180,14 +180,14 @@ public class JkProjectTest {
     public void runDisplayDependencies() {
         //JkLog.setDecorator(JkLog.Style.INDENT);
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
@@ -211,7 +211,7 @@ public class JkProjectTest {
         Path base = top.resolve("base");
         JkProject baseProject = JkProject.of();
         baseProject.setBaseDir(base).flatFacade()
-                .configureCompileDependencies(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.14")))
+                .customizeCompileDeps(deps -> deps.and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.14")))
                 .getProject()
                     .compilation
                         .layout

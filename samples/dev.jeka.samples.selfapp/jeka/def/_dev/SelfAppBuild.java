@@ -2,9 +2,9 @@ package _dev;
 
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.core.tool.builtins.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
-import dev.jeka.core.tool.builtins.tools.DockerKBean;
+import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
 @JkInjectClasspath("org.springframework.boot:spring-boot-starter-test")

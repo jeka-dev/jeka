@@ -9,12 +9,12 @@ public class PureApi {
         // A project with ala Maven layout (src/main/javaPlugin, src/test/javaPlugin, ...)
         JkProject coreProject = JkProject.of().flatFacade()
                 .setBaseDir("../dev.jeka.samples.basic")
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                     .and("junit:junit:4.13")).getProject();
 
         // A project depending on the first project + Guava
         JkProject dependerProject = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                     .and("com.google.guava:guava:30.0-jre")
                     .and(coreProject.toDependency()))
                 .setModuleId("mygroup:depender")

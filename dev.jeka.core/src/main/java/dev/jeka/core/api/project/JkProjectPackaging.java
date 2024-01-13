@@ -1,7 +1,6 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
@@ -136,7 +135,6 @@ public class JkProjectPackaging {
         }
         JkJarPacker.of(classDir)
                 .withManifest(getManifest())
-                .withExtraFiles(getFatJarExtraContent())
                 .makeJar(target);
     }
 
@@ -281,23 +279,10 @@ public class JkProjectPackaging {
     }
 
     private JkManifest defaultManifest() {
-        JkManifest manifest = JkManifest.of();
-        JkModuleId moduleId = project.getModuleId();
-
-        String version = project.getVersion().getValue();
-        if (moduleId != null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
-        }
-        if (version != null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
-        }
-        String mainClass = this.getMainClass();
-        if (mainClass != null) {
-            manifest.addMainClass(mainClass);
-        }
-        manifest.addCBuildInfo();
-        return manifest;
+        return JkManifest.of()
+                .addImplementationInfo(project.getModuleId(), project.getVersion())
+                .addMainClass(this.getMainClass())
+                .addBuildInfo();
     }
 
     /*

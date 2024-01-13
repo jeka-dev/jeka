@@ -7,7 +7,6 @@ import dev.jeka.core.api.java.JkJarWriter;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.IOException;
@@ -16,6 +15,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class SpringbootPacker {
@@ -30,11 +30,11 @@ class SpringbootPacker {
 
     private final Path bootLoaderJar;
 
-    private final JkManifest manifestToMerge;
+    private final JkManifest originalManifest;
 
     private final String mainClassName;
 
-    private SpringbootPacker(List<Path> nestedLibs, Path loader, String mainClassNeme, JkManifest manifestToMerge) {
+    private SpringbootPacker(List<Path> nestedLibs, Path loader, String mainClassNeme, JkManifest originalManifest) {
         super();
         this.nestedLibs = nestedLibs.stream()  // sanitize
                 .filter(path -> {
@@ -50,12 +50,13 @@ class SpringbootPacker {
                 .distinct()
                 .collect(Collectors.toList());
         this.bootLoaderJar = loader;
-        this.manifestToMerge = manifestToMerge;
+        this.originalManifest = originalManifest;
         this.mainClassName = mainClassNeme;
     }
 
-    public static final SpringbootPacker of(List<Path> nestedLibs, Path loader, String mainClassName) {
-        return new SpringbootPacker(nestedLibs, loader, mainClassName, null);
+    public static final SpringbootPacker of(List<Path> nestedLibs, Path loader, String mainClassName,
+                                            JkManifest originalManifest) {
+        return new SpringbootPacker(nestedLibs, loader, mainClassName, originalManifest);
     }
 
     public static String getJarLauncherClass(String springbootVersion) {
@@ -76,9 +77,8 @@ class SpringbootPacker {
         JkJarWriter jarWriter = JkJarWriter.of(target);
 
         // Manifest
-        Path path = classTree.getRoot().resolve("META-INF/MANIFEST.MF");
-        final JkManifest manifest = Files.exists(path) ? JkManifest.of().loadFromFile(path) : JkManifest.of();
-        jarWriter.writeManifest(createManifest(manifest, mainClassName).getManifest());
+        augmentManifest(mainClassName);;
+        jarWriter.writeManifest(originalManifest.getManifest());
 
 
         // Add nested jars
@@ -120,19 +120,15 @@ class SpringbootPacker {
                 });
     }
 
-    private JkManifest createManifest(JkManifest original, String startClassName) {
+    private void augmentManifest(String startClassName) {
         String springbootVersion = findSpringbootVersion(this.nestedLibs);
         String launcherJarClass = getJarLauncherClass(springbootVersion);
-        JkManifest result = JkUtilsObject.firstNonNull(original, JkManifest.of())
+        originalManifest
                 .addMainClass(launcherJarClass)
                 .addMainAttribute("Start-Class", startClassName)
                 .addMainAttribute("Spring-Boot-Version", springbootVersion)
                 .addMainAttribute("Spring-Boot-Classes", "BOOT-INF/classes/")
                 .addMainAttribute("Spring-Boot-Lib", "BOOT-INF/lib/");
-        if (this.manifestToMerge != null) {
-            result.merge(manifestToMerge.getManifest());
-        }
-        return result;
     }
 
     private static String findSpringbootVersion(List<Path> libs) {

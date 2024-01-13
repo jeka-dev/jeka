@@ -275,7 +275,7 @@ public class DependencySetResolutionIT {
         JkProject project = JkProject.of()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .flatFacade()
-                    .configureCompileDependencies(deps -> deps
+                    .customizeCompileDeps(deps -> deps
                         .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE)
                         .and("org.openjfx:javafx-controls:linux:11.0.2", JkTransitivity.NONE)
                         .and("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE))
@@ -293,7 +293,7 @@ public class DependencySetResolutionIT {
         JkProject project = JkProject.of()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);

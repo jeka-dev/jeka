@@ -26,7 +26,7 @@ public class FatJarKBean extends KBean {
         JkProject project = load(ProjectKBean.class).project;
         project.flatFacade().setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
         project.flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:22.0")
                         .and(sampleBuild.projectKBean.project.toDependency()));
     }

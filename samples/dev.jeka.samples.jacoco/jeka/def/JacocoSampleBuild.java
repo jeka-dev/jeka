@@ -29,7 +29,7 @@ public class JacocoSampleBuild extends KBean {
         JkJacoco.ofVersion("0.8.11")
                 .configureForAndApplyTo(project);
        project.flatFacade()
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 );
     }

@@ -33,10 +33,10 @@ class SonarqubeSampleBuild extends KBean {
     protected void init() {
         projectKBean.project.flatFacade()
                 .setJvmTargetVersion(JkJavaVersion.V8)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                     .and("com.github.djeang:vincer-dom:1.4.0")
                 )
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                     .and(JkPopularLibs.JUNIT_5 + ":5.8.2")
                 );
         sonarqube = JkSonarqube.ofEmbedded()

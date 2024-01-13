@@ -24,7 +24,7 @@ public class NodeJsBuild extends KBean {
                 .setModuleId("dev.jeka:nodejs-plugin")
                 .mixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.mavenPublication

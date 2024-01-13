@@ -26,7 +26,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
             .flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("org.apache.httpcomponents.client5:httpclient5:5.1.3"))
                 .getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())

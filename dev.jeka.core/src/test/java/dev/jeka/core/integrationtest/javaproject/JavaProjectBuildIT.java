@@ -24,12 +24,12 @@ public class JavaProjectBuildIT {
 
         JkProject baseProject = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0")).getProject();
 
         JkProject coreProject = JkProject.of().setBaseDir(root.resolve("core")).flatFacade()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps.and(baseProject.toDependency()))
+                .customizeCompileDeps(deps -> deps.and(baseProject.toDependency()))
                 .getProject();
 
         JkResolveResult resolveResult = coreProject.compilation.resolveDependencies();
@@ -54,14 +54,14 @@ public class JavaProjectBuildIT {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 )
                 .setModuleId("my:project").setVersion("MyVersion-snapshot")
@@ -80,14 +80,14 @@ public class JavaProjectBuildIT {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0")
                         .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and("org.postgresql:postgresql:42.2.19")
                         .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                         .minus("javax.servlet:javax.servlet-api"))
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and("org.mockito:mockito-core:2.10.0")
                 ).getProject();
 

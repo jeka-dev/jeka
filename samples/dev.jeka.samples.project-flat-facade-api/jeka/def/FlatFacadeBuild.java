@@ -52,7 +52,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                 )
 
                 // Fine control on project dependencies
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:22.0").withLocalExclusions(
                                     "com.google.j2objc:j2objc-annotations",
                                     "com.google.code.findbugs")
@@ -64,14 +64,14 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                         .and("com.fasterxml.jackson.core:jackson-core", JkTransitivity.NONE)
                         .and("com.fasterxml.jackson.core:jackson-databind", JkTransitivity.RUNTIME)
                 )
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDeps(deps -> deps
                         .and(Hint.before(JkCoordinateDependency.of("com.github.djeang:vincer-dom")),
                                 "commons-codec:commons-codec:1.16.0")
                         .minus("org.projectlombok:lombok")
                         .withMoving(Hint.first(), "com.fasterxml.jackson.core:jackson-databind")
 
                 )
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and(JkPopularLibs.JUNIT_5.toCoordinate("5.8.1"))
                 )
 

@@ -24,7 +24,7 @@ public class JacocoBuild extends KBean {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
                 .setModuleId("dev.jeka:jacoco-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
         project.mavenPublication

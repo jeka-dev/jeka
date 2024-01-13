@@ -23,7 +23,7 @@ class KotlinBuild extends KBean {
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
             .mixResourcesAndSources()
-            .configureCompileDependencies(deps -> deps
+            .customizeCompileDeps(deps -> deps
                     .andFiles(JkLocator.getJekaJarPath())
             );
 

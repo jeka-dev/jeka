@@ -1,6 +1,8 @@
 package dev.jeka.core.api.java;
 
 
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -19,7 +21,7 @@ import java.util.jar.Manifest;
 
 
 /**
- * Helper class to read and write Manifest from and to file.
+ * Wrapper class on {@link Manifest} providing utility methods.
  *
  * @author Jerome Angibaud
  */
@@ -158,14 +160,32 @@ public final class JkManifest{
      * This method returns this object.
      */
     public JkManifest addMainClass(String value) {
-        return addMainAttribute(Name.MAIN_CLASS, value);
+        if (value != null) {
+            addMainAttribute(Name.MAIN_CLASS, value);
+        }
+        return this;
+    }
+
+    /**
+     * Adds <i>implementation-*</i> information to the JkManifest.
+     *t.
+     */
+    public JkManifest addImplementationInfo(JkModuleId moduleId, JkVersion version) {
+        if (moduleId != null) {
+            this.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
+            this.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
+        }
+        if (!version.isUnspecified()) {
+            this.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
+        }
+        return this;
     }
 
     /**
      * Fills this manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
-    public JkManifest addCBuildInfo() {
+    public JkManifest addBuildInfo() {
         return this
                 .addMainAttribute(CREATED_BY, "JeKa " + JkInfo.getJekaVersion())
                 .addMainAttribute(BUILT_BY, System.getProperty("user.name"))
