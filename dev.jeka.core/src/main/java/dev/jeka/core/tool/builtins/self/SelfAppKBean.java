@@ -103,6 +103,8 @@ public abstract class SelfAppKBean extends KBean {
     @JkDoc("Displays info about this SelfApp")
     public void info() {
         StringBuilder sb = new StringBuilder();
+        sb.append("Module Id    : " + this.moduleId).append("\n");
+        sb.append("Version      : " + this.getVersion()).append("\n");
         sb.append("Main Class   : " + this.getMainClass()).append("\n");
         sb.append("Class Files  : ").append("\n");
         this.classTree().getRelativeFiles().stream()

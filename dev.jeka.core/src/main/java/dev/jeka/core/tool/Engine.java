@@ -107,8 +107,9 @@ final class Engine {
 
         // If def compilation failed, we ignore the defaultBeanClass cause it may be absent
         // from the classpath.
-        boolean ignoreDefaultBeanNotFound = !result.compileFailedProjects.getEntries().isEmpty()
-                && Environment.standardOptions.ignoreCompileFail;
+        boolean ignoreDefaultBeanNotFound = result == null ||
+                (!result.compileFailedProjects.getEntries().isEmpty() &&
+                Environment.standardOptions.ignoreCompileFail);
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.kbeanName(), ignoreDefaultBeanNotFound);
@@ -119,7 +120,7 @@ final class Engine {
         JkLog.endTask();
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
-        if (!result.compileFailedProjects.getEntries().isEmpty()) {
+        if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {
             JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
                     .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");

@@ -25,7 +25,7 @@ public class GitKBean extends KBean {
 
     private transient JkVersionFromGit versionFromGit;
 
-    @JkDoc("Performs a dirty check first, put a tag at the HEAD and push it to remote." +
+    @JkDoc("Performs a dirty check first, put a tag at the HEAD and push it to the remote repo." +
             " The user will be prompted to enter the tag name.")
     public void tagRemote() {
         JkGit aGit = git.copy().setLogCommand(false).setLogWithJekaDecorator(false);

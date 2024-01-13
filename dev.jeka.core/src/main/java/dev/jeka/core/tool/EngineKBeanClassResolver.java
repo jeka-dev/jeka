@@ -69,11 +69,11 @@ final class EngineKBeanClassResolver {
                     .stream().distinct().collect(Collectors.toList());
             List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
             if (matchingClassNames.isEmpty()) {  // maybe the cache is staled -> rescan classpath
-                JkLog.trace("KBean '%s' does not match any class names on %s. Rescan classpath", beanName, beanClasses);
+                JkLog.trace("KBean '%s' does not match any class names on %s. Rescan classpath", beanName, beanClassNames);
                 reloadGlobalBeanClassNames();
                 matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
                 if (matchingClassNames.isEmpty()) {
-                    JkLog.trace("KBean '%s' does not match any class namecs on %s. Fail.", beanName, beanClasses);
+                    JkLog.trace("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClassNames);
                 }
             }
             Class<? extends KBean> selected = loadUniqueClass(matchingClassNames, beanName,
@@ -180,11 +180,16 @@ final class EngineKBeanClassResolver {
 
     private void reloadGlobalBeanClassNames() {
         long t0 = System.currentTimeMillis();
-        ClassLoader classLoader = JkClassLoader.ofCurrent().get();
+        final ClassLoader classLoader;
+        final boolean ignoreParentClassLoader;
         if (classpath != null) {
 
             // If classpath is set, then sources has been compiled in work dir
             classLoader = new URLClassLoader(classpath.toUrls());
+            ignoreParentClassLoader = true; // everything should be on classpath
+        } else {
+            classLoader = JkClassLoader.ofCurrent().get();
+            ignoreParentClassLoader = false; // fail on project without jeka/def if true
         }
         cachedGlobalBeanClassName = CLASSPATH_SCANNER.findClassesInheritingOrAnnotatesWith(
                 classLoader,
@@ -192,8 +197,9 @@ final class EngineKBeanClassResolver {
                 path -> true,
                 path -> true,
                 true,
-                true);
+                ignoreParentClassLoader);
         if (JkLog.isVerbose()) {
+            JkLog.trace("Scanned classloader :  " + JkClassLoader.of(classLoader).getClasspath());
             JkLog.trace("All KBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
             cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
         }

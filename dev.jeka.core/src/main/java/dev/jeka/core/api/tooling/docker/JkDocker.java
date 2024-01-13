@@ -8,7 +8,6 @@ import dev.jeka.core.api.system.JkProcess;
  */
 public class JkDocker {
 
-
     /**
      * Executes the specified Docker command with the given parameters and returns the result.
      *
@@ -43,6 +42,13 @@ public class JkDocker {
                 .setLogCommand(true)
                 .setInheritIO(true)
                 .setFailOnError(false);
+    }
+
+    /**
+     * Checks if Docker is present on the system.
+     */
+    public static boolean isPresent() {
+        return exec("version").hasSucceed();
     }
 
 
