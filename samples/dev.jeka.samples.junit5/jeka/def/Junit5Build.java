@@ -16,10 +16,10 @@ import java.nio.file.Path;
 /**
  * This build class illustrates how to use directly JUnit5 Platform API.
  * <p>
- * To use JUnit5 Platform API in the build class, you need to declare *plateform-launcher* library on
+ * To use JUnit5 Platform API in the build class, you need to declare *platform-launcher* library on
  * the def classpath as done below.
  * <p>
- * Normally, for most of cases, you won't need it has the Jeka API are yet powerful enough to customize
+ * Normally, for most of the cases, you won't need it has the JeKa API are yet powerful enough to customize
  * most of the testing scenario.
  * <p>
  * There is 2 points where you can add *junit5 native* instructions from a {@link JkTestProcessor} :
