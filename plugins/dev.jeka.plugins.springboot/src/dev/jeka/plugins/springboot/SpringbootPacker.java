@@ -129,7 +129,6 @@ class SpringbootPacker {
                 .addMainAttribute("Spring-Boot-Version", springbootVersion)
                 .addMainAttribute("Spring-Boot-Classes", "BOOT-INF/classes/")
                 .addMainAttribute("Spring-Boot-Lib", "BOOT-INF/lib/");
-        result.addContextualInfo();
         if (this.manifestToMerge != null) {
             result.merge(manifestToMerge.getManifest());
         }

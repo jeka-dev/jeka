@@ -209,7 +209,7 @@ class MasterBuild extends KBean {
 
     static class ShowVersion {
         public static void main(String[] args) {
-            System.out.println(JkInit.instanceOf(GitKBean.class, args).version());
+            System.out.println(JkInit.instanceOf(GitKBean.class, args).gerVersionFromGit().getVersion());
         }
     }
 

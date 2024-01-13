@@ -49,7 +49,7 @@ public class JkVersionFromGit  {
     /**
      * Gets the current version either from commit message if specified nor from git tag.
      */
-    public String version() {
+    public String getVersion() {
         if (cachedVersion != null) {
             return cachedVersion;
         }
@@ -65,15 +65,15 @@ public class JkVersionFromGit  {
         return cachedVersion;
     }
 
-    public JkVersion versionAsJkVersion() {
-        return JkVersion.of(version());
+    public JkVersion getVersionAsJkVersion() {
+        return JkVersion.of(getVersion());
     }
 
     /**
      * Configures the specified project to use git version for publishing and adds git info to the manifest.
      */
     public void handleVersioning(JkProject project) {
-        project.setVersionSupplier(this::versionAsJkVersion);
+        project.setVersionSupplier(this::getVersionAsJkVersion);
         JkGit git = JkGit.of(project.getBaseDir());
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
         project.packaging.manifestCustomizer.add(manifest -> manifest
@@ -84,8 +84,8 @@ public class JkVersionFromGit  {
     /**
      * Configures the specified selfAppKBean to use git version for publishing and adds git info to the manifest.
      */
-    public void handleVersion(SelfAppKBean selfAppKBean) {
-        selfAppKBean.setVersionSupplier(this::versionAsJkVersion);
+    public void handleVersioning(SelfAppKBean selfAppKBean) {
+        selfAppKBean.setVersionSupplier(this::getVersionAsJkVersion);
         JkGit git = JkGit.of(selfAppKBean.getBaseDir());
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
         selfAppKBean.manifestCustomizers.add(manifest -> manifest

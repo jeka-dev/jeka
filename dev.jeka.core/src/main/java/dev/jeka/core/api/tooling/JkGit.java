@@ -3,6 +3,7 @@ package dev.jeka.core.api.tooling;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -276,6 +277,37 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .exec()
                 .getOutputMultiline();
         return tags.isEmpty() ? null : tags.get(0);
+    }
+
+    /**
+     * Tags the remote repository with a new tag.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     * <li> Prints the existing tags on the origin.
+     * <li> Checks if the Git workspace is dirty. If it is, it prints an error message and returns.
+     * <li> Checks if the current tracking branch is aligned with the remote branch. If it is not, it prints an error message and returns.
+     * <li> Prompts the user to enter a new tag.
+     * <li> Tags the current commit with the new tag and pushes the tag to the remote repository.
+     * </ul>
+     *
+     * Note: It is necessary to have a clean Git workspace and a tracking branch aligned with the remote branch
+     *       in order to tag the remote repository.
+     */
+    public void tagRemote() {
+        JkLog.info("Existing tags on origin :");
+        this.copy().setLogWithJekaDecorator(true).setParams("ls<li>remote", "--tag", "--sort=creatordate", "origin").exec();
+        if (this.isWorkspaceDirty()) {
+            JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
+            return;
+        }
+        if (!this.isSyncWithRemote()) {
+            JkLog.info("The current tracking branch is not aligned with the remote. Please update/push and retry.");
+            return;
+        }
+        JkLog.info("You are about to tag commit : " + this.getCurrentCommit());
+        final String newTag = JkPrompt.ask("Enter new tag : ");
+        this.setLogCommand(true).tagAndPush(newTag);
     }
 
     @Override

@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
@@ -154,10 +153,8 @@ public final class JkSpringbootProject {
         }
         JkLog.startTask("Packaging bootable jar");
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
-        final JkPathSequence embeddedJars = dependencyResolver.resolve(
-                project.packaging.getRuntimeDependencies().normalised(project.getDuplicateConflictStrategy()))
-                .getFiles();
-        JkSpringbootJars.createBootJar(classTree, embeddedJars.getEntries(), dependencyResolver.getRepos(), target);
+        final List<Path> embeddedJars = project.packaging.resolveRuntimeDependenciesAsFiles();
+        JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target);
         JkLog.endTask();
     }
 

@@ -283,6 +283,7 @@ public class JkProjectPackaging {
     private JkManifest defaultManifest() {
         JkManifest manifest = JkManifest.of();
         JkModuleId moduleId = project.getModuleId();
+
         String version = project.getVersion().getValue();
         if (moduleId != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
@@ -295,6 +296,7 @@ public class JkProjectPackaging {
         if (mainClass != null) {
             manifest.addMainClass(mainClass);
         }
+        manifest.addCBuildInfo();
         return manifest;
     }
 

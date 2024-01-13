@@ -2,6 +2,7 @@ package dev.jeka.core.api.java;
 
 
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
@@ -10,7 +11,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -33,6 +34,8 @@ public final class JkManifest{
      * The JDK version who was running while building this manifest.
      */
     public static final String BUILD_JDK = "Build-Jdk";
+
+    public static final String BUILD_TIME = "Build-Time";
 
     /**
      * The software that has created this manifest. Normally "Jeka" along its
@@ -143,20 +146,6 @@ public final class JkManifest{
     }
 
     /**
-     * Adds the main class entry by auto-detecting the class holding the main method.
-     */
-    public JkManifest addAutodetectMain(Path classDir) {
-        ClassLoader classLoader = JkUrlClassLoader.of(classDir).get();
-        List<String> classes = JkInternalClasspathScanner.of().findClassesWithMainMethod(classLoader);
-        if (!classes.isEmpty()) {
-            this.addMainClass(classes.get(0));
-        } else {
-            throw new IllegalStateException("No class with main method found.");
-        }
-        return this;
-    }
-
-    /**
      * @see #addMainAttribute(Name, String)
      */
     public JkManifest addMainAttribute(String key, String value) {
@@ -176,10 +165,12 @@ public final class JkManifest{
      * Fills this manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
-    public JkManifest addContextualInfo() {
-        return addMainAttribute(CREATED_BY, "Jeka").addMainAttribute(BUILT_BY,
-                System.getProperty("user.name")).addMainAttribute(BUILD_JDK,
-                        System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+    public JkManifest addCBuildInfo() {
+        return this
+                .addMainAttribute(CREATED_BY, "JeKa " + JkInfo.getJekaVersion())
+                .addMainAttribute(BUILT_BY, System.getProperty("user.name"))
+                .addMainAttribute(BUILD_JDK, System.getProperty("java.vendor") + " " + System.getProperty("java.version"))
+                .addMainAttribute(BUILD_TIME, ZonedDateTime.now().toString());
     }
 
     /**
