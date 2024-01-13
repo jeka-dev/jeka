@@ -95,8 +95,14 @@ public final class JkSpringbootProject {
 
         project.packaging.setMainClass(JkProjectPackaging.AUTO_FIND_MAIN_CLASS);
         project.packaging.setMainClassFinder(() -> {
-            project.compilation.runIfNeeded();
-            return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());
+            try {
+                return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());
+            } catch (IllegalStateException e) {
+                JkLog.info("No Springboot application class found in class dir. Force recompile and re-search.");
+                project.compilation.runIfNeeded();
+                return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());
+            }
+
         });
 
         return this;

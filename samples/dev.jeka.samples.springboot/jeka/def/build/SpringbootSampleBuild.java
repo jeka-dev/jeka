@@ -1,6 +1,7 @@
 package build;
 
 import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.ide.IntellijKBean;
@@ -40,8 +41,7 @@ public class SpringbootSampleBuild extends KBean {
                 .addTestDeps(
                         "org.springframework.boot:spring-boot-starter-test"
                 )
-                .setModuleId("dev.jeka:samples-springboot")
-                .setVersion("1.0-SNAPSHOT");
+                .setModuleId("dev.jeka:samples-springboot");
         JkSpringbootProject.of(projectKBean.project)
                 .configure()
                 .includeParentBom("3.2.0");
@@ -56,6 +56,10 @@ public class SpringbootSampleBuild extends KBean {
         System.out.println(this.aa);
         cleanPack();
         springbootKBean.load(ProjectKBean.class).runJar();
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(SpringbootSampleBuild.class, args).projectKBean.info();
     }
 
 }

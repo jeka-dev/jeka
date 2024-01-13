@@ -30,6 +30,8 @@ public class JkSpringbootJars {
         JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(downloadRepo,
                 LOADER_COORDINATE + DEFAULT_SPRINGBOOT_VERSION);
 
+
+
         SpringbootPacker.of(libsToInclude, loaderProxy.get(), mainClassName)
                 .makeExecJar(classTree, targetJar);
     }
