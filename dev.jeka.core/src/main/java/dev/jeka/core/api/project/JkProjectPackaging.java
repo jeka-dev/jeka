@@ -7,9 +7,11 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Files;
@@ -17,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Responsible to create binary, Javadoc and Source jars.
@@ -27,28 +30,51 @@ public class JkProjectPackaging {
         REGULAR, FAT
     }
 
-    private final JkProject project;
+    /**
+     * This constant represents the value "auto" and is used in {@link #setMainClass(String)}
+     * to indicate that the main class should be discovered automatically..
+     */
+    public static final String AUTO_FIND_MAIN_CLASS = "auto";
 
-    public final JkManifest manifest;
+    /**
+     * Consumer container for customizing the manifest that will bbe included in constructed Jar files.
+     *
+     */
+    public final JkConsumers<JkManifest> manifestCustomizer = JkConsumers.of();
+
+    /**
+     * Provides fluent interface for producing Javadoc.
+     */
+    public final JkJavadocProcessor javadocProcessor;
+
+    private final JkProject project;
 
     private JkPathTreeSet fatJarExtraContent = JkPathTreeSet.ofEmpty();
 
     private final PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
-    public final JkJavadocProcessor javadocProcessor;
+    String mainClass;
+
+    private Supplier<String> mainClassFinder;
 
     private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
 
     private JkResolveResult cachedJkResolveResult;
 
-     JkProjectPackaging(JkProject project) {
+    JkProjectPackaging(JkProject project) {
         this.project = project;
-        this.manifest = JkManifest.of();
         this.javadocProcessor = JkJavadocProcessor.of();
+        this.mainClassFinder = this::findMainClass;
     }
 
     public Path getJavadocDir() {
         return project.getOutputDir().resolve("javadoc");
+    }
+
+    public JkManifest getManifest() {
+         JkManifest manifest = defaultManifest();
+         manifestCustomizer.accept(manifest);
+         return manifest;
     }
 
     /**
@@ -108,9 +134,8 @@ public class JkProjectPackaging {
             JkLog.warn("No class dir found : skip bin jar.");
             return;
         }
-        addManifestDefaults();
         JkJarPacker.of(classDir)
-                .withManifest(manifest)
+                .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeJar(target);
     }
@@ -131,9 +156,8 @@ public class JkProjectPackaging {
         project.testing.runIfNeeded();
         JkLog.startTask("Packing fat jar...");
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
-        addManifestDefaults();
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
-                .withManifest(manifest)
+                .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
         JkLog.endTask();
@@ -146,6 +170,36 @@ public class JkProjectPackaging {
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.of("fat", "jar"));
         createFatJar(path);
         return path;
+    }
+
+    /**
+     * Sets the main class name to use in #runXxx and for building docker images.
+     * The value <code>auto</code> means that it will e auto-discovered.
+     */
+    public JkProjectPackaging setMainClass(String mainClass) {
+        this.mainClass = mainClass;
+        return this;
+    }
+
+    /**
+     * Sets the main class finder for this project. The main class finder is responsible for
+     * providing the name of the main class to use in the project. This can be used for running
+     * the project or building Docker images.
+     */
+    public JkProjectPackaging setMainClassFinder(Supplier<String> mainClassFinder) {
+        this.mainClassFinder = mainClassFinder;
+        return this;
+    }
+
+    /**
+     * Returns the main class name of the project. This might be <code>null</code> for
+     * library projects.
+     */
+    public String getMainClass() {
+        if (AUTO_FIND_MAIN_CLASS.equals(mainClass)) {
+            return mainClassFinder.get();
+        }
+        return this.mainClass;
     }
 
     /**
@@ -196,41 +250,52 @@ public class JkProjectPackaging {
      * Retrieves the runtime dependencies as a sequence of files.
      */
     public List<Path> resolveRuntimeDependenciesAsFiles() {
-        return project.compilation.resolveDependenciesAsFiles();
+        return project.dependencyResolver.resolveFiles(getRuntimeDependencies());
     }
 
     /**
-     * This method is meant to be consumed by an artifact producer that does not
-     * produce artifact file itself (that's why the <code>target</code> parameter is not used.
-     * It Just copies the manifest in the classDir director.
+     * Copies the manifest file to the class directory.
      */
-    public void includeManifestInClassDir() {
+    public void copyManifestInClassDir() {
         project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
         Path classDir = project.compilation.layout.resolveClassDir();
         if (!Files.exists(classDir)) {
             JkLog.warn("No class dir found.");
         }
-        addManifestDefaults();
-        manifest.writeToStandardLocation(project.compilation.layout.resolveClassDir());
+        getManifest().writeToStandardLocation(project.compilation.layout.resolveClassDir());
+    }
+
+    String declaredMainClass() {
+        return mainClass;
+    }
+
+    private String findMainClass() {
+        JkUrlClassLoader ucl = JkUrlClassLoader.of(project.compilation.layout.resolveClassDir(),
+                ClassLoader.getSystemClassLoader());
+        return ucl.toJkClassLoader().findUniqueMainClass();
     }
 
     private JkPathTreeSet getFatJarExtraContent() {
         return this.fatJarExtraContent;
     }
 
-    private void addManifestDefaults() {
-        JkModuleId jkModuleId = project.getModuleId();
+    private JkManifest defaultManifest() {
+        JkManifest manifest = JkManifest.of();
+        JkModuleId moduleId = project.getModuleId();
         String version = project.getVersion().getValue();
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_TITLE) == null && jkModuleId != null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, jkModuleId.getName());
+        if (moduleId != null) {
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
+            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
         }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VENDOR) == null && jkModuleId != null) {
-            manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, jkModuleId.getGroup());
-        }
-        if (manifest.getMainAttribute(JkManifest.IMPLEMENTATION_VERSION) == null && version != null) {
+        if (version != null) {
             manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         }
+        String mainClass = this.getMainClass();
+        if (mainClass != null) {
+            manifest.addMainClass(mainClass);
+        }
+        return manifest;
     }
 
     /*
@@ -247,5 +312,7 @@ public class JkProjectPackaging {
         javadocProcessor.make(classpath, sources, getJavadocDir());
         return true;
     }
+
+
 
 }

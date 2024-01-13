@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -63,6 +64,11 @@ public final class SpringbootKBean extends KBean {
         } else {
             JkLog.trace("SelfAppKBean found in runtime. Assume SpringbootKBean is for configuring SelfApp. ");
             SelfAppKBean selfApp = optionalSelfAppKBean.get();
+
+            selfApp.setMainClass(SelfAppKBean.AUTO_FIND_MAIN_CLASS);
+            selfApp.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
+                    getBaseDir().resolve(JkConstants.DEF_BIN_DIR)));
+
             selfApp.setJarMaker(path -> JkSpringbootJars.createBootJar(
                     selfApp.classTree(), selfApp.libs(), getRuntime().getDependencyResolver().getRepos(), path)
             );
@@ -79,12 +85,12 @@ public final class SpringbootKBean extends KBean {
         );
 
         // Configure Docker KBean to add port mapping on run
-        // We need to force loading, cause dockerKBean may not be present in runtime when springboot Kean is initialized
-        // This breaks docker configuration for projectKBean, sowe enable this only for selfKBean
-        if (optionalSelfAppKBean.isPresent()) {
-            DockerKBean dockerKBean = load(DockerKBean.class);
-            dockerKBean.dockerBuild.setExposedPorts(8080);
-        }
+        DockerKBean dockerKBean = load(DockerKBean.class);
+        dockerKBean.customize(dockerBuild -> {
+            if (dockerBuild.getExposedPorts().isEmpty()) {
+                dockerBuild.setExposedPorts(8080);
+            }
+        });
 
     }
 

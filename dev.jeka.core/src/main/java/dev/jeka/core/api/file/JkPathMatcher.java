@@ -144,7 +144,7 @@ public final class JkPathMatcher implements PathMatcher {
             return ACCEPT_ALL;
         }
         return new JkPathMatcher(new OrMatcher(this.matcher, other),
-                this.label + " || " + other.toString());
+                this.label + " || " + other);
     }
 
     public JkPathMatcher and(boolean positive, FileSystem fileSystem, String ...patterns) {
@@ -195,7 +195,7 @@ public final class JkPathMatcher implements PathMatcher {
 
     // ------------------------------------- Other
 
-    public JkPathMatcher reversed() {
+    public JkPathMatcher negate() {
         PathMatcher reversedMatcher = path -> !this.matcher.matches(path);
         return new JkPathMatcher(reversedMatcher, "Reverse of " + this.label);
     }

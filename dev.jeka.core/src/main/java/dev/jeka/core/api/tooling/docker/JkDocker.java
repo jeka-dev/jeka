@@ -1,37 +1,49 @@
 package dev.jeka.core.api.tooling.docker;
 
+import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
 
-import java.util.*;
-
+/**
+ * Class providing utility methods for executing Docker commands.
+ */
 public class JkDocker {
 
-    public static void run(String command, String ...tokens) {
-        JkProcess.ofCmdLine(String.format("docker run " + command, tokens))
+
+    /**
+     * Executes the specified Docker command with the given parameters and returns the result.
+     *
+     * @param dockerCommand The Docker command to execute as 'run', 'tag', 'version', ....
+     * @param params        The parameters to pass to the Docker command.
+     * @return The result of the command execution.
+     */
+    public static JkProcResult exec(String dockerCommand, String ...params) {
+        return prepareExec(dockerCommand, params).exec();
+    }
+
+    /**
+     * Executes the specified Docker command with the given parameters expressed with
+     * a space separated string of arguments.
+     *
+     * @param dockerCommand The space separated String representing the arguments.
+     * @param cmdLine       The parameters to pass to the Docker command as a space separated string (e.g. "-X -e run").
+     * @see JkDocker#exec(String, String...)
+     * @see JkProcess#addParamsAsString(String)
+     */
+    public static JkProcResult execCmdLine(String dockerCommand, String cmdLine) {
+        return prepareExec(dockerCommand).addParamsAsString(cmdLine).exec();
+    }
+
+    /**
+     * Prepares a JkProcess object to execute a Docker command with the given parameters..
+     */
+    public static JkProcess prepareExec(String dockerCommand, String ...params) {
+        return JkProcess.of("docker")
+                .addParams(dockerCommand)
+                .addParams(params)
                 .setLogCommand(true)
                 .setInheritIO(true)
-                .setFailOnError(false)
-                .exec();
+                .setFailOnError(false);
     }
 
-    public static class Run {
 
-        private final Map<Integer, Integer> portMapping = new HashMap<>();
-
-        private final List<String> extraOptions = new LinkedList<>();
-
-        public Run addExtraOptions(String ...options) {
-            extraOptions.addAll(Arrays.asList(options));
-            return this;
-        }
-
-        public Run addPortMapping(int hostPort, int containerPort) {
-            portMapping.put(hostPort, containerPort);
-            return this;
-        }
-
-        public void run() {
-
-        }
-    }
 }

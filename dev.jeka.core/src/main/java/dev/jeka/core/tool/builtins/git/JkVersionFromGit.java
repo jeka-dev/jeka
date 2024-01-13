@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.tool.builtins.self.SelfAppKBean;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,18 +70,29 @@ public class JkVersionFromGit  {
     }
 
     /**
-     * Configures the specified project to use git version for publishing and adds git info to the manifest..
+     * Configures the specified project to use git version for publishing and adds git info to the manifest.
      */
     public void handleVersioning(JkProject project) {
         project.setVersionSupplier(this::versionAsJkVersion);
-        //project.packaging.manifest.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version);
         JkGit git = JkGit.of(project.getBaseDir());
-        String commit = git.getCurrentCommit();
-        if (git.isWorkspaceDirty()) {
-            commit = "dirty-" + commit;
-        }
-        project.packaging.manifest.addMainAttribute("Git-commit", commit);
-        project.packaging.manifest.addMainAttribute("Git-branch", git.getCurrentBranch());
+        String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
+        project.packaging.manifestCustomizer.add(manifest -> manifest
+                .addMainAttribute("Git-commit", commit)
+                .addMainAttribute("Git-branch", git.getCurrentBranch()));
     }
+
+    /**
+     * Configures the specified selfAppKBean to use git version for publishing and adds git info to the manifest.
+     */
+    public void handleVersion(SelfAppKBean selfAppKBean) {
+        selfAppKBean.setVersionSupplier(this::versionAsJkVersion);
+        JkGit git = JkGit.of(selfAppKBean.getBaseDir());
+        String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
+        selfAppKBean.manifestCustomizers.add(manifest -> manifest
+                .addMainAttribute("Git-commit", commit)
+                .addMainAttribute("Git-branch", git.getCurrentBranch()));
+    }
+
+
 
 }

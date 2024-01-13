@@ -218,10 +218,10 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public class JkRunOptions {
 
         @JkDoc("JVM options to use when running generated jar")
-        public String jvmOptions;
+        public String jvmOptions = "";
 
         @JkDoc("Program arguments to use when running generated jar")
-        public String programArgs;
+        public String programArgs = "";
 
         @JkDoc("If true, the resolved runtime classpath will be used when running the generated jar. " +
                 "If the generated jar is a Uber jar or contains all the needed dependencies, leave it to 'false'")

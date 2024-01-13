@@ -6,10 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -254,6 +251,15 @@ public final class JkManifest{
         JkUtilsPath.createFileSafely(file);
         try (OutputStream outputStream = Files.newOutputStream(file)) {
             manifest.write(outputStream);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String asString() {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            manifest.write(baos);
+            return baos.toString("UTF-8");
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

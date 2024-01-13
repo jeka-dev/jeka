@@ -8,6 +8,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
@@ -90,12 +91,14 @@ public final class JkSpringbootProject {
         // This is more efficient to keep the structure exploded to have efficient image layering.
         // In this case, just copy manifest in class dir is enough.
         if (!createBootJar && !createOriginalJar && !createWarFile) {
-            project.packActions.append("Include manifest", project.packaging::includeManifestInClassDir);
+            project.packActions.append("Include manifest", project.packaging::copyManifestInClassDir);
         }
 
-        if (project.getMainClass() == null) {
-            project.setMainClass(JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir()));
-        }
+        project.packaging.setMainClass(JkProjectPackaging.AUTO_FIND_MAIN_CLASS);
+        project.packaging.setMainClassFinder(() -> {
+            project.compilation.runIfNeeded();
+            return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());
+        });
 
         return this;
     }

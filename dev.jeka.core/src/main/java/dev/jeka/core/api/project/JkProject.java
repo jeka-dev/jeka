@@ -13,10 +13,8 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
@@ -28,6 +26,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -50,29 +49,9 @@ import java.util.function.Supplier;
  */
 public class JkProject implements JkIdeSupportSupplier {
 
+
+
     private static final String DEFAULT_ENCODING = "UTF-8";
-
-    private Path baseDir = Paths.get("");
-
-    private String outputDir = JkConstants.OUTPUT_PATH;
-
-    private JkJavaVersion jvmTargetVersion;
-
-    private String sourceEncoding = DEFAULT_ENCODING;
-
-    private String mainClass;
-
-    private JkModuleId moduleId;
-
-    private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
-
-    private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
-
-    private boolean includeTextAndLocalDependencies = true;
-
-    private LocalAndTxtDependencies cachedTextAndLocalDeps;
-
-    private URL dependencyTxtUrl;
 
     /**
      * Provides conventional path where artifact files are supposed to be generated.
@@ -127,6 +106,26 @@ public class JkProject implements JkIdeSupportSupplier {
      * Defines extra actions to execute when {@link JkProject#clean()} is invoked.
      */
     public final JkRunnables cleanExtraActions = JkRunnables.of();
+
+    private Path baseDir = Paths.get("");
+
+    private String outputDir = JkConstants.OUTPUT_PATH;
+
+    private JkJavaVersion jvmTargetVersion;
+
+    private String sourceEncoding = DEFAULT_ENCODING;
+
+    private JkModuleId moduleId;
+
+    private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
+
+    private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
+
+    private boolean includeTextAndLocalDependencies = true;
+
+    private LocalAndTxtDependencies cachedTextAndLocalDeps;
+
+    private URL dependencyTxtUrl;
 
     private JkProject() {
         artifactLocator = artifactLocator();
@@ -229,22 +228,6 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Sets the main class name to use in #runXxx and for building docker images.
-     */
-    public JkProject setMainClass(String mainClass) {
-        this.mainClass = mainClass;
-        return this;
-    }
-
-    /**
-     * Returns the main class name of the project. This might be <code>null</code> for
-     * library projects.
-     */
-    public String getMainClass() {
-        return this.mainClass;
-    }
-
-    /**
      * Returns the strategy to use when twi dependencies with distinct versions
      * are declared in the project dependencies.
      */
@@ -268,7 +251,7 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public JkJavaProcess prepareRunMain() {
         compilation.runIfNeeded();
-        return JkJavaProcess.ofJava(actualMainClass())
+        return JkJavaProcess.ofJava(this.packaging.getMainClass())
                 .setClasspath(this.packaging.resolveRuntimeDependenciesAsFiles())
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
@@ -309,17 +292,6 @@ public class JkProject implements JkIdeSupportSupplier {
         return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps);
     }
 
-    /**
-     * Creates a {@link JkDockerBuild} to build a docker image of the application.
-     */
-    public JkDockerBuild prepareDockerImage() {
-        compilation.runIfNeeded();
-        return JkDockerBuild.of()
-                .setClasses(JkPathTree.of(compilation.layout.resolveClassDir()))
-                .setClasspath(packaging.resolveRuntimeDependenciesAsFiles())
-                .setMainClass(actualMainClass());
-    }
-
     // -------------------------- Other -------------------------
 
     @Override
@@ -349,21 +321,35 @@ public class JkProject implements JkIdeSupportSupplier {
         JkDependencySet compileDependencies = compilation.getDependencies();
         JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
         JkDependencySet testDependencies = testing.compilation.getDependencies();
-        StringBuilder builder = new StringBuilder("Project Location : " + this.getBaseDir().toAbsolutePath().normalize() + "\n")
-            .append("Production sources : " + compilation.layout.getInfo()).append("\n")
-            .append("Test sources : " + testing.compilation.layout.getInfo()).append("\n")
-            .append("Java Version : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
-            .append("Source Encoding : " + sourceEncoding + "\n")
-            .append("Source file count : " + compilation.layout.resolveSources()
+        StringBuilder builder = new StringBuilder()
+            .append("ModuleId                         : " + moduleId + "\n")
+            .append("Version                          : " + getVersion() + "\n")
+            .append("Project Location                 : " + this.getBaseDir().toAbsolutePath().normalize() + "\n")
+            .append("Production Sources               : " + compilation.layout.getInfo()).append("\n")
+            .append("Test Sources                     : " + testing.compilation.layout.getInfo()).append("\n")
+            .append("Java Version                     : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
+            .append("Source Encoding                  : " + sourceEncoding + "\n")
+            .append("Source File Count                : " + compilation.layout.resolveSources()
                     .count(Integer.MAX_VALUE, false) + "\n")
-            .append("Download Repositories : " + dependencyResolver.getRepos() + "\n")
-            .append("Declared Compile Dependencies : " + compileDependencies.getEntries().size() + " elements.\n");
+            .append("Test Source file count           : " + testing.compilation.layout.resolveSources()
+                        .count(Integer.MAX_VALUE, false) + "\n")
+            .append("Main Class Name                  : " + packaging.declaredMainClass() + "\n")
+            .append("Download Repositories            : " + dependencyResolver.getRepos() + "\n")
+            .append("Declared Compile Dependencies    : " + compileDependencies.getEntries().size() + " elements.\n");
         compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
-        builder.append("Declared Runtime Dependencies : " + runtimeDependencies
+        builder
+            .append("Declared Runtime Dependencies    : " + runtimeDependencies
                 .getEntries().size() + " elements.\n");
         runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
-        builder.append("Declared Test Dependencies : " + testDependencies.getEntries().size() + " elements.\n");
+        builder
+            .append("Declared Test Dependencies       : " + testDependencies.getEntries().size() + " elements.\n");
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+
+        builder
+            .append("Manifest                         : \n" );
+         Arrays.stream(packaging.getManifest().asString().split("\n"))
+                 .forEach(line -> builder.append("  " + line + "\n"));
+
         if (mavenPublication.getModuleId() != null) {
             builder.append(mavenPublication.info());
         }
@@ -596,14 +582,7 @@ public class JkProject implements JkIdeSupportSupplier {
         );
     }
 
-    private String actualMainClass() {
-        if (mainClass != null) {
-            return mainClass;
-        }
-        compilation.runIfNeeded();
-        JkUrlClassLoader ucl = JkUrlClassLoader.of(this.compilation.layout.resolveClassDir());
-        return ucl.toJkClassLoader().findUniqueMainClass();
-    }
+
 
     private static JkMavenPublication mavenPublication(JkProject project) {
         return JkMavenPublication.of(project.artifactLocator)
@@ -618,5 +597,7 @@ public class JkProject implements JkIdeSupportSupplier {
                 .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, project.packaging::createSourceJar)
                 .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, project.packaging::createJavadocJar);
     }
+
+
 
 }

@@ -2,7 +2,9 @@ package dev.jeka.core.api.tooling.docker;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -26,9 +28,9 @@ public class JkDockerBuild {
 
     private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
 
-    private static final Predicate<Path> IS_CLASS = path -> path.toString().endsWith(".class");
-
     private static final String EXTRA_FILE_DIR = "extra-files";
+
+    private static final JkPathMatcher CLASS_MATCHER = JkPathMatcher.of("**/*.class", "*.class");
 
     private JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
 
@@ -59,6 +61,23 @@ public class JkDockerBuild {
      */
     public static JkDockerBuild of() {
         return new JkDockerBuild();
+    }
+
+    /**
+     * Creates a JkDockerBuild instance for the specified JkProject.
+     */
+    public static JkDockerBuild of(JkProject project) {
+        return of().adaptTo(project);
+    }
+
+    /**
+     * Adapts this JkDockerBuild instance to build the specified JkProject.
+     */
+    public JkDockerBuild adaptTo(JkProject project) {
+        return this
+                .setClasses(JkPathTree.of(project.compilation.layout.resolveClassDir()))
+                .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
+                .setMainClass(project.packaging.getMainClass());
     }
 
     /**
@@ -144,10 +163,16 @@ public class JkDockerBuild {
      * Adds a port to be exposed by the container.
      */
     public JkDockerBuild setExposedPorts(Integer ...ports) {
-        System.out.println("------------- setExposed ports" + Arrays.asList(ports) );
         this.exposedPorts.clear();
         this.exposedPorts.addAll(Arrays.asList(ports));
         return this;
+    }
+
+    /**
+     * Returns an unmodifiable list of exposed ports in the Docker image.
+     */
+    public List<Integer> getExposedPorts() {
+        return Collections.unmodifiableList(exposedPorts);
     }
 
     /**
@@ -157,9 +182,7 @@ public class JkDockerBuild {
     public void buildImage(String imageName) {
         JkPathTree.of(tempBuildDir).deleteContent();
 
-        List<Path> sanitizedLibs = classpath.stream()
-                .filter(path -> !Files.isDirectory(path))
-                .collect(Collectors.toList());
+        List<Path> sanitizedLibs = sanitizedLibs();
 
         // Handle extra build steps
         String extraStatements = extraBuildSteps.stream()
@@ -204,10 +227,10 @@ public class JkDockerBuild {
         JkUtilsPath.createDirectories(tempBuildDir.resolve("classes"));
 
         // Copy classes to docker-build/classes
-        classes.andMatching("**/*.class", "*.class").copyTo(tempBuildDir.resolve("classes"));
+        classFiles().copyTo(tempBuildDir.resolve("classes"));
 
         // Copy resources to docker-build/resources
-        //classes.andMatching(false, "**/*.class", "*.class").copyTo(tempBuildDir.resolve("resources"));
+        resourceFiles().copyTo(tempBuildDir.resolve("resources"));
 
         // Copy classpath.txt
         String classpathTxt = createClasspathArs(sanitizedLibs);
@@ -215,7 +238,7 @@ public class JkDockerBuild {
 
         // Copy Snapshot libs
         sanitizedLibs.stream()
-                .filter(path -> CHANGING_LIB.test(path))
+                .filter(CHANGING_LIB)
                 .map(JkPathFile::of)
                 .forEach(file -> file.copyToDir(tempBuildDir.resolve("libs")));
 
@@ -237,21 +260,39 @@ public class JkDockerBuild {
      * Returns a formatted string that contains information about this Docker build.
      */
     public String info() {
+
         StringBuilder sb = new StringBuilder();
-        sb.append("Base Image Name  : " + this.baseImage).append("\n");
-        sb.append("Main class       : " + this.mainClass).append("\n");
-        sb.append("Classes          : " + this.classes).append("\n");
-        sb.append("Classpath        : " ).append("\n");
-        this.classpath.forEach(item -> sb.append("  " + item + "\n"));
-        sb.append("Extra Files      :").append("\n");
+        sb.append("Base Image Name   : " + this.baseImage).append("\n");
+
+        sb.append("Exposed Ports     : " + this.exposedPorts).append("\n");
+
+        sb.append("Extra Build Steps : ").append("\n");
+        this.extraBuildSteps.forEach(item -> sb.append("  " + item).append("\n"));
+
+        sb.append("Extra Files       :").append("\n");
         this.extraFiles.entrySet().forEach(entry
                 -> sb.append("  " + entry.getValue()  + " -> " + entry.getKey()+ "\n"));
+
         sb.append("Agents            : ").append("\n");
         this.agents.entrySet().forEach(entry
                 -> sb.append("  " + entry.getKey()  + "=" + entry.getValue() + "\n"));
-        sb.append("Exposed Ports     : " + this.exposedPorts).append("\n");
-        sb.append("Extra Build Steps : ").append("\n");
-        this.extraBuildSteps.forEach(item -> sb.append("  " + item).append("\n"));
+
+        List<Path> libs = sanitizedLibs();
+        sb.append("Released libs     :").append("\n");
+        libs.stream().filter(CHANGING_LIB.negate()).forEach(item -> sb.append("  " + item + "\n"));
+        sb.append("Snapshot libs     :").append("\n");
+        libs.stream().filter(CHANGING_LIB).forEach(item -> sb.append("  " + item + "\n"));
+
+        sb.append("Resources Files   : " ).append("\n");
+        resourceFiles().getRelativeFiles().forEach(path -> sb.append("  " + path + "\n"));
+
+        sb.append("Class Files       : " ).append("\n");
+        classFiles().getRelativeFiles().forEach(path -> sb.append("  " + path + "\n"));
+
+        sb.append("Main class        : " + this.mainClass).append("\n");
+        sb.append("Classpath         : " ).append("\n");
+        this.classpath.forEach(item -> sb.append("  " + item + "\n"));
+
         return sb.toString();
     }
 
@@ -266,6 +307,20 @@ public class JkDockerBuild {
                     .reduce("-p ", (init, port) -> init  + port + ":" + port + " ");
         }
         return portMapping;
+    }
+
+    private JkPathTree classFiles() {
+        return classes.andMatcher(CLASS_MATCHER);
+    }
+
+    private JkPathTree resourceFiles() {
+        return classes.andMatcher(CLASS_MATCHER.negate());
+    }
+
+    private List<Path> sanitizedLibs() {
+        return classpath.stream()
+                .filter(path -> !Files.isDirectory(path))
+                .collect(Collectors.toList());
     }
 
     private String createClasspathArs(List<Path> sanitizedLibs) {

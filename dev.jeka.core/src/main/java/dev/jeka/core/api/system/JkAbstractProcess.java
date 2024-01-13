@@ -100,6 +100,16 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
+     * Adds the specified parameters as a space separated args to the command line.
+     * The string will be parsed in an array of parameters.
+     *
+     * @param params the parameters as a string (e.g '-X -e run').
+     */
+    public T addParamsAsString(String params) {
+        return addParams(JkUtilsString.parseCommandline(params));
+    }
+
+    /**
      * Adds specified parameters to the command line
      */
     public T addParams(String... parameters) {
@@ -130,9 +140,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * @see  #addParams(String...)
      */
     public T addParams(Collection<String> parameters) {
-        List<String> params = new LinkedList<>(parameters);
-        params.removeAll(Collections.singleton(null));
-        this.parameters.addAll(params);
+        List<String> sanitizedParams = sanitized(parameters);
+        List<String> params = new LinkedList<>(this.parameters);
+        params.addAll(sanitizedParams);
+        this.parameters = params;
         return (T) this;
     }
 
@@ -141,9 +152,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * Any null values in the parameters collection will be removed before adding.
      */
     public T addParamsFirst(Collection<String> parameters) {
-        List<String> params = new LinkedList<>(parameters);
-        params.removeAll(Collections.singleton(null));
-        this.parameters.addAll(0, params);
+        List<String> sanitizedParams = sanitized(parameters);
+        List<String> params = new LinkedList<>(sanitizedParams);
+        params.addAll(this.parameters);
+        this.parameters = params;
         return (T) this;
     }
 
@@ -291,7 +303,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         if (line.length() > 150) {
             line = String.join("\n", parameters);
         }
-        return line;
+        return command + " " + line;
     }
 
     /**
@@ -318,6 +330,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
             JkLog.startTask("Start program : " + workingDirName + " " + this);
         }
+        if (inheritIO) {
+            JkLog.getOutPrintStream().flush();
+            JkLog.getErrPrintStream().flush();
+        }
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
@@ -337,6 +353,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
             JkLog.info("Start program asynchronously : " + workingDirName + commands);
+        }
+        if (inheritIO) {
+            JkLog.getOutPrintStream().flush();
+            JkLog.getErrPrintStream().flush();
         }
         Process process = runProcessAsync(commands);
 
@@ -441,6 +461,13 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             builder.directory(workingDir.toAbsolutePath().normalize().toFile());
         }
         return builder;
+    }
+
+    private static List<String> sanitized(Collection<String> params) {
+        return params.stream()
+                .filter(Objects::nonNull)
+                .filter(param -> !param.isEmpty())
+                .collect(Collectors.toList());
     }
 
 }

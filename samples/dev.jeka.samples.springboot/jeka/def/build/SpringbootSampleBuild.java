@@ -1,7 +1,6 @@
 package build;
 
 import dev.jeka.core.api.tooling.intellij.JkIml;
-import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.ide.IntellijKBean;
@@ -57,13 +56,6 @@ public class SpringbootSampleBuild extends KBean {
         System.out.println(this.aa);
         cleanPack();
         springbootKBean.load(ProjectKBean.class).runJar();
-    }
-
-    // Clean, compile, test and generate springboot application jar
-    public static void main(String[] args) {
-        SpringbootSampleBuild build = JkInit.instanceOf(SpringbootSampleBuild.class, args, "-ls=BRACE");
-        build.cleanPack();
-        //build.load(ProjectKBean.class).publishLocal();
     }
 
 }

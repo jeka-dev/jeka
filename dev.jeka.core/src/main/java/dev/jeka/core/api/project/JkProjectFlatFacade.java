@@ -104,6 +104,17 @@ public class JkProjectFlatFacade {
         return this;
     }
 
+    /**
+     * Sets the main class name to use in #runXxx and for building docker images.
+     * The value <code>auto</code> means that it will e auto-discovered.
+     * 
+     * @see JkProjectPackaging#setMainClass(String)
+     */
+    public JkProjectFlatFacade setMainClass(String mainClass) {
+        project.packaging.setMainClass(mainClass);
+        return this;
+    }
+
     public JkProjectFlatFacade configureCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         project.compilation.configureDependencies(modifier);
         return this;

@@ -71,10 +71,7 @@ public class CoreBuild extends KBean {
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
         project
             .packaging
-                .manifest
-                    .addMainClass("dev.jeka.core.tool.Main");
-        project
-            .packaging
+                .setMainClass("dev.jeka.core.tool.Main")
                 .javadocProcessor
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp");

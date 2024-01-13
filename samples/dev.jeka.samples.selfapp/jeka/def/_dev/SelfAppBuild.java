@@ -29,10 +29,11 @@ class SelfAppBuild extends SelfAppKBean {
     protected void init() {
 
         // configure image
-        load(DockerKBean.class).dockerBuild
+        load(DockerKBean.class).customize(dockerBuild -> dockerBuild
                 .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
                 .addExtraFile(getBaseDir().resolve("jeka/local.properties"), "/toto.txt")
-                .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "");
+                .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
+        );
     }
 
     public void clean() {

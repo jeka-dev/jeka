@@ -1,6 +1,8 @@
 package dev.jeka.core.tool.builtins.tools;
 
-import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
@@ -11,7 +13,9 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.self.SelfAppKBean;
 
+import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @JkDoc("Build and run image based on SelfAppKBean or ProjectKBean present on the runtime. " +
         "A running Docker daemon is mandatory to use this KBean.")
@@ -26,14 +30,14 @@ public class DockerKBean extends KBean {
     /**
      * Handler on the Docker build configuration for customizing built images.
      */
-    @JkDoc(hide = true)
-    public final JkDockerBuild dockerBuild = JkDockerBuild.of();
+    private final JkConsumers<JkDockerBuild> customizer = JkConsumers.of();
 
     // Used only for running image. Not for building.
     private String jvmOptions = "";
 
     // Used only for running image. Not for building.
     private String programArgs = "";
+
 
     @Override
     protected void init() {
@@ -52,38 +56,53 @@ public class DockerKBean extends KBean {
 
     @JkDoc("Build Docker image in local registry.")
     public void build() {
-        dockerBuild.buildImage(dockerImageName);
+        dockerBuild().buildImage(dockerImageName);
     }
 
     @JkDoc("Run Docker image and wait until termination.")
     public void run() {
-        String containerName = "jeka-" + dockerImageName;
-        JkDocker.run("-it --rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" " + dockerRunParams + " --name %s %s",
-                dockerBuild.portMappingArgs(),
+        String containerName = "jeka-" + dockerImageName.replace(':', '-');
+        String args = String.format("-it --rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
+                        + dockerRunParams + " --name %s %s",
+                dockerBuild().portMappingArgs(),
                 jvmOptions,
                 programArgs,
                 containerName,
                 dockerImageName);
+        JkDocker.execCmdLine("run", args);
     }
 
     @JkDoc("Displays info about the Docker image.")
     public void info() {
-        JkLog.info("Image Name       : " + this.dockerImageName);
-        JkLog.info(this.dockerBuild.info());
+        String buildInfo = dockerBuild().info(); // May trigger a compilation to find the main class
+        JkLog.info("Image Name        : " + this.dockerImageName);
+        JkLog.info(buildInfo);
+    }
+
+    public void customize(Consumer<JkDockerBuild> dockerBuildCustomizer) {
+        customizer.add(dockerBuildCustomizer);
+    }
+
+    private JkDockerBuild dockerBuild() {
+        JkDockerBuild dockerBuild = JkDockerBuild.of();
+        customizer.accept(dockerBuild);
+        return dockerBuild;
     }
 
     private void configureForSelfApp(SelfAppKBean selfAppKBean) {
         JkLog.info("Configure DockerKBean for SelAppKBean " + selfAppKBean);
         final String effectiveName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
-                : selfAppKBean.getBaseDirName();
+                : computeImageName(selfAppKBean.getModuleId(), selfAppKBean.getVersion(), selfAppKBean.getBaseDir());
         this.dockerImageName = effectiveName;
-        this.jvmOptions = selfAppKBean.jvmOptions;
-        this.programArgs = selfAppKBean.programArgs;
-        this.dockerBuild
+        this.jvmOptions = JkUtilsString.nullToEmpty(selfAppKBean.jvmOptions);
+        this.programArgs = JkUtilsString.nullToEmpty(selfAppKBean.programArgs);
+
+        this.customize(dockerBuild ->  dockerBuild
+                .setMainClass(selfAppKBean.getMainClass())
                 .setClasses(selfAppKBean.classTree())
                 .setClasspath(selfAppKBean.appClasspath())
-                .setMainClass(selfAppKBean.actualMainClass());
+        );
     }
 
     private void configureForProject(ProjectKBean projectKBean) {
@@ -91,14 +110,28 @@ public class DockerKBean extends KBean {
         JkProject project = projectKBean.project;
         final String effectiveName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
-                : project.getBaseDir().toAbsolutePath().getFileName().toString();
+                : computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
         this.dockerImageName = effectiveName;
-        this.jvmOptions = projectKBean.run.jvmOptions;
-        this.programArgs = projectKBean.run.programArgs;
-        this.dockerBuild
-                .setClasses(JkPathTree.of(project.compilation.layout.resolveClassDir()))
-                .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
-                .setMainClass(project.getMainClass());
+        this.jvmOptions = JkUtilsString.nullToEmpty(projectKBean.run.jvmOptions);
+        this.programArgs = JkUtilsString.nullToEmpty(projectKBean.run.programArgs);
+        this.customize(dockerBuild -> dockerBuild.adaptTo(project));
+    }
+
+    private String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
+        String name;
+        if (moduleId != null) {
+            name = moduleId.toString();
+        } else {
+            name =  baseDir.toAbsolutePath().getFileName().toString();
+        }
+        return name + ":" + computeVersion(version);
+    }
+
+    private String computeVersion(JkVersion version) {
+        if (version.isSnapshot()) {
+            return "latest";
+        }
+        return version.toString();
     }
 
 }
