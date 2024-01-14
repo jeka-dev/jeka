@@ -9,6 +9,7 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
@@ -16,6 +17,7 @@ import dev.jeka.core.tool.KBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -23,18 +25,17 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @JkDoc(
-        "Experimental !!! KBean for application self-contained in jeka/def dir.\n" +
+        "KBean for application/library self-contained in jeka/def dir.\n" +
         "The application must contain a class with main method in order to : \n" +
         "  - Run application\n" +
         "  - Create bootable jar\n" +
-        "  - Create bootable fat jar, and create Docker images.\n" +
-        "  - Note : The Docker feature requires a running Docker daemon running on host machine."
+        "  - Create bootable fat jar, and create Docker images."
 )
 public abstract class SelfAppKBean extends KBean {
 
     /**
-     * This constant represents the value "auto" and is used in {@link #setMainClass(String)}
-     * to indicate that the main class should be discovered automatically..
+     * Represents the value "auto" usable in {@link #setMainClass(String)}
+     * to indicate that the main class should be discovered automatically.
      */
     public static final String AUTO_FIND_MAIN_CLASS = "auto";
 
@@ -74,7 +75,7 @@ public abstract class SelfAppKBean extends KBean {
 
     @JkDoc("Launch test suite")
     public void test() {
-        JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getClassTree().getRoot());
+        JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getAppClasses().getRoot());
         JkTestProcessor.of()
                 .setForkingProcess(true)
                 .launch(JkClassLoader.ofCurrent().getClasspath(), testSelection);
@@ -82,16 +83,16 @@ public abstract class SelfAppKBean extends KBean {
 
     @JkDoc("Create runnable fat jar.")
     public void buildJar() {
-        jarMaker.accept(jarPath());
+        jarMaker.accept(getJarPath());
     }
 
     @JkDoc("Run fat jar.")
     public void runJar() {
-        Path jarPath = jarPath();
+        Path jarPath = getJarPath();
         if (!Files.exists(jarPath)) {
             buildJar();
         }
-        JkJavaProcess.ofJavaJar(jarPath())
+        JkJavaProcess.ofJavaJar(getJarPath())
                 .setLogCommand(true)
                 .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true)
@@ -109,7 +110,7 @@ public abstract class SelfAppKBean extends KBean {
         sb.append("JVM Options  : " + jvmOptions).append("\n");
         sb.append("Program Args : " + programArgs).append("\n");
         sb.append("Class Files  : ").append("\n");
-        this.getClassTree().getRelativeFiles().stream()
+        this.getAppClasses().getRelativeFiles().stream()
                 .forEach(path -> sb.append("  " + path + "\n"));
         sb.append("Classpath    : ").append("\n");
         this.getAppClasspath().forEach(path -> sb.append("  " + path + "\n"));
@@ -123,8 +124,15 @@ public abstract class SelfAppKBean extends KBean {
     /**
      * Returns the path to the JAR file created by {@link #buildJar()} method.
      */
-    public Path jarPath() {
-        return getBaseDir().resolve(JkConstants.OUTPUT_PATH).resolve(getBaseDirName() + ".jar");
+    public Path getJarPath() {
+        return Paths.get(getJarPathBaseName() + ".jar");
+    }
+
+    /**
+     * Returns the base name of the JAR file path created by the {@link #buildJar()} method.
+     */
+    public String getJarPathBaseName() {
+        return getBaseDir().resolve(JkConstants.OUTPUT_PATH).resolve(getBaseDirName()).toString();
     }
 
     /**
@@ -222,10 +230,10 @@ public abstract class SelfAppKBean extends KBean {
      * Returns a List of Path objects representing the libraries used by the application.
      * It contains the classpath minus the class dir.
      */
-    public List<Path> getLibs() {
+    public List<Path> getAppLibs() {
         return getAppClasspath().stream()
                 .filter(entry -> !entry.toAbsolutePath().normalize()
-                        .equals(getClassTree().getRoot().toAbsolutePath().normalize()))
+                        .equals(getAppClasses().getRoot().toAbsolutePath().normalize()))
                 .collect(Collectors.toList());
     }
 
@@ -234,7 +242,7 @@ public abstract class SelfAppKBean extends KBean {
      * The tree includes all files in the root directory and its subdirectories,
      * except for files matching the specified patterns.
      */
-    public JkPathTree getClassTree() {
+    public JkPathTree getAppClasses() {
         return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR))
                 .andMatching(false, "_*", "_*/**", ".*", "**/.*");
     }
@@ -253,16 +261,47 @@ public abstract class SelfAppKBean extends KBean {
         return manifest;
     }
 
+    /**
+     * Creates a Javadoc Jar file at the specified target path.
+     */
+    public void createJavadocJar(Path target) {
+        JkUtilsPath.deleteIfExists(target);
+        Path tempFolder = JkUtilsPath.createTempDirectory("jk-self-sources");
+        JkJavadocProcessor.of()
+                .make(getAppLibs(), getAppSources().toSet(), tempFolder);
+        JkPathTree.of(tempFolder).zipTo(target);
+        JkPathTree.of(tempFolder).deleteRoot();
+    }
+
+    /**
+     * Creates a source JAR file at the specified target path.
+     */
+    public void createSourceJar(Path target) {
+        JkUtilsPath.deleteIfExists(target);
+        getAppSources().zipTo(target);
+    }
+
+    /**
+     * Returns a JkPathTree representing the application sources.
+     */
+    public JkPathTree getAppSources() {
+        return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_DIR)).withMatcher(
+                JkConstants.PRIVATE_IN_DEF_MATCHER.negate());
+    }
+
     private String findMainClass() {
         JkUrlClassLoader ucl = JkUrlClassLoader.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR));
-        return ucl.toJkClassLoader().findUniqueMainClass();
+        return ucl.toJkClassLoader().findClassesHavingMainMethod().stream()
+                .filter(candidate -> !candidate.startsWith("_"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No main class found in classpath"));
     }
 
     private void fatJar(Path jarPath) {
         JkLog.startTask("Making fat jar. It may takes a while ... ");
-        JkJarPacker.of(getClassTree())
+        JkJarPacker.of(getAppClasses())
                 .withManifest(getManifest())
-                .makeFatJar(jarPath, getLibs(), JkPathMatcher.of());
+                .makeFatJar(jarPath, getAppLibs(), JkPathMatcher.of());
         JkLog.endTask();
         JkLog.info("Jar created at : " + jarPath);
     }

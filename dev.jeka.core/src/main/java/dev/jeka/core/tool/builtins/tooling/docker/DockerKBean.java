@@ -99,7 +99,7 @@ public class DockerKBean extends KBean {
 
         this.customize(dockerBuild ->  dockerBuild
                 .setMainClass(selfAppKBean.getMainClass())
-                .setClasses(selfAppKBean.getClassTree())
+                .setClasses(selfAppKBean.getAppClasses())
                 .setClasspath(selfAppKBean.getAppClasspath())
         );
     }

@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 /**
- * Defines methods for enumerating artifacts files likely to be produced.
+ * Defines methods for enumerating and locating artifacts files likely to be produced.
  */
 public class JkArtifactLocator {
 
@@ -17,13 +17,25 @@ public class JkArtifactLocator {
         this.baseNameSupplier = baseNameSupplier;
     }
 
+    /**
+     * Creates a new JkArtifactLocator with the provided output directory supplier and base name supplier.
+     *
+     * @param outputDirSupplier A supplier that provides the output directory path.
+     * @param baseNameSupplier  A supplier that provides the base name.
+     */
     public static JkArtifactLocator of(Supplier<Path> outputDirSupplier,
                                         Supplier<String> baseNameSupplier) {
         return new JkArtifactLocator(outputDirSupplier, baseNameSupplier);
     }
 
+    /**
+     * Creates a new JkArtifactLocator with the provided output directory and artifact base name.
+     *
+     * @param outputDir The output directory path.
+     * @param artifactBaseName The base name of the artifact.
+     */
     public static JkArtifactLocator of(Path outputDir, String artifactBaseName) {
-        return of(() ->outputDir, () -> artifactBaseName);
+        return of(() -> outputDir, () -> artifactBaseName);
     }
 
     /**
@@ -34,6 +46,10 @@ public class JkArtifactLocator {
         return outputDirSupplier.get().resolve(artifactId.toFileName(baseNameSupplier.get()));
     }
 
+    /**
+     * Returns the path where the specified artifact file is supposed to be produced. This method is intended
+     * to only return the file reference and not generate it.
+     */
     public Path getArtifactPath(String qualifier, String extension) {
         return getArtifactPath(JkArtifactId.of(qualifier, extension));
     }

@@ -42,13 +42,13 @@ import java.util.stream.Collectors;
  */
 final class Engine {
 
-    private static final JkPathMatcher JAVA_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java")
-            .and(false, "**/_*", "_*");
+    private static final String[] PRIVATE_GLOB_PATTERN = new String[] { "**/_*", "_*"};
+
+    static final JkPathMatcher JAVA_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java")
+            .and(false,PRIVATE_GLOB_PATTERN);
 
     private static final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
-           .and(false, "**/_*", "_*");
-
-    private static final JkPathMatcher PRIVATE_FOLDER = JkPathMatcher.of(true, "_*", "_*/**");
+           .and(false, PRIVATE_GLOB_PATTERN);
 
     static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER);
 

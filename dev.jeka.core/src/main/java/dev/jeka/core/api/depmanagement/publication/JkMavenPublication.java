@@ -245,8 +245,9 @@ public final class JkMavenPublication {
         StringBuilder sb = new StringBuilder();
         sb.append("ModuleId    : " + this.moduleIdSupplier.get() + "\n");
         sb.append("Version     : " + this.versionSupplier.get() + "\n");
-        sb.append("Repos       : " + this.repos + "\n");
-        sb.append("Artifacts   : " + this.repos + "\n");
+        sb.append("Repos       : " + "\n");
+        this.repos.getRepos().forEach(repo -> sb.append("  " + repo + "\n"));
+        sb.append("Artifacts   : " +  "\n");
         Arrays.stream(this.artifactPublisher.info().split("\n")).forEach(
                 line -> sb.append("  " + line + "\n"));
         sb.append("Dependencies : " + "\n");
