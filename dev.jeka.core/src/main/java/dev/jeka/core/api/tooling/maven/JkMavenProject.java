@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkDoc;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +20,8 @@ public class JkMavenProject {
     public final Path baseDir;
 
     private JkMavenProject(Path baseDir) {
+        JkUtilsAssert.state(Files.exists(baseDir.resolve("pom.xml")), "No pom.xml file found at %s . Can't process.",
+                baseDir);
         this.baseDir = baseDir;
     }
 
@@ -60,8 +61,6 @@ public class JkMavenProject {
      */
     public String getDependencyAsJeKaCode(int codeIndent)  {
         StringBuilder sb = new StringBuilder();
-        JkUtilsAssert.state(Files.exists(baseDir.resolve("pom.xml")), "No pom.xml file found at %s . Won't process.",
-                baseDir);
         Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
         mvn().addParamsAsCmdLine("help:effective-pom -Doutput=%s", effectivePom)
                 .setLogCommand(JkLog.isVerbose())
@@ -92,8 +91,6 @@ public class JkMavenProject {
      */
     public String getDependenciesAsTxt()  {
         StringBuilder sb = new StringBuilder();
-        JkUtilsAssert.state(Files.exists(baseDir.resolve("pom.xml")), "No pom.xml file found at %s . Won't process.",
-                baseDir);
         Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
         mvn().addParamsAsCmdLine("help:effective-pom -Doutput=%s", effectivePom)
                 .setLogCommand(JkLog.isVerbose())
