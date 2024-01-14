@@ -40,6 +40,19 @@ public final class JkArtifactPublisher {
         return new LinkedList<>(consumers.keySet());
     }
 
+    /**
+     * Returns a string representation the artifacts that will be published.
+     */
+    public String info() {
+        StringBuilder sb = new StringBuilder();
+        getArtifactIds().forEach(artifactId -> {
+            boolean producerProvided = consumers.containsKey(artifactId);
+            String producerHint = producerProvided ? " : Producer provided" : "";
+            sb.append(artifactId + producerHint + "\n");
+        });
+        return sb.toString();
+    }
+
     JkArtifactPublisher putArtifact(JkArtifactId artifactId, Consumer<Path> artifactFileMaker) {
         consumers.put(artifactId, artifactFileMaker);
         return this;

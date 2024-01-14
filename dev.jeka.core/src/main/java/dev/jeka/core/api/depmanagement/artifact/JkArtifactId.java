@@ -99,7 +99,7 @@ public final class JkArtifactId {
 
     @Override
     public String toString() {
-        String classif = classifier == null ? "[main-artifact]" : "-" + classifier;
+        String classif = MAIN_ARTIFACT_CLASSIFIER.equals(classifier) ? "[main]" : "-" + classifier;
         return classif + '.' + extension;
     }
 

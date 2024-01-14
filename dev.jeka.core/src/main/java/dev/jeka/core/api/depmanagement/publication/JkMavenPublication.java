@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.tooling.maven.JkMvn;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -25,7 +26,20 @@ import java.util.function.UnaryOperator;
  */
 public final class JkMavenPublication {
 
+    /**
+     * Represents the Maven metadata for a publication.
+     */
     public final JkPomMetadata pomMetadata = JkPomMetadata.of();
+
+    /**
+     * Collection of runnables that are executed before publishing to M2 repos.
+     */
+    public final JkRunnables preActions = JkRunnables.of();
+
+    /**
+     * Collection of runnables that are executed after publishing to M2 repos.
+     */
+    public final JkRunnables postActions = JkRunnables.of();
 
     private Function<JkDependencySet, JkDependencySet> dependencies = UnaryOperator.identity();
 
@@ -40,10 +54,6 @@ public final class JkMavenPublication {
     private Supplier<JkRepoSet> bomResolverRepoSupplier = JkRepoSet::of;
 
     private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
-
-    public final JkRunnables preActions = JkRunnables.of();
-
-    public final JkRunnables postActions = JkRunnables.of();
 
     private JkMavenPublication(JkArtifactLocator artifactLocator) {
         this.artifactPublisher = JkArtifactPublisher.of(artifactLocator);
@@ -213,13 +223,36 @@ public final class JkMavenPublication {
     }
 
     /**
-     * Publishes this publication on the local repository
+     * Publishes this publication on the JeKa local repository
      */
     public JkMavenPublication publishLocal() {
-        preActions.run();
         publish(JkRepoSet.ofLocal());
-        postActions.run();
         return this;
+    }
+
+    /**
+     * Publishes this publication on the M2 local repository
+     */
+    public JkMavenPublication publishLocalM2() {
+        publish(JkRepo.of(JkMvn.getM2LocalRepo()).toSet());
+        return this;
+    }
+
+    /**
+     * Returns a string representation of the information for this {@link JkMavenPublication}.
+     */
+    public String info() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ModuleId    : " + this.moduleIdSupplier.get() + "\n");
+        sb.append("Version     : " + this.versionSupplier.get() + "\n");
+        sb.append("Repos       : " + this.repos + "\n");
+        sb.append("Artifacts   : " + this.repos + "\n");
+        Arrays.stream(this.artifactPublisher.info().split("\n")).forEach(
+                line -> sb.append("  " + line + "\n"));
+        sb.append("Dependencies : " + "\n");
+        getDependencies().withResolvedBoms(this.repos).toResolvedModuleVersions().getEntries().forEach(
+                dep -> sb.append("  " + dep + "\n"));
+        return sb.toString();
     }
 
     @Override
@@ -238,22 +271,6 @@ public final class JkMavenPublication {
                 .filter(repo1 -> !repo1.isLocal())
                 .findFirst()
                 .orElse(null);
-    }
-
-    /**
-     * Provides information about this publication.
-     */
-    public String info() {
-        StringBuilder builder = new StringBuilder();
-        builder
-                .append("\nPublish Maven repositories : ")
-                .append(getRepos()).append("\n")
-                .append("Published Maven Module & version : ")
-                .append(getModuleId().toCoordinate(getVersion()))
-                .append("\n")
-                .append("Published Maven Dependencies :");
-        getDependencies().getEntries().forEach(dep -> builder.append("\n  ").append(dep));
-        return builder.toString();
     }
 
     /**

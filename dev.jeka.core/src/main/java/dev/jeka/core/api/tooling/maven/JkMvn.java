@@ -1,12 +1,15 @@
 package dev.jeka.core.api.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,36 +22,32 @@ public final class JkMvn implements Runnable {
 
     private final static String MVN_CMD = mvnCmd();
 
-    /** Returns <code>true</code> if Maven is installed on the machine running this code. */
-    // TODO rework
-    public static final boolean INSTALLED = MVN_CMD != null;
+    private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private static String mvnCmd() {
-        if (JkUtilsSystem.IS_WINDOWS) {
-            if (exist("mvn.bat")) {
-                return "mvn.bat";
-            } else if (exist("mvn.cmd")) {
-                return "mvn.cmd";
-            } else {
-                return null;
-            }
-        }
-        if (exist("mvn")) {
-            return "mvn";
-        }
-        return null;
+    /**
+     * Path to the local Maven repository dir containing user configuration and local repo.
+     */
+    public static final Path USER_M2_DIR = USER_HOME.resolve(".m2");
+
+    /**
+     * Returns the path to the local Maven repository.
+     */
+    public static Path getM2LocalRepo() {
+        return USER_M2_DIR.resolve("repository");  // TODO naive implementation : handle settings.xml
     }
 
-    private static boolean exist(String cmd) {
-        String command = cmd + " -version";
-        try {
-            final int result = Runtime.getRuntime().exec(command).waitFor();
-            return result == 0;
-        } catch (final Exception e) {  //NOSONAR
-            JkLog.trace("Error while executing command '" + command + "' : " + e.getMessage());
-            return false;
+    /**
+     * Returns the XML document representing the Maven settings file, or null if the file does not exist.
+     */
+    public static JkDomDocument settingsXmlDoc() {
+        Path file = USER_M2_DIR.resolve("settings");
+        if (!Files.exists(file)) {
+            return null;
         }
+        return JkDomDocument.parse(file);
     }
+
+
 
     /**
      * Creates a Maven command. Separate argument in different string, don't use
@@ -197,6 +196,33 @@ public final class JkMvn implements Runnable {
             return JkQualifiedDependency.of(null, dependency);
         }
         return null;
+    }
+
+    private static String mvnCmd() {
+        if (JkUtilsSystem.IS_WINDOWS) {
+            if (exist("mvn.bat")) {
+                return "mvn.bat";
+            } else if (exist("mvn.cmd")) {
+                return "mvn.cmd";
+            } else {
+                return null;
+            }
+        }
+        if (exist("mvn")) {
+            return "mvn";
+        }
+        return null;
+    }
+
+    private static boolean exist(String cmd) {
+        String command = cmd + " -version";
+        try {
+            final int result = Runtime.getRuntime().exec(command).waitFor();
+            return result == 0;
+        } catch (final Exception e) {  //NOSONAR
+            JkLog.trace("Error while executing command '" + command + "' : " + e.getMessage());
+            return false;
+        }
     }
 
 
