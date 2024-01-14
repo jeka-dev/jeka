@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
@@ -44,7 +45,7 @@ final class IvyPublisherForMaven {
 
     private final RepositoryResolver resolver;
 
-    private final UnaryOperator<Path> signer;
+    private final JkFileSigner signer;
 
     private final Path descriptorOutputDir;
 
@@ -52,7 +53,7 @@ final class IvyPublisherForMaven {
 
     private final Set<String> checksumAlgos;
 
-    IvyPublisherForMaven(UnaryOperator<Path> signer, RepositoryResolver dependencyResolver,
+    IvyPublisherForMaven(JkFileSigner signer, RepositoryResolver dependencyResolver,
                          Path descriptorOutputDir, boolean uniqueSnapshot, Set<String> checksumAlgos) {
         super();
         this.resolver = dependencyResolver;
@@ -304,7 +305,6 @@ final class IvyPublisherForMaven {
         return path;
     }
 
-
     private void putInRepo(Path source, String destination, boolean overwrite) {
         final Repository repository = this.resolver.getRepository();
         final String dest = completePath(destination);
@@ -321,7 +321,7 @@ final class IvyPublisherForMaven {
                 Files.deleteIfExists(temp);
             }
             if (this.signer != null) {
-                final Path signed = signer.apply(source);
+                final Path signed = signer.sign(source);
                 final String signedDest = dest + ".asc";
                 JkLog.info("Publish file " + signedDest);
                 repository.put(null, signed.toFile(), signedDest, overwrite);

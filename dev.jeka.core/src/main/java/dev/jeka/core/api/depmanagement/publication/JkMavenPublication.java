@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
@@ -53,7 +54,7 @@ public final class JkMavenPublication {
 
     private Supplier<JkRepoSet> bomResolverRepoSupplier = JkRepoSet::of;
 
-    private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
+    private JkFileSigner defaultSigner;  // Can be null. Signer used if none is defined on repos
 
     private JkMavenPublication(JkArtifactLocator artifactLocator) {
         this.artifactPublisher = JkArtifactPublisher.of(artifactLocator);
@@ -148,7 +149,7 @@ public final class JkMavenPublication {
      * Normally, each publish repository can define its own signer.
      * Conveniently we can specify a file signer for repositories which don't have.
      */
-    public UnaryOperator<Path> getDefaultSigner() {
+    public JkFileSigner getDefaultSigner() {
         return defaultSigner;
     }
 
@@ -156,7 +157,7 @@ public final class JkMavenPublication {
      * Sets the default file signer to use for this publication.
      * @see #getDefaultSigner()
      */
-    public JkMavenPublication setDefaultSigner(UnaryOperator<Path> defaultSigner) {
+    public JkMavenPublication setDefaultSigner(JkFileSigner defaultSigner) {
         this.defaultSigner = defaultSigner;
         return this;
     }

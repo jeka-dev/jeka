@@ -1,5 +1,6 @@
 package dev.jeka.core.samples;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.crypto.gpg.JkGpg;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkRepo;
@@ -64,7 +65,7 @@ public class SignedArtifactsKBean extends KBean {
         project.mavenPublication
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion("1.3.1")
-                .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword).getSigner(""))
+                .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword, ""))
                 .pomMetadata
                         .setProjectName("my project")
                         .setProjectDescription("My description")
@@ -76,7 +77,7 @@ public class SignedArtifactsKBean extends KBean {
     }
 
     private void configForOssrh(JkMavenPublication publication) {
-        UnaryOperator<Path> signer = JkGpg.ofSecretRing(secringPath, secringPassword).getSigner("");
+        JkFileSigner signer = JkGpg.ofSecretRing(secringPath, secringPassword, "");
         publication.setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 

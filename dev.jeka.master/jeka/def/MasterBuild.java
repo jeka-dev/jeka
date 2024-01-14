@@ -160,7 +160,7 @@ class MasterBuild extends KBean {
     private JkRepoSet publishRepo() {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);
         JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
-        JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg.getSigner(""));
+        JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg);
         releaseRepo.publishConfig
                     .setVersionFilter(jkVersion -> !jkVersion.isSnapshot());
         JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka");

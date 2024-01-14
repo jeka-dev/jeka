@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -80,7 +81,7 @@ public final class JkRepoSet {
     /**
      * Creates a JkRepoSet for publishing on <a href="http://central.sonatype.org/">OSSRH</a>
      */
-    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password, UnaryOperator<Path> signer) {
+    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password, JkFileSigner signer) {
         return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
                 JkRepo.ofMavenOssrhDeployRelease(userName, password, signer));
     }
@@ -127,7 +128,7 @@ public final class JkRepoSet {
         return get(JkCoordinate.of(coordinate));
     }
 
-    public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
+    public JkRepoSet withDefaultSigner(JkFileSigner signer) {
         List<JkRepo> reposCopy = repos.stream()
                 .map(repo -> {
                     if (repo.publishConfig.getSigner() == null

@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.publication;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathFile;
@@ -28,7 +29,7 @@ public final class JkIvyPublication {
 
     private JkRepoSet repos = JkRepoSet.of();
 
-    private UnaryOperator<Path> defaultSigner;  // Can be null. Signer used if none is defined on repos
+    private JkFileSigner defaultSigner;  // Can be null. Signer used if none is defined on repos
 
     private Function<JkQualifiedDependencySet, JkQualifiedDependencySet> dependencies = UnaryOperator.identity();
 
@@ -156,7 +157,7 @@ public final class JkIvyPublication {
      * Normally, each publish repository can define its own signer.
      * Conveniently we can specify a file signer for repositories which don't have.
      */
-    public UnaryOperator<Path> getDefaultSigner() {
+    public JkFileSigner getDefaultSigner() {
         return defaultSigner;
     }
 
@@ -164,7 +165,7 @@ public final class JkIvyPublication {
      * Sets the default file signer to use for this publication.
      * @see #getDefaultSigner()
      */
-    public JkIvyPublication setDefaultSigner(UnaryOperator<Path> defaultSigner) {
+    public JkIvyPublication setDefaultSigner(JkFileSigner defaultSigner) {
         this.defaultSigner = defaultSigner;
         return this;
     }

@@ -1,10 +1,6 @@
 package dev.jeka.core.api.crypto.gpg.embedded.bc;
 
 import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
-import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.openpgp.PGPUtil;
@@ -25,18 +21,17 @@ import java.util.List;
 
 final class BcGpgDoer implements JkInternalGpgDoer {
 
-    private static final int HASH_ALGO = HashAlgorithmTags.SHA1;  //NOSONAR
+    private static final int HASH_ALGO = HashAlgorithmTags.SHA1;
 
     // Accessed through reflection
     static BcGpgDoer of() {
         return new BcGpgDoer();
     }
 
-    public boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
-
+    public boolean verify(Path fileToVerify, Path signatureFile, Path publicRingPath) {
         try (final InputStream streamToVerify = Files.newInputStream(fileToVerify);
              final InputStream signatureStream = Files.newInputStream(signatureFile);
-             final InputStream pubringStream = Files.newInputStream(pubringFile)) {
+             final InputStream pubringStream = Files.newInputStream(publicRingPath)) {
             return verify(streamToVerify, signatureStream, pubringStream);
         } catch (final IOException | PGPException e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -84,19 +79,10 @@ final class BcGpgDoer implements JkInternalGpgDoer {
         return signature.verify();
     }
 
-    public void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
-                            boolean armor) {
-        JkLog.info("Sign file %s using secretkey file %s and key name '%s'.",
-                JkUtilsPath.relativizeFromWorkingDir(fileToSign),
-                JkUtilsPath.relativizeFromWorkingDir(secringFile),
-                keyName);
-        JkUtilsAssert.argument(Files.exists(fileToSign), fileToSign + " not found.");
-        JkUtilsAssert.argument(Files.exists(secringFile), secringFile + " not found.");
-        JkPathFile.of(signatureFile).createIfNotExist();
-        try (final InputStream toSign = Files.newInputStream(fileToSign);
-             final InputStream keyRing = Files.newInputStream(secringFile);
-             final OutputStream out = Files.newOutputStream(signatureFile)) {
-            sign(toSign, keyRing, keyName, out, pass, armor);
+    @Override
+    public void sign(InputStream streamToSign, OutputStream signatureStream, Path secretRingPath, String keyName, char[] pass, boolean armor) {
+        try (final InputStream keyRing = Files.newInputStream(secretRingPath)) {
+            sign(streamToSign, keyRing, keyName, signatureStream, pass, armor);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -204,7 +190,6 @@ final class BcGpgDoer implements JkInternalGpgDoer {
                                 + " Was expecting a file containing secret key only. ");
             }
         }
-
     }
 
     private BcGpgDoer() {

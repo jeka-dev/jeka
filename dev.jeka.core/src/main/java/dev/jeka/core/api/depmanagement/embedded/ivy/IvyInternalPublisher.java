@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.publication.JkArtifactPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkInternalPublisher;
@@ -162,7 +163,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             if (isMaven(resolver) && publishRepo.publishConfig.getVersionFilter().test(version)) {
                 JkLog.startTask("Publish to " + publishRepo.getUrl());
                 boolean signatureRequired = publishRepo.publishConfig.isSignatureRequired();
-                UnaryOperator<Path> signer = publishRepo.publishConfig.getSigner();
+                JkFileSigner signer = publishRepo.publishConfig.getSigner();
                 if (signatureRequired && signer == null) {
                     throw new IllegalStateException("Repo " + publishRepo + " requires file signature but " +
                             "no signer has been defined on.");

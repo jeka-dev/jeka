@@ -1,5 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -144,7 +145,7 @@ public final class JkRepo {
      * Creates an OSSRH repository for deploying released artifacts.
      */
     public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword,
-                                                   UnaryOperator<Path> signer) {
+                                                   JkFileSigner signer) {
         JkRepo repo =  of(MAVEN_OSSRH_DEPLOY_RELEASE)
                 .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager");
         repo.publishConfig
@@ -413,7 +414,7 @@ public final class JkRepo {
 
         private Set<String> checksumAlgos = new HashSet<>();
 
-        private UnaryOperator<Path> signer;
+        private JkFileSigner signer;
 
         /**
          * Returns the filter used for this {@link JkPublishConfig}.
@@ -435,7 +436,7 @@ public final class JkRepo {
             return checksumAlgos;
         }
 
-        public UnaryOperator<Path> getSigner() {
+        public JkFileSigner getSigner() {
             return signer;
         }
 
@@ -460,7 +461,7 @@ public final class JkRepo {
             return this;
         }
 
-        public JkPublishConfig setSigner(UnaryOperator<Path> signer) {
+        public JkPublishConfig setSigner(JkFileSigner signer) {
             this.signer = signer;
             return this;
         }
