@@ -106,7 +106,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
         project.mavenPublication
                 .setModuleId("dev.jeka.examples:my-sample")
                 .setVersion("1.0.0")
-                .setDefaultSigner(path -> path)   // sign published artifact
+                .setDefaultSigner((path1, path2) -> {})   // sign published artifact
                 .setRepos(JkRepoSet.of("https://my.org.repository/internal"))
 
                     .customizeDependencies(deps -> deps  // Fine tune published transitive dependencies

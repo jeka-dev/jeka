@@ -119,6 +119,13 @@ public abstract class SelfKBean extends KBean {
         JkLog.info(sb.toString());
     }
 
+    @JkDoc("Display exported dependency tree on console.")
+    public void showDepTree() {
+        String output = getRunbase().getDependencyResolver().resolve(getRunbase().getExportedDependencies())
+                .getDependencyTree().toStringTree();
+        JkLog.info(output);
+    }
+
     /**
      * Returns the path to the JAR file created by {@link #buildJar()} method.
      */

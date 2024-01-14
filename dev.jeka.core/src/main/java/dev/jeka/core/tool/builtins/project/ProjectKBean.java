@@ -326,7 +326,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (!compilerToolChain.isToolOrProcessSpecified()) {
             compilerToolChain.setJdkHints(jdks(), true);
         }
-        project.flatFacade().publishJavadocAndSources(mavenPublication.javadoc, mavenPublication.sources);
         if (pack.jarType != null) {
             project.flatFacade().setMainArtifactJarType(pack.jarType);
         }

@@ -18,7 +18,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")
 class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
-    @JkDoc("Tell if the Integration Tests should be run.")
+    @JkDoc("Sets if the Integration Tests should be run.")
     public boolean runIT = true;
 
     FlatFacadeBuild() {
@@ -39,7 +39,6 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                 .mixResourcesAndSources()  // java sources and resources are located in same folder
 
                 // Control on produced artifacts
-                .publishJavadocAndSources(false, true)
                 .setMainArtifactJarType(JkProjectPackaging.JarType.FAT)
 
                 // Simple declaration of project dependencies

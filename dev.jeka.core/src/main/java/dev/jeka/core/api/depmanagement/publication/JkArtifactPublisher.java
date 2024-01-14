@@ -46,9 +46,9 @@ public final class JkArtifactPublisher {
     public String info() {
         StringBuilder sb = new StringBuilder();
         getArtifactIds().forEach(artifactId -> {
-            boolean producerProvided = consumers.containsKey(artifactId);
-            String producerHint = producerProvided ? " : Producer provided" : "";
-            sb.append(artifactId + producerHint + "\n");
+            boolean producerProvided = consumers.get(artifactId) != null;
+            String producerHint = producerProvided ? " (Producer provided)" : "";
+            sb.append(artifactLocator.getArtifactPath(artifactId) +  producerHint + "\n");
         });
         return sb.toString();
     }

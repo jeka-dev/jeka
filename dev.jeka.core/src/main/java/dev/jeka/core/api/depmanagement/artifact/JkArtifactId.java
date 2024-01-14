@@ -103,5 +103,11 @@ public final class JkArtifactId {
         return classif + '.' + extension;
     }
 
+    /**
+     * Returns a representation of the artifact id in the format "[classifier, extension]".
+     */
+    public String toSquareNotation() {
+        return "[" + classifier + ", " + extension + "]";
+    }
 
 }
