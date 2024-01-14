@@ -1,7 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.crypto.JkFileSigner;
-import dev.jeka.core.api.crypto.gpg.JkGpg;
+import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
@@ -14,7 +14,6 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Path;
-import java.util.function.UnaryOperator;
 
 /**
  * When publishing on a public repository as Maven central, you need to provide extra metadata information, checksum
@@ -65,7 +64,7 @@ public class SignedArtifactsKBean extends KBean {
         project.mavenPublication
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion("1.3.1")
-                .setDefaultSigner(JkGpg.ofSecretRing(secringPath, secringPassword, ""))
+                .setDefaultSigner(JkGpgSigner.of(secringPath, secringPassword, ""))
                 .pomMetadata
                         .setProjectName("my project")
                         .setProjectDescription("My description")
@@ -77,7 +76,7 @@ public class SignedArtifactsKBean extends KBean {
     }
 
     private void configForOssrh(JkMavenPublication publication) {
-        JkFileSigner signer = JkGpg.ofSecretRing(secringPath, secringPassword, "");
+        JkFileSigner signer = JkGpgSigner.of(secringPath, secringPassword, "");
         publication.setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
     }
 

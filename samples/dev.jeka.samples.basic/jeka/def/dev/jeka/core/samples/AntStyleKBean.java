@@ -1,6 +1,6 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.crypto.gpg.JkGpg;
+import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
@@ -107,7 +107,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
     // publish both on Maven and Ivy repo
     public void publish() {
 
-        JkGpg gpg = JkGpg.ofSecretRing(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd", "");
+        JkGpgSigner gpg = JkGpgSigner.of(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd", "");
         JkRepo ivyRepo = JkRepo.of(getOutputDir().resolve("test-output/ivy-repo"));
         JkRepo mavenRepo = JkRepo.of(getOutputDir().resolve("test-output/maven-repo"));
         JkCoordinateDependency versionedModule = JkCoordinateDependency.of("myGroup:myName:0.2.2-SNAPSHOT");

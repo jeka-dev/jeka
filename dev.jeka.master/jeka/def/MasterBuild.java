@@ -1,5 +1,5 @@
 import dev.jeka.core.CoreBuild;
-import dev.jeka.core.api.crypto.gpg.JkGpg;
+import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
@@ -159,7 +159,7 @@ class MasterBuild extends KBean {
 
     private JkRepoSet publishRepo() {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);
-        JkGpg gpg = JkGpg.ofStandardProject(this.getBaseDir());
+        JkGpgSigner gpg = JkGpgSigner.ofStandardProject(this.getBaseDir());
         JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg);
         releaseRepo.publishConfig
                     .setVersionFilter(jkVersion -> !jkVersion.isSnapshot());

@@ -10,7 +10,7 @@ public class PgpRunner {
     public static void main(String[] args) throws Exception {
         System.out.println("ttt".startsWith(""));
         final Path sampleFile = Paths.get(JkGpgTest.class.getResource("sampleFileToSign.txt").toURI());
-        JkGpg.ofDefaultGnuPg("", "").sign(sampleFile);
+        JkGpgSigner.ofDefaultGnuPg("", "").sign(sampleFile);
     }
 
 }
