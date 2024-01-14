@@ -92,11 +92,11 @@ public class SimpleProjectKBean extends KBean {
 
     public void printMvn() {
         MavenMigrationKBean pluginPom = getRuntime().load(MavenMigrationKBean.class);
-        pluginPom.migrateToCode();
+        pluginPom.showDepsAsCode();
     }
 
     public void showDependencies() {
-        projectKBean.showDependenciesXml();
+        projectKBean.showDepTreesAsXml();
     }
     
     public static void main(String[] args) {

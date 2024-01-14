@@ -29,7 +29,7 @@ public class JkDocker {
      * @see JkProcess#addParamsAsString(String)
      */
     public static JkProcResult execCmdLine(String dockerCommand, String cmdLine) {
-        return prepareExec(dockerCommand).addParamsAsString(cmdLine).exec();
+        return prepareExec(dockerCommand).addParamsAsCmdLine(cmdLine).exec();
     }
 
     /**

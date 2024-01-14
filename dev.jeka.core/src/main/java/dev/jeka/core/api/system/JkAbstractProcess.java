@@ -103,10 +103,12 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * Adds the specified parameters as a space separated args to the command line.
      * The string will be parsed in an array of parameters.
      *
-     * @param params the parameters as a string (e.g '-X -e run').
+     * @param cmdLine the parameters as a string (e.g '-X -e run').
+     * @param tokens If command line contains tokens as '%s', they are replaced by these tokens.
+     *
      */
-    public T addParamsAsString(String params) {
-        return addParams(JkUtilsString.parseCommandline(params));
+    public T addParamsAsCmdLine(String cmdLine, Object ...tokens) {
+        return addParams(JkUtilsString.parseCommandline(String.format(cmdLine, tokens)));
     }
 
     /**

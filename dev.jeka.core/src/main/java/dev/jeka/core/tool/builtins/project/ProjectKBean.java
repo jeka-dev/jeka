@@ -120,13 +120,13 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         pack();
     }
 
-    @JkDoc("Displays resolved dependency tree on console.")
-    public final void showDependencies() {
+    @JkDoc("Displays resolved dependency trees on console.")
+    public final void showDepTrees() {
         project.displayDependencyTree();
     }
 
-    @JkDoc("Displays resolved dependency tree in xml")
-    public void showDependenciesXml() {
+    @JkDoc("Displays resolved dependency trees as xml, on console.")
+    public void showDepTreesAsXml() {
         Document document = project.getDependenciesAsXml();
         String xml = JkDomDocument.of(document).toXml();
         if (outputFile == null) {
