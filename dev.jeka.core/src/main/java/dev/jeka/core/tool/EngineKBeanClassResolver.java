@@ -54,7 +54,7 @@ final class EngineKBeanClassResolver {
         this.baseDir = baseDir;
         this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
         this.defClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
-        this.localProperties = JkRuntime.localProperties(baseDir);
+        this.localProperties = JkRunbase.localProperties(baseDir);
     }
 
     List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName, boolean ignoreDefaultBeanNotFound) {

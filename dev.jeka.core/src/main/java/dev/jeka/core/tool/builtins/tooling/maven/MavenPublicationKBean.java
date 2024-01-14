@@ -9,14 +9,14 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.util.Optional;
 
-@JkDoc("Provides a Maven Publication according ProjectKBean or SefApp found in the JkRuntime.")
+@JkDoc("Provides a Maven Publication according ProjectKBean or SefApp found in the JkRunbase.")
 public class MavenPublicationKBean extends KBean {
 
     private JkMavenPublication mavenPublication;
 
     @Override
     protected void init() {
-        Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);
+        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
         optionalProjectKBean.ifPresent(
                 projectKBean -> mavenPublication = JkMavenPublications.of(projectKBean.project));
     }

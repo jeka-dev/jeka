@@ -21,11 +21,19 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Container where are registered the KBeans.
- * There is one <code>JkRuntime</code> per project root.*<p>
- * In multi-project (aka multi-module project) there is one runtime per sub-project.
+ * Execution context associated with a base directory.
+ * <p><
+ * Each <i>runbase</i> has :
+ * <ul>
+ *     <li>A base dir from where JeKa resolves file paths. The base dir generally contains a <i>jeka</i> dir at its root.</li>
+ *     <li>A KBean registry for holding KBeans involved in the run context.
+ *     There can bbe only one KBean instance per class within a runbase.</li>
+ *     <li>A property set that is locally defined in the runbase</li>
+ *     <li>A set of imported runbase that can be invoked from this runbase</li>
+ * </ul>
+ * Typically, there is one runbase per project to build, sharing the same base dir.
  */
-public final class JkRuntime {
+public final class JkRunbase {
 
     // Experiment for invoking 'KBean#init()' method lately, once all KBean has been instantiated
     // Note : Calling all KBeans init() methods in a later stage then inside 'load' methods
@@ -34,9 +42,9 @@ public final class JkRuntime {
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
-    private static final Map<Path, JkRuntime> RUNTIMES = new LinkedHashMap<>();
+    private static final Map<Path, JkRunbase> RUNTIMES = new LinkedHashMap<>();
 
-    private final Path projectBaseDir;
+    private final Path baseDir;
 
     private JkDependencyResolver dependencyResolver;
 
@@ -46,7 +54,7 @@ public final class JkRuntime {
 
     private JkDependencySet exportedDependencies;
 
-    private JkPathSequence importedProjects = JkPathSequence.of();
+    private JkPathSequence importedRunbaseDirs = JkPathSequence.of();
 
     private List<EngineCommand> fieldInjections = Collections.emptyList();
 
@@ -54,19 +62,19 @@ public final class JkRuntime {
 
     private final Map<Class<? extends KBean>, KBean> beans = new LinkedHashMap<>();
 
-    private JkRuntime(Path projectBaseDir) {
-        this.projectBaseDir = projectBaseDir;
+    private JkRunbase(Path projectBaseDir) {
+        this.baseDir = projectBaseDir;
         this.properties = constructProperties(projectBaseDir);
     }
 
     /**
-     * Returns the JkRuntime instance associated with the specified project base directory.
+     * Returns the JkRunbase instance associated with the specified project base directory.
      */
-    public static JkRuntime get(Path projectBaseDir) {
-        return RUNTIMES.computeIfAbsent(projectBaseDir, path -> new JkRuntime(path));
+    public static JkRunbase get(Path projectBaseDir) {
+        return RUNTIMES.computeIfAbsent(projectBaseDir, path -> new JkRunbase(path));
     }
 
-    static JkRuntime getCurrentContextBaseDir() {
+    static JkRunbase getCurrentContextBaseDir() {
         return get(getBaseDirContext());
     }
 
@@ -82,8 +90,8 @@ public final class JkRuntime {
         });
     }
 
-    Path getProjectBaseDir() {
-        return projectBaseDir;
+    Path getBaseDir() {
+        return baseDir;
     }
 
     /**
@@ -101,7 +109,7 @@ public final class JkRuntime {
     }
 
     /**
-     * Returns the exported classpath used by the JkRuntime instance.
+     * Returns the exported classpath used by the JkRunbase instance.
      * <p>
      * The exported classpath is the classpath minus 'private' dependencies. Private dependencies
      * are declared using <code>@JkInjectClasspath</code> in a class that is in package with root
@@ -112,7 +120,7 @@ public final class JkRuntime {
     }
 
     /**
-     * Returns the exported dependencies of the JkRuntime instance.
+     * Returns the exported dependencies of the JkRunbase instance.
      * <p>
      * The exported dependencies is the dependencies minus 'private' dependencies. Private dependencies
      * are declared using <code>@JkInjectClasspath</code> in a class that is in package with root
@@ -125,15 +133,15 @@ public final class JkRuntime {
     /**
      * Returns root path of imported projects.
      */
-    public JkPathSequence getImportedProjects() {
-        return importedProjects;
+    public JkPathSequence getImportedRunbaseDirs() {
+        return importedRunbaseDirs;
     }
 
 
 
     /**
-     * Instantiates the specified KBean into this runtime, if it is not already present. <p>
-     * As KBeans are singleton within a runtime, this method has no effect if the bean is already loaded.
+     * Instantiates the specified KBean into this runbase, if it is not already present. <p>
+     * As KBeans are singleton within a runbase, this method has no effect if the bean is already loaded.
      * @param beanClass The class of the KBean to load.
      * @param consumer Give a chance to inject default values in the returned instance. It has only effect
      *                 when creating the singleton. If the singleton in cached, then the consumer
@@ -144,12 +152,12 @@ public final class JkRuntime {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         T result = (T) beans.get(beanClass);
         if (result == null) {
-            String projectDisplayName = projectBaseDir.toString().isEmpty() ?
-                    projectBaseDir.toAbsolutePath().getFileName().toString()
-                    : projectBaseDir.toString();
+            String projectDisplayName = baseDir.toString().isEmpty() ?
+                    baseDir.toAbsolutePath().getFileName().toString()
+                    : baseDir.toString();
             JkLog.startTask("Instantiate KBean %s in project '%s'", beanClass, projectDisplayName);
             Path previousProject = BASE_DIR_CONTEXT.get();
-            BASE_DIR_CONTEXT.set(projectBaseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
+            BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
             JkLog.endTask();
@@ -158,7 +166,7 @@ public final class JkRuntime {
     }
 
     /**
-     * @see JkRuntime#load(Class, Consumer)
+     * @see JkRunbase#load(Class, Consumer)
      */
     public <T extends KBean> T load(Class<T> beanClass) {
         return load(beanClass, bean -> {});
@@ -166,14 +174,14 @@ public final class JkRuntime {
 
 
     /**
-     * Returns the KBean of the exact specified class, present in this runtime.
+     * Returns the KBean of the exact specified class, present in this runbase.
      */
     public <T extends KBean> Optional<T> find(Class<T> beanClass) {
         return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
     }
 
     /**
-     * Returns the first KBean being an instance of the specified class, present in this runtime.
+     * Returns the first KBean being an instance of the specified class, present in this runbase.
      */
     public <T extends KBean> Optional<T> findInstanceOf(Class<T> beanClass) {
         return (Optional<T>) beans.values().stream()
@@ -201,8 +209,8 @@ public final class JkRuntime {
         this.classpath = pathSequence;
     }
 
-    void setImportedProjects(JkPathSequence importedProjects) {
-        this.importedProjects = importedProjects;
+    void setImportedRunbaseDirs(JkPathSequence importedRunbaseDirs) {
+        this.importedRunbaseDirs = importedRunbaseDirs;
     }
 
     void setExportedClassPath(JkPathSequence exportedClassPath) {
@@ -214,7 +222,7 @@ public final class JkRuntime {
     }
 
     void init(List<EngineCommand> commands) {
-        JkLog.trace("Initialize JkRuntime with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
+        JkLog.trace("Initialize JkRunbase with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
         this.fieldInjections = commands.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .collect(Collectors.toList());
@@ -251,7 +259,7 @@ public final class JkRuntime {
 
     private <T extends KBean> T instantiate(Class<T> beanClass, Consumer<T> consumer) {
         if (Modifier.isAbstract(beanClass.getModifiers())) {
-            throw new JkException("KBean class " + beanClass + " in " + this.projectBaseDir
+            throw new JkException("KBean class " + beanClass + " in " + this.baseDir
                     + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
         }
         T bean = JkUtilsReflect.newInstance(beanClass);
@@ -332,8 +340,8 @@ public final class JkRuntime {
 
     @Override
     public String toString() {
-        return "JkRuntime{" +
-                "projectBaseDir=" + projectBaseDir +
+        return "JkRunbase{" +
+                "projectBaseDir=" + baseDir +
                 ", beans=" + beans.keySet() +
                 '}';
     }

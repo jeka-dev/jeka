@@ -29,7 +29,7 @@ public final class JkExternalToolApi {
     }
 
     public static JkRepoSet getDownloadRepos(Path projectDir) {
-        JkProperties properties = JkRuntime.constructProperties(projectDir);
+        JkProperties properties = JkRunbase.constructProperties(projectDir);
         JkRepoSet result = JkRepoProperties.of(properties).getDownloadRepos();
         return result;
     }
@@ -74,7 +74,7 @@ public final class JkExternalToolApi {
     }
 
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
-        Map<String, String> result = JkRuntime.readProjectPropertiesRecursively(projectDir)
+        Map<String, String> result = JkRunbase.readProjectPropertiesRecursively(projectDir)
                 .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
         List<String> keys = new LinkedList<>(result.keySet());
         keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
@@ -83,7 +83,7 @@ public final class JkExternalToolApi {
     }
 
     public static JkProperties getProperties(Path projectDir) {
-        return JkRuntime.readProjectPropertiesRecursively(projectDir);
+        return JkRunbase.readProjectPropertiesRecursively(projectDir);
     }
 
     public static JkProperties getGlobalProperties() {

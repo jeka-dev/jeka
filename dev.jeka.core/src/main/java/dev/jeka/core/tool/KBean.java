@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 /**
  * Base class for KBean. User code is not supposed to instantiate KBeans using 'new' but usinng
- * {@link JkRuntime#load(java.lang.Class)}.
+ * {@link JkRunbase#load(java.lang.Class)}.
  */
 public abstract class KBean {
 
@@ -20,17 +20,17 @@ public abstract class KBean {
 
     private static final String CLASS_SUFFIX = KBean.class.getSimpleName();
 
-    private final JkRuntime runtime;
+    private final JkRunbase runbase;
 
     private final JkImportedKBeans importedKBeans;  // KBeans from other projects
 
-    private KBean(JkRuntime runtime) {
-        this.runtime = runtime;
+    private KBean(JkRunbase runbase) {
+        this.runbase = runbase;
         this.importedKBeans = new JkImportedKBeans(this);
 
         // This way KBeans are registered in the order they have been requested for instantiation,
         // and not the order they have finished to be instantiated.
-        this.runtime.putKBean(this.getClass(), this);
+        this.runbase.putKBean(this.getClass(), this);
     }
 
     /**
@@ -40,7 +40,7 @@ public abstract class KBean {
      * properties <p>
      */
     protected KBean() {
-        this(JkRuntime.getCurrentContextBaseDir());
+        this(JkRunbase.getCurrentContextBaseDir());
     }
 
     /**
@@ -61,7 +61,7 @@ public abstract class KBean {
      * the sub-project base directory.
      */
     public Path getBaseDir() {
-        return runtime.getProjectBaseDir();
+        return runbase.getBaseDir();
     }
 
     /**
@@ -88,21 +88,21 @@ public abstract class KBean {
     }
 
     /**
-     * Returns the {@link JkRuntime} where this KBean has been instantiated.
+     * Returns the {@link JkRunbase} where this KBean has been instantiated.
      */
-    public JkRuntime getRuntime() {
-        return runtime;
+    public JkRunbase getRunbase() {
+        return runbase;
     }
 
     /**
-     * Instantiates the specified KBean into the current runtime, if it is not already present. <p>
-     * As KBeans are singleton within a runtime, this method has no effect if the bean is already loaded.
+     * Instantiates the specified KBean into the current runbase, if it is not already present. <p>
+     * As KBeans are singleton within a runbase, this method has no effect if the bean is already loaded.
      * @param beanClass The class of the KBean to load.
      * @return This object for call chaining.
-     * @see JkRuntime#load(Class)
+     * @see JkRunbase#load(Class)
      */
     public <T extends KBean> T load(Class<T> beanClass) {
-        return runtime.load(beanClass);
+        return runbase.load(beanClass);
     }
 
     static boolean nameMatches(String className, String nameCandidate) {
@@ -130,7 +130,7 @@ public abstract class KBean {
 
     @Override
     public String toString() {
-        return "KBean '" + shortName() + "' [from project '" + JkUtilsPath.friendlyName(this.runtime.getProjectBaseDir()) + "']";
+        return "KBean '" + shortName() + "' [from project '" + JkUtilsPath.friendlyName(this.runbase.getBaseDir()) + "']";
     }
 
     /**

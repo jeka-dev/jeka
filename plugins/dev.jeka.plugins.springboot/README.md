@@ -29,7 +29,7 @@ jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#scaffo
 [SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) is designed to auto-configure
 *ProjectKBean*, *SelfAppKBean* and *ScaffoldKBean* when any of them is present in the runtime.
 
-It configures following KBeans when it is loaded in the runtime :
+It configures following KBeans when it is loaded in the runbase :
 - `ProjectKBean` : 
   - Adds Spring-Boot bom to dependencies of the project.
   - Instructs project to create bootable jar. War file and original artifacts can be generated as well

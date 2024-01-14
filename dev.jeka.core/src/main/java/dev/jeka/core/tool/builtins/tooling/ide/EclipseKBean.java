@@ -38,7 +38,7 @@ public final class EclipseKBean extends KBean {
     private final Map<JkDependency, Properties> accessRules = new HashMap<>();
 
     protected void init() {
-        getRuntime().load(ScaffoldKBean.class);
+        getRunbase().load(ScaffoldKBean.class);
     }
 
     // ------------------------- setters ----------------------------
@@ -56,7 +56,7 @@ public final class EclipseKBean extends KBean {
             "dependencies and source layout.")
     public void files() {
         final Path dotProject = getBaseDir().resolve(".project");
-        JkIdeSupport projectIde = IdeSupport.getProjectIde(getRuntime());
+        JkIdeSupport projectIde = IdeSupport.getProjectIde(getRunbase());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final KBean importedKBean : getImportedKBeans().get(false)) {
@@ -65,7 +65,7 @@ public final class EclipseKBean extends KBean {
             final JkEclipseClasspathGenerator classpathGenerator =
                     JkEclipseClasspathGenerator.of(projectIde);
 
-            classpathGenerator.setDefDependencies(getRuntime().getDependencyResolver(), IdeSupport.classpathAsDependencySet());
+            classpathGenerator.setDefDependencies(getRunbase().getDependencyResolver(), IdeSupport.classpathAsDependencySet());
             classpathGenerator.setIncludeJavadoc(this.javadoc);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);

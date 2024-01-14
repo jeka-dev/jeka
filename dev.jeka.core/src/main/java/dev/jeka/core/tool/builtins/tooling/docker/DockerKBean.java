@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-@JkDoc("Build and run image based on SelfAppKBean or ProjectKBean present on the runtime. " +
+@JkDoc("Build and run image based on SelfAppKBean or ProjectKBean present on the runbase. " +
         "A running Docker daemon is mandatory to use this KBean.")
 public class DockerKBean extends KBean {
 
@@ -41,11 +41,11 @@ public class DockerKBean extends KBean {
 
     @Override
     protected void init() {
-        Optional<SelfAppKBean> optionalSelfAppKBean = getRuntime().findInstanceOf(SelfAppKBean.class);
-        Optional<ProjectKBean> optionalProjectKBean = getRuntime().find(ProjectKBean.class);
+        Optional<SelfAppKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(SelfAppKBean.class);
+        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
        /*
         if (optionalProjectKBean.isPresent() && optionalProjectKBean.isPresent()) {
-            throw new IllegalStateException("Both a SelfAppKBean and ProjectKBean are present in the JkRuntime. " +
+            throw new IllegalStateException("Both a SelfAppKBean and ProjectKBean are present in the JkRunbase. " +
                     "Cannot configure for Both. You need to remove one of these KBeans in order to use DockerKBean.");
         }
 

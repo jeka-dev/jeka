@@ -223,7 +223,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("Program arguments to use when running generated jar")
         public String programArgs = "";
 
-        @JkDoc("If true, the resolved runtime classpath will be used when running the generated jar. " +
+        @JkDoc("If true, the resolved runbase classpath will be used when running the generated jar. " +
                 "If the generated jar is a Uber jar or contains all the needed dependencies, leave it to 'false'")
         public boolean useRuntimeDepsForClasspath;
 
@@ -286,11 +286,11 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     // ------- private methods
 
     private JkJdks jdks() {
-        return JkJdks.ofJdkHomeProps(getRuntime().getProperties().getAllStartingWith("jeka.jdk.", false));
+        return JkJdks.ofJdkHomeProps(getRunbase().getProperties().getAllStartingWith("jeka.jdk.", false));
     }
 
     private void applyRepoConfigOn(JkProject project) {
-        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRuntime().getProperties());
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
         JkRepoSet mavenPublishRepos = repoProperties.getPublishRepository();
         if (mavenPublishRepos.getRepos().isEmpty()) {
             mavenPublishRepos = mavenPublishRepos.and(JkRepo.ofLocal());
@@ -357,7 +357,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     }
 
     private void configureScaffold() {
-        getRuntime().find(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
+        getRunbase().find(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
 
             // Scaffold project structure including build class
             JkScaffoldOptions scaffoldOptions = this.scaffold;

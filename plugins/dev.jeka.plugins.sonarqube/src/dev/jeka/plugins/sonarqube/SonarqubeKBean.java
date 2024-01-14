@@ -30,7 +30,7 @@ public class SonarqubeKBean extends KBean {
             "Properties prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to sonarQube properties.")
     public void run() {
-        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean -> {
+        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
             sonarqube.configureFor(projectKBean.project, provideProductionLibs, provideTestLibs);
         });
         sonarqube.run();
@@ -41,10 +41,10 @@ public class SonarqubeKBean extends KBean {
         if (JkUtilsString.isBlank(scannerVersion)) {
             sonarqube.setVersion(null, null);
         } else {
-            sonarqube.setVersion(getRuntime().getDependencyResolver().getRepos(), scannerVersion);
+            sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), scannerVersion);
         }
         sonarqube.setLogOutput(logOutput);
-        sonarqube.setProperties(getRuntime().getProperties());
+        sonarqube.setProperties(getRunbase().getProperties());
     }
 
 }

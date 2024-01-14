@@ -5,7 +5,7 @@ This plugin provides utility classes and KBean to perform Sonarqube code analysi
 ## Configure using KBeans
 
 [SonarqubeKBean](src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java) configures itself from KBeans found 
-in the runtime and specified options.
+in the runbase and specified options.
 
 The *SonarqubeKBean* does not launch automatically. The method `SonarqubeKBean#run` should bbe explicitly invoked.
 

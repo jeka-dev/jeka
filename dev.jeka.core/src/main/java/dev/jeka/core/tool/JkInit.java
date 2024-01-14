@@ -54,16 +54,16 @@ public final class JkInit {
             List<EngineCommand> commands = new LinkedList<>();
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
             commands.addAll(engineKBeanClassResolver.resolve(Environment.commandLine, KBean.name(clazz), false));
-            JkRuntime jkRuntime = JkRuntime.get(Paths.get(""));
-            jkRuntime.setImportedProjects(getImportedProjects(clazz));
-            JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
+            JkRunbase runbase = JkRunbase.get(Paths.get(""));
+            runbase.setImportedRunbaseDirs(getImportedProjects(clazz));
+            JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
             JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();
             JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
             dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(true);
-            jkRuntime.setDependencyResolver(dependencyResolver);
-            jkRuntime.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
-            jkRuntime.init(commands);
-            final T jkBean = jkRuntime.load(clazz);
+            runbase.setDependencyResolver(dependencyResolver);
+            runbase.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
+            runbase.init(commands);
+            final T jkBean = runbase.load(clazz);
             JkLog.info(jkBean + " is ready to run.");
             if (memoryBufferLogActivated) {
                 JkMemoryBufferLogDecorator.inactivateOnJkLog();
@@ -108,7 +108,7 @@ public final class JkInit {
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
-        JkProperties properties = JkRuntime.constructProperties(Paths.get(""));
+        JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
         sb.append("\nJeka download Repositories : " + JkRepoProperties.of(properties).getDownloadRepos());
         sb.append("\nProperties :\n").append(properties.toKeyValueString("  "));
         JkLog.info(sb.toString());

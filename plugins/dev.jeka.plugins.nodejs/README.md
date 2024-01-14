@@ -11,7 +11,7 @@ It also provides a library to install and invoke conveniently NodeJs from Java.
 ```properties
 jeka.classpath.inject=dev.jeka:nodejs-plugin
 
-# Load the plugin in the runtime.
+# Load the plugin in the runbase.
 jeka.cmd._append=nodeJs#
 
 # Optional tool settings, visit KBean source code for exhaustive options

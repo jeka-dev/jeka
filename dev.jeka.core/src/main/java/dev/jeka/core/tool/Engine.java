@@ -64,7 +64,7 @@ final class Engine {
         super();
         this.projectBaseDir = baseDir;
         this.beanClassesResolver = new EngineKBeanClassResolver(baseDir);
-        JkRepoSet repos = JkRepoProperties.of(JkRuntime.constructProperties(baseDir)).getDownloadRepos();
+        JkRepoSet repos = JkRepoProperties.of(JkRunbase.constructProperties(baseDir)).getDownloadRepos();
         this.dependencyResolver = JkDependencyResolver.of(repos);
         this.dependencyResolver
                 .getDefaultParams()
@@ -101,9 +101,9 @@ final class Engine {
             help();
             return;
         }
-        JkLog.startTask("Setting up runtime");
-        JkRuntime runtime = JkRuntime.get(projectBaseDir);
-        runtime.setClasspath(computedClasspath);
+        JkLog.startTask("Setting up runbase");
+        JkRunbase runbase = JkRunbase.get(projectBaseDir);
+        runbase.setClasspath(computedClasspath);
 
         // If def compilation failed, we ignore the defaultBeanClass cause it may be absent
         // from the classpath.
@@ -113,8 +113,8 @@ final class Engine {
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.kbeanName(), ignoreDefaultBeanNotFound);
-        JkLog.startTask("Init runtime");
-        runtime.init(resolvedCommands);
+        JkLog.startTask("Init runbase");
+        runbase.init(resolvedCommands);
         JkLog.endTask();
         JkLog.endTask();
         JkLog.endTask();
@@ -135,7 +135,7 @@ final class Engine {
         if (!commandLine.hasMethodInvokations() && !Environment.standardOptions.logRuntimeInformation) {
             JkLog.warn("This command contains no actions. Execute 'jeka help' to know about available actions.");
         }
-        runtime.run(resolvedCommands);
+        runbase.run(resolvedCommands);
     }
     
     private static String projectName(Path path) {
@@ -246,7 +246,7 @@ final class Engine {
                 // We need to add kotlin libs in order to invoke local KBean compiled with kotlin
                 if (hasKotlinSource()) {
                     JkLog.traceStartTask("Preparing for Kotlin");
-                    JkProperties props = JkRuntime.constructProperties(projectBaseDir);
+                    JkProperties props = JkRunbase.constructProperties(projectBaseDir);
                     String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
                     JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
                     JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer);
@@ -266,12 +266,12 @@ final class Engine {
                 JkPathSequence.of(failedProjects).withoutDuplicates(),
                 resultClasspath,
                 compilationContext.classpathChanged || importedProjectClasspathChanged);
-        JkRuntime runtime = JkRuntime.get(projectBaseDir);
-        runtime.setDependencyResolver(dependencyResolver);
-        runtime.setImportedProjects(compilationResult.importedProjects);
-        runtime.setClasspath(compilationResult.classpath);
-        runtime.setExportedClassPath(compilationContext.exportedClasspath);
-        runtime.setExportedDependencies(compilationContext.exportedDependencies);
+        JkRunbase runbase = JkRunbase.get(projectBaseDir);
+        runbase.setDependencyResolver(dependencyResolver);
+        runbase.setImportedRunbaseDirs(compilationResult.importedProjects);
+        runbase.setClasspath(compilationResult.classpath);
+        runbase.setExportedClassPath(compilationContext.exportedClasspath);
+        runbase.setExportedDependencies(compilationContext.exportedDependencies);
         return compilationResult;
     }
 
@@ -279,7 +279,7 @@ final class Engine {
                                            boolean failOnCompileError) {
         JkPathTree.of(beanClassesResolver.defClassDir).deleteContent();
         JkPathSequence extraClasspath = JkPathSequence.of();
-        JkProperties props = JkRuntime.constructProperties(projectBaseDir);
+        JkProperties props = JkRunbase.constructProperties(projectBaseDir);
         String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
         if (hasKotlinSource()) {
             JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
@@ -479,7 +479,7 @@ final class Engine {
     }
 
     private JkProperties localProperties() {
-        return JkRuntime.localProperties(projectBaseDir);
+        return JkRunbase.localProperties(projectBaseDir);
     }
 
     private String projectBaseDirName() {

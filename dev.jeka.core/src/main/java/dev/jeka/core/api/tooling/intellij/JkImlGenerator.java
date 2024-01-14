@@ -12,7 +12,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkRuntime;
+import dev.jeka.core.tool.JkRunbase;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -201,8 +201,8 @@ public final class JkImlGenerator {
     private List<JkIml.OrderEntry> defOrderEntries() {
         OrderEntries orderEntries = new OrderEntries();
         JkPathSequence importedClasspath = defImportedProjects.getEntries().stream()
-                        .map(JkRuntime::get)
-                        .map(JkRuntime::getClasspath)
+                        .map(JkRunbase::get)
+                        .map(JkRunbase::getClasspath)
                         .reduce(JkPathSequence.of(), (ps1, ps2) -> ps1.and(ps2))
                         .withoutDuplicates();
 

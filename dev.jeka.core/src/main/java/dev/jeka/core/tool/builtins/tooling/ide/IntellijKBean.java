@@ -60,9 +60,9 @@ public final class IntellijKBean extends KBean {
     protected void init() {
         imlGenerator
                 .setBaseDir(this.getBaseDir())
-                .setDefClasspath(this.getRuntime().getClasspath())
-                .setDefImportedProjects(this.getRuntime().getImportedProjects())
-                .setIdeSupport(() -> IdeSupport.getProjectIde(getRuntime()))
+                .setDefClasspath(this.getRunbase().getClasspath())
+                .setDefImportedProjects(this.getRunbase().getImportedRunbaseDirs())
+                .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
                 .setDedicatedJekaModule(this.dedicatedJekaModule)
                 .setUseVarPath(useVarPath);

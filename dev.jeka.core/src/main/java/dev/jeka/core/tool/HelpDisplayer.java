@@ -68,10 +68,10 @@ final class HelpDisplayer {
         items.add(option("log.style", "ls", "choose the display log style : INDENT(default), BRACE or DEBUG"));
         items.add(option("log.verbose", "lv", "log 'trace' level"));
         items.add(option("log.ivy.verbose", "liv",  " log 'trace' level + Ivy trace level"));
-        items.add(option("log.runtime.information", "lri",  " log Jeka runtime information at startup"));
+        items.add(option("log.runtime.information", "lri",  " log Jeka runbase information at startup"));
         items.add(option("log.no.animation", "lna",  " do not log animations on console"));
         items.add(option("log.duration", "ld",  " log execution duration"));
-        items.add(option("log.runtime.info", "lri",  " log Jeka runtime information as Jeka version, JDK version, working dir, classpath ..."));
+        items.add(option("log.runtime.info", "lri",  " log Jeka runbase information as Jeka version, JDK version, working dir, classpath ..."));
         items.add(option("log.banner", "lb",  " log intro and outro banners"));
         items.add(option("log.stacktrace", "lst",  " log the stacktrace when Jeka fail"));
         items.add(option("log.setup", "lsu",  " log KBean setup process"));
@@ -108,11 +108,11 @@ final class HelpDisplayer {
 
     static void helpJkBean(KBean kBean) {
         BeanDoc beanDescription = new BeanDoc(kBean.getClass());
-        JkLog.info(helpBeanDescription(beanDescription, kBean.getRuntime()));
+        JkLog.info(helpBeanDescription(beanDescription, kBean.getRunbase()));
         JkLog.info("Execute 'jeka -help' to get global help.\n");
     }
 
-    private static String helpBeanDescription(BeanDoc description, JkRuntime runtime) {
+    private static String helpBeanDescription(BeanDoc description, JkRunbase runbase) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         List<RenderItem> items = new LinkedList<>();
@@ -132,7 +132,7 @@ final class HelpDisplayer {
         }
         new ItemContainer(items).render().forEach(line -> sb.append(line + "\n"));
         sb.append(BeanDescription.renderItem(description.beanClass()).flatDescription());
-        sb.append(shortcuts(runtime.getProjectBaseDir()));
+        sb.append(shortcuts(runbase.getBaseDir()));
         return sb.toString();
     }
 

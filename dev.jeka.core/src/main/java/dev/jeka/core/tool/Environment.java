@@ -30,7 +30,7 @@ class Environment {
         List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(commandLineArgs));
 
         // Add arguments contained in local.properties 'jeka.cmd._appendXXXX'
-        JkProperties props = JkRuntime.readProjectPropertiesRecursively(Paths.get(""));
+        JkProperties props = JkRunbase.readProjectPropertiesRecursively(Paths.get(""));
         List<String> appendedArgs = props.getAllStartingWith(CMD_APPEND_PROP, true).keySet().stream()
                 .sorted()
                 .map(props::get)

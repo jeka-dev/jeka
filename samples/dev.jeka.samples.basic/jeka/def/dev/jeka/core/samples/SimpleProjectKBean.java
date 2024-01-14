@@ -80,7 +80,7 @@ public class SimpleProjectKBean extends KBean {
 
     public void checkValueIsA() {
         JkUtilsAssert.state("A".equals(checkedValue), "checkedValue field values %s and not 'A'.", checkedValue);
-        JkUtilsAssert.state("foo".equals(getRuntime().getProperties().get("my.prop")),"Project property 'my.prop' not found.");
+        JkUtilsAssert.state("foo".equals(getRunbase().getProperties().get("my.prop")),"Project property 'my.prop' not found.");
     }
 
     // For debugging purpose
@@ -91,7 +91,7 @@ public class SimpleProjectKBean extends KBean {
     }
 
     public void printMvn() {
-        MavenMigrationKBean pluginPom = getRuntime().load(MavenMigrationKBean.class);
+        MavenMigrationKBean pluginPom = getRunbase().load(MavenMigrationKBean.class);
         pluginPom.showDepsAsCode();
     }
 

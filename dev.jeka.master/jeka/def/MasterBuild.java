@@ -70,7 +70,7 @@ class MasterBuild extends KBean {
         getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
-        jacocoForCore = JkJacoco.ofVersion(getRuntime().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
+        jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
         jacocoForCore.configureForAndApplyTo(coreBuild.load(ProjectKBean.class).project);
 
         load(NexusKBean.class).configureNexusRepo(this::configureNexus);
@@ -88,8 +88,8 @@ class MasterBuild extends KBean {
         JkLog.endTask();
         if (runSamples) {
             JkLog.startTask("Running samples");
-            SamplesTester samplesTester = new SamplesTester(this.getRuntime().getProperties());
-            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester(this.getRuntime().getProperties());
+            SamplesTester samplesTester = new SamplesTester(this.getRunbase().getProperties());
+            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester(this.getRunbase().getProperties());
             if (jacocoForCore != null) {
                 samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
                 pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
@@ -125,7 +125,7 @@ class MasterBuild extends KBean {
             publishLocal();
             JkLog.endTask();
         }
-        if (getRuntime().getProperties().get("sonar.host.url") != null) {
+        if (getRunbase().getProperties().get("sonar.host.url") != null) {
             coreBuild.load(SonarqubeKBean.class).run();
         }
     }
@@ -186,11 +186,11 @@ class MasterBuild extends KBean {
     }
 
     public void runSamples()  {
-        new SamplesTester(this.getRuntime().getProperties()).run();
+        new SamplesTester(this.getRunbase().getProperties()).run();
     }
 
     public void runScaffoldsWithPlugins() {
-        new PluginScaffoldTester(this.getRuntime().getProperties()).run();
+        new PluginScaffoldTester(this.getRunbase().getProperties()).run();
     }
 
     public void publishLocal() {

@@ -42,7 +42,7 @@ public class ScaffoldKBean extends KBean {
 
                 // todo : Sample code should be encapsulated
                 () -> JkUtilsIO.read(JkScaffold.class.getResource("buildclass.snippet")));
-        JkRepoSet repos = JkRepoProperties.of(getRuntime().getProperties()).getDownloadRepos();
+        JkRepoSet repos = JkRepoProperties.of(getRunbase().getProperties()).getDownloadRepos();
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
         this.scaffold.setDependencyResolver(dependencyResolver);
         this.scaffold.addLocalPropsFileContent(this.localPropsExtraContent);

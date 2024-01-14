@@ -51,8 +51,8 @@ public final class JkImportedKBeans {
      */
     public <T extends KBean> List<T> get(Class<T> beanClass, boolean includeTransitives) {
         return get(includeTransitives).stream()
-                .map(KBean::getRuntime)
-                .map(runtime -> runtime.find(beanClass))
+                .map(KBean::getRunbase)
+                .map(runbase -> runbase.find(beanClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -125,11 +125,11 @@ public final class JkImportedKBeans {
         JkLog.startTask("Import bean " + importedBeanClass + " from " + importedProjectDir);
 
         // Not sure it is necessary. Is so, explain why.
-        JkRuntime.get(importedProjectDir);
+        JkRunbase.get(importedProjectDir);
 
-        JkRuntime.setBaseDirContext(importedProjectDir);
-        final T result = JkRuntime.get(importedProjectDir).load(importedBeanClass);
-        JkRuntime.setBaseDirContext(Paths.get(""));
+        JkRunbase.setBaseDirContext(importedProjectDir);
+        final T result = JkRunbase.get(importedProjectDir).load(importedBeanClass);
+        JkRunbase.setBaseDirContext(Paths.get(""));
         JkLog.endTask();
         return result;
     }

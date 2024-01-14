@@ -46,16 +46,16 @@ public class KotlinJvmKBean extends KBean {
 
     /**
      * Retrieves the Kotlin JVM project. If the project has already been created, it is returned.
-     * Otherwise, it creates a new Kotlin JVM project using the projectKBean found in runtime..
-     * If no projectKean is found in the runtime, an IllegalStateException is thrown.
+     * Otherwise, it creates a new Kotlin JVM project using the projectKBean found in runbase..
+     * If no projectKean is found in the runbase, an IllegalStateException is thrown.
      *
-     * @throws IllegalStateException if no projectKean is found in the runtime
+     * @throws IllegalStateException if no projectKean is found in the runbase
      */
     public JkKotlinJvm getKotlinJvm() {
         if (kotlinJvmProject != null) {
             return kotlinJvmProject;
         }
-        JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getRuntime().getDependencyResolver().getRepos(),
+        JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getRunbase().getDependencyResolver().getRepos(),
                 getKotlinVersion());
         kotlinJvmProject = JkKotlinJvm.of(kotlinCompiler).setAddStdlib(this.addStdlib);
         return kotlinJvmProject;
@@ -64,7 +64,7 @@ public class KotlinJvmKBean extends KBean {
     private String getKotlinVersion() {
         String result = kotlinVersion;
         if (result == null) {
-            result = Optional.ofNullable(getRuntime().getProperties()
+            result = Optional.ofNullable(getRunbase().getProperties()
                     .get(JkKotlinCompiler.KOTLIN_VERSION_OPTION)).orElse(DEFAULT_VERSION);
         }
         return result;

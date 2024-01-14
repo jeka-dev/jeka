@@ -215,7 +215,7 @@ public abstract class SelfAppKBean extends KBean {
      * Returns the application classpath. This contains class dir + libraries.
      */
     public List<Path> getAppClasspath() {
-        return getRuntime().getExportedClasspath().getEntries();
+        return getRunbase().getExportedClasspath().getEntries();
     }
 
     /**

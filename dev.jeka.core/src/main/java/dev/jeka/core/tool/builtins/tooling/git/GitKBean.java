@@ -22,7 +22,7 @@ public class GitKBean extends KBean {
             "you can set this value to 'v' or whatever prefix.")
     public String versionTagPrefix = "";
 
-    @JkDoc("If true, this Kbean will handle versioning og ProjectKBean or SelfAppKBean found in the JkRuntime.")
+    @JkDoc("If true, this Kbean will handle versioning og ProjectKBean or SelfAppKBean found in the JkRunbase.")
     public boolean handleVersioning;
 
     public final JkGit git = JkGit.of(getBaseDir());
@@ -33,9 +33,9 @@ public class GitKBean extends KBean {
     protected void init() {
         versionFromGit = JkVersionFromGit.of(getBaseDir(), versionTagPrefix);
         if (handleVersioning) {
-            getRuntime().findInstanceOf(SelfAppKBean.class).ifPresent(selApp ->
+            getRunbase().findInstanceOf(SelfAppKBean.class).ifPresent(selApp ->
                     versionFromGit.handleVersioning(selApp));
-            getRuntime().find(ProjectKBean.class).ifPresent(projectKBean ->
+            getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
                     versionFromGit.handleVersioning(projectKBean.project));
         }
     }
@@ -54,7 +54,7 @@ public class GitKBean extends KBean {
     @JkDoc("Handle versioning of the project managed in the projectKBean. " +
             "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
     public void handleProjectVersioning() {
-        getRuntime().find(ProjectKBean.class).ifPresent(projectKBean ->
+        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
                 gerVersionFromGit().handleVersioning(projectKBean.project));
     }
 

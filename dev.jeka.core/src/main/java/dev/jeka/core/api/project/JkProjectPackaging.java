@@ -233,7 +233,7 @@ public class JkProjectPackaging {
     }
 
     /**
-     * Returns the resolved (and cached) dependencies for the runtime.
+     * Returns the resolved (and cached) dependencies needed at runtime.
      */
     public JkResolveResult resolveRuntimeDependencies() {
         if (cachedJkResolveResult != null) {
