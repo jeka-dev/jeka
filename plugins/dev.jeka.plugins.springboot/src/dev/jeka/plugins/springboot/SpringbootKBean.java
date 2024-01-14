@@ -9,7 +9,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
-import dev.jeka.core.tool.builtins.self.SelfAppKBean;
+import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
 import java.util.Optional;
@@ -54,18 +54,18 @@ public final class SpringbootKBean extends KBean {
     @Override
     protected void init() {
 
-        // Spring-Boot KBean is intended to enhance either ProjectKBean nor SelfAppKBean.
+        // Spring-Boot KBean is intended to enhance either ProjectKBean nor SelfKBean.
         // If none is present yet in the runbase, we assume that ProjectKBean should be instantiated implicitly
-        Optional<SelfAppKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(SelfAppKBean.class);
+        Optional<SelfKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(SelfKBean.class);
 
         if (!optionalSelfAppKBean.isPresent()) {
-            JkLog.trace("No SelfAppKBean found in runbase. Assume SpringbootKBean is for configuring Project.");
+            JkLog.trace("No SelfKBean found in runbase. Assume SpringbootKBean is for configuring Project.");
             load(ProjectKBean.class);
         } else {
-            JkLog.trace("SelfAppKBean found in runbase. Assume SpringbootKBean is for configuring SelfApp. ");
-            SelfAppKBean selfApp = optionalSelfAppKBean.get();
+            JkLog.trace("SelfKBean found in runbase. Assume SpringbootKBean is for configuring SelfApp. ");
+            SelfKBean selfApp = optionalSelfAppKBean.get();
 
-            selfApp.setMainClass(SelfAppKBean.AUTO_FIND_MAIN_CLASS);
+            selfApp.setMainClass(SelfKBean.AUTO_FIND_MAIN_CLASS);
             selfApp.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
                     getBaseDir().resolve(JkConstants.DEF_BIN_DIR)));
 

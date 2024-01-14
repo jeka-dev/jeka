@@ -31,15 +31,13 @@ import java.util.stream.Collectors;
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."
 )
-public abstract class SelfAppKBean extends KBean {
+public abstract class SelfKBean extends KBean {
 
     /**
      * Represents the value "auto" usable in {@link #setMainClass(String)}
      * to indicate that the main class should be discovered automatically.
      */
     public static final String AUTO_FIND_MAIN_CLASS = "auto";
-
-    private final String dockerImageTag = getBaseDirName();
 
     @JkDoc("Space separated list of options to pass to the JVM that will run the program.")
     public String jvmOptions = "";
@@ -138,25 +136,25 @@ public abstract class SelfAppKBean extends KBean {
     /**
      * Sets the jarMaker for creating a runnable fat jar.
      */
-    public SelfAppKBean setJarMaker(Consumer<Path> jarMaker) {
+    public SelfKBean setJarMaker(Consumer<Path> jarMaker) {
         this.jarMaker = jarMaker;
         return this;
     }
 
     /**
-     * Sets the version supplier for this SelfAppKBean. The version represents the
+     * Sets the version supplier for this SelfKBean. The version represents the
      * version of the application/library.
      */
-    public SelfAppKBean setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+    public SelfKBean setVersionSupplier(Supplier<JkVersion> versionSupplier) {
         this.versionSupplier = versionSupplier;
         return this;
     }
 
     /**
-     * Sets the version for this SelfAppKBean. The version represents the
+     * Sets the version for this SelfKBean. The version represents the
      * version of the application/library.
      */
-    public SelfAppKBean setVersion(String version) {
+    public SelfKBean setVersion(String version) {
         this.versionSupplier = ()  -> JkVersion.of(version);
         return this;
     }
@@ -183,7 +181,7 @@ public abstract class SelfAppKBean extends KBean {
      *
      * @param moduleId The module ID formatted as <i>group:name</i>.
      */
-    public SelfAppKBean setModuleId(String moduleId) {
+    public SelfKBean setModuleId(String moduleId) {
         this.moduleId = JkModuleId.of(moduleId);
         return this;
     }
@@ -214,7 +212,7 @@ public abstract class SelfAppKBean extends KBean {
      * providing the name of the main class to use in the project. This can be used for running
      * the project or building Docker images.
      */
-    public SelfAppKBean setMainClassFinder(Supplier<String> mainClassFinder) {
+    public SelfKBean setMainClassFinder(Supplier<String> mainClassFinder) {
         this.mainClassFinder = mainClassFinder;
         return this;
     }

@@ -11,13 +11,13 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.self.SelfAppKBean;
+import dev.jeka.core.tool.builtins.self.SelfKBean;
 
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-@JkDoc("Build and run image based on SelfAppKBean or ProjectKBean present on the runbase. " +
+@JkDoc("Build and run image based on SelfKBean or ProjectKBean present on the runbase. " +
         "A running Docker daemon is mandatory to use this KBean.")
 public class DockerKBean extends KBean {
 
@@ -41,11 +41,11 @@ public class DockerKBean extends KBean {
 
     @Override
     protected void init() {
-        Optional<SelfAppKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(SelfAppKBean.class);
+        Optional<SelfKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(SelfKBean.class);
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
        /*
         if (optionalProjectKBean.isPresent() && optionalProjectKBean.isPresent()) {
-            throw new IllegalStateException("Both a SelfAppKBean and ProjectKBean are present in the JkRunbase. " +
+            throw new IllegalStateException("Both a SelfKBean and ProjectKBean are present in the JkRunbase. " +
                     "Cannot configure for Both. You need to remove one of these KBeans in order to use DockerKBean.");
         }
 
@@ -89,18 +89,18 @@ public class DockerKBean extends KBean {
         return dockerBuild;
     }
 
-    private void configureForSelfApp(SelfAppKBean selfAppKBean) {
-        JkLog.info("Configure DockerKBean for SelAppKBean " + selfAppKBean);
+    private void configureForSelfApp(SelfKBean selfKBean) {
+        JkLog.info("Configure DockerKBean for SelAppKBean " + selfKBean);
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
-                : computeImageName(selfAppKBean.getModuleId(), selfAppKBean.getVersion(), selfAppKBean.getBaseDir());
-        this.jvmOptions = JkUtilsString.nullToEmpty(selfAppKBean.jvmOptions);
-        this.programArgs = JkUtilsString.nullToEmpty(selfAppKBean.programArgs);
+                : computeImageName(selfKBean.getModuleId(), selfKBean.getVersion(), selfKBean.getBaseDir());
+        this.jvmOptions = JkUtilsString.nullToEmpty(selfKBean.jvmOptions);
+        this.programArgs = JkUtilsString.nullToEmpty(selfKBean.programArgs);
 
         this.customize(dockerBuild ->  dockerBuild
-                .setMainClass(selfAppKBean.getMainClass())
-                .setClasses(selfAppKBean.getAppClasses())
-                .setClasspath(selfAppKBean.getAppClasspath())
+                .setMainClass(selfKBean.getMainClass())
+                .setClasses(selfKBean.getAppClasses())
+                .setClasspath(selfKBean.getAppClasspath())
         );
     }
 
