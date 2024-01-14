@@ -147,7 +147,7 @@ public class JkProjectTest {
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 )
                 .setModuleId("my:project").setVersion("MyVersion")
-                .configurePublishedDeps(deps -> deps.minus("org.postgresql:postgresql"))
+                .customizePublishedDeps(deps -> deps.minus("org.postgresql:postgresql"))
                 .getProject();
         JkDependencySet publishDeps = project.mavenPublication.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
@@ -225,7 +225,7 @@ public class JkProjectTest {
         coreProject
                 .setBaseDir(core)
                     .compilation
-                        .configureDependencies(deps -> deps
+                        .customizeDependencies(deps -> deps
                             .and(baseProject.toDependency())
                         )
                         .layout
@@ -239,7 +239,7 @@ public class JkProjectTest {
         desktopProject
                 .setBaseDir(desktop)
                 .compilation
-                    .configureDependencies(deps -> deps
+                    .customizeDependencies(deps -> deps
                             .and(coreProject.toDependency()));
         desktopProject
                 .compilation

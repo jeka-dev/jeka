@@ -136,7 +136,7 @@ public class JkProjectCompilation {
         return this;
     }
 
-    public JkProjectCompilation configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectCompilation customizeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }

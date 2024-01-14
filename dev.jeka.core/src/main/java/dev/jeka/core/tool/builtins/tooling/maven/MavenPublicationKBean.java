@@ -70,7 +70,7 @@ public class MavenPublicationKBean extends KBean {
         return JkMavenPublication.of(artifactLocator)
                 .setModuleIdSupplier(selfKBean::getModuleId)
                 .setVersionSupplier(selfKBean::getVersion)
-                .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
+                .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                         selfKBean.getRunbase().getExportedDependencies(),
                         selfKBean.getRunbase().getExportedDependencies(),
                         JkCoordinate.ConflictStrategy.TAKE_FIRST))

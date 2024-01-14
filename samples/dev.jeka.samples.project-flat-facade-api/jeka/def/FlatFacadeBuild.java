@@ -84,7 +84,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
         // Here we are modifying the dependencies mentioned in the published POM
         project.mavenPublication
-                .configureDependencies(deps -> deps
+                .customizeDependencies(deps -> deps
                         .minus("com.fasterxml.jackson.core")
                         .withTransitivity("com.github.djeang:vincer-dom", JkTransitivity.RUNTIME)
                 );

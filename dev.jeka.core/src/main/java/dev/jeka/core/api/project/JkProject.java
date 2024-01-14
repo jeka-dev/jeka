@@ -588,7 +588,7 @@ public class JkProject implements JkIdeSupportSupplier {
         return JkMavenPublication.of(project.artifactLocator)
                 .setModuleIdSupplier(project::getModuleId)
                 .setVersionSupplier(project::getVersion)
-                .configureDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
+                .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
                         project.compilation.getDependencies(),
                         project.packaging.getRuntimeDependencies(),
                         project.getDuplicateConflictStrategy()))

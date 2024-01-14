@@ -1,7 +1,6 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
@@ -103,17 +102,6 @@ public class JkProjectFlatFacade {
         return this;
     }
 
-    // TODO maybe not part of JkProject concerns.
-    public JkProjectFlatFacade publishJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        if (!includeJavaDoc) {
-            project.mavenPublication.removeArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID);
-        }
-        if (!includeSources) {
-            project.mavenPublication.removeArtifact(JkArtifactId.SOURCES_ARTIFACT_ID);
-        }
-        return this;
-    }
-
     /**
      * Sets the main class name to use in #runXxx and for building docker images.
      * The value <code>auto</code> means that it will e auto-discovered.
@@ -129,7 +117,7 @@ public class JkProjectFlatFacade {
      * Customizes the compilation dependencies of the project using the provided modifier function.
      */
     public JkProjectFlatFacade customizeCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.compilation.configureDependencies(modifier);
+        project.compilation.customizeDependencies(modifier);
         return this;
     }
 
@@ -137,7 +125,7 @@ public class JkProjectFlatFacade {
      * Customizes the runtime dependencies of the project using the provided modifier function.
      */
     public JkProjectFlatFacade customizeRuntimeDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.packaging.configureRuntimeDependencies(modifier);
+        project.packaging.customizeRuntimeDependencies(modifier);
         return this;
     }
 
@@ -145,7 +133,7 @@ public class JkProjectFlatFacade {
      * Customizes the test dependencies of the project using the provided modifier function.
      */
     public JkProjectFlatFacade customizeTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.testing.compilation.configureDependencies(modifier);
+        project.testing.compilation.customizeDependencies(modifier);
         return this;
     }
 
@@ -252,10 +240,10 @@ public class JkProjectFlatFacade {
     }
 
     /**
-     * Configures the dependencies to be published in a Maven repository.
+     * Customize the dependencies to be published in a Maven repository.
      */
-    public JkProjectFlatFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.mavenPublication.configureDependencies(dependencyModifier);
+    public JkProjectFlatFacade customizePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
+        project.mavenPublication.customizeDependencies(dependencyModifier);
         return this;
     }
 

@@ -123,7 +123,7 @@ public final class JkSpringbootProject {
      * @return This oject for chaining.
      */
     public JkSpringbootProject includeParentBom(String version) {
-        project.compilation.configureDependencies(deps -> deps
+        project.compilation.customizeDependencies(deps -> deps
                 .and(BOM_COORDINATE + version));
         return this;
     }

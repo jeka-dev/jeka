@@ -117,7 +117,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
         JkMavenPublication.of(artifactLocator)
                 .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID, this::makeJar)
                 .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, this::jarSources)
-                .configureDependencies(deps -> prodDependencies)
+                .customizeDependencies(deps -> prodDependencies)
                 .setModuleId(versionedModule.getCoordinate().getModuleId().toString())
                 .setVersion(versionedModule.getCoordinate().getVersion().getValue())
                 .addRepos(mavenRepo)

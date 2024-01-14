@@ -54,7 +54,7 @@ public class SimpleProjectKBean extends KBean {
                     .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
        project
            .packaging
-               .configureRuntimeDependencies(deps -> deps
+               .customizeRuntimeDependencies(deps -> deps
                        .and("com.github.djeang:vincer-dom:1.2.0")
                );
        project
@@ -70,7 +70,7 @@ public class SimpleProjectKBean extends KBean {
 
                // Published dependencies can be modified here from the ones declared in dependency management.
                // Here jersey-server is not supposed to be part of the API but only needed at runtime.
-               .configureDependencies(deps -> deps
+               .customizeDependencies(deps -> deps
                    .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
     }
 

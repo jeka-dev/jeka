@@ -213,14 +213,14 @@ public class JkProjectPackaging {
      * get the runtime dependencies.
      * @param modifier A function that define the runtime dependencies from the compilation ones.
      */
-    public JkProjectPackaging configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectPackaging customizeRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencySetModifier = modifier;
         return this;
     }
 
     /**
      * Returns the runtime dependencies computed from 'compile' dependencies and modified
-     * through {@link #configureRuntimeDependencies(Function)}
+     * through {@link #customizeRuntimeDependencies(Function)}
      */
     public JkDependencySet getRuntimeDependencies() {
         JkDependencySet baseDependencies = project.compilation.getDependencies();

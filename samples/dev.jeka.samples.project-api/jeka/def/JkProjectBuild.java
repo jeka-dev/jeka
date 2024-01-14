@@ -57,7 +57,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
             .compilation
                 .addJavaCompilerOptions("-g")
                 .addSourceGenerator(new MySourceGenerator()) /// Custom basic source generator
-                .configureDependencies(deps -> deps
+                .customizeDependencies(deps -> deps
                     .and("com.google.api-client:google-api-client:1.30.7")
                         .withLocalExclusions("com.google.guava:guava")  // remove dependency to avoid conflict
                     .and("com.google.guava:guava:28.0-jre")
@@ -69,7 +69,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
             .testing
                 .compilation
                     .addJavaCompilerOptions("-g")
-                    .configureDependencies(deps -> deps
+                    .customizeDependencies(deps -> deps
                             .and("org.junit.jupiter:junit-jupiter:5.10.1")
                     );
 
@@ -97,7 +97,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
             .packaging
                 .customizeFatJarContent(pathTreeSet ->  pathTreeSet
                         .withMatcher(JkPathMatcher.of(false, "**/*.jks")))
-                .configureRuntimeDependencies(deps -> deps
+                .customizeRuntimeDependencies(deps -> deps
                         .minus("org.codehaus.plexus:plexus-container-default")
                         .and("com.h2database:h2:2.2.224")
                 );
@@ -109,7 +109,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                 .setDefaultSigner(path -> path)   // sign published artifact
                 .setRepos(JkRepoSet.of("https://my.org.repository/internal"))
 
-                    .configureDependencies(deps -> deps  // Fine tune published transitive dependencies
+                    .customizeDependencies(deps -> deps  // Fine tune published transitive dependencies
                             .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
                     )
                     .pomMetadata   // Metadata required to publish on Maven Central

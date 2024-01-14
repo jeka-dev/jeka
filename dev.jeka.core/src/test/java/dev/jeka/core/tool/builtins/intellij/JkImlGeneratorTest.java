@@ -31,7 +31,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProject() {
         JkProject project = JkProject.of();
-        project.compilation.configureDependencies(deps -> dependencies());
+        project.compilation.customizeDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
                 .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
@@ -45,7 +45,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProjectSimpleLayout() {
         JkProject project = JkProject.of();
-        project.compilation.configureDependencies(deps -> dependencies());
+        project.compilation.customizeDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
                 .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));

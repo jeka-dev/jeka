@@ -42,7 +42,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
             .compilation
-                .configureDependencies(deps -> deps.and(baseProject.toDependency()));
+                .customizeDependencies(deps -> deps.and(baseProject.toDependency()));
         coreProject
             .testing
                 .compilation
@@ -65,7 +65,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
             .compilation
-                    .configureDependencies(deps -> deps.and(coreProject.toDependency()));
+                    .customizeDependencies(deps -> deps.and(coreProject.toDependency()));
         desktopProject.pack();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());

@@ -17,7 +17,7 @@ public class JkEclipseClasspathGeneratorRunner {
         JkProject project = JkProject.of();
         project
                 .compilation
-                    .configureDependencies(deps -> deps
+                    .customizeDependencies(deps -> deps
                             .and(fileDep)
                             .and(coordinateDependency));
         JkEclipseClasspathGenerator generator = JkEclipseClasspathGenerator.of(project.getJavaIdeSupport());
