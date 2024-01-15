@@ -165,9 +165,7 @@ public final class JkLog implements Serializable {
         }
     }
 
-
-
-    public static void error(String message, String ...params) {
+    public static void error(String message, Object ...params) {
         consume(JkLogEvent.ofRegular(Type.ERROR, String.format(message, params)));
     }
 

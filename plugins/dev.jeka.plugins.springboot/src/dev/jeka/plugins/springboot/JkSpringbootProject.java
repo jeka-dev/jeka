@@ -69,21 +69,18 @@ public final class JkSpringbootProject {
             JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             project.packActions.append("Make bootable jar", () -> createBootJar(artifactFile));
-            project.mavenPublication.putArtifact(artifactId, this::createBootJar);
         }
         if (createWarFile) {
             JkArtifactId artifactId = JkArtifactId.ofMainArtifact("war");
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(project, path);
             project.packActions.append("Make war file", () -> warMaker.accept(artifactFile) );
-            project.mavenPublication.putArtifact(artifactId, warMaker);
         }
         if (createOriginalJar) {
             JkArtifactId artifactId = ORIGINAL_ARTIFACT;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
             project.packActions.append("Make original jar", () -> makeBinJar.accept(artifactFile));
-            project.mavenPublication.putArtifact(artifactId, makeBinJar);
         }
 
         // To deploy spring-Boot app in a container, we don't need to create a jar

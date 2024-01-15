@@ -93,11 +93,6 @@ public class JkProject implements JkIdeSupportSupplier {
     public final JkProjectTesting testing;
 
     /**
-     * Object responsible for publishing artifacts to a Maven repository.
-     */
-    public final JkMavenPublication mavenPublication;
-
-    /**
      * Function to modify the {@link JkIdeSupport} used for configuring IDEs.
      */
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
@@ -134,7 +129,6 @@ public class JkProject implements JkIdeSupportSupplier {
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseInMemoryCache(true);
-        mavenPublication = mavenPublication(this);
         packActions.set(packaging::createBinJar);
     }
 
@@ -350,9 +344,6 @@ public class JkProject implements JkIdeSupportSupplier {
          Arrays.stream(packaging.getManifest().asString().split("\n"))
                  .forEach(line -> builder.append("  " + line + "\n"));
 
-        if (mavenPublication.getModuleId() != null) {
-            builder.append(mavenPublication.info());
-        }
         return builder.toString();
     }
 

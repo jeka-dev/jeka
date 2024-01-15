@@ -80,8 +80,7 @@ public abstract class KBean {
     }
 
     /**
-     * Refer to the KBeans coming from other sub-projects, that has been imported
-     * in this KBean.
+     * Refer to the KBeans coming from other sub-runbase, that has been imported in this KBean.
      */
     public JkImportedKBeans getImportedKBeans() {
         return importedKBeans;

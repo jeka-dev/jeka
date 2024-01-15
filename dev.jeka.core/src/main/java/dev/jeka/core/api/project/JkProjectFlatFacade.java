@@ -240,14 +240,6 @@ public class JkProjectFlatFacade {
     }
 
     /**
-     * Customize the dependencies to be published in a Maven repository.
-     */
-    public JkProjectFlatFacade customizePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.mavenPublication.customizeDependencies(dependencyModifier);
-        return this;
-    }
-
-    /**
      * By default, every class in test folder are run. If you add an exclude filter,
      * tests accepting this filter won't be run.
      * @param condition : the filter will be added only if this parameter is <code>true</code>.

@@ -13,6 +13,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 import dev.jeka.core.tool.builtins.tooling.nexus.NexusKBean;
 import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
@@ -68,6 +69,7 @@ class MasterBuild extends KBean {
 
         coreBuild.runIT = true;
         getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
+        getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(this::applyToSlave);
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
@@ -110,7 +112,7 @@ class MasterBuild extends KBean {
         // Publish artifacts only if we are on 'master' branch
         if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
-            getImportedKBeans().get(ProjectKBean.class, false).forEach(ProjectKBean::publish);
+            getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publish);
             closeAndReleaseRepo();
             JkLog.endTask();
             JkLog.startTask("Creating GitHub Release");
@@ -171,14 +173,16 @@ class MasterBuild extends KBean {
     private void applyToSlave(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         versionFromGit.handleVersioning(project);
-        project.compilation
-                        .addJavaCompilerOptions("-g");
-        project.mavenPublication
+        project.compilation.addJavaCompilerOptions("-g");
+    }
+
+    private void applyToSlave(MavenPublicationKBean mavenPublicationKBean) {
+        mavenPublicationKBean.getMavenPublication()
                 .setRepos(this.publishRepo())
                 .pomMetadata
-                    .setProjectUrl("https://jeka.dev")
-                    .setScmUrl("https://github.com/jerkar/jeka.git")
-                    .addApache2License();
+                .setProjectUrl("https://jeka.dev")
+                .setScmUrl("https://github.com/jerkar/jeka.git")
+                .addApache2License();
     }
 
     public void buildCore() {
@@ -194,7 +198,7 @@ class MasterBuild extends KBean {
     }
 
     public void publishLocal() {
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(ProjectKBean::publishLocal);
+        getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publishLocal);
     }
 
     public static void main(String[] args) throws Exception {

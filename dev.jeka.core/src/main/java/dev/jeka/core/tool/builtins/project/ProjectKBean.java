@@ -65,15 +65,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring compilation.
      */
-    @JkDoc("")
-    @JkInjectProperty // nested prop-injectable fields
-    private final JkCompilationOptions compilation = new JkCompilationOptions();
-
-    /**
-     * Options for Maven publication
-     */
     @JkDoc
-    private final JkPublishOptions mavenPublication = new JkPublishOptions();
+    @JkInjectProperty // some nested fields are prop-injectable
+    private final JkCompilationOptions compilation = new JkCompilationOptions();
 
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
@@ -145,17 +139,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Run the generated jar.")
     public void runJar() {
         this.run.runJar();
-    }
-
-    @JkDoc("Publishes produced artifacts to configured repository.")
-    public void publish() {
-        JkLog.info("Publish " + project + " ...");
-        project.mavenPublication.publish();
-    }
-
-    @JkDoc("Publishes produced artifacts to local repository.")
-    public void publishLocal() {
-        project.mavenPublication.publishLocal();
     }
 
     @Override
@@ -290,14 +273,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     }
 
     private void applyRepoConfigOn(JkProject project) {
-        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
-        JkRepoSet mavenPublishRepos = repoProperties.getPublishRepository();
-        if (mavenPublishRepos.getRepos().isEmpty()) {
-            mavenPublishRepos = mavenPublishRepos.and(JkRepo.ofLocal());
-        }
-        project.mavenPublication.setRepos(mavenPublishRepos);
 
         // set dependency resolver
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
         final JkRepoSet downloadRepos = repoProperties.getDownloadRepos();
         if (!downloadRepos.getRepos().isEmpty()) {
             project.dependencyResolver.setRepos(downloadRepos);

@@ -75,18 +75,18 @@ public class JkNexusRepos {
      *
      * @param profileNames See {@link #setProfileNameFilters(String...)}
      */
-    public static void handleAutoRelease(JkProject project, String... profileNames) {
-        JkNexusRepos.ofPublishRepo(project)
+    public static void handleAutoRelease(JkMavenPublication mavenPublication, String... profileNames) {
+        JkNexusRepos.ofPublishRepo(mavenPublication)
                 .setProfileNameFilters(profileNames)
-                .autoReleaseAfterPublication(project);
+                .autoReleaseAfterPublication(mavenPublication);
     }
 
     /**
      * Creates a {@link JkNexusRepos} from the publishing repo of the specified {@link JkProject}
      */
-    public static JkNexusRepos ofPublishRepo(JkProject project) {
-        JkRepo repo = project.mavenPublication.findFirstNonLocalRepo();
-        JkUtilsAssert.argument(repo != null, "No remote publish repo found on project " + project);
+    public static JkNexusRepos ofPublishRepo(JkMavenPublication mavenPublication) {
+        JkRepo repo = mavenPublication.findFirstNonLocalRepo();
+        JkUtilsAssert.argument(repo != null, "No remote publish repo found on mavenPublication " + mavenPublication);
         return JkNexusRepos.ofRepo(repo);
     }
 
@@ -197,8 +197,8 @@ public class JkNexusRepos {
         }
     }
 
-    public void autoReleaseAfterPublication(JkProject project) {
-        project.mavenPublication.postActions.append(TASK_NAME, this::closeAndReleaseOpenRepositories);
+    public void autoReleaseAfterPublication(JkMavenPublication mavenPublication) {
+        mavenPublication.postActions.append(TASK_NAME, this::closeAndReleaseOpenRepositories);
     }
 
     private List<JkStagingRepo> doFindStagingRepositories() throws IOException {

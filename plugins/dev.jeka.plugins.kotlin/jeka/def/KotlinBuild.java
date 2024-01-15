@@ -6,6 +6,7 @@ import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 
 class KotlinBuild extends KBean {
 
@@ -27,7 +28,7 @@ class KotlinBuild extends KBean {
                     .andFiles(JkLocator.getJekaJarPath())
             );
 
-        project.mavenPublication
+        load(MavenPublicationKBean.class).getMavenPublication()
                     .pomMetadata
                         .setProjectName("Jeka plugin for Kotlin")
                         .setProjectDescription("A Jeka plugin for Kotlin language support")

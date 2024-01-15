@@ -3,8 +3,10 @@ package dev.jeka.core.api.project;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -147,9 +149,11 @@ public class JkProjectTest {
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 )
                 .setModuleId("my:project").setVersion("MyVersion")
-                .customizePublishedDeps(deps -> deps.minus("org.postgresql:postgresql"))
                 .getProject();
-        JkDependencySet publishDeps = project.mavenPublication.getDependencies();
+
+        JkMavenPublication mavenPublication = JkMavenPublications.of(project);
+        mavenPublication.customizeDependencies(deps -> deps.minus("org.postgresql:postgresql"));
+        JkDependencySet publishDeps = mavenPublication.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
         Assert.assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
     }

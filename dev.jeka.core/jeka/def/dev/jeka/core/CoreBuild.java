@@ -1,6 +1,7 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -10,11 +11,13 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -40,7 +43,10 @@ public class CoreBuild extends KBean {
 
     public boolean runIT;
 
+    @Override
     protected void init()  {
+
+        // Configure Project
         JkProject project = projectKBean.project;
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
@@ -75,8 +81,9 @@ public class CoreBuild extends KBean {
                 .javadocProcessor
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp");
-        project
-            .mavenPublication
+
+        // Configure Maven publication
+        load(MavenPublicationKBean.class).getMavenPublication()
                 .putArtifact(DISTRIB_FILE_ID)
                 .putArtifact(WRAPPER_ARTIFACT_ID)
                 .pomMetadata

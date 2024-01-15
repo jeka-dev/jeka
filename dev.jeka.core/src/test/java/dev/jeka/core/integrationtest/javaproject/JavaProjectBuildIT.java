@@ -2,11 +2,13 @@ package dev.jeka.core.integrationtest.javaproject;
 
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -68,9 +70,10 @@ public class JavaProjectBuildIT {
                 .setVersion("1-SNAPSHOT")
                 .getProject();
         project.pack();
-        project.mavenPublication.publishLocal();
+        JkMavenPublication mavenPublication = JkMavenPublications.of(project).publishLocal();
+        mavenPublication.publishLocal();
         System.out.println(project.getInfo());
-        Assert.assertEquals(JkTransitivity.COMPILE, project.mavenPublication.getDependencies()
+        Assert.assertEquals(JkTransitivity.COMPILE, mavenPublication.getDependencies()
                 .get("com.google.guava:guava").getTransitivity());
 
     }

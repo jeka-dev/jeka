@@ -6,6 +6,7 @@ import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 
 class ProtobufBuild extends KBean {
 
@@ -26,10 +27,11 @@ class ProtobufBuild extends KBean {
                 .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.mavenPublication.pomMetadata
-                .setProjectName("Jeka plugin for NodeJs")
-                .setProjectDescription("A Jeka plugin to integrate with NodeJs")
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+        load(MavenPublicationKBean.class).getMavenPublication()
+                .pomMetadata
+                    .setProjectName("Jeka plugin for NodeJs")
+                    .setProjectDescription("A Jeka plugin to integrate with NodeJs")
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     public void cleanPack() {

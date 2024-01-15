@@ -1,6 +1,9 @@
 package dev.jeka.core.tool.builtins.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
@@ -23,6 +26,9 @@ public class MavenPublicationKBean extends KBean {
 
         // Configure with ProjectKBean if present
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
+        if (optionalProjectKBean.isPresent()) {
+            mavenPublication = JkMavenPublications.of(optionalProjectKBean.get().project);
+        }
         optionalProjectKBean.ifPresent(
                 projectKBean -> mavenPublication = JkMavenPublications.of(projectKBean.project));
 
@@ -32,6 +38,14 @@ public class MavenPublicationKBean extends KBean {
                 mavenPublication = createMavenPublication(selfAppKBean);
             });
         }
+
+        if (mavenPublication == null) {
+            throw new IllegalStateException("No ProjectKBean of SelfKBean found on runbase " + getBaseDir() + ". " +
+                    "The MavenPublication KBean can't be configurated.");
+        }
+
+        // Add Publish Repos from JKProperties
+        mavenPublication.setRepos(getPublishReposFromProps());
     }
 
     @JkDoc("Display Maven Publication information on the console.")
@@ -78,6 +92,15 @@ public class MavenPublicationKBean extends KBean {
                 .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
                 .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, selfKBean::createSourceJar)
                 .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, selfKBean::createJavadocJar);
+    }
+
+    private JkRepoSet getPublishReposFromProps() {
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
+        JkRepoSet result = repoProperties.getPublishRepository();
+        if (result.getRepos().isEmpty()) {
+            result = result.and(JkRepo.ofLocal());
+        }
+        return result;
     }
 
 }

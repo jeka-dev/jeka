@@ -7,6 +7,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 
 class SonarqubeBuild extends KBean {
 
@@ -27,7 +28,7 @@ class SonarqubeBuild extends KBean {
                 .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        project.mavenPublication
+        load(MavenPublicationKBean.class).getMavenPublication()
                     .pomMetadata
                         .setProjectName("Jeka plugin for Sonarqube")
                         .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
@@ -41,7 +42,7 @@ class SonarqubeBuild extends KBean {
     public static void main(String[] args) {
         SonarqubeBuild build = JkInit.instanceOf(SonarqubeBuild.class);
         build.cleanPack();
-        build.projectKBean.publishLocal();
+        build.load(MavenPublicationKBean.class).publishLocal();
     }
 
 

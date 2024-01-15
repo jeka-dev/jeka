@@ -12,6 +12,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 
 import java.nio.file.Path;
 
@@ -34,6 +35,8 @@ import java.nio.file.Path;
 public class SignedArtifactsKBean extends KBean {
 
     ProjectKBean projectKBean = load(ProjectKBean.class);
+
+    JkMavenPublication mavenPublication;
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
@@ -61,7 +64,9 @@ public class SignedArtifactsKBean extends KBean {
             .customizeTestDeps(deps -> deps
                 .and(SimpleProjectKBean.JUNIT5)
             );
-        project.mavenPublication
+
+        mavenPublication = load(MavenPublicationKBean.class).getMavenPublication();
+        mavenPublication
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion("1.3.1")
                 .setDefaultSigner(JkGpgSigner.of(secringPath, secringPassword, ""))
@@ -72,7 +77,7 @@ public class SignedArtifactsKBean extends KBean {
                         .setScmConnection("https://github.com/jerkar/sample.git")
                         .addApache2License()
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
-        configForLocalRepo(project.mavenPublication);
+        configForLocalRepo(mavenPublication);
     }
 
     private void configForOssrh(JkMavenPublication publication) {
@@ -90,7 +95,8 @@ public class SignedArtifactsKBean extends KBean {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        cleanOutput(); projectKBean.pack(); projectKBean.project.mavenPublication.publish();
+        projectKBean.cleanPack();
+        mavenPublication.publish();
     }
 
     public static void main(String[] args) {

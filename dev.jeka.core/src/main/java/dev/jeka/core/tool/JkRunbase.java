@@ -298,7 +298,8 @@ public final class JkRunbase {
                     Set<String> usedProperties =
                             FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(), action.getValue()));
                     if (usedProperties.isEmpty()) {
-                        throw new JkException("Field %s do not exist in KBean %s", action.getMember(), bean.getClass().getName());
+                        throw new JkException("Field %s do not exist in KBean %s (runbase %s)",
+                                action.getMember(), bean.getClass().getName(), getBaseDir());
                     }
                 });
     }

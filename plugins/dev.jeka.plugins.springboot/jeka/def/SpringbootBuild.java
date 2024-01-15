@@ -8,6 +8,7 @@ import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
 
 public class SpringbootBuild extends KBean {
 
@@ -35,17 +36,18 @@ public class SpringbootBuild extends KBean {
         project.compilation.layout.setResources(JkPathTreeSet.ofRoots("resources"));
         project.testing.setSkipped(true);
         project.setModuleId("dev.jeka:springboot-plugin");
-        project.mavenPublication
+
+        load(MavenPublicationKBean.class).getMavenPublication()
                 .pomMetadata
-                .setProjectName("Jeka plugin for Spring Boot")
-                .setProjectDescription("A Jeka plugin for Spring boot application")
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+                    .setProjectName("Jeka plugin for Spring Boot")
+                    .setProjectDescription("A Jeka plugin for Spring boot application")
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
     public void cleanPack() {
         cleanOutput();
         projectBean.pack();
-        projectBean.publishLocal();
+        load(MavenPublicationKBean.class).publishLocal();
     }
 
 }
