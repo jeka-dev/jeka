@@ -58,6 +58,21 @@ propJdkHome() {
   echo $path
 }
 
+# return the argument following '-r' argument
+# it return nothing if '-r' not found
+get_remote_argument() {
+  local found_r=0
+  for arg in "$@"; do
+    if [ "$found_r" -eq 1 ]; then
+      echo "$arg"
+      break
+    fi
+    if [ "$arg" = "r" ]; then
+      found_r=1
+    fi
+  done
+}
+
 if [ -z "$Jeka_OPTS" ] ; then
   export "JEKA_OPTS= "
 fi
@@ -207,5 +222,7 @@ else
    LOCAL_BUILD_DIR=""
 fi
 
+# Path of the script that is currently executing
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
 exec "$JAVACMD" $JEKA_OPTS -cp "$LOCAL_BUILD_DIR$SCRIPTPATH/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"

@@ -40,10 +40,15 @@ public class Booter {
     public static final String GITHUB_PACKAGE_URL = "https://maven.pkg.github.com/jeka-dev/jeka";
 
     public static void main(String[] args) throws Exception {
-        final Path jekawDir = Paths.get(args[0]);
+
+        // Extract info from program arguments
+        final Path jekawDir = Paths.get(args[0]);  // location of jekaw script that has called this java program
         Properties props = props(jekawDir);
+
+
         props.putAll(props(args));
         Path jekaBinPath = location(props);  // First try to get it from explicit location
+
         if (jekaBinPath == null) {
             final String version = version(props);
             jekaBinPath = getJekaBinPath(version);
@@ -62,11 +67,22 @@ public class Booter {
             System.out.println("File " + jekaBinPath + " mentioned in property file not found");
             System.exit(1);
         }
+
+        // Invoking JeKa-core Main class by reflection
+
+        // -- Create classpath
         List<URL> classpath = new LinkedList<>();
         classpath.addAll(getBootLibs());
         classpath.add(jekaBinPath.toUri().toURL());
+
+        // -- Create classloader
         final ClassLoader classLoader = new URLClassLoader(classpath.toArray(new URL[0]));
         Thread.currentThread().setContextClassLoader(classLoader);
+
+        // -- Path the jekaw script parent dir as property
+        System.setProperty("jeka.current.basedir", jekawDir.toString());
+
+        // -- Create invoke
         final Class<?> mainClass = classLoader.loadClass(MAIN_CLASS_NAME);
         final Method method = mainClass.getMethod("main", String[].class);
         final String[] actualArgs = args.length <= 1 ? new String[0]

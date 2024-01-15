@@ -45,14 +45,17 @@ public final class Main {
             if (Environment.standardOptions.logRuntimeInformation) {
                 JkInit.displayRuntimeInfo();
             }
-            final Path workingDir = Paths.get("");
+            String basedirProp = System.getProperty("jeka.current.basedir");
+            final Path baseDir = basedirProp == null ? Paths.get("")
+                    : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
+            System.out.println("-----------besedir prop=" + baseDir);
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
                 JkMemoryBufferLogDecorator.activateOnJkLog();
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
-            final Engine engine = new Engine(workingDir);
+            final Engine engine = new Engine(baseDir);
             engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
             if (Environment.standardOptions.logBanner) {
                 displayOutro(start);

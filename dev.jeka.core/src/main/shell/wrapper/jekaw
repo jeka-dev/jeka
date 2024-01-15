@@ -207,5 +207,7 @@ else
    LOCAL_BUILD_DIR=""
 fi
 
+# Path of the script that is currently executing
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
 exec "$JAVACMD" $JEKA_OPTS -cp "$LOCAL_BUILD_DIR$SCRIPTPATH/jeka/wrapper/*" dev.jeka.core.wrapper.Booter $SCRIPTPATH "$@"

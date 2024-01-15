@@ -29,11 +29,12 @@ public class ScaffoldKBean extends KBean {
      * Use {@link #localPropsExtraContentPath} instead.
      */
     @JkDoc("Deprecated - Add extra content at the end of the template local.properties file.")
-    private final String localPropsExtraContent = "";
+    private String localPropsExtraContent = "";
 
     @JkDoc("Add extra content at the end of the template local.properties file.")
     private Path localPropsExtraContentPath;
 
+    @JkDoc(hide = true)
     public final JkScaffold scaffold = JkScaffold.of(getBaseDir());
 
     @Override
