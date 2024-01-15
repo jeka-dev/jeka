@@ -155,8 +155,8 @@ public abstract class KBean {
         return JkUtilsString.uncapitalize(prefix);
     }
 
-    static String name(Class<?> jkBeanClass) {
-        return name(jkBeanClass.getName());
+    static String name(Class<?> kbeanClass) {
+        return name(kbeanClass.getName());
     }
 
     final boolean isMatchingName(String candidateName) {

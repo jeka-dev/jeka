@@ -1,12 +1,11 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.tooling.maven.JkMavenPublications;
+import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -47,7 +46,7 @@ public class SimpleWarKBean extends KBean {
 
     public void cleanPackRun() {
         project.clean().pack();
-        JkMavenPublications.of(project).publishLocal();
+        JkProjectPublications.mavenPublication(project).publishLocal();
     }
 
     public void check() {

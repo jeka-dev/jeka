@@ -23,16 +23,16 @@ public class KotlinJvmKBean extends KBean {
     private String kotlinVersion;
 
     @JkDoc("Location of Kotlin sources")
-    private final String kotlinSourceDir = "src/main/kotlin";
+    private String kotlinSourceDir = "src/main/kotlin";
 
     @JkDoc("Location of Kotlin sources for tests")
-    private final String kotlinTestSourceDir = "src/test/kotlin";
+    private String kotlinTestSourceDir = "src/test/kotlin";
 
     @JkDoc("Include standard lib in for compiling")
-    private final boolean addStdlib = true;
+    private boolean addStdlib = true;
 
     @JkDoc("If true, the project KBean will be automatically configured to use Kotlin.")
-    private final boolean autoConfigureProject = false;
+    private boolean autoConfigureProject = false;
 
     private JkKotlinJvm kotlinJvmProject;
 

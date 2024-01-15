@@ -6,7 +6,6 @@ import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
-import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -151,7 +150,7 @@ public class JkProjectTest {
                 .setModuleId("my:project").setVersion("MyVersion")
                 .getProject();
 
-        JkMavenPublication mavenPublication = JkMavenPublications.of(project);
+        JkMavenPublication mavenPublication = JkProjectPublications.mavenPublication(project);
         mavenPublication.customizeDependencies(deps -> deps.minus("org.postgresql:postgresql"));
         JkDependencySet publishDeps = mavenPublication.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
@@ -172,7 +171,8 @@ public class JkProjectTest {
                         .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
                         .and(Hint.first(), "io.rest-assured:rest-assured:4.3.3")
                 ).getProject();
-        JkIvyPublication ivyPublication = project.createIvyPublication()
+
+        JkIvyPublication ivyPublication = JkProjectPublications.ivyPublication(project)
                 .setModuleId("my:module")
                 .setVersion("0.1");
         System.out.println(project.compilation.getDependencies());

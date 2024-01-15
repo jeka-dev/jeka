@@ -2,7 +2,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.samples.SimpleProjectKBean;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectProject;
+import dev.jeka.core.tool.JkInjectRunbase;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -27,7 +27,7 @@ public class NormalJarKBean extends KBean {
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkInjectProject("../dev.jeka.samples.basic")
+    @JkInjectRunbase("../dev.jeka.samples.basic")
     private SimpleProjectKBean sampleBuild;
 
     @Override

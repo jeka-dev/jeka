@@ -1,7 +1,6 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -11,7 +10,6 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
@@ -39,15 +37,13 @@ public class CoreBuild extends KBean {
 
     private static final JkArtifactId WRAPPER_ARTIFACT_ID = JkArtifactId.of("wrapper", "jar");
 
-    final ProjectKBean projectKBean = load(ProjectKBean.class);
+    public final JkProject project = load(ProjectKBean.class).project;
 
     public boolean runIT;
 
     @Override
     protected void init()  {
 
-        // Configure Project
-        JkProject project = projectKBean.project;
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setModuleId("dev.jeka:jeka-core")
@@ -94,11 +90,10 @@ public class CoreBuild extends KBean {
     }
 
     private Path distribFolder() {
-        return projectKBean.project.getOutputDir().resolve("distrib");
+        return project.getOutputDir().resolve("distrib");
     }
 
     private void doDistrib() {
-        JkProject project = projectKBean.project;
         Path distribFile = project.artifactLocator.getArtifactPath(DISTRIB_FILE_ID);
         project.packaging.createSourceJar(); // Sources should be included in distrib
         if (!Files.exists(project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID))) {
@@ -116,7 +111,7 @@ public class CoreBuild extends KBean {
 
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw")).setPosixExecPermissions();
-        if (!projectKBean.project.testing.isSkipped() && runIT) {
+        if (!project.testing.isSkipped() && runIT) {
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
@@ -166,10 +161,9 @@ public class CoreBuild extends KBean {
 
     private void doPackWithEmbeddedJar() {
 
-        Path targetJar = projectKBean.project.artifactLocator.getMainArtifactPath();
+        Path targetJar = project.artifactLocator.getMainArtifactPath();
 
         // Main jar
-        JkProject project = projectKBean.project;
         project.packaging.createBinJar(targetJar);
         JkZipTree jarTree = JkZipTree.of(targetJar);
 
@@ -197,14 +191,14 @@ public class CoreBuild extends KBean {
     }
 
     private void doWrapper() {
-        Path wrapperJar = projectKBean.project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID);
-        projectKBean.project.compilation.runIfNeeded();
-        JkPathTree.of(projectKBean.project.compilation.layout
+        Path wrapperJar = project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID);
+        project.compilation.runIfNeeded();
+        JkPathTree.of(project.compilation.layout
                 .resolveClassDir()).andMatching("dev/jeka/core/wrapper/**").zipTo(wrapperJar);
     }
 
     public void cleanPack() {
-        cleanOutput(); projectKBean.pack();
+        project.clean().pack();
     }
 
     // This method has to be run in dev.jeka.core (this module root) working directory
@@ -215,7 +209,7 @@ public class CoreBuild extends KBean {
     public static class RunBuildAndIT {
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
-            coreBuild.projectKBean.pack();
+            coreBuild.project.pack();
         }
     }
 

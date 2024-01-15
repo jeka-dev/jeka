@@ -30,12 +30,6 @@ public class JkProjectPackaging {
     }
 
     /**
-     * This constant represents the value "auto" and is used in {@link #setMainClass(String)}
-     * to indicate that the main class should be discovered automatically..
-     */
-    public static final String AUTO_FIND_MAIN_CLASS = "auto";
-
-    /**
      * Consumer container for customizing the manifest that will bbe included in constructed Jar files.
      *
      */
@@ -172,7 +166,8 @@ public class JkProjectPackaging {
 
     /**
      * Sets the main class name to use in #runXxx and for building docker images.
-     * The value <code>auto</code> means that it will e auto-discovered.
+     * The value <code>"auto"</code> means that it will bbe auto-discovered, this value
+     * can be referenced using constant {@link JkProject#AUTO_FIND_MAIN_CLASS}
      */
     public JkProjectPackaging setMainClass(String mainClass) {
         this.mainClass = mainClass;
@@ -194,7 +189,7 @@ public class JkProjectPackaging {
      * library projects.
      */
     public String getMainClass() {
-        if (AUTO_FIND_MAIN_CLASS.equals(mainClass)) {
+        if (JkProject.AUTO_FIND_MAIN_CLASS.equals(mainClass)) {
             return mainClassFinder.get();
         }
         return this.mainClass;

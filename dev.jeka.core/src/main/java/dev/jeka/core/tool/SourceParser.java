@@ -64,8 +64,8 @@ class SourceParser {
             return;
         }
 
-        // Handle JkInjectProject
-        annotationParser = new AnnotationParser(line, JkInjectProject.class);
+        // Handle JkInjectRunbase
+        annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
             info.dependencyProjects.add(baseDir.resolve(value));

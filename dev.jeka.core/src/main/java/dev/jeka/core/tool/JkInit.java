@@ -140,7 +140,7 @@ public final class JkInit {
 
     private static JkPathSequence getImportedProjects(Class<?> clazz) {
         List<Path> paths = JkUtilsReflect.getAllDeclaredFields(clazz, true).stream()
-                .map(field -> field.getAnnotation(JkInjectProject.class))
+                .map(field -> field.getAnnotation(JkInjectRunbase.class))
                 .filter(Objects::nonNull)
                 .map(jkInjectProject -> jkInjectProject.value())
                 .map(Paths::get)

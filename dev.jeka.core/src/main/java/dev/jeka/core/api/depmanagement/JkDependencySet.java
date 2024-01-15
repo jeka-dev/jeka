@@ -74,7 +74,7 @@ public class JkDependencySet {
         List<JkDependency> others = other.entries;
         JkDependencySet proto = this.and(other);
         final List<JkDependency> result = new LinkedList<>(this.entries);
-        if (hint == null) {
+        if (hint == null || hint == Hint.NONE) {
             result.addAll(others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
         }
@@ -117,7 +117,7 @@ public class JkDependencySet {
      * this one.
      */
     public JkDependencySet and(List<? extends JkDependency> others) {
-        return and(null, others);
+        return and(Hint.NONE, others);
     }
 
     public JkDependencySet and(JkDependencySet other) {
@@ -133,11 +133,11 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(JkDependency... others) {
-        return and(null, others);
+        return and((Hint.NONE), others);
     }
 
-    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate) {
-        return and(hint, JkCoordinate.of(coordinate));
+    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, Object ...tokens) {
+        return and(hint, JkCoordinate.of(coordinate, tokens));
     }
 
     public JkDependencySet and(Hint hint, JkModuleId jkModuleId) {
@@ -149,23 +149,23 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(JkCoordinate coordinate) {
-        return and(null, coordinate);
+        return and(Hint.NONE, coordinate);
     }
 
     public JkDependencySet and(JkModuleId jkModuleId) {
         return and(jkModuleId.toCoordinate());
     }
 
-    public JkDependencySet and(@JkDepSuggest String coordinate) {
-        return and(null, coordinate);
+    public JkDependencySet and(@JkDepSuggest String coordinate, Object... tokens) {
+        return and(null, coordinate, tokens);
     }
 
-    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, JkTransitivity transitivity) {
+    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, JkTransitivity transitivity, Object ...tokens) {
         return and(hint, JkCoordinateDependency.of(coordinate).withTransitivity(transitivity));
     }
 
-    public JkDependencySet and(@JkDepSuggest String coordinate, JkTransitivity transitivity) {
-        return and(null, coordinate, transitivity);
+    public JkDependencySet and(@JkDepSuggest String coordinate, JkTransitivity transitivity, Object ...tokens) {
+        return and(null, coordinate, transitivity, tokens);
     }
 
     public JkDependencySet andFiles(Hint hint, Iterable<Path> paths) {
@@ -176,7 +176,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet andFiles(Iterable<Path> paths) {
-        return andFiles(null, paths);
+        return andFiles(Hint.NONE, paths);
     }
 
     public JkDependencySet andFiles(Hint hint, String... paths) {
@@ -184,7 +184,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet andFiles(String... paths) {
-        return andFiles(null, paths);
+        return andFiles(Hint.NONE, paths);
     }
 
     public JkDependencySet minus(List<JkDependency> dependencies) {
@@ -608,7 +608,7 @@ public class JkDependencySet {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
-                String dependencyString = coordinate.getModuleId().getColonNotation();
+                String dependencyString = coordinate.getModuleId().toColonNotation();
                 if (and && !coordinate.getVersion().isUnspecified()) {
                     dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
                 }
@@ -627,7 +627,7 @@ public class JkDependencySet {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
-                String dependencyString = coordinate.getModuleId().getColonNotation();
+                String dependencyString = coordinate.getModuleId().toColonNotation();
                 if (!coordinate.getVersion().isUnspecified() && !minus) {
                     dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
                 }
@@ -641,6 +641,8 @@ public class JkDependencySet {
     }
 
     public static class Hint {
+
+        public static final Hint NONE =new Hint(null, false, false);
 
         private final JkDependency before;
 

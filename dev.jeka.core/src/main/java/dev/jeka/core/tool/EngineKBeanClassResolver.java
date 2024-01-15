@@ -76,9 +76,10 @@ final class EngineKBeanClassResolver {
                     JkLog.trace("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClassNames);
                 }
             }
-            Class<? extends KBean> selected = loadUniqueClass(matchingClassNames, beanName,
-                    !ignoreDefaultBeanNotFound);
-            beanClasses.put(KBean.name(selected), selected);
+            Class<? extends KBean> selected = loadUniqueClass(matchingClassNames, beanName, !ignoreDefaultBeanNotFound);
+            if (selected != null) {
+                beanClasses.put(KBean.name(selected), selected);
+            }
         }
 
         // Resolve default KBean

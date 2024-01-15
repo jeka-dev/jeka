@@ -1,5 +1,7 @@
 package dev.jeka.core.api.depmanagement.artifact;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
+
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
@@ -7,6 +9,11 @@ import java.util.function.Supplier;
  * Defines methods for enumerating and locating artifacts files likely to be produced.
  */
 public class JkArtifactLocator {
+
+    /**
+     * Null-Case instance for {@link JkArtifactLocator}
+     */
+    public static final JkArtifactLocator VOID = JkArtifactLocator.of((Supplier<Path>) null, null);
 
     private final Supplier<Path> outputDirSupplier;
 
@@ -43,6 +50,8 @@ public class JkArtifactLocator {
      * to only returns the file reference and not generate it.
      */
     public Path getArtifactPath(JkArtifactId artifactId) {
+        JkUtilsAssert.state(outputDirSupplier != null,
+                "This Artifact locator has not been configured to locate artifacts.");
         return outputDirSupplier.get().resolve(artifactId.toFileName(baseNameSupplier.get()));
     }
 

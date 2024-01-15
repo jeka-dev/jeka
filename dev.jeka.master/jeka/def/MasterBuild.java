@@ -2,6 +2,7 @@ import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
@@ -38,28 +39,27 @@ class MasterBuild extends KBean {
 
     private final JkVersionFromGit versionFromGit = JkVersionFromGit.of();
 
-
     // ------ Slave projects
 
-    @JkInjectProject("../dev.jeka.core")
+    @JkInjectRunbase("../dev.jeka.core")
     CoreBuild coreBuild;
 
-    @JkInjectProject("../plugins/dev.jeka.plugins.jacoco")
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.jacoco")
     JacocoBuild jacocoBuild;
 
-    @JkInjectProject("../plugins/dev.jeka.plugins.sonarqube")
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.sonarqube")
     SonarqubeBuild sonarqubeBuild;
 
-    @JkInjectProject("../plugins/dev.jeka.plugins.springboot")
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
-    @JkInjectProject("../plugins/dev.jeka.plugins.nodejs")
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.nodejs")
     NodeJsBuild nodeJsBuild;
 
-    @JkInjectProject("../plugins/dev.jeka.plugins.kotlin")
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.kotlin")
     KotlinBuild kotlinBuild;
 
-    @JkInjectProject("../plugins/dev.jeka.plugins.protobuf")
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.protobuf")
     ProtobufBuild protobufBuild;
 
     private JkJacoco jacocoForCore;
@@ -113,6 +113,7 @@ class MasterBuild extends KBean {
         if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publish);
+            bomPublication().publish();
             closeAndReleaseRepo();
             JkLog.endTask();
             JkLog.startTask("Creating GitHub Release");
@@ -155,6 +156,27 @@ class MasterBuild extends KBean {
         });
     }
 
+    @JkDoc("Publish all on local repo")
+    public void publishLocal() {
+        getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publishLocal);
+        bomPublication().publishLocal();
+    }
+
+    @JkDoc("Clean Pack jeka-core")
+    public void buildCore() {
+        coreBuild.cleanPack();
+    }
+
+    @JkDoc("Run samples")
+    public void runSamples()  {
+        new SamplesTester(this.getRunbase().getProperties()).run();
+    }
+
+    @JkDoc("Run scaffold test")
+    public void runScaffoldsWithPlugins() {
+        new PluginScaffoldTester(this.getRunbase().getProperties()).run();
+    }
+
     private void configureNexus(JkNexusRepos nexusRepos) {
         nexusRepos.setReadTimeout(60*1000);
     }
@@ -177,29 +199,36 @@ class MasterBuild extends KBean {
     }
 
     private void applyToSlave(MavenPublicationKBean mavenPublicationKBean) {
-        mavenPublicationKBean.getMavenPublication()
+        adaptMavenConfig(mavenPublicationKBean.getMavenPublication());
+    }
+
+    private void adaptMavenConfig(JkMavenPublication mavenPublication) {
+        mavenPublication
                 .setRepos(this.publishRepo())
                 .pomMetadata
-                .setProjectUrl("https://jeka.dev")
-                .setScmUrl("https://github.com/jerkar/jeka.git")
-                .addApache2License();
+            .setProjectUrl("https://jeka.dev")
+            .setScmUrl("https://github.com/jerkar/jeka.git")
+            .addApache2License();
     }
 
-    public void buildCore() {
-        coreBuild.cleanPack();
+    private JkMavenPublication bomPublication() {
+        JkMavenPublication result = JkMavenPublication.ofPomOnly();
+        String version = JkVersionFromGit.of().getVersion();
+        result.setModuleId("dev.jeka:bom")
+                .setVersion(version)
+                .pomMetadata
+                    .setProjectName("Jeka BOM")
+                    .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group")
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(projectKBean -> {
+            JkProject project = projectKBean.project;
+            result.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), version);
+        });
+        adaptMavenConfig(result);
+        return result;
     }
 
-    public void runSamples()  {
-        new SamplesTester(this.getRunbase().getProperties()).run();
-    }
-
-    public void runScaffoldsWithPlugins() {
-        new PluginScaffoldTester(this.getRunbase().getProperties()).run();
-    }
-
-    public void publishLocal() {
-        getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publishLocal);
-    }
 
     public static void main(String[] args) throws Exception {
         JkInit.instanceOf(MasterBuild.class, args).make();
@@ -216,6 +245,5 @@ class MasterBuild extends KBean {
             System.out.println(JkInit.instanceOf(GitKBean.class, args).gerVersionFromGit().getVersion());
         }
     }
-
 
 }

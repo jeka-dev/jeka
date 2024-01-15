@@ -7,7 +7,6 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
@@ -90,7 +89,7 @@ public final class JkSpringbootProject {
             project.packActions.append("Include manifest", project.packaging::copyManifestInClassDir);
         }
 
-        project.packaging.setMainClass(JkProjectPackaging.AUTO_FIND_MAIN_CLASS);
+        project.packaging.setMainClass(JkProject.AUTO_FIND_MAIN_CLASS);
         project.packaging.setMainClassFinder(() -> {
             try {
                 return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());

@@ -132,7 +132,7 @@ public class JkQualifiedDependencySet {
     public List<JkQualifiedDependency> findByCoordinateGroupId(String moduleId) {
         return this.entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
-                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getModuleId().getColonNotation()
+                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getModuleId().toColonNotation()
                         .equals(moduleId))
                 .collect(Collectors.toList());
     }

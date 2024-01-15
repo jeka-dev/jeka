@@ -3,12 +3,15 @@ package dev.jeka.core.api.depmanagement.embedded.ivy;
 import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkArtifactPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata;
 import dev.jeka.core.api.depmanagement.publication.JkPomMetadata;
 import dev.jeka.core.api.depmanagement.publication.JkPomTemplateGenerator;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
+import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -31,10 +34,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.UnaryOperator;
 
 /**
@@ -63,7 +63,9 @@ final class IvyPublisherForMaven {
         this.checksumAlgos = checksumAlgos;
     }
 
-    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactPublisher artifactPublisher, JkPomMetadata metadata) {
+    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactPublisher artifactPublisher,
+                 JkPomMetadata metadata, Map<JkModuleId, JkVersion> managedDependencies) {
+
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         try {
             resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -77,6 +79,10 @@ final class IvyPublisherForMaven {
 
         // publish pom
         final Path pomXml = makePom(moduleDescriptor, artifactPublisher.artifactLocator, metadata);
+        if (!managedDependencies.isEmpty()) {
+            includeManagedDependencies(pomXml, managedDependencies);
+        }
+
         final String version;
         if (coordinate.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(coordinate);
@@ -152,8 +158,11 @@ final class IvyPublisherForMaven {
         } else {
             pomXml = JkUtilsPath.createTempFile("published-pom-", ".xml");
         }
-        final String packaging = JkUtilsString.substringAfterLast(artifactLocator
-                .getMainArtifactPath().getFileName().toString(), ".");
+
+        // Packaging is for <packaging>jar</packaging> tag
+        final String packaging = artifactLocator == JkArtifactLocator.VOID ? "pom" :
+                JkUtilsString.substringAfterLast(artifactLocator.getMainArtifactPath().getFileName().toString(), ".");
+
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setMapping(new ScopeMapping());
         pomWriterOptions.setArtifactPackaging(packaging);
@@ -370,8 +379,17 @@ final class IvyPublisherForMaven {
             }
             return null;
         }
+    }
 
-
+    private static void includeManagedDependencies(Path pomFile, Map<JkModuleId, JkVersion> managedDependencies) {
+        JkDomDocument dom = JkDomDocument.parse(pomFile);
+        JkDomElement dependenciesEl = dom.root().get("managedDependency").get("dependencies").make();
+        managedDependencies.forEach((key, value) -> dependenciesEl
+                .add("dependency")
+                    .add("groupId").text(key.getGroup()).make().__
+                    .add("artifactId").text(key.getName()).make().__
+                    .add("version").text(value.getValue()).make());
+        dom.save(pomFile);
     }
 
 }

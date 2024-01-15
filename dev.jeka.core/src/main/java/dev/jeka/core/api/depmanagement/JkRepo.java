@@ -280,7 +280,7 @@ public final class JkRepo {
 
     @Override
     public String toString() {
-        return "url=" + url.toString() + " publishConfig=" + publishConfig;
+        return url.toString() + "     " + publishConfig;
     }
 
     private static URL toUrl(String urlOrDir) {
@@ -480,13 +480,13 @@ public final class JkRepo {
         public String toString() {
             boolean hasVersionFilter = versionFilter != NO_FILTER;
             boolean hasSigner = signer != null;
-            return "[" +
-                    "versionFilter=" + hasVersionFilter +
-                    ", signatureRequired=" + signatureRequired +
-                    ", uniqueSnapshot=" + uniqueSnapshot +
-                    ", checksumAlgos=" + checksumAlgos +
-                    ", signer=" + hasSigner +
-                    ']';
+            return "publishConfig:{" +
+                    "versionFilter:" + hasVersionFilter +
+                    ", signatureRequired:" + signatureRequired +
+                    ", uniqueSnapshot:" + uniqueSnapshot +
+                    ", checksumAlgos:" + checksumAlgos +
+                    ", signer:" + hasSigner +
+                    '}';
         }
     }
 

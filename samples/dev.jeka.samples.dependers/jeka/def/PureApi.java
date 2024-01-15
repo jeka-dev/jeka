@@ -1,7 +1,6 @@
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 
 public class PureApi {
 
@@ -23,6 +22,6 @@ public class PureApi {
                 .setVersion("1.0-SNAPSHOT").getProject();
 
         dependerProject.pack();
-        JkMavenPublications.of(dependerProject).publish();
+        JkProjectPublications.mavenPublication(dependerProject).publish();
     }
 }

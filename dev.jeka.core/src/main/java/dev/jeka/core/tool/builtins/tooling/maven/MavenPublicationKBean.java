@@ -7,8 +7,8 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.maven.JkMavenPublications;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -27,10 +27,10 @@ public class MavenPublicationKBean extends KBean {
         // Configure with ProjectKBean if present
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
         if (optionalProjectKBean.isPresent()) {
-            mavenPublication = JkMavenPublications.of(optionalProjectKBean.get().project);
+            mavenPublication = JkProjectPublications.mavenPublication(optionalProjectKBean.get().project);
         }
         optionalProjectKBean.ifPresent(
-                projectKBean -> mavenPublication = JkMavenPublications.of(projectKBean.project));
+                projectKBean -> mavenPublication = JkProjectPublications.mavenPublication(projectKBean.project));
 
         // If ProjectKBean is absent, try to configure wih SelfKBean if present
         if (!optionalProjectKBean.isPresent()) {

@@ -388,7 +388,7 @@ public final class JkEclipseClasspathGenerator {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
-                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getModuleId().getColonNotation());
+                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getModuleId().toColonNotation());
                 JkDependency dependency = JkCoordinateDependency.of(coordinate);
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);

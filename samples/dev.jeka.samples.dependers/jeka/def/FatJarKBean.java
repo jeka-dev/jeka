@@ -1,7 +1,7 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.samples.SimpleProjectKBean;
-import dev.jeka.core.tool.JkInjectProject;
+import dev.jeka.core.tool.JkInjectRunbase;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -14,7 +14,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
  */
 public class FatJarKBean extends KBean {
     
-    @JkInjectProject("../dev.jeka.samples.basic")
+    @JkInjectRunbase("../dev.jeka.samples.basic")
     private SimpleProjectKBean sampleBuild;
 
     @Override

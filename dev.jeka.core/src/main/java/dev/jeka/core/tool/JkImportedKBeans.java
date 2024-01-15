@@ -24,7 +24,7 @@ public final class JkImportedKBeans {
 
     private List<KBean> transitives;
 
-    // The declared @JkInjectProject values, read at pre-compile time
+    // The declared @JkInjectRunbase values, read at pre-compile time
     private List<Path> importedBeanRoots = Collections.emptyList();
 
     JkImportedKBeans(KBean holder) {
@@ -78,12 +78,12 @@ public final class JkImportedKBeans {
     @SuppressWarnings("unchecked")
     private static List<KBean> computeDirects(KBean masterBean) {
         final List<KBean> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBean.getClass(), JkInjectProject.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBean.getClass(), JkInjectRunbase.class);
         if (!fields.isEmpty()) {
             JkLog.trace("Projects imported by " + masterBean + " : " + fields);
         }
         for (final Field field : fields) {
-            final JkInjectProject jkProject = field.getAnnotation(JkInjectProject.class);
+            final JkInjectRunbase jkProject = field.getAnnotation(JkInjectRunbase.class);
             final KBean importedJkClass = createImportedJkBean(
                     (Class<? extends KBean>) field.getType(), jkProject.value(), masterBean.getBaseDir());
             try {

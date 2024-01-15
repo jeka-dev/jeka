@@ -8,7 +8,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.tooling.maven.JkMavenPublications;
+import dev.jeka.core.api.project.JkProjectPublications;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -70,7 +70,7 @@ public class JavaProjectBuildIT {
                 .setVersion("1-SNAPSHOT")
                 .getProject();
         project.pack();
-        JkMavenPublication mavenPublication = JkMavenPublications.of(project).publishLocal();
+        JkMavenPublication mavenPublication = JkProjectPublications.mavenPublication(project).publishLocal();
         mavenPublication.publishLocal();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.COMPILE, mavenPublication.getDependencies()
@@ -94,7 +94,7 @@ public class JavaProjectBuildIT {
                         .and("org.mockito:mockito-core:2.10.0")
                 ).getProject();
 
-        JkIvyPublication ivyPublication = project.createIvyPublication()
+        JkIvyPublication ivyPublication = JkProjectPublications.ivyPublication(project)
                 .setModuleId("my:module")
                 .setVersion("0.1");
         project.pack();

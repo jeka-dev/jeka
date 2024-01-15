@@ -10,9 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -54,6 +52,8 @@ public final class JkMavenPublication {
 
     private Supplier<JkRepoSet> bomResolverRepoSupplier = JkRepoSet::of;
 
+    private final Map<JkModuleId, JkVersion> managedDependencies = new HashMap<>();
+
     private JkFileSigner defaultSigner;  // Can be null. Signer used if none is defined on repos
 
     private JkMavenPublication(JkArtifactLocator artifactLocator) {
@@ -69,12 +69,29 @@ public final class JkMavenPublication {
     }
 
     /**
+     * Creates a {@link JkMavenPublication} that can contains only a POM, and no artifacts.
+     * The typical usage is to publish BOMs.
+     */
+    public static JkMavenPublication ofPomOnly() {
+        return of(JkArtifactLocator.VOID);
+    }
+
+    /**
      * Configure the dependencies that will be exported with the published module.<br/>
      * By default, JeKa computes it from the compile and runtime dependencies.
      * This method allows to customize these dependencies by adding/removing or changing their transitivity.
      */
     public JkMavenPublication customizeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependencies = dependencies.andThen(modifier);
+        return this;
+    }
+
+    /**
+     * Adds the specified moduleId and version in the <i>dependencyManagement</i> of the POM file to be published.
+     * This is the way to create BOM file.
+     */
+    public JkMavenPublication addManagedDependenciesInPom(String moduleId, String version) {
+        this.managedDependencies.put(JkModuleId.of(moduleId), JkVersion.of(version));
         return this;
     }
 
@@ -310,7 +327,12 @@ public final class JkMavenPublication {
 
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
-        internalPublisher.publishMaven(coordinate, artifactPublisher, pomMetadata, dependencySet);
+        internalPublisher.publishMaven(
+                coordinate,
+                artifactPublisher,
+                pomMetadata,
+                dependencySet,
+                this.managedDependencies);
         return this;
     }
 

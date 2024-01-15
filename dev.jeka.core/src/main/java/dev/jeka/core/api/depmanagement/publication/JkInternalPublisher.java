@@ -1,15 +1,13 @@
 package dev.jeka.core.api.depmanagement.publication;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Not part of the public API.
@@ -31,8 +29,11 @@ public interface JkInternalPublisher {
     void publishIvy(JkCoordinate coordinate, List<JkIvyPublication.JkIvyPublishedArtifact> publishedArtifacts,
                     JkQualifiedDependencySet dependencies);
 
-    void publishMaven(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher, JkPomMetadata pomMetadata,
-                      JkDependencySet dependencySet);
+    void publishMaven(JkCoordinate coordinate,
+                      JkArtifactPublisher artifactPublisher,
+                      JkPomMetadata pomMetadata,
+                      JkDependencySet dependencySet,
+                      Map<JkModuleId, JkVersion> managedDependencies);
 
     static JkInternalPublisher of(JkRepoSet publishRepos, Path artifactDir) {
         final Class<?> factoryClass = JkClassLoader.ofCurrent().loadIfExist(FACTORY_CLASS_NAME);

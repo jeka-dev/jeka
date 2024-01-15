@@ -104,7 +104,7 @@ public class JkProjectFlatFacade {
 
     /**
      * Sets the main class name to use in #runXxx and for building docker images.
-     * The value <code>auto</code> means that it will e auto-discovered.
+     * The value <code>"auto"</code> means that it will e auto-discovered.
      * 
      * @see JkProjectPackaging#setMainClass(String)
      */
@@ -157,7 +157,7 @@ public class JkProjectFlatFacade {
         customizeCompileDeps(addFun);
         String[] groupAndNames = Arrays.stream(coordinates)
                 .map(JkCoordinate::of)
-                .map(coordinate -> coordinate.getModuleId().getColonNotation())
+                .map(coordinate -> coordinate.getModuleId().toColonNotation())
                 .toArray(String[]::new);
         UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, groupAndNames);
         return customizeRuntimeDeps(minusFun);

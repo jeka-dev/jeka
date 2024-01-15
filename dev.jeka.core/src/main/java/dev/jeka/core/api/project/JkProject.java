@@ -50,6 +50,11 @@ import java.util.function.Supplier;
 public class JkProject implements JkIdeSupportSupplier {
 
 
+    /**
+     * This constant represents the value "auto" and is used in {@link JkProjectPackaging#setMainClass(String)} (String)}
+     * to indicate that the main class should be discovered automatically..
+     */
+    public static final String AUTO_FIND_MAIN_CLASS = "auto";
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -449,20 +454,6 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Creates a Ivy publication from this project.
-     */
-    public JkIvyPublication createIvyPublication() {
-        return JkIvyPublication.of()
-                .putMainArtifact(artifactLocator.getMainArtifactPath())
-                .setVersionSupplier(this::getVersion)
-                .setModuleIdSupplier(this::getModuleId)
-                .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
-                        compilation.getDependencies(),
-                        packaging.getRuntimeDependencies(),
-                        getDuplicateConflictStrategy()));
-    }
-
-    /**
      * Returns the moduleId of this project. The moduleId is used to :
      * <ul>
      *     <li>Publish artifact to Maven/Ivy repository</li>
@@ -572,23 +563,5 @@ public class JkProject implements JkIdeSupportSupplier {
                         : baseDir.toAbsolutePath().getFileName().toString()
         );
     }
-
-
-
-    private static JkMavenPublication mavenPublication(JkProject project) {
-        return JkMavenPublication.of(project.artifactLocator)
-                .setModuleIdSupplier(project::getModuleId)
-                .setVersionSupplier(project::getVersion)
-                .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        project.compilation.getDependencies(),
-                        project.packaging.getRuntimeDependencies(),
-                        project.getDuplicateConflictStrategy()))
-                .setBomResolutionRepos(project.dependencyResolver::getRepos)
-                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
-                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, project.packaging::createSourceJar)
-                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, project.packaging::createJavadocJar);
-    }
-
-
 
 }

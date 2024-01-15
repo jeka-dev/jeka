@@ -86,7 +86,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
     /**
      * A concatenation of the group and name of this module as '[group]:[value]'.
      */
-    public String getColonNotation() {
+    public String toColonNotation() {
         return group + ":" + name;
     }
 
@@ -113,7 +113,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
 
     @Override
     public String toString() {
-        return getColonNotation();
+        return toColonNotation();
     }
 
     @Override

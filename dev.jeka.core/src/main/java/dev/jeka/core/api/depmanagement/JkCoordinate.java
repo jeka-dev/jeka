@@ -84,17 +84,19 @@ public final class JkCoordinate {
      *
      * Version can be a '?' if it is unspecified or a '+' to take the highest existing version.
      */
-    public static JkCoordinate of(@JkDepSuggest String description) {
-        final String[] strings = description.split( ":");
-        final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of \n" +
+    public static JkCoordinate of(@JkDepSuggest String coordinate, Object...tokens) {
+        String formattedCoordinate = String.format(coordinate, tokens);
+        final String[] strings = formattedCoordinate.split( ":");
+        final String errorMessage = "Coordinate specification '" + formattedCoordinate + "' is not correct. Should be one of \n" +
                 "  group:name \n" +
                 "  group:name:version \n" +
                 "  group:name:classifiers:version \n" +
                 "  group:name:classifiers:extension:version \n" +
                 "  group:name:classifiers:extension: \n" +
                 "where classifiers can be a coma separated list of classifier.";
-        JkUtilsAssert.argument(isCoordinateDescription(description), errorMessage);
-        int separatorCount = JkUtilsString.countOccurrence(description, ':');
+
+        JkUtilsAssert.argument(isCoordinateDescription(formattedCoordinate), errorMessage);
+        int separatorCount = JkUtilsString.countOccurrence(formattedCoordinate, ':');
         final JkModuleId jkModuleId = JkModuleId.of(strings[0], strings[1]);
         if (separatorCount == 1 && strings.length == 2) {
             return of(jkModuleId, JkVersion.UNSPECIFIED);

@@ -32,6 +32,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
 final class IvyInternalPublisher implements JkInternalPublisher {
@@ -85,13 +86,17 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     @Override
-    public void publishMaven(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher,
-                             JkPomMetadata metadata, JkDependencySet dependencies) {
+    public void publishMaven(JkCoordinate coordinate,
+                             JkArtifactPublisher artifactPublisher,
+                             JkPomMetadata metadata,
+                             JkDependencySet dependencies,
+                             Map<JkModuleId, JkVersion > managedDependencies) {
         JkLog.startTask("Publish " + coordinate + " on Maven repositories");
         final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptorForMavenPublish(coordinate,
                 artifactPublisher, dependencies);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(publishRepos, JkResolutionParameters.of());
-        final int count = publishMavenArtifacts(artifactPublisher, metadata, ivy.getSettings(), moduleDescriptor);
+        final int count = publishMavenArtifacts(artifactPublisher, metadata, ivy.getSettings(), moduleDescriptor,
+                managedDependencies);
         JkLog.info("Module published in %s.", JkUtilsString.pluralize(count, "repository", "repositories"));
         JkLog.endTask();
     }
@@ -153,7 +158,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     }
 
     private int publishMavenArtifacts(JkArtifactPublisher artifactPublisher, JkPomMetadata pomMetadata,
-                                      IvySettings ivySettings, DefaultModuleDescriptor moduleDescriptor) {
+                                      IvySettings ivySettings, DefaultModuleDescriptor moduleDescriptor,
+                                      Map<JkModuleId, JkVersion > managedDependencies) {
         int count = 0;
         for (JkRepo publishRepo : this.publishRepos.getRepos()) {
             RepositoryResolver resolver = IvyTranslatorToResolver.convertToPublishAndBind(publishRepo, ivySettings);
@@ -172,7 +178,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
                     signer, resolver, descriptorOutputDir,
                     publishRepo.publishConfig.isUniqueSnapshot(),
                     publishRepo.publishConfig.getChecksumAlgos());
-                ivyPublisherForMaven.publish(moduleDescriptor, artifactPublisher, pomMetadata);
+                ivyPublisherForMaven.publish(moduleDescriptor, artifactPublisher, pomMetadata, managedDependencies);
                 count++;
                 JkLog.endTask();
             }
