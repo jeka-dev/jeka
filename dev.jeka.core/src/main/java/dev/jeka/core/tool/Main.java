@@ -46,6 +46,8 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             String basedirProp = System.getProperty("jeka.current.basedir");
+            System.out.println("-----------besedir prop=" + basedirProp);
+            System.out.println("-----------working dir=" +  Paths.get("").toAbsolutePath().normalize());
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
             System.out.println("-----------besedir prop=" + baseDir);

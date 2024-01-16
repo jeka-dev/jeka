@@ -1,13 +1,24 @@
 #!/bin/sh
 
 set -e
+#set -x
 
-declare DRY_RUN=1  # Debugging purpose
+
+declare DRY_RUN  # Debugging purpose
 declare JEKA_VERSION_PROP_NAME="jeka.java.version"
 declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
 declare GLOBAL_PROP_FILE
 declare JEKA_USER_HOME
-declare GLOBAL_ARGS="$@"
+#declare GLOBAL_ARGS="$@"
+declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
+declare CURRENT_SCRIPT_DIR
+declare LOG_DEBUG="on"
+
+debug() {
+  if [ ! -z $"$LOG_DEBUG" ]; then
+    echo "$1"
+  fi
+}
 
 download_and_unpack() {
   local url=$1
@@ -17,7 +28,7 @@ download_and_unpack() {
 
   ## download
   if [ -x "$(command -v curl)" ]; then
-    curl -sLf -o "$temp_file" "$url"
+    curl -sLf --fail --show-error -o "$temp_file" "$url"
   elif [ -x "$(command -v wget)" ]; then
     wget -q -O "$temp_file" "$url"
   else
@@ -213,7 +224,7 @@ compute_jeka_distrib_dir() {
   local base_dir=$1
   local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
   if [ ! -z "$explicit_distrib_dir" ]; then
-    JEKA_DIST_DIR=explicit_distrib_dir
+    JEKA_DIST_DIR="$explicit_distrib_dir"
     return 0
   fi
   local jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
@@ -240,21 +251,19 @@ compute_jeka_distrib_dir() {
   fi
 }
 
-## Execute Jeka. Call `exec_jeka`.
+## Execute Jeka. Call `exec_jeka $base_dir`.
 exec_jeka() {
   local dist_dir=$1
 
   # If no distrib dir is specified (no jeka.version specified), we look first
   # for jeka-core.jar presence in the same dir of the current script
   if [ -z "$dist_dir" ]; then  ## No jeka.version is specified, should find the local one
-    local current_script_path="$GLOBAL_ARG[0]"
-    local candidate="$( cd "$(dirname "$current_script_path")" ; pwd -P )"
-    if [ -f "$candidate/$JEKA_JAR_NAME" ]; then
-      dist_dir=candidate
+    if [ -f "$CURRENT_SCRIPT_DIR/$JEKA_JAR_NAME" ]; then
+      dist_dir="$CURRENT_SCRIPT_DIR"
     fi
     if [ -z "$dist_dir" ]; then
       echo "No JeKa distribution found from script $current_script_path."
-      echo "You probably you forgot to mention a 'jeka.version' property in local.properties file."
+      echo "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in local.properties file."
       exit 1
     fi
   fi
@@ -273,20 +282,43 @@ exec_jeka() {
        boot_dir_args="./jeka/boot/*:"
     fi
   fi
-  exec "$JAVACMD" $JEKA_OPTS -Djeka.current.basedir=$REMOTE_BASE_DIR -cp "$boot_dir_args$dist_dir/$JEKA_JAR_NAME" "$GLOBAL_ARGS"
+  local jar_file="$dist_dir/$JEKA_JAR_NAME"
+  if [ ! -f "$jar_file" ]; then
+    echo "Cannot find JeKa jar file $jar_file."
+    echo "Are you sure the JeKa distribution you use is properly packaged ?"
+    exit 1
+  fi
+  exec "$JAVACMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$boot_dir_args$jar_file" "dev.jeka.core.tool.Main" "$GLOBAL_ARGS"
 }
 
-
-
 ## -- script start here
+
+declare GLOBAL_ARGS=()
+declare -i i=0
+for PARAM in "$@"; do
+  echo "Parameter: $PARAM"
+  GLOBAL_ARGS[$i]=$PARAM
+  i+=1
+  echo "$i"
+done
+
+for PARAM in "$GLOBAL_ARGS"; do
+  echo "Parameter global: $PARAM"
+done
+
+compute_remote_base_dir
+BASE_DIR="$REMOTE_BASE_DIR"
+if [ -z "$BASE_DIR" ]; then
+  BASE_DIR=$(pwd)
+fi
+CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 if [ -n "$JEKA_JDK" ] ; then
   export JAVA_HOME=$JEKA_JDK
   else
-    workingDir=$(pwd)
-    javaVersion=$(get_java_version_from_props $workingDir)
+    javaVersion=$(get_java_version_from_props "$BASE_DIR")
     if [ ! -z $javaVersion ]; then
-      jdkPath=$(get_jdk_home_for_version $workingDir $javaVersion)
+      jdkPath=$(get_jdk_home_for_version "$BASE_DIR" $javaVersion)
       if [ ! -z $jdkPath ]; then
         export JAVA_HOME=$jdkPath
       fi
@@ -419,7 +451,8 @@ compute_remote_base_dir
 
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
-  exec_jeka
+  compute_jeka_distrib_dir "$BASE_DIR"
+  exec_jeka "$JEKA_DIST_DIR"
 fi
 
 
