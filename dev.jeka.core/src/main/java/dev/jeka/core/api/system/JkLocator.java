@@ -2,7 +2,6 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,7 +18,7 @@ public final class JkLocator {
 
     private final static String JK_USER_HOME_ENV_NAME = "JEKA_USER_HOME";
 
-    private final static String JK_CACHE_PROP_NAME = "jeka.cache.dir";
+    private final static String JK_CACHE_DIR_ENV_NAME = "JEKA_CACHE_DIR";
 
     private static Path JEKA_JAR_FILE;
 
@@ -86,7 +85,7 @@ public final class JkLocator {
 
     public static Path getCacheDir() {
         final Path result;
-        final String env = JkProperties.ofSysPropsThenEnv().get(JK_CACHE_PROP_NAME);
+        final String env = System.getenv(JK_CACHE_DIR_ENV_NAME);
         if (!JkUtilsString.isBlank(env)) {
             result = Paths.get(env);
         } else {
