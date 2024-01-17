@@ -216,6 +216,12 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .collect(Collectors.toList());
         branch = getCurrentBranch();
         dirty = isWorkspaceDirty();
+        if (branch == null) {   // detached Head
+            JkLog.trace("Git detached branch. Infer version from exact matching tag.");
+            return this.copy()
+                    .setParams("describe", "--tags", "--exact-match")
+                    .setCollectOutput(true).exec().getOutput();
+        }
         if (tags.isEmpty() || dirty) {
             return branch + "-SNAPSHOT";
         } else {
