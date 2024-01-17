@@ -36,6 +36,7 @@ public final class Main {
         }
         final long start = System.nanoTime();
         try {
+            // TODO filter -r xxxx args
             Environment.initialize(args);
             Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
             JkLog.setDecorator(Environment.standardOptions.logStyle);
@@ -46,11 +47,8 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             String basedirProp = System.getProperty("jeka.current.basedir");
-            System.out.println("-----------besedir prop=" + basedirProp);
-            System.out.println("-----------working dir=" +  Paths.get("").toAbsolutePath().normalize());
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
-            System.out.println("-----------besedir prop=" + baseDir);
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");

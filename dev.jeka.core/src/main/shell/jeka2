@@ -42,7 +42,7 @@ download_and_unpack() {
   else
     unzip -qq -o "$temp_file" -d "$dir"
   fi
-
+  rm "$temp_file"
 }
 
 get_jeka_user_home() {
@@ -252,7 +252,8 @@ compute_jeka_distrib_dir() {
 }
 
 ## Execute Jeka. Call `exec_jeka $base_dir`.
-exec_jeka() {
+## Returns value in JEKA_CLASSPATH
+get_jeka_classpath() {
   local dist_dir=$1
 
   # If no distrib dir is specified (no jeka.version specified), we look first
@@ -288,23 +289,10 @@ exec_jeka() {
     echo "Are you sure the JeKa distribution you use is properly packaged ?"
     exit 1
   fi
-  exec "$JAVACMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$boot_dir_args$jar_file" "dev.jeka.core.tool.Main" "$GLOBAL_ARGS"
+  JEKA_CLASSPATH="$boot_dir_args$jar_file"
 }
 
 ## -- script start here
-
-declare GLOBAL_ARGS=()
-declare -i i=0
-for PARAM in "$@"; do
-  echo "Parameter: $PARAM"
-  GLOBAL_ARGS[$i]=$PARAM
-  i+=1
-  echo "$i"
-done
-
-for PARAM in "$GLOBAL_ARGS"; do
-  echo "Parameter global: $PARAM"
-done
 
 compute_remote_base_dir
 BASE_DIR="$REMOTE_BASE_DIR"
@@ -404,8 +392,8 @@ if $cygwin ; then
     JEKA_HOME=`cygpath --unix "$JEKA_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$CLASSPATH" ] &&
-    CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
+  [ -n "$JEKA_CLASSPATH" ] &&
+    JEKA_CLASSPATH=`cygpath --path --unix "$JEKA_CLASSPATH"`
 fi
 
 # For Migwn, ensure paths are in UNIX format before anything is touched
@@ -442,8 +430,8 @@ if $cygwin; then
     JEKA_HOME=`cygpath --path --windows "$JEKA_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
-  [ -n "$CLASSPATH" ] &&
-    CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+  [ -n "$JEKA_CLASSPATH" ] &&
+    JEKA_CLASSPATH=`cygpath --path --windows "$JEKA_CLASSPATH"`
 fi
 
 ## Search if this is a call on remote base dir : result is stored REMOTE_BASE_DIR in case of.
@@ -452,9 +440,6 @@ compute_remote_base_dir
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
   compute_jeka_distrib_dir "$BASE_DIR"
-  exec_jeka "$JEKA_DIST_DIR"
+  get_jeka_classpath "$JEKA_DIST_DIR"
+  exec "$JAVACMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi
-
-
-
-
