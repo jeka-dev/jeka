@@ -82,7 +82,8 @@ class MasterBuild extends KBean {
     public void make() throws IOException {
         JkLog.startTask("Building core and plugins");
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
-            JkLog.startTask("Running %s", bean);
+            JkLog.startTask("Packaging %s ...", bean);
+            JkLog.info(bean.project.getInfo());
             bean.clean();
             bean.pack();
             JkLog.endTask();

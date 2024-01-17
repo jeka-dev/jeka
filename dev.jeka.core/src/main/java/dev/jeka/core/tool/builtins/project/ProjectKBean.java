@@ -266,6 +266,11 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     }
 
+    @Override
+    public String toString() {
+        return project.toString();
+    }
+
     // ------- private methods
 
     private JkJdks jdks() {
