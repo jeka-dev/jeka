@@ -26,7 +26,7 @@ public final class JkVersion implements Comparable<JkVersion> {
      * an {@link #UNSPECIFIED} version.
      */
     public static JkVersion of(String name) {
-        if (name == null) {
+        if (JkUtilsString.isBlank(name)) {
             return UNSPECIFIED;
         }
         return new JkVersion(name);

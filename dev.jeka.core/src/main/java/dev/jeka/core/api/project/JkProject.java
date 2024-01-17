@@ -492,7 +492,7 @@ public class JkProject implements JkIdeSupportSupplier {
      * </ul>
      */
     public JkVersion getVersion() {
-        return Optional.ofNullable(versionSupplier.get()).orElse(JkVersion.UNSPECIFIED);
+        return versionSupplier.get();
     }
 
     /**
