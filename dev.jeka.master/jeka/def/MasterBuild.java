@@ -69,15 +69,20 @@ class MasterBuild extends KBean {
     private final String effectiveVersion;
 
     MasterBuild() {
-        // ON GitAction, when not on main branch, git version may return empty, so we rely on the branch name
-        // injected in GitAction
-        String gitVersion = versionFromGit.getVersion();
-        effectiveVersion =  JkUtilsString.isBlank(gitVersion) ?
-                System.getenv("CI_REF_NAME") + "-SNAPSHOT" :  gitVersion;
+        effectiveVersion = versionFromGit.getVersion();
     }
 
     @Override
     protected void init()  {
+
+        System.out.println("==============================================");
+        System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
+        System.out.println("Git getVersion from tag  : " + JkGit.of(getBaseDir()).getVersionFromTag());
+        System.out.println("Branch from Git          : " + JkGit.of(getBaseDir()).getCurrentBranch());
+        System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit());
+        System.out.println("Tag Count from Git       : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit().size());
+        System.out.println("Effective version        : " + effectiveVersion);
+        System.out.println("==============================================");
 
         coreBuild.runIT = true;
         getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
@@ -92,15 +97,6 @@ class MasterBuild extends KBean {
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() throws IOException {
-
-        System.out.println("==============================================");
-        System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
-        System.out.println("Git getVersion from tag  : " + JkGit.of(getBaseDir()).getVersionFromTag());
-        System.out.println("Branch from Git          : " + JkGit.of(getBaseDir()).getCurrentBranch());
-        System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit());
-        System.out.println("Tag Count from Git       : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit().size());
-        System.out.println("Effective version        : " + effectiveVersion);
-        System.out.println("==============================================");
 
         JkLog.startTask("Building core and plugins");
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
@@ -133,7 +129,7 @@ class MasterBuild extends KBean {
         JkLog.trace("current ossrhUser:  %s", ossrhUser);
 
         // Publish artifacts only if we are on 'master' branch
-        if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
+        if (JkUtilsIterable.listOf("HEAD", "master", "0.11.x").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publish);
             bomPublication().publish();
