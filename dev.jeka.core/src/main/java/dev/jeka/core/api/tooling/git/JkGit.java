@@ -105,7 +105,10 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setParams("tag", "-l", "--points-at", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
-                .exec().getOutputMultiline();
+                .exec().getOutputMultiline()
+                .stream()
+                    .filter(tag -> !tag.isEmpty())
+                    .collect(Collectors.toList());
     }
 
     /**
