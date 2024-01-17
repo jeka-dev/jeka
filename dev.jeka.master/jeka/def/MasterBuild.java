@@ -67,6 +67,10 @@ class MasterBuild extends KBean {
     @Override
     protected void init()  {
 
+        System.out.println("==============================================");
+        System.out.println("Version from Git : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
+        System.out.println("==============================================");
+
         coreBuild.runIT = true;
         getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
         getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(this::applyToSlave);
