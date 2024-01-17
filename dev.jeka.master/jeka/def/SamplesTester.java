@@ -1,4 +1,5 @@
 import dev.jeka.core.JekaCommandLineExecutor;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
@@ -20,7 +21,9 @@ class SamplesTester extends JekaCommandLineExecutor {
     void run() {
         runJeka("dev.jeka.samples.protobuf", "@../../plugins/dev.jeka.plugins.protobuf project#cleanPack -liv");
         runJekaw("dev.jeka.samples.basic", "-kb=simpleProject #cleanPackPublish #checkedValue=A #checkValueIsA");
-        runJeka("dev.jeka.samples.springboot", "@../../plugins/dev.jeka.plugins.springboot project#clean project#pack mavenPublication#publishLocal -cw");
+        if (JkJavaVersion.ofCurrent().compareTo(JkJavaVersion.V17) >= 0) {
+            runJeka("dev.jeka.samples.springboot", "@../../plugins/dev.jeka.plugins.springboot project#clean project#pack mavenPublication#publishLocal -cw");
+        }
         runJekaw("dev.jeka.samples.basic", "-kb=signedArtifacts #cleanPackPublish");
         runJekaw("dev.jeka.samples.basic", "-kb=thirdPartyDependencies #cleanPack");
         runJekaw("dev.jeka.samples.basic", "-kb=antStyle #cleanPackPublish");
