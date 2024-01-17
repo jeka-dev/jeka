@@ -94,10 +94,11 @@ class MasterBuild extends KBean {
     public void make() throws IOException {
 
         System.out.println("==============================================");
-        System.out.println("Version from Git  : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
-        System.out.println("Branch from Git   : " + JkGit.of(getBaseDir()).getCurrentBranch());
-        System.out.println("Tag rom Git       : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit());
-        System.out.println("Effective version : " + effectiveVersion);
+        System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
+        System.out.println("Git getVersion from tag  : " + JkGit.of(getBaseDir()).getVersionFromTag());
+        System.out.println("Branch from Git          : " + JkGit.of(getBaseDir()).getCurrentBranch());
+        System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit());
+        System.out.println("Effective version        : " + effectiveVersion);
         System.out.println("==============================================");
 
         JkLog.startTask("Building core and plugins");

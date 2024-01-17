@@ -53,7 +53,7 @@ public class JkVersionFromGit  {
             return cachedVersion;
         }
         JkGit git = JkGit.of(baseDir);
-        boolean dirty = JkGit.of(this.baseDir).isWorkspaceDirty();
+        boolean dirty = git.isWorkspaceDirty();
         if (dirty) {
             JkLog.trace("Git workspace is dirty. Use SNAPSHOT for version.");
             cachedVersion = git.getCurrentBranch() + JkVersion.SNAPSHOT_SUFIX;
