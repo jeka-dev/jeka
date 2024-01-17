@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,6 +22,8 @@ import java.util.List;
  * @author Jerome Angibaud
  */
 public final class Main {
+
+    private static final String REMOTE_OPTION = "-r";
 
     /**
      * Entry point for Jeka application when launched from command-line
@@ -37,7 +40,8 @@ public final class Main {
         final long start = System.nanoTime();
         try {
             // TODO filter -r xxxx args
-            Environment.initialize(args);
+            String[] filteredArgs = filteredArgs(args);
+            Environment.initialize(filteredArgs);
             Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
             JkLog.setDecorator(Environment.standardOptions.logStyle);
             if (Environment.standardOptions.logBanner) {
@@ -47,8 +51,10 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             String basedirProp = System.getProperty("jeka.current.basedir");
+            System.out.println("---- prop jeka.current.basedir : " + basedirProp);
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
+            System.out.println("---- actual base dir : " + baseDir);
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
@@ -162,6 +168,18 @@ public final class Main {
 
     private static void displayDuration(long startTs) {
         System.out.println("\nTotal run duration : " + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+    }
+
+    private static String[] filteredArgs(String[] originalArgs) {
+        List<String> result = new LinkedList<>();
+        String previous = null;
+        for (String arg : originalArgs) {
+            if (!REMOTE_OPTION.equals(arg) && !REMOTE_OPTION.equals(previous)) {
+                result.add(arg);
+            }
+            previous = arg;
+        }
+        return result.toArray(new String[0]);
     }
 
     private Main() {

@@ -32,6 +32,11 @@ echo "non.existing=$prop_value"
 prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "jeka.jdk.17")
 echo "jeka.jdk.17=$prop_value"
 
+# Test get_java_version_from_props
+prop_value=$(get_java_version_from_props "$SUB_DIR")
+echo "get_java_version_from_props = $prop_value"
+[ ! "$prop_value" == "17" ] && echo "Failure: function 'get_java_version_from_props' does not returns '17'" && exit 1
+
 # ------- JDK Location
 
 # Test JDK Path
@@ -50,7 +55,7 @@ echo "Git Cache Dir : $git_cache_dir"
 
 # ------- Remote script call
 
-remote_arg=$(get_remote_argument)
+remote_arg=$(get_remote_argument "$@")
 echo "Remote argument : '$remote_arg'"
 
 git_url="https://github.com/jeka-dev/template-examples.git#2.0"
