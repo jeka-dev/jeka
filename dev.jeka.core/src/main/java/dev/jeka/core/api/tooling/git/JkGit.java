@@ -211,16 +211,11 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         List<String> tags;
         String branch;
         boolean dirty;
-        try {
-            tags = getTagsOfCurrentCommit().stream()
-                    .filter(tag -> tag.startsWith(prefix))
-                    .collect(Collectors.toList());
-            branch = getCurrentBranch();
-            dirty = isWorkspaceDirty();
-        } catch (IllegalStateException e) {
-            JkLog.warn(e.getMessage());
-            return JkVersion.UNSPECIFIED.getValue();
-        }
+        tags = getTagsOfCurrentCommit().stream()
+                .filter(tag -> tag.startsWith(prefix))
+                .collect(Collectors.toList());
+        branch = getCurrentBranch();
+        dirty = isWorkspaceDirty();
         if (tags.isEmpty() || dirty) {
             return branch + "-SNAPSHOT";
         } else {
