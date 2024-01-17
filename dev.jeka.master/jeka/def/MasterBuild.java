@@ -66,6 +66,16 @@ class MasterBuild extends KBean {
 
     private JkJacoco jacocoForCore;
 
+    private final String effectiveVersion;
+
+    MasterBuild() {
+        // ON GitAction, when not on main branch, git version may return empty, so we rely on the branch name
+        // injected in GitAction
+        String gitVersion = versionFromGit.getVersion();
+        effectiveVersion =  JkUtilsString.isBlank(gitVersion) ?
+                System.getenv("CI_REF_NAME") + "-SNAPSHOT" :  gitVersion;
+    }
+
     @Override
     protected void init()  {
 
@@ -87,7 +97,7 @@ class MasterBuild extends KBean {
         System.out.println("Version from Git  : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
         System.out.println("Branch from Git   : " + JkGit.of(getBaseDir()).getCurrentBranch());
         System.out.println("Tag rom Git       : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit());
-        System.out.println("Effective version : " + effectiveVersion());
+        System.out.println("Effective version : " + effectiveVersion);
         System.out.println("==============================================");
 
         JkLog.startTask("Building core and plugins");
@@ -205,19 +215,8 @@ class MasterBuild extends KBean {
 
     private void applyToSlave(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-
-
-        project.setVersion(effectiveVersion());
-
-        // ON GitAction, when not on main branch, git version may return empty, so we rely on the branch name
-        // injected in GitAction
+        project.setVersion(effectiveVersion);
         project.compilation.addJavaCompilerOptions("-g");
-    }
-
-    private String effectiveVersion() {
-        String gitVersion = versionFromGit.getVersion();
-        return JkUtilsString.isBlank(gitVersion) ?
-                System.getenv("CI_REF_NAME") + "-SNAPSHOT" :  gitVersion;
     }
 
     private void applyToSlave(MavenPublicationKBean mavenPublicationKBean) {
@@ -235,9 +234,8 @@ class MasterBuild extends KBean {
 
     private JkMavenPublication bomPublication() {
         JkMavenPublication result = JkMavenPublication.ofPomOnly();
-        String version = effectiveVersion();
         result.setModuleId("dev.jeka:bom")
-                .setVersion(version)
+                .setVersion(effectiveVersion)
                 .pomMetadata
                     .setProjectName("Jeka BOM")
                     .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group")
@@ -245,7 +243,7 @@ class MasterBuild extends KBean {
 
         getImportedKBeans().get(ProjectKBean.class, false).forEach(projectKBean -> {
             JkProject project = projectKBean.project;
-            result.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), version);
+            result.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
         });
         adaptMavenConfig(result);
         return result;
