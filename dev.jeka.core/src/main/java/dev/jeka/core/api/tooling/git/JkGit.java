@@ -52,7 +52,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public String getCurrentBranch() {
         List<String> branches = this.copy()
-                .addParams("rev-parse", "--abbrev-ref", "HEAD")
+                .addParams("branch", "--show-current")
                 .setLogWithJekaDecorator(false)
                 .setCollectOutput(true)
                 .exec().getOutputMultiline();

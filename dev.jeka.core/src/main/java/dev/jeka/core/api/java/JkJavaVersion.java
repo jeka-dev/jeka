@@ -87,5 +87,11 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
         return Integer.compare(this.value, o.value);
     }
 
+    /**
+     * Determines if the current Java version is equal to or greater than the specified Java version.
+     */
+    public boolean isEqualOrGreaterThan(JkJavaVersion other) {
+        return this.compareTo(other) >= 0;
+    }
 
 }
