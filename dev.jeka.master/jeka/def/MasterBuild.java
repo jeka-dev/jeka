@@ -11,6 +11,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
@@ -67,10 +68,6 @@ class MasterBuild extends KBean {
     @Override
     protected void init()  {
 
-        System.out.println("==============================================");
-        System.out.println("Version from Git : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
-        System.out.println("==============================================");
-
         coreBuild.runIT = true;
         getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
         getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(this::applyToSlave);
@@ -84,6 +81,11 @@ class MasterBuild extends KBean {
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() throws IOException {
+
+        System.out.println("==============================================");
+        System.out.println("Version from Git : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
+        System.out.println("==============================================");
+
         JkLog.startTask("Building core and plugins");
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
             JkLog.startTask("Packaging %s ...", bean);
@@ -199,7 +201,14 @@ class MasterBuild extends KBean {
 
     private void applyToSlave(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-        versionFromGit.handleVersioning(project);
+
+        // ON GitAction, when not on main branch, git version may return empty, so we rely on the branch name
+        // injected in GitAction
+        String gitVersion = versionFromGit.getVersion();
+        final String effectiveVersion = JkUtilsString.isBlank(gitVersion) ?
+            System.getenv("CI_REF_NAME") + "-SNAPSHOT" :  gitVersion;
+
+        project.setVersion(effectiveVersion);
         project.compilation.addJavaCompilerOptions("-g");
     }
 
