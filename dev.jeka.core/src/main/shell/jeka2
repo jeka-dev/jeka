@@ -10,10 +10,10 @@ declare GLOGAL_ARGS=$@  ## store in global variable to access within function
 declare JEKA_VERSION_PROP_NAME="jeka.java.version"
 declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
 
-declare GLOBAL_PROP_FILE
 declare JEKA_USER_HOME
+declare GLOBAL_PROP_FILE
 declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
-declare CURRENT_SCRIPT_DIR
+declare CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 declare WORKING_DIR=$(pwd)
 
 declare JDK_DOWNLOAD_DISTRIB="temurin"
@@ -62,8 +62,7 @@ get_jeka_user_home() {
     echo $JEKA_USER_HOME
   fi
 }
-JEKA_USER_HOME=$(get_jeka_user_home)
-GLOBAL_PROP_FILE=$JEKA_USER_HOME"/global.properties"
+
 
 # Returns the value of a property within a property file
 # call `prop file prop_name'
@@ -86,6 +85,15 @@ get_env_var_name() {
 get_prop_value_from_base_dir() {
   local base_dir=$1
   local prop_name=$2
+
+  # TODO first look in cmd line arg as "-Dmy.prop=my_value"
+  # Look first in env variables
+  local envValue=$(printenv "$prop_name")
+  if [ "$envValue" != "" ]; then
+    echo $envValue
+    return 0
+  fi
+
   local value=$(get_prop_value_from_file "$base_dir/jeka/local.properties" "$prop_name")
   if [ -z $value ]; then
     local parent_dir="$base_dir/.."
@@ -100,7 +108,7 @@ get_prop_value_from_base_dir() {
   echo $value
 }
 
-# call `propJavaVersion currentDir`
+# call `propJavaVersion base_dir`
 get_java_version_from_props() {
   local base_dir="$1"
   local version=$(get_prop_value_from_base_dir "$base_dir" "$JEKA_VERSION_PROP_NAME")
@@ -108,11 +116,12 @@ get_java_version_from_props() {
   echo $trimmed_version
 }
 
-# call `get_jdk_home_for_version currentDir javaVersion`
+# call `get_jdk_home_for_version base_dir JAVA_VERSION`
 get_jdk_home_for_version() {
   local base_dir=$1
   local jdk_version=$2
   local prop_name="jeka.jdk.$jdk_version"
+
 
   # Look first in env variables
   local envValue=$(printenv "$prop_name")
@@ -198,54 +207,104 @@ giturl_to_foldername() {
     echo $foldername
 }
 
-## return value in GLOBAL VAR : REMOTE_BASE_DIR
-compute_remote_base_dir() {
+assert_dir_exits() {
+  if [ ! -d "$1" ]; then
+    echo "Directory $1 does not exist"
+    exit 1
+  fi
+}
 
-    local remote_path_arg=$(get_remote_argument "$@")
-    if [ -z "$remote_path_arg" ]; then
-        REMOTE_BASE_DIR=""
-        debug "No -r argument detected"
-        return 0  #no remote argument fount
-    fi
-    is_git_remote=$(is_git_url "$remote_path_arg")
-    if [ "false" == "$is_git_remote" ]; then
-      local target_base_dir
-      if [[ "$remote_path_arg" == /* ]]; then    # absolute path
-        target_base_dir="$remote_path_arg"
-        if [ ! -d "$target_base_dir" ]; then
-          echo "Directory $target_base_dir does not exist"
-          exit 1
-        fi
-      else  # relative path
-        target_base_dir="$WORKING_DIR"/"$remote_path_arg"
-        if [ ! -d "$target_base_dir" ]; then
-          echo "Directory $target_base_dir does not exist"
-          exit 1
-        fi
-        target_base_dir=$(cd "$target_base_dir" && pwd)  # normalize pass
-      fi
-      REMOTE_BASE_DIR="$target_base_dir"
-      debug "Remote '-r' argument detected with value $target_base_dir"
-      return 0
-    fi
 
-    ## Remote reference a git repo
-    local git_url=$(substring_before_hash "$remote_path_arg")
-    local git_tag=$(substring_after_hash "$remote_path_arg")
-    local branch_args=""
-    if [ "$git_tag" != "" ]; then
-      branch_args="--branch $git_tag"
+compute_base_dir_from_resolved_remote_arg() {
+
+  local remote_path="$1"  # file-system path or git url
+  local should_clean="$2"
+  is_git_remote=$(is_git_url "$remote_path")
+
+  # the remote reference a file-system path
+  if [ "false" == "$is_git_remote" ]; then
+
+    if [[ "$remote_path" == /* ]]; then    # absolute path
+      result="$remote_path"
+      assert_dir_exits "$result"
+    else  # relative path
+      result=$(pwd)/"$remote_arg"
+      assert_dir_exits "$result"
+      result=$(cd "$result" && pwd)  # normalize pass
     fi
-    local cache_dir_name=$(giturl_to_foldername "$remote_path_arg")
-    local target_cache_dir=$(get_git_cache_dir)/"$cache_dir_name"
-    if [ ! -d "$target_cache_dir" ]; then
-        echo "Cloning $git_url into $target_cache_dir  ..."
-        sync
-        git clone -c advice.detachedHead=false --depth 1 $branch_args $git_url $target_cache_dir
+    BASE_DIR="$result"
+    return 0
+  fi
+
+  ## Remote reference a git repo
+  local git_url=$(substring_before_hash "$remote_path")
+  local git_tag=$(substring_after_hash "$remote_path")
+  local branch_args=""
+  if [ "$git_tag" != "" ]; then
+    branch_args="--branch $git_tag"
+  fi
+  local cache_dir_name=$(giturl_to_foldername "$remote_path")
+  result=$(get_git_cache_dir)/"$cache_dir_name"
+  if [ -n "$should_clean" ]; then
+    rm -rf "$result"
+  fi
+  if [ ! -d "$result" ]; then
+      echo "Cloning $git_url into $result  ..."
+      git clone -c advice.detachedHead=false --depth 1 $branch_args $git_url $result
+  else
+      debug "Cache directory $result already exists. Won't clone or update."
+  fi
+  BASE_DIR=$result
+}
+
+# resolve alias in global.properties
+# Call 'resolve_alias cmdLineArg'.
+resolve_alias() {
+  arg=$1
+  if [[ ${arg:0:1} == "@" ]]; then  # argument start with '@'
+    if [ ! -f "$GLOBAL_PROP_FILE" ]; then
+      echo "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
+      exit 1
+    fi
+    local alias_name=${arg:1}
+    local prop_name="jeka.remote.alias.$alias_name"
+    local resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
+    if [ -z "$resolved" ]; then
+      echo "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg" 1>&2
+      echo "Defined Aliases :" 1>&2
+      echo "==============================" 1>&2
+      cat "$GLOBAL_PROP_FILE" | grep '^jeka.remote.alias.'  1>&2
+      echo "==============================" 1>&2
+      exit 1
     else
-        echo  "Cache directory $target_cache_dir already exists. Won't clone or update."
+      echo "$resolved"
     fi
-    REMOTE_BASE_DIR=$target_cache_dir
+  else
+    echo "$arg"
+  fi
+}
+
+## return value in global var : BASE_DIR
+## call `compute_BASE_DIR $1 $2`
+compute_BASE_DIR() {
+
+  local result
+  local delete_git_cache_flag
+  if [ "$1" == "-r" ]; then
+    local remote_arg=$2
+    local resolved_remote_arg=$(resolve_alias "$remote_arg")
+    echo "--------alias $remote_arg resolved to $resolved_remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$resolved_remote_arg"
+  elif [ "$1" == "-rc" ]; then
+    local remote_arg=$2
+    local resolved_remote_arg=$(resolve_alias "$remote_arg")
+    compute_base_dir_from_resolved_remote_arg "$resolved_remote_arg" "clean"
+  elif [[ "${1:1}" == "@" ]]; then   # shortcut to invoke like `jeka @my_alias doSomething`
+    local resolved_remote_arg=$(resolve_alias "$remote_arg")
+    compute_base_dir_from_resolved_remote_arg "$resolved_remote_arg"
+  else
+    BASE_DIR=$(pwd)
+  fi
 }
 
 # result is written in JEKA_DIST_DIR
@@ -282,7 +341,7 @@ compute_jeka_distrib_dir() {
 
 ## Execute Jeka. Call `exec_jeka $base_dir`.
 ## Returns value in JEKA_CLASSPATH
-get_jeka_classpath() {
+compute_JEKA_CLASSPATH() {
   local dist_dir=$1
 
   # If no distrib dir is specified (no jeka.version specified), we look first
@@ -321,27 +380,27 @@ get_jeka_classpath() {
   JEKA_CLASSPATH="$boot_dir_args$jar_file"
 }
 
-# call `get_or_download_jdk $javaVersion`. The result is set to DOWNLOAD_JDK_DIR var.
+# call `get_or_download_jdk $JAVA_VERSION`. The result is set to DOWNLOAD_JDK_DIR var.
 get_or_download_jdk() {
-  local javaVersion="$1"
+  local JAVA_VERSION="$1"
   local specified_distrib=$(get_prop_value_from_base_dir "$BASE_DIR" "jeka.java.distrib")
   if [ -n "$specified_distrib" ]; then
     JDK_DOWNLOAD_DISTRIB="$specified_distrib"
   fi
-  local jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$javaVersion"
+  local jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$JAVA_VERSION"
   if [ ! -d "$jdk_cache_dir" ]; then
     if [ -z "$JDK_DOWNLOAD_OS" ]; then
       echo "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
-      echo "You may workaround the problem in specifying a 'jeka.jdk.$javaVersion' env var or a property in ~/jeka/global.properties file." 1>&2
+      echo "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or a property in ~/jeka/global.properties file." 1>&2
       exit 1
     fi
     if [ -z "$JDK_DOWNLOAD_ARCH" ]; then
       echo "Unable to download JDK, unsupported Architecture: $(uname -m)" 1>&2
-      echo "You may workaround the problem in specifying a 'jeka.jdk.$javaVersion' env var or property in ~/jeka/global.properties file." 1>&2
+      echo "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
       exit 1
     fi
-    local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$javaVersion&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
-    echo "Downloading JKD $JDK_DOWNLOAD_DISTRIB $javaVersion to $jdk_cache_dir. It may take a while..."
+    local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
+    echo "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
     download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
     if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
       pushd "$jdk_cache_dir"
@@ -355,19 +414,14 @@ get_or_download_jdk() {
   DOWNLOAD_JDK_DIR=$jdk_cache_dir
 }
 
-## -- script start here
+## --------------------------------------- script start here ---------------------------------------------
 
-compute_remote_base_dir "$@"
-BASE_DIR="$REMOTE_BASE_DIR"
-if [ -z "$BASE_DIR" ]; then
-  BASE_DIR=$(pwd)
-fi
-CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+JEKA_USER_HOME=$(get_jeka_user_home)
+GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
+
+compute_BASE_DIR "$1" "$2"
 
 # OS specific support.  $var _must_ be set to either true or false.
-cygwin=false;
-darwin=false;
-mingw=false
 case "$(uname -s)" in
   Linux*)
     JDK_DOWNLOAD_OS="linux"
@@ -375,39 +429,22 @@ case "$(uname -s)" in
       JDK_DOWNLOAD_OS=alpine-linux
     fi
     ;;
-  CYGWIN*|MSYS*)
-    cygwin=true
-    JDK_DOWNLOAD_OS="windows"
-    JDK_DOWNLOAD_LIBC_TYPE="c_std_lib"
-    JDK_DOWNLOAD_FILE_TYPE="zip"
-    ;;
-  MINGW*)
-    mingw=true
-    JDK_DOWNLOAD_OS="windows"
-    JDK_DOWNLOAD_LIBC_TYPE="c_std_lib"
-    JDK_DOWNLOAD_FILE_TYPE="zip"
-    ;;
   Darwin*)
-    darwin=true
     JDK_DOWNLOAD_OS="mac"
     JDK_DOWNLOAD_LIBC_TYPE="libc"; # necessary to download proper JDK
 
     # Look for the Apple JDKs first to preserve the existing behaviour, and then look
     # for the new JDKs provided by Oracle.
     if [ -z "$JAVA_HOME" ] && [ -L /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK ] ; then
-      # Apple JDKs
       JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home
     fi
     if [ -z "$JAVA_HOME" ] && [ -L /System/Library/Java/JavaVirtualMachines/CurrentJDK ] ; then
-      # Apple JDK
       JAVA_HOME=/System/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
     fi
     if [ -z "$JAVA_HOME" ] && [ -L "/Library/Java/JavaVirtualMachines/CurrentJDK" ] ; then
-      # Oracle JDK
       JAVA_HOME=/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
     fi
     if [ -z "$JAVA_HOME" ] && [ -L "/usr/libexec/java_home" ]; then
-       # Apple JDKs
        JAVA_HOME=`/usr/libexec/java_home`
     fi
     ;;
@@ -439,113 +476,48 @@ case "$(uname -m)" in
     ;;
 esac
 
-# FIND JAVA HOME
+# Determines JAVA_HOME
+JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR")
 
-if [ -n "$JEKA_JDK" ] ; then
-  JAVA_HOME=$JEKA_JDK
-  else
-    javaVersion=$(get_java_version_from_props "$BASE_DIR")
-    if [ -n "$javaVersion" ]; then
-      jdkPath=$(get_jdk_home_for_version "$BASE_DIR" "$javaVersion")
-      debug "JDK HOME $javaVersion from env or props : $jdkPath "
-      if [ -z "$jdkPath" ]; then
-        get_or_download_jdk "$javaVersion"
-        if [ "$JDK_DOWNLOAD_OS" == "mac" ]; then
-          jdk_entry_sub_dir="/Contents/Home"
-        fi
-        JAVA_HOME="$DOWNLOAD_JDK_DIR$jdk_entry_sub_dir"
-      fi
+if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
+  JAVA_HOME="$JEKA_JDK_HOME"
+
+elif [ -n "$JAVA_VERSION" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
+  jdkPath=$(get_jdk_home_for_version "$BASE_DIR" "$JAVA_VERSION")
+  debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
+  if [ -z "$jdkPath" ]; then
+    get_or_download_jdk "$JAVA_VERSION"
+    if [ "$JDK_DOWNLOAD_OS" == "mac" ]; then
+      jdk_entry_sub_dir="/Contents/Home"
     fi
-fi
-
-if [ -z "$JAVA_HOME" ] ; then
-  if [ -r /etc/gentoo-release ] ; then
-    JAVA_HOME=`java-config --jre-home`
+    JAVA_HOME="$DOWNLOAD_JDK_DIR$jdk_entry_sub_dir"
   fi
 fi
 
-if [ -z "$JEKA_HOME" ] ; then
-  ## resolve links - $0 may be a link to jeka's home
-  PRG="$0"
-
-  # need this for relative symlinks
-  while [ -h "$PRG" ] ; do
-    ls=`ls -ld "$PRG"`
-    link=`expr "$ls" : '.*-> \(.*\)$'`
-    if expr "$link" : '/.*' > /dev/null; then
-      PRG="$link"
-    else
-      PRG="`dirname "$PRG"`/$link"
-    fi
-  done
-
-  saveddir=`pwd`
-
-  JEKA_HOME=`dirname "$PRG"`
-
-  # make it fully qualified
-  JEKA_HOME=`cd "$JEKA_HOME" && pwd`
-
-  cd "$saveddir"
-fi
-
-# For Cygwin, ensure paths are in UNIX format before anything is touched
-if $cygwin ; then
-  [ -n "$JEKA_HOME" ] &&
-    JEKA_HOME=`cygpath --unix "$JEKA_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$JEKA_CLASSPATH" ] &&
-    JEKA_CLASSPATH=`cygpath --path --unix "$JEKA_CLASSPATH"`
-fi
-
-# For Migwn, ensure paths are in UNIX format before anything is touched
-if $mingw ; then
-  [ -n "$JEKA_HOME" ] &&
-    JEKA_HOME="`(cd "$JEKA_HOME"; pwd)`"
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-fi
-
-if [ -z "$JAVACMD" ] ; then
+# Determines JAVA_CMD to use according JAVA_HOME
+if [ -z "$JAVA_CMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
       # IBM's JDK on AIX uses strange locations for the executables
-      JAVACMD="$JAVA_HOME/jre/sh/java"
+      JAVA_CMD="$JAVA_HOME/jre/sh/java"
     else
-      JAVACMD="$JAVA_HOME/bin/java"
+      JAVA_CMD="$JAVA_HOME/bin/java"
     fi
   else
-    JAVACMD="`which java`"
+    JAVA_CMD="`which java`"
   fi
 fi
 
-if [ ! -x "$JAVACMD" ] ; then
+if [ ! -x "$JAVA_CMD" ] ; then
   echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )." >&2
-  echo "  We cannot execute $JAVACMD" >&2
+  echo "  We cannot execute $JAVA_CMD" >&2
   echo "  You can specify which JDK to use by setting JEKA_JDK environment variable." >&2
   exit 1
-fi
-
-# For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
-  [ -n "$JEKA_HOME" ] &&
-    JEKA_HOME=`cygpath --path --windows "$JEKA_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
-  [ -n "$JEKA_CLASSPATH" ] &&
-    JEKA_CLASSPATH=`cygpath --path --windows "$JEKA_CLASSPATH"`
-fi
-
-## Search if this is a call on remote base dir : result is stored REMOTE_BASE_DIR in case of.
-TARGET_BASE_DIR="$BASE_DIR"
-if [ -n "$REMOTE_BASE_DIR" ]; then
-  TARGET_BASE_DIR="$REMOTE_BASE_DIR"
 fi
 
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
   compute_jeka_distrib_dir "$BASE_DIR"
-  get_jeka_classpath "$JEKA_DIST_DIR"
-  exec "$JAVACMD" $JEKA_OPTS -Djeka.current.basedir=$TARGET_BASE_DIR -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
+  compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
+  exec "$JAVA_CMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi

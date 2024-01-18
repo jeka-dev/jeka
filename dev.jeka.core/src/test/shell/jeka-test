@@ -3,7 +3,7 @@
 DRY_RUN=true
 export DRY_RUN
 source ../../main/shell/jeka2
-set +e
+set -e
 
 SAMPLE_DIR=./sample-dir
 SUB_DIR=$SAMPLE_DIR/sub-dir
@@ -53,17 +53,25 @@ git_cache_dir=$(get_git_cache_dir)
 echo "Git Cache Dir : $git_cache_dir"
 [ -z "$git_cache_dir" ] && echo "Git cache dir is empty" && exit 1
 
-# ------- Remote script call
-
-remote_arg=$(get_remote_argument "$@")
-echo "Remote argument : '$remote_arg'"
+echo "-------------- Remote script call    -----------------"
 
 git_url="https://github.com/jeka-dev/template-examples.git#2.0"
 git_cache_folder_name=$(giturl_to_foldername "$git_url")
 echo "Folder name for caching $git_url is '$git_cache_folder_name'"
 [ "github.com_jeka-dev_template-examples.git#2.0" != "$git_cache_folder_name" ] && echo "Git cache folder name failed" && exit 1
 
-compute_remote_base_dir
+git_url="https://github.com/djeang/jeka-remote-sample-basic.git#0.0.1"
+is_git=$(is_git_url "$git_url")
+[ $is_git != "true" ] && echo "Failed, $git_url not considered as a git url" && exit 1
+is_git=$(is_git_url "/my_path")
+[ $is_git != "false" ] && echo "Failed,/my_path considered as a git url" && exit 1
+
+
+resolved_alias=$(resolve_alias "$git_url")
+[ "$resolved_alias" != "$git_url" ] && echo "Failed at resolving alias : $git_url resolved to $resolved_alias"
+
+
+compute_BASE_DIR
 echo "Remote base dir : '$REMOTE_BASE_DIR'"
 
 #args=("-r" "./toto")

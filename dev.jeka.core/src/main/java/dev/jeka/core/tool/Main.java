@@ -5,6 +5,7 @@ import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
@@ -13,6 +14,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -171,14 +173,19 @@ public final class Main {
     }
 
     private static String[] filteredArgs(String[] originalArgs) {
-        List<String> result = new LinkedList<>();
-        String previous = null;
-        for (String arg : originalArgs) {
-            if (!REMOTE_OPTION.equals(arg) && !REMOTE_OPTION.equals(previous)) {
-                result.add(arg);
-            }
-            previous = arg;
+        System.out.println("=====original args = +" + Arrays.asList(originalArgs));
+        if (originalArgs.length == 0) {
+            return originalArgs;
         }
+        List<String> result = new LinkedList<>(Arrays.asList(originalArgs));
+        String first =result.get(0);
+        if (JkUtilsIterable.listOf("-r", "-rc").contains(first)) {
+            result.remove(0);
+            result.remove(0);
+        } else if (first.startsWith("@")) {   // remove remote @alias
+            result.remove(0);
+        }
+        System.out.println("=====filterd args = +" + result);
         return result.toArray(new String[0]);
     }
 
