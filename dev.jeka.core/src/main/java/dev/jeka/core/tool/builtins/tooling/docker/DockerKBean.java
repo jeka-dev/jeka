@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 @JkDoc("Build and run image based on SelfKBean or ProjectKBean present on the runbase. " +
-        "A running Docker daemon is mandatory to use this KBean.")
+        "A running Docker daemon is mandatory.")
 public class DockerKBean extends KBean {
 
     @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")

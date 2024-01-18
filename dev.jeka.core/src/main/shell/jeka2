@@ -2,7 +2,7 @@
 
 set -e
 
-declare LOG_DEBUG="true"
+declare LOG_DEBUG
 declare DRY_RUN  # Debugging purpose
 
 declare GLOGAL_ARGS=$@  ## store in global variable to access within function
@@ -259,8 +259,10 @@ compute_base_dir_from_resolved_remote_arg() {
 
 # resolve alias in global.properties
 # Call 'resolve_alias cmdLineArg'.
+# Returns in 'resolved_alias' var
 resolve_alias() {
-  arg=$1
+  local arg=$1
+  resolved_alias=""
   if [[ ${arg:0:1} == "@" ]]; then  # argument start with '@'
     if [ ! -f "$GLOBAL_PROP_FILE" ]; then
       echo "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
@@ -270,38 +272,37 @@ resolve_alias() {
     local prop_name="jeka.remote.alias.$alias_name"
     local resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
     if [ -z "$resolved" ]; then
-      echo "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg" 1>&2
-      echo "Defined Aliases :" 1>&2
-      echo "==============================" 1>&2
-      cat "$GLOBAL_PROP_FILE" | grep '^jeka.remote.alias.'  1>&2
-      echo "==============================" 1>&2
+      echo "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg"
+      echo "Defined Aliases :"
+      echo "=============================="
+      cat "$GLOBAL_PROP_FILE" | grep '^jeka.remote.alias.'
+      echo "=============================="
       exit 1
     else
-      echo "$resolved"
+      resolved_alias="$resolved"
     fi
   else
-    echo "$arg"
+    resolved_alias="$arg"
   fi
 }
 
 ## return value in global var : BASE_DIR
 ## call `compute_BASE_DIR $1 $2`
 compute_BASE_DIR() {
-
   local result
   local delete_git_cache_flag
+  local arg="$1"
   if [ "$1" == "-r" ]; then
     local remote_arg=$2
-    local resolved_remote_arg=$(resolve_alias "$remote_arg")
-    echo "--------alias $remote_arg resolved to $resolved_remote_arg"
-    compute_base_dir_from_resolved_remote_arg "$resolved_remote_arg"
+    resolve_alias "$remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$resolved_alias"
   elif [ "$1" == "-rc" ]; then
     local remote_arg=$2
-    local resolved_remote_arg=$(resolve_alias "$remote_arg")
-    compute_base_dir_from_resolved_remote_arg "$resolved_remote_arg" "clean"
-  elif [[ "${1:1}" == "@" ]]; then   # shortcut to invoke like `jeka @my_alias doSomething`
-    local resolved_remote_arg=$(resolve_alias "$remote_arg")
-    compute_base_dir_from_resolved_remote_arg "$resolved_remote_arg"
+    resolve_alias "$remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$resolved_alias" "clean"
+  elif [ "${arg:0:1}" == "@" ]; then   # if first arg is an alias.
+    resolve_alias "$1"
+    compute_base_dir_from_resolved_remote_arg "$resolved_alias"
   else
     BASE_DIR=$(pwd)
   fi
