@@ -97,7 +97,7 @@ public final class JkScaffold {
         }
 
         // Create .gitignore
-        JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(".gitignore"))
+        JkPathFile.of(baseDir.resolve(".gitignore"))
                         .fetchContentFrom(JkScaffold.class.getResource("gitignore.snippet"));
         extraActions.run();
     }

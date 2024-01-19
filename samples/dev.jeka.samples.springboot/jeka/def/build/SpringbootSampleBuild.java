@@ -9,7 +9,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka/output/dev.jeka.springboot-plugin.jar")
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
 public class SpringbootSampleBuild extends KBean {
 
     public String aa;

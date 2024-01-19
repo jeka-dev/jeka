@@ -3,6 +3,7 @@ package dev.jeka.core.api.project;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -60,7 +61,7 @@ public class JkCompileLayout {
 
     private JkCompileLayout() {
         baseDirSupplier = () -> Paths.get("");
-        outputDirSupplier = () -> baseDirSupplier.get().resolve("jeka/output");
+        outputDirSupplier = () -> baseDirSupplier.get().resolve(JkConstants.OUTPUT_PATH);
         setSourceMavenStyle(Concern.PROD);
         setStandardOutputDirs(Concern.PROD);
     }

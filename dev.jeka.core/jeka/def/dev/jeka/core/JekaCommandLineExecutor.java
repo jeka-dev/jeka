@@ -38,7 +38,7 @@ public abstract class JekaCommandLineExecutor {
     }
 
     protected JekaCommandLineExecutor(Path projectRootDir, JkProperties properties) {
-        this(projectRootDir.resolve("samples"), projectRootDir.resolve("dev.jeka.core/jeka/output/distrib"), properties);
+        this(projectRootDir.resolve("samples"), projectRootDir.resolve("dev.jeka.core/jeka-output/distrib"), properties);
     }
 
     protected JekaCommandLineExecutor(String projectRootDir, JkProperties properties) {

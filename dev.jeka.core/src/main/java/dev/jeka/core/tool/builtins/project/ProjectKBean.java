@@ -85,7 +85,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     // ------------------------------- command line methods -----------------------------
 
-    @JkDoc("Delete the content of jeka/output directory and might execute extra clean actions")
+    @JkDoc("Delete the content of jeka-output directory and might execute extra clean actions")
     public void clean() {
         project.clean();
     }

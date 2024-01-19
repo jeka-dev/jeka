@@ -24,8 +24,8 @@ import github.Github;
 import java.io.IOException;
 import java.sql.SQLOutput;
 
-@JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka/output/classes")
-@JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka/output/classes")
+@JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
+@JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
 class MasterBuild extends KBean {
 
     @JkInjectProperty("OSSRH_USER")

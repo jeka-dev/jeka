@@ -12,7 +12,7 @@ import dev.jeka.plugins.jacoco.JkJacoco;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")  // For local testing
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends KBean {
 
     ProjectKBean projectKBean = load(ProjectKBean.class);

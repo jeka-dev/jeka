@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 /**
  * A pretty exhaustive usage of {@link JkProject} api.
  */
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")
 @JkInjectClasspath("org.eclipse.jdt:ecj:3.25.0")  // Inject Eclipse compiler that we are using in this build
 class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
 

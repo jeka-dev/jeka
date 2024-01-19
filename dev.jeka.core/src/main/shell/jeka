@@ -309,7 +309,7 @@ compute_BASE_DIR() {
 }
 
 # result is written in JEKA_DIST_DIR
-compute_jeka_distrib_dir() {
+compute_JEKA_DIST_DIR() {
   local base_dir=$1
   local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
   if [ ! -z "$explicit_distrib_dir" ]; then
@@ -518,7 +518,7 @@ fi
 
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
-  compute_jeka_distrib_dir "$BASE_DIR"
+  compute_JEKA_DIST_DIR "$BASE_DIR"
   compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
   exec "$JAVA_CMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi

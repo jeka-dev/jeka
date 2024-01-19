@@ -15,7 +15,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
  * The dependencies declared here are only for demonstration purpose and not necessary to build.
  * the project.
  */
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka/output/dev.jeka.jacoco-plugin.jar")
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")
 class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Sets if the Integration Tests should be run.")

@@ -215,8 +215,8 @@ public final class JkIml {
             String prefix = dedicatedJekaModule ? "" : "jeka/";
             return this
                     .addSourceFolder(prefix + "def", true, null)
-                    .addExcludeFolder(prefix + "output")
-                    .addExcludeFolder(prefix + ".work")
+                    .addExcludeFolder("jeka-output")
+                    .addExcludeFolder(".jeka-work")
                     .addExcludeFolder(".idea/output");
         }
 

@@ -12,8 +12,8 @@ import java.nio.file.Paths;
  */
 class PluginScaffoldTester extends JekaCommandLineExecutor {
 
-    private final String sprinbootBluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka/"
-            + "output/dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
+    private final String sprinbootBluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka-output/" +
+            "dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
 
     PluginScaffoldTester(JkProperties properties) {
         super("..", properties);

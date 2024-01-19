@@ -76,7 +76,7 @@ final class HelpDisplayer {
         items.add(option("log.stacktrace", "lst",  " log the stacktrace when Jeka fail"));
         items.add(option("log.setup", "lsu",  " log KBean setup process"));
         items.add(option("kbean", Environment.KB_KEYWORD, " Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name"));
-        items.add(option("clean.work", "cw",  " Delete all files cached in jeka/.work"));
+        items.add(option("clean.work", "cw",  " Delete all files cached in .jeka-work"));
         items.add(option("no.help", "", "Does not display help if no method is invoked"));
         items.add(option("def.compile.ignore-failure", "dci",  " Try to compile def classes. If fail, ignore failure and continue"));
         new ItemContainer(items).render().forEach(item -> sb.append("  " + item + "\n"));

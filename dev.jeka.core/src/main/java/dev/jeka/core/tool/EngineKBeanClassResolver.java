@@ -306,7 +306,7 @@ final class EngineKBeanClassResolver {
 
     private void storeGlobalKBeanClasses(List<String> classNames) {
         Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(JkConstants.KBEAN_CLASSES_CACHE_FILE_NAME);
-        if (!Files.exists(store.getParent().getParent())) {
+        if (!Files.exists(store.getParent())) {
             return;
         }
         String content = String.join(System.lineSeparator(), classNames);

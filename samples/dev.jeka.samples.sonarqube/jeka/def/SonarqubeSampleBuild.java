@@ -14,7 +14,7 @@ import dev.jeka.plugins.sonarqube.JkSonarqube;
  * User has to run or use an existing server.
  * By default, sonar
  */
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka/output/dev.jeka.sonarqube-plugin.jar")  // for local test
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar")  // for local test
 class SonarqubeSampleBuild extends KBean {
 
     SonarqubeSampleBuild() {

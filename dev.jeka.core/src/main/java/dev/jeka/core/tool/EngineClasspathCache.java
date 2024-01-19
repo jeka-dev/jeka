@@ -84,14 +84,14 @@ class EngineClasspathCache {
             }
         }
         JkLog.trace("Update cached 'unresolved-classpath'.");
-        if (Files.exists(cacheFile.getParent().getParent())) {
+        if (Files.exists(cacheFile.getParent())) {
             JkPathFile.of(cacheFile).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
         }
         return true;
     }
 
     private void storeResolvedClasspath(Scope scope, JkPathSequence pathSequence) {
-        if (!Files.exists(resolvedClasspathCache(scope).getParent().getParent())) {
+        if (!Files.exists(resolvedClasspathCache(scope).getParent())) {
             return;  // if project dir has no 'jeka' folder, don't store this file.
         }
         JkPathFile.of(resolvedClasspathCache(scope)).createIfNotExist()

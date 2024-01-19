@@ -15,12 +15,12 @@ public final class JkConstants {
     /**
      * Relative path to the project base directory where output files are generated.
      */
-    public static final String OUTPUT_PATH = JEKA_DIR + "/output";
+    public static final String OUTPUT_PATH = "jeka-output";
 
     /**
      * Relative path to the project base directory where jeka work files are generated.
      */
-    public static final String WORK_PATH = JEKA_DIR + "/.work";
+    public static final String WORK_PATH = ".jeka-work";
 
     static final String DEF_BIN_DIR_NAME = "def-classes";
 
