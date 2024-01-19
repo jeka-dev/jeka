@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -97,20 +98,21 @@ public final class JkInit {
     static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
-        sb.append("\nCommand Line : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
-        sb.append("\nJava Home : " + System.getProperty("java.home"));
-        sb.append("\nJava Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
-        sb.append("\nJeka Version : " + JkInfo.getJekaVersion());
+        sb.append("\nCommand Line      : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
+        sb.append("\nJava Home         : " + System.getProperty("java.home"));
+        sb.append("\nJava Version      : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        sb.append("\nJeka Version      : " + JkInfo.getJekaVersion());
         if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
-            sb.append("\nJeka Home : " + bootDir().normalize() + " ( embedded !!! )");
+            sb.append("\nJeka Home         : " + bootDir().normalize() + " ( embedded !!! )");
         } else {
-            sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir().normalize());
+            sb.append("\nJeka Home         : " + JkLocator.getJekaHomeDir().normalize());
         }
-        sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
+        sb.append("\nJeka User Home    : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
+        sb.append("\nJeka Cache Dir    : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
         JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
-        sb.append("\nJeka download Repositories : " + JkRepoProperties.of(properties).getDownloadRepos());
-        sb.append("\nProperties :\n").append(properties.toKeyValueString("  "));
+        sb.append("\nDownload Repos    : " + JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
+                .map(JkRepo::getUrl).collect(Collectors.toList()));
+        sb.append("\nProperties        :\n").append(properties.toKeyValueString("  "));
         JkLog.info(sb.toString());
     }
 

@@ -94,7 +94,7 @@ public final class EclipseKBean extends KBean {
     @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka/def directory are taken in account. See eclipse#files.")
     public void all() {
         final Iterable<Path> folders = JkPathTree.of(getBaseDir())
-                .andMatching(true,"**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
+                .andMatching(true,"**/" + JkConstants.JEKA_SRC_DIR, JkConstants.JEKA_SRC_DIR)
                 .andMatching(false,"**/" + JkConstants.OUTPUT_PATH + "/**")
                 .getFiles();
         for (final Path folder : folders) {

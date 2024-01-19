@@ -315,7 +315,7 @@ public final class JkRunbase {
     }
 
     static JkProperties localProperties(Path baseDir) {
-        Path localPropFile = baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
+        Path localPropFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
         if (!Files.exists(localPropFile)) {
             return JkProperties.EMPTY;
         }
@@ -326,14 +326,13 @@ public final class JkRunbase {
     // Takes also in account properties defined in parent project dirs if any.
     static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
         Path baseDir = projectBaseDir.toAbsolutePath().normalize();
-        Path projectPropertiesFile = baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE);
+        Path projectPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
         JkProperties result = JkProperties.EMPTY;
         if (Files.exists(projectPropertiesFile)) {
             result = JkProperties.ofFile(JkUtilsPath.relativizeFromWorkingDir(projectPropertiesFile));
         }
-        Path parentProject =baseDir.getParent();
-        if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.JEKA_DIR))
-                & Files.isDirectory(parentProject.resolve(JkConstants.JEKA_DIR))) {
+        Path parentProject = baseDir.getParent();
+        if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.PROPERTIES_FILE))) {
             result = result.withFallback(readProjectPropertiesRecursively(parentProject));
         }
         return result;

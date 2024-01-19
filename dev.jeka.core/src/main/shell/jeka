@@ -94,11 +94,11 @@ get_prop_value_from_base_dir() {
     return 0
   fi
 
-  local value=$(get_prop_value_from_file "$base_dir/jeka/local.properties" "$prop_name")
+  local value=$(get_prop_value_from_file "$base_dir/jeka.properties" "$prop_name")
   if [ -z $value ]; then
     local parent_dir="$base_dir/.."
-    local parent_jeka_dir="$parent_dir/jeka"
-    if [ -d "$parent_jeka_dir" ]; then
+    local parent_jeka_props="$parent_dir/jeka.properties"
+    if [ -f "$parent_jeka_props" ]; then
       echo $(get_prop_value_from_base_dir "$parent_dir" "$prop_name")
     else
       echo $(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
@@ -353,7 +353,7 @@ compute_JEKA_CLASSPATH() {
     fi
     if [ -z "$dist_dir" ]; then
       echo "No JeKa distribution found from script $current_script_path."
-      echo "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in local.properties file."
+      echo "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in jeka.properties file."
       exit 1
     fi
   fi

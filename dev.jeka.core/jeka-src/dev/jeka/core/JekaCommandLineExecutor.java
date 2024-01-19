@@ -44,44 +44,42 @@ public abstract class JekaCommandLineExecutor {
                 properties);
     }
 
-    protected void runJekaw(String projectDir, String cmdLine) {
+    protected void runBaseDirJeka(String projectDir, String cmdLine) {
         runJeka(true, projectDir, cmdLine);
     }
 
-    protected void runJeka(String projectDir, String cmdLine) {
+    protected void runDistribJeka(String projectDir, String cmdLine) {
         runJeka(false, projectDir, cmdLine);
     }
 
-    protected void runJeka(String projectDir, String cmdLine, String jekaJdkHome) {
+    protected void runDistribJeka(String projectDir, String cmdLine, String jekaJdkHome) {
         runJeka(false, projectDir, cmdLine, jekaJdkHome);
     }
 
-    protected void runJeka(boolean useWrapper, String projectDir, String cmdLine) {
-        runJeka(useWrapper, projectDir, cmdLine, null);
+    /**
+     * @param useBaseDirJeka if true, will invoke 'jeka' shell script located in the basedir to run.
+     */
+    protected void runJeka(boolean useBaseDirJeka, String projectDir, String cmdLine) {
+        runJeka(useBaseDirJeka, projectDir, cmdLine, null);
     }
 
-    protected void runJeka(boolean useWrapper, String projectDir, String cmdLine, String jekaJdkHome) {
+    protected void runJeka(boolean useBaseDirJeka, String projectDir, String cmdLine, String jekaJdkHome) {
         String jdkHome = jekaJdkHome == null ?
                 JkJavaProcess.CURRENT_JAVA_HOME.normalize().toString()
                         : jekaJdkHome;
         Path dir = this.samplesRootDir.resolve(projectDir);
-        String jekaDistribLocation = useWrapper ? jekaDistribDir.toAbsolutePath().toString() : "";
-        process(dir, useWrapper)
+        process(dir, useBaseDirJeka)
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
                 .inheritJkLogOptions()
                 .addParams("-dcf", "-lst", "-cw", "-lsu", "-lri")
                 .setEnv("JEKA_JDK", jdkHome)
-                .setEnv("jeka.distrib.location",jekaDistribLocation)
+                .setEnv("jeka.distrib.location", jekaDistribDir.toAbsolutePath().toString())
                 .run();
     }
 
-    protected Path getJekaDistribDir() {
-        return jekaDistribDir.toAbsolutePath().normalize();
-    }
-
-    private static String jekawCmd(Path dir) {
-        String scriptName = JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jekaw";
-        return JkUtilsPath.relativizeFromWorkingDir(dir.resolve(scriptName)).toAbsolutePath().normalize().toString();
+    private static String localJekaCommand(Path baseDir) {
+        String scriptName = JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jeka";
+        return JkUtilsPath.relativizeFromWorkingDir(baseDir.resolve(scriptName)).toAbsolutePath().normalize().toString();
     }
 
     private String jekaCmd() {
@@ -95,7 +93,7 @@ public abstract class JekaCommandLineExecutor {
     }
 
     private JkProcess process(Path workingDir, boolean useWrapper) {
-        String cmd = useWrapper ? jekawCmd(workingDir) : jekaCmd();
+        String cmd = useWrapper ? localJekaCommand(workingDir) : jekaCmd();
         JkProcess result = JkProcess.of(cmd)
                 .setWorkingDir(workingDir)
                 .setLogCommand(true)

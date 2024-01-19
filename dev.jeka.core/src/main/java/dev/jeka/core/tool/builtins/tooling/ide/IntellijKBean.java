@@ -105,7 +105,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
         Stream<Path> stream = JkPathTree.of(getBaseDir())
-                .andMatching(true, "**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
+                .andMatching(true, "**/" + JkConstants.JEKA_SRC_DIR, JkConstants.JEKA_SRC_DIR)
                 .andMatching(false, "**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream();
         stream

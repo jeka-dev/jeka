@@ -248,7 +248,7 @@ public abstract class SelfKBean extends KBean {
      * except for files matching the specified patterns.
      */
     public JkPathTree getAppClasses() {
-        return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR))
+        return JkPathTree.of(getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR))
                 .andMatching(false, "_*", "_*/**", ".*", "**/.*");
     }
 
@@ -290,12 +290,12 @@ public abstract class SelfKBean extends KBean {
      * Returns a JkPathTree representing the application sources.
      */
     public JkPathTree getAppSources() {
-        return JkPathTree.of(getBaseDir().resolve(JkConstants.DEF_DIR)).withMatcher(
+        return JkPathTree.of(getBaseDir().resolve(JkConstants.JEKA_SRC_DIR)).withMatcher(
                 JkConstants.PRIVATE_IN_DEF_MATCHER.negate());
     }
 
     private String findMainClass() {
-        JkUrlClassLoader ucl = JkUrlClassLoader.of(getBaseDir().resolve(JkConstants.DEF_BIN_DIR));
+        JkUrlClassLoader ucl = JkUrlClassLoader.of(getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR));
         return ucl.toJkClassLoader().findClassesHavingMainMethod().stream()
                 .filter(candidate -> !candidate.startsWith("_"))
                 .findFirst()

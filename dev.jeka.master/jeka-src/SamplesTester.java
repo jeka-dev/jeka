@@ -20,25 +20,25 @@ class SamplesTester extends JekaCommandLineExecutor {
     }
 
     void run() {
-        runJeka("dev.jeka.samples.protobuf", "-liv @../../plugins/dev.jeka.plugins.protobuf project#cleanPack");
-        runJekaw("dev.jeka.samples.basic", "-kb=simpleProject #cleanPackPublish #checkedValue=A #checkValueIsA");
+        runDistribJeka("dev.jeka.samples.protobuf", "-liv @../../plugins/dev.jeka.plugins.protobuf project#cleanPack");
+        runDistribJeka("dev.jeka.samples.basic", "-kb=simpleProject #cleanPackPublish #checkedValue=A #checkValueIsA");
         if (JkJavaVersion.ofCurrent().isEqualOrGreaterThan(JkJavaVersion.V17)) {
-            runJeka("dev.jeka.samples.springboot", "-lna @../../plugins/dev.jeka.plugins.springboot project#clean project#pack mavenPublication#publishLocal -cw");
+            runDistribJeka("dev.jeka.samples.springboot", "-lna @../../plugins/dev.jeka.plugins.springboot project#clean project#pack mavenPublication#publishLocal -cw");
         }
-        runJekaw("dev.jeka.samples.basic", "-kb=signedArtifacts #cleanPackPublish");
-        runJekaw("dev.jeka.samples.basic", "-kb=thirdPartyDependencies #cleanPack");
-        runJekaw("dev.jeka.samples.basic", "-kb=antStyle #cleanPackPublish");
-        runJekaw("dev.jeka.samples.dependers", "-kb=fatJar project#clean project#pack");
-        runJekaw("dev.jeka.samples.dependers", "-kb=normalJar project#clean project#pack");
-        runJekaw("dev.jeka.samples.junit5", "-lna project#clean project#pack");
-        runJekaw("dev.jeka.samples.junit5", "project#clean project#pack #checkReportGenerated -project#tests.fork");
-        runJeka("dev.jeka.samples.jacoco", "-lna @../../plugins/dev.jeka.plugins.jacoco project#clean project#pack #checkReportGenerated");
-        runJeka("dev.jeka.samples.sonarqube", "-lna @../../plugins/dev.jeka.plugins.sonarqube project#clean project#pack");
+        runDistribJeka("dev.jeka.samples.basic", "-kb=signedArtifacts #cleanPackPublish");
+        runDistribJeka("dev.jeka.samples.basic", "-kb=thirdPartyDependencies #cleanPack");
+        runDistribJeka("dev.jeka.samples.basic", "-kb=antStyle #cleanPackPublish");
+        runDistribJeka("dev.jeka.samples.dependers", "-kb=fatJar project#clean project#pack");
+        runDistribJeka("dev.jeka.samples.dependers", "-kb=normalJar project#clean project#pack");
+        runDistribJeka("dev.jeka.samples.junit5", "-lna project#clean project#pack");
+        runDistribJeka("dev.jeka.samples.junit5", "project#clean project#pack #checkReportGenerated -project#tests.fork");
+        runDistribJeka("dev.jeka.samples.jacoco", "-lna @../../plugins/dev.jeka.plugins.jacoco project#clean project#pack #checkReportGenerated");
+        runDistribJeka("dev.jeka.samples.sonarqube", "-lna @../../plugins/dev.jeka.plugins.sonarqube project#clean project#pack");
     }
 
     public void launchManually(String cmdLine) {
         Path dir = JkUtilsPath.createTempDirectory("jeka-sample-generated");
-        runJeka(dir.toString(), cmdLine);
+        runDistribJeka(dir.toString(), cmdLine);
         try {
             Desktop.getDesktop().open(dir.toFile());
         } catch (IOException e) {

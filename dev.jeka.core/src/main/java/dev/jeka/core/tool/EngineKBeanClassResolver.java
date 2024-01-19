@@ -8,6 +8,7 @@ import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -34,27 +35,26 @@ final class EngineKBeanClassResolver {
 
     private final Path baseDir;
 
-    final Path defSourceDir;
+    final Path jekaSourceDir;
 
-    final Path defClassDir;
+    final Path jekaSrcClassDir;
 
     private JkPathSequence classpath;
 
-    private List<String> cachedDefBeanClassNames;
+    private List<String> cachedJekaSrcBeanClassNames;
 
     private List<String> cachedGlobalBeanClassName;
 
-    private final JkProperties localProperties;
+    private final JkProperties jekaProperties;
 
     private boolean useStoredCache;
-
 
     EngineKBeanClassResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.defSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
-        this.defClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
-        this.localProperties = JkRunbase.localProperties(baseDir);
+        this.jekaSourceDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        this.jekaSrcClassDir = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
+        this.jekaProperties = JkRunbase.localProperties(baseDir);
     }
 
     List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName, boolean ignoreDefaultBeanNotFound) {
@@ -65,7 +65,7 @@ final class EngineKBeanClassResolver {
         Set<String> involvedKBeanNames = new HashSet<>(commandLine.involvedBeanNames());
         involvedKBeanNames.addAll(getInvolvedKBeanNamesFromProperties());
         for (String beanName : involvedKBeanNames) {
-            List<String> beanClassNames = JkUtilsIterable.concatLists(defBeanClassNames(), globalBeanClassNames())
+            List<String> beanClassNames = JkUtilsIterable.concatLists(jekaSrcBeanClassNames(), globalBeanClassNames())
                     .stream().distinct().collect(Collectors.toList());
             List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
             if (matchingClassNames.isEmpty()) {  // maybe the cache is staled -> rescan classpath
@@ -119,12 +119,12 @@ final class EngineKBeanClassResolver {
 
     private Class<? extends KBean> defaultBeanClass(String defaultBeanName, boolean failIfNotFound) {
         if (defaultBeanName == null) {
-            if (defBeanClassNames().isEmpty()) {
+            if (jekaSrcBeanClassNames().isEmpty()) {
                 return null;
             }
-            return defBeanClasses().get(0);
+            return jekaSrcBeanClasses().get(0);
         }
-        List<String> matchingclassNames = findClassesMatchingName(defBeanClassNames(), defaultBeanName);
+        List<String> matchingclassNames = findClassesMatchingName(jekaSrcBeanClassNames(), defaultBeanName);
         if (matchingclassNames.isEmpty()) {
             matchingclassNames = findClassesMatchingName(globalBeanClassNames(), defaultBeanName);
         }
@@ -207,8 +207,8 @@ final class EngineKBeanClassResolver {
         storeGlobalKBeanClasses(cachedGlobalBeanClassName);
     }
 
-    List<Class<? extends KBean>> defBeanClasses() {
-        List result = defBeanClassNames().stream()
+    List<Class<? extends KBean>> jekaSrcBeanClasses() {
+        List result = jekaSrcBeanClassNames().stream()
                 .sorted()
                 .map(className -> JkClassLoader.ofCurrent().load(className))
                 .collect(Collectors.toList());
@@ -216,15 +216,15 @@ final class EngineKBeanClassResolver {
     }
 
     boolean hasDefSource() {
-        if (!Files.exists(defSourceDir)) {
+        if (!Files.exists(jekaSourceDir)) {
             return false;
         }
-        return JkPathTree.of(defSourceDir).andMatching(true,
+        return JkPathTree.of(jekaSourceDir).andMatching(true,
                 "**.java", "*.java", "**.kt", "*.kt").count(0, false) > 0;
     }
 
     boolean hasClassesInWorkDir() {
-        return JkPathTree.of(defClassDir).andMatching(true, "**.class")
+        return JkPathTree.of(jekaSrcClassDir).andMatching(true, "**.class")
                 .count(0, false) > 0;
     }
 
@@ -237,27 +237,27 @@ final class EngineKBeanClassResolver {
     }
 
     JkPathTree getSourceTree() {
-        return JkPathTree.of(defSourceDir)
+        return JkPathTree.of(jekaSourceDir)
                 .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
-    private List<String> defBeanClassNames() {
-        if (cachedDefBeanClassNames == null) {
+    private List<String> jekaSrcBeanClassNames() {
+        if (cachedJekaSrcBeanClassNames == null) {
             long t0 = System.currentTimeMillis();
             ClassLoader classLoader = JkClassLoader.ofCurrent().get();
 
-            // Should return only classes located in  'def class dir' folder.
+            // Should return only classes located in  'jeka-src class dir' folder.
             Predicate<Path> shouldInclude = pathElement ->
-                    pathElement.equals(this.defClassDir.toAbsolutePath().normalize());
+                    pathElement.equals(this.jekaSrcClassDir.toAbsolutePath().normalize());
 
             if (classpath != null) {
 
                 // If classpath is set, then sources has been compiled in work dir
                 classLoader = new URLClassLoader(
-                        JkPathSequence.of().and(this.defClassDir).and(JkLocator.getJekaJarPath()).toUrls(),
+                        JkPathSequence.of().and(this.jekaSrcClassDir).and(JkLocator.getJekaJarPath()).toUrls(),
                         ClassLoader.getSystemClassLoader());
             }
-            cachedDefBeanClassNames = CLASSPATH_SCANNER.findClassesInheritingOrAnnotatesWith(
+            cachedJekaSrcBeanClassNames = CLASSPATH_SCANNER.findClassesInheritingOrAnnotatesWith(
                     classLoader,
                     KBean.class,
                     EngineKBeanClassResolver::shouldScan,
@@ -266,11 +266,11 @@ final class EngineKBeanClassResolver {
                     true,
                     JkDoc.class);
             if (JkLog.isVerbose()) {
-                JkLog.trace("Def KBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
-                cachedDefBeanClassNames.forEach(className -> JkLog.trace("  " + className ));
+                JkLog.trace("Classes from jeka-src scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+                cachedJekaSrcBeanClassNames.forEach(className -> JkLog.trace("  " + className ));
             }
         }
-        return cachedDefBeanClassNames;
+        return cachedJekaSrcBeanClassNames;
     }
 
     private static boolean shouldScan(String pathElement) {
@@ -282,11 +282,12 @@ final class EngineKBeanClassResolver {
                                                  Map<String, Class<? extends KBean>> beanClasses) {
         Class<? extends KBean> beanClass = (action.beanName == null)
                 ? beanClasses.get(null)
-                : getJkBeanClass(beanClasses.values(), action.beanName);
+                : getKBeanClass(beanClasses.values(), action.beanName);
+        JkUtilsAssert.state(beanClass != null, "Can't resolve KBean class for action %s", action);
         return new EngineCommand(action.action, beanClass, action.member, action.value);
     }
 
-    private  Class<? extends KBean> getJkBeanClass(Collection<Class<? extends KBean>> beanClasses, String name) {
+    private  Class<? extends KBean> getKBeanClass(Collection<Class<? extends KBean>> beanClasses, String name) {
         return beanClasses.stream()
                 .filter(Objects::nonNull)
                 .filter(beanClass -> KBean.nameMatches(beanClass.getName(), name))
@@ -301,7 +302,7 @@ final class EngineKBeanClassResolver {
     }
 
     private JkPathTree defSources() {
-        return JkPathTree.of(this.defSourceDir).withMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
+        return JkPathTree.of(this.jekaSourceDir).withMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
     private void storeGlobalKBeanClasses(List<String> classNames) {
@@ -315,7 +316,7 @@ final class EngineKBeanClassResolver {
 
     // get involved KBean names from local properties
     private List<String> getInvolvedKBeanNamesFromProperties() {
-        Map<String, String> props = localProperties.getAllStartingWith("", true);
+        Map<String, String> props = jekaProperties.getAllStartingWith("", true);
         return props.keySet().stream()
                 .filter(key -> key.contains(CommandLine.KBEAN_SYMBOL))
                 .map(key -> JkUtilsString.substringBeforeFirst(key, CommandLine.KBEAN_SYMBOL))
@@ -325,7 +326,7 @@ final class EngineKBeanClassResolver {
 
     // get actionKBean from local properties
     private List<CommandLine.JkBeanAction> getBeanActionFromProperties() {
-        Map<String, String> props = localProperties.getAllStartingWith("", true);
+        Map<String, String> props = jekaProperties.getAllStartingWith("", true);
         return props.entrySet().stream()
                 .filter(entry -> entry.getKey().contains(CommandLine.KBEAN_SYMBOL))
                 .map(entry -> {

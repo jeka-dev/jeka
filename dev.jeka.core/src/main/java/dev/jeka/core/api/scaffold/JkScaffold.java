@@ -18,6 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Object that process scaffolding.
@@ -30,15 +31,17 @@ public final class JkScaffold {
 
     private String classFilename = "Build.java";
 
-    private String wrapperJekaVersion;
-
     private JkDependencyResolver dependencyResolver;
 
     public final JkRunnables extraActions = JkRunnables.of();
 
-    private String cachedJekaVersion;
+    private String jekaVersion;
 
-    private String localPropsExtraContent = "";
+    private String jekaDistribRepo;
+
+    private String jekaLocation;
+
+    private String extraPropsExtraContent = "";
 
     private JkScaffold(Path baseDir) {
         super();
@@ -51,18 +54,38 @@ public final class JkScaffold {
         return new JkScaffold(baseDir);
     }
 
-    public JkScaffold setWrapperJekaVersion(String wrapperJekaVersion) {
-        this.wrapperJekaVersion = wrapperJekaVersion;
-        return this;
-    }
-
     public JkScaffold setDependencyResolver(JkDependencyResolver jkDependencyResolver) {
         this.dependencyResolver = jkDependencyResolver;
         return this;
     }
 
     public JkScaffold addLocalPropsFileContent(String extraContent) {
-        this.localPropsExtraContent += extraContent;
+        this.extraPropsExtraContent += extraContent;
+        return this;
+    }
+
+    public JkScaffold setJekaVersion(String jekaVersion) {
+        this.jekaVersion = jekaVersion;
+        return this;
+    }
+
+    public JkScaffold setJekaDistribRepo(String jekaDistribRepo) {
+        this.jekaDistribRepo = jekaDistribRepo;
+        return this;
+    }
+
+    public JkScaffold setJekaLocation(String jekaLocation) {
+        this.jekaLocation = jekaLocation;
+        return this;
+    }
+
+    public JkScaffold setJekaClassCodeProvider(Supplier<String> codeProvider) {
+        this.jkClassCodeProvider = codeProvider;
+        return this;
+    }
+
+    public JkScaffold setClassFilename(String classFilename) {
+        this.classFilename = classFilename;
         return this;
     }
 
@@ -72,7 +95,7 @@ public final class JkScaffold {
     public void run() {
 
         // Create 'def' dir
-        final Path def = baseDir.resolve(JkConstants.DEF_DIR);
+        final Path def = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         JkLog.info("Create " + def);
         JkUtilsPath.createDirectories(def);
 
@@ -80,117 +103,68 @@ public final class JkScaffold {
         final Path buildClass = def.resolve(classFilename);
         JkLog.info("Create " + buildClass);
         String code = jkClassCodeProvider.get();
+        String effectiveJekaVersion = !JkUtilsString.isBlank(jekaVersion) ? jekaVersion : lastJekaVersion();
         if (!JkUtilsString.isBlank(code)) {
             if (code.contains("${jekaVersion}")) {
-                final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
-                code = code.replace("${jekaVersion}", version);
+                code = code.replace("${jekaVersion}", effectiveJekaVersion);
             }
             JkUtilsPath.write(buildClass, code.getBytes(StandardCharsets.UTF_8));
         }
 
-        // Create 'local.properties' file
-        JkPathFile localPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROPERTIES_FILE))
+        // Create 'jeka.properties' file
+        JkPathFile jekaPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE))
                 .fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
-        if (!JkUtilsString.isBlank(this.localPropsExtraContent)) {
-            String content = localPropsExtraContent.replace("\\n", "\n");
-            localPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        if (!JkUtilsString.isBlank(jekaLocation)) {
+            String line = "jeka.distrib.location=" + jekaLocation + "\n";
+            jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+
+        // we need to specify a version if distribution location is empty
+        } else  {
+            String line = "jeka.version=" + effectiveJekaVersion + "\n";
+            jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
+
+        if (!JkUtilsString.isBlank(this.jekaDistribRepo)) {
+            String line = "jeka.distrib.repo=" + jekaDistribRepo + "\n";
+            jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
+        if (!JkUtilsString.isBlank(this.extraPropsExtraContent)) {
+            String content = extraPropsExtraContent.replace("\\n", "\n");
+            jekaPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
 
         // Create .gitignore
         JkPathFile.of(baseDir.resolve(".gitignore"))
                         .fetchContentFrom(JkScaffold.class.getResource("gitignore.snippet"));
+
+        /// Shell scripts
+        createShellScripts();
+
         extraActions.run();
     }
 
-    /**
-     * Creates wrapper files, meaning shell scripts, jar, and configuration file.
-     */
-    public void createStandardWrapperStructure() {
-
-        // shell scripts
-        JkLog.info("Create shell files.");
-        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
-        JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
-                "to generate shell scripts");
-        JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
-        Path jekawPath = baseDir.resolve("jekaw");
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), jekawPath,
-                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        JkPathFile.of(jekawPath).setPosixExecPermissions(true, true, true);
-
-        // jar file
-        final Path jekaWrapperJar = JkLocator.getJekaJarPath().getParent().resolve("dev.jeka.jeka-core-wrapper.jar");
-        final Path wrapperFolder = baseDir.resolve(JkConstants.JEKA_DIR + "/wrapper");
-        JkUtilsPath.createDirectories(wrapperFolder);
-        final Path target = wrapperFolder.resolve(jekaWrapperJar.getFileName());
-        JkLog.info("Copy jeka wrapper jar to " + baseDir.relativize(target));
-        JkUtilsPath.copy(jekaWrapperJar, target, StandardCopyOption.REPLACE_EXISTING);
-        final String version = JkUtilsString.isBlank(wrapperJekaVersion) ? jekaVersion() : wrapperJekaVersion;
-
-        // wrapper.properties file
-        Path tempProps = JkUtilsPath.createTempFile("jeka-", ".properties");
-        Path jekaPropertiesPath = wrapperFolder.resolve("wrapper.properties");
-        if (!Files.exists(jekaPropertiesPath)) {
-            JkPathFile.of(tempProps)
-                    .fetchContentFrom(JkScaffold.class.getResource("wrapper.properties"))
-                    .copyReplacingTokens(jekaPropertiesPath,
-                            JkUtilsIterable.mapOf("${version}", version), StandardCharsets.UTF_8)
-                    .deleteIfExist();
-        }
-    }
-
-    /**
-     * Creates the files needed to delegate the wrapper to another module.
-     * This is generally used in multi-modules projects to have a single
-     * shared wrapper (and version) to manage.
-     * It consists in creating shell files that simply invoke the wrapper from
-     * another directory.
-     */
-    public void createWrapperStructureWithDelegate(String delegateFolder) {
-        JkPathFile newBatFile = JkPathFile.of(baseDir.resolve("jekaw.bat"));
-        JkPathFile newShellFile = JkPathFile.of(baseDir.resolve("jekaw"));
-        Path batDelegate = baseDir.resolve(delegateFolder).resolve("jekaw.bat");
-        if (!Files.exists(batDelegate) && JkUtilsSystem.IS_WINDOWS) {
-            throw new IllegalArgumentException("Cannot find file " + batDelegate);
-        } else {
-            String content = delegateFolder + "\\jekaw %*";
-            content = content.replace('/', '\\');
-            newBatFile.deleteIfExist().createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
-        }
-        Path shellDelegate = baseDir.resolve(delegateFolder).resolve("jekaw");
-        if (!Files.exists(shellDelegate) && !JkUtilsSystem.IS_WINDOWS) {
-            throw new IllegalStateException("Cannot find file " + batDelegate);
-        } else {
-            String content ="#!/bin/sh\n\n" + delegateFolder.replace('\\', '/') + "/jekaw $@";
-            newShellFile.deleteIfExist().createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8))
-                    .setPosixExecPermissions(true, true, true);
-        }
-        JkLog.info("Shell scripts generated.");
-    }
-
-    public void setJekaClassCodeProvider(Supplier<String> codeProvider) {
-        this.jkClassCodeProvider = codeProvider;
-    }
-
-    public void setClassFilename(String classFilename) {
-        this.classFilename = classFilename;
-    }
-
-    private String jekaVersion() {
-        if (cachedJekaVersion != null) {
-            return cachedJekaVersion;
-        }
-        if (!JkVersion.of(JkInfo.getJekaVersion()).isSnapshot()) {
-            cachedJekaVersion = JkInfo.getJekaVersion();
-            return cachedJekaVersion;
-        }
-        List<String> versions = dependencyResolver.searchVersions(JkInfo.JEKA_MODULE_ID);
+    private String lastJekaVersion() {
+        List<String> versions = dependencyResolver.searchVersions(JkInfo.JEKA_MODULE_ID).stream()
+                .filter(version -> !JkVersion.of(version).isSnapshot())
+                .collect(Collectors.toList());
         if (versions.isEmpty()) {
             JkLog.warn("Didn't find any version of " + JkInfo.JEKA_MODULE_ID + " in " + dependencyResolver);
             JkLog.warn("Will use current one : " + JkInfo.getJekaVersion());
             return JkInfo.getJekaVersion();
         }
-        cachedJekaVersion = versions.get(versions.size() -1);
-        return cachedJekaVersion;
+        return versions.get(versions.size() -1);
+    }
+
+    private void createShellScripts() {
+        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
+        JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
+                "to generate shell scripts");
+        JkLog.info("Create jeka.bat file");
+        JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
+        Path jekaShell = baseDir.resolve("jeka");
+        JkLog.info("Create jeka shell file");
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), jekaShell,
+                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+        JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
     }
 }

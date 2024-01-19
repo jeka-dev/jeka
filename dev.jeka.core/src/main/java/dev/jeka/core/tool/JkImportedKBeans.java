@@ -91,7 +91,7 @@ public final class JkImportedKBeans {
             } catch (final RuntimeException e) {
                 Path currentClassBaseDir = Paths.get(masterBean.getClass().getProtectionDomain()
                         .getCodeSource().getLocation().getPath());
-                while (!Files.exists(currentClassBaseDir.resolve(JkConstants.DEF_DIR)) && currentClassBaseDir != null) {
+                while (!Files.exists(currentClassBaseDir.resolve(JkConstants.JEKA_SRC_DIR)) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
                 if (!Files.exists(currentClassBaseDir)) {

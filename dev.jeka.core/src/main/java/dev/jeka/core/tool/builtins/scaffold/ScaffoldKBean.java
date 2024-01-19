@@ -6,7 +6,6 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 
@@ -18,21 +17,24 @@ import java.nio.file.Path;
 @JkDoc("Generates project skeletons (folder structure and basic build files).")
 public class ScaffoldKBean extends KBean {
 
-    @JkDoc("If set then the wrapper shell script will delegate 'jekaw' call to jekaw script located in the specified folder")
-    public String wrapDelegatePath;
+    @JkDoc("Set a specific jeka.version to include in jeka.properties.")
+    private String jekaVersion;
 
-    @JkDoc("Set the Jeka version to fetch for the wrapper. If null, it will use the same Jeka version than the running one.")
-    private String wrapperJekaVersion;
+    @JkDoc("Set a specific jeka.distrib.location to include in jeka.properties.")
+    private String jekaLocation;
+
+    @JkDoc("Set a specific jeka.distrib.repo to include in jeka.properties.")
+    private String jekaDistribRepo;
 
     /**
      * In windows, we cannot pass arguments with breaking lines.
-     * Use {@link #localPropsExtraContentPath} instead.
+     * Use {@link #jekaPropsExtraContentPath} instead.
      */
     @JkDoc("Deprecated - Add extra content at the end of the template local.properties file.")
-    private String localPropsExtraContent = "";
+    private String jekaPropsExtraContent = "";
 
     @JkDoc("Add extra content at the end of the template local.properties file.")
-    private Path localPropsExtraContentPath;
+    private Path jekaPropsExtraContentPath;
 
     @JkDoc(hide = true)
     public final JkScaffold scaffold = JkScaffold.of(getBaseDir());
@@ -45,11 +47,14 @@ public class ScaffoldKBean extends KBean {
                 () -> JkUtilsIO.read(JkScaffold.class.getResource("buildclass.snippet")));
         JkRepoSet repos = JkRepoProperties.of(getRunbase().getProperties()).getDownloadRepos();
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
-        this.scaffold.setDependencyResolver(dependencyResolver);
-        this.scaffold.addLocalPropsFileContent(this.localPropsExtraContent);
-        this.scaffold.setWrapperJekaVersion(this.wrapperJekaVersion);
-        if (this.localPropsExtraContentPath != null) {
-            String content = JkPathFile.of(localPropsExtraContentPath).readAsString();
+        this.scaffold
+                .setDependencyResolver(dependencyResolver)
+                .addLocalPropsFileContent(this.jekaPropsExtraContent)
+                .setJekaVersion(jekaVersion)
+                .setJekaLocation(jekaLocation)
+                .setJekaDistribRepo(jekaDistribRepo);
+        if (this.jekaPropsExtraContentPath != null) {
+            String content = JkPathFile.of(jekaPropsExtraContentPath).readAsString();
             this.scaffold.addLocalPropsFileContent(content);
         }
     }
@@ -57,15 +62,6 @@ public class ScaffoldKBean extends KBean {
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")
     public void run() {
         scaffold.run();
-    }
-
-    @JkDoc("Copies Jeka wrapper executable inside the project in order to be run in wrapper mode.")
-    public void wrapper() {
-        if (JkUtilsString.isBlank(wrapDelegatePath)) {
-            scaffold.createStandardWrapperStructure();
-        } else {
-            scaffold.createWrapperStructureWithDelegate(wrapDelegatePath);
-        }
     }
 
 }

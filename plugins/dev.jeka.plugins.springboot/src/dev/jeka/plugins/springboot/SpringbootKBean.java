@@ -67,7 +67,7 @@ public final class SpringbootKBean extends KBean {
 
             selfApp.setMainClass(SelfKBean.AUTO_FIND_MAIN_CLASS);
             selfApp.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
-                    getBaseDir().resolve(JkConstants.DEF_BIN_DIR)));
+                    getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
 
             selfApp.setJarMaker(path -> JkSpringbootJars.createBootJar(
                     selfApp.getAppClasses(),

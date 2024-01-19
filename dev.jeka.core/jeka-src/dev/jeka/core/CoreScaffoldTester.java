@@ -20,18 +20,18 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
 
     void run() {
         scaffold("scaffold#run -lv", "help", false);
-        Path projectDir = scaffold("scaffold#run scaffold#wrapper", "help", false);
-        scaffold("scaffold#run scaffold#wrapper", "help", true);
+        Path projectDir = scaffold("scaffold#run", "help", false);
+        scaffold("scaffold#run", "help", true);
         projectDir = scaffold("scaffold#run project#", "project#clean project#pack", false);
-        runJeka(projectDir.toString(), "eclipse#files");
-        runJeka(projectDir.toString(), "intellij#iml");
+        runDistribJeka(projectDir.toString(), "eclipse#files");
+        runDistribJeka(projectDir.toString(), "intellij#iml");
         JkUtilsAssert.state(Files.exists(projectDir.resolve("src/main/java")),
                 "No source tree has been created when scaffolding Java.");
     }
 
     private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-        runJeka(path.toString(), scaffoldCmdLine);
+        runDistribJeka(path.toString(), scaffoldCmdLine);
         runJeka(checkWithWrapper, path.toString(), checkCommandLine);
         return path;
     }

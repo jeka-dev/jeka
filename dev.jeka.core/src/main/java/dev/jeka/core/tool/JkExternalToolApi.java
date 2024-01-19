@@ -39,31 +39,23 @@ public final class JkExternalToolApi {
      * Returns <code>true</code> if the specified path is the root directory of a Jeka project.
      */
     public static boolean isJekaProject(Path candidate) {
-        Path jekaDir = candidate.resolve(JkConstants.JEKA_DIR);
-        if (!Files.isDirectory(jekaDir)) {
-            return false;
-        }
-        Path defDir = candidate.resolve(JkConstants.DEF_DIR);
-        if (Files.isDirectory(defDir)) {
+        Path jekaSrc = candidate.resolve(JkConstants.JEKA_SRC_DIR);
+        if (Files.isDirectory(jekaSrc)) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROPERTIES_FILE))) {
+        if (Files.isRegularFile(candidate.resolve(JkConstants.PROPERTIES_FILE))) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))) {
+        if (Files.isRegularFile(candidate.resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))) {
             return true;
         }
-        if (Files.isDirectory(jekaDir.resolve(JkProject.PROJECT_LIBS_DIR))) {
+        if (Files.isDirectory(candidate.resolve(JkProject.PROJECT_LIBS_DIR))) {
             return true;
         }
-        Path wrapperDir = jekaDir.resolve("wrapper");
-        if (Files.isDirectory(wrapperDir)) {
+        if (Files.isRegularFile(candidate.resolve("jeka"))) {
             return true;
         }
-        if (Files.isRegularFile(candidate.resolve("jekaw"))) {
-            return true;
-        }
-        return Files.isRegularFile(candidate.resolve("jekaw.bat"));
+        return Files.isRegularFile(candidate.resolve("jeka.bat"));
     }
 
     public static Path getImlFile(Path moduleDir) {

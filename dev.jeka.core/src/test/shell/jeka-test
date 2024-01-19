@@ -2,7 +2,7 @@
 
 DRY_RUN=true
 export DRY_RUN
-source ../../main/shell/jeka2
+source ../../main/shell/jeka
 set -e
 
 SAMPLE_DIR=./sample-dir
@@ -11,7 +11,7 @@ SUB_DIR=$SAMPLE_DIR/sub-dir
 # Test read value present in sub-dir
 prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "overriden.prop")
 echo "overriden.prop=$prop_value"
-[ "$prop_value" -ne 1 ] && echo "Failure: Variable 'overriden.prop' does not equal 1" && exit 1
+[ "$prop_value" != "1" ] && echo "Failure: Variable 'overriden.prop' does not equal 1" && exit 1
 
 # Test read value present in sample-dir
 prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "foo")

@@ -82,7 +82,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private boolean hasJekaDefDir() {
-        return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.DEF_DIR));
+        return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.JEKA_SRC_DIR));
     }
 
     // -------------------------- setters ----------------------------
@@ -203,7 +203,7 @@ public final class JkEclipseClasspathGenerator {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
-                    "path", JkConstants.DEF_DIR);
+                    "path", JkConstants.JEKA_SRC_DIR);
         }
         generateSrcAndTestSrc(writer);
 

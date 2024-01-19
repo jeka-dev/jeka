@@ -54,7 +54,7 @@ class EngineCompilationUpdateTracker {
     }
 
     private long lastModifiedAccordingFileAttributes() {
-        Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
+        Path def = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
         Stream<Path> stream = JkPathTree.of(def).stream();
         return stream
                 .filter(path -> !Files.isDirectory(path))
@@ -67,7 +67,7 @@ class EngineCompilationUpdateTracker {
 
 
     private String hashString() {
-        String md5 = JkPathTree.of(projectBaseDir.resolve(JkConstants.DEF_DIR)).checksum("md5");
+        String md5 = JkPathTree.of(projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR)).checksum("md5");
         return md5 + ":" + JkJavaVersion.ofCurrent();
     }
 
@@ -77,8 +77,8 @@ class EngineCompilationUpdateTracker {
 
 
     boolean isMissingBinaryFiles() {
-        Path work = projectBaseDir.resolve(JkConstants.DEF_BIN_DIR);
-        Path def = projectBaseDir.resolve(JkConstants.DEF_DIR);
+        Path work = projectBaseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
+        Path def = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
         return JkPathTree.of(work).count(Integer.MAX_VALUE, false) <
                 JkPathTree.of(def).count(Integer.MAX_VALUE, false);
     }

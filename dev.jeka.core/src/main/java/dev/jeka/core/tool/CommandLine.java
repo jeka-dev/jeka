@@ -31,7 +31,7 @@ final class CommandLine {
 
     private final List<JkBeanAction> beanActions = new LinkedList<>();
 
-    private final List<JkDependency> defDependencies = new LinkedList<>();
+    private final List<JkDependency> jekaSrcDependencies = new LinkedList<>();
 
     private String[] rawArgs;
 
@@ -49,7 +49,7 @@ final class CommandLine {
                 KeyValue keyValue = KeyValue.of(word.substring(1), true);
                 result.standardOptions.put(keyValue.key, keyValue.value);
             } else if (word.startsWith(AT_SYMBOL_CHAR)) {
-                result.defDependencies.add(toDependency(Paths.get(""), word.substring(1)));
+                result.jekaSrcDependencies.add(toDependency(Paths.get(""), word.substring(1)));
             } else {
                 result.beanActions.add(new JkBeanAction(word));
             }
@@ -75,8 +75,8 @@ final class CommandLine {
                 .anyMatch(item -> item.action == EngineCommand.Action.METHOD_INVOKE);
     }
 
-    List<JkDependency> getDefDependencies() {
-        return this.defDependencies;
+    List<JkDependency> getJekaSrcDependencies() {
+        return this.jekaSrcDependencies;
     }
 
     String[] rawArgs() {

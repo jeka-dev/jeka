@@ -38,7 +38,7 @@ class SourceParser {
     }
 
     private static boolean isInPrivateFolder(Path file, Path baseDir) {
-        Path jekaDef = baseDir.resolve(JkConstants.DEF_DIR);
+        Path jekaDef = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         if (!file.startsWith(jekaDef)) {  // Make testable in Junit
             return false;
         }

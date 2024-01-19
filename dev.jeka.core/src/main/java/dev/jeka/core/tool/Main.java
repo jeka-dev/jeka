@@ -57,6 +57,7 @@ public final class Main {
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
             System.out.println("---- actual base dir : " + baseDir);
+            System.out.println("---- actual base dir absolute : " + baseDir.toAbsolutePath().normalize());
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");

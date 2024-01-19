@@ -209,7 +209,7 @@ public final class JkImlGenerator {
         defClasspath.and(defImportedProjects).getEntries().stream()
                 .filter(path -> !importedClasspath.getEntries().contains(path))
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
-                .filter(path -> !path.equals(Paths.get(JkConstants.DEF_BIN_DIR)))
+                .filter(path -> !path.equals(Paths.get(JkConstants.JEKA_SRC_CLASSES_DIR)))
                 .forEach(path -> orderEntries.add(path, JkIml.Scope.TEST));
         return new LinkedList<>(orderEntries.orderEntries);
     }
@@ -245,7 +245,7 @@ public final class JkImlGenerator {
 
         // first, look if it is inside an imported project
         for (Path importedProject : this.defImportedProjects) {
-            if (importedProject.resolve(JkConstants.DEF_BIN_DIR).equals(dir)) {
+            if (importedProject.resolve(JkConstants.JEKA_SRC_CLASSES_DIR).equals(dir)) {
                 return JkIml.ModuleOrderEntry.of()
                         .setModuleName(moduleName(dir))
                         .setExported(true)
