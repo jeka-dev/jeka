@@ -322,13 +322,13 @@ final class Engine {
 
         // If true, we assume Jeka is provided in IDE classpath (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.getJekaJarPath());
-        JkPathSequence result = JkPathSequence.of(bootLibs());
+        JkPathSequence result = JkPathSequence.of(bootLibs()).normalized();
         if (devMode) {
             result = result.and(JkClasspath.ofCurrentRuntime());
         } else {
             result = result.and(JkLocator.getJekaJarPath());
         }
-        JkLog.trace("Use Jeka " + result + " for compilation.");
+        JkLog.trace("Use Jeka " + result.normalized() + " for compilation.");
         return result.withoutDuplicates();
     }
 

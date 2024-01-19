@@ -104,7 +104,7 @@ public final class JkInit {
         if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
             sb.append("\nJeka Home : " + bootDir().normalize() + " ( embedded !!! )");
         } else {
-            sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir());
+            sb.append("\nJeka Home : " + JkLocator.getJekaHomeDir().normalize());
         }
         sb.append("\nJeka User Home : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJeka Cache Dir : " + JkLocator.getCacheDir().toAbsolutePath().normalize());

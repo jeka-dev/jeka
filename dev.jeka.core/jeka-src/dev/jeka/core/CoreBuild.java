@@ -107,7 +107,7 @@ public class CoreBuild extends KBean {
             .importDir(getBaseDir().resolve("src/main/shell"))
             .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.MAIN_JAR_ARTIFACT_ID))
             .importFiles(project.artifactLocator.getArtifactPath(WRAPPER_ARTIFACT_ID))
-            .importFiles(project.artifactLocator.getArtifactPath(SOURCES_ARTIFACT_ID));
+            .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID));
 
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("jeka-legacy")).setPosixExecPermissions();

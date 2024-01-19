@@ -7,6 +7,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * This class has to be run using dev.jeka.master as working dir.
@@ -15,7 +16,7 @@ import java.nio.file.Path;
 class SamplesTester extends JekaCommandLineExecutor {
 
     SamplesTester(JkProperties properties) {
-        super("..", properties);
+        super(Paths.get(".."), properties);
     }
 
     void run() {

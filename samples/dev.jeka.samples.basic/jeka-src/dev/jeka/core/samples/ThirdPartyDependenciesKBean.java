@@ -1,6 +1,7 @@
 package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
+import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -29,13 +30,13 @@ public class ThirdPartyDependenciesKBean extends KBean {
     protected void init() {
         projectKBean.project.flatFacade()
             .customizeCompileDeps(deps -> deps
-                .and(JAVAX_SERVLET_API.toCoordinate("3.1.0"))
-                .and(GUAVA.toCoordinate("30.0-jre")))
+                .and(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("3.1.0"))
+                .and(JkPopularLibs.GUAVA.toCoordinate("30.0-jre")))
             .customizeRuntimeDeps(compileDeps -> compileDeps
-                .minus(JAVAX_SERVLET_API))
+                .minus(JkPopularLibs.JAVAX_SERVLET_API))
             .customizeTestDeps(deps -> deps
                 .and(SimpleProjectKBean.JUNIT5)
-                .and(MOCKITO_ALL.toCoordinate("1.10.19")));
+                .and(JkPopularLibs.MOCKITO_ALL.toCoordinate("1.10.19")));
     }
 
     @JkDoc("Performs some load test using http client")

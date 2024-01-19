@@ -296,14 +296,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("project version = " + version);
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-
         if (!JkUtilsString.isBlank(version)) {
             project.setVersion(version);
         }

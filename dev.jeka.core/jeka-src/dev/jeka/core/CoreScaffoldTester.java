@@ -6,6 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * End-to-end tests about scaffolding.
@@ -14,7 +15,7 @@ import java.nio.file.Path;
 class CoreScaffoldTester extends JekaCommandLineExecutor {
 
     CoreScaffoldTester(JkProperties properties) {
-        super("..", properties);
+        super(Paths.get(".."), properties);
     }
 
     void run() {

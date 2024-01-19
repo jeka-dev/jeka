@@ -36,7 +36,7 @@ public final class JkConstants {
     /**
      * Relative path to the project where the def definition sources lie.
      */
-    public static final String DEF_DIR = JEKA_DIR + "/def";
+    public static final String DEF_DIR = "jeka-src";
 
     public static final String CMD_PROP_PREFIX = "jeka.cmd.";
 
