@@ -24,7 +24,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 "-lsu scaffold#run springboot# " +
                 "springboot#scaffoldDefClasspath=" + sprinbootBluginJar +
                 " @" + sprinbootBluginJar,
-                "project#pack -lsu", false);
+                "project#info project#pack -lsu project#version=0.0.1", false);
         String jdk17 = properties.get("jeka.jdk.17");
         if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
             runJeka(dir.toString(), "intellij#iml", jdk17);

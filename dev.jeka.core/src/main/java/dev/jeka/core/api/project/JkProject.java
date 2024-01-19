@@ -118,7 +118,9 @@ public class JkProject implements JkIdeSupportSupplier {
 
     private JkModuleId moduleId;
 
-    private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
+    private JkVersion version;
+
+    private Supplier<JkVersion> versionSupplier = () -> null;
 
     private JkCoordinate.ConflictStrategy duplicateConflictStrategy = JkCoordinate.ConflictStrategy.FAIL;
 
@@ -482,7 +484,11 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Returns the version of the projects. The version is used to :
+     * Returns the version of the projects. It returns version explicitly set
+     * by {@link #setVersion(String)} if one has been set. Otherwise, it uses
+     * the version returned by the version supplier.
+     *
+     * The version is used to :
      * <ul>
      *     <li>Publish artifact to Maven/Ivy repository</li>
      *     <li>Populate Manifest</li>
@@ -492,7 +498,10 @@ public class JkProject implements JkIdeSupportSupplier {
      * </ul>
      */
     public JkVersion getVersion() {
-        return versionSupplier.get();
+        if (version != null && !version.isUnspecified()) {
+            return version;
+        }
+        return Optional.ofNullable(versionSupplier.get()).orElse(JkVersion.UNSPECIFIED);
     }
 
     /**
@@ -505,10 +514,10 @@ public class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Convenient method to set a static version on this project.
+     * Sets the explicit version of this project.
      */
     public JkProject setVersion(String version) {
-        this.versionSupplier = () -> JkVersion.of(version);
+        this.version = JkVersion.of(version);
         return this;
     }
 

@@ -7,11 +7,10 @@ import dev.jeka.plugins.springboot.JkSpringbootProject;
 @JkInjectClasspath("dev.jeka:springboot-plugin")
 class Build extends KBean {
 
-    ProjectKBean projectKBean = load(ProjectKBean.class);
+    JkProject project = load(ProjectKBean.class).project;
 
     @Override
     protected void init() {
-        JkProject project = projectKBean.project;
         JkSpringbootProject.of(project)
                 .configure()
                 .includeParentBom("${springbootVersion}");
@@ -24,8 +23,7 @@ class Build extends KBean {
                 )
                 .addTestDeps(
                         "org.springframework.boot:spring-boot-starter-test"
-                )
-                .setVersionFromGitTag();  // Infer version from Git
+                );
     }
 
 }

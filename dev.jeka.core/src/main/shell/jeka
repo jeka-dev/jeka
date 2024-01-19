@@ -1,228 +1,524 @@
 #!/bin/sh
 
-# returns the value of a property within a property file
-# call `prop file propName'
-prop() {
+set -e
+
+declare LOG_DEBUG
+declare DRY_RUN  # Debugging purpose
+
+declare GLOGAL_ARGS=$@  ## store in global variable to access within function
+
+declare JEKA_VERSION_PROP_NAME="jeka.java.version"
+declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
+
+declare JEKA_USER_HOME
+declare GLOBAL_PROP_FILE
+declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
+declare CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+declare WORKING_DIR=$(pwd)
+
+declare JDK_DOWNLOAD_DISTRIB="temurin"
+declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
+declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
+declare JDK_DOWNLOAD_OS
+declare JDK_DOWNLOAD_ARCH
+
+debug() {
+  if [ -n "$LOG_DEBUG" ]; then
+    echo "$1"
+  fi
+}
+
+download_and_unpack() {
+  local url=$1
+  local dir=$2
+  local file_type=$3  # 'zip' or 'tar.gz'
+  local temp_file=$(mktemp)
+  rm "$temp_file"
+
+  ## download
+  if [ -x "$(command -v curl)" ]; then
+    curl -Lf --fail --show-error -o "$temp_file" "$url"
+  elif [ -x "$(command -v wget)" ]; then
+    wget -q -O "$temp_file" "$url"
+  else
+    echo "Error: curl or wget not found, please make sure one of them is installed" 1>&2
+    exit 1
+  fi
+
+  ## unpack
+  if [ "$file_type" == "tar.gz" ]; then
+      mkdir -p "$dir"
+      gzip -cd "$temp_file" | tar xf - -C "$dir"
+  else
+    unzip -qq -o "$temp_file" -d "$dir"
+  fi
+  rm "$temp_file"
+}
+
+get_jeka_user_home() {
+  if [ -z "$JEKA_USER_HOME" ]; then
+    echo $HOME/.jeka
+  else
+    echo $JEKA_USER_HOME
+  fi
+}
+
+
+# Returns the value of a property within a property file
+# call `prop file prop_name'
+get_prop_value_from_file() {
     if [ ! -f "$1" ]; then
         return
     fi
     grep "^\\s*${2}=" ${1} | cut -d'=' -f2
 }
 
-# call `propJavaVersion currentDir
-propJavaVersion() {
-  local version=$(prop $1/jeka/local.properties jeka.java.version)
-  version=$(echo $version | sed 's/ //g')
-  if [ -z $version ]
-  then
-    if [ -d "${1}/../jeka" ]
-    then
-      echo $(propJavaVersion "${1}/..")
-    else
-      echo ""
-    fi
-    return
-  fi
-  echo $version
+# Translates a property name (as my.prop) to an env var name (as MY_PROP)
+# Call `get_env_var_name "my.prop"`
+get_env_var_name() {
+  echo $(echo "$1" | tr 'a-z.' 'A-Z_')
 }
 
-# call `propJdkVersion currentDir javaVersion`
-propJdkHome() {
-  local envValue=$(printenv "JEKA_JDK_${2}")
-  if [ ! -z $envValue ]; then
+# Returns the value of a property from a base dir. If value is not found then
+# it search recursively in the parent base dir until the parent does not contain a 'jeka' folder.
+# call `get_prop_value_from_base_dir base_dir prop_name`
+get_prop_value_from_base_dir() {
+  local base_dir=$1
+  local prop_name=$2
+
+  # TODO first look in cmd line arg as "-Dmy.prop=my_value"
+  # Look first in env variables
+  local envValue=$(printenv "$prop_name")
+  if [ "$envValue" != "" ]; then
     echo $envValue
-    return
+    return 0
   fi
-  envValue=$(printenv "jeka.jdk.${2}")
-  if [ ! -z $envValue ]; then
-    echo $envValue
-    return
-  fi
-  local propName="jeka.jdk.${2}"
-  local path=$(prop $1/jeka/local.properties $propName)
-  path=$(echo $version | sed 's/ //g')
-  if [ -z $path ]
-  then
-    if [ -d "${1}/../jeka" ]
-    then
-      path=$(propJdkHome "${1}/.." ${2})
+
+  local value=$(get_prop_value_from_file "$base_dir/jeka/local.properties" "$prop_name")
+  if [ -z $value ]; then
+    local parent_dir="$base_dir/.."
+    local parent_jeka_dir="$parent_dir/jeka"
+    if [ -d "$parent_jeka_dir" ]; then
+      echo $(get_prop_value_from_base_dir "$parent_dir" "$prop_name")
     else
-      local jekaUserHome=$JEKA_USER_HOME
-      if [ -z $jekaUserHome ]; then
-        jekaUserHome=~/.jeka
-      fi
-      propFile=$jekaUserHome/global.properties
-      path=$(prop $propFile $propName)
+      echo $(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
     fi
+    return
   fi
+  echo $value
+}
+
+# call `propJavaVersion base_dir`
+get_java_version_from_props() {
+  local base_dir="$1"
+  local version=$(get_prop_value_from_base_dir "$base_dir" "$JEKA_VERSION_PROP_NAME")
+  local trimmed_version=$(echo "$version" | sed 's/ //g')  # remove spaces
+  echo $trimmed_version
+}
+
+# call `get_jdk_home_for_version base_dir JAVA_VERSION`
+get_jdk_home_for_version() {
+  local base_dir=$1
+  local jdk_version=$2
+  local prop_name="jeka.jdk.$jdk_version"
+
+
+  # Look first in env variables
+  local envValue=$(printenv "$prop_name")
+  if [ "$envValue" != "" ]; then
+    echo $envValue
+    return 0
+  fi
+
+  # -- look for 'envVarified' name
+  local env_var_name=$(get_env_var_name "$prop_name")
+  #envValue=$(printenv "env_var_name")
+  #if [ "$envValue" != "" ]; then
+  #  echo $envValue
+  #  return 0
+  #fi
+
+  # Look in property files
+  local path=$(get_prop_value_from_base_dir "$base_dir" "$prop_name")
   echo $path
 }
 
-# return the argument following '-r' argument
-# it return nothing if '-r' not found
+get_cache_dir() {
+  if [ -z "$JEKA_CACHE_DIR" ]; then
+      echo $JEKA_USER_HOME/cache
+    else
+      echo $JEKA_CACHE_DIR
+    fi
+}
+
+get_git_cache_dir() {
+  echo $(get_cache_dir)/git
+}
+
+## To be called as substring=$(substring_before_hash 'Hello#World')
+substring_before_hash() {
+    # Extract the substring before '#' using cut
+    result=$(echo "$1" | cut -d'#' -f1)
+
+    # Echo the resulting substring
+    echo "$result"
+}
+
+substring_after_hash() {
+    # Extract the substring after '#' using parameter expansion
+    result=${1#*#}
+
+    # If the input string did not have a '#', return empty. Otherwise, return the result
+    if [ "$result" == "$1" ]; then
+        echo ""
+    else
+        echo $result
+    fi
+}
+
+# Return the argument following '-r' arguments. Returns nothing if '-r' not found.
+# It takes an array as argument. If no arguments is passed, it use script exec args.
 get_remote_argument() {
-  local found_r=0
   for arg in "$@"; do
-    if [ "$found_r" -eq 1 ]; then
-      echo "$arg"
-      break
+    if [ "$previous" == "-r" ]; then
+      echo $arg
+      return
     fi
-    if [ "$arg" = "r" ]; then
-      found_r=1
-    fi
+    previous=$arg
   done
 }
 
-if [ -z "$Jeka_OPTS" ] ; then
-  export "JEKA_OPTS= "
-fi
-
-if [ -n "$JEKA_JDK" ] ; then
-  export JAVA_HOME=$JEKA_JDK
-  else
-    workingDir=$(pwd)
-    javaVersion=$(propJavaVersion $workingDir)
-    if [ ! -z $javaVersion ]; then
-      jdkPath=$(propJdkHome $workingDir $javaVersion)
-      if [ ! -z $jdkPath ]; then
-        export JAVA_HOME=$jdkPath
-      fi
+is_git_url() {
+    if [[ $1 =~ ^(https://|ssh://|git://|git@).* ]]; then
+        echo "true"
+    else
+        echo "false"
     fi
-fi
+}
+
+giturl_to_foldername() {
+    local url=$1
+    local trimmed_url=$(echo $url | sed 's/https:\/\///')
+    trimmed_url=$(echo $trimmed_url | sed 's/ssh:\/\///')
+    trimmed_url=$(echo $trimmed_url | sed 's/git:\/\///')
+    trimmed_url=$(echo $trimmed_url | sed  's/git@//')
+    # Extract the repository name from the Git URL using sed and awk
+    local foldername=$(echo "$trimmed_url" | sed 's/\//_/g')
+    echo $foldername
+}
+
+assert_dir_exits() {
+  if [ ! -d "$1" ]; then
+    echo "Directory $1 does not exist"
+    exit 1
+  fi
+}
+
+
+compute_base_dir_from_resolved_remote_arg() {
+
+  local remote_path="$1"  # file-system path or git url
+  local should_clean="$2"
+  is_git_remote=$(is_git_url "$remote_path")
+
+  # the remote reference a file-system path
+  if [ "false" == "$is_git_remote" ]; then
+
+    if [[ "$remote_path" == /* ]]; then    # absolute path
+      result="$remote_path"
+      assert_dir_exits "$result"
+    else  # relative path
+      result=$(pwd)/"$remote_arg"
+      assert_dir_exits "$result"
+      result=$(cd "$result" && pwd)  # normalize pass
+    fi
+    BASE_DIR="$result"
+    return 0
+  fi
+
+  ## Remote reference a git repo
+  local git_url=$(substring_before_hash "$remote_path")
+  local git_tag=$(substring_after_hash "$remote_path")
+  local branch_args=""
+  if [ "$git_tag" != "" ]; then
+    branch_args="--branch $git_tag"
+  fi
+  local cache_dir_name=$(giturl_to_foldername "$remote_path")
+  result=$(get_git_cache_dir)/"$cache_dir_name"
+  if [ -n "$should_clean" ]; then
+    rm -rf "$result"
+  fi
+  if [ ! -d "$result" ]; then
+      echo "Cloning $git_url into $result  ..."
+      git clone -c advice.detachedHead=false --depth 1 $branch_args $git_url $result
+  else
+      debug "Cache directory $result already exists. Won't clone or update."
+  fi
+  BASE_DIR=$result
+}
+
+# resolve alias in global.properties
+# Call 'resolve_alias cmdLineArg'.
+# Returns in 'resolved_alias' var
+resolve_alias() {
+  local arg=$1
+  resolved_alias=""
+  if [[ ${arg:0:1} == "@" ]]; then  # argument start with '@'
+    if [ ! -f "$GLOBAL_PROP_FILE" ]; then
+      echo "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
+      exit 1
+    fi
+    local alias_name=${arg:1}
+    local prop_name="jeka.remote.alias.$alias_name"
+    local resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
+    if [ -z "$resolved" ]; then
+      echo "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg"
+      echo "Defined Aliases :"
+      echo "=============================="
+      cat "$GLOBAL_PROP_FILE" | grep '^jeka.remote.alias.'
+      echo "=============================="
+      exit 1
+    else
+      resolved_alias="$resolved"
+    fi
+  else
+    resolved_alias="$arg"
+  fi
+}
+
+## return value in global var : BASE_DIR
+## call `compute_BASE_DIR $1 $2`
+compute_BASE_DIR() {
+  local result
+  local delete_git_cache_flag
+  local arg="$1"
+  if [ "$1" == "-r" ]; then
+    local remote_arg=$2
+    resolve_alias "$remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$resolved_alias"
+  elif [ "$1" == "-rc" ]; then
+    local remote_arg=$2
+    resolve_alias "$remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$resolved_alias" "clean"
+  elif [ "${arg:0:1}" == "@" ]; then   # if first arg is an alias.
+    resolve_alias "$1"
+    compute_base_dir_from_resolved_remote_arg "$resolved_alias"
+  else
+    BASE_DIR=$(pwd)
+  fi
+}
+
+# result is written in JEKA_DIST_DIR
+compute_jeka_distrib_dir() {
+  local base_dir=$1
+  local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
+  if [ ! -z "$explicit_distrib_dir" ]; then
+    JEKA_DIST_DIR="$explicit_distrib_dir"
+    return 0
+  fi
+  local jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
+  if [ -z "$jeka_version" ]; then
+    JEKA_DIST_DIR=""
+    return 0
+  fi
+  local distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
+
+  if [ -d "$distrib_cache_dir" ]; then
+    JEKA_DIST_DIR="$distrib_cache_dir"
+  else
+    # select download repo
+    local jeka_repo="https://repo.maven.apache.org/maven2"
+    local download_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
+    [ ! -z "$download_repo" ] && jeka_repo=$download_repo
+    local distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
+        [ ! -z "$distrib_repo" ] && jeka_repo=$distrib_repo
+
+    local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
+    echo "Download Jeka distrib from $url in $distrib_cache_dir"
+    download_and_unpack "$url" "$distrib_cache_dir"
+    JEKA_DIST_DIR=$distrib_cache_dir
+  fi
+}
+
+## Execute Jeka. Call `exec_jeka $base_dir`.
+## Returns value in JEKA_CLASSPATH
+compute_JEKA_CLASSPATH() {
+  local dist_dir=$1
+
+  # If no distrib dir is specified (no jeka.version specified), we look first
+  # for jeka-core.jar presence in the same dir of the current script
+  if [ -z "$dist_dir" ]; then  ## No jeka.version is specified, should find the local one
+    if [ -f "$CURRENT_SCRIPT_DIR/$JEKA_JAR_NAME" ]; then
+      dist_dir="$CURRENT_SCRIPT_DIR"
+    fi
+    if [ -z "$dist_dir" ]; then
+      echo "No JeKa distribution found from script $current_script_path."
+      echo "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in local.properties file."
+      exit 1
+    fi
+  fi
+
+  local boot_dir_args
+
+  ## Reference to remote found
+  if [ "$REMOTE_BASE_DIR" != "" ]; then
+    if [ -d $REMOTE_BASE_DIR"/jeka/boot" ]; then
+         boot_dir_args=$REMOTE_BASE_DIR"/jeka/boot/*:"
+    fi
+
+  ## No remote script, launch on current dir
+  else
+    if [ -d "./jeka/boot" ]; then
+       boot_dir_args="./jeka/boot/*:"
+    fi
+  fi
+  local jar_file="$dist_dir/$JEKA_JAR_NAME"
+  if [ ! -f "$jar_file" ]; then
+    echo "Cannot find JeKa jar file $jar_file."
+    echo "Are you sure the JeKa distribution you use is properly packaged ?"
+    exit 1
+  fi
+  JEKA_CLASSPATH="$boot_dir_args$jar_file"
+}
+
+# call `get_or_download_jdk $JAVA_VERSION`. The result is set to DOWNLOAD_JDK_DIR var.
+get_or_download_jdk() {
+  local JAVA_VERSION="$1"
+  local specified_distrib=$(get_prop_value_from_base_dir "$BASE_DIR" "jeka.java.distrib")
+  if [ -n "$specified_distrib" ]; then
+    JDK_DOWNLOAD_DISTRIB="$specified_distrib"
+  fi
+  local jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$JAVA_VERSION"
+  if [ ! -d "$jdk_cache_dir" ]; then
+    if [ -z "$JDK_DOWNLOAD_OS" ]; then
+      echo "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
+      echo "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or a property in ~/jeka/global.properties file." 1>&2
+      exit 1
+    fi
+    if [ -z "$JDK_DOWNLOAD_ARCH" ]; then
+      echo "Unable to download JDK, unsupported Architecture: $(uname -m)" 1>&2
+      echo "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
+      exit 1
+    fi
+    local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
+    echo "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
+    download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
+    if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
+      pushd "$jdk_cache_dir"
+      local nested_dir=$(find "." -mindepth 1 -maxdepth 1 -type d | head -n 1 | cut -c 3-)
+      popd
+      temp_dir=$(mktemp -d)
+      mv "$jdk_cache_dir"/"$nested_dir"/* "$temp_dir"
+      mv "$temp_dir"/* "$jdk_cache_dir"
+    fi
+  fi
+  DOWNLOAD_JDK_DIR=$jdk_cache_dir
+}
+
+## --------------------------------------- script start here ---------------------------------------------
+
+JEKA_USER_HOME=$(get_jeka_user_home)
+GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
+
+compute_BASE_DIR "$1" "$2"
 
 # OS specific support.  $var _must_ be set to either true or false.
-cygwin=false;
-darwin=false;
-mingw=false
-case "`uname`" in
-  CYGWIN*) cygwin=true ;;
-  MINGW*) mingw=true;;
-  Darwin*) darwin=true
-           #
-           # Look for the Apple JDKs first to preserve the existing behaviour, and then look
-           # for the new JDKs provided by Oracle.
-           #
-           if [ -z "$JAVA_HOME" ] && [ -L /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK ] ; then
-             #
-             # Apple JDKs
-             #
-             export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home
-           fi
+case "$(uname -s)" in
+  Linux*)
+    JDK_DOWNLOAD_OS="linux"
+    if [ -f /etc/alpine-release ]; then
+      JDK_DOWNLOAD_OS=alpine-linux
+    fi
+    ;;
+  Darwin*)
+    JDK_DOWNLOAD_OS="mac"
+    JDK_DOWNLOAD_LIBC_TYPE="libc"; # necessary to download proper JDK
 
-           if [ -z "$JAVA_HOME" ] && [ -L /System/Library/Java/JavaVirtualMachines/CurrentJDK ] ; then
-             #
-             # Apple JDKs
-             #
-             export JAVA_HOME=/System/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
-           fi
-
-           if [ -z "$JAVA_HOME" ] && [ -L "/Library/Java/JavaVirtualMachines/CurrentJDK" ] ; then
-             #
-             # Oracle JDKs
-             #
-             export JAVA_HOME=/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
-           fi
-
-           if [ -z "$JAVA_HOME" ] && [ -L "/usr/libexec/java_home" ]; then
-             #
-             # Apple JDKs
-             #
-             export JAVA_HOME=`/usr/libexec/java_home`
-           fi
-           ;;
+    # Look for the Apple JDKs first to preserve the existing behaviour, and then look
+    # for the new JDKs provided by Oracle.
+    if [ -z "$JAVA_HOME" ] && [ -L /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK ] ; then
+      JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home
+    fi
+    if [ -z "$JAVA_HOME" ] && [ -L /System/Library/Java/JavaVirtualMachines/CurrentJDK ] ; then
+      JAVA_HOME=/System/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
+    fi
+    if [ -z "$JAVA_HOME" ] && [ -L "/Library/Java/JavaVirtualMachines/CurrentJDK" ] ; then
+      JAVA_HOME=/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
+    fi
+    if [ -z "$JAVA_HOME" ] && [ -L "/usr/libexec/java_home" ]; then
+       JAVA_HOME=`/usr/libexec/java_home`
+    fi
+    ;;
 esac
 
-if [ -z "$JAVA_HOME" ] ; then
-  if [ -r /etc/gentoo-release ] ; then
-    JAVA_HOME=`java-config --jre-home`
+case "$(uname -m)" in
+  i?86)
+    JDK_DOWNLOAD_ARCH="x32";;
+  x86_64|amd64)
+    JDK_DOWNLOAD_ARCH="x64";;
+  aarch64)
+    JDK_DOWNLOAD_ARCH="aarch64";;
+  armv7l)
+    JDK_DOWNLOAD_ARCH="arm";;
+  ppc64le)
+    JDK_DOWNLOAD_ARCH="ppc64le";;
+  s390x)
+    JDK_DOWNLOAD_ARCH="s390x";;
+  arm64)
+    JDK_DOWNLOAD_ARCH="arm64"
+    ;;
+  *)
+    ## AIX gives a machine ID for `uname -m` but it only supports ppc64
+    if [ "$os" = "aix" ]; then
+      JDK_DOWNLOAD_ARCH="ppc64"
+    else
+      JDK_DOWNLOAD_ARCH=""
+    fi
+    ;;
+esac
+
+# Determines JAVA_HOME
+JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR")
+
+if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
+  JAVA_HOME="$JEKA_JDK_HOME"
+
+elif [ -n "$JAVA_VERSION" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
+  jdkPath=$(get_jdk_home_for_version "$BASE_DIR" "$JAVA_VERSION")
+  debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
+  if [ -z "$jdkPath" ]; then
+    get_or_download_jdk "$JAVA_VERSION"
+    if [ "$JDK_DOWNLOAD_OS" == "mac" ]; then
+      jdk_entry_sub_dir="/Contents/Home"
+    fi
+    JAVA_HOME="$DOWNLOAD_JDK_DIR$jdk_entry_sub_dir"
   fi
 fi
 
-if [ -z "$JEKA_HOME" ] ; then
-  ## resolve links - $0 may be a link to jeka's home
-  PRG="$0"
-
-  # need this for relative symlinks
-  while [ -h "$PRG" ] ; do
-    ls=`ls -ld "$PRG"`
-    link=`expr "$ls" : '.*-> \(.*\)$'`
-    if expr "$link" : '/.*' > /dev/null; then
-      PRG="$link"
-    else
-      PRG="`dirname "$PRG"`/$link"
-    fi
-  done
-
-  saveddir=`pwd`
-
-  JEKA_HOME=`dirname "$PRG"`
-
-  # make it fully qualified
-  JEKA_HOME=`cd "$JEKA_HOME" && pwd`
-
-  cd "$saveddir"
-fi
-
-# For Cygwin, ensure paths are in UNIX format before anything is touched
-if $cygwin ; then
-  [ -n "$JEKA_HOME" ] &&
-    JEKA_HOME=`cygpath --unix "$JEKA_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$CLASSPATH" ] &&
-    CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
-fi
-
-# For Migwn, ensure paths are in UNIX format before anything is touched
-if $mingw ; then
-  [ -n "$JEKA_HOME" ] &&
-    JEKA_HOME="`(cd "$JEKA_HOME"; pwd)`"
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-fi
-
-if [ -z "$JAVACMD" ] ; then
+# Determines JAVA_CMD to use according JAVA_HOME
+if [ -z "$JAVA_CMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
       # IBM's JDK on AIX uses strange locations for the executables
-      JAVACMD="$JAVA_HOME/jre/sh/java"
+      JAVA_CMD="$JAVA_HOME/jre/sh/java"
     else
-      JAVACMD="$JAVA_HOME/bin/java"
+      JAVA_CMD="$JAVA_HOME/bin/java"
     fi
   else
-    JAVACMD="`which java`"
+    JAVA_CMD="`which java`"
   fi
 fi
 
-if [ ! -x "$JAVACMD" ] ; then
+if [ ! -x "$JAVA_CMD" ] ; then
   echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )." >&2
-  echo "  We cannot execute $JAVACMD" >&2
+  echo "  We cannot execute $JAVA_CMD" >&2
   echo "  You can specify which JDK to use by setting JEKA_JDK environment variable." >&2
   exit 1
 fi
 
-# For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
-  [ -n "$JEKA_HOME" ] &&
-    JEKA_HOME=`cygpath --path --windows "$JEKA_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
-  [ -n "$CLASSPATH" ] &&
-    CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+## When debugging we don't want to execute Jeka
+if [ -z "$DRY_RUN" ]; then
+  compute_jeka_distrib_dir "$BASE_DIR"
+  compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
+  exec "$JAVA_CMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi
-
-# Provide a "standardized" way to retrieve the CLI args that will
-# work with both Windows and non-Windows executions.
-JEKA_CMD_LINE_ARGS="$@"
-export JEKA_CMD_LINE_ARGS
-
-if [ -d "./jeka/boot" ]; then
-   LOCAL_BUILD_DIR="./jeka/boot/*:"
-else
-   LOCAL_BUILD_DIR=""
-fi
-
-# Path of the script that is currently executing
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-
-exec "$JAVACMD" $JEKA_OPTS -cp "$LOCAL_BUILD_DIR$SCRIPTPATH/dev.jeka.jeka-core.jar" dev.jeka.core.tool.Main "$@"

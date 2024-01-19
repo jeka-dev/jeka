@@ -41,7 +41,8 @@ public class SpringbootSampleBuild extends KBean {
                 .addTestDeps(
                         "org.springframework.boot:spring-boot-starter-test"
                 )
-                .setModuleId("dev.jeka:samples-springboot");
+                .setModuleId("dev.jeka:samples-springboot")
+                .setVersion("0.0.1");
         JkSpringbootProject.of(projectKBean.project)
                 .configure()
                 .includeParentBom("3.2.0");

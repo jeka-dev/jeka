@@ -34,6 +34,9 @@ import java.util.List;
 @JkDoc("Provides a configured JkProject instance for building JVM based projects.")
 public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
+    @JkDoc("Version of the project. Can be used by a CI/CD tool to inject version.")
+    public String version;
+
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
@@ -292,6 +295,17 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (!JkLog.isAcceptAnimation()) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
+        }
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("project version = " + version);
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+
+        if (!JkUtilsString.isBlank(version)) {
+            project.setVersion(version);
         }
         project.dependencyResolver.setFileSystemCacheDir(getBaseDir().resolve(JkConstants.WORK_PATH)
                 .resolve("project-dep-resolution-cache"));

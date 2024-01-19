@@ -114,7 +114,7 @@ public final class JkScaffold {
                 "to generate shell scripts");
         JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
         Path jekawPath = baseDir.resolve("jekaw");
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("wrapper/jekaw"), jekawPath,
+        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), jekawPath,
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         JkPathFile.of(jekawPath).setPosixExecPermissions(true, true, true);
 
