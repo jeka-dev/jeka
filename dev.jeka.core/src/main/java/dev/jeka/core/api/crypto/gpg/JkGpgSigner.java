@@ -72,7 +72,7 @@ public final class JkGpgSigner implements JkSigner {
      * @return a {@link JkGpgSigner} instance for the standard project
      */
     public static JkGpgSigner ofStandardProject(Path baseDir) {
-        Path localSec = baseDir.resolve(JkConstants.JEKA_DIR).resolve("gpg/secring.gpg");
+        Path localSec = baseDir.resolve("gpg/secring.gpg");
         Path sec = JkUtilsPath.firstExisting(localSec, JkGpgSigner.getDefaultGpgSecretRingPath());
         if (sec == null) {
             sec = JkGpgSigner.getDefaultGpgSecretRingPath();
