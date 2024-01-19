@@ -25,14 +25,14 @@ class IntellijModulesXmlGenerator {
 
     private final Iterable<Path> imlFiles;
 
-    private final Path projectDir;
+    private final Path baseDir;
 
     private final Path outputFile;
 
-    public IntellijModulesXmlGenerator(Path projectDir, Iterable<Path> imlFiles) {
+    public IntellijModulesXmlGenerator(Path baseDir, Iterable<Path> imlFiles) {
         this.imlFiles = imlFiles;
-        this.projectDir = projectDir;
-        this.outputFile = projectDir.resolve(".idea/modules.xml");
+        this.baseDir = baseDir;
+        this.outputFile = baseDir.resolve(".idea/modules.xml");
     }
 
     public void generate() {
@@ -61,7 +61,7 @@ class IntellijModulesXmlGenerator {
         writer.writeStartElement("modules");
         writer.writeCharacters("\n");
         for (final Path iml : imlFiles) {
-            final Path relPath = projectDir.relativize(iml);
+            final Path relPath = baseDir.relativize(iml);
             JkLog.info("Iml file detected : " + relPath);
             final String path = path(relPath);
             writer.writeCharacters(T3);

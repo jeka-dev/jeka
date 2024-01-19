@@ -63,7 +63,7 @@ public final class JkExternalToolApi {
     }
 
     public static Path getImlFile(Path moduleDir, boolean inJekaSubDir) {
-        return JkImlGenerator.getImlFilePath(moduleDir, inJekaSubDir);
+        return JkImlGenerator.getImlFilePath(moduleDir);
     }
 
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {

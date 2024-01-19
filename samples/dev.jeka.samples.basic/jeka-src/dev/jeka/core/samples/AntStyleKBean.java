@@ -107,7 +107,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
     // publish both on Maven and Ivy repo
     public void publish() {
 
-        JkGpgSigner gpg = JkGpgSigner.of(getBaseDir().resolve("jeka/jekadummy-secring.gpg"), "jeka-pwd", "");
+        JkGpgSigner gpg = JkGpgSigner.of(getBaseDir().resolve("jekadummy-secring.gpg"), "jeka-pwd", "");
         JkRepo ivyRepo = JkRepo.of(getOutputDir().resolve("test-output/ivy-repo"));
         JkRepo mavenRepo = JkRepo.of(getOutputDir().resolve("test-output/maven-repo"));
         JkCoordinateDependency versionedModule = JkCoordinateDependency.of("myGroup:myName:0.2.2-SNAPSHOT");

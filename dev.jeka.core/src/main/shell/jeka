@@ -314,29 +314,29 @@ compute_JEKA_DIST_DIR() {
   local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
   if [ ! -z "$explicit_distrib_dir" ]; then
     JEKA_DIST_DIR="$explicit_distrib_dir"
-    return 0
-  fi
-  local jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
-  if [ -z "$jeka_version" ]; then
-    JEKA_DIST_DIR=""
-    return 0
-  fi
-  local distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
 
-  if [ -d "$distrib_cache_dir" ]; then
-    JEKA_DIST_DIR="$distrib_cache_dir"
   else
-    # select download repo
-    local jeka_repo="https://repo.maven.apache.org/maven2"
-    local download_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
-    [ ! -z "$download_repo" ] && jeka_repo=$download_repo
-    local distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
-        [ ! -z "$distrib_repo" ] && jeka_repo=$distrib_repo
+    local jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
+    if [ -z "$jeka_version" ]; then
+      JEKA_DIST_DIR=""
 
-    local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
-    echo "Download Jeka distrib from $url in $distrib_cache_dir"
-    download_and_unpack "$url" "$distrib_cache_dir"
-    JEKA_DIST_DIR=$distrib_cache_dir
+    else
+      local distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
+      if [ -d "$distrib_cache_dir" ]; then
+        JEKA_DIST_DIR="$distrib_cache_dir"
+
+      else
+        # select download repo
+        local jeka_repo="https://repo.maven.apache.org/maven2"
+        local distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
+        [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
+
+        local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
+        echo "Download Jeka distrib from $url in $distrib_cache_dir"
+        download_and_unpack "$url" "$distrib_cache_dir"
+        JEKA_DIST_DIR=$distrib_cache_dir
+      fi
+    fi
   fi
 }
 

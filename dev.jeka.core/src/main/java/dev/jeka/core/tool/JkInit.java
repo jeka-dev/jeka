@@ -33,11 +33,6 @@ public final class JkInit {
     public static <T extends KBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
         Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
-        if (!Files.isDirectory(Paths.get("jeka")) ) {
-            throw new IllegalStateException("The current directory " + Paths.get("").toAbsolutePath()
-                    + " does not seem to be a JeKa project as " +
-                    "it does not contain a 'jeka' folder.");
-        }
         JkLog.setDecorator(Environment.standardOptions.logStyle);
         if (Environment.standardOptions.logRuntimeInformation) {
             displayRuntimeInfo();

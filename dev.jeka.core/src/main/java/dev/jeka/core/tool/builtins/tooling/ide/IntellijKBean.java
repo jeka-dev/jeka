@@ -35,10 +35,6 @@ public final class IntellijKBean extends KBean {
             "(only a warning will be notified).")
     private final boolean failOnDepsResolutionError = true;
 
-    @JkDoc("When true, .iml file will be generated assuming that 'jeka'' folder is the root of a specific module. " +
-            "This is useful for working with tool as Maven or Gradle that manage the intellij dependencies by their own.")
-    private boolean dedicatedJekaModule;
-
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
 
@@ -64,7 +60,6 @@ public final class IntellijKBean extends KBean {
                 .setDefImportedProjects(this.getRunbase().getImportedRunbaseDirs())
                 .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
-                .setDedicatedJekaModule(this.dedicatedJekaModule)
                 .setUseVarPath(useVarPath);
         if (!JkUtilsString.isBlank(jekaModuleName)) {
             useJekaDefinedInModule(jekaModuleName.trim());
@@ -80,8 +75,7 @@ public final class IntellijKBean extends KBean {
     public void iml() {
         Path basePath = getBaseDir();
         JkIml iml = imlGenerator.computeIml();
-        Path imlPath = Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(basePath,
-                dedicatedJekaModule));
+        Path imlPath = Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(basePath));
         JkPathFile.of(imlPath)
                 .deleteIfExist()
                 .createIfNotExist()

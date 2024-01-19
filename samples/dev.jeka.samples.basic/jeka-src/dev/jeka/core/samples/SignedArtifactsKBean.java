@@ -51,7 +51,7 @@ public class SignedArtifactsKBean extends KBean {
     private final String keyName = "jeka-dummy";
 
     // The secret key file is stored in the project but protected with the password below.
-    private final Path secringPath = getBaseDir().resolve("jeka/jekadummy-secring.gpg");
+    private final Path secringPath = getBaseDir().resolve("jekadummy-secring.gpg");
 
     public String secringPassword = "jeka-pwd";  // Normally injected from command line
 

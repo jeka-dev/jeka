@@ -46,9 +46,6 @@ public final class JkImlGenerator {
 
     private boolean failOnDepsResolutionError = true;
 
-    // If true, assumes that jeka dir is the root of the module.
-    private boolean dedicatedJekaModule;
-
     private JkImlGenerator() {
     }
 
@@ -57,24 +54,13 @@ public final class JkImlGenerator {
     }
 
     /**
-     * Returns the .iml file path for a module loacted at the specified root dir.
+     * Returns the .iml file path for a module located at the specified root dir.
      * @param moduleRootDir The path of module root dir
-     * @param dedicatedJekaModule If true, the .iml file will be located inside the 'jeka' subfilder.
-     *                     This is meant for handling case where 'jeka' has its own intellij module
      */
-    public static Path getImlFilePath(Path moduleRootDir, boolean dedicatedJekaModule) {
+    public static Path getImlFilePath(Path moduleRootDir) {
         String fileName = moduleRootDir.getFileName().toString().equals("")
                 ? moduleRootDir.toAbsolutePath().getFileName().toString()
                 : moduleRootDir.getFileName().toString();
-        if (dedicatedJekaModule) {
-            fileName = fileName + "-jeka";
-            moduleRootDir = moduleRootDir.resolve("jeka");
-
-            // if .iml file is generated in .idea folder, it is not convenient to macos user
-            // to import the jeka module as the .iml file will be in a hidde folder
-            return JkImlGenerator.findExistingImlFile(moduleRootDir)
-                    .orElse(moduleRootDir.resolve(fileName + ".iml"));
-        }
         return JkImlGenerator.findExistingImlFile(moduleRootDir)
                 .orElse(moduleRootDir.resolve(".idea").resolve(fileName + ".iml"));
     }
@@ -102,15 +88,6 @@ public final class JkImlGenerator {
     public JkImlGenerator setBaseDir(Path baseDir) {
         this.baseDir = baseDir;
         return this;
-    }
-
-    public JkImlGenerator setDedicatedJekaModule(boolean dedicatedJekaModule) {
-        this.dedicatedJekaModule = dedicatedJekaModule;
-        return this;
-    }
-
-    public boolean isDedicatedJekaModule() {
-        return dedicatedJekaModule;
     }
 
     public JkImlGenerator configureIml(Consumer<JkIml> imlConfigurer) {
@@ -162,7 +139,7 @@ public final class JkImlGenerator {
         }
         iml.component
                 .getContent()
-                    .addJekaStandards(dedicatedJekaModule);
+                    .addJekaStandards();
         if (ideSupport != null) {
             List<Path> sourcePaths = ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles();
             sourcePaths
@@ -358,6 +335,11 @@ public final class JkImlGenerator {
         } else {
             return JkIml.Scope.COMPILE;
         }
+    }
+
+    private static boolean isExistingProject(Path baseDir) {
+        return Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR)) ||
+                Files.exists(baseDir.resolve(JkConstants.PROPERTIES_FILE));
     }
 
 }

@@ -29,7 +29,7 @@ public final class JkScaffold {
 
     private Supplier<String> jkClassCodeProvider;
 
-    private String classFilename = "Build.java";
+    private String classFilename = "App.java";
 
     private JkDependencyResolver dependencyResolver;
 
@@ -94,13 +94,13 @@ public final class JkScaffold {
      */
     public void run() {
 
-        // Create 'def' dir
-        final Path def = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        JkLog.info("Create " + def);
-        JkUtilsPath.createDirectories(def);
+        // Create 'jeka-src' dir
+        final Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        JkLog.info("Create " + jekaSrc);
+        JkUtilsPath.createDirectories(jekaSrc);
 
         // Create build class if needed
-        final Path buildClass = def.resolve(classFilename);
+        final Path buildClass = jekaSrc.resolve(classFilename);
         JkLog.info("Create " + buildClass);
         String code = jkClassCodeProvider.get();
         String effectiveJekaVersion = !JkUtilsString.isBlank(jekaVersion) ? jekaVersion : lastJekaVersion();
@@ -167,4 +167,5 @@ public final class JkScaffold {
                 StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
     }
+
 }
