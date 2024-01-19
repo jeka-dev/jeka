@@ -12,6 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/jeka/.work" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/jeka-output" />
+      <excludeFolder url="file://$MODULE_DIR$/.jeka-work" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -138,33 +139,22 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/boot/commons-compress-1.21.jar!/" />
+          <root url="jar://$MODULE_DIR$/jeka-boot/commonmark-0.11.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/boot/commonmark-0.11.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/jeka-boot/commons-compress-1.21.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/jeka/output/distrib/dev.jeka.jeka-core.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/jeka/output/distrib/dev.jeka.jeka-core-sources.jar!/" />
-        </SOURCES>
       </library>
     </orderEntry>
   </component>

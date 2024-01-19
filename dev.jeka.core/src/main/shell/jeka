@@ -362,14 +362,14 @@ compute_JEKA_CLASSPATH() {
 
   ## Reference to remote found
   if [ "$REMOTE_BASE_DIR" != "" ]; then
-    if [ -d $REMOTE_BASE_DIR"/jeka/boot" ]; then
-         boot_dir_args=$REMOTE_BASE_DIR"/jeka/boot/*:"
+    if [ -d $REMOTE_BASE_DIR"/jeka-boot" ]; then
+         boot_dir_args=$REMOTE_BASE_DIR"/jeka-boot/*:"
     fi
 
   ## No remote script, launch on current dir
   else
-    if [ -d "./jeka/boot" ]; then
-       boot_dir_args="./jeka/boot/*:"
+    if [ -d "./jeka-boot" ]; then
+       boot_dir_args="./jeka-boot/*:"
     fi
   fi
   local jar_file="$dist_dir/$JEKA_JAR_NAME"

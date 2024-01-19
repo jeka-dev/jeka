@@ -24,7 +24,7 @@ public final class JkConstants {
 
     static final String DEF_BIN_DIR_NAME = "def-classes";
 
-    static final String BOOT_DIR = JEKA_DIR + "/boot";
+    static final String BOOT_DIR = "jeka-boot";
 
     /**
      * Relative path to the project where the def classes will be compiled.

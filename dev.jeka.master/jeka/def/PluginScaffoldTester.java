@@ -12,7 +12,7 @@ import java.nio.file.Paths;
  */
 class PluginScaffoldTester extends JekaCommandLineExecutor {
 
-    private final String sprinbootBluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka-output/" +
+    private final String sprinbootPluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka-output/" +
             "dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
 
     PluginScaffoldTester(JkProperties properties) {
@@ -22,8 +22,8 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     void run() {
         Path dir = scaffold(
                 "-lsu scaffold#run springboot# " +
-                "springboot#scaffoldDefClasspath=" + sprinbootBluginJar +
-                " @" + sprinbootBluginJar,
+                "springboot#scaffoldDefClasspath=" + sprinbootPluginJar +
+                " @" + sprinbootPluginJar,
                 "project#info project#pack -lsu project#version=0.0.1", false);
         String jdk17 = properties.get("jeka.jdk.17");
         if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions

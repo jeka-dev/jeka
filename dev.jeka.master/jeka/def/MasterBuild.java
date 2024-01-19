@@ -11,7 +11,6 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
@@ -22,7 +21,6 @@ import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 
 @JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
 @JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
