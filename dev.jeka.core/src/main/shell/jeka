@@ -1,26 +1,37 @@
 #!/bin/sh
 
+# Script for launching JeKa
+# Authors: Jerome Angibaud, Patrick Santana
+
 set -e
 
-declare LOG_DEBUG
-declare DRY_RUN  # Debugging purpose
+#####################
+# Global vars
+#####################
 
-declare GLOGAL_ARGS=$@  ## store in global variable to access within function
+LOG_DEBUG=""
+DRY_RUN=""  # Debugging purpose
 
-declare JEKA_VERSION_PROP_NAME="jeka.java.version"
-declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
+GLOGAL_ARGS=$@  ## store in global variable to access within function
 
-declare JEKA_USER_HOME
-declare GLOBAL_PROP_FILE
-declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
-declare CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
-declare WORKING_DIR=$(pwd)
+JEKA_VERSION_PROP_NAME="jeka.java.version"
+JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
 
-declare JDK_DOWNLOAD_DISTRIB="temurin"
-declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
-declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
-declare JDK_DOWNLOAD_OS
-declare JDK_DOWNLOAD_ARCH
+JEKA_USER_HOME=""
+GLOBAL_PROP_FILE=""
+BASE_DIR=""  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
+CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+WORKING_DIR=$(pwd)
+
+JDK_DOWNLOAD_DISTRIB="temurin"
+JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
+JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
+JDK_DOWNLOAD_OS=""
+JDK_DOWNLOAD_ARCH=""
+
+###########################
+# Functions
+###########################
 
 debug() {
   if [ -n "$LOG_DEBUG" ]; then
@@ -415,7 +426,9 @@ get_or_download_jdk() {
   DOWNLOAD_JDK_DIR=$jdk_cache_dir
 }
 
-## --------------------------------------- script start here ---------------------------------------------
+##############################################################
+# Script starts here
+##############################################################
 
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
