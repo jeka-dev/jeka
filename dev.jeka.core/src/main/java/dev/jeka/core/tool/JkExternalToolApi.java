@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 
@@ -49,10 +50,10 @@ public final class JkExternalToolApi {
         if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROPERTIES_FILE))) {
             return true;
         }
-        if (Files.isRegularFile(jekaDir.resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))) {
+        if (Files.isRegularFile(jekaDir.resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))) {
             return true;
         }
-        if (Files.isDirectory(jekaDir.resolve(JkConstants.PROJECT_LIBS_DIR))) {
+        if (Files.isDirectory(jekaDir.resolve(JkProject.PROJECT_LIBS_DIR))) {
             return true;
         }
         Path wrapperDir = jekaDir.resolve("wrapper");

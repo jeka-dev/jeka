@@ -3,7 +3,6 @@ package dev.jeka.core.api.project;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
-import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -56,6 +55,8 @@ public class JkProject implements JkIdeSupportSupplier {
      * to indicate that the main class should be discovered automatically..
      */
     public static final String AUTO_FIND_MAIN_CLASS = "auto";
+    public static final String PROJECT_DEPENDENCIES_TXT_FILE = "project-dependencies.txt";
+    public static final String PROJECT_LIBS_DIR = "project-libs";
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -526,10 +527,10 @@ public class JkProject implements JkIdeSupportSupplier {
             return cachedTextAndLocalDeps;
         }
         LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
-                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_LIBS_DIR));
+                baseDir.resolve(PROJECT_LIBS_DIR));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(JkConstants.JEKA_DIR).resolve(JkConstants.PROJECT_DEPENDENCIES_TXT_FILE))
+                baseDir.resolve(PROJECT_DEPENDENCIES_TXT_FILE))
                 : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
