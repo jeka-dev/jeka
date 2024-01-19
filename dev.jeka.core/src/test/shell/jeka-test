@@ -2,8 +2,10 @@
 
 DRY_RUN=true
 export DRY_RUN
+set -x
 source ../../main/shell/jeka
 set -e
+
 
 SAMPLE_DIR=./sample-dir
 SUB_DIR=$SAMPLE_DIR/sub-dir

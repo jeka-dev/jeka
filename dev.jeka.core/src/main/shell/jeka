@@ -200,7 +200,7 @@ get_remote_argument() {
 }
 
 is_git_url() {
-    if [[ $1 =~ ^(https://|ssh://|git://|git@).* ]]; then
+    if expr "$1" : '\(https://\|ssh://\|git://\|git@).*' >/dev/null; then
         echo "true"
     else
         echo "false"
