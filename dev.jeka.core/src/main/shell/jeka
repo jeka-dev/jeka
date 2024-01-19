@@ -303,15 +303,15 @@ compute_BASE_DIR() {
   local result
   local delete_git_cache_flag
   local arg="$1"
-  if [ "$1" == "-r" ]; then
+  if [ "$1" = "-r" ]; then
     local remote_arg=$2
     resolve_alias "$remote_arg"
     compute_base_dir_from_resolved_remote_arg "$resolved_alias"
-  elif [ "$1" == "-rc" ]; then
+  elif [ "$1" = "-rc" ]; then
     local remote_arg=$2
     resolve_alias "$remote_arg"
     compute_base_dir_from_resolved_remote_arg "$resolved_alias" "clean"
-  elif [ "${arg:0:1}" == "@" ]; then   # if first arg is an alias.
+  elif [ "${arg:0:1}" = "@" ]; then   # if first arg is an alias.
     resolve_alias "$1"
     compute_base_dir_from_resolved_remote_arg "$resolved_alias"
   else
@@ -323,7 +323,7 @@ compute_BASE_DIR() {
 compute_JEKA_DIST_DIR() {
   local base_dir=$1
   local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
-  if [ ! -z "$explicit_distrib_dir" ]; then
+  if [ -n "$explicit_distrib_dir" ]; then
     JEKA_DIST_DIR="$explicit_distrib_dir"
 
   else
@@ -363,7 +363,7 @@ compute_JEKA_CLASSPATH() {
       dist_dir="$CURRENT_SCRIPT_DIR"
     fi
     if [ -z "$dist_dir" ]; then
-      echo "No JeKa distribution found from script $current_script_path."
+      echo "No JeKa distribution found from script location $CURRENT_SCRIPT_DIR."
       echo "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in jeka.properties file."
       exit 1
     fi
@@ -501,7 +501,7 @@ elif [ -n "$JAVA_VERSION" ]; then # if a Java version is specified in then use o
   debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
   if [ -z "$jdkPath" ]; then
     get_or_download_jdk "$JAVA_VERSION"
-    if [ "$JDK_DOWNLOAD_OS" == "mac" ]; then
+    if [ "$JDK_DOWNLOAD_OS" = "mac" ]; then
       jdk_entry_sub_dir="/Contents/Home"
     fi
     JAVA_HOME="$DOWNLOAD_JDK_DIR$jdk_entry_sub_dir"
