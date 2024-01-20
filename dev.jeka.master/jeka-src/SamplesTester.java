@@ -26,15 +26,14 @@ class SamplesTester extends JekaCommandLineExecutor {
         run("dev.jeka.samples.basic", "-kb=signedArtifacts #cleanPackPublish");
         run("dev.jeka.samples.basic", "-kb=thirdPartyDependencies #cleanPack");
         run("dev.jeka.samples.basic", "-kb=antStyle #cleanPackPublish");
-        run("dev.jeka.samples.dependers", "-kb=fatJar project#clean project#pack");
-        run("dev.jeka.samples.dependers", "-kb=normalJar project#clean project#pack");
-        run("dev.jeka.samples.junit5", "-lna project#clean project#pack");
+        run("dev.jeka.samples.dependers", "-kb=fatJar project#cleanPack");
+        run("dev.jeka.samples.dependers", "-kb=normalJar project#cleanPack");
+        run("dev.jeka.samples.junit5", "-lna project#cleanPack");
         run("dev.jeka.samples.junit5", "project#clean project#pack #checkReportGenerated " +
-                "project#tests.fork");
-        run("dev.jeka.samples.jacoco", "-lna @../../plugins/dev.jeka.plugins.jacoco project#clean " +
-                "project#pack #checkReportGenerated");
-        run("dev.jeka.samples.sonarqube", "-lna @../../plugins/dev.jeka.plugins.sonarqube " +
-                "project#clean project#pack");
+                "project#tests.fork=true");
+        run("dev.jeka.samples.jacoco", "-lna @../../plugins/dev.jeka.plugins.jacoco project#cleanPack " +
+                "project#pack #checkGeneratedReport");
+        run("dev.jeka.samples.sonarqube", "-lna @../../plugins/dev.jeka.plugins.sonarqube project#cleanPack");
     }
 
     private void run(String sampleDir, String cmdLine) {

@@ -72,7 +72,7 @@ class EngineCompilationUpdateTracker {
     }
 
     private JkPathFile flagFile() {
-        return JkPathFile.of(projectBaseDir.resolve(JkConstants.WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
+        return JkPathFile.of(projectBaseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
     }
 
 

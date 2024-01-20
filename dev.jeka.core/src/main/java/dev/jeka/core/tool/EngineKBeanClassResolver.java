@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
  */
 final class EngineKBeanClassResolver {
 
+    private static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
+
     private static final String JAVA_HOME = JkUtilsPath.toUrl(Paths.get(System.getProperty("java.home"))).toString();
 
     private static final JkInternalClasspathScanner CLASSPATH_SCANNER = JkInternalClasspathScanner.of();
@@ -229,7 +231,7 @@ final class EngineKBeanClassResolver {
     }
 
     List<String> readKbeanClasses() {
-        Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(JkConstants.KBEAN_CLASSES_CACHE_FILE_NAME);
+        Path store = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(KBEAN_CLASSES_CACHE_FILE_NAME);
         if (!Files.exists(store)) {
             return Collections.emptyList();
         }
@@ -306,7 +308,7 @@ final class EngineKBeanClassResolver {
     }
 
     private void storeGlobalKBeanClasses(List<String> classNames) {
-        Path store = baseDir.resolve(JkConstants.WORK_PATH).resolve(JkConstants.KBEAN_CLASSES_CACHE_FILE_NAME);
+        Path store = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(KBEAN_CLASSES_CACHE_FILE_NAME);
         if (!Files.exists(store.getParent())) {
             return;
         }

@@ -200,7 +200,7 @@ final class Engine {
         }
         yetCompiledProjects.put(this.baseDir, JkPathSequence.of());
         if (Environment.standardOptions.workClean()) {
-            Path workDir = baseDir.resolve(JkConstants.WORK_PATH);
+            Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
             JkLog.info("Clean .work directory " + workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
@@ -330,7 +330,7 @@ final class Engine {
 
     private JkPathSequence bootLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
-        final Path bootDir = this.baseDir.resolve(JkConstants.BOOT_DIR);
+        final Path bootDir = this.baseDir.resolve(JkConstants.JEKA_BOOT_DIR);
         if (Files.exists(bootDir)) {
             extraLibs.addAll(JkPathTree.of(bootDir).andMatching(true,"**.jar").getFiles());
         }

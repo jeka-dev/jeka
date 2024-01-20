@@ -171,7 +171,6 @@ public class CoreBuild extends KBean {
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
         Path embeddedJar = project.getOutputDir().resolve("embedded.jar");
         JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
-        Path providedLibs = getBaseDir().resolve(JkConstants.JEKA_DIR).resolve("libs/compile");
         JkPathTreeSet.of(classTree.andMatching("**/embedded/**/*")).zipTo(embeddedJar);
         JkZipTree.of(embeddedJar).andMatching( "META-INF/*.SF", "META-INF/*.RSA").deleteContent().close();
 

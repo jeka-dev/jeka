@@ -72,8 +72,7 @@ public class JkProjectScaffold {
      */
     public JkProjectScaffold generateLocalLibsFolders() {
         scaffold.extraActions.append("Generate folders for local libs", () -> {
-            Path libs = project.getBaseDir().resolve(JkConstants.JEKA_DIR)
-                    .resolve(JkProject.PROJECT_LIBS_DIR);
+            Path libs = project.getBaseDir().resolve(JkProject.PROJECT_LIBS_DIR);
             JkPathFile.of(libs.resolve("readme.txt"))
                     .fetchContentFrom(ProjectKBean.class.getResource("libs-readme.txt"));
             JkUtilsPath.createDirectories(libs.resolve("regular"));
@@ -110,8 +109,7 @@ public class JkProjectScaffold {
                 }
             }
             String content = sb.toString();
-            JkPathFile.of(project.getBaseDir().resolve(JkConstants.JEKA_DIR)
-                            .resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))
+            JkPathFile.of(project.getBaseDir().resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))
                     .createIfNotExist()
                     .write(content);
         });

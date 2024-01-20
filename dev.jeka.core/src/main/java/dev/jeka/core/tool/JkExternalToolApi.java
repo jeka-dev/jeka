@@ -68,7 +68,7 @@ public final class JkExternalToolApi {
 
     public static Map<String, String> getCmdShortcutsProperties(Path projectDir) {
         Map<String, String> result = JkRunbase.readProjectPropertiesRecursively(projectDir)
-                .getAllStartingWith(JkConstants.CMD_PROP_PREFIX, false);
+                .getAllStartingWith(JkConstants.CMD_PREFIX_PROP, false);
         List<String> keys = new LinkedList<>(result.keySet());
         keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
                         .forEach(key -> result.remove(key));

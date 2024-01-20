@@ -35,7 +35,7 @@ public class JacocoSampleBuild extends KBean {
     }
 
     // For local testing
-    public void checkReportGenerated() {
+    public void checkGeneratedReport() {
         Path report = getOutputDir().resolve("jacoco/jacoco.xml");
         JkUtilsAssert.state(Files.exists(report), "Report file " + report + " not found.");
     }

@@ -246,7 +246,8 @@ public final class JkRunbase {
                     method = bean.getClass().getMethod(engineCommand.getMember());
                 } catch (NoSuchMethodException e) {
                     throw new JkException("No public no-args method '" + engineCommand.getMember() + "' found on KBean "
-                            + bean.getClass());
+                            + bean.getClass() + "\nWas declared in base dir "
+                            + getBaseDir().toAbsolutePath().normalize());
                 }
                 JkUtilsReflect.invoke(bean, method);
             }

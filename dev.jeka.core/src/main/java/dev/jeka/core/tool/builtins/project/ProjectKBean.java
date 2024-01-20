@@ -1,6 +1,5 @@
 package dev.jeka.core.tool.builtins.project;
 
-import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathFile;
@@ -299,7 +298,7 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (!JkUtilsString.isBlank(version)) {
             project.setVersion(version);
         }
-        project.dependencyResolver.setFileSystemCacheDir(getBaseDir().resolve(JkConstants.WORK_PATH)
+        project.dependencyResolver.setFileSystemCacheDir(getBaseDir().resolve(JkConstants.JEKA_WORK_PATH)
                 .resolve("project-dep-resolution-cache"));
         project.dependencyResolver.setUseFileSystemCache(true);
         if (!JkUtilsString.isBlank(compilation.javaVersion)) {

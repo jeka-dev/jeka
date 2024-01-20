@@ -7,10 +7,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
  */
 public final class JkConstants {
 
-    /**
-     * Relative path to the project where Jeka elements lie.
-     */
-    public static final String JEKA_DIR = "jeka";
+    // ------------ Standard file names and locations --------------------------
 
     /**
      * Relative path to the project base directory where output files are generated.
@@ -20,39 +17,43 @@ public final class JkConstants {
     /**
      * Relative path to the project base directory where jeka work files are generated.
      */
-    public static final String WORK_PATH = ".jeka-work";
+    public static final String JEKA_WORK_PATH = ".jeka-work";
 
-    static final String JEKA_SRC_CLASSES_DIR_NAME = "jeka-src-classes";
-
-    static final String BOOT_DIR = "jeka-boot";
+    /**
+     * Relative path to put jars that will be automatically prepended to jeka classpath.
+     */
+    public static final String JEKA_BOOT_DIR = "jeka-boot";
 
     /**
      * Relative path to the project where the jeka-src classes will be compiled.
      */
-    public static final String JEKA_SRC_CLASSES_DIR = WORK_PATH + "/" + JEKA_SRC_CLASSES_DIR_NAME;
-
-    public static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
+    public static final String JEKA_SRC_CLASSES_DIR = JEKA_WORK_PATH + "/jeka-src-classes";
 
     /**
      * Relative path of jeka-src dir to the base dir.
      */
     public static final String JEKA_SRC_DIR = "jeka-src";
 
-    public static final String CMD_PROP_PREFIX = "jeka.cmd.";
+    /**
+     * Relative path to the jeka.properties.
+     */
+    public static final String PROPERTIES_FILE = "jeka.properties";
+
+    // ------------ Jeka standard properties --------------------------
+
+    public static final String CMD_PREFIX_PROP = "jeka.cmd.";
 
     public static final String CMD_APPEND_SUFFIX_PROP =  "_append";
 
-    public static final String CLASSPATH_INJECT_PROP = "jeka.classpath.inject";
+    public static final String CLASSPATH_INJECT_PROP = "jeka.inject.classpath";
 
     public static final String DEFAULT_KBEAN_PROP = "jeka.default.kbean";
 
-    public static final String JAVA_VERSION_PROP = "jeka.java.version";
-
-    public static final String CMD_APPEND_PROP = CMD_PROP_PREFIX + CMD_APPEND_SUFFIX_PROP;
+    public static final String CMD_APPEND_PROP = CMD_PREFIX_PROP + CMD_APPEND_SUFFIX_PROP;
 
     public static final String CMD_SUBSTITUTE_SYMBOL = ":";
 
-    public static final String PROPERTIES_FILE = "jeka.properties";
+    // --------------------  Misc ----------------------------------------------
 
     public static final JkPathMatcher PRIVATE_IN_DEF_MATCHER = JkPathMatcher.of("_*", "_*/**");
 

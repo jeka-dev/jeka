@@ -43,7 +43,7 @@ class Environment {
             String word = it.next();
             if (word.startsWith(CMD_SUBSTITUTE_SYMBOL)) {
                 String token = word.substring(CMD_SUBSTITUTE_SYMBOL.length());
-                String propName = CMD_PROP_PREFIX + token;
+                String propName = CMD_PREFIX_PROP + token;
                 String presetValue = props.get(propName);
                 if (presetValue != null) {
                     String[] replacingItems = JkUtilsString.parseCommandline(presetValue);

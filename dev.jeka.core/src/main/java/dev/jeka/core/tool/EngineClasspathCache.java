@@ -118,11 +118,11 @@ class EngineClasspathCache {
     }
 
     private Path unresolvedClasspathCache(Scope scope) {
-        return baseDir.resolve(JkConstants.WORK_PATH).resolve(scope.prefix() + UNRESOLVED_CLASSPATH_FILE);
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(scope.prefix() + UNRESOLVED_CLASSPATH_FILE);
     }
 
     private Path resolvedClasspathCache(Scope scope) {
-        return baseDir.resolve(JkConstants.WORK_PATH).resolve(scope.prefix() + RESOLVED_CLASSPATH_FILE);
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(scope.prefix() + RESOLVED_CLASSPATH_FILE);
     }
 
     private static class PartialResult {

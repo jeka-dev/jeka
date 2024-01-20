@@ -42,7 +42,7 @@ public class SpringbootSampleBuild extends KBean {
                         "org.springframework.boot:spring-boot-starter-test"
                 )
                 .setModuleId("dev.jeka:samples-springboot")
-                .setVersion("0.0.1");
+                .setVersion("0.0.1-SNAPSHOT");  // Snapshot is necessary otherwise it can not deploy twice in maven local repo
         JkSpringbootProject.of(projectKBean.project)
                 .configure()
                 .includeParentBom("3.2.0");

@@ -16,7 +16,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
     void run() {
         String scaffoldCmd = String.format("-lsu scaffold#run springboot# springboot#scaffoldDefClasspath=%s @%s "
-                + "jekaPropsExtraValues=%s",
+                + "scaffold#jekaPropsExtraValues=%s",
                 sprinbootPluginJar, sprinbootPluginJar, "jeka.java.version=17");
         String checkCmd = "project#info project#pack -lsu project#version=0.0.1";
 

@@ -305,7 +305,7 @@ public final class JkSonarqube {
     }
 
     private static String workDir(Path baseDir) {
-        return baseDir.resolve(JkConstants.JEKA_DIR + "/.sonarscannerworks").toString();
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH + "/.sonarscannerworks").toString();
     }
 
     private JkJavaProcess javaProcess(Path jar) {

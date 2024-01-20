@@ -132,7 +132,7 @@ public final class JkInit {
     }
 
     private static Path bootDir() {
-        return Paths.get(JkConstants.BOOT_DIR);
+        return Paths.get(JkConstants.JEKA_BOOT_DIR);
     }
 
     private static JkPathSequence getImportedProjects(Class<?> clazz) {

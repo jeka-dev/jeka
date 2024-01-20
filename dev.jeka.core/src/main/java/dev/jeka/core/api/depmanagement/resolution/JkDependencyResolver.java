@@ -45,7 +45,7 @@ public final class JkDependencyResolver  {
 
     private boolean useFileSystemCache;
 
-    private Path fileSystemCacheDir = Paths.get(JkConstants.WORK_PATH).resolve("dep-cache");
+    private Path fileSystemCacheDir = Paths.get(JkConstants.JEKA_WORK_PATH).resolve("dep-cache");
 
     private JkDependencyResolver() {
         parameters = JkResolutionParameters.of();
