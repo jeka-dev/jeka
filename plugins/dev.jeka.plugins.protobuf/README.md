@@ -7,9 +7,6 @@ This plugin provides utility classes and KBean to compile Google ProtoBuffer .pr
 ```properties
 jeka.classpath.inject=dev.jeka:protobuf-plugin
 
-# Instantiate protobuf KBean
-jeka.cmd._append=protobuf#
-
 # Change the location of proto files (default is src/main/proto)
 protobuf#protoPath=src/main/protofiles
 

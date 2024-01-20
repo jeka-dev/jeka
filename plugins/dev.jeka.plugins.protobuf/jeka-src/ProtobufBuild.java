@@ -34,8 +34,4 @@ class ProtobufBuild extends KBean {
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
-    public void cleanPack() {
-        projectKBean.cleanPack();
-    }
-
 }

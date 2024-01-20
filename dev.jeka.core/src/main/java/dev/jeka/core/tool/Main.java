@@ -104,6 +104,7 @@ public final class Main {
         System.err.println();
         System.err.println("=============================== Stack Trace =============================================");
         e.printStackTrace(System.err);
+        System.err.flush();
         System.err.println("=========================================================================================");
         System.err.println("\nAn error occurred during execution.");
         System.err.println("This could be caused by issues in the user code or settings, or potentially a bug in Jeka.");
