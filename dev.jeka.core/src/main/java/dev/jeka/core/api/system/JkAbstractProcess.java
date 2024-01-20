@@ -199,7 +199,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     /**
      * Specifies if the running process should throw an Exception in case process returns with a
-     * code different to 0.
+     * code different to 0.<p>
+     * Initial value is 'true'.
      */
     public T setFailOnError(boolean fail) {
         this.failOnError = fail;
