@@ -93,6 +93,7 @@ final class Engine {
         } else {
             computedClasspath = dependencyResolver.resolve(commandLineDependencies.and(dependenciesFromJekaProps))
                     .getFiles();
+            beanClassesResolver.setClasspath(computedClasspath, false);
             result = null;
         }
         if (isHelpCmd()) {
