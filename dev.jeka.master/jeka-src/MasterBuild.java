@@ -112,8 +112,13 @@ class MasterBuild extends KBean {
                 samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
                 pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
             }
-            samplesTester.run();
+
+            // run sample including springboot scaffolding project
             pluginScaffoldTester.run();
+
+            // run samples
+            samplesTester.run();
+
             if (jacocoForCore != null) {
                 jacocoForCore.generateExport();
             }
