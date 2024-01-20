@@ -204,7 +204,7 @@ public final class JkSpringbootProject {
                     JkConstants.CLASSPATH_INJECT_PROP + "=" + "dev.jeka:springboot-plugin\n" +
                     JkConstants.DEFAULT_KBEAN_PROP + "=" + SpringbootKBean.class.getName() + "\n\n" +
                     "springboot#springbootVersion=" + latestSpringbootVersion();
-            scaffold.addLocalPropsFileContent(propsContent);
+            scaffold.addJekaPropsFileContent(propsContent);
             JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffold);
             projectScaffold.createProjectDependenciesTxt(
                     Collections.singletonList("org.springframework.boot:spring-boot-starter-web"),

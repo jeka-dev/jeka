@@ -27,14 +27,14 @@ public final class JkConstants {
     static final String BOOT_DIR = "jeka-boot";
 
     /**
-     * Relative path to the project where the def classes will be compiled.
+     * Relative path to the project where the jeka-src classes will be compiled.
      */
     public static final String JEKA_SRC_CLASSES_DIR = WORK_PATH + "/" + JEKA_SRC_CLASSES_DIR_NAME;
 
     public static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
 
     /**
-     * Relative path to the project where the def definition sources lie.
+     * Relative path of jeka-src dir to the base dir.
      */
     public static final String JEKA_SRC_DIR = "jeka-src";
 

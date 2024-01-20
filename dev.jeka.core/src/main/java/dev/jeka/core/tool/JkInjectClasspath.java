@@ -5,7 +5,7 @@ import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import java.lang.annotation.*;
 
 /**
- * Adds an element to def classpath. It can specify a library referenced in a repository (as
+ * Adds an element to jeka-src classpath. It can specify a library referenced in a repository (as
  * "com.google.guava:guava:18.0") or file pattern relative to the project
  * directory (as "../lib-folder/mylib.jar" or "libs/*.jar")
  *

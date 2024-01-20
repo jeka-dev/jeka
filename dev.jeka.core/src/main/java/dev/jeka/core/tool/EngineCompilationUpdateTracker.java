@@ -54,8 +54,8 @@ class EngineCompilationUpdateTracker {
     }
 
     private long lastModifiedAccordingFileAttributes() {
-        Path def = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        Stream<Path> stream = JkPathTree.of(def).stream();
+        Path jekaSrc = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        Stream<Path> stream = JkPathTree.of(jekaSrc).stream();
         return stream
                 .filter(path -> !Files.isDirectory(path))
                 .peek(path -> JkLog.trace("read file attribute of " + path))
@@ -78,9 +78,9 @@ class EngineCompilationUpdateTracker {
 
     boolean isMissingBinaryFiles() {
         Path work = projectBaseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
-        Path def = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        Path jekaSrc = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
         return JkPathTree.of(work).count(Integer.MAX_VALUE, false) <
-                JkPathTree.of(def).count(Integer.MAX_VALUE, false);
+                JkPathTree.of(jekaSrc).count(Integer.MAX_VALUE, false);
     }
 
 

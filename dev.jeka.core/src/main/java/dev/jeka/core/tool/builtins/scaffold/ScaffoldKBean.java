@@ -10,6 +10,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 /**
  * Provides method to generate a project skeleton (folder structure, configuration files, ....)
@@ -26,12 +27,8 @@ public class ScaffoldKBean extends KBean {
     @JkDoc("Set a specific jeka.distrib.repo to include in jeka.properties.")
     private String jekaDistribRepo;
 
-    /**
-     * In windows, we cannot pass arguments with breaking lines.
-     * Use {@link #jekaPropsExtraContentPath} instead.
-     */
-    @JkDoc("Deprecated - Add extra content at the end of the template local.properties file.")
-    private String jekaPropsExtraContent = "";
+    @JkDoc("Coma separated string representing properties to add to jeka.properties.")
+    private String jekaPropsExtraValues = "";
 
     @JkDoc("Add extra content at the end of the template local.properties file.")
     private Path jekaPropsExtraContentPath;
@@ -41,22 +38,30 @@ public class ScaffoldKBean extends KBean {
 
     @Override
     protected void init() {
-        this.scaffold.setJekaClassCodeProvider(
 
-                // todo : Sample code should be encapsulated
-                () -> JkUtilsIO.read(JkScaffold.class.getResource("app.snippet")));
+        // Add sample code
+        // todo : Sample code should be encapsulated
+        this.scaffold.setJekaClassCodeProvider(
+                () -> JkUtilsIO.read(JkScaffold.class.getResource("app.snippet"))
+        );
+
         JkRepoSet repos = JkRepoProperties.of(getRunbase().getProperties()).getDownloadRepos();
         final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
+
+        // add extra content to jeka.properties
+        if (jekaPropsExtraValues != null) {
+            Arrays.stream(jekaPropsExtraValues.split(",")).forEach(scaffold::addJekaPropValue);
+        }
+        if (jekaPropsExtraContentPath != null) {
+            String content = JkPathFile.of(jekaPropsExtraContentPath).readAsString();
+            this.scaffold.addJekaPropsFileContent(content);
+        }
+
         this.scaffold
                 .setDependencyResolver(dependencyResolver)
-                .addLocalPropsFileContent(this.jekaPropsExtraContent)
                 .setJekaVersion(jekaVersion)
                 .setJekaLocation(jekaLocation)
                 .setJekaDistribRepo(jekaDistribRepo);
-        if (this.jekaPropsExtraContentPath != null) {
-            String content = JkPathFile.of(jekaPropsExtraContentPath).readAsString();
-            this.scaffold.addLocalPropsFileContent(content);
-        }
     }
 
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")

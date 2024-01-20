@@ -198,7 +198,7 @@ public final class JkEclipseClasspathGenerator {
 
         final Set<String> paths = new HashSet<>();
 
-        // Write sources for def classes
+        // Write sources for jeka-src
         if (hasJekaDefDir()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
@@ -207,7 +207,7 @@ public final class JkEclipseClasspathGenerator {
         }
         generateSrcAndTestSrc(writer);
 
-        // write entries for def imported projects
+        // write entries for jeka-src imported projects
         for (final Path projectFile : this.importedProjects) {
             if (!paths.add(projectFile.toAbsolutePath().toString())) {
                 continue;
@@ -222,7 +222,7 @@ public final class JkEclipseClasspathGenerator {
         }
         writeJre(writer);
 
-        // add def dependencies
+        // add jeka-src dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
             JkQualifiedDependencySet qualifiedDependencies =
                     JkQualifiedDependencySet.ofDependencies(defDependencies.getEntries());

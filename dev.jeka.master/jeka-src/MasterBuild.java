@@ -106,8 +106,8 @@ class MasterBuild extends KBean {
         JkLog.endTask();
         if (runSamples) {
             JkLog.startTask("Running samples");
-            SamplesTester samplesTester = new SamplesTester(this.getRunbase().getProperties());
-            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester(this.getRunbase().getProperties());
+            SamplesTester samplesTester = new SamplesTester();
+            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
             if (jacocoForCore != null) {
                 samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
                 pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
@@ -185,12 +185,12 @@ class MasterBuild extends KBean {
 
     @JkDoc("Run samples")
     public void runSamples()  {
-        new SamplesTester(this.getRunbase().getProperties()).run();
+        new SamplesTester().run();
     }
 
     @JkDoc("Run scaffold test")
     public void runScaffoldsWithPlugins() {
-        new PluginScaffoldTester(this.getRunbase().getProperties()).run();
+        new PluginScaffoldTester().run();
     }
 
     private void configureNexus(JkNexusRepos nexusRepos) {

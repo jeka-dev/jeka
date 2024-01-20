@@ -24,7 +24,7 @@ final class HelpDisplayer {
 
         final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");
         if (compilationFailed) {
-            sb.append("  [WARN] Compilation of jeka/def failed. Cannot provide information about KBean defined locally.\n");
+            sb.append("  [WARN] Compilation of jeka-src failed. Cannot provide information about KBean defined locally.\n");
         } else {
             List<RenderItem> renderItems = new LinkedList<>();
             for (int i = 0; i < localBeanClasses.size(); i++) {
@@ -78,7 +78,7 @@ final class HelpDisplayer {
         items.add(option("kbean", Environment.KB_KEYWORD, " Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name"));
         items.add(option("clean.work", "cw",  " Delete all files cached in .jeka-work"));
         items.add(option("no.help", "", "Does not display help if no method is invoked"));
-        items.add(option("def.compile.ignore-failure", "dci",  " Try to compile def classes. If fail, ignore failure and continue"));
+        items.add(option("def.compile.ignore-failure", "dci",  " Try to compile jeka-src classes. If fail, ignore failure and continue"));
         new ItemContainer(items).render().forEach(item -> sb.append("  " + item + "\n"));
         return sb.toString();
     }

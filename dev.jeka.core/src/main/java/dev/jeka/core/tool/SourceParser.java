@@ -38,12 +38,12 @@ class SourceParser {
     }
 
     private static boolean isInPrivateFolder(Path file, Path baseDir) {
-        Path jekaDef = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        if (!file.startsWith(jekaDef)) {  // Make testable in Junit
+        Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        if (!file.startsWith(jekaSrc)) {  // Make testable in Junit
             return false;
         }
-        Path relativeToJekaDef = jekaDef.relativize(file);
-        Path relativeRoot = relativeToJekaDef.subpath(0, 1);
+        Path relativeToJekaSrc = jekaSrc.relativize(file);
+        Path relativeRoot = relativeToJekaSrc.subpath(0, 1);
         return relativeRoot.toString().startsWith("_");
     }
 

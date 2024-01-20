@@ -279,7 +279,7 @@ public class JkClassLoader {
     public String findUniqueMainClass() {
         List<String> candidates = findClassesHavingMainMethod();
         JkUtilsAssert.state(!candidates.isEmpty(), "No class with main method found. Add one to " +
-                "def folder in order to run.");
+                "jeka-src folder in order to run.");
         JkUtilsAssert.state(candidates.size() == 1, "Multiple classes with main method found %s, please pickup " +
                 "one and mention it in #setMainClass.", candidates);
         return candidates.get(0);

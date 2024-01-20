@@ -1,7 +1,6 @@
 import dev.jeka.core.JekaCommandLineExecutor;
-import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,30 +14,16 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     private final String sprinbootPluginJar = Paths.get("../plugins/dev.jeka.plugins.springboot/jeka-output/" +
             "dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
 
-    PluginScaffoldTester(JkProperties properties) {
-        super(Paths.get(".."), properties);
-    }
-
     void run() {
-        Path dir = scaffold(
-                "-lsu scaffold#run springboot# springboot#scaffoldDefClasspath=" + sprinbootPluginJar
-                        + " @" + sprinbootPluginJar,
-                "project#info project#pack -lsu project#version=0.0.1"
-                , false);
-        String jdk17 = properties.get("jeka.jdk.17");
-        if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
-            runDistribJeka(dir.toString(), "intellij#iml", jdk17);
-        }
-    }
+        String scaffoldCmd = String.format("-lsu scaffold#run springboot# springboot#scaffoldDefClasspath=%s @%s "
+                + "jekaPropsExtraValues=%s",
+                sprinbootPluginJar, sprinbootPluginJar, "jeka.java.version=17");
+        String checkCmd = "project#info project#pack -lsu project#version=0.0.1";
 
-    private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-        runDistribJeka(path.toString(), scaffoldCmdLine);
-        String jdk17 = properties.get("jeka.jdk.17");
-        if (!JkUtilsString.isBlank(jdk17)) {   // No JDK 17 set on github actions
-            runJeka(checkWithWrapper, path.toString(), checkCommandLine, jdk17);
-        }
-        return path;
+        runWithDistribJekaShell(path, scaffoldCmd);
+        runWithBaseDirJekaShell(path, checkCmd);
+        JkPathTree.of(path).deleteRoot();
     }
 
 }

@@ -59,8 +59,22 @@ public final class JkScaffold {
         return this;
     }
 
-    public JkScaffold addLocalPropsFileContent(String extraContent) {
+    public JkScaffold addJekaPropsFileContent(String extraContent) {
+        if (extraContent == null) {
+            return this;
+        }
         this.extraPropsExtraContent += extraContent;
+        return this;
+    }
+
+    /**
+     * Adds a property to scaffolded jeka.properties by specifying a string with format "prop.name=prop.value".
+     */
+    public JkScaffold addJekaPropValue(String propValue) {
+        if (JkUtilsString.isBlank(propValue)) {
+            return this;
+        }
+        extraPropsExtraContent += "\n" + propValue.trim();
         return this;
     }
 

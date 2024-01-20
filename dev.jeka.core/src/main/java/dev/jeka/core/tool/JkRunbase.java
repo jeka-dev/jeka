@@ -102,7 +102,7 @@ public final class JkRunbase {
     }
 
     /**
-     * Returns the classpath used to compile def classes.
+     * Returns the classpath used to compile jeka-src.
      */
     public JkPathSequence getClasspath() {
         return classpath;

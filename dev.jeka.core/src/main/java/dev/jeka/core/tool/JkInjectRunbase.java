@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Adds a Jeka project def classpath to the Jeka def classpath where this annotation is declared.
+ * Adds an entry to the jeka-src classpath where this annotation is declared.
  * Typically, the annotated element is a <code>JkClass</code> class from 'jeka/def' source directory.
  * But when used on a public field of type  <code>JkClass</code> within a <code>JkClass</code> class,
  * the annotated field is injected with an initialised <code>JkClass</code> instance of the imported project.<p>

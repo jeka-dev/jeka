@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Engine is responsible to compile jeka-src ,instantiate KBeans and run them.<br/>
  * Sources are expected to lie in [project base dir]/jeka-src <br/>
- * Def classes having simple name starting with '_' are ignored.
+ * jeka-src classes having simple name starting with '_' are ignored.
  *
  * jeka-src classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka-boot directory</li>
@@ -52,17 +52,15 @@ final class Engine {
 
     static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_JEKA_SRC_MATCHER.or(KOTLIN_JEKA_SRC_MATCHER);
 
-    private final Path projectBaseDir;
+    private final Path baseDir;
 
     private final JkDependencyResolver dependencyResolver;
 
     private final EngineKBeanClassResolver beanClassesResolver;
 
-
-
     Engine(Path baseDir) {
         super();
-        this.projectBaseDir = baseDir;
+        this.baseDir = baseDir;
         this.beanClassesResolver = new EngineKBeanClassResolver(baseDir);
         JkRepoSet repos = JkRepoProperties.of(JkRunbase.constructProperties(baseDir)).getDownloadRepos();
         this.dependencyResolver = JkDependencyResolver.of(repos);
@@ -82,7 +80,7 @@ final class Engine {
         JkLog.trace("IDependencies injected in classpath from jeka.properties : " + dependenciesFromJekaProps);
         final JkPathSequence computedClasspath;
         final CompilationResult result;
-        boolean hasJekaSrc = Files.exists(projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR))
+        boolean hasJekaSrc = Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR))
                 || commandLine.involvedBeanNames().contains("scaffold");
         if (hasJekaSrc) {
             boolean failOnError = !Environment.standardOptions.ignoreCompileFail && !commandLine.isHelp();
@@ -102,10 +100,10 @@ final class Engine {
             return;
         }
         JkLog.startTask("Setting up runbase");
-        JkRunbase runbase = JkRunbase.get(projectBaseDir);
+        JkRunbase runbase = JkRunbase.get(baseDir);
         runbase.setClasspath(computedClasspath);
 
-        // If def compilation failed, we ignore the defaultBeanClass cause it may be absent
+        // If jeka-src compilation failed, we ignore the defaultBeanClass cause it may be absent
         // from the classpath.
         boolean ignoreDefaultBeanNotFound = result == null ||
                 (!result.compileFailedProjects.getEntries().isEmpty() &&
@@ -121,7 +119,7 @@ final class Engine {
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
         if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {
-            JkLog.warn("Def compilation failed on projects " + result.compileFailedProjects.getEntries()
+            JkLog.warn("Jeka-src compilation failed on base dirs " + result.compileFailedProjects.getEntries()
                     .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
@@ -158,9 +156,9 @@ final class Engine {
 
         JkPathTree sourceTree = beanClassesResolver.getSourceTree();
         JkLog.traceStartTask("Parsing source code of " + sourceTree);
-        EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.projectBaseDir, dependencyResolver);
+        EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.baseDir, dependencyResolver);
         final ParsedSourceInfo parsedSourceInfo =
-                SourceParser.of(this.projectBaseDir, sourceTree).parse();
+                SourceParser.of(this.baseDir, sourceTree).parse();
         JkLog.traceEndTask();
 
         JkDependencySet defDependencies = JkDependencySet.of()
@@ -195,21 +193,19 @@ final class Engine {
      */
     private CompilationResult resolveAndCompile(Map<Path, JkPathSequence> yetCompiledProjects, boolean compileSources,
                                              boolean failOnCompileError) {
-        if (yetCompiledProjects.containsKey(this.projectBaseDir)) {
-            JkLog.trace("Project '%s' already compiled. Skip", this.projectBaseDir);
+        if (yetCompiledProjects.containsKey(this.baseDir)) {
+            JkLog.trace("Project '%s' already compiled. Skip", this.baseDir);
             return new CompilationResult(JkPathSequence.of(), JkPathSequence.of(),
-                    yetCompiledProjects.get(this.projectBaseDir), false);
+                    yetCompiledProjects.get(this.baseDir), false);
         }
-        yetCompiledProjects.put(this.projectBaseDir, JkPathSequence.of());
+        yetCompiledProjects.put(this.baseDir, JkPathSequence.of());
         if (Environment.standardOptions.workClean()) {
-            Path workDir = projectBaseDir.resolve(JkConstants.WORK_PATH);
+            Path workDir = baseDir.resolve(JkConstants.WORK_PATH);
             JkLog.info("Clean .work directory " + workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
 
-        String msg = "Scanning sources and compiling def classes for project '"
-                + projectBaseDirName() + "'";
-        JkLog.startTask(msg);
+        JkLog.startTask("Scanning and compiling jeka-src for base dir %s", baseDir.toAbsolutePath());
         CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
         List<Path> failedProjects = new LinkedList<>();
@@ -223,7 +219,7 @@ final class Engine {
             importedProjectClasspathChanged = importedProjectClasspathChanged || compilationResult.classpathChanged;
         }
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
-        EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(projectBaseDir);
+        EngineCompilationUpdateTracker compilationTracker = new EngineCompilationUpdateTracker(baseDir);
         boolean outdated = compilationTracker.isOutdated();
         if (!beanClassesResolver.hasDefSource() && beanClassesResolver.hasClassesInWorkDir()) {
             JkPathTree.of(beanClassesResolver.jekaSrcClassDir).deleteContent();
@@ -236,7 +232,7 @@ final class Engine {
             if (outdated || missingBinaryFiles) {
                 SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
-                    failedProjects.add(projectBaseDir);
+                    failedProjects.add(baseDir);
                     compilationTracker.deleteCompileFlag();
                 } else {
                     classpath = classpath.and(result.extraClasspath);
@@ -246,27 +242,27 @@ final class Engine {
                 // We need to add kotlin libs in order to invoke local KBean compiled with kotlin
                 if (hasKotlinSource()) {
                     JkLog.traceStartTask("Preparing for Kotlin");
-                    JkProperties props = JkRunbase.constructProperties(projectBaseDir);
+                    JkProperties props = JkRunbase.constructProperties(baseDir);
                     String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
                     JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
                     JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer);
                     AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
                     JkLog.traceEndTask();
                 }
-                JkLog.trace("Last def classes are up-to-date : No need to compile.");
+                JkLog.trace("Last jeka-src classes are up-to-date : No need to compile.");
             }
         } else if (outdated) {
             compilationTracker.updateCompileFlag();
         }
         JkLog.endTask();
         JkPathSequence resultClasspath = classpath.andPrepend(beanClassesResolver.jekaSrcClassDir);
-        yetCompiledProjects.put(this.projectBaseDir, resultClasspath);
+        yetCompiledProjects.put(this.baseDir, resultClasspath);
         CompilationResult compilationResult = new CompilationResult(
                 JkPathSequence.of(compilationContext.importedProjectDirs),
                 JkPathSequence.of(failedProjects).withoutDuplicates(),
                 resultClasspath,
                 compilationContext.classpathChanged || importedProjectClasspathChanged);
-        JkRunbase runbase = JkRunbase.get(projectBaseDir);
+        JkRunbase runbase = JkRunbase.get(baseDir);
         runbase.setDependencyResolver(dependencyResolver);
         runbase.setImportedRunbaseDirs(compilationResult.importedProjects);
         runbase.setClasspath(compilationResult.classpath);
@@ -279,7 +275,7 @@ final class Engine {
                                            boolean failOnCompileError) {
         JkPathTree.of(beanClassesResolver.jekaSrcClassDir).deleteContent();
         JkPathSequence extraClasspath = JkPathSequence.of();
-        JkProperties props = JkRunbase.constructProperties(projectBaseDir);
+        JkProperties props = JkRunbase.constructProperties(baseDir);
         String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
         if (hasKotlinSource()) {
             JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
@@ -334,7 +330,7 @@ final class Engine {
 
     private JkPathSequence bootLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
-        final Path bootDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
+        final Path bootDir = this.baseDir.resolve(JkConstants.BOOT_DIR);
         if (Files.exists(bootDir)) {
             extraLibs.addAll(JkPathTree.of(bootDir).andMatching(true,"**.jar").getFiles());
         }
@@ -376,14 +372,14 @@ final class Engine {
 
     @Override
     public String toString() {
-        return this.projectBaseDir.getFileName().toString();
+        return this.baseDir.getFileName().toString();
     }
 
     private static class CompilationContext {
 
         private final JkPathSequence classpath;
 
-        // classpath used for consumption by other project or to package jeka/def as an application
+        // classpath used for consumption by other project or to package jeka-src as an application
         private final JkPathSequence exportedClasspath;
 
         private final JkDependencySet exportedDependencies;
@@ -427,7 +423,7 @@ final class Engine {
                 .filter(Objects::nonNull)   // due to cache, some classNames may not be in classpath
                 .filter(beanClass -> !localBeanClasses.contains(beanClass))
                 .collect(Collectors.toList());
-        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false, this.projectBaseDir);
+        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false, this.baseDir);
     }
 
     private static class CompilationResult {
@@ -473,19 +469,19 @@ final class Engine {
             if (depString.trim().isEmpty()) {
                 continue;
             }
-            dependencies.add(CommandLine.toDependency(projectBaseDir, depString.trim()));
+            dependencies.add(CommandLine.toDependency(baseDir, depString.trim()));
         }
         return JkDependencySet.of(dependencies);
     }
 
     private JkProperties localProperties() {
-        return JkRunbase.localProperties(projectBaseDir);
+        return JkRunbase.localProperties(baseDir);
     }
 
     private String projectBaseDirName() {
-        String rawDirName = this.projectBaseDir.getFileName().toString();
+        String rawDirName = this.baseDir.getFileName().toString();
         if (rawDirName.isEmpty()) {
-            return this.projectBaseDir.toAbsolutePath().getFileName().toString();
+            return this.baseDir.toAbsolutePath().getFileName().toString();
         }
         return rawDirName;
     }

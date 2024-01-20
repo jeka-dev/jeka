@@ -49,7 +49,7 @@ class EngineClasspathCache {
         boolean changed = compareAndStore(scope, dependencies);
         if (changed) {
             JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
-            JkLog.info("Dependency tree of jeka/def :");
+            JkLog.info("Dependency tree of jeka-src :");
             JkLog.info(resolveResult.getDependencyTree().toStringTree());
             JkPathSequence pathSequence = resolveResult.getFiles();
             storeResolvedClasspath(scope, pathSequence);

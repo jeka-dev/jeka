@@ -92,7 +92,7 @@ final class EngineKBeanClassResolver {
                     + "One is necessary to define "
                     + defaultBeanActions.get(0).shortDescription() + suggest + "."
                     + "\nUse -kb=[beanName] to precise a "
-                    + "bean present in classpath or create a class extending JkBean into jeka/def dir.");
+                    + "bean present in classpath or create a class extending JkBean into jeka-src dir.");
         }
         beanClasses.put(null, defaultBeanClass);
         if (defaultBeanClass != null) {
@@ -190,7 +190,7 @@ final class EngineKBeanClassResolver {
             ignoreParentClassLoader = true; // everything should be on classpath
         } else {
             classLoader = JkClassLoader.ofCurrent().get();
-            ignoreParentClassLoader = false; // fail on project without jeka/def if true
+            ignoreParentClassLoader = false; // fail on project without jeka-src if true
         }
         cachedGlobalBeanClassName = CLASSPATH_SCANNER.findClassesInheritingOrAnnotatesWith(
                 classLoader,

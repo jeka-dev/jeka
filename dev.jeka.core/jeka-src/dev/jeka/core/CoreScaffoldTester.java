@@ -1,12 +1,11 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * End-to-end tests about scaffolding.
@@ -14,25 +13,29 @@ import java.nio.file.Paths;
  */
 class CoreScaffoldTester extends JekaCommandLineExecutor {
 
-    CoreScaffoldTester(JkProperties properties) {
-        super(Paths.get(".."), properties);
-    }
-
     void run() {
-        scaffold("scaffold#run -lv", "help", false);
-        Path projectDir = scaffold("scaffold#run", "help", false);
-        scaffold("scaffold#run", "help", true);
-        projectDir = scaffold("scaffold#run project#", "project#clean project#pack", false);
-        runDistribJeka(projectDir.toString(), "eclipse#files");
-        runDistribJeka(projectDir.toString(), "intellij#iml");
-        JkUtilsAssert.state(Files.exists(projectDir.resolve("src/main/java")),
+
+        // Basic scaffold and checks
+        scaffoldAndCheckInTemp("scaffold#run -lv", "help", true);
+        scaffoldAndCheckInTemp("scaffold#run", "help", true);
+
+        // Check IntelliJ + Eclipse metadata
+        Path workingDir = scaffoldAndCheckInTemp("scaffold#run project#", "project#clean project#pack", false);
+        runWithDistribJekaShell(workingDir, "eclipse#files");
+        runWithDistribJekaShell(workingDir, "intellij#iml");
+        JkUtilsAssert.state(Files.exists(workingDir.resolve("src/main/java")),
                 "No source tree has been created when scaffolding Java.");
+        JkPathTree.of(workingDir).deleteRoot();
     }
 
-    private Path scaffold(String scaffoldCmdLine, String checkCommandLine, boolean checkWithWrapper) {
+    private Path scaffoldAndCheckInTemp(String scaffoldCmdLine, String checkCommandLine, boolean deleteAfter) {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-        runDistribJeka(path.toString(), scaffoldCmdLine);
-        runJeka(checkWithWrapper, path.toString(), checkCommandLine);
+        runWithDistribJekaShell(path, scaffoldCmdLine);
+        runWithDistribJekaShell(path, checkCommandLine);
+        runWithBaseDirJekaShell(path, checkCommandLine);
+        if (deleteAfter) {
+            JkPathTree.of(path).deleteRoot();
+        }
         return path;
     }
 

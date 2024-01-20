@@ -3,7 +3,7 @@ package dev.jeka.core.tool;
 import java.lang.annotation.*;
 
 /**
- * Specifies the options of the Jeka compiler for def classes.
+ * Specifies the options of the Jeka compiler for jeka-src classes.
  * Normally, one option by annotation is expected tough this annotation is repeatable.
  * You can declare it has follow :
  * <pre><code>
