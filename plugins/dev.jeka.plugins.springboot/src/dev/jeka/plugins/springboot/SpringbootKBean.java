@@ -39,9 +39,6 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Specific Spring repo where to download spring artifacts. Not needed if you use official release.")
     private JkSpringRepo springRepo;
 
-    @JkDoc(hide = true, value = "For internal test purpose : if not null, scaffolded build class will reference this classpath for <i>dev.jeka:springboot-plugin</i> dependency.")
-    private String scaffoldDefClasspath;
-
     @JkDoc("Kind of build class to be scaffolded")
     private final JkSpringbootProject.ScaffoldBuildKind scaffoldKind = JkSpringbootProject.ScaffoldBuildKind.LIB;
 
@@ -112,7 +109,6 @@ public final class SpringbootKBean extends KBean {
                     .configureScaffold(
                             scaffold,
                             scaffoldKind,
-                            scaffoldDefClasspath,
                             projectKBean.scaffold.getTemplate()));
     }
 

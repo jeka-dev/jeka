@@ -4,7 +4,7 @@ import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 
-@JkInjectClasspath("dev.jeka:springboot-plugin")
+@JkInjectClasspath("${dependencyDescription}")
 class Build extends KBean {
 
     JkProject project = load(ProjectKBean.class).project;

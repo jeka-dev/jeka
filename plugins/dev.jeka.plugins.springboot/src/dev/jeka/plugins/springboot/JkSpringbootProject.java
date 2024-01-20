@@ -33,6 +33,11 @@ public final class JkSpringbootProject {
 
     public static final JkArtifactId ORIGINAL_ARTIFACT = JkArtifactId.of("original", "jar");
 
+    // In some test scenario, we might want to inject a specific version of JeKA springboot plugin.
+    // In this case we generally refers to a jar file on file system
+    public static final String OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME
+            = "jeka.springboot.plugin.dependency";
+
     static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies::pom:";
 
     private final JkProject project;
@@ -185,15 +190,16 @@ public final class JkSpringbootProject {
     void configureScaffold(
             JkScaffold scaffold,
             ScaffoldBuildKind scaffoldBuildKind,
-            String scaffoldDefClasspath,  // nullable
             JkProjectScaffold.BuildClassTemplate projectBuildClassTemplate) {
 
         // Generate Build class
         if (scaffoldBuildKind == ScaffoldBuildKind.LIB) {
-            String buildClassSource = "BuildLib.java";
+            String buildClassSource = "Build.java";
             String code = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
-            String defClasspath = scaffoldDefClasspath != null ? scaffoldDefClasspath.replace("\\", "/") : "dev.jeka:springboot-plugin";
-            code = code.replace("${dependencyDescription}", defClasspath);
+            String overriddenPluginDep = System.getProperty(OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
+            String injectClasspath = overriddenPluginDep != null ?
+                    overriddenPluginDep.replace("\\", "/") : "dev.jeka:springboot-plugin";
+            code = code.replace("${dependencyDescription}", injectClasspath);
             code = code.replace("${springbootVersion}", latestSpringbootVersion());
             final String jkClassCode = code;
             if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.CODE_LESS) {

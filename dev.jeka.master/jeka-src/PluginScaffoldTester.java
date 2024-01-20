@@ -1,6 +1,7 @@
 import dev.jeka.core.JekaCommandLineExecutor;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.plugins.springboot.JkSpringbootProject;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,9 +16,11 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
             "dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
 
     void run() {
-        String scaffoldCmd = String.format("-lsu scaffold#run springboot# springboot#scaffoldDefClasspath=%s @%s "
-                + "scaffold#jekaPropsExtraValues=%s",
-                sprinbootPluginJar, sprinbootPluginJar, "jeka.java.version=17");
+        String scaffoldCmd = String.format("-lsu scaffold#run springboot# -D%s=%s "
+                + "scaffold#jekaPropsExtraValues=%s ",
+                JkSpringbootProject.OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME,
+                sprinbootPluginJar,
+                "jeka.java.version=17");
         String checkCmd = "project#info project#pack -lsu project#version=0.0.1";
 
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
