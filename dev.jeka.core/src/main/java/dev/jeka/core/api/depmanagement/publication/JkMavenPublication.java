@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMvn;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -317,6 +318,7 @@ public final class JkMavenPublication {
         JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
 
+        JkLog.info("Publishing %s:%s to Maven ...", moduleIdSupplier.get(), versionSupplier.get());
         JkRepoSet bomRepos = this.bomResolverRepoSupplier.get().and(repos);
         JkDependencySet dependencySet = this.getDependencies()
                 .withResolvedBoms(bomRepos)

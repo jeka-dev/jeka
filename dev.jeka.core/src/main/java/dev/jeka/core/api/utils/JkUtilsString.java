@@ -431,4 +431,26 @@ public final class JkUtilsString {
         return in == null ? "" : in;
     }
 
+    /**
+     * Wraps the given string character-wise to fit within the specified width.
+     */
+    public static String wrapStringCharacterWise(String input, int maxLineLength) {
+        StringBuilder stringBuilder = new StringBuilder(input);
+        int index = 0;
+        while(stringBuilder.length() > index + maxLineLength) {
+            int lastLineReturn = stringBuilder.lastIndexOf("\n", index + maxLineLength);
+            if (lastLineReturn > index) {
+                index = lastLineReturn;
+            } else {
+                index = stringBuilder.lastIndexOf(" ", index + maxLineLength);
+                if (index == -1) {
+                    return input;  // Can't slice cause one word exceeds max size
+                }
+                stringBuilder.replace(index, index + 1, "\n");
+                index++;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
 }

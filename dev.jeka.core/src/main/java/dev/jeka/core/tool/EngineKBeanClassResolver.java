@@ -23,7 +23,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /*
- * A resolver to determine witch {@link JkBean} class to use as default or according KBean short name.
+ * A resolver to determine witch {@link JkBean} class to use :
+ *  - as Master
+ *  - according KBean short name.
  *
  * @author Jerome Angibaud
  */
@@ -59,7 +61,7 @@ final class EngineKBeanClassResolver {
         this.jekaProperties = JkRunbase.localProperties(baseDir);
     }
 
-    List<EngineCommand> resolve(CommandLine commandLine, String defaultBeanName, boolean ignoreDefaultBeanNotFound) {
+    List<EngineCommand> resolve(CommandLine commandLine, String masterBeanName, boolean ignoreMasterBeanNotFound) {
         JkLog.startTask("Resolve KBean classes");
 
         // Resolve involved KBean classes
@@ -78,27 +80,27 @@ final class EngineKBeanClassResolver {
                     JkLog.trace("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClassNames);
                 }
             }
-            Class<? extends KBean> selected = loadUniqueClass(matchingClassNames, beanName, !ignoreDefaultBeanNotFound);
+            Class<? extends KBean> selected = loadUniqueClass(matchingClassNames, beanName, !ignoreMasterBeanNotFound);
             if (selected != null) {
                 beanClasses.put(KBean.name(selected), selected);
             }
         }
 
-        // Resolve default KBean
-        Class<? extends KBean> defaultBeanClass = defaultBeanClass(defaultBeanName, !ignoreDefaultBeanNotFound);
+        // Resolve master KBean
+        Class<? extends KBean> masterBeanClass = masterBeanClass(masterBeanName, !ignoreMasterBeanNotFound);
         List<EngineCommand> result = new LinkedList<>();
-        List<CommandLine.JkBeanAction> defaultBeanActions = commandLine.getDefaultBeanActions();
-        if (defaultBeanClass == null && !defaultBeanActions.isEmpty() && !ignoreDefaultBeanNotFound) {
+        List<CommandLine.JkBeanAction> masterBeanActions = commandLine.getMasterBeanActions();
+        if (masterBeanClass == null && !masterBeanActions.isEmpty() && !ignoreMasterBeanNotFound) {
             String suggest = "help".equals(Environment.originalCmdLineAsString()) ? " ( You mean '-help' ? )" : "";
-            throw new JkException("No default KBean has bean has been selected. "
+            throw new JkException("No Master KBean has bean has been selected. "
                     + "One is necessary to define "
-                    + defaultBeanActions.get(0).shortDescription() + suggest + "."
+                    + masterBeanActions.get(0).shortDescription() + suggest + "."
                     + "\nUse -kb=[beanName] to precise a "
                     + "bean present in classpath or create a class extending JkBean into jeka-src dir.");
         }
-        beanClasses.put(null, defaultBeanClass);
-        if (defaultBeanClass != null) {
-            result.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, defaultBeanClass,
+        beanClasses.put(null, masterBeanClass);
+        if (masterBeanClass != null) {
+            result.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, masterBeanClass,
                     null, null));
         }
 
@@ -109,8 +111,8 @@ final class EngineKBeanClassResolver {
                 .map(action -> toEngineCommand(action, beanClasses))
                 .forEach(result::add);
 
-        JkLog.endTask();
-        JkLog.info("Default KBean : " + defaultBeanClass);
+        JkLog.endTask("KBean classes resolved in %d millis");
+        JkLog.info("Master KBean : " + masterBeanClass);
         return Collections.unmodifiableList(result);
     }
 
@@ -119,18 +121,18 @@ final class EngineKBeanClassResolver {
         this.useStoredCache = !classpathChanged;
     }
 
-    private Class<? extends KBean> defaultBeanClass(String defaultBeanName, boolean failIfNotFound) {
-        if (defaultBeanName == null) {
+    private Class<? extends KBean> masterBeanClass(String masterBeanName, boolean failIfNotFound) {
+        if (masterBeanName == null) {
             if (jekaSrcBeanClassNames().isEmpty()) {
                 return null;
             }
             return jekaSrcBeanClasses().get(0);
         }
-        List<String> matchingclassNames = findClassesMatchingName(jekaSrcBeanClassNames(), defaultBeanName);
+        List<String> matchingclassNames = findClassesMatchingName(jekaSrcBeanClassNames(), masterBeanName);
         if (matchingclassNames.isEmpty()) {
-            matchingclassNames = findClassesMatchingName(globalBeanClassNames(), defaultBeanName);
+            matchingclassNames = findClassesMatchingName(globalBeanClassNames(), masterBeanName);
         }
-        return loadUniqueClass(matchingclassNames, defaultBeanName, failIfNotFound);
+        return loadUniqueClass(matchingclassNames, masterBeanName, failIfNotFound);
     }
 
     private Class<? extends KBean> loadUniqueClass(List<String> matchingBeanClasses, String beanName,
@@ -141,8 +143,8 @@ final class EngineKBeanClassResolver {
             }
             return null;
         } else if (matchingBeanClasses.size() > 1) {
-            throw new JkException("Several classes matches default bean name '" + beanName + "' : "
-                    + matchingBeanClasses + ". Please precise the fully qualified class name of the default bean " +
+            throw new JkException("Several classes matches bean name '" + beanName + "' : "
+                    + matchingBeanClasses + ". Please precise the fully qualified class name of the bean " +
                     "instead of its short name.");
         } else {
             Class<? extends KBean> result = JkClassLoader.ofCurrent().loadIfExist(matchingBeanClasses.get(0));

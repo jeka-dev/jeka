@@ -83,7 +83,7 @@ final class CommandLine {
         return rawArgs;
     }
 
-    List<JkBeanAction> getDefaultBeanActions() {
+    List<JkBeanAction> getMasterBeanActions() {
         return beanActions.stream().filter(beanAction -> beanAction.beanName == null).collect(Collectors.toList());
     }
 

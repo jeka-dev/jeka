@@ -128,10 +128,10 @@ final class HelpDisplayer {
         }
         final List<String> activationEffects = description.activationEffect();
         if (!activationEffects.isEmpty()) {
-            items.add(new RenderItem("Instantiation effects", activationEffects));
+            items.add(new RenderItem("Init", activationEffects));
         }
         new ItemContainer(items).render().forEach(line -> sb.append(line + "\n"));
-        sb.append(BeanDescription.renderItem(description.beanClass()).flatDescription());
+        sb.append(BeanDescription.renderItem(description.beanClass()).description(10));
         sb.append(shortcuts(runbase.getBaseDir()));
         return sb.toString();
     }

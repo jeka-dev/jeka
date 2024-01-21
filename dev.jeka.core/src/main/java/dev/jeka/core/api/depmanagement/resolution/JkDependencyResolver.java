@@ -254,7 +254,7 @@ public final class JkDependencyResolver  {
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         int moduleCount = resolveResult.getInvolvedCoordinates().size();
         int fileCount = resolveResult.getFiles().getEntries().size();
-        JkLog.info(pluralize(moduleCount, "module") + " -> " + pluralize(fileCount, "file"));
+        JkLog.info("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
         if (JkLog.isVerbose()) {
             resolveResult.getFiles().forEach(path -> JkLog.info(path.toString()));
         }

@@ -1,5 +1,6 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkAbstractPathTree;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -164,7 +165,7 @@ public final class JkJavaCompileSpec {
 
     public List<Path> getSourceDirs() {
         return sources.toList().stream()
-                .map(tree -> tree.getRoot())
+                .map(JkAbstractPathTree::getRoot)
                 .map(JkUtilsPath::relativizeFromWorkingDir)
                 .collect(Collectors.toList());
     }

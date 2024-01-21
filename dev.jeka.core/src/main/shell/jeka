@@ -325,15 +325,11 @@ compute_JEKA_DIST_DIR() {
   local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
   if [ -n "$explicit_distrib_dir" ]; then
     JEKA_DIST_DIR="$explicit_distrib_dir"
-    echo "------- jeka explicit distrib folder $explicit_distrib_dir"
-    echo "111111111111"
   else
     local jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
     if [ -z "$jeka_version" ]; then
       JEKA_DIST_DIR="$CURRENT_SCRIPT_DIR"  # if no version and distrib location specified, use the current script dir
-      echo "22222222222"
     else
-      echo "333333333333"
       local distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
       if [ -d "$distrib_cache_dir" ]; then
         JEKA_DIST_DIR="$distrib_cache_dir"
@@ -357,7 +353,6 @@ compute_JEKA_DIST_DIR() {
 ## Returns value in JEKA_CLASSPATH
 compute_JEKA_CLASSPATH() {
   local dist_dir=$1
-  echo "============ dist dir $dist_dir"
 
   # If no distrib dir is specified (no jeka.version specified), we look first
   # for jeka-core.jar presence in the same dir of the current script
@@ -388,7 +383,6 @@ compute_JEKA_CLASSPATH() {
   fi
   local jar_file="$dist_dir/$JEKA_JAR_NAME"
   if [ ! -f "$jar_file" ]; then
-    echo "============ current script dir $CURRENT_SCRIPT_DIR"
     echo "Cannot find JeKa jar file $jar_file."
     echo "Are you sure the JeKa distribution you use is properly packaged ?"
     exit 1
@@ -535,9 +529,7 @@ fi
 
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
-  echo "----------current script dir $CURRENT_SCRIPT_DIR"
   compute_JEKA_DIST_DIR "$BASE_DIR"
-  echo "----------JEKA DIST_DIR $JEKA_DIST_DIR"
   compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
   exec "$JAVA_CMD" $JEKA_OPTS -Djeka.current.basedir=$BASE_DIR -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi

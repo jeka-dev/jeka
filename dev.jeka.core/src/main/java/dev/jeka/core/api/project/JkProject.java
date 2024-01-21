@@ -15,6 +15,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,7 +49,6 @@ import java.util.function.Supplier;
  * a regular binary jar, but it can be customized for your needs.
  */
 public class JkProject implements JkIdeSupportSupplier {
-
 
     /**
      * This constant represents the value "auto" and is used in {@link JkProjectPackaging#setMainClass(String)} (String)}
@@ -338,6 +338,12 @@ public class JkProject implements JkIdeSupportSupplier {
                         .count(Integer.MAX_VALUE, false) + "\n")
             .append("Main Class Name                  : " + packaging.declaredMainClass() + "\n")
             .append("Download Repositories            : " + dependencyResolver.getRepos() + "\n")
+            .append("Manifest                         : \n" );
+        Arrays.stream(packaging.getManifest().asString().split("\n"))
+                .filter(line -> !JkUtilsString.isBlank(line))
+                .forEach(line -> builder.append("  " + line + "\n"));
+        //builder.deleteCharAt(builder.length()-1);  // remove leading "\n" at end of manifast
+        builder
             .append("Declared Compile Dependencies    : " + compileDependencies.getEntries().size() + " elements.\n");
         compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
         builder
@@ -347,12 +353,6 @@ public class JkProject implements JkIdeSupportSupplier {
         builder
             .append("Declared Test Dependencies       : " + testDependencies.getEntries().size() + " elements.\n");
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
-
-        builder
-            .append("Manifest                         : \n" );
-         Arrays.stream(packaging.getManifest().asString().split("\n"))
-                 .forEach(line -> builder.append("  " + line + "\n"));
-
         return builder.toString();
     }
 

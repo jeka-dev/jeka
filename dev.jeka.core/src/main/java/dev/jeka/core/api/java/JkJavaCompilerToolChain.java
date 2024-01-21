@@ -179,7 +179,7 @@ public final class JkJavaCompilerToolChain {
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
                 .orElse(compileSpec.minJavaVersion());
         final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
-        JkLog.endTask();
+        JkLog.endTask("Compilation succeed.");
         return result;
     }
 

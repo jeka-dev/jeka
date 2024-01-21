@@ -47,6 +47,10 @@ public final class JkFlatLogDecorator extends JkLog.JkLogDecorator {
         }
         String message = event.getMessage();
         if (logType == JkLog.Type.END_TASK) {
+            if (!event.getMessage().isEmpty()) {
+                err.flush();
+                out.println(event.getMessage());
+            }
             // Do nothing
         } else if (logType == JkLog.Type.START_TASK) {
             err.flush();

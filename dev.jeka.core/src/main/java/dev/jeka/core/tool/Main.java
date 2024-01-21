@@ -53,11 +53,11 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             String basedirProp = System.getProperty("jeka.current.basedir");
-            System.out.println("---- prop jeka.current.basedir : " + basedirProp);
+            //System.out.println("---- prop jeka.current.basedir : " + basedirProp);
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
-            System.out.println("---- actual base dir : " + baseDir);
-            System.out.println("---- actual base dir absolute : " + baseDir.toAbsolutePath().normalize());
+            //System.out.println("---- actual base dir : " + baseDir);
+            //System.out.println("---- actual base dir absolute : " + baseDir.toAbsolutePath().normalize());
             JkLog.setAcceptAnimation(!Environment.standardOptions.logNoAnimation);
             if (!Environment.standardOptions.logSetup) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
@@ -175,7 +175,7 @@ public final class Main {
     }
 
     private static String[] filteredArgs(String[] originalArgs) {
-        System.out.println("=====original args = +" + Arrays.asList(originalArgs));
+        //System.out.println("=====original args = +" + Arrays.asList(originalArgs));
         if (originalArgs.length == 0) {
             return originalArgs;
         }
@@ -187,7 +187,7 @@ public final class Main {
         } else if (first.startsWith("@")) {   // remove remote @alias
             result.remove(0);
         }
-        System.out.println("=====filterd args = +" + result);
+        //System.out.println("=====filterd args = +" + result);
         return result.toArray(new String[0]);
     }
 

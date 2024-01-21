@@ -105,14 +105,14 @@ final class Engine {
         JkRunbase runbase = JkRunbase.get(baseDir);
         runbase.setClasspath(computedClasspath);
 
-        // If jeka-src compilation failed, we ignore the defaultBeanClass cause it may be absent
+        // If jeka-src compilation failed, we ignore the master bean class because it may be absent
         // from the classpath.
-        boolean ignoreDefaultBeanNotFound = result == null ||
+        boolean ignoreMasterBeanNotFound = result == null ||
                 (!result.compileFailedProjects.getEntries().isEmpty() &&
                 Environment.standardOptions.ignoreCompileFail);
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
-                Environment.standardOptions.kbeanName(), ignoreDefaultBeanNotFound);
+                Environment.standardOptions.kbeanName(), ignoreMasterBeanNotFound);
         JkLog.startTask("Init runbase");
         runbase.init(resolvedCommands);
         JkLog.endTask();
@@ -126,7 +126,7 @@ final class Engine {
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
         if (Environment.standardOptions.logRuntimeInformation) {
-            JkLog.info("Classloader : ");
+            JkLog.info("JeKa class loader : ");
             Arrays.stream(JkClassLoader.ofCurrent().toString().split("\n"))
                     .forEach(line -> JkLog.info("  " + line));
             System.out.println();

@@ -110,6 +110,11 @@ public final class JkResourceProcessor {
     public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
         Path relativeOutputDir = outputDir.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(outputDir)
                 : outputDir;
+        boolean hasResourceFiles  = resourceTrees.count(1, false) > 0;
+        if (!hasResourceFiles) {
+            JkLog.info("No resources to process.");
+            return;
+        }
         JkLog.startTask("Copy resource files to %s", relativeOutputDir);
         for (final JkPathTree resourceTree : resourceTrees.toList()) {
             final AtomicInteger count = new AtomicInteger(0);

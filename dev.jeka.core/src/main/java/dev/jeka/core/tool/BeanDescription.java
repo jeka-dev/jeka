@@ -90,34 +90,26 @@ final class BeanDescription {
         return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
     }
 
-    String flatDescription() {
-        return description(beanClass, false, true);
-    }
-
-    private String description(Class<?> beanClass, boolean withHeader, boolean includeHierarchy) {
-        List<BeanMethod> methods = includeHierarchy ? this.beanMethods : this.methodsOf(beanClass);
-        List<BeanField> properties = includeHierarchy ? this.beanFields : this.optionsOf(beanClass);
+    String description(int leftColumnLength) {
+        List<BeanMethod> methods = this.beanMethods;
+        List<BeanField> properties =this.beanFields;
         if (methods.isEmpty() && properties.isEmpty()) {
             return "";
         }
         StringBuilder stringBuilder = new StringBuilder();
-        if (withHeader) {
-            stringBuilder.append("\nFrom " + beanClass.getName() + " :\n");
-        }
-        String margin = withHeader ? "  " : "";
         if (!methods.isEmpty()) {
-            stringBuilder.append(margin + "\nMethods:\n");
+            stringBuilder.append(JkUtilsString.padEnd("Methods", leftColumnLength, ' ')).append(":\n");
             List<RenderItem> items = methods.stream()
                     .map(BeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
-            container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
+            container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
         }
         if (!properties.isEmpty()) {
-            stringBuilder.append(margin + "\nProperties:\n");
+            stringBuilder.append(JkUtilsString.padEnd("Properties", leftColumnLength, ' ')).append(":\n");
             List<RenderItem> items = properties.stream()
                     .map(BeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
-            container.render().forEach(line -> stringBuilder.append(margin + "  " + line + "\n"));
+            container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
         }
         return stringBuilder.toString();
     }
