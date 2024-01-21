@@ -119,7 +119,7 @@ class Environment {
             this.logSetup = valueOf(boolean.class, map, false,"log.setup", "lsu");
             this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
-            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.BRACE, "log.style", "ls");
+            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.FLAT, "log.style", "ls");
             this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");

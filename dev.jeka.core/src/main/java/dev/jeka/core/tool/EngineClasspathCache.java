@@ -49,8 +49,13 @@ class EngineClasspathCache {
         boolean changed = compareAndStore(scope, dependencies);
         if (changed) {
             JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
-            JkLog.info("Dependency tree of jeka-src :");
-            JkLog.info(resolveResult.getDependencyTree().toStringTree());
+            String treeASString = resolveResult.getDependencyTree().toStringTree();
+            if (treeASString.trim().isEmpty()) {  // Nicer output
+                JkLog.info("Dependency tree of jeka-src : empty.");
+            } else {
+                JkLog.info("Dependency tree of jeka-src :");
+                JkLog.info(resolveResult.getDependencyTree().toStringTree());
+            }
             JkPathSequence pathSequence = resolveResult.getFiles();
             storeResolvedClasspath(scope, pathSequence);
             return new PartialResult(true, pathSequence);

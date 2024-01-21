@@ -126,7 +126,9 @@ final class Engine {
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
         if (Environment.standardOptions.logRuntimeInformation) {
-            System.out.println("Classloader : " + JkClassLoader.ofCurrent());
+            JkLog.info("Classloader : ");
+            Arrays.stream(JkClassLoader.ofCurrent().toString().split("\n"))
+                    .forEach(line -> JkLog.info("  " + line));
             System.out.println();
         }
         if (!hasJekaSrc) {

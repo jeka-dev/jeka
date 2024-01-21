@@ -108,6 +108,8 @@ public final class JkScaffold {
      */
     public void run() {
 
+        JkLog.startTask("Scaffolding");
+
         // Create 'jeka-src' dir
         final Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         JkLog.info("Create " + jekaSrc);
@@ -155,6 +157,7 @@ public final class JkScaffold {
         createShellScripts();
 
         extraActions.run();
+        JkLog.endTask();;
     }
 
     private String lastJekaVersion() {

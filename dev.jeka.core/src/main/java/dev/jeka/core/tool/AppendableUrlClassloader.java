@@ -28,6 +28,8 @@ class AppendableUrlClassloader extends URLClassLoader {
         }
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Jeka ClassLoader : " + AppendableUrlClassloader.class.getName();
+    }
 }

@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class JkLog implements Serializable {
 
     public enum Type {
-        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK;
+        INFO, WARN, ERROR, TRACE, PROGRESS, START_TASK, END_TASK;
 
         public boolean isTraceWarnOrError() {
             return this == TRACE || this == WARN || this == ERROR;
@@ -41,7 +41,9 @@ public final class JkLog implements Serializable {
     public enum Style {
         BRACE(new JkBraceLogDecorator()),
         INDENT(new JkIndentLogDecorator()),
-        DEBUG(new JkDebugLogDecorator());
+        DEBUG(new JkDebugLogDecorator()),
+        NUMBER(new JkNumberLogDecorator()),
+        FLAT(new JkFlatLogDecorator());
 
         private final JkLogDecorator decorator;
 
