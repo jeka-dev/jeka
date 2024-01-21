@@ -24,12 +24,9 @@ final class BeanDescription {
 
     private final List<BeanField> beanFields;
 
-    private final Class<? extends KBean> beanClass;
-
-    private BeanDescription(Class<? extends KBean> beanClass, List<BeanMethod> beanMethods,
+    private BeanDescription(List<BeanMethod> beanMethods,
                             List<BeanField> beanFields) {
         super();
-        this.beanClass = beanClass;
         this.beanMethods = Collections.unmodifiableList(beanMethods);
         this.beanFields = Collections.unmodifiableList(beanFields);
     }
@@ -46,7 +43,7 @@ final class BeanDescription {
                     nameAndField.name, nameAndField.rootClass));
         }
         Collections.sort(options);
-        return new BeanDescription(beanClass, methods, options);
+        return new BeanDescription(methods, options);
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {

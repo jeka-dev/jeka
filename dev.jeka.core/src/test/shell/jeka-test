@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 DRY_RUN=true
 export DRY_RUN
-set -x
+#set -x
 source ../../main/shell/jeka
 set -e
 
@@ -55,7 +55,7 @@ git_cache_dir=$(get_git_cache_dir)
 echo "Git Cache Dir : $git_cache_dir"
 [ -z "$git_cache_dir" ] && echo "Git cache dir is empty" && exit 1
 
-echo "-------------- Remote script call    -----------------"
+echo "-------------- Test Remote script call    -----------------"
 
 git_url="https://github.com/jeka-dev/template-examples.git#2.0"
 git_cache_folder_name=$(giturl_to_foldername "$git_url")
@@ -68,22 +68,20 @@ is_git=$(is_git_url "$git_url")
 is_git=$(is_git_url "/my_path")
 [ $is_git != "false" ] && echo "Failed,/my_path considered as a git url" && exit 1
 
-
-resolved_alias=$(resolve_alias "$git_url")
-[ "$resolved_alias" != "$git_url" ] && echo "Failed at resolving alias : $git_url resolved to $resolved_alias"
-
+compute_RESOLVED_ALIAS "$git_url" # result is returned in resolved_alias global var
+[ "$RESOLVED_ALIAS" != "$git_url" ] && echo "Failed at resolving alias '$git_url' : resolved to '$RESOLVED_ALIAS'"
 
 compute_BASE_DIR
-echo "Remote base dir : '$REMOTE_BASE_DIR'"
+echo "Remote base dir : '$BASE_DIR'"
 
 #args=("-r" "./toto")
 #remote_path=$(get_remote_argument "{$args[@]}")
 #echo "$remote_path"
 
-# --------- Download jeka distrib
+echo "------------- Test Download jeka distrib ---------"
 
 jeka_version=$(get_prop_value_from_base_dir "$SUB_DIR" "jeka.version")
 distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
-rm -r $distrib_cache_dir
-compute_jeka_distrib_dir "$SUB_DIR"
+rm -rf $distrib_cache_dir
+compute_JEKA_DIST_DIR "$SUB_DIR"
 echo "Jeka distrib cache dir : $JEKA_DIST_DIR"

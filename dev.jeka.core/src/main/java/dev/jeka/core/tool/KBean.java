@@ -50,7 +50,7 @@ public abstract class KBean {
     protected void init() {
     }
 
-    @JkDoc("Displays help about this KBean")
+    @JkDoc(hide = true, value="Displays help about this KBean")
     public void help() {
         HelpDisplayer.helpJkBean(this);
     }

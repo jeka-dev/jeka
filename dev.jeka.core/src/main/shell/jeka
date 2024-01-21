@@ -9,25 +9,24 @@ set -e
 # Global vars
 #####################
 
-LOG_DEBUG=""
-DRY_RUN=""  # Debugging purpose
+declare LOG_DEBUG
+declare DRY_RUN  # Debugging purpose
 
-GLOGAL_ARGS=$@  ## store in global variable to access within function
+declare JEKA_VERSION_PROP_NAME="jeka.java.version"
+declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
 
-JEKA_VERSION_PROP_NAME="jeka.java.version"
-JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
+declare JEKA_USER_HOME
+declare GLOBAL_PROP_FILE
+declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
+declare CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
-JEKA_USER_HOME=""
-GLOBAL_PROP_FILE=""
-BASE_DIR=""  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
-CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
-WORKING_DIR=$(pwd)
+declare JDK_DOWNLOAD_DISTRIB="temurin"
+declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
+declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
+declare JDK_DOWNLOAD_OS
+declare JDK_DOWNLOAD_ARCH
 
-JDK_DOWNLOAD_DISTRIB="temurin"
-JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
-JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
-JDK_DOWNLOAD_OS=""
-JDK_DOWNLOAD_ARCH=""
+declare RESOLVED_ALIAS
 
 ###########################
 # Functions
@@ -68,9 +67,9 @@ download_and_unpack() {
 
 get_jeka_user_home() {
   if [ -z "$JEKA_USER_HOME" ]; then
-    echo $HOME/.jeka
+    echo "$HOME/.jeka"
   else
-    echo $JEKA_USER_HOME
+    echo "$JEKA_USER_HOME"
   fi
 }
 
@@ -200,7 +199,7 @@ get_remote_argument() {
 }
 
 is_git_url() {
-    if expr "$1" : '\(https://\|ssh://\|git://\|git@).*' >/dev/null; then
+    if [[ $1 =~ ^(https://|ssh://|git://|git@).* ]]; then
         echo "true"
     else
         echo "false"
@@ -230,6 +229,7 @@ compute_base_dir_from_resolved_remote_arg() {
 
   local remote_path="$1"  # file-system path or git url
   local should_clean="$2"
+  local is_git_remot
   is_git_remote=$(is_git_url "$remote_path")
 
   # the remote reference a file-system path
@@ -239,7 +239,7 @@ compute_base_dir_from_resolved_remote_arg() {
       result="$remote_path"
       assert_dir_exits "$result"
     else  # relative path
-      result=$(pwd)/"$remote_arg"
+      result="$(pwd)/$remote_arg"
       assert_dir_exits "$result"
       result=$(cd "$result" && pwd)  # normalize pass
     fi
@@ -270,10 +270,10 @@ compute_base_dir_from_resolved_remote_arg() {
 
 # resolve alias in global.properties
 # Call 'resolve_alias cmdLineArg'.
-# Returns in 'resolved_alias' var
-resolve_alias() {
+# Returns in 'RESOLVED_ALIAS' var
+compute_RESOLVED_ALIAS() {
   local arg=$1
-  resolved_alias=""
+  RESOLVED_ALIAS=""
   if [[ ${arg:0:1} == "@" ]]; then  # argument start with '@'
     if [ ! -f "$GLOBAL_PROP_FILE" ]; then
       echo "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
@@ -290,10 +290,10 @@ resolve_alias() {
       echo "=============================="
       exit 1
     else
-      resolved_alias="$resolved"
+      RESOLVED_ALIAS="$resolved"
     fi
   else
-    resolved_alias="$arg"
+    RESOLVED_ALIAS="$arg"
   fi
 }
 
@@ -305,15 +305,15 @@ compute_BASE_DIR() {
   local arg="$1"
   if [ "$1" = "-r" ]; then
     local remote_arg=$2
-    resolve_alias "$remote_arg"
-    compute_base_dir_from_resolved_remote_arg "$resolved_alias"
+    compute_RESOLVED_ALIAS "$remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS"
   elif [ "$1" = "-rc" ]; then
     local remote_arg=$2
-    resolve_alias "$remote_arg"
-    compute_base_dir_from_resolved_remote_arg "$resolved_alias" "clean"
+    compute_RESOLVED_ALIAS "$remote_arg"
+    compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS" "clean"
   elif [ "${arg:0:1}" = "@" ]; then   # if first arg is an alias.
-    resolve_alias "$1"
-    compute_base_dir_from_resolved_remote_arg "$resolved_alias"
+    compute_RESOLVED_ALIAS "$1"
+    compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS"
   else
     BASE_DIR=$(pwd)
   fi

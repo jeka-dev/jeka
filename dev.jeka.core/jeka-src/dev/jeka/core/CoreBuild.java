@@ -113,6 +113,7 @@ public class CoreBuild extends KBean {
         JkPathFile.of(distrib.get("jeka-legacy")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("wrapper/jekaw-legacy")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
+            new ShellRemoteTester().run();  // Test 'jeka -r https://......git'
             testScaffolding();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());

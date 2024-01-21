@@ -34,6 +34,10 @@ public abstract class JekaCommandLineExecutor {
         }
     }
 
+    public Path getJekaShellPath() {
+        return jekaShellCmd;
+    }
+
     public void setJacoco(Path agent, Path report) {
         jacocoAgentPath = agent.toAbsolutePath().normalize();
         jacocoReportFile = report.toAbsolutePath().normalize();
