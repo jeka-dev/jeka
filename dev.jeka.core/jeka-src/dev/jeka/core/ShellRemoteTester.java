@@ -34,7 +34,8 @@ public class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
         String output = result.getOutput();
-        JkUtilsAssert.state( output.endsWith("ok\n"), "Command output was '%s', expecting ending with 'ok'", output);
+        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+                "expecting ending with 'ok 'followed by a breaking line)", output);
     }
 
     private void testWithSnapshotDistribVersion() {
@@ -67,14 +68,18 @@ public class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
-        JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "-lna", "#ok")
+        JkProcResult procResult =JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "-lna", "#ok")
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
+                .setCollectOutput(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .setEnv("jeka.java.version", "20")
                 .setEnv("jeka.java.distrib", distro)
                 .exec();
         JkUtilsAssert.state(Files.exists(cachedJdk),"Jdk not found at %s", cachedJdk);
+        String output = procResult.getOutput();
+        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+                "expecting ending with 'ok 'followed by a breaking line)", output);
     }
 
 }

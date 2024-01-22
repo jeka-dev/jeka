@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Script for debugging jeka bash script.
+
 DRY_RUN=true
 export DRY_RUN
 #set -x
@@ -39,7 +41,25 @@ prop_value=$(get_java_version_from_props "$SUB_DIR")
 echo "get_java_version_from_props = $prop_value"
 [ ! "$prop_value" == "17" ] && echo "Failure: function 'get_java_version_from_props' does not returns '17'" && exit 1
 
-# ------- JDK Location
+echo "---------- Test parsing arguments --------------"
+
+echo "SHOULD_LOG_DOWNLOAD = '$SHOULD_LOG_DOWNLOAD'"
+
+args=( "toto" "titi" )
+compute_SHOULD_LOG_DOWNLOAD "${args[@]})"
+[ "$SHOULD_LOG_DOWNLOAD" != "" ] && echo "Failure: -lsu not present but SHOULD_LOG_DOWNLOAD is set to '$SHOULD_LOG_DOWNLOAD'" && exit 1
+
+args=( "toto" "-lsu" "uu")
+compute_SHOULD_LOG_DOWNLOAD "${args[@]})"
+[ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
+
+args=( "toto" "-lsu")
+compute_SHOULD_LOG_DOWNLOAD "${args[@]})"
+[ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
+
+
+
+echo "---------- Test JDK Location --------------------"
 
 # Test JDK Path
 prop_value=$(get_jdk_home_for_version "$SUB_DIR" "17")

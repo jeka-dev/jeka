@@ -9,16 +9,14 @@ set -e
 # Global vars
 #####################
 
-declare LOG_DEBUG
-declare DRY_RUN  # Debugging purpose
-
 declare JEKA_VERSION_PROP_NAME="jeka.java.version"
 declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
 
 declare JEKA_USER_HOME
 declare GLOBAL_PROP_FILE
 declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
-declare CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+declare CURRENT_SCRIPT_DIR
+CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 declare JDK_DOWNLOAD_DISTRIB="temurin"
 declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
@@ -26,7 +24,12 @@ declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
 declare JDK_DOWNLOAD_OS
 declare JDK_DOWNLOAD_ARCH
 
-declare RESOLVED_ALIAS
+declare RESOLVED_ALIAS # the resolved value of the remote execution argument if started with '@'
+
+declare SHOULD_LOG_DOWNLOAD # we should not log anything when on the green path, except if '-lsu' arg is present
+
+declare LOG_DEBUG # DEBUG
+declare DRY_RUN  # Debugging purpose
 
 ###########################
 # Functions
@@ -38,16 +41,31 @@ debug() {
   fi
 }
 
+compute_SHOULD_LOG_DOWNLOAD() {
+  for arg in "$@"
+    do
+      if [ "$arg" == "-lsu" ] ; then
+          SHOULD_LOG_DOWNLOAD="true"
+          return 0
+      fi
+    done
+}
+
 download_and_unpack() {
   local url=$1
   local dir=$2
   local file_type=$3  # 'zip' or 'tar.gz'
-  local temp_file=$(mktemp)
+  local temp_file
+  temp_file=$(mktemp)
   rm "$temp_file"
 
   ## download
   if [ -x "$(command -v curl)" ]; then
-    curl -Lf --fail --show-error -o "$temp_file" "$url"
+    local silent_flag="s"
+    if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+      silent_flag=""
+    fi
+    curl -"$silent_flag"Lf --fail --show-error -o "$temp_file" "$url"
   elif [ -x "$(command -v wget)" ]; then
     wget -q -O "$temp_file" "$url"
   else
@@ -86,7 +104,7 @@ get_prop_value_from_file() {
 # Translates a property name (as my.prop) to an env var name (as MY_PROP)
 # Call `get_env_var_name "my.prop"`
 get_env_var_name() {
-  echo $(echo "$1" | tr 'a-z.' 'A-Z_')
+  echo "$1" | tr 'a-z.' 'A-Z_'
 }
 
 # Returns the value of a property from a base dir. If value is not found then
@@ -98,20 +116,22 @@ get_prop_value_from_base_dir() {
 
   # TODO first look in cmd line arg as "-Dmy.prop=my_value"
   # Look first in env variables
-  local envValue=$(printenv "$prop_name")
-  if [ "$envValue" != "" ]; then
-    echo $envValue
+  local env_value
+  env_value=$(printenv "$prop_name")
+  if [ "$env_value" != "" ]; then
+    echo "$env_value"
     return 0
   fi
 
-  local value=$(get_prop_value_from_file "$base_dir/jeka.properties" "$prop_name")
-  if [ -z $value ]; then
+  local value
+  value=$(get_prop_value_from_file "$base_dir/jeka.properties" "$prop_name")
+  if [ -z "$value" ]; then
     local parent_dir="$base_dir/.."
     local parent_jeka_props="$parent_dir/jeka.properties"
     if [ -f "$parent_jeka_props" ]; then
-      echo $(get_prop_value_from_base_dir "$parent_dir" "$prop_name")
+      echo "$(get_prop_value_from_base_dir $parent_dir $prop_name)"
     else
-      echo $(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
+      echo "$(get_prop_value_from_file $GLOBAL_PROP_FILE $prop_name)"
     fi
     return
   fi
@@ -121,9 +141,11 @@ get_prop_value_from_base_dir() {
 # call `propJavaVersion base_dir`
 get_java_version_from_props() {
   local base_dir="$1"
-  local version=$(get_prop_value_from_base_dir "$base_dir" "$JEKA_VERSION_PROP_NAME")
-  local trimmed_version=$(echo "$version" | sed 's/ //g')  # remove spaces
-  echo $trimmed_version
+  local version
+  version=$(get_prop_value_from_base_dir "$base_dir" "$JEKA_VERSION_PROP_NAME")
+  local trimmed_version
+  trimmed_version=$(echo "$version" | sed 's/ //g')  # remove spaces
+  echo "$trimmed_version"
 }
 
 # call `get_jdk_home_for_version base_dir JAVA_VERSION`
@@ -134,23 +156,24 @@ get_jdk_home_for_version() {
 
 
   # Look first in env variables
-  local envValue=$(printenv "$prop_name")
-  if [ "$envValue" != "" ]; then
-    echo $envValue
+  local env_value
+  env_value=$(printenv "$prop_name")
+  if [ "$env_value" != "" ]; then
+    echo $env_value
     return 0
   fi
 
   # -- look for 'envVarified' name
-  local env_var_name=$(get_env_var_name "$prop_name")
-  #envValue=$(printenv "env_var_name")
-  #if [ "$envValue" != "" ]; then
-  #  echo $envValue
+  #local env_var_name
+  #env_var_name=$(get_env_var_name "$prop_name")
+  #env_value=$(printenv "env_var_name")
+  #if [ "$env_value" != "" ]; then
+  #  echo $env_value
   #  return 0
   #fi
 
   # Look in property files
-  local path=$(get_prop_value_from_base_dir "$base_dir" "$prop_name")
-  echo $path
+  get_prop_value_from_base_dir "$base_dir" "$prop_name"
 }
 
 get_cache_dir() {
@@ -162,7 +185,7 @@ get_cache_dir() {
 }
 
 get_git_cache_dir() {
-  echo $(get_cache_dir)/git
+  echo "$(get_cache_dir)/git"
 }
 
 ## To be called as substring=$(substring_before_hash 'Hello#World')
@@ -208,13 +231,15 @@ is_git_url() {
 
 giturl_to_foldername() {
     local url=$1
-    local trimmed_url=$(echo $url | sed 's/https:\/\///')
+    local trimmed_url
+    trimmed_url=$(echo $url | sed 's/https:\/\///')
     trimmed_url=$(echo $trimmed_url | sed 's/ssh:\/\///')
     trimmed_url=$(echo $trimmed_url | sed 's/git:\/\///')
     trimmed_url=$(echo $trimmed_url | sed  's/git@//')
     # Extract the repository name from the Git URL using sed and awk
-    local foldername=$(echo "$trimmed_url" | sed 's/\//_/g')
-    echo $foldername
+    local folder_name
+    folder_name=$(echo "$trimmed_url" | sed 's/\//_/g')
+    echo "$folder_name"
 }
 
 assert_dir_exits() {
@@ -229,7 +254,7 @@ compute_base_dir_from_resolved_remote_arg() {
 
   local remote_path="$1"  # file-system path or git url
   local should_clean="$2"
-  local is_git_remot
+  local is_git_remote
   is_git_remote=$(is_git_url "$remote_path")
 
   # the remote reference a file-system path
@@ -248,20 +273,28 @@ compute_base_dir_from_resolved_remote_arg() {
   fi
 
   ## Remote reference a git repo
-  local git_url=$(substring_before_hash "$remote_path")
-  local git_tag=$(substring_after_hash "$remote_path")
+  local git_url
+  git_url=$(substring_before_hash "$remote_path")
+  local git_tag
+  git_tag=$(substring_after_hash "$remote_path")
   local branch_args=""
   if [ "$git_tag" != "" ]; then
     branch_args="--branch $git_tag"
   fi
-  local cache_dir_name=$(giturl_to_foldername "$remote_path")
+  local cache_dir_name
+  cache_dir_name=$(giturl_to_foldername "$remote_path")
   result=$(get_git_cache_dir)/"$cache_dir_name"
   if [ -n "$should_clean" ]; then
     rm -rf "$result"
   fi
   if [ ! -d "$result" ]; then
-      echo "Cloning $git_url into $result  ..."
-      git clone -c advice.detachedHead=false --depth 1 $branch_args $git_url $result
+      local quiet_flag="--quiet"
+      if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+        echo "------- SHOULD_LOG_DOWNLOAD = '$SHOULD_LOG_DOWNLOAD'"
+        quiet_flag=""
+        echo "Cloning $git_url into $result  ..."
+      fi
+      git clone -c advice.detachedHead=false --depth 1 $branch_args $git_url $result $quiet_flag
   else
       debug "Cache directory $result already exists. Won't clone or update."
   fi
@@ -281,7 +314,8 @@ compute_RESOLVED_ALIAS() {
     fi
     local alias_name=${arg:1}
     local prop_name="jeka.remote.alias.$alias_name"
-    local resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
+    local resolved
+    resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
     if [ -z "$resolved" ]; then
       echo "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg"
       echo "Defined Aliases :"
@@ -301,7 +335,6 @@ compute_RESOLVED_ALIAS() {
 ## call `compute_BASE_DIR $1 $2`
 compute_BASE_DIR() {
   local result
-  local delete_git_cache_flag
   local arg="$1"
   if [ "$1" = "-r" ]; then
     local remote_arg=$2
@@ -322,26 +355,32 @@ compute_BASE_DIR() {
 # result is written in JEKA_DIST_DIR
 compute_JEKA_DIST_DIR() {
   local base_dir=$1
-  local explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
+  local explicit_distrib_dir
+  explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
   if [ -n "$explicit_distrib_dir" ]; then
     JEKA_DIST_DIR="$explicit_distrib_dir"
   else
-    local jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
+    local jeka_version=
+    jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
     if [ -z "$jeka_version" ]; then
       JEKA_DIST_DIR="$CURRENT_SCRIPT_DIR"  # if no version and distrib location specified, use the current script dir
     else
-      local distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
+      local distrib_cache_dir
+      distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
       if [ -d "$distrib_cache_dir" ]; then
         JEKA_DIST_DIR="$distrib_cache_dir"
 
       else
         # select download repo
         local jeka_repo="https://repo.maven.apache.org/maven2"
-        local distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
+        local distrib_repo
+        distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
 
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
-        echo "Download Jeka distrib from $url in $distrib_cache_dir"
+        if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+          echo "Download Jeka distrib from $url in $distrib_cache_dir"
+        fi
         download_and_unpack "$url" "$distrib_cache_dir"
         JEKA_DIST_DIR=$distrib_cache_dir
       fi
@@ -393,11 +432,13 @@ compute_JEKA_CLASSPATH() {
 # call `get_or_download_jdk $JAVA_VERSION`. The result is set to DOWNLOAD_JDK_DIR var.
 get_or_download_jdk() {
   local JAVA_VERSION="$1"
-  local specified_distrib=$(get_prop_value_from_base_dir "$BASE_DIR" "jeka.java.distrib")
+  local specified_distrib
+  specified_distrib=$(get_prop_value_from_base_dir "$BASE_DIR" "jeka.java.distrib")
   if [ -n "$specified_distrib" ]; then
     JDK_DOWNLOAD_DISTRIB="$specified_distrib"
   fi
-  local jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$JAVA_VERSION"
+  local jdk_cache_dir
+  jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$JAVA_VERSION"
   if [ ! -d "$jdk_cache_dir" ]; then
     if [ -z "$JDK_DOWNLOAD_OS" ]; then
       echo "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
@@ -410,12 +451,15 @@ get_or_download_jdk() {
       exit 1
     fi
     local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
-    echo "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
+    if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+      echo "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
+    fi
     download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
     if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
-      pushd "$jdk_cache_dir"
-      local nested_dir=$(find "." -mindepth 1 -maxdepth 1 -type d | head -n 1 | cut -c 3-)
-      popd
+      pushd "$jdk_cache_dir" > /dev/null 2>&1
+      local nested_dir
+      nested_dir=$(find "." -mindepth 1 -maxdepth 1 -type d | head -n 1 | cut -c 3-)
+      popd > /dev/null 2>&1
       temp_dir=$(mktemp -d)
       mv "$jdk_cache_dir"/"$nested_dir"/* "$temp_dir"
       mv "$temp_dir"/* "$jdk_cache_dir"
@@ -428,8 +472,10 @@ get_or_download_jdk() {
 # Script starts here
 ##############################################################
 
+compute_SHOULD_LOG_DOWNLOAD "$@"
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
+
 
 compute_BASE_DIR "$1" "$2"
 
@@ -479,12 +525,7 @@ case "$(uname -m)" in
     JDK_DOWNLOAD_ARCH="arm64"
     ;;
   *)
-    ## AIX gives a machine ID for `uname -m` but it only supports ppc64
-    if [ "$os" = "aix" ]; then
-      JDK_DOWNLOAD_ARCH="ppc64"
-    else
-      JDK_DOWNLOAD_ARCH=""
-    fi
+    JDK_DOWNLOAD_ARCH=""
     ;;
 esac
 
