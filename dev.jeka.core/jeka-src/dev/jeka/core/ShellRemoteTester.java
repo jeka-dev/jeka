@@ -1,13 +1,14 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ShellRemoteTester  extends JekaCommandLineExecutor {
 
@@ -28,14 +29,14 @@ public class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "-lna", "#ok")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "#ok")
                 .setLogCommand(true)
                 .setCollectOutput(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
         String output = result.getOutput();
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
-                "expecting ending with 'ok 'followed by a breaking line)", output);
+                "expecting 'ok' followed by a breaking line)", output);
     }
 
     private void testWithSnapshotDistribVersion() {

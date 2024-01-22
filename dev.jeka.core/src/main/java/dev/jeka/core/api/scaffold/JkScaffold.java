@@ -110,26 +110,32 @@ public final class JkScaffold {
 
         JkLog.startTask("Scaffolding");
 
+        String effectiveJekaVersion = !JkUtilsString.isBlank(jekaVersion) ? jekaVersion : lastJekaVersion();
+
         // Create 'jeka-src' dir
         final Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         JkLog.info("Create " + jekaSrc);
         JkUtilsPath.createDirectories(jekaSrc);
 
         // Create build class if needed
-        final Path buildClass = jekaSrc.resolve(classFilename);
-        JkLog.info("Create " + buildClass);
-        String code = jkClassCodeProvider.get();
-        String effectiveJekaVersion = !JkUtilsString.isBlank(jekaVersion) ? jekaVersion : lastJekaVersion();
-        if (!JkUtilsString.isBlank(code)) {
-            if (code.contains("${jekaVersion}")) {
-                code = code.replace("${jekaVersion}", effectiveJekaVersion);
+        final Path appClass = jekaSrc.resolve(classFilename);
+        if (!Files.exists(appClass)) {
+            JkLog.info("Create " + appClass);
+            String code = jkClassCodeProvider.get();
+            if (!JkUtilsString.isBlank(code)) {
+                if (code.contains("${jekaVersion}")) {
+                    code = code.replace("${jekaVersion}", effectiveJekaVersion);
+                }
+                JkUtilsPath.write(appClass, code.getBytes(StandardCharsets.UTF_8));
             }
-            JkUtilsPath.write(buildClass, code.getBytes(StandardCharsets.UTF_8));
         }
 
         // Create 'jeka.properties' file
-        JkPathFile jekaPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE))
-                .fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
+        JkPathFile jekaPropsFile = jekaPropsFile = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
+        if (!jekaPropsFile.exists()) {
+            jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
+        }
+
         if (!JkUtilsString.isBlank(jekaLocation)) {
             String line = "jeka.distrib.location=" + jekaLocation + "\n";
             jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);

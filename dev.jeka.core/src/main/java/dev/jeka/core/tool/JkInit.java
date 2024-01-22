@@ -40,7 +40,7 @@ public final class JkInit {
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
         }
         boolean memoryBufferLogActivated = false;
-        if (!Environment.standardOptions.logSetup && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
+        if (!Environment.standardOptions.logStartUp && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
             JkMemoryBufferLogDecorator.activateOnJkLog();
             JkLog.info("");   // To have a br prior the memory log is flushed
             memoryBufferLogActivated = true;

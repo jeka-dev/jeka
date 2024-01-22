@@ -70,7 +70,7 @@ public final class JkLog implements Serializable {
 
     private static Style decoratorStyle;
 
-    // if false, no animation should be displayed.
+    // if false, no working animation should be displayed.
     private static boolean acceptAnimation = true;
 
     private static LinkedList<Long> getStartTimes() {
@@ -119,7 +119,7 @@ public final class JkLog implements Serializable {
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
-        JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
+        JkUtilsAssert.argument(verbosityArg != null, "Verbosity can not be set to null.");
         verbosity = verbosityArg;
     }
 
@@ -216,7 +216,8 @@ public final class JkLog implements Serializable {
 
             }
             long durationMillis = JkUtilsTime.durationInMillis(startTime);
-            consume(JkLogEvent.ofEndTask(Type.END_TASK, message, durationMillis));
+            String actualMessage = message.contains("%d") ? String.format(message, durationMillis) : message;
+            consume(JkLogEvent.ofEndTask(Type.END_TASK, actualMessage, durationMillis));
         }
     }
 

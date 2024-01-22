@@ -86,13 +86,13 @@ class Environment {
 
         boolean logVerbose;
 
-        boolean logNoAnimation;
+        Boolean logAnimation;
 
         boolean logBanner;
 
         boolean logDuration;
 
-        boolean logSetup;
+        boolean logStartUp;
 
         boolean logStackTrace;
 
@@ -113,10 +113,10 @@ class Environment {
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(boolean.class, map, false, "Log.verbose", "lv");
             this.logIvyVerbose = valueOf(boolean.class, map, false, "log.ivy.verbose", "liv");
-            this.logNoAnimation = valueOf(boolean.class, map, false, "log.no.animation", "lna");
+            this.logAnimation = valueOf(boolean.class, map, null, "log.animation", "la");
             this.logBanner = valueOf(boolean.class, map, false,"log.banner", "lb");
             this.logDuration = valueOf(boolean.class, map, false,"log.duration", "ld");
-            this.logSetup = valueOf(boolean.class, map, false,"log.setup", "lsu");
+            this.logStartUp = valueOf(boolean.class, map, false,"log.setup", "lsu");
             this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
             this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.FLAT, "log.style", "ls");

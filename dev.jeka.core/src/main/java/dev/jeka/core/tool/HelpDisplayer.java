@@ -69,7 +69,7 @@ final class HelpDisplayer {
         items.add(option("log.verbose", "lv", "log 'trace' level"));
         items.add(option("log.ivy.verbose", "liv",  " log 'trace' level + Ivy trace level"));
         items.add(option("log.runtime.information", "lri",  " log Jeka runbase information at startup"));
-        items.add(option("log.no.animation", "lna",  " do not log animations on console"));
+        items.add(option("log.animation", "la",  "log working animations on console"));
         items.add(option("log.duration", "ld",  " log execution duration"));
         items.add(option("log.runtime.info", "lri",  " log Jeka runbase information as Jeka version, JDK version, working dir, classpath ..."));
         items.add(option("log.banner", "lb",  " log intro and outro banners"));
