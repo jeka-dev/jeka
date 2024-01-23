@@ -21,7 +21,6 @@ public abstract class JekaCommandLineExecutor {
 
     private Path jacocoReportFile;
 
-
     protected JekaCommandLineExecutor() {
         super();
         String relPath = "jeka-output/distrib/" + scriptName();

@@ -13,6 +13,7 @@ declare CMD_LINE_ARGS=("$@")
 
 declare JEKA_VERSION_PROP_NAME="jeka.java.version"
 declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
+declare DEFAULT_JAVA_VERSION="21"
 
 declare JEKA_USER_HOME
 declare GLOBAL_PROP_FILE
@@ -560,7 +561,13 @@ JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR")
 if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
   JAVA_HOME="$JEKA_JDK_HOME"
 
-elif [ -n "$JAVA_VERSION" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
+elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
+  if [ -z "$JAVA_VERSION" ]; then
+    JAVA_VERSION=$"$DEFAULT_JAVA_VERSION"
+    if [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
+      echo "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION"
+    fi
+  fi
   jdkPath=$(get_jdk_home_for_version "$BASE_DIR" "$JAVA_VERSION")
   debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
   if [ -z "$jdkPath" ]; then
@@ -587,9 +594,9 @@ if [ -z "$JAVA_CMD" ] ; then
 fi
 
 if [ ! -x "$JAVA_CMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )." >&2
+  echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )."
   echo "  We cannot execute $JAVA_CMD" >&2
-  echo "  You can specify which JDK to use by setting JEKA_JDK environment variable." >&2
+  echo "  You can specify which JDK to use by setting JEKA_JDK environment variable."
   exit 1
 fi
 
