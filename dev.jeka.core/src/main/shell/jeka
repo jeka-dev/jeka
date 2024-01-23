@@ -3,6 +3,15 @@
 # Script for launching JeKa
 # Authors: Jerome Angibaud, Patrick Santana
 
+# Rules for selecting a JDK :
+# - If JEKA_JDK_HOME ios specified, choose it
+# - If a jeka.java.version is specified
+#   - First look if a jeka.jdk.[version] is specified. If so, choose it.
+#   - Otherwise look in cache or download the proper JDK
+# - Else
+#   - If JAVA_HOME env var is specified, choose it
+#   - Otherwise look in cache and download default version (21)
+
 set -e
 
 #####################
@@ -13,7 +22,6 @@ declare CMD_LINE_ARGS=("$@")
 
 declare JEKA_VERSION_PROP_NAME="jeka.java.version"
 declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
-declare DEFAULT_JAVA_VERSION="21"
 
 declare JEKA_USER_HOME
 declare GLOBAL_PROP_FILE
@@ -21,6 +29,7 @@ declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, .
 declare CURRENT_SCRIPT_DIR
 CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
+declare DEFAULT_JAVA_VERSION="21"
 declare JDK_DOWNLOAD_DISTRIB="temurin"
 declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
 declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
@@ -156,11 +165,11 @@ get_prop_value_from_base_dir() {
     local parent_dir="$base_dir/.."
     local parent_jeka_props="$parent_dir/jeka.properties"
     if [ -f "$parent_jeka_props" ]; then
-      echo "$(get_prop_value_from_base_dir $parent_dir $prop_name)"
+      get_prop_value_from_base_dir "$parent_dir" "$prop_name"
     else
-      echo "$(get_prop_value_from_file $GLOBAL_PROP_FILE $prop_name)"
+      get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name"
     fi
-    return
+    return 0
   fi
   echo "$value"
 }
