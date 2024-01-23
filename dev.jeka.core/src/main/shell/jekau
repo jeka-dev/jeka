@@ -46,6 +46,23 @@ download_and_unpack() {
   rm "$temp_file"
 }
 
+check_prerequisites() {
+  if ! command -v git > /dev/null 2>&1; then
+      echo "Git is not installed. Please install it prior installing Jeka"
+      exit 1
+  fi
+  if ! command -v curl > /dev/null 2>&1; then
+      echo "Curl is not installed. Please install it prior installing Jeka"
+      exit 1
+  fi
+  if ! command -v unzip  > /dev/null 2>&1; then
+      echo "Unzip is not installed. Please install it prior installing Jeka"
+      exit 1
+  fi
+
+
+}
+
 compute_LAST_VERSION() {
   local group_id="dev.jeka"
   local artifact_id="jeka-core"
@@ -85,6 +102,8 @@ compute_SHELL_CONFIG_FILE() {
 ## install in the current directory
 ## This method is intended to install JeKa from scratch
 setup() {
+
+  check_prerequisites
 
   compute_SHELL_CONFIG_FILE
 
