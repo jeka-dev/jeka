@@ -2,6 +2,7 @@ import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.tool.JkDoc;
@@ -80,14 +81,6 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                 // Control on published artifact and versions
                 .setModuleId("org.jerkar:examples-java-flat-facade")
                 .setVersionFromGitTag();
-
-        // Here we are modifying the dependencies mentioned in the published POM
-        project.mavenPublication
-                .customizeDependencies(deps -> deps
-                        .minus("com.fasterxml.jackson.core")
-                        .withTransitivity("com.github.djeang:vincer-dom", JkTransitivity.RUNTIME)
-                );
-
         return project;
     }
 

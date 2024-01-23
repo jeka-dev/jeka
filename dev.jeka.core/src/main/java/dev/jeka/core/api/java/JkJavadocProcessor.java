@@ -80,7 +80,7 @@ public final class JkJavadocProcessor {
             return;
         }
         executeCommandLine(classpath, srcDirs, outputDir);
-        JkLog.endTask("Javadoc generated");
+        JkLog.endTask("Javadoc generated in %d mills.");
     }
 
     // https://www.programcreek.com/java-api-examples/index.php?api=javax.tools.DocumentationTool

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Script for debugging jekau
+# executing `jekau install` in this directory should download last distrib, copy it in this
+# directory and adjust PATH variable
+
+SPECIFIC_JEKA_DIST_URL="https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/0.11.x-SNAPSHOT/jeka-core-0.11.x-SNAPSHOT-distrib.zip"
+
+#set -x
+source ../../../main/shell/jekau
+
+# ./jekau-test setup_from_scratch
+
+
+
+
+
+

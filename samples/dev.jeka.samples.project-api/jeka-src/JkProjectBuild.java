@@ -1,16 +1,17 @@
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.project.JkIdeSupport;
-import dev.jeka.core.api.project.JkIdeSupportSupplier;
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectSourceGenerator;
+import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
@@ -28,6 +29,28 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
     IntellijKBean intelliKBean = load(IntellijKBean.class)
             .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
             .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+
+    JkProject project = project();
+
+    JkMavenPublication mavenPublication = mavenPublication(project);
+
+    JkIvyPublication ivyPublication = ivyPublication(project);
+
+    @JkDoc("Clean output and create the bin jar for this project")
+    public void cleanPack() {
+        project().clean().pack();
+    }
+
+    @JkDoc("Pulish on Maven repo")
+    public void publish() {
+        mavenPublication.publish();
+    }
+
+    @Override
+    public JkIdeSupport getJavaIdeSupport() {
+        return project().getJavaIdeSupport();
+    }
+
 
     /*
      * Configures plugins to be bound to this command class. When this method is called, option
@@ -101,41 +124,38 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                         .minus("org.codehaus.plexus:plexus-container-default")
                         .and("com.h2database:h2:2.2.224")
                 );
+        return project;
+    }
 
-        // Control on publication
-        project.mavenPublication
+    private JkMavenPublication mavenPublication(JkProject project) {
+        JkMavenPublication mavenPublication = JkProjectPublications.mavenPublication(project);
+        mavenPublication
                 .setModuleId("dev.jeka.examples:my-sample")
                 .setVersion("1.0.0")
                 .setDefaultSigner((path1, path2) -> {})   // sign published artifact
                 .setRepos(JkRepoSet.of("https://my.org.repository/internal"))
 
-                    .customizeDependencies(deps -> deps  // Fine tune published transitive dependencies
-                            .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-                    )
-                    .pomMetadata   // Metadata required to publish on Maven Central
-                        .addLicense("A licence", "https://org.my.license")
-                        .addDeveloper("John", "Doe", "g-mol", "johndoe@gmol.com")
-                        .setProjectName("My project name")
-                        .setProjectDescription("My project description")
-                        .setProjectUrl("https://my.project.url")
-                        .setScmConnection("git://my.git.repo/for.project")
-                        .setScmDeveloperConnection("https://my.scn.dev.connectyion");
+                .customizeDependencies(deps -> deps  // Fine tune published transitive dependencies
+                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
+                )
+                .pomMetadata   // Metadata required to publish on Maven Central
+                .addLicense("A licence", "https://org.my.license")
+                .addDeveloper("John", "Doe", "g-mol", "johndoe@gmol.com")
+                .setProjectName("My project name")
+                .setProjectDescription("My project description")
+                .setProjectUrl("https://my.project.url")
+                .setScmConnection("git://my.git.repo/for.project")
+                .setScmDeveloperConnection("https://my.scn.dev.connectyion");
+        return mavenPublication;
+    }
 
-        project.createIvyPublication()
-                    .setRepos(JkRepoSet.of("https://my.ivy.repo"));
+    public JkIvyPublication ivyPublication(JkProject project) {
+        return JkProjectPublications.ivyPublication(project)
+                .setRepos(JkRepoSet.of("https://my.ivy.repo"));
                 //... similar to Maven
-
-        return project;
     }
 
-    public void cleanPack() {
-        project().clean().pack();
-    }
 
-    @Override
-    public JkIdeSupport getJavaIdeSupport() {
-        return project().getJavaIdeSupport();
-    }
 
     public static class MySourceGenerator extends JkProjectSourceGenerator {
 

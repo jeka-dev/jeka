@@ -1,0 +1,201 @@
+#!/bin/bash
+
+set -e
+
+# Script for installing and upgrading JeKa
+# Authors: Jerome Angibaud
+
+# curl https://jeka.dev/install_scripts/jekai.sh | batch -s - setup
+
+
+declare MAVEN_REPO="https://repo1.maven.org/maven2"
+declare MANUAL_NOTICE="https://jeka-dev.github.io/jeka/reference-guide/install"
+declare TEST_REMOTE_URL="https://github.com/jeka-dev/sample-for-integration-test.git#0.0.1"
+
+download_and_unpack() {
+  local url=$1
+  local dir=$2
+  local file_type=$3  # 'zip' or 'tar.gz'
+  local temp_file
+  temp_file=$(mktemp)
+  rm "$temp_file"
+
+  echo "------ temp_file $temp_file"
+
+  ## download
+  if [ -x "$(command -v curl)" ]; then
+    echo "-----curl $url"
+    curl -Lf --fail --show-error -o "$temp_file" "$url"
+  elif [ -x "$(command -v wget)" ]; then
+    wget -q -O "$temp_file" "$url"
+  else
+    echo "Error: curl or wget not found, please make sure one of them is installed" 1>&2
+    exit 1
+  fi
+
+  ## unpack
+  if [ "$file_type" == "tar.gz" ]; then
+      mkdir -p "$dir"
+      gzip -cd "$temp_file" | tar xf - -C "$dir"
+  else
+    unzip -qq -o "$temp_file" -d "$dir"
+  fi
+  rm "$temp_file"
+}
+
+compute_LAST_VERSION() {
+  local group_id="dev.jeka"
+  local artifact_id="jeka-core"
+  local url
+  url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
+  LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
+
+}
+
+get_download_url() {
+  local version="$1"
+  echo "$MAVEN_REPO/dev/jeka/jeka-core/$version/jeka-core-$version-distrib.zip"
+}
+
+compute_SHELL_CONFIG_FILE() {
+  local shell_bin
+  local current_shell="$SHELL"
+  if [ "$current_shell" == "" ]; then
+    current_shell="$0"
+  fi
+  if [[ $current_shell == *"bash"* ]]; then
+      shell_bin="bash"
+  elif [[ $current_shell == *"zsh"* ]]; then
+      shell_bin="zsh"
+  fi
+  echo "Detected shell $current_shell ($shell_bin)"
+  if [ "$shell_bin" == "zsh" ]; then
+    SHELL_CONFIG_FILE="$HOME/.zshrc"
+  elif [ -f "$HOME/.bash_profile" ]; then
+    SHELL_CONFIG_FILE="$HOME/.bash_profile"
+  elif [ -f "$HOME/.bashrc" ]; then
+     SHELL_CONFIG_FILE="$HOME/.bash_profile"
+  fi
+  echo "Detected shell config file $SHELL_CONFIG_FILE"
+}
+
+## install in the current directory
+## This method is intended to install JeKa from scratch
+setup() {
+
+  compute_SHELL_CONFIG_FILE
+
+  echo "----a"
+  # First check if Jeka is not already installed
+  local current_jeka_path
+  current_jeka_path=$(which jeka || echo "not found")
+  if [ "$JEKA_HOME" != "" ] || [ "$current_jeka_path" != "not found" ]; then
+    echo "Your computer seems to already have JeKa installed."
+    echo "JEKA_HOME=$JEKA_HOME"
+    echo "Jeka Path=$current_jeka_path"
+    echo ""
+    echo "For updating Jeka, run 'jekau' or 'jekau <version>'."
+    echo "You can see latest versions here : https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions"
+    echo ""
+    echo "For manual install/fixing, check your $SHELL_CONFIG_FILE file"
+    echo "and visit manual installation guide et ; $MANUAL_NOTICE"
+    echo ""
+    exit 1
+  fi
+
+  echo "-----b"
+
+  # Check if we can determine shell configuration file for augmenting PATH
+  if [ "$SHELL_CONFIG_FILE" == "" ]; then
+    echo "Your shell config can't be determined, please $MANUAL_NOTICE" 2>&1
+    exit 1
+  fi
+
+  echo "-----c"
+
+  # Check that JEKA_HOME is not already defined
+  local contains_jeka_export
+  echo "----- d"
+  contains_jeka_export=$(grep '^export JEKA_HOME=' "$SHELL_CONFIG_FILE" || true)
+  echo "----- e"
+  if [ "$contains_jeka_export" != "" ]; then
+      echo "File $SHELL_CONFIG_FILE already contains a 'JEKA_HOME=' entry."
+      echo ""
+      echo "Please, verify that you can use it by executing 'jeka --help'"
+      echo "If your current version does not work properly, please $MANUAL_NOTICE"
+      exit 1
+  fi
+
+  # Proceed install
+  if [ "$SPECIFIC_JEKA_DIST_URL" != "" ]; then  ## $SPECIFIC_JEKA_DIST_URL may be overridden
+    url="$SPECIFIC_JEKA_DIST_URL"
+  else
+    compute_LAST_VERSION
+    local url
+    url="$(get_download_url "$LAST_VERSION")"
+  fi
+
+  # Downloading and unpack
+  download_and_unpack "$url" "." "zip"
+  echo "Version $LAST_VERSION copied in $(pwd)"
+  echo ""
+  chmod +x ./jeka
+
+  # Adapt shell script
+  compute_SHELL_CONFIG_FILE
+  echo "Modifying $SHELL_CONFIG_FILE to add JEKA_HOME environment variable and append it to PATH..."
+  local jeka_path
+  jeka_path=$(pwd)
+  echo "" >> "$SHELL_CONFIG_FILE"
+  echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
+  echo "export JEKA_HOME=$jeka_path" >> "$SHELL_CONFIG_FILE"
+  echo "export PATH=\$PATH:\$JEKA_HOME" >> "$SHELL_CONFIG_FILE"
+  echo "$SHELL_CONFIG_FILE modified"
+  echo ""
+
+  echo "Checking install by executing remote JeKa script $TEST_REMOTE_URL"
+  PATH=$PATH:$jeka_path
+  jeka -rc "$TEST_REMOTE_URL" -lsu "#ok"
+  echo "Jeka is properly installed."
+}
+
+update() {
+  local version="$1"
+  if [ "$version" == "" ]; then
+    compute_LAST_VERSION
+    version="$LAST_VERSION"
+  fi
+  echo "Updating Jeka to version $version ? [y/n]"
+  read -r user_input
+  if [ "$user_input" != "y" ]; then
+    exit 1
+  fi
+  echo "Updating to Jeka version $version ..."
+  local url
+  url="$(get_download_url "$version" || "")"
+  local jeka_path="$JEKA_HOME"
+  if [ "$jeka_path" == "" ]; then
+    jeka_path=$(which jeka || echo "not found")
+  fi
+  if [ "$jeka_path" == "" ]; then
+    echo "Can't find either 'jeka' executable nor \$JEKA_HOME environment variable."
+    echo "Are you sure JeKa is properly installed on your system ?"
+    exit 1
+  fi
+  download_and_unpack "$url" "$jeka_path" "zip"
+  echo "Jeka updated to version $version"
+}
+
+
+
+# ------------------------------- Script start here ----------------------
+
+if [ "$1" == "setup_from_scratch" ]; then  ## hidden functionality used only for installing from scratch
+  setup
+else
+  echo "Update installed Jeka Version. Usage 'jekau <version>'."
+  echo "If version is not specified, last version is used."
+  echo ""
+  update "$1"
+fi
+
