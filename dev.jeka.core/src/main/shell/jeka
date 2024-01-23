@@ -319,7 +319,7 @@ compute_base_dir_from_resolved_remote_arg() {
         quiet_flag=""
         echo "Cloning $git_url into $result  ..."
       fi
-      git clone -c advice.detachedHead=false --depth 1 $branch_args "$git_url" "$result" "$quiet_flag"
+      git clone $quiet_flag -c advice.detachedHead=false --depth 1 $branch_args "$git_url" "$result"
   else
       debug "Cache directory $result already exists. Won't clone or update."
   fi

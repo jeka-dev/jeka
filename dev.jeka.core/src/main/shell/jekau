@@ -5,7 +5,7 @@ set -e
 # Script for installing and upgrading JeKa
 # Authors: Jerome Angibaud
 
-# curl https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jekau | bash -s - setup_from_scratch
+# curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jekau | $(echo $0) -s - setup_from_scratch
 
 
 declare MAVEN_REPO="https://repo1.maven.org/maven2"
@@ -171,7 +171,7 @@ setup() {
   echo ""
 
   echo "Checking install by executing remote JeKa script $TEST_REMOTE_URL"
-  PATH=$PATH:$jeka_path
+  export PATH=$PATH:$jeka_path
   jeka -rc "$TEST_REMOTE_URL" -lsu
   echo "Jeka is properly installed."
 }
