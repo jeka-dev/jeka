@@ -179,11 +179,11 @@ public final class JkScaffold {
     }
 
     private void createShellScripts() {
-        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("wrapper/jekaw.bat");
+        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.bat");
         JkUtilsAssert.state(Files.exists(jekaBat), "Jeka should be run from an installed version in order " +
                 "to generate shell scripts");
         JkLog.info("Create jeka.bat file");
-        JkUtilsPath.copy(jekaBat, baseDir.resolve("jekaw.bat"), StandardCopyOption.REPLACE_EXISTING);
+        JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.bat"), StandardCopyOption.REPLACE_EXISTING);
         Path jekaShell = baseDir.resolve("jeka");
         JkLog.info("Create jeka shell file");
         JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), jekaShell,

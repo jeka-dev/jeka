@@ -582,7 +582,7 @@ if [ -z "$JAVA_CMD" ] ; then
       JAVA_CMD="$JAVA_HOME/bin/java"
     fi
   else
-    JAVA_CMD="`which java`"
+    JAVA_CMD="$(which java)"
   fi
 fi
 

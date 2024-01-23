@@ -302,14 +302,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     @Override
     public String toString() {
-        String line = String.join(" ", parameters);
-        return JkUtilsString.wrapStringCharacterWise(line, 120);
-        /*
-        if (line.length() > 150) {
-            line = String.join("\n", parameters);
-        }
-        return command + " " + line;
-         */
+        return this.command + " " + String.join(" ", parameters);
     }
 
     /**
