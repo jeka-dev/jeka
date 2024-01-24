@@ -603,6 +603,9 @@ get_or_download_jdk() {
       nested_dir=$(find "." -mindepth 1 -maxdepth 1 -type d | head -n 1 | cut -c 3-)
       popd > /dev/null 2>&1
       temp_dir=$(mktemp -d)
+      if [ "$JDK_DOWNLOAD_OS" = "mac" ]; then
+          nested_dir+="/Contents/Home"
+      fi
       mv "$jdk_cache_dir"/"$nested_dir"/* "$temp_dir"
       mv "$temp_dir"/* "$jdk_cache_dir"
     fi
@@ -688,10 +691,7 @@ elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is 
   debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
   if [ -z "$jdkPath" ]; then
     get_or_download_jdk "$JAVA_VERSION"
-    if [ "$JDK_DOWNLOAD_OS" = "mac" ]; then
-      jdk_entry_sub_dir="/Contents/Home"
-    fi
-    JAVA_HOME="$DOWNLOAD_JDK_DIR$jdk_entry_sub_dir"
+    JAVA_HOME="$DOWNLOAD_JDK_DIR"
   fi
 fi
 

@@ -8,6 +8,10 @@ Nevertheless, you might need to install it for the following use-cases :
 - Execute remote scripts/applications located of filesystem or *git* repo.
 - Use shorter command `jeka` instead of `./jeka`or `.\jeka.ps`.
 
+Once installed, you will rarely need to upgrade as JeKa will execute the JeKa version specified in
+the application to run.
+However, you'll be able to upgrade your base install by executing `jekau` command.
+
 ## MacOS and Linux
 
 For installing and running, JeKa needs only *curl* and *unzip* be installed on the system.
