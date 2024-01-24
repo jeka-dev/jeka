@@ -23,12 +23,9 @@ download_and_unpack() {
   temp_file=$(mktemp)
   rm "$temp_file"
 
-  echo "------ temp_file $temp_file"
-
   ## download
   if [ -x "$(command -v curl)" ]; then
-    echo "-----curl $url"
-    curl -Lf --fail --show-error -o "$temp_file" "$url"
+    curl -sLf --fail --show-error -o "$temp_file" "$url"
   elif [ -x "$(command -v wget)" ]; then
     wget -q -O "$temp_file" "$url"
   else
@@ -59,8 +56,6 @@ check_prerequisites() {
       echo "Unzip is not installed. Please install it prior installing Jeka"
       exit 1
   fi
-
-
 }
 
 compute_LAST_VERSION() {
@@ -69,7 +64,6 @@ compute_LAST_VERSION() {
   local url
   url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
   LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
-
 }
 
 get_download_url() {
@@ -88,7 +82,6 @@ compute_SHELL_CONFIG_FILE() {
   elif [[ $current_shell == *"zsh"* ]]; then
       shell_bin="zsh"
   fi
-  echo "Detected shell $current_shell ($shell_bin)"
   if [ "$shell_bin" == "zsh" ]; then
     SHELL_CONFIG_FILE="$HOME/.zshrc"
   elif [ -f "$HOME/.bash_profile" ]; then
@@ -96,7 +89,6 @@ compute_SHELL_CONFIG_FILE() {
   elif [ -f "$HOME/.bashrc" ]; then
      SHELL_CONFIG_FILE="$HOME/.bash_profile"
   fi
-  echo "Detected shell config file $SHELL_CONFIG_FILE"
 }
 
 ## install in the current directory
@@ -153,14 +145,14 @@ setup() {
 
   # Downloading and unpack
   download_and_unpack "$url" "." "zip"
-  echo "Version $LAST_VERSION copied in $(pwd)"
+  echo "Version $LAST_VERSION installed in $(pwd)"
   echo ""
   chmod +x ./jeka
   chmod +x ./jekau
 
   # Adapt shell script
   compute_SHELL_CONFIG_FILE
-  echo "Modifying $SHELL_CONFIG_FILE to add JEKA_HOME environment variable and append it to PATH..."
+  echo "Append JEKA_HOME to PATH in $SHELL_CONFIG_FILE"
   local jeka_path
   jeka_path=$(pwd)
   echo "" >> "$SHELL_CONFIG_FILE"
