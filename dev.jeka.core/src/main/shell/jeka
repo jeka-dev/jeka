@@ -1,16 +1,27 @@
 #!/bin/bash
-
-# Script for launching JeKa
+#
+# Script for launching JeKa tool.
+#
 # Authors: Jerome Angibaud, Patrick Santana
-
+#
 # Rules for selecting a JDK :
-# - If JEKA_JDK_HOME ios specified, choose it
-# - If a jeka.java.version is specified
-#   - First look if a jeka.jdk.[version] is specified. If so, choose it.
-#   - Otherwise look in cache or download the proper JDK
-# - Else
-#   - If JAVA_HOME env var is specified, choose it
-#   - Otherwise look in cache and download default version (21)
+# - if JEKA_JDK_HOME env var is specified, select it
+# - if a jeka.java.version property is specified
+#     - if a jeka.jdk.[version] property is specified, select it.
+#     - else, look in cache or download the proper JDK
+# - else
+#   - if JAVA_HOME env var is specified, select it
+#   - else, look in cache and download default version (21)
+#
+#
+# Rules for reading a property (said "my.prop") :
+# - if a command line args contains "-Dmy.prop=xxx", returns 'xxx'
+# - if an env var 'my.prop' exists, returns this value
+# - if property is defined in $BASE_DIR/jeka.properties, returns this value
+# - look recursively in $BASE_DIR/../jeka.properties. Stop at first folder ancestor not having a jeka.properties file
+# - look in JEKA_USER_HOME/global.properties
+#
+
 
 set -e
 
@@ -43,16 +54,77 @@ declare SHOULD_LOG_DOWNLOAD # we should not log anything when on the green path,
 declare LOG_DEBUG # DEBUG
 declare DRY_RUN  # Debugging purpose
 
-###########################
-# Functions
-###########################
 
+#######################################
+# Prints passed arguments on the standard stream, only if LOG_DEBUG is non-empty
+# Globals:
+#   LOG_DEBUG (read)
+# Arguments:
+#   $*
+#######################################
 debug() {
   if [ -n "$LOG_DEBUG" ]; then
     echo "$1"
   fi
 }
 
+#######################################
+# Prints passed arguments on the error stream
+# Globals:
+#   none
+# Arguments:
+#   $*
+#######################################
+error() {
+  echo "$*" >&2
+}
+
+#######################################
+# Gets the sub-string part ending before '#' of a specified string. ('Hello#World' should returns 'Hello')
+# Globals:
+#   none
+# Arguments:
+#   $1 : the string to extract substring from
+# Outputs:
+#   Write extracted sub-string to stdout
+#######################################
+substring_before_hash() {
+    # Extract the substring before '#' using cut
+    result=$(echo "$1" | cut -d'#' -f1)
+
+    # Echo the resulting substring
+    echo "$result"
+}
+
+#######################################
+# Gets the sub-string part starting after '#' of a specified string. ('Hello#World' should returns 'World')
+# Globals:
+#   none
+# Arguments:
+#   $1 : the string to extract substring from
+# Outputs:
+#   Write extracted sub-string to stdout
+#######################################
+substring_after_hash() {
+    # Extract the substring after '#' using parameter expansion
+    result=${1#*#}
+
+    # If the input string did not have a '#', return empty. Otherwise, return the result
+    if [ "$result" == "$1" ]; then
+        echo ""
+    else
+        echo "$result"
+    fi
+}
+
+#######################################
+# Computes if we should print something on console when downloading files
+# Globals:
+#   CMD_LINE_ARGS (read)
+#   SHOULD_LOG_DOWNLOAD (write)
+# Arguments:
+#   None
+#######################################
 compute_SHOULD_LOG_DOWNLOAD() {
   for arg in "${CMD_LINE_ARGS[@]}"
     do
@@ -63,6 +135,15 @@ compute_SHOULD_LOG_DOWNLOAD() {
     done
 }
 
+#######################################
+# Download specified zip/tgz file and unpack it to the specified dir
+# Globals:
+#   none
+# Arguments:
+#   $1 : url to download file
+#   $2 : the target directory path to unzip/unpack content
+#   $3 : optional file type to unpack ('zip' or 'tar.gz'). Default is 'zip'.
+#######################################
 download_and_unpack() {
   local url=$1
   local dir=$2
@@ -95,6 +176,15 @@ download_and_unpack() {
   rm "$temp_file"
 }
 
+#######################################
+# Gets the Jeka directory for the user. This is where are located global.properties and cache dirs.
+# Globals:
+#   JEKA_USER_HOME (read)
+# Arguments:
+#   none
+# Outputs:
+#   Write location to stdout
+#######################################
 get_jeka_user_home() {
   if [ -z "$JEKA_USER_HOME" ]; then
     echo "$HOME/.jeka"
@@ -103,15 +193,51 @@ get_jeka_user_home() {
   fi
 }
 
-## Returns the value of a property declared as '-Dprop.name=prop.value'.
-## The array is supposed to be the command line argument, but it is expected to be passed as function
-## argument for testability.
-## call `get_system_prop_from_args $array_of_args $prop_name`
+#######################################
+# Gets the effective cache dir for Jeka user
+# Globals:
+#   JEKA_CACHE_DIR (read)
+#   JEKA_USER_HOME (read)
+# Arguments:
+#   none
+# Outputs:
+#   Write location to stdout
+#######################################
+get_cache_dir() {
+  if [ -z "$JEKA_CACHE_DIR" ]; then
+      echo "$JEKA_USER_HOME/cache"
+    else
+      echo "$JEKA_CACHE_DIR"
+    fi
+}
+
+#######################################
+# Gets the dir for caching projects cloned from git
+# Globals:
+#   JEKA_CACHE_DIR (read)
+#   JEKA_USER_HOME (read)
+# Arguments:
+#   none
+# Outputs:
+#   Write location to stdout
+#######################################
+get_git_cache_dir() {
+  echo "$(get_cache_dir)/git"
+}
+
+#######################################
+# Gets the value of a property, declared as '-Dprop.name=prop.value' in an array.
+# Globals:
+#   CMD_LINE_ARGS (read)
+# Arguments:
+#   $1 : the property name
+# Outputs:
+#   Write property value to stdout
+#######################################
 get_system_prop_from_args() {
-  local args=("$1")
-  local prop_name=$2
+  local prop_name=$1
   local prefix="-D$prop_name="
-  for arg in "${args[@]}"
+  for arg in "${CMD_LINE_ARGS[@]}"
       do
         if [[ "$arg" == "$prefix"* ]] ; then
             echo "${arg#$prefix}"
@@ -120,9 +246,16 @@ get_system_prop_from_args() {
 
 }
 
-
-# Returns the value of a property within a property file
-# call `prop file prop_name'
+#######################################
+# Gets the value of a property declared within a property file
+# Globals:
+#   none
+# Arguments:
+#   $1 : the path of the property file
+#   $2 : the property name
+# Outputs:
+#   Write property value to stdout
+#######################################
 get_prop_value_from_file() {
     if [ ! -f "$1" ]; then
         return
@@ -130,22 +263,36 @@ get_prop_value_from_file() {
     grep "^\\s*${2}=" "${1}" | cut -d'=' -f2
 }
 
-# Translates a property name (as my.prop) to an env var name (as MY_PROP)
-# Call `get_env_var_name "my.prop"`
+#######################################
+# Gets the translation of a property name (as my.prop) to an env var name (as MY_PROP)
+# Globals:
+#   none
+# Arguments:
+#   $1 : the property name
+# Outputs:
+#   Write env var name to stdout
+#######################################
 get_env_var_name() {
   echo "$1" | tr 'a-z.' 'A-Z_'
 }
 
-# Returns the value of a property from a base dir. If value is not found then
-# it search recursively in the parent base dir until the parent does not contain a 'jeka' folder.
-# call `get_prop_value_from_base_dir base_dir prop_name`
+#######################################
+# Resolves and returns the value of a property by looking in command line args, env var and jeka.properties files
+# Globals:
+#   CMD_LINE_ARGS (read)
+# Arguments:
+#   $1 : the base directory from where looking for jeka.properties file
+#   $2 : the property name
+# Outputs:
+#   Write env var name to stdout
+#######################################
 get_prop_value_from_base_dir() {
   local base_dir=$1
   local prop_name=$2
 
   # First look in command line args
   local cmd_args_value
-  cmd_args_value="$(get_system_prop_from_args "${CMD_LINE_ARGS[@]}" "$prop_name")"
+  cmd_args_value="$(get_system_prop_from_args "$prop_name")"
   if [ "$cmd_args_value" != "" ]; then
     echo "$cmd_args_value"
     return 0
@@ -174,7 +321,16 @@ get_prop_value_from_base_dir() {
   echo "$value"
 }
 
-# call `propJavaVersion base_dir`
+#######################################
+# Returns the JAVA version to use according properties
+# Globals:
+#   CMD_LINE_ARGS (read)
+#   JEKA_VERSION_PROP_NAME (read)
+# Arguments:
+#   $1 : the base directory from where looking for jeka.properties file
+# Outputs:
+#   Write JAVA version to stdout
+#######################################
 get_java_version_from_props() {
   local base_dir="$1"
   local version
@@ -185,65 +341,16 @@ get_java_version_from_props() {
 }
 
 # call `get_jdk_home_for_version base_dir JAVA_VERSION`
-get_jdk_home_for_version() {
+get_jdk_home_from_props() {
   local base_dir=$1
   local jdk_version=$2
   local prop_name="jeka.jdk.$jdk_version"
-
-
-  # Look first in env variables
-  local env_value
-  env_value=$(printenv "$prop_name")
-  if [ "$env_value" != "" ]; then
-    echo "$env_value"
-    return 0
-  fi
-
-  # -- look for 'envVarified' name
-  #local env_var_name
-  #env_var_name=$(get_env_var_name "$prop_name")
-  #env_value=$(printenv "env_var_name")
-  #if [ "$env_value" != "" ]; then
-  #  echo $env_value
-  #  return 0
-  #fi
-
-  # Look in property files
   get_prop_value_from_base_dir "$base_dir" "$prop_name"
 }
 
-get_cache_dir() {
-  if [ -z "$JEKA_CACHE_DIR" ]; then
-      echo "$JEKA_USER_HOME/cache"
-    else
-      echo "$JEKA_CACHE_DIR"
-    fi
-}
 
-get_git_cache_dir() {
-  echo "$(get_cache_dir)/git"
-}
 
-## To be called as substring=$(substring_before_hash 'Hello#World')
-substring_before_hash() {
-    # Extract the substring before '#' using cut
-    result=$(echo "$1" | cut -d'#' -f1)
 
-    # Echo the resulting substring
-    echo "$result"
-}
-
-substring_after_hash() {
-    # Extract the substring after '#' using parameter expansion
-    result=${1#*#}
-
-    # If the input string did not have a '#', return empty. Otherwise, return the result
-    if [ "$result" == "$1" ]; then
-        echo ""
-    else
-        echo "$result"
-    fi
-}
 
 # Return the argument following '-r' arguments. Returns nothing if '-r' not found.
 # It takes an array as argument. If no arguments is passed, it use script exec args.
@@ -577,7 +684,7 @@ elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is 
       echo "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION"
     fi
   fi
-  jdkPath=$(get_jdk_home_for_version "$BASE_DIR" "$JAVA_VERSION")
+  jdkPath=$(get_jdk_home_from_props "$BASE_DIR" "$JAVA_VERSION")
   debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
   if [ -z "$jdkPath" ]; then
     get_or_download_jdk "$JAVA_VERSION"

@@ -10,7 +10,7 @@ set -e
 
 declare MAVEN_REPO="https://repo1.maven.org/maven2"
 declare MANUAL_NOTICE="https://jeka-dev.github.io/jeka/reference-guide/install"
-declare TEST_REMOTE_URL="https://github.com/jeka-dev/sample-for-integration-test.git#0.0.1"
+
 
 ## While there is no official release for Jeka 0.11.x, we force to fetch distrib from OSSRH snapshot
 SPECIFIC_JEKA_DIST_URL="https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/0.11.x-SNAPSHOT/jeka-core-0.11.x-SNAPSHOT-distrib.zip"
@@ -170,10 +170,11 @@ setup() {
   echo "$SHELL_CONFIG_FILE modified"
   echo ""
 
-  echo "Checking install by executing remote JeKa script $TEST_REMOTE_URL"
+  echo "Checking install. This requires JDK download. It may take a while ..."
   export PATH=$PATH:$jeka_path
-  jeka -rc "$TEST_REMOTE_URL" -lsu
+  jeka --version
   echo "Jeka is properly installed."
+  echo "Later, You can updated JeKa version by executing 'jekau' or jekau <version>."
 }
 
 update() {

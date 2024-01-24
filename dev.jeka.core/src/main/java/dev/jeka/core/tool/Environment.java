@@ -168,7 +168,12 @@ class Environment {
 
     static boolean isPureHelpCmd() {
         return Environment.originalArgs.length == 1 &&
-                (Environment.originalArgs[0].equals("-help") || Environment.originalArgs[0].equals("-h"));
+                (Environment.originalArgs[0].equals("--help") || Environment.originalArgs[0].equals("-h"));
+    }
+
+    static boolean isPureVersionCmd() {
+        return Environment.originalArgs.length == 1 &&
+                (Environment.originalArgs[0].equals("--version") || Environment.originalArgs[0].equals("-v"));
     }
 
 }

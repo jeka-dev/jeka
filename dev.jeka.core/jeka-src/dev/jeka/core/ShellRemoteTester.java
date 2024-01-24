@@ -10,7 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ShellRemoteTester  extends JekaCommandLineExecutor {
+class ShellRemoteTester  extends JekaCommandLineExecutor {
 
     private static final String GIT_URL = "https://github.com/jeka-dev/sample-for-integration-test.git#0.0.1";
 
@@ -72,15 +72,16 @@ public class ShellRemoteTester  extends JekaCommandLineExecutor {
 
         // Test without alias
         // We pass 'jeka.java.version" in cmdLine args to test this feature
-        JkProcResult procResult =JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "#ok")
+        JkProcResult procResult =JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "#ok",
+                        "-Djeka.java.version=" + javaVersion)
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
                 .setCollectOutput(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .setEnv("jeka.java.distrib", distro)
-                .setEnv("jeka.java.version", "20")
+                //.setEnv("jeka.java.version", "20")
                 .exec();
-        JkUtilsAssert.state(Files.exists(cachedJdk),"Jdk not found at %s", cachedJdk);
+        JkUtilsAssert.state(Files.exists(cachedJdk),"Jdk not downloaded at %s", cachedJdk);
         String output = procResult.getOutput();
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
                 "expecting ending with 'ok 'followed by a breaking line)", output);

@@ -45,18 +45,19 @@ echo "get_java_version_from_props = $prop_value"
 
 echo "---------- Test parsing arguments --------------"
 
+CMD_LINE_ARGS=("one-argument" "-lsu")
 echo "SHOULD_LOG_DOWNLOAD = '$SHOULD_LOG_DOWNLOAD'"
 
-args=( "toto" "titi" )
-compute_SHOULD_LOG_DOWNLOAD "${args[@]})"
+CMD_LINE_ARGS=("one-argument" "other")
+compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "" ] && echo "Failure: -lsu not present but SHOULD_LOG_DOWNLOAD is set to '$SHOULD_LOG_DOWNLOAD'" && exit 1
 
-args=( "toto" "-lsu" "uu")
-compute_SHOULD_LOG_DOWNLOAD "${args[@]})"
+CMD_LINE_ARGS=( "toto" "-lsu" "uu")
+compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
 
-args=( "toto" "-lsu")
-compute_SHOULD_LOG_DOWNLOAD "${args[@]})"
+CMD_LINE_ARGS=( "toto" "-lsu")
+compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
 
 

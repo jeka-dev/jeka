@@ -101,6 +101,10 @@ final class Engine {
             help();
             return;
         }
+        if (Environment.isPureVersionCmd()) {
+            System.out.println(JkInfo.getJekaVersion());
+            return;
+        }
         JkLog.startTask("Setting up runbase");
         JkRunbase runbase = JkRunbase.get(baseDir);
         runbase.setClasspath(computedClasspath);
