@@ -84,12 +84,12 @@ compute_SHELL_CONFIG_FILE() {
   fi
   if [ "$shell_bin" == "zsh" ]; then
     SHELL_CONFIG_FILE="$HOME/.zshrc"
+  elif [ -f "$HOME/.bashrc" ]; then
+       SHELL_CONFIG_FILE="$HOME/.bashrc"
+  elif [ -f "$HOME/.bash_profile" ]; then
+      SHELL_CONFIG_FILE="$HOME/.bash_profile"
   elif [ -f "$HOME/.profile" ]; then
       SHELL_CONFIG_FILE="$HOME/.profile"
-  elif [ -f "$HOME/.bash_profile" ]; then
-    SHELL_CONFIG_FILE="$HOME/.bash_profile"
-  elif [ -f "$HOME/.bashrc" ]; then
-     SHELL_CONFIG_FILE="$HOME/.bash_profile"
   fi
 }
 
@@ -148,9 +148,8 @@ setup() {
   fi
 
   # Downloading and unpack
+  echo "Installing Jeka Version $LAST_VERSION in $(pwd) ..."
   download_and_unpack "$url" "." "zip"
-  echo "Version $LAST_VERSION installed in $(pwd)"
-  echo ""
   chmod +x ./jeka
   chmod +x ./jekau
 
@@ -165,12 +164,11 @@ setup() {
   echo "export PATH=\$PATH:\$JEKA_HOME" >> "$SHELL_CONFIG_FILE"
   echo ""
 
-  echo "Checking install. This requires JDK download. It may take a while ..."
+  echo "Checking install with 'jeka --version'. This requires JDK download. It may take a while ..."
   export PATH=$PATH:$jeka_path
-  echo "jeka --version"
   jeka --version -la=false
   echo "Jeka is properly installed."
-  echo "Later, You can updated JeKa version by executing 'jekau' or jekau <version>."
+  echo "Later on, you can upgrade to a different JeKa version by running either 'jekau' or 'jekau <version>'."
 }
 
 update() {
