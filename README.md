@@ -189,8 +189,12 @@ Cause of Sonarqube scanner, this command has to be run with a JDK >= 11.
 
 Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
 
-You must install _Python_ and _Material for MkDocs_ on your computer (`pip install mkdocs-material`) prior to execute following command lines from the repo root directory :
-- `mkdocs serve` : generate and serve the documentation on localhost:8000
+You must install _Python_ and _Material for MkDocs_ on your computer 
+(`pip install mkdocs-material`) prior to execute following command lines from the repo root directory :
+```shell
+mkdocs serve
+```
+This generates and serves the documentation on localhost:8000
 
 The documentation is also supposed to be regenerated after each push/pull-request.
 

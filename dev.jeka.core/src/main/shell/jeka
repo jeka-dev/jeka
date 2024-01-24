@@ -681,7 +681,7 @@ elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is 
   if [ -z "$JAVA_VERSION" ]; then
     JAVA_VERSION=$"$DEFAULT_JAVA_VERSION"
     if [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
-      echo "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION"
+      echo "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION."
     fi
   fi
   jdkPath=$(get_jdk_home_from_props "$BASE_DIR" "$JAVA_VERSION")

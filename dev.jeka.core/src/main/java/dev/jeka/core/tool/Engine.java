@@ -77,7 +77,7 @@ final class Engine {
         JkDependencySet commandLineDependencies = JkDependencySet.of(commandLine.getJekaSrcDependencies());
         JkLog.trace("Dependencies injected in classpath from command line : " + commandLineDependencies);
         JkDependencySet dependenciesFromJekaProps = dependenciesFromJekaProps();
-        JkLog.trace("IDependencies injected in classpath from jeka.properties : " + dependenciesFromJekaProps);
+        JkLog.trace("Dependencies injected in classpath from jeka.properties : " + dependenciesFromJekaProps);
         final JkPathSequence computedClasspath;
         final CompilationResult result;
         boolean hasJekaSrc = Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR))

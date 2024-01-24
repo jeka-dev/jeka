@@ -101,7 +101,7 @@ public class JkProjectCompilation {
         preCompileActions.run();
         compileActions.run();
         postCompileActions.run();
-        JkLog.endTask();
+        JkLog.endTask("Compilation phase for " + purpose() + " achieved in %d millis.");
     }
 
     /**

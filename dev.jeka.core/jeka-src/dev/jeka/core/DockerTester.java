@@ -7,6 +7,7 @@ import dev.jeka.core.api.tooling.docker.JkDocker;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 
 class DockerTester  {
 
@@ -14,7 +15,7 @@ class DockerTester  {
 
     private static final Path DOCKER_DIR = dockerDir();
 
-    private static final boolean NO_CACHE = true;
+    private static final boolean NO_CACHE = false;
 
     static void run() {
         if (!JkDocker.isPresent()) {
@@ -29,6 +30,7 @@ class DockerTester  {
 
         JkDocker.prepareExec("build")
                 .addParamsIf(NO_CACHE, "--no-cache")
+                .addParamsAsCmdLine("--build-arg CACHEBUST=%s", Instant.now())
                 .addParamsAsCmdLine("--progress=plain -t %s .", IMAGE_NAME)
                 .setWorkingDir(DOCKER_DIR)
                 .exec();

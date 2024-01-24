@@ -14,6 +14,7 @@ extra:
         provider: google
         property: UA-103449580-2
 nav:
+    - Installation: installation.md
     - Reference Guide:
         - Execution Engine:
           - File Structure: reference-guide/execution-engine-files.md
