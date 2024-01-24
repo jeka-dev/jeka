@@ -160,11 +160,10 @@ setup() {
   echo "" >> "$SHELL_CONFIG_FILE"
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
   echo "export PATH=\$PATH:$jeka_path" >> "$SHELL_CONFIG_FILE"
-  echo ""
 
   echo "Checking install with 'jeka --version'. This requires JDK download. It may take a while ..."
   export PATH=$PATH:$jeka_path
-  jeka --version -la=false
+  jeka --version
   echo "Jeka is properly installed."
   echo "Later on, you can upgrade to a different JeKa version by running either 'jekau' or 'jekau <version>'."
 }
@@ -183,10 +182,8 @@ update() {
   echo "Updating to Jeka version $version ..."
   local url
   url="$(get_download_url "$version" || "")"
-  local jeka_path="$JEKA_HOME"
-  if [ "$jeka_path" == "" ]; then
-    jeka_path=$(which jeka || echo "not found")
-  fi
+  local jeka_path
+  jeka_path=$(which jeka || echo "")
   if [ "$jeka_path" == "" ]; then
     echo "Can't find either 'jeka' executable nor \$JEKA_HOME environment variable."
     echo "Are you sure JeKa is properly installed on your system ?"
@@ -203,6 +200,7 @@ if [ "$1" == "setup_from_scratch" ]; then  ## hidden functionality used only for
 else
   echo "Update installed Jeka Version. Usage 'jekau <version>'."
   echo "If version is not specified, last version is used."
+  echo "Too see latest available versions, visit https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions"
   echo ""
   update "$1"
 fi
