@@ -84,13 +84,12 @@ compute_SHELL_CONFIG_FILE() {
   fi
   if [ "$shell_bin" == "zsh" ]; then
     SHELL_CONFIG_FILE="$HOME/.zshrc"
+  elif [ -f "$HOME/.profile" ]; then
+      SHELL_CONFIG_FILE="$HOME/.profile"
   elif [ -f "$HOME/.bash_profile" ]; then
     SHELL_CONFIG_FILE="$HOME/.bash_profile"
   elif [ -f "$HOME/.bashrc" ]; then
      SHELL_CONFIG_FILE="$HOME/.bash_profile"
-  fi
-  if [ ! -f "$SHELL_CONFIG_FILE" ]; then
-    touch "$SHELL_CONFIG_FILE"
   fi
 }
 
