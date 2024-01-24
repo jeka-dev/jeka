@@ -23,7 +23,7 @@ final class CommandLine {
 
     static final String KBEAN_SYMBOL = "#";
 
-    private static final String AT_SYMBOL_CHAR = "@";
+    private static final String AT_SYMBOL_CHAR = "+";
 
     private final Map<String, String> standardOptions = new HashMap<>();
 

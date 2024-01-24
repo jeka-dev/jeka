@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
  * Engine is responsible to compile jeka-src ,instantiate KBeans and run them.<br/>
  * Sources are expected to lie in [project base dir]/jeka-src <br/>
  * jeka-src classes having simple name starting with '_' are ignored.
- *
+ * <p>
  * jeka-src classes can have dependencies on jars : <ul>
  *     <li>located in [base dir]/jeka-boot directory</li>
  *     <li>Dependencies declared in {@link JkInjectClasspath} annotation</li>
- *     <li>declared in command-line, using '@'</li>
+ *     <li>declared in command-line, using '+'</li>
  * </ul>
  */
 final class Engine {

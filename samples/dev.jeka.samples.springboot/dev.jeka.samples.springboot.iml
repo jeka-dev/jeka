@@ -11,6 +11,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/jeka-src" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
+      <excludeFolder url="file://$MODULE_DIR$/.jeka-work" />
+      <excludeFolder url="file://$MODULE_DIR$/jeka-output" />
     </content>
     <orderEntry type="jdk" jdkName="17" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />

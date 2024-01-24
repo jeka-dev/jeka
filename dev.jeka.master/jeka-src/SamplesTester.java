@@ -1,11 +1,5 @@
 import dev.jeka.core.JekaCommandLineExecutor;
-import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
-import java.awt.*;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -21,16 +15,16 @@ class SamplesTester extends JekaCommandLineExecutor {
         run("dev.jeka.samples.springboot", "-lna  " +
                 "project#clean project#pack mavenPublication#publishLocal -cw");
 
-        // Test with injecting plugin dep via "@"
+        // Test with injecting plugin dep via "+"
         run("dev.jeka.samples.sonarqube", "-lna " +
-                "@../../plugins/dev.jeka.plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar " +
+                "+../../plugins/dev.jeka.plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar " +
                 "project#cleanPack");
 
         // Test with injecting plugin dep via jeka.properties file
         run("dev.jeka.samples.protobuf", "-liv project#cleanPack");
 
         // Test with injecting dep via @JkInjectClasspath(...)
-        run("dev.jeka.samples.jacoco", "-lna @../../plugins/dev.jeka.plugins.jacoco project#cleanPack " +
+        run("dev.jeka.samples.jacoco", "-lna +../../plugins/dev.jeka.plugins.jacoco project#cleanPack " +
                 "project#pack #checkGeneratedReport");
 
         // No Jeka deps test samples
