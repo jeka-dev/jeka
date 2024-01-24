@@ -157,6 +157,8 @@ final class EngineKBeanClassResolver {
     }
 
     private JkException beanClassNotFound(String name) {
+        String classloaderMention = JkLog.isVerbose() ?
+                "\nCurrent classloader :\n" + JkClassLoader.ofCurrent() : "";
         return new JkException("Can not find a KBean named '" + name
                 + "'.\nThe name to identify a KBean can be :"
                 + "\n  - The fully qualified class name of the KBean (e.g. org.foo.BarKBean)"
@@ -164,9 +166,14 @@ final class EngineKBeanClassResolver {
                 + "\n  - The uncapitalized simple class name (e.g. barKBean)"
                 + "\n  - The simple class name minus the 'KBean' suffix. (e.g. Bar)"
                 + "\n  - The uncapitalized simple class name minus the 'KBean' suffix.(e.g. bar)"
-                + "\nAvailable KBeans :\n  " + String.join("\n  ", globalBeanClassNames())
-                + "\nCurrent classloader :\n"
-                + JkClassLoader.ofCurrent());
+                + "\nAvailable KBeans :\n  " + String.join("\n  ", smartKBeanNames())
+                + classloaderMention);
+    }
+
+    private List<String> smartKBeanNames() {
+        return globalBeanClassNames().stream()
+                .map(fqcn -> KBean.name(fqcn) + "    (" + fqcn + ")")
+                .collect(Collectors.toList());
     }
 
     List<String> globalBeanClassNames() {

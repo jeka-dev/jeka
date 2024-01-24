@@ -123,23 +123,10 @@ setup() {
     exit 1
   fi
 
-  # Check that JEKA_HOME is not already defined
-  local contains_jeka_export
-  if [ -f "$SHELL_CONFIG_FILE" ]; then
-    contains_jeka_export=$(grep '^export JEKA_HOME=' "$SHELL_CONFIG_FILE" || true)
-  fi
-  if [ "$contains_jeka_export" != "" ]; then
-      echo "File $SHELL_CONFIG_FILE already contains a 'JEKA_HOME=' entry."
-      echo "Won't install to not collide with previous installed version."
-      echo ""
-      echo "Please, verify that you can use it by executing 'jeka --help' "
-      echo "or proceed to manual installation : $MANUAL_NOTICE"
-      exit 1
-  fi
-
   # Proceed install
   if [ "$SPECIFIC_JEKA_DIST_URL" != "" ]; then  ## $SPECIFIC_JEKA_DIST_URL may be overridden
     url="$SPECIFIC_JEKA_DIST_URL"
+    LAST_VERSION="0.11.x-SNAPSHOT"
   else
     compute_LAST_VERSION
     local url
@@ -147,22 +134,22 @@ setup() {
   fi
 
   # Downloading and unpack
-  echo "Installing Jeka Version $LAST_VERSION in $(pwd) ..."
+  local install_dir="$HOME/.jeka/bin"
+  echo "Installing Jeka Version $LAST_VERSION in $install_dir ..."
   download_and_unpack "$url" "." "zip"
-  chmod +x ./jeka
-  chmod +x ./jekau
+  chmod +x "$install_dir/jeka"
+  chmod +x "$install_dir./jekau"
 
   # Adapt shell script
   compute_SHELL_CONFIG_FILE
   echo "Append JEKA_HOME to PATH in $SHELL_CONFIG_FILE"
   local jeka_path
-  jeka_path=$(pwd)
   echo "" >> "$SHELL_CONFIG_FILE"
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
-  echo "export PATH=\$PATH:$jeka_path" >> "$SHELL_CONFIG_FILE"
+  echo "export PATH=\$PATH:$install_dir" >> "$SHELL_CONFIG_FILE"
 
   echo "Checking install with 'jeka --version'. This requires JDK download. It may take a while ..."
-  export PATH=$PATH:$jeka_path
+  export PATH=$PATH:$install_dir
   jeka --version
   echo "Jeka is properly installed."
   echo "Later on, you can upgrade to a different JeKa version by running either 'jekau' or 'jekau <version>'."
