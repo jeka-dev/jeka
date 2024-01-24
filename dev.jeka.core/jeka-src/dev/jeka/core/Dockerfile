@@ -16,9 +16,6 @@ RUN apt install -y curl  \
 # Set the non-root user as the default user
 USER nonroot
 
-RUN mkdir /home/nonroot/jeka_install
-WORKDIR /home/nonroot/jeka_install
-RUN ls -l
-RUN curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jekau | bash -s - setup_from_scratch
+RUN curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jekau | bash -s - setup
 
 WORKDIR /home/nonroot

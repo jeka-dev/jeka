@@ -183,7 +183,7 @@ update() {
 
 # ------------------------------- Script start here ----------------------
 
-if [ "$1" == "setup_from_scratch" ]; then  ## hidden functionality used only for installing from scratch
+if [ "$1" == "setup" ]; then  ## hidden functionality used only for installing from scratch
   setup
 else
   echo "Update installed Jeka Version. Usage 'jekau <version>'."
