@@ -183,27 +183,37 @@ public class JkClassLoader {
 
     @Override
     public String toString() {
-        return toString(delegate);
+        return toString(delegate, Integer.MAX_VALUE);
     }
 
-    private static String toString(ClassLoader classLoader) {
+    public String toString(int maxEntryCount) {
+        return toString(delegate, maxEntryCount);
+    }
+
+    private static String toString(ClassLoader classLoader, int maxEntryCount) {
         String result;
         if (classLoader instanceof URLClassLoader) {
-            result = ucltoString((URLClassLoader) classLoader);
+            result = ucltoString((URLClassLoader) classLoader, maxEntryCount);
         } else {
             result = classLoader.toString();
         }
         if (classLoader.getParent() != null) {
-            result = result + "\n" + toString(classLoader.getParent());
+            result = result + "\n" + toString(classLoader.getParent(), maxEntryCount);
         }
         return result;
     }
 
-    private static String ucltoString(URLClassLoader urlClassLoader) {
+    private static String ucltoString(URLClassLoader urlClassLoader, int maxEntryCount) {
         final StringBuilder builder = new StringBuilder();
         builder.append(urlClassLoader);
+        int i = 0;
         for (final URL url : urlClassLoader.getURLs()) {
+            if (i >= maxEntryCount) {
+                builder.append("\n  ...");
+                break;
+            }
             builder.append("\n  ").append(url);
+            i++;
         }
         return builder.toString();
     }

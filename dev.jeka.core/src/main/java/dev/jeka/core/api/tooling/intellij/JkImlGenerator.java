@@ -26,9 +26,9 @@ import java.util.function.Supplier;
  */
 public final class JkImlGenerator {
 
-    private JkPathSequence defClasspath = JkPathSequence.of();
+    private JkPathSequence jekaSrcClasspath = JkPathSequence.of();
 
-    private JkPathSequence defImportedProjects = JkPathSequence.of();
+    private JkPathSequence jekaSrcImportedProjects = JkPathSequence.of();
 
     /* When true, path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of explicit absolute path. */
     private boolean useVarPath = true;
@@ -74,14 +74,14 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setDefClasspath(JkPathSequence defClasspath) {
-        this.defClasspath = defClasspath;
+    public JkImlGenerator setJekaSrcClasspath(JkPathSequence jekaSrcClasspath) {
+        this.jekaSrcClasspath = jekaSrcClasspath;
         return this;
     }
 
-    public JkImlGenerator setDefImportedProjects(JkPathSequence defImportedProjects) {
-        JkUtilsAssert.argument(defImportedProjects != null, "defImportedProjects cannot be null.");
-        this.defImportedProjects = defImportedProjects;
+    public JkImlGenerator setJekaSrcImportedProjects(JkPathSequence jekaSrcImportedProjects) {
+        JkUtilsAssert.argument(jekaSrcImportedProjects != null, "defImportedProjects cannot be null.");
+        this.jekaSrcImportedProjects = jekaSrcImportedProjects;
         return this;
     }
 
@@ -132,8 +132,8 @@ public final class JkImlGenerator {
         JkIdeSupport ideSupport = ideSupportSupplier == null ? null : ideSupportSupplier.get();
         Path dir = ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
         JkIml iml = JkIml.of().setModuleDir(dir);
-        JkLog.trace("Compute iml jeka-src classpath : " + defClasspath);
-        JkLog.trace("Compute iml jeka-src imported projects : " + defImportedProjects);
+        JkLog.trace("Compute iml jeka-src classpath : " + jekaSrcClasspath);
+        JkLog.trace("Compute iml jeka-src imported projects : " + jekaSrcImportedProjects);
         if (this.useVarPath) {
             iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir());
         }
@@ -177,13 +177,13 @@ public final class JkImlGenerator {
     // For def, we have computed classpath from runtime
     private List<JkIml.OrderEntry> defOrderEntries() {
         OrderEntries orderEntries = new OrderEntries();
-        JkPathSequence importedClasspath = defImportedProjects.getEntries().stream()
+        JkPathSequence importedClasspath = jekaSrcImportedProjects.getEntries().stream()
                         .map(JkRunbase::get)
                         .map(JkRunbase::getClasspath)
                         .reduce(JkPathSequence.of(), (ps1, ps2) -> ps1.and(ps2))
                         .withoutDuplicates();
 
-        defClasspath.and(defImportedProjects).getEntries().stream()
+        jekaSrcClasspath.and(jekaSrcImportedProjects).getEntries().stream()
                 .filter(path -> !importedClasspath.getEntries().contains(path))
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
                 .filter(path -> !path.equals(Paths.get(JkConstants.JEKA_SRC_CLASSES_DIR)))
@@ -221,7 +221,7 @@ public final class JkImlGenerator {
     private JkIml.OrderEntry dirAsOrderEntry(Path dir, JkIml.Scope scope) {
 
         // first, look if it is inside an imported project
-        for (Path importedProject : this.defImportedProjects) {
+        for (Path importedProject : this.jekaSrcImportedProjects) {
             if (importedProject.resolve(JkConstants.JEKA_SRC_CLASSES_DIR).equals(dir)) {
                 return JkIml.ModuleOrderEntry.of()
                         .setModuleName(moduleName(dir))

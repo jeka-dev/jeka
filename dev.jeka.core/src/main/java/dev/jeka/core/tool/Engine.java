@@ -128,7 +128,8 @@ final class Engine {
         }
         if (Environment.standardOptions.logRuntimeInformation) {
             JkLog.info("JeKa class loader : ");
-            Arrays.stream(JkClassLoader.ofCurrent().toString().split("\n"))
+            int maxEntriesDisplayed = JkLog.isVerbose() ? Integer.MAX_VALUE : 6;
+            Arrays.stream(JkClassLoader.ofCurrent().toString(maxEntriesDisplayed).split("\n"))
                     .forEach(line -> JkLog.info("  " + line));
             System.out.println();
         }

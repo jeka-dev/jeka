@@ -1,5 +1,6 @@
 package dev.jeka.core.api.system;
 
+import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -204,19 +205,12 @@ public final class JkProperties {
 
     public String toKeyValueString(String margin) {
         Set<String> keys = find("");
-        StringBuilder sb = new StringBuilder();
         JkProperties systemLess = systemLess();
         if (systemLess == null) {
             return "";
         }
-        int maxKeyLength = keys.stream()
-                .max(Comparator.comparingInt(String::length))
-                .orElse("").length();
-        int maxValueLength = keys.stream()
-                .filter(key -> systemLess.get(key) != null)
-                .map(this::get)
-                .max(Comparator.comparingInt(String::length))
-                .orElse("").length();
+        Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200)
+                .setAdjustLeft(true).setMarginLeft(margin);
         for (String key : keys) {
             if (systemLess.get(key) == null) {
                 continue;
@@ -228,12 +222,14 @@ public final class JkProperties {
                     || key.toLowerCase().endsWith("pwd")) {
                 value = "***";
             }
-            String keyLabel = JkUtilsString.padEnd(key, maxKeyLength + 1, ' ');
-            String valueLabel = JkUtilsString.padEnd(value, maxValueLength + 2, ' ');
-            JkProperties declaringProps = getSourceDefining(key);
-            sb.append(margin + keyLabel + ":" + valueLabel + "[from " + declaringProps.source + "]\n");
+            String source = getSourceDefining(key).source;
+            if (source.endsWith("global.properties")) {
+                source = "globbal.properties";
+            }
+            String right = value + " [" + source + "]";
+            columnsText.add(key, right);
         }
-        return sb.toString();
+        return columnsText.toString();
     }
 
     private JkProperties getSourceDefining(String key) {

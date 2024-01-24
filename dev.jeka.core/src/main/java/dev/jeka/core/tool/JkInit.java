@@ -107,7 +107,7 @@ public final class JkInit {
         JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
         sb.append("\nDownload Repos    : " + JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
                 .map(JkRepo::getUrl).collect(Collectors.toList()));
-        sb.append("\nProperties        :\n").append(properties.toKeyValueString("  "));
+        sb.append("\nProperties        :\n").append(properties.toKeyValueString("    "));
         JkLog.info(sb.toString());
     }
 

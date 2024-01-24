@@ -22,7 +22,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withoutJavaProject() {
         JkImlGenerator imlGenerator = JkImlGenerator.of()
-                .setDefClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()))
+                .setJekaSrcClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()))
                 .setBaseDir(Paths.get(""));
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
@@ -34,7 +34,7 @@ public class JkImlGeneratorTest {
         project.compilation.customizeDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
-                .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
+                .setJekaSrcClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
         List<JkIml.SourceFolder> sourceFolders = iml.component.getContent().getSourceFolders();
@@ -48,7 +48,7 @@ public class JkImlGeneratorTest {
         project.compilation.customizeDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
-                .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
+                .setJekaSrcClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);

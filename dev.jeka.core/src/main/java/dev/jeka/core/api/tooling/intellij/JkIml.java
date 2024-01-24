@@ -147,8 +147,6 @@ public final class JkIml {
             return this;
         }
 
-
-
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
             boolean inheritedJdk = JkUtilsString.isBlank(jdkName) || "inheritedJdk".equals(jdkName);
             parent.add("component")

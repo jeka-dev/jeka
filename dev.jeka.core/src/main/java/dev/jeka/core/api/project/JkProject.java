@@ -14,6 +14,7 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -31,6 +32,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven <i>POM</i> but
@@ -324,35 +326,41 @@ public class JkProject implements JkIdeSupportSupplier {
         JkDependencySet compileDependencies = compilation.getDependencies();
         JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
         JkDependencySet testDependencies = testing.compilation.getDependencies();
-        StringBuilder builder = new StringBuilder()
-            .append("ModuleId                         : " + moduleId + "\n")
-            .append("Version                          : " + getVersion() + "\n")
-            .append("Project Location                 : " + this.getBaseDir().toAbsolutePath().normalize() + "\n")
-            .append("Production Sources               : " + compilation.layout.getInfo()).append("\n")
-            .append("Test Sources                     : " + testing.compilation.layout.getInfo()).append("\n")
-            .append("Java Version                     : " + (jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )+ "\n")
-            .append("Source Encoding                  : " + sourceEncoding + "\n")
-            .append("Source File Count                : " + compilation.layout.resolveSources()
-                    .count(Integer.MAX_VALUE, false) + "\n")
-            .append("Test Source file count           : " + testing.compilation.layout.resolveSources()
-                        .count(Integer.MAX_VALUE, false) + "\n")
-            .append("Main Class Name                  : " + packaging.declaredMainClass() + "\n")
-            .append("Download Repositories            : " + dependencyResolver.getRepos() + "\n")
-            .append("Manifest                         : \n" );
+        StringBuilder builder = new StringBuilder();
+        Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200).setAdjustLeft(true)
+                .add("ModuleId", moduleId)
+                .add("Version", getVersion() )
+                .add("Base Dir Location", this.getBaseDir().toAbsolutePath().normalize())
+                .add("Production Sources", compilation.layout.getInfo())
+                .add("Test Sources", testing.compilation.layout.getInfo())
+                .add("Java Version", jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )
+                .add("Source Encoding", sourceEncoding + "\n")
+                .add("Source File Count", compilation.layout.resolveSources()
+                        .count(Integer.MAX_VALUE, false))
+                .add("Test Source file count       ", testing.compilation.layout.resolveSources()
+                        .count(Integer.MAX_VALUE, false))
+                .add("Main Class Name", packaging.declaredMainClass())
+                .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
+                        .map(repo -> repo.getUrl()).collect(Collectors.toList()))
+                .add("Manifest", "");
+        builder.append(columnsText.toString());
+
+        // add manifest
         Arrays.stream(packaging.getManifest().asString().split("\n"))
                 .filter(line -> !JkUtilsString.isBlank(line))
-                .forEach(line -> builder.append("  " + line + "\n"));
-        //builder.deleteCharAt(builder.length()-1);  // remove leading "\n" at end of manifast
+                .forEach(line -> builder.append("    " + line + "\n"));
+
+        // add declared dependencies
         builder
-            .append("Declared Compile Dependencies    : " + compileDependencies.getEntries().size() + " elements.\n");
-        compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+            .append("Declared Compile Deps    : " + compileDependencies.getEntries().size() + " elements.\n");
+        compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
         builder
-            .append("Declared Runtime Dependencies    : " + runtimeDependencies
+            .append("Declared Runtime Deps    : " + runtimeDependencies
                 .getEntries().size() + " elements.\n");
-        runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+        runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
         builder
-            .append("Declared Test Dependencies       : " + testDependencies.getEntries().size() + " elements.\n");
-        testDependencies.getVersionedDependencies().forEach(dep -> builder.append("  " + dep + "\n"));
+            .append("Declared Test Deps       : " + testDependencies.getEntries().size() + " elements.\n");
+        testDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
         return builder.toString();
     }
 
