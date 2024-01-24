@@ -104,12 +104,11 @@ setup() {
   # First check if Jeka is not already installed
   local current_jeka_path
   current_jeka_path=$(which jeka || echo "not found")
-  if [ "$JEKA_HOME" != "" ] || [ "$current_jeka_path" != "not found" ]; then
-    echo "Your computer seems to already have JeKa installed."
-    echo "JEKA_HOME=$JEKA_HOME"
-    echo "Jeka Path=$current_jeka_path"
-    echo ""
-    echo "For updating Jeka, run 'jekau' or 'jekau <version>'."
+  if [ "$current_jeka_path" != "not found" ]; then
+    echo "Your system seems to already have JeKa installed at : $current_jeka_path"
+    echo "If it is a an old version of jeka (<0.11), you can rename it (i.e. jekal) and re-run this script."
+    echo
+    echo "If it is an recent version, you can update it by executing 'jekau' or 'jekau <version>'."
     echo "You can see latest versions here : https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions"
     echo ""
     echo "For manual install/fixing, check your $SHELL_CONFIG_FILE file"
@@ -160,8 +159,7 @@ setup() {
   jeka_path=$(pwd)
   echo "" >> "$SHELL_CONFIG_FILE"
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
-  echo "export JEKA_HOME=$jeka_path" >> "$SHELL_CONFIG_FILE"
-  echo "export PATH=\$PATH:\$JEKA_HOME" >> "$SHELL_CONFIG_FILE"
+  echo "export PATH=\$PATH:\$jeka_path" >> "$SHELL_CONFIG_FILE"
   echo ""
 
   echo "Checking install with 'jeka --version'. This requires JDK download. It may take a while ..."
