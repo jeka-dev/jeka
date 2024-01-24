@@ -159,7 +159,7 @@ setup() {
   jeka_path=$(pwd)
   echo "" >> "$SHELL_CONFIG_FILE"
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
-  echo "export PATH=\$PATH:\$jeka_path" >> "$SHELL_CONFIG_FILE"
+  echo "export PATH=\$PATH:$jeka_path" >> "$SHELL_CONFIG_FILE"
   echo ""
 
   echo "Checking install with 'jeka --version'. This requires JDK download. It may take a while ..."
