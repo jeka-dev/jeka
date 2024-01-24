@@ -10,17 +10,37 @@ import java.nio.file.Paths;
 
 class DockerTester  {
 
+    private static final String IMAGE_NAME = "jeka-install-ubuntu";
+
+    private static final Path DOCKER_DIR = dockerDir();
+
+    private static final boolean NO_CACHE = true;
+
     static void run() {
         if (!JkDocker.isPresent()) {
             JkLog.warn("Docker not present. Can't run Docker tests");
+            return;
         }
+        buildImage();
+        //runImage();
+    }
+
+    static void buildImage() {
+
         JkDocker.prepareExec("build")
-                .addParamsAsCmdLine("--progress=plain --no-cache -t jeka-install-ubuntu .")
-                .setWorkingDir(dockerDir())
+                .addParamsIf(NO_CACHE, "--no-cache")
+                .addParamsAsCmdLine("--progress=plain -t %s .", IMAGE_NAME)
+                .setWorkingDir(DOCKER_DIR)
                 .exec();
     }
 
-    static Path dockerDir() {
+    static void runImage() {
+        JkDocker.prepareExec("run", "-rm", "-t", IMAGE_NAME)
+                .setWorkingDir(DOCKER_DIR)
+                .exec();
+    }
+
+    private static Path dockerDir() {
         String candidate = "dev.jeka.core/jeka-src/dev/jeka/core";
         if (Files.isDirectory(Paths.get(candidate))) {
             return Paths.get(candidate);

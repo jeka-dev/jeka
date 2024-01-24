@@ -89,6 +89,9 @@ compute_SHELL_CONFIG_FILE() {
   elif [ -f "$HOME/.bashrc" ]; then
      SHELL_CONFIG_FILE="$HOME/.bash_profile"
   fi
+  if [ ! -f "$SHELL_CONFIG_FILE" ]; then
+    touch "$SHELL_CONFIG_FILE"
+  fi
 }
 
 ## install in the current directory
