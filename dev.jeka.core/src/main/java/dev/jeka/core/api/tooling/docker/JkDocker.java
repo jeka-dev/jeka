@@ -24,12 +24,12 @@ public class JkDocker {
      * a space separated string of arguments.
      *
      * @param dockerCommand The space separated String representing the arguments.
-     * @param cmdLine       The parameters to pass to the Docker command as a space separated string (e.g. "-X -e run").
+     * @param cmdLineArgs       The parameters to pass to the Docker command as a space separated string (e.g. "-X -e run").
      * @see JkDocker#exec(String, String...)
-     * @see JkProcess#addParamsAsString(String)
+     * @see JkProcess#addParamsAsCmdLine(String, Object...) (String)
      */
-    public static JkProcResult execCmdLine(String dockerCommand, String cmdLine) {
-        return prepareExec(dockerCommand).addParamsAsCmdLine(cmdLine).exec();
+    public static JkProcResult execCmdLine(String dockerCommand, String cmdLineArgs) {
+        return prepareExec(dockerCommand).addParamsAsCmdLine(cmdLineArgs).exec();
     }
 
     /**
@@ -48,7 +48,11 @@ public class JkDocker {
      * Checks if Docker is present on the system.
      */
     public static boolean isPresent() {
-        return exec("version").hasSucceed();
+        return prepareExec("version")
+                .setLogCommand(false)
+                .setInheritIO(false)
+                .setLogWithJekaDecorator(false)
+                .exec().hasSucceed();
     }
 
 

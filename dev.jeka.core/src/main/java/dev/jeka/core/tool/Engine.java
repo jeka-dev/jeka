@@ -101,10 +101,7 @@ final class Engine {
             help();
             return;
         }
-        if (Environment.isPureVersionCmd()) {
-            System.out.println(JkInfo.getJekaVersion());
-            return;
-        }
+
         JkLog.startTask("Setting up runbase");
         JkRunbase runbase = JkRunbase.get(baseDir);
         runbase.setClasspath(computedClasspath);
@@ -485,15 +482,5 @@ final class Engine {
     private JkProperties localProperties() {
         return JkRunbase.localProperties(baseDir);
     }
-
-    private String projectBaseDirName() {
-        String rawDirName = this.baseDir.getFileName().toString();
-        if (rawDirName.isEmpty()) {
-            return this.baseDir.toAbsolutePath().getFileName().toString();
-        }
-        return rawDirName;
-    }
-
-
 
 }

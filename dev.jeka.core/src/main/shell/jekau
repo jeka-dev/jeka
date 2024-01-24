@@ -124,7 +124,9 @@ setup() {
 
   # Check that JEKA_HOME is not already defined
   local contains_jeka_export
-  contains_jeka_export=$(grep '^export JEKA_HOME=' "$SHELL_CONFIG_FILE" || true)
+  if [ -f "$SHELL_CONFIG_FILE" ]; then
+    contains_jeka_export=$(grep '^export JEKA_HOME=' "$SHELL_CONFIG_FILE" || true)
+  fi
   if [ "$contains_jeka_export" != "" ]; then
       echo "File $SHELL_CONFIG_FILE already contains a 'JEKA_HOME=' entry."
       echo "Won't install to not collide with previous installed version."
@@ -159,12 +161,12 @@ setup() {
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
   echo "export JEKA_HOME=$jeka_path" >> "$SHELL_CONFIG_FILE"
   echo "export PATH=\$PATH:\$JEKA_HOME" >> "$SHELL_CONFIG_FILE"
-  echo "$SHELL_CONFIG_FILE modified"
   echo ""
 
   echo "Checking install. This requires JDK download. It may take a while ..."
   export PATH=$PATH:$jeka_path
-  jeka --version
+  echo "jeka --version"
+  jeka --version -la=false
   echo "Jeka is properly installed."
   echo "Later, You can updated JeKa version by executing 'jekau' or jekau <version>."
 }

@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkBusyIndicator;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -43,9 +44,12 @@ public final class Main {
         }
         final long start = System.nanoTime();
         try {
-            // TODO filter -r xxxx args
             String[] filteredArgs = filteredArgs(args);
             Environment.initialize(filteredArgs);
+            if (Environment.isPureVersionCmd()) {
+                System.out.println(JkInfo.getJekaVersion());
+                return;
+            }
             Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
             JkLog.setDecorator(standardOptions.logStyle);
             if (standardOptions.logBanner) {
