@@ -136,11 +136,11 @@ class LocalAndTxtDependencies {
                 return LocalAndTxtDependencies.of();
             }
             JkDependencySet regular = JkDependencySet.of()
-                    .andFiles(libDir.andMatching(true, "regular" + "/*.jar").getFiles());
+                    .andFiles(libDir.andMatching(true, "compile" + "/*.jar").getFiles());
             JkDependencySet compileOnly = JkDependencySet.of()
                     .andFiles(libDir.andMatching(true, "compile-only" + "/*.jar").getFiles());
             JkDependencySet runtimeOnly = JkDependencySet.of()
-                    .andFiles(libDir.andMatching(true, "*.jar", "runtime-only" + "/*.jar").getFiles());
+                    .andFiles(libDir.andMatching(true, "*.jar", "runtime" + "/*.jar").getFiles());
             JkDependencySet test = JkDependencySet.of()
                     .andFiles(libDir.andMatching(true, "*.jar", TEST + "/*.jar").getFiles());
 

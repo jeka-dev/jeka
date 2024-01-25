@@ -48,6 +48,7 @@ public final class IntellijKBean extends KBean {
      * Underlying imlGenerator used to generate Iml. <p>
      * Use this object to  configure finely generated iml.
      */
+    @JkDoc(hide = true)
     public final JkImlGenerator imlGenerator = JkImlGenerator.of();
 
     private final LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
