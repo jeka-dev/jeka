@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -9,19 +10,28 @@ import java.util.stream.Collectors;
 
 final class HelpDisplayer {
 
-    static void help(List<Class<? extends KBean>> localBeanClasses, List<Class> classpathBeanClasses,
+    static void help(List<Class<?>> localBeanClasses, List<Class<?>> classpathBeanClasses,
                      boolean compilationFailed, Path baseDir) {
-        String introSb = "\nPurpose:\n" +
-                "  Executes the specified methods defined in KBeans, using the specified properties, options and extra classpath.\n\n" +
-                "Usage:\n" +
-                "  jeka (method | kbean#method ...) [property=<value> | kbean#property=<value> ...] " +
-                "[-option | -option=<value> ...] [@<module coordinates> ...] [@<path> ...] " +
-                "[-DsystemPropertyName=<value> ...]\n\n" +
-                "Example:\n" +
-                "  jeka project#clean project#pack project#pack.sources=true -ls=DEBUG -Dmy.prop=aValue @org.example:a-plugin:1.1.0\n\n" +
-                standardProperties();
-        System.out.println(introSb);
-
+        System.out.println("JeKa command line processor [version " + JkInfo.getJekaVersion() + "]");
+        System.out.println();
+        String purpose = "JeKa is a tool for executing Java source code from the command line. It resolves dependencies and " +
+                "compile sources behind the scene prior execution. The entrypoint code needs to be wrapped in a KBean class in " +
+                "order to be invokable from command class.";
+        System.out.println(JkUtilsString.wrapStringCharacterWise(purpose, 100));
+        System.out.println();
+        System.out.println("Usage : jeka [options] [+<coordinates|path>] <KBean actions ...>");
+        System.out.println("   or   jeka -r <git_url|path|@alias> [options] <KBean actions ...>");
+        System.out.println("   or   jeka -rc <git_url|path|@alias> [options] <KBean actions ...>");
+        System.out.println("   or   jeka @alias [options] <KBean actions ...>");
+        System.out.println();
+        System.out.println("Examples :");
+        System.out.println("  Scaffold a simple project      : jeka self: scaffold");
+        System.out.println("  Scaffold a Spring-Boot project : jeka +dev.jeka:springboot-plugin project: layout.style=SIMPLE springboot: scaffold");
+        System.out.println("  Generate Intellij Metadata     : jeka intellij: iml");
+        System.out.println("  Execute KBean actions          : jeka myBean: myMethod myFieldA=8 myFieldB=false");
+        System.out.println("  Execute Remote actions         : jeka -r  myMethod myFieldA=8 myFieldB=false");
+        System.out.println();
+        System.out.println(standardProperties());
         final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");
         if (compilationFailed) {
             sb.append("  [WARN] Compilation of jeka-src failed. Cannot provide information about KBean defined locally.\n");
@@ -56,7 +66,6 @@ final class HelpDisplayer {
             beanDescription = beanDescription + ".";
         }
         beanDescription = beanDescription.trim();
-        beanDescription = beanDescription + "[" + beanClass.getName() + "]";
         return new RenderItem(shortName, Collections.singletonList(beanDescription));
     }
 
