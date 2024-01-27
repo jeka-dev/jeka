@@ -12,7 +12,7 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.Main;
-import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
+import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -36,10 +36,6 @@ public final class EclipseKBean extends KBean {
     private final Map<JkDependency, Properties> attributes = new HashMap<>();
 
     private final Map<JkDependency, Properties> accessRules = new HashMap<>();
-
-    protected void init() {
-        getRunbase().load(ScaffoldKBean.class);
-    }
 
     // ------------------------- setters ----------------------------
 

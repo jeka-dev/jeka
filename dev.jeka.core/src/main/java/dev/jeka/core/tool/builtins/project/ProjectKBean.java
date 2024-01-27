@@ -10,18 +10,17 @@ import dev.jeka.core.api.java.JkJdks;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInjectProperty;
-import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
+import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import org.w3c.dom.Document;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,11 @@ import java.util.List;
  * and a decoration for scaffolding.
  */
 @JkDoc("Provides a configured JkProject instance for building JVM based projects.")
-public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
+public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
+
+    // The underlying project managed by this KBean
+    @JkDoc(hide = true)
+    public final JkProject project = JkProject.of();
 
     @JkDoc("Version of the project. Can be used by a CI/CD tool to inject version.")
     public String version;
@@ -53,10 +56,11 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc
     private final JkTestOptions tests = new JkTestOptions();
 
+
     /**
      * Options for configuring scaffold.
      */
-    public final JkScaffoldOptions scaffold = new JkScaffoldOptions();
+    public final JkProjectScaffoldOptions scaffold = new JkProjectScaffoldOptions(project);
 
     /**
      * Options for configuring directory layout.
@@ -74,12 +78,9 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
 
-    public final JkProject project = JkProject.of();
-
     @Override
     protected void init() {
         configureProject();
-        configureScaffold();
     }
 
     // ------------------------------- command line methods -----------------------------
@@ -141,6 +142,13 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Run the generated jar.")
     public void runJar() {
         this.run.runJar();
+    }
+    
+    @JkDoc("Scaffold a JeKa project skeleton in working directory.")
+    public void scaffold() {
+        JkScaffold scaffolder = JkScaffold.of(Paths.get(""));
+        this.scaffold.configure(scaffolder);
+        scaffolder.run();
     }
 
     @Override
@@ -232,13 +240,20 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     }
 
-    public static class JkScaffoldOptions {
+    public static class JkProjectScaffoldOptions extends JkScaffoldOptions {
+
+        private final JkProject project;
+
 
         @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
         private final boolean generateLocalLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
         private final JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.SIMPLE_FACADE;
+
+        public JkProjectScaffoldOptions(JkProject project) {
+            this.project = project;
+        }
 
         public JkProjectScaffold.BuildClassTemplate getTemplate() {
             return template;
@@ -263,9 +278,26 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
                 }
                 return Arrays.asList(description.split(","));
             }
-
         }
 
+        @Override
+        public void configure(JkScaffold scaffold) {
+            super.configure(scaffold);
+            // Scaffold project structure including build class
+            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffold);
+            projectScaffold.configureScaffold(template);
+
+            // Create 'project-dependencies.txt' file if needed
+            List<String> compileDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
+            List<String> runtimeDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
+            List<String> testDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
+            projectScaffold.createProjectDependenciesTxt(compileDeps, runtimeDeps, testDeps);
+
+            // Create local lib folder structure if needed
+            if (generateLocalLibsFolders) {
+                projectScaffold.generateLocalLibsFolders();
+            }
+        }
     }
 
     @Override
@@ -341,28 +373,6 @@ public class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.compilation.addJavaCompilerOptions(
                     JkUtilsString.parseCommandline(compilation.compilerExtraArgs));
         }
-    }
-
-    private void configureScaffold() {
-        getRunbase().find(ScaffoldKBean.class).ifPresent(scaffoldKBean -> {
-
-            // Scaffold project structure including build class
-            JkScaffoldOptions scaffoldOptions = this.scaffold;
-            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffoldKBean.scaffold);
-            projectScaffold.configureScaffold(scaffoldOptions.template);
-
-            // Create 'project-dependencies.txt' file if needed
-            JkScaffoldOptions.DependenciesTxt dependenciesTxt = scaffoldOptions.dependenciesTxt;
-            List<String> compileDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
-            List<String> runtimeDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
-            List<String> testDeps = JkScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
-            projectScaffold.createProjectDependenciesTxt(compileDeps, runtimeDeps, testDeps);
-
-            // Create local lib folder structure if needed
-            if (scaffoldOptions.generateLocalLibsFolders) {
-                projectScaffold.generateLocalLibsFolders();
-            }
-        });
     }
 
 }

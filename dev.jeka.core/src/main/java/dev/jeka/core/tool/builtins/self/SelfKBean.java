@@ -6,6 +6,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -13,7 +14,9 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkRunbase;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +34,7 @@ import java.util.stream.Collectors;
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."
 )
-public abstract class SelfKBean extends KBean {
+public final class SelfKBean extends KBean {
 
     /**
      * Represents the value "auto" usable in {@link #setMainClass(String)}
@@ -44,6 +47,9 @@ public abstract class SelfKBean extends KBean {
 
     @JkDoc("Space separated list of program arguments to pass to the command line running the program.")
     public String programArgs = "";
+
+    @JkDoc
+    public final JkScaffoldOptions scaffold = new JkScaffoldOptions();
 
     public final JkConsumers<JkManifest> manifestCustomizers = JkConsumers.of();
 
@@ -124,6 +130,13 @@ public abstract class SelfKBean extends KBean {
         String output = getRunbase().getDependencyResolver().resolve(getRunbase().getExportedDependencies())
                 .getDependencyTree().toStringTree();
         JkLog.info(output);
+    }
+
+    @JkDoc("Creates a skeleton in the current working directory.")
+    public void scaffold() {
+        JkScaffold scaffolder = JkScaffold.of(Paths.get(""));
+        this.scaffold.configure(scaffolder);
+        scaffolder.run();
     }
 
     /**
