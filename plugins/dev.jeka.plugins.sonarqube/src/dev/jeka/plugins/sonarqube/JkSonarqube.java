@@ -10,12 +10,14 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkException;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -165,9 +167,12 @@ public final class JkSonarqube {
         String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("localhost");
         JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
         Path jar = getToolJar();
-        javaProcess(jar)
+        JkProcResult procResult = javaProcess(jar)
                 .addParamsIf(JkLog.isVerbose(), "-X")
                 .exec();
+        if (!procResult.hasSucceed()) {
+            throw new JkException("SonarScanner command failed. Use--verbose to get more details.");
+        }
         JkLog.endTask();
     }
 
@@ -311,10 +316,11 @@ public final class JkSonarqube {
     private JkJavaProcess javaProcess(Path jar) {
         return JkJavaProcess.ofJava("org.sonarsource.scanner.cli.Main")
                 .setClasspath(jar)
-                .setFailOnError(true)
+                .setFailOnError(JkLog.isVerbose())
                 .addParams(toProperties())
                 .setLogCommand(JkLog.isVerbose())
-                .setLogWithJekaDecorator(JkLog.isVerbose() || logOutput);
+                .setInheritIO(logOutput)
+                .setLogWithJekaDecorator(false);
     }
 
     private List<String> toProperties() {

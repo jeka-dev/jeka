@@ -237,6 +237,10 @@ public final class JkRunbase {
         JkLog.endTask();
     }
 
+    void assertValid() {
+        JkUtilsAssert.state(dependencyResolver != null, "Dependency resolver can't be null.");
+    }
+
     void run(List<EngineCommand> commands) {
         for (EngineCommand engineCommand : commands) {
             KBean bean = load(engineCommand.getBeanClass());

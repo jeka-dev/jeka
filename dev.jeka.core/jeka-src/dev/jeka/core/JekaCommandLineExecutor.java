@@ -55,7 +55,7 @@ public abstract class JekaCommandLineExecutor {
         JkProcess process = JkProcess.of(cmd.toString())
                 .setWorkingDir(baseDir)
                 .setLogCommand(true)
-                .setLogWithJekaDecorator(true)
+                //.setLogWithJekaDecorator(true)
                 .setFailOnError(true)
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
                 .inheritJkLogOptions()

@@ -96,12 +96,10 @@ public class JkProjectCompilation {
      * Performs entire compilation phase.
      */
     public void run() {
-        JkLog.startTask("Run compilation phase for " + purpose());
         generateSources();
         preCompileActions.run();
         compileActions.run();
         postCompileActions.run();
-        JkLog.endTask("Compilation phase for " + purpose() + " achieved in %d millis.");
     }
 
     /**

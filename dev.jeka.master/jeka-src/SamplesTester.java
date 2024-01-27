@@ -16,9 +16,9 @@ class SamplesTester extends JekaCommandLineExecutor {
                 "project#clean project#pack mavenPublication#publishLocal -cw");
 
         // Test with injecting plugin dep via "+"
-        run("dev.jeka.samples.sonarqube", "-lna " +
+        run("dev.jeka.samples.sonarqube", "-lri " +
                 "+../../plugins/dev.jeka.plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar " +
-                "project#cleanPack");
+                "project#cleanPack sonarqube#");
 
         // Test with injecting plugin dep via jeka.properties file
         run("dev.jeka.samples.protobuf", "-liv project#cleanPack");
@@ -26,6 +26,8 @@ class SamplesTester extends JekaCommandLineExecutor {
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.jacoco", "-lna +../../plugins/dev.jeka.plugins.jacoco project#cleanPack " +
                 "project#pack #checkGeneratedReport");
+
+
 
         // No Jeka deps test samples
         run("dev.jeka.samples.basic", "-kb=simpleProject #cleanPackPublish #checkedValue=A #checkValueIsA");

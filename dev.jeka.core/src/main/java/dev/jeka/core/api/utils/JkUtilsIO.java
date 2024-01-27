@@ -386,8 +386,8 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns a thread that write each data read to the specified input
-     * getOutputStream to the specified output getOutputStream.
+     * Returns a thread that write each data read to the specified inputStream
+     * to the specified output getOutputStream.
      */
     public static JkStreamGobbler newStreamGobbler(Process process, InputStream is, OutputStream ... outputStreams) {
         return new JkStreamGobbler(process, is, outputStreams);
