@@ -15,6 +15,7 @@ extra:
         property: UA-103449580-2
 nav:
     - Installation: installation.md
+    - Cheat Sheet: cheat-sheet.md
     - Reference Guide:
         - Execution Engine:
           - File Structure: reference-guide/execution-engine-files.md
@@ -34,7 +35,6 @@ nav:
     - Tutorials IntelliJ Plugin:
         - Getting Started: tutorials/gui-getting-started.md
         - Reuse Elements: tutorials/gui-reuse-elements.md
-    - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md
 repo_url: https://github.com/jerkar/jeka
