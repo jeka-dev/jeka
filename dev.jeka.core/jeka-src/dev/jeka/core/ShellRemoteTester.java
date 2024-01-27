@@ -7,6 +7,9 @@ import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -18,9 +21,19 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
     private static final String SNAPSHOT_VERSION = "0.11.x-SNAPSHOT";
 
+    public static void main(String[] args) {
+        new ShellRemoteTester().run();
+    }
+
     void run() {
         testWithRemoteGitHttp();
-        testWithSnapshotDistribVersion();
+        try {
+            testWithSnapshotDistribVersion();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         testWithSpecificJavaVersion();
         testLsu();
     }
@@ -41,7 +54,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 "expecting 'ok' followed by a breaking line)", output);
     }
 
-    private void testWithSnapshotDistribVersion() {
+    private void testWithSnapshotDistribVersion() throws IOException, InterruptedException {
         JkLog.info("============ Testing snapshot jeka version %s =============================", SNAPSHOT_VERSION);
 
         // Delete cached distrib to force reloading
@@ -53,10 +66,18 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         // Test without alias
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL,  "#ok")
                 .setLogCommand(true)
-                .setLogWithJekaDecorator(true)
+                .setLogWithJekaDecorator(false)
+                .setCollectOutput(true)
+                .redirectErrorStream(false)
                 .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
                 .setEnv("jeka.version", SNAPSHOT_VERSION)
                 .exec();
+
+        // Tests if messages written in stderr by jeka shell are not
+        // collected in the output
+        String output = result.getOutput();
+        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+                "expecting 'ok' followed by a breaking line)", output);
     }
 
     private void testWithSpecificJavaVersion() {
@@ -76,6 +97,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                         "-Djeka.java.version=" + javaVersion)
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
+                .redirectErrorStream(false)
                 .setCollectOutput(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .setEnv("jeka.java.distrib", distro)
@@ -110,5 +132,6 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         JkUtilsAssert.state(!output.startsWith("ok"), "Command output was '%s', " +
                 "expecting output from distrib installation", output);
     }
+
 
 }

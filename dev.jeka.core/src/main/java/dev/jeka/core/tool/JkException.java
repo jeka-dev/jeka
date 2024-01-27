@@ -3,12 +3,12 @@ package dev.jeka.core.tool;
 import java.util.UnknownFormatConversionException;
 
 /**
- * Marker exception to notice a misconfiguration from the user.
+ * Marker exception to notice a misconfiguration from the user or an infrastructure problem.
  * When such an exception is raised, Jeka does not display stacktrace on output console.
  *
  * @author Jerome Angibaud
  */
-final class JkException extends RuntimeException {
+public final class JkException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

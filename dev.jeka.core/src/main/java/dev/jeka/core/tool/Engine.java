@@ -94,6 +94,9 @@ final class Engine {
             computedClasspath = dependencyResolver.resolve(commandLineDependencies.and(dependenciesFromJekaProps))
                     .getFiles();
             AppendableUrlClassloader.addEntriesOnContextClassLoader(computedClasspath);
+
+            // adding this cause an exception
+            // Fail at loading class SonarqubeSampleBuild on dev.jeka.core.tool.AppendableUrlClassloader
             //beanClassesResolver.setClasspath(computedClasspath, false);
             result = null;
         }
@@ -104,7 +107,9 @@ final class Engine {
 
         JkLog.startTask("Setting up runbase");
         JkRunbase runbase = JkRunbase.get(baseDir);
+        runbase.setDependencyResolver(this.dependencyResolver);
         runbase.setClasspath(computedClasspath);
+        runbase.assertValid(); // fail-fast. bugfix purpose
 
         // If jeka-src compilation failed, we ignore the master bean class because it may be absent
         // from the classpath.
@@ -167,11 +172,11 @@ final class Engine {
                 SourceParser.of(this.baseDir, sourceTree).parse();
         JkLog.traceEndTask();
 
-        JkDependencySet defDependencies = JkDependencySet.of()
+        JkDependencySet jekaSrcDependencies = JkDependencySet.of()
                 .and(Environment.commandLine.getJekaSrcDependencies())
                 .and(parsedSourceInfo.getDependencies())
                 .and(dependenciesFromJekaProps());
-        JkDependencySet exportedDependencies = defDependencies;
+        JkDependencySet exportedDependencies = jekaSrcDependencies;
         boolean hasPrivateDependencies = parsedSourceInfo.hasPrivateDependencies();
         if (hasPrivateDependencies) {
             exportedDependencies = JkDependencySet.of()
@@ -181,7 +186,7 @@ final class Engine {
         }
 
         EngineClasspathCache.Result cacheResult = engineClasspathCache.resolvedClasspath(
-                defDependencies, exportedDependencies, !hasPrivateDependencies);
+                jekaSrcDependencies, exportedDependencies, !hasPrivateDependencies);
 
         return new CompilationContext(
                 jekaClasspath().and(cacheResult.classpath),
@@ -236,7 +241,7 @@ final class Engine {
                 JkLog.trace("Some binary files seem missing.");
             }
             if (outdated || missingBinaryFiles) {
-                SingleCompileResult result = compileDef(classpath, compilationContext.compileOptions, failOnCompileError);
+                SingleCompileResult result = compileJekaSrc(classpath, compilationContext.compileOptions, failOnCompileError);
                 if (!result.success) {
                     failedProjects.add(baseDir);
                     compilationTracker.deleteCompileFlag();
@@ -274,11 +279,14 @@ final class Engine {
         runbase.setClasspath(compilationResult.classpath);
         runbase.setExportedClassPath(compilationContext.exportedClasspath);
         runbase.setExportedDependencies(compilationContext.exportedDependencies);
+        runbase.assertValid();
         return compilationResult;
     }
 
-    private SingleCompileResult compileDef(JkPathSequence defClasspath, List<String> compileOptions,
-                                           boolean failOnCompileError) {
+    private SingleCompileResult compileJekaSrc(JkPathSequence defClasspath,
+                                               List<String> compileOptions,
+                                               boolean failOnCompileError) {
+
         JkPathTree.of(beanClassesResolver.jekaSrcClassDir).deleteContent();
         JkPathSequence extraClasspath = JkPathSequence.of();
         JkProperties props = JkRunbase.constructProperties(baseDir);

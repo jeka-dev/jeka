@@ -59,6 +59,7 @@ public final class JkInit {
             runbase.setDependencyResolver(dependencyResolver);
             runbase.setClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()));
             runbase.init(commands);
+            runbase.assertValid();;
             final T jkBean = runbase.load(clazz);
             JkLog.info(jkBean + " is ready to run.");
             if (memoryBufferLogActivated) {

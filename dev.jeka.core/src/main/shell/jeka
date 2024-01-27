@@ -64,19 +64,19 @@ declare DRY_RUN  # Debugging purpose
 #######################################
 debug() {
   if [ -n "$LOG_DEBUG" ] || [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
-    echo "$1"
+    echo "$1" 1>&2
   fi
 }
 
 #######################################
-# Prints passed arguments on the error stream
+# Prints passed arguments on the stderr
 # Globals:
 #   none
 # Arguments:
 #   $*
 #######################################
-error() {
-  echo "$*" >&2
+msg() {
+  echo "$*" 1>&2
 }
 
 #######################################
@@ -162,7 +162,7 @@ download_and_unpack() {
   elif [ -x "$(command -v wget)" ]; then
     wget -q -O "$temp_file" "$url"
   else
-    echo "Error: curl or wget not found, please make sure one of them is installed" 1>&2
+    msg "Error: curl or wget not found, please make sure one of them is installed" 1>&2
     exit 1
   fi
 
@@ -387,7 +387,7 @@ giturl_to_foldername() {
 
 assert_dir_exits() {
   if [ ! -d "$1" ]; then
-    echo "Directory $1 does not exist"
+    msg "Directory $1 does not exist"
     exit 1
   fi
 }
@@ -434,11 +434,11 @@ compute_base_dir_from_resolved_remote_arg() {
       local quiet_flag="--quiet"
       if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
         quiet_flag=""
-        echo "Cloning $git_url into $result  ..."
+        msg "Cloning $git_url into $result  ..."
       fi
       git clone $quiet_flag -c advice.detachedHead=false --depth 1 $branch_args "$git_url" "$result"
   else
-      debug "Cache directory $result already exists. Won't clone or update."
+      msg "Cache directory $result already exists. Won't clone or update."
   fi
   BASE_DIR=$result
 }
@@ -451,7 +451,7 @@ compute_RESOLVED_ALIAS() {
   RESOLVED_ALIAS=""
   if [[ ${arg:0:1} == "@" ]]; then  # argument start with '@'
     if [ ! -f "$GLOBAL_PROP_FILE" ]; then
-      echo "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
+      msg "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
       exit 1
     fi
     local alias_name=${arg:1}
@@ -459,11 +459,11 @@ compute_RESOLVED_ALIAS() {
     local resolved
     resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
     if [ -z "$resolved" ]; then
-      echo "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg"
-      echo "Defined Aliases :"
-      echo "=============================="
+      msg "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg"
+      msg "Defined Aliases :"
+      msg "=============================="
       cat "$GLOBAL_PROP_FILE" | grep '^jeka.remote.alias.'
-      echo "=============================="
+      msg "=============================="
       exit 1
     else
       RESOLVED_ALIAS="$resolved"
@@ -521,7 +521,7 @@ compute_JEKA_DIST_DIR() {
 
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
         if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
-          echo "Download Jeka distrib from $url in $distrib_cache_dir"
+          msg "Download Jeka distrib from $url in $distrib_cache_dir"
         fi
         download_and_unpack "$url" "$distrib_cache_dir"
         JEKA_DIST_DIR=$distrib_cache_dir
@@ -542,8 +542,8 @@ compute_JEKA_CLASSPATH() {
       dist_dir="$CURRENT_SCRIPT_DIR"
     fi
     if [ -z "$dist_dir" ]; then
-      echo "No JeKa distribution found from script location $CURRENT_SCRIPT_DIR."
-      echo "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in jeka.properties file."
+      msg "No JeKa distribution found from script location $CURRENT_SCRIPT_DIR."
+      msg "You probably forgot to mention a 'jeka.version' or 'jeka.distrib.location' property in jeka.properties file."
       exit 1
     fi
   fi
@@ -564,8 +564,8 @@ compute_JEKA_CLASSPATH() {
   fi
   local jar_file="$dist_dir/$JEKA_JAR_NAME"
   if [ ! -f "$jar_file" ]; then
-    echo "Cannot find JeKa jar file $jar_file."
-    echo "Are you sure the JeKa distribution you use is properly packaged ?"
+    msg "Cannot find JeKa jar file $jar_file."
+    msg "Are you sure the JeKa distribution you use is properly packaged ?"
     exit 1
   fi
   JEKA_CLASSPATH="$boot_dir_args$jar_file"
@@ -583,18 +583,18 @@ get_or_download_jdk() {
   jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$JAVA_VERSION"
   if [ ! -d "$jdk_cache_dir" ]; then
     if [ -z "$JDK_DOWNLOAD_OS" ]; then
-      echo "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
-      echo "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or a property in ~/jeka/global.properties file." 1>&2
+      msg "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
+      msg "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or a property in ~/jeka/global.properties file." 1>&2
       exit 1
     fi
     if [ -z "$JDK_DOWNLOAD_ARCH" ]; then
-      echo "Unable to download JDK, unsupported Architecture: $(uname -m)" 1>&2
-      echo "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
+      msg "Unable to download JDK, unsupported Architecture: $(uname -m)" 1>&2
+      msg "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
       exit 1
     fi
     local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
     if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
-      echo "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
+      msg "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
     fi
     download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
     if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
@@ -669,7 +669,7 @@ elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is 
   if [ -z "$JAVA_VERSION" ]; then
     JAVA_VERSION=$"$DEFAULT_JAVA_VERSION"
     if [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
-      echo "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION."
+      msg "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION."
     fi
   fi
   jdkPath=$(get_jdk_home_from_props "$BASE_DIR" "$JAVA_VERSION")
@@ -695,9 +695,9 @@ if [ -z "$JAVA_CMD" ] ; then
 fi
 
 if [ ! -x "$JAVA_CMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )."
-  echo "  We cannot execute $JAVA_CMD" >&2
-  echo "  You can specify which JDK to use by setting JEKA_JDK environment variable."
+  msg "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )."
+  msg "  We cannot execute $JAVA_CMD" >&2
+  msg "  You can specify which JDK to use by setting JEKA_JDK environment variable."
   exit 1
 fi
 

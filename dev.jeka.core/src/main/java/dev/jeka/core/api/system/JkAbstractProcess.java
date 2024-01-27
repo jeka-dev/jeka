@@ -37,7 +37,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     private boolean destroyAtJvmShutdown;
 
-    private boolean redirectErrorStream = true;
+    private boolean redirectErrorStream;
 
     private boolean collectOutput;
 
@@ -218,9 +218,12 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     /**
      * Set if the output streams of the process must be logged keeping the JkLog decorator.
      * <p>
-     * This is generally desirable, as the output will honor the indentation and visibility
+     * This may be desirable, as the output will honor the indentation and visibility
      * set by JeKa log decorator.
      * This implies a small extra resource costs that is acceptable in most of the situations.
+     * <p>
+     * Be aware that the stdout and stderr of the sub-process will be mixed
+     * in the {@link Process#getInputStream()} as specified in this method Javadoc.
      * <p>
      * Nevertheless, if you want to bypass this mechanism, you can specify to not using it.
      * In this case, you may set up explicitly a mean to get the output streams. One solution
@@ -266,8 +269,9 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
-     * Same as {@link ProcessBuilder#redirectErrorStream(boolean)}. The difference is that the initial
-     * value is <code>true</code> for {@link JkAbstractProcess}
+     * Same as {@link ProcessBuilder#redirectErrorStream(boolean)}.
+     * <p>
+     * Initial value is false.
      */
     public T redirectErrorStream(boolean value) {
         this.redirectErrorStream = value;
@@ -335,8 +339,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         }
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final OutputStream collectOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
-        int exitCode = runProcess(commands,collectOs);
+        final OutputStream collectRecipientOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
+        int exitCode = runProcess(commands,collectRecipientOs);
         if (logCommand) {
             JkLog.endTask();
         }
@@ -396,7 +400,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         return process;
     }
 
-    private int runProcess(List<String> commands, OutputStream collectOs) {
+    private int runProcess(List<String> commands, OutputStream collectRecipientOs) {
         final Process process = runProcessAsync(commands);
 
         // Initialize stream globber so output stream of subprocess does not bybass decorators 
@@ -412,7 +416,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             OutputStream consoleErrStream = logWithJekaDecorator ?
                     JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
             outputStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getInputStream(),
-                    consoleOutputStream, collectOs);
+                    consoleOutputStream, collectRecipientOs);
             errorStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getErrorStream(),
                     consoleErrStream, JkUtilsIO.nopOutputStream());
         }

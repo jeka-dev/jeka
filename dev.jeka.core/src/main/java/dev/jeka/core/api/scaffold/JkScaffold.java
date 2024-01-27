@@ -185,10 +185,14 @@ public final class JkScaffold {
         JkLog.info("Create jeka.bat file");
         JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.bat"), StandardCopyOption.REPLACE_EXISTING);
         Path jekaShell = baseDir.resolve("jeka");
-        JkLog.info("Create jeka shell file");
-        JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), jekaShell,
-                StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-        JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
+        if (Files.isDirectory(jekaShell)) {
+            JkLog.warn("%s directory is still present. Cannot create jeka shell file in base directory.", jekaShell);
+        } else  {
+            JkLog.info("Create jeka shell file");
+            JkUtilsPath.copy(JkLocator.getJekaHomeDir().resolve("jeka"), jekaShell,
+                    StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+            JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
+        }
     }
 
 }
