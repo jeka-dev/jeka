@@ -215,7 +215,7 @@ public class JkDependencySet {
         return minus(JkModuleId.of(moduleId));
     }
 
-    public JkDependencySet withMoving(Hint hint, @JkDepSuggest String moduleId) {
+    public JkDependencySet withMoving(@JkDepSuggest String moduleId, Hint hint) {
         JkDependency dependency = getMatching(JkCoordinateDependency.of(moduleId));
         return minus(dependency).and(hint, dependency);
     }

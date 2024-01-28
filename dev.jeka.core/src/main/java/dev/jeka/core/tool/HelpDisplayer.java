@@ -29,7 +29,7 @@ final class HelpDisplayer {
         System.out.println("  Scaffold a Spring-Boot project : jeka +dev.jeka:springboot-plugin project: layout.style=SIMPLE springboot: scaffold");
         System.out.println("  Generate Intellij Metadata     : jeka intellij: iml");
         System.out.println("  Execute KBean actions          : jeka myBean: myMethod myFieldA=8 myFieldB=false");
-        System.out.println("  Execute Remote actions         : jeka -r  myMethod myFieldA=8 myFieldB=false");
+        System.out.println("  Execute Git hosted application : jeka -r https://github.com/djeang/jeka-spring-boot-thymeleaf-example self: runJar");
         System.out.println();
         System.out.println(standardProperties());
         final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");

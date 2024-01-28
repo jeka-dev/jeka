@@ -20,9 +20,8 @@ import java.util.List;
  */
 public class JkProjectScaffold {
 
-
     public enum BuildClassTemplate {
-        NORMAL, SIMPLE_FACADE, PLUGIN, CODE_LESS, PURE_API
+        REGULAR, FLAT_FACADE, PROPS, PLUGIN
     }
 
     private final JkProject project;
@@ -45,15 +44,14 @@ public class JkProjectScaffold {
     public void configureScaffold(BuildClassTemplate template) {
         scaffold.setJekaClassCodeProvider( () -> {
             final String snippet;
-            if (template == BuildClassTemplate.CODE_LESS) {
+            if (template == BuildClassTemplate.PROPS) {
+                scaffold.addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
                 return null;
             }
-            if (template == BuildClassTemplate.NORMAL) {
+            if (template == BuildClassTemplate.REGULAR) {
                 snippet = "buildclass.snippet";
             } else if (template == BuildClassTemplate.PLUGIN) {
                 snippet = "buildclassplugin.snippet";
-            } else if (template == BuildClassTemplate.PURE_API) {
-                snippet = "buildclasspureapi.snippet";
             } else {
                 snippet = "buildclassfacade.snippet";
             }
@@ -87,13 +85,13 @@ public class JkProjectScaffold {
     /**
      * Creates the <li>project-dependencies.txt</li> containing the specified dependencies,
      */
-    public JkProjectScaffold createProjectDependenciesTxt(List<String> compileDeps,
-                                                          List<String> runtimeDeps,
-                                                          List<String> testDeps) {
+    public JkProjectScaffold createDependenciesTxt(List<String> compileDeps,
+                                                   List<String> runtimeDeps,
+                                                   List<String> testDeps) {
         if (compileDeps.isEmpty() && runtimeDeps.isEmpty() && testDeps.isEmpty()) {
             return this;
         }
-        scaffold.extraActions.append("Generate project-dependencies.txt", () -> {
+        scaffold.extraActions.append("Generate dependencies.txt", () -> {
             List<String> lines = JkUtilsIO.readAsLines(JkProjectScaffold.class.getResourceAsStream("dependencies.txt"));
             StringBuilder sb = new StringBuilder();
             for (String line : lines) {
@@ -109,7 +107,7 @@ public class JkProjectScaffold {
                 }
             }
             String content = sb.toString();
-            JkPathFile.of(project.getBaseDir().resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))
+            JkPathFile.of(project.getBaseDir().resolve(JkProject.DEPENDENCIES_TXT_FILE))
                     .createIfNotExist()
                     .write(content);
         });
@@ -129,7 +127,7 @@ public class JkProjectScaffold {
         testLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
         testLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
 
-        // This is special scaffolding for project pretending to be plugins for Jeka
+        // This is special scaffolding for plugin projects
         if (template == JkProjectScaffold.BuildClassTemplate.PLUGIN) {
             Path breakingChangeFile = project.getBaseDir().resolve("breaking_versions.txt");
             String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
@@ -137,7 +135,7 @@ public class JkProjectScaffold {
             JkPathFile.of(breakingChangeFile).write(text);
             Path sourceDir =
                     project.compilation.layout.getSources().toList().get(0).getRoot();
-            String pluginCode = JkUtilsIO.read(ProjectKBean.class.getResource("pluginclass.snippet"));
+            String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("pluginclass.snippet"));
             JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
                     .createIfNotExist()
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));

@@ -57,9 +57,11 @@ public abstract class JekaCommandLineExecutor {
                 .setLogCommand(true)
                 //.setLogWithJekaDecorator(true)
                 .setFailOnError(true)
+                .addParamsIf(!cmdLine.contains("-Djeka.java.version="), "-Djeka.java.version=8")
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
                 .inheritJkLogOptions()
                 .addParams("-dcf", "-lst", "-cw", "-lsu", "-lri")
+
 
                 // set explicitly jeka-core.jar to use, otherwise it may fetch a Jeka version from maven
                 // if jeka.properties contains a jeka.version prop, has it happens when scaffolding.

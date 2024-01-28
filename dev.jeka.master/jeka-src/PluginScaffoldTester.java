@@ -18,12 +18,10 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
         // inject springboot-plugin.jar both as a jeka dependencies (for running plugin)
         // And as a substitute of  @JkInjectClasspath("${jeka.springboot.plugin.dependency}") in scaffolded project
-        String scaffoldCmd = String.format("-lsu project# springboot#scaffold -Djeka.springboot.plugin.dependency=%s +%s"
-                + " project#scaffold.extraJekaProps=%s",
+        String scaffoldCmd = String.format("-lsu project# springboot#scaffold -Djeka.springboot.plugin.dependency=%s +%s",
                 sprinbootPluginJar,
-                sprinbootPluginJar,
-                "jeka.java.version=17");
-        String checkCmd = "project#info project#pack -lsu project#version=0.0.1";
+                sprinbootPluginJar);
+        String checkCmd = "project#info project#pack -lsu project#version=0.0.1 -Djeka.java.version=17";
 
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
         runWithDistribJekaShell(path, scaffoldCmd);

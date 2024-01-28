@@ -46,7 +46,7 @@ public final class JkExternalToolApi {
         if (Files.isRegularFile(candidate.resolve(JkConstants.PROPERTIES_FILE))) {
             return true;
         }
-        if (Files.isRegularFile(candidate.resolve(JkProject.PROJECT_DEPENDENCIES_TXT_FILE))) {
+        if (Files.isRegularFile(candidate.resolve(JkProject.DEPENDENCIES_TXT_FILE))) {
             return true;
         }
         if (Files.isDirectory(candidate.resolve(JkProject.PROJECT_LIBS_DIR))) {

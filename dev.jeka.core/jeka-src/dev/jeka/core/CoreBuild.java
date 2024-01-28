@@ -147,7 +147,7 @@ public class CoreBuild extends KBean {
 
     void testScaffolding()  {
         JkLog.startTask("Run scaffold tests");
-        new CoreScaffoldTester().run();
+        new ScaffoldTester().run();
         JkLog.endTask();
     }
 

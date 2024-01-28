@@ -24,6 +24,9 @@ import java.util.stream.Stream;
 @JkDoc("Generates Idea Intellij metadata files (*.iml and modules.xml).")
 public final class IntellijKBean extends KBean {
 
+    // Flag for skipping modules.xml creation when testing.
+    public static final String IML_SKIP_MODULE_XML_PROP = "jeka.intellij.iml.skip.moduleXml";
+
     @JkDoc("Add a iml dependency on the specified module (hosting Jeka) instead of adding a direct dependency on Jeka jar." +
             "This is desirable on multi-module projects to share a single Jeka version.")
     private String jekaModuleName;
@@ -81,19 +84,25 @@ public final class IntellijKBean extends KBean {
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
         JkLog.info("Iml file generated at " + imlPath);
+        if ("true".equals(getRunbase().getProperties().get(IML_SKIP_MODULE_XML_PROP))) {
+            return;
+        }
+        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir());
+        if (!Files.exists(intelliJProject.getModulesXmlPath())) {
+            intelliJProject.generateModulesXml(imlPath);
+            JkLog.info("%s generated.", intelliJProject.getModulesXmlPath());
+        }
     }
 
     /**
      * Generate modules.xml files
      */
-    @JkDoc("Generates ./idea/modules.xml file.")
+    @JkDoc("Generates ./idea/modules.xml file by grabbing all .iml files presents " +
+            "in root or sub-directory of the project.")
     public void modulesXml() {
-        checkProjectRoot();
-        final Path current = getBaseDir();
         final Iterable<Path> imls = JkPathTree.of(getBaseDir()).andMatching(true, "**.iml").getFiles();
-        final IntellijModulesXmlGenerator intellijModulesXmlGenerator = new IntellijModulesXmlGenerator(current, imls);
-        intellijModulesXmlGenerator.generate();
-        JkLog.info("File generated at : " + intellijModulesXmlGenerator.outputFile());
+        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir()).generateModulesXml(imls);
+        JkLog.info("File generated at : " + intelliJProject.getModulesXmlPath());
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
@@ -111,7 +120,6 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("Shorthand for intellij#allIml + intellij#modulesXml.")
     public void fullProject() {
-        checkProjectRoot();
         allIml();
         modulesXml();
     }
@@ -119,6 +127,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Try to refresh project by deleting workspace.xml and touching iml file")
     public void refresh() {
         IntelliJProject.find(getBaseDir()).deleteWorkspaceXml();
+        iml();;
     }
 
     /**
@@ -194,15 +203,6 @@ public final class IntellijKBean extends KBean {
 
     private Path getImlFile() {
         return Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(getBaseDir()));
-    }
-
-    private void checkProjectRoot() {
-        final IntellijModulesXmlGenerator intellijModulesXmlGenerator = new IntellijModulesXmlGenerator(getBaseDir(),
-                Collections.emptyList());
-        JkUtilsAssert.state(Files.exists(intellijModulesXmlGenerator.outputFile()),
-                "Folder where Jeka has run '%s' seems not to be the root of the project cause no file %s " +
-                        "has been found here.\nPlease relaunch this command from IntelliJ project root directory."
-                , getBaseDir().toAbsolutePath(), intellijModulesXmlGenerator.outputFile());
     }
 
 }

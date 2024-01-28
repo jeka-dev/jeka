@@ -3,6 +3,7 @@ package dev.jeka.core;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,18 +12,22 @@ import java.nio.file.Path;
  * End-to-end tests about scaffolding.
  * Supposed to be run in dev.jeka.core working dir.
  */
-class CoreScaffoldTester extends JekaCommandLineExecutor {
+class ScaffoldTester extends JekaCommandLineExecutor {
 
     void run() {
 
         // Basic scaffold and checks
         scaffoldAndCheckInTemp("self#scaffold -lv", "help", true);
-        scaffoldAndCheckInTemp("project#scaffold", "help", true);
+        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=REGULAR", "#help", true);
+        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=FLAT_FACADE", "#help", true);
+        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PROPS", "#help", true);
+        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PLUGIN", "#help", true);
+
 
         // Check IntelliJ + Eclipse metadata
         Path workingDir = scaffoldAndCheckInTemp("project#scaffold", "project#clean project#pack", false);
         runWithDistribJekaShell(workingDir, "eclipse#files");
-        runWithDistribJekaShell(workingDir, "intellij#iml");
+        runWithDistribJekaShell(workingDir, "intellij#iml -D" + IntellijKBean.IML_SKIP_MODULE_XML_PROP + "=true");
         JkUtilsAssert.state(Files.exists(workingDir.resolve("src/main/java")),
                 "No source tree has been created when scaffolding Java.");
         JkPathTree.of(workingDir).deleteRoot();

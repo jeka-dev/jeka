@@ -202,7 +202,7 @@ public final class JkSpringbootProject {
             code = code.replace("${dependencyDescription}", injectClasspath);
             code = code.replace("${springbootVersion}", latestSpringbootVersion());
             final String jkClassCode = code;
-            if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.CODE_LESS) {
+            if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.PROPS) {
                 scaffold.setJekaClassCodeProvider(() -> jkClassCode);
             }
         } else if (scaffoldBuildKind == ScaffoldBuildKind.PROPS) {
@@ -212,7 +212,7 @@ public final class JkSpringbootProject {
                     "springboot#springbootVersion=" + latestSpringbootVersion();
             scaffold.addJekaPropsFileContent(propsContent);
             JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffold);
-            projectScaffold.createProjectDependenciesTxt(
+            projectScaffold.createDependenciesTxt(
                     Collections.singletonList("org.springframework.boot:spring-boot-starter-web"),
                     Collections.emptyList(),
                     Collections.singletonList("org.springframework.boot:spring-boot-starter-test"));

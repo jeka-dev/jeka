@@ -1,7 +1,5 @@
 package dev.jeka.core.api.utils;
 
-import dev.jeka.core.api.system.JkLog;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +45,7 @@ public class JkUtilsHttp {
                 connection.connect();
 
                 statusCode = connection.getResponseCode();
-                JkLog.info("Pinging % returned %s", url, statusCode);
+                System.out.printf("Pinging %s returned %s%n", url, statusCode);
 
                 // sleep for 2 seconds before the next request
                 if (statusCode < 200 || statusCode >= 400) {
@@ -55,7 +53,7 @@ public class JkUtilsHttp {
                 }
                 connection.disconnect();
             } catch (Exception e) {
-                JkLog.warn("Error pinging " + url + " :" + e.getMessage());
+                System.out.println("Error pinging " + url + " :" + e.getMessage());
                 JkUtilsSystem.sleep(sleepMillis);
             }
         }

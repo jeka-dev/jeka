@@ -246,10 +246,10 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
 
         @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
-        private final boolean generateLocalLibsFolders = false;
+        private boolean generateLocalLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
-        private final JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.SIMPLE_FACADE;
+        private JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.FLAT_FACADE;
 
         public JkProjectScaffoldOptions(JkProject project) {
             this.project = project;
@@ -291,7 +291,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             List<String> compileDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
             List<String> runtimeDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
             List<String> testDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
-            projectScaffold.createProjectDependenciesTxt(compileDeps, runtimeDeps, testDeps);
+            projectScaffold.createDependenciesTxt(compileDeps, runtimeDeps, testDeps);
 
             // Create local lib folder structure if needed
             if (generateLocalLibsFolders) {

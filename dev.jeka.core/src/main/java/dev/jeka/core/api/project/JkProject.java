@@ -57,7 +57,7 @@ public class JkProject implements JkIdeSupportSupplier {
      * to indicate that the main class should be discovered automatically..
      */
     public static final String AUTO_FIND_MAIN_CLASS = "auto";
-    public static final String PROJECT_DEPENDENCIES_TXT_FILE = "project-dependencies.txt";
+    public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
     public static final String PROJECT_LIBS_DIR = "project-libs";
 
     private static final String DEFAULT_ENCODING = "UTF-8";
@@ -538,7 +538,7 @@ public class JkProject implements JkIdeSupportSupplier {
                 baseDir.resolve(PROJECT_LIBS_DIR));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(PROJECT_DEPENDENCIES_TXT_FILE))
+                baseDir.resolve(DEPENDENCIES_TXT_FILE))
                 : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
