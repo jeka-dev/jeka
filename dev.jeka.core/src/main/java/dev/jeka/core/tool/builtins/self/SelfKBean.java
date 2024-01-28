@@ -96,17 +96,7 @@ public final class SelfKBean extends KBean {
 
     @JkDoc("Run fat jar.")
     public void runJar() {
-        Path jarPath = getJarPath();
-        if (!Files.exists(jarPath)) {
-            buildJar();
-        }
-        JkJavaProcess.ofJavaJar(getJarPath())
-                .setLogCommand(true)
-                .setInheritIO(true)
-                .setDestroyAtJvmShutdown(true)
-                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
-                .addParams(JkUtilsString.parseCommandline(programArgs))
-                .run();
+        this.prepareRunJar().exec();
     }
 
     @JkDoc("Displays info about this SelfApp")
@@ -309,6 +299,22 @@ public final class SelfKBean extends KBean {
     public JkPathTree getAppSources() {
         return JkPathTree.of(getBaseDir().resolve(JkConstants.JEKA_SRC_DIR)).withMatcher(
                 JkConstants.PRIVATE_IN_DEF_MATCHER.negate());
+    }
+
+    /**
+     * Prepares a {@link JkJavaProcess ready to run.
+     */
+    public JkJavaProcess prepareRunJar() {
+        Path jarPath = getJarPath();
+        if (!Files.exists(jarPath)) {
+            buildJar();
+        }
+        return JkJavaProcess.ofJavaJar(getJarPath())
+                .setLogCommand(true)
+                .setInheritIO(true)
+                .setDestroyAtJvmShutdown(true)
+                .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
+                .addParams(JkUtilsString.parseCommandline(programArgs));
     }
 
     private String findMainClass() {
