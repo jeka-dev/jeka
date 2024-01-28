@@ -9,6 +9,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.maven.JkMavenProject;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -17,9 +18,12 @@ import dev.jeka.core.tool.builtins.self.SelfKBean;
 import java.util.Optional;
 
 @JkDoc("Provides a Maven Publication according ProjectKBean or SefApp found in the JkRunbase.")
-public class MavenPublicationKBean extends KBean {
+public class MavenKBean extends KBean {
 
     private JkMavenPublication mavenPublication;
+
+    @JkDoc("whitespace count to indentSpri dependency code.")
+    public int codeIndent = 4;
 
     @Override
     protected void init() {
@@ -66,6 +70,12 @@ public class MavenPublicationKBean extends KBean {
     @JkDoc("Publishes the Maven publication on the local M2 repository. This is the local repository of Maven.")
     public void publishLocalM2() {
         mavenPublication.publishLocalM2();
+    }
+
+    @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
+    public void showPomDeps()  {
+        JkLog.info(JkMavenProject.of(getBaseDir()).getDependencyAsJeKaCode(codeIndent));
+        JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
     }
 
     /**

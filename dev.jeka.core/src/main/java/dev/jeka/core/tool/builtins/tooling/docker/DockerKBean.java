@@ -118,7 +118,7 @@ public class DockerKBean extends KBean {
     private String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
         String name;
         if (moduleId != null) {
-            name = moduleId.toString();
+            name = moduleId.toString().replace(":", "-");
         } else {
             name =  baseDir.toAbsolutePath().getFileName().toString();
         }

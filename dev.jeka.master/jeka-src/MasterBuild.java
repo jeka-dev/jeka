@@ -14,7 +14,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import dev.jeka.core.tool.builtins.tooling.nexus.NexusKBean;
 import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
@@ -83,7 +83,7 @@ class MasterBuild extends KBean {
 
         coreBuild.runIT = true;
         getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
-        getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(this::applyToSlave);
+        getImportedKBeans().get(MavenKBean.class, false).forEach(this::applyToSlave);
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
@@ -133,7 +133,7 @@ class MasterBuild extends KBean {
         // Publish artifacts only if we are on 'master' branch
         if (JkUtilsIterable.listOf("HEAD", "master", "0.11.x").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
-            getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publish);
+            getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
             closeAndReleaseRepo();
             JkLog.endTask();
@@ -179,7 +179,7 @@ class MasterBuild extends KBean {
 
     @JkDoc("Publish all on local repo")
     public void publishLocal() {
-        getImportedKBeans().get(MavenPublicationKBean.class, false).forEach(MavenPublicationKBean::publishLocal);
+        getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
         bomPublication().publishLocal();
     }
 
@@ -219,8 +219,8 @@ class MasterBuild extends KBean {
         project.compilation.addJavaCompilerOptions("-g");
     }
 
-    private void applyToSlave(MavenPublicationKBean mavenPublicationKBean) {
-        adaptMavenConfig(mavenPublicationKBean.getMavenPublication());
+    private void applyToSlave(MavenKBean mavenKBean) {
+        adaptMavenConfig(mavenKBean.getMavenPublication());
     }
 
     private void adaptMavenConfig(JkMavenPublication mavenPublication) {

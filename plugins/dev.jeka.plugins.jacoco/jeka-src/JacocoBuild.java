@@ -7,7 +7,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 public class JacocoBuild extends KBean {
 
@@ -28,7 +28,7 @@ public class JacocoBuild extends KBean {
                 .customizeCompileDeps(deps -> deps
                         .andFiles(JkLocator.getJekaJarPath())
                 );
-        load(MavenPublicationKBean.class).getMavenPublication()
+        load(MavenKBean.class).getMavenPublication()
                     .pomMetadata
                         .setProjectName("Jeka plugin for Jacoco")
                         .setProjectDescription("A Jeka plugin for Jacoco coverage tool")

@@ -7,7 +7,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 import java.util.function.Consumer;
 
@@ -21,22 +21,22 @@ public class NexusKBean extends KBean {
 
     @Override
     protected void init() {
-        MavenPublicationKBean mavenPublicationKBean = getRunbase().find(MavenPublicationKBean.class).orElse(null);
-        if (mavenPublicationKBean == null) {
+        MavenKBean mavenKBean = getRunbase().find(MavenKBean.class).orElse(null);
+        if (mavenKBean == null) {
             JkLog.trace("Nexus KBean cannot find MavenPublication KBean in runbase. Can't configure any repo.");
         } else {
-            configureMavenPublication(mavenPublicationKBean.getMavenPublication());
+            configureMavenPublication(mavenKBean.getMavenPublication());
         }
     }
 
     @JkDoc("Closes and releases the nexus repositories used by project KBean to publish artifacts.")
     public void closeAndRelease() {
-        MavenPublicationKBean mavenPublicationKBean = getRunbase().find(MavenPublicationKBean.class).orElse(null);
-        if (mavenPublicationKBean == null) {
-            JkLog.error("No MavenPublicationKBean found in runbase %s.", getBaseDir());
+        MavenKBean mavenKBean = getRunbase().find(MavenKBean.class).orElse(null);
+        if (mavenKBean == null) {
+            JkLog.error("No MavenKBean found in runbase %s.", getBaseDir());
             return;
         }
-        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenPublicationKBean.getMavenPublication());
+        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenKBean.getMavenPublication());
         if (nexusRepos == null) {
             return;
         }

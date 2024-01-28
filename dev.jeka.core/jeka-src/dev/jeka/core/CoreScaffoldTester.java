@@ -16,11 +16,11 @@ class CoreScaffoldTester extends JekaCommandLineExecutor {
     void run() {
 
         // Basic scaffold and checks
-        scaffoldAndCheckInTemp("scaffold#run -lv", "help", true);
-        scaffoldAndCheckInTemp("scaffold#run", "help", true);
+        scaffoldAndCheckInTemp("self#scaffold -lv", "help", true);
+        scaffoldAndCheckInTemp("project#scaffold", "help", true);
 
         // Check IntelliJ + Eclipse metadata
-        Path workingDir = scaffoldAndCheckInTemp("scaffold#run project#", "project#clean project#pack", false);
+        Path workingDir = scaffoldAndCheckInTemp("project#scaffold", "project#clean project#pack", false);
         runWithDistribJekaShell(workingDir, "eclipse#files");
         runWithDistribJekaShell(workingDir, "intellij#iml");
         JkUtilsAssert.state(Files.exists(workingDir.resolve("src/main/java")),

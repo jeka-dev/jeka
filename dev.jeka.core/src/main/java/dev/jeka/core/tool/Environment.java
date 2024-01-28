@@ -106,6 +106,8 @@ class Environment {
 
         private final boolean cleanWork;
 
+        private final boolean cleanOutput;
+
         private final Set<String> names = new HashSet<>();
 
         StandardOptions (Map<String, String> map) {
@@ -121,6 +123,7 @@ class Environment {
             this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
             this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
             this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
+            this.cleanOutput = valueOf(boolean.class, map, false, "clean.output", "co");
         }
 
         private static boolean isDefaultKBeanDefined(Map<String, String> map) {
@@ -131,8 +134,12 @@ class Environment {
             return kbeanName;
         }
 
-        boolean workClean() {
+        boolean shouldCleanWorkDir() {
             return cleanWork;
+        }
+
+        boolean shouldCleanOutputDir() {
+            return cleanOutput;
         }
 
         @Override

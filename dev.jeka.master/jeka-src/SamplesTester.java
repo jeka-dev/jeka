@@ -13,7 +13,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.springboot", "-lna  " +
-                "project#clean project#pack mavenPublication#publishLocal -cw");
+                "project#clean project#pack maven#publishLocal -cw");
 
         // Test with injecting plugin dep via "+"
         run("dev.jeka.samples.sonarqube", "-lri " +

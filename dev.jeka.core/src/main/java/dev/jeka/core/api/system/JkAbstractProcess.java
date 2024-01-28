@@ -306,7 +306,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     @Override
     public String toString() {
-        return this.command + " " + String.join(" ", parameters);
+        if (JkLog.isVerbose()) {
+            return this.command + " " + String.join(" ", parameters);
+        }
+        return JkUtilsString.ellipse(this.command + " " + String.join(" ", parameters), 120);
     }
 
     /**

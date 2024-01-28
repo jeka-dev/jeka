@@ -12,7 +12,7 @@ import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectProperty;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 import java.nio.file.Path;
 
@@ -65,7 +65,7 @@ public class SignedArtifactsKBean extends KBean {
                 .and(SimpleProjectKBean.JUNIT5)
             );
 
-        mavenPublication = load(MavenPublicationKBean.class).getMavenPublication();
+        mavenPublication = load(MavenKBean.class).getMavenPublication();
         mavenPublication
                 .setModuleId("dev.jeka.core:samples-signedArtifacts")
                 .setVersion("1.3.1")

@@ -210,11 +210,17 @@ final class Engine {
                     yetCompiledProjects.get(this.baseDir), false);
         }
         yetCompiledProjects.put(this.baseDir, JkPathSequence.of());
-        if (Environment.standardOptions.workClean()) {
+        if (Environment.standardOptions.shouldCleanWorkDir()) {
             Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
-            JkLog.info("Clean .work directory " + workDir.toAbsolutePath().normalize());
+            JkLog.info("Clean .jaka-work directory " + workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
+        if (Environment.standardOptions.shouldCleanOutputDir()) {
+            Path dir = baseDir.resolve(JkConstants.OUTPUT_PATH);
+            JkLog.info("Clean jeka-output directory");
+            JkPathTree.of(dir).deleteContent();
+        }
+
 
         JkLog.startTask("Scanning and compiling jeka-src for base dir %s", baseDir.toAbsolutePath());
         CompilationContext compilationContext = preCompile();
@@ -431,13 +437,13 @@ final class Engine {
     private void help() {
         JkLog.endTask();
         stopBusyIndicator();
-        List<Class<? extends KBean>> localBeanClasses = beanClassesResolver.jekaSrcBeanClasses();
-        List<Class> globalBeanClasses = beanClassesResolver.globalBeanClassNames().stream()
-                .map(className -> JkClassLoader.ofCurrent().loadIfExist(className))
+        List localBeanClasses = beanClassesResolver.jekaSrcBeanClasses();
+        List<Class<?>> globalBeanClasses = beanClassesResolver.globalBeanClassNames().stream()
+                    .map(className -> JkClassLoader.ofCurrent().loadIfExist(className))
                 .filter(Objects::nonNull)   // due to cache, some classNames may not be in classpath
                 .filter(beanClass -> !localBeanClasses.contains(beanClass))
                 .collect(Collectors.toList());
-        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false, this.baseDir);
+        HelpDisplayer.help(localBeanClasses, globalBeanClasses, false);
     }
 
     private static class CompilationResult {

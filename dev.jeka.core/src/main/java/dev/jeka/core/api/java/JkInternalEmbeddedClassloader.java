@@ -41,6 +41,17 @@ public class JkInternalEmbeddedClassloader {
     }
 
     public static JkInternalEmbeddedClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {
+        List<Path> pathList = embeddedLibs();
+        pathList.addAll(extraEntries);
+        List<URL> urlList = pathList.stream()
+                .map(JkUtilsPath::toUrl)
+                .collect(Collectors.toList());
+        URL[] urls = urlList.toArray(new URL[0]);
+        ClassLoader classLoader = new URLClassLoader(urls,  targetClassloader());
+        return of(classLoader);
+    }
+
+    static List<Path> embeddedLibs() {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         List<Path> pathList = new LinkedList<>();
         URL embeddedNameUrl =  JkInternalEmbeddedClassloader.class.getClassLoader()
@@ -50,13 +61,7 @@ public class JkInternalEmbeddedClassloader {
             Path file = getEmbeddedLibAsPath("META-INF/" + jarName);
             pathList.add(file);
         }
-        pathList.addAll(extraEntries);
-        List<URL> urlList = pathList.stream()
-                .map(JkUtilsPath::toUrl)
-                .collect(Collectors.toList());
-        URL[] urls = urlList.toArray(new URL[0]);
-        ClassLoader classLoader = new URLClassLoader(urls,  targetClassloader());
-        return of(classLoader);
+        return pathList;
     }
 
     public static Path getEmbeddedLibAsPath(String resourcePath) {

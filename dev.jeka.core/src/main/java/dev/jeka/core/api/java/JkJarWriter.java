@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.*;
 import java.net.URL;
@@ -35,6 +36,9 @@ import java.util.zip.ZipEntry;
 
     private JkJarWriter(Path target) {
         try {
+            if (target.getParent() != null) {
+                JkUtilsPath.createDirectories(target.getParent());
+            }
             OutputStream fileOutputStream = Files.newOutputStream(target);
             this.jarOutput = new JarOutputStream(fileOutputStream);
         } catch (IOException e) {

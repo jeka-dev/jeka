@@ -3,6 +3,7 @@ package dev.jeka.core.tool.builtins.self;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.*;
@@ -67,14 +68,17 @@ public final class SelfKBean extends KBean {
     // requiring that the Java process is launched using Spring-Boot application class
     @JkDoc("Launch application")
     public void runMain() {
+        Path tempDirClass = JkUtilsPath.createTempDirectory("jk-");
+        getAppClasses().copyTo(tempDirClass);
         JkJavaProcess.ofJava(getMainClass())
-                .setClasspath(getAppClasspath())
+                .setClasspath(JkPathSequence.of(tempDirClass).and(getAppClasspath()))
                 .setInheritIO(true)
-                .setInheritSystemProperties(true)
+                //.setInheritSystemProperties(true)
                 .setDestroyAtJvmShutdown(true)
                 .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
                 .addParams(JkUtilsString.parseCommandline(programArgs))
                 .exec();
+        JkPathTree.of(tempDirClass).createIfNotExist();
     }
 
     @JkDoc("Launch test suite")

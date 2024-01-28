@@ -8,10 +8,11 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.scaffold.ScaffoldKBean;
+import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @JkDoc(
@@ -42,10 +43,21 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Kind of build class to be scaffolded")
     private final JkSpringbootProject.ScaffoldBuildKind scaffoldKind = JkSpringbootProject.ScaffoldBuildKind.LIB;
 
-    @JkDoc("Scaffold a basic example application in package org.example")
-    public void scaffoldSample() {
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
-                JkSpringbootProject.of(projectKBean.project).scaffoldSample());
+    @JkDoc("Scaffold a basic Spring-Boot application in package 'app'")
+    public void scaffold() {
+        JkScaffold scaffold = JkScaffold.of(Paths.get(""));
+
+        // For scaffolding projects
+        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
+            projectKBean.scaffold.configure(scaffold);  // Configure project concerns for scaffolding
+            JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project);
+            springbootProject.configureScaffold(  // Configure springboot concerns
+                    scaffold,
+                    scaffoldKind,
+                    projectKBean.scaffold.getTemplate());
+            scaffold.run(); // run scaffold
+            springbootProject.scaffoldSample(); // Add example app.
+        });
     }
 
     @Override
@@ -79,11 +91,6 @@ public final class SpringbootKBean extends KBean {
         if (!optionalSelfAppKBean.isPresent()) {
             configure(load(ProjectKBean.class).project);
         }
-
-        // Configure Scaffold KBean
-        getRunbase().find(ScaffoldKBean.class).ifPresent(scaffoldKBean ->
-                configureScaffold(scaffoldKBean.scaffold)
-        );
 
         // Configure Docker KBean to add port mapping on run
         DockerKBean dockerKBean = load(DockerKBean.class);

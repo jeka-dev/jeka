@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 final class HelpDisplayer {
 
     static void help(List<Class<?>> localBeanClasses, List<Class<?>> classpathBeanClasses,
-                     boolean compilationFailed, Path baseDir) {
+                     boolean compilationFailed) {
         System.out.println("JeKa command line processor [version " + JkInfo.getJekaVersion() + "]");
         System.out.println();
         String purpose = "JeKa is a tool for executing Java source code from the command line. It resolves dependencies and " +

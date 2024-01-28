@@ -12,8 +12,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenMigrationKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 
 /**
@@ -65,7 +64,7 @@ public class SimpleProjectKBean extends KBean {
                     .engineBehavior
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
 
-       load(MavenPublicationKBean.class).getMavenPublication()
+       load(MavenKBean.class).getMavenPublication()
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion("1.0-SNAPSHOT")
                .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
@@ -78,7 +77,7 @@ public class SimpleProjectKBean extends KBean {
 
     public void cleanPackPublish() {
          projectKBean.cleanPack();
-         load(MavenPublicationKBean.class).publishLocal();
+         load(MavenKBean.class).publishLocal();
     }
 
     public void checkValueIsA() {
@@ -94,8 +93,8 @@ public class SimpleProjectKBean extends KBean {
     }
 
     public void printMvn() {
-        MavenMigrationKBean pluginPom = getRunbase().load(MavenMigrationKBean.class);
-        pluginPom.showDepsAsCode();
+        MavenKBean pluginPom = getRunbase().load(MavenKBean.class);
+        pluginPom.showPomDeps();
     }
 
     public void showDependencies() {

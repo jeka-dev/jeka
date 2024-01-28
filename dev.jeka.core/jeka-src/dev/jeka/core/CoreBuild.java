@@ -11,11 +11,10 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenPublicationKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
@@ -24,8 +23,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static dev.jeka.core.api.depmanagement.artifact.JkArtifactId.SOURCES_ARTIFACT_ID;
 
 /**
  * Run main method to create full distrib.
@@ -77,7 +74,7 @@ public class CoreBuild extends KBean {
                     .addOptions("-notimestamp");
 
         // Configure Maven publication
-        load(MavenPublicationKBean.class).getMavenPublication()
+        load(MavenKBean.class).getMavenPublication()
                 .putArtifact(DISTRIB_FILE_ID)
                 .pomMetadata
                     .setProjectName("jeka")
@@ -106,8 +103,8 @@ public class CoreBuild extends KBean {
         JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
         JkPathFile.of(distrib.get("jekau")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
-            new ShellRemoteTester().run();  // Test 'jeka -r https://......git'
             testScaffolding();
+            new ShellRemoteTester().run();  // Test 'jeka -r https://......git'
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
         zipDistrib(distrib.getRoot(), distribFile);

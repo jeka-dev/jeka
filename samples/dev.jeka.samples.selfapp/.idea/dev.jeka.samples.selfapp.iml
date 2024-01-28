@@ -4,9 +4,13 @@
         <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
         <exclude-output/>
         <content url="file://$MODULE_DIR$">
-            <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/jeka/def"/>
-            <excludeFolder url="file://$MODULE_DIR$/jeka/output"/>
-            <excludeFolder url="file://$MODULE_DIR$/jeka/.work"/>
+            <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/jeka-src"/>
+            <sourceFolder url="file://$MODULE_DIR$/src/main/java"/>
+            <sourceFolder type="java-resource" url="file://$MODULE_DIR$/src/main/resources"/>
+            <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/src/test/java"/>
+            <sourceFolder type="java-test-resource" url="file://$MODULE_DIR$/src/test/resources"/>
+            <excludeFolder url="file://$MODULE_DIR$/jeka-output"/>
+            <excludeFolder url="file://$MODULE_DIR$/.jeka-work"/>
             <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
         </content>
         <orderEntry type="inheritedJdk"/>
@@ -596,10 +600,14 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/dev.jeka/springboot-plugin/jars/springboot-plugin-0.11.x-SNAPSHOT.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar!/"/>
                 </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
+                <JAVADOC>
+                    <root url="jar://$MODULE_DIR$/../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin-javadoc.jar!/"/>
+                </JAVADOC>
+                <SOURCES>
+                    <root url="jar://$MODULE_DIR$/../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin-sources.jar!/"/>
+                </SOURCES>
             </library>
         </orderEntry>
     </component>

@@ -2,6 +2,7 @@ package _dev;
 
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -9,8 +10,8 @@ import dev.jeka.plugins.springboot.SpringbootKBean;
 
 @JkInjectClasspath("org.springframework.boot:spring-boot-starter-test")
 
-@JkInjectClasspath("dev.jeka:springboot-plugin")
-class SelfAppBuild extends SelfKBean {
+@JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
+class SelfAppBuild extends KBean {
 
     SelfAppBuild() {
 

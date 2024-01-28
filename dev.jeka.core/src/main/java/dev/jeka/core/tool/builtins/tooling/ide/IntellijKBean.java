@@ -74,9 +74,8 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
-        Path basePath = getBaseDir();
         JkIml iml = imlGenerator.computeIml();
-        Path imlPath = Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(basePath));
+        Path imlPath = getImlFile();
         JkPathFile.of(imlPath)
                 .deleteIfExist()
                 .createIfNotExist()
@@ -115,6 +114,11 @@ public final class IntellijKBean extends KBean {
         checkProjectRoot();
         allIml();
         modulesXml();
+    }
+
+    @JkDoc("Try to refresh project by deleting workspace.xml and touching iml file")
+    public void refresh() {
+        IntelliJProject.find(getBaseDir()).deleteWorkspaceXml();
     }
 
     /**
@@ -186,6 +190,10 @@ public final class IntellijKBean extends KBean {
         JkLog.startTask("Generate iml file on '%s'", moduleDir);
         Main.exec(moduleDir, "intellij#iml", "-dci");
         JkLog.endTask();
+    }
+
+    private Path getImlFile() {
+        return Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(getBaseDir()));
     }
 
     private void checkProjectRoot() {
