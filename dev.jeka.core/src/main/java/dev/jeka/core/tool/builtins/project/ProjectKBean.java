@@ -245,7 +245,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         private final JkProject project;
 
 
-        @JkDoc("Generate jeka/project-libs sub-folders for hosting local libraries")
+        @JkDoc("Generate libs sub-folders for hosting local libraries")
         private boolean generateLocalLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")

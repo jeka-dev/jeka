@@ -58,7 +58,7 @@ public class JkProject implements JkIdeSupportSupplier {
      */
     public static final String AUTO_FIND_MAIN_CLASS = "auto";
     public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
-    public static final String PROJECT_LIBS_DIR = "project-libs";
+    public static final String PROJECT_LIBS_DIR = "libs";
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 
