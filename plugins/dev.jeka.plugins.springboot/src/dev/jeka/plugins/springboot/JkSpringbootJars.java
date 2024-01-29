@@ -2,10 +2,13 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -60,6 +63,23 @@ public class JkSpringbootJars {
             }
         }
         throw new IllegalStateException("No class annotated with @SpringBootApplication found.");
+    }
+
+    /*
+     * Returns the latest GA Spring-Boot version
+     */
+    static String findLatestSpringbootVersion(JkRepoSet repos) {
+        try {
+            List<String> springbootVersions = JkDependencyResolver.of(repos)
+                    .searchVersions(JkSpringModules.Boot.STARTER_PARENT);
+            return springbootVersions.stream()
+                    .sorted(JkVersion.VERSION_COMPARATOR.reversed())
+                    .findFirst().get();
+        } catch (Exception e) {
+            JkLog.warn(e.getMessage());
+            JkLog.warn("Cannot find latest springboot version, choose default : " + JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
+            return JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION;
+        }
     }
 
 }

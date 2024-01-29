@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.scaffold.JkScaffold;
-import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkRunbase;
 
@@ -36,15 +35,6 @@ public class JkScaffoldOptions {
 
     public void configure(JkScaffold scaffold) {
 
-        // Add sample code
-        // todo : Sample code should be encapsulated
-        scaffold.setJekaClassCodeProvider(
-                () -> JkUtilsIO.read(JkScaffold.class.getResource("app.snippet"))
-        );
-
-        JkRepoSet repos = JkRepoProperties.of(JkRunbase.get(Paths.get("")).getProperties()).getDownloadRepos();
-        final JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
-
         // add extra content to jeka.properties
         if (extraJekaProps != null) {
             Arrays.stream(extraJekaProps.split(",")).forEach(scaffold::addJekaPropValue);
@@ -55,9 +45,8 @@ public class JkScaffoldOptions {
         }
 
         scaffold
-                .setDependencyResolver(dependencyResolver)
                 .setJekaVersion(jekaVersion)
-                .setJekaLocation(jekaLocation)
+                .setJekaDistribLocation(jekaLocation)
                 .setJekaDistribRepo(jekaDistribRepo);
     }
 

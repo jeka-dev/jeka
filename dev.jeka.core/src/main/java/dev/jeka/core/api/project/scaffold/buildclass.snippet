@@ -1,4 +1,3 @@
-
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -8,23 +7,11 @@ class Build extends KBean {
     final JkProject project = load(ProjectKBean.class).project;
 
     /*
-     * Configures plugins to be bound to this command class. When this method is called, option
-     * fields have already been injected from command line.
+     * Configures KBean project
+     * When this method is called, option fields have already been injected from command line.
      */
     @Override
     protected void init() {
-
-        project.compilation.customizeDependencies(deps -> deps
-                .and("com.google.guava:guava:21.0")
-        );
-        project.testing.compilation.customizeDependencies(deps -> deps
-                .and("org.junit.jupiter:junit-jupiter:5.9.2")
-        );
-
-        // This info may be necessary if your project is being published to a binary repository.
-        project
-                .setModuleId("your.org:project-name")
-                .setVersion("0.0.1-SNAPSHOT");
     }
 
 }

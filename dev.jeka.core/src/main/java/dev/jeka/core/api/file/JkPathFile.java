@@ -17,6 +17,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -210,6 +211,13 @@ public final class JkPathFile {
      */
     public String readAsString() {
         return new String(JkUtilsPath.readAllBytes(path), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Returns the content of this file as a List of strings, where each element represents a line in the file.
+     */
+    public List<String> readAsLines() {
+        return Arrays.stream(readAsString().split("\n")).collect(Collectors.toList());
     }
 
     /**

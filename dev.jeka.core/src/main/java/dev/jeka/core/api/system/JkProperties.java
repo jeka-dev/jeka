@@ -2,7 +2,9 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -67,6 +69,10 @@ public final class JkProperties {
         return ofSystemProperties().withFallback(ENVIRONMENT_VARIABLES);
     }
 
+    /**
+     * Returns an instance of JkProperties from system properties and environment variables,
+     * with fallback to global.properties if they exist.
+     */
     public static JkProperties ofSysPropsThenEnvThenGlobalProperties() {
         Path globalPropsFile = JkLocator.getGlobalPropertiesFile();
         if (Files.exists(globalPropsFile)) {
@@ -75,25 +81,9 @@ public final class JkProperties {
         return ofSysPropsThenEnv();
     }
 
-    private static JkProperties ofEnvironmentVariables() {
-        Map<String, String> props = new HashMap<>();
-        for (String varName : System.getenv().keySet() ) {
-            String value = System.getenv(varName);
-            props.put(varName, value);
-            props.put(lowerCase(varName), value);
-        }
-        return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
-    }
-
-    // The system properties are likely to change during the run, so we cannot cache it.
-    private static JkProperties ofSystemProperties() {
-        Map<String, String> props = new HashMap<>();
-        for (String propName : System.getProperties().stringPropertyNames() ) {
-            props.put(propName, System.getProperty(propName));
-        }
-        return new JkProperties(SYS_PROPS_NAME, Collections.unmodifiableMap(props), null);
-    }
-
+    /**
+     * Returns an instance of JkProperties by loading properties from the specified file.
+     */
     public static JkProperties ofFile(Path propertyFile) {
         Properties properties = new Properties();
         try (InputStream is = new FileInputStream(propertyFile.toFile())) {
@@ -106,6 +96,9 @@ public final class JkProperties {
         }
     }
 
+    /**
+     * Returns a JkProperties instance from this one plus the specified fallback.
+     */
     public JkProperties withFallback(JkProperties fallback) {
         if (fallback == null || fallback == EMPTY) {
             return this;
@@ -153,6 +146,25 @@ public final class JkProperties {
             return fallback.getRawValue(propName);
         }
         return null;
+    }
+
+    private static JkProperties ofEnvironmentVariables() {
+        Map<String, String> props = new HashMap<>();
+        for (String varName : System.getenv().keySet() ) {
+            String value = System.getenv(varName);
+            props.put(varName, value);
+            props.put(lowerCase(varName), value);
+        }
+        return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
+    }
+
+    // The system properties are likely to change during the run, so we cannot cache it.
+    private static JkProperties ofSystemProperties() {
+        Map<String, String> props = new HashMap<>();
+        for (String propName : System.getProperties().stringPropertyNames() ) {
+            props.put(propName, System.getProperty(propName));
+        }
+        return new JkProperties(SYS_PROPS_NAME, Collections.unmodifiableMap(props), null);
     }
 
     private String interpolate(String string) {

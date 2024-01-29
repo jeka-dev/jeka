@@ -17,11 +17,14 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("javadoc")
-public class PackageDependencyTest {
+
+/*
+ * Unit test failing if a cyclic dependency has been detected in the jeka-core code base.
+ */
+public class PackageCyclicDependencyTest {
 
     @Test
-    public void testDependencies() throws Exception {
+    public void codeBase_hasNoCyclicDependency() throws Exception {
         final String packagePrefix = "dev.jeka.core";
         final File classDir = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
         PackageAnalyser packageAnalyser = PackageAnalyser.of(classDir, packagePrefix);

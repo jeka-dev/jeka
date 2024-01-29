@@ -5,6 +5,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.scaffold.JkScaffold;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -13,112 +14,122 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Provides features to scaffold projects.
  */
-public class JkProjectScaffold {
+public class JkProjectScaffold extends JkScaffold {
 
-    public enum BuildClassTemplate {
-        REGULAR, FLAT_FACADE, PROPS, PLUGIN
+    protected static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Build.java";
+
+    protected static final String SIMPLE_STYLE_PROP = "project#layout.style=SIMPLE";
+
+    public enum Template {
+        BUILD_CLASS, PROPS, PLUGIN
     }
 
-    private final JkProject project;
+    protected final JkProject project;
 
-    private final JkScaffold scaffold;
+    private boolean useSimpleStyle;
 
-    private JkProjectScaffold(JkProject project, JkScaffold scaffold) {
+    public final List<String> compileDeps = new LinkedList<>();
+
+    public final List<String> runtimeDeps = new LinkedList<>();
+
+    public final List<String> testDeps = new LinkedList<>();
+
+    private boolean generateLibsFolders;
+
+    private Template template = Template.BUILD_CLASS;
+
+    public JkProjectScaffold(JkProject project) {
+        super(project.getBaseDir());
         this.project = project;
-        this.scaffold = scaffold;
     }
 
-    public static JkProjectScaffold of(JkProject project, JkScaffold scaffold) {
-        return new JkProjectScaffold(project, scaffold);
+    /**
+     * Returns the template currently set for this scaffold
+     */
+    public Template getTemplate() {
+        return template;
+    }
+
+    /**
+     * Sets the template for this scaffold.
+     */
+    public JkProjectScaffold setTemplate(Template template) {
+        this.template = template;
+        return this;
+    }
+
+    public boolean isUseSimpleStyle() {
+        return useSimpleStyle;
+    }
+
+    public JkProjectScaffold setUseSimpleStyle(boolean useSimpleStyle) {
+        this.useSimpleStyle = useSimpleStyle;
+        return this;
+    }
+
+    public JkProjectScaffold setGenerateLibsFolders(boolean generateLibsFolders) {
+        this.generateLibsFolders = generateLibsFolders;
+        return this;
+    }
+
+    @Override
+    public void run() {
+        configureScaffold();
+        super.run();
+        generateProjectStructure();
+        generateDependencyTxt();
+        if (generateLibsFolders) {
+            generateLibsFolders();
+        }
+    }
+
+    protected void removeFileEntry(String relativePath) {
+        ListIterator<JkFileEntry> it = fileEntries.listIterator();
+        while (it.hasNext()) {
+            JkFileEntry fileEntry = it.next();
+            if (relativePath.equals(fileEntry.relativePath)) {
+                it.remove();
+            }
+        }
     }
 
     /**
      * Configures scaffold to creates project structure, including build class, according
      * the specified template.
      */
-    public void configureScaffold(BuildClassTemplate template) {
-        scaffold.setJekaClassCodeProvider( () -> {
-            final String snippet;
-            if (template == BuildClassTemplate.PROPS) {
-                scaffold.addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
-                return null;
-            }
-            if (template == BuildClassTemplate.REGULAR) {
-                snippet = "buildclass.snippet";
-            } else if (template == BuildClassTemplate.PLUGIN) {
-                snippet = "buildclassplugin.snippet";
-            } else {
-                snippet = "buildclassfacade.snippet";
-            }
-            String templateTxt = JkUtilsIO.read(JkProjectScaffold.class.getResource(snippet));
-            String baseDirName = project.getBaseDir().getFileName().toString();
-            return templateTxt.replace("${group}", baseDirName).replace("${name}", baseDirName);
-        });
-        scaffold.setClassFilename("Build.java");
-        scaffold.extraActions.append( () -> this.scaffoldProjectStructure(template));
-    }
+    protected void configureScaffold() {
 
-
-
-    /**
-     * Creates a folder structure, local to the project, to store dependency library files.
-     */
-    public JkProjectScaffold generateLocalLibsFolders() {
-        scaffold.extraActions.append("Generate folders for local libs", () -> {
-            Path libs = project.getBaseDir().resolve(JkProject.PROJECT_LIBS_DIR);
-            JkPathFile.of(libs.resolve("readme.txt"))
-                    .fetchContentFrom(ProjectKBean.class.getResource("libs-readme.txt"));
-            JkUtilsPath.createDirectories(libs.resolve("regular"));
-            JkUtilsPath.createDirectories(libs.resolve("compile-only"));
-            JkUtilsPath.createDirectories(libs.resolve("runtime-only"));
-            JkUtilsPath.createDirectories(libs.resolve("test"));
-            JkUtilsPath.createDirectories(libs.resolve("sources"));
-        });
-        return this;
-    }
-
-    /**
-     * Creates the <li>project-dependencies.txt</li> containing the specified dependencies,
-     */
-    public JkProjectScaffold createDependenciesTxt(List<String> compileDeps,
-                                                   List<String> runtimeDeps,
-                                                   List<String> testDeps) {
-        if (compileDeps.isEmpty() && runtimeDeps.isEmpty() && testDeps.isEmpty()) {
-            return this;
+        if (useSimpleStyle) {
+            project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+            addJekaPropValue(SIMPLE_STYLE_PROP);
         }
-        scaffold.extraActions.append("Generate dependencies.txt", () -> {
-            List<String> lines = JkUtilsIO.readAsLines(JkProjectScaffold.class.getResourceAsStream("dependencies.txt"));
-            StringBuilder sb = new StringBuilder();
-            for (String line : lines) {
-                sb.append(line).append("\n");
-                if (line.startsWith("== COMPILE") && !compileDeps.isEmpty()) {
-                    compileDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
-                }
-                if (line.startsWith("== RUNTIME") && !runtimeDeps.isEmpty()) {
-                    runtimeDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
-                }
-                if (line.startsWith("== TEST") && !testDeps.isEmpty()) {
-                    testDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
-                }
-            }
-            String content = sb.toString();
-            JkPathFile.of(project.getBaseDir().resolve(JkProject.DEPENDENCIES_TXT_FILE))
-                    .createIfNotExist()
-                    .write(content);
-        });
-        return this;
+
+        if (template == Template.BUILD_CLASS) {
+            String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
+            addFileEntry(BUILD_CLASS_PATH, code);
+
+        } else if (template == Template.PLUGIN) {
+            String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");
+            code = code.replace("${jekaVersion}", JkInfo.getJekaVersion());
+            addFileEntry(BUILD_CLASS_PATH, code);
+
+        } else if (template == Template.PROPS) {
+            addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
+        }
+
     }
 
-    /*
-     * Generates project structure, including
-     * @param template
+    /**
+     * Generate the jeka-agnostic project skeleton (src dirs)
      */
-    private void scaffoldProjectStructure(BuildClassTemplate template) {
+    protected void generateProjectStructure() {
         JkLog.info("Create source directories.");
         JkCompileLayout prodLayout = project.compilation.layout;
         prodLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
@@ -128,7 +139,7 @@ public class JkProjectScaffold {
         testLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
 
         // This is special scaffolding for plugin projects
-        if (template == JkProjectScaffold.BuildClassTemplate.PLUGIN) {
+        if (template == Template.PLUGIN) {
             Path breakingChangeFile = project.getBaseDir().resolve("breaking_versions.txt");
             String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
@@ -141,5 +152,43 @@ public class JkProjectScaffold {
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));
         }
     }
+
+    /**
+     * Creates a folder structure, local to the project, to store dependency library files.
+     */
+    private JkProjectScaffold generateLibsFolders() {
+        Path libs = project.getBaseDir().resolve(JkProject.PROJECT_LIBS_DIR);
+        JkPathFile.of(libs.resolve("readme.txt"))
+                .fetchContentFrom(ProjectKBean.class.getResource("libs-readme.txt"));
+        JkUtilsPath.createDirectories(libs.resolve("compile"));
+        JkUtilsPath.createDirectories(libs.resolve("compile-only"));
+        JkUtilsPath.createDirectories(libs.resolve("runtime-only"));
+        JkUtilsPath.createDirectories(libs.resolve("test"));
+        JkUtilsPath.createDirectories(libs.resolve("sources"));
+        return this;
+    }
+
+    private void generateDependencyTxt() {
+        List<String> lines = JkUtilsIO.readAsLines(JkProjectScaffold.class.getResourceAsStream("dependencies.txt"));
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            sb.append(line).append("\n");
+            if (line.startsWith("== COMPILE") && !compileDeps.isEmpty()) {
+                compileDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
+            }
+            if (line.startsWith("== RUNTIME") && !runtimeDeps.isEmpty()) {
+                runtimeDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
+            }
+            if (line.startsWith("== TEST") && !testDeps.isEmpty()) {
+                testDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
+            }
+        }
+        String content = sb.toString();
+        JkPathFile.of(project.getBaseDir().resolve(JkProject.DEPENDENCIES_TXT_FILE))
+                .createIfNotExist()
+                .write(content);
+    }
+
+
 
 }

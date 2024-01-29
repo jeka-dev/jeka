@@ -1,5 +1,6 @@
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
@@ -8,7 +9,6 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
-import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkConstants;
@@ -17,7 +17,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -26,7 +25,7 @@ import java.util.function.Consumer;
  */
 public final class JkSpringbootProject {
 
-    public enum ScaffoldBuildKind {
+    public enum SpringbootScaffoldTemplate {
         LIB,
         PROPS
     }
@@ -164,85 +163,6 @@ public final class JkSpringbootProject {
         JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target,
                 project.packaging.getManifest());
         JkLog.endTask();
-    }
-
-    /**
-     * Scaffolds a sample Spring-Boot application at sources and test location.
-     */
-    public void scaffoldSample() {
-        String basePackage = "app";  // Applications are not consumed as dependency, therefore we do not need to use a unique identified packages.
-        Path sourceDir = project.compilation.layout
-                .getSources().getRootDirsOrZipFiles().get(0);
-        Path pack = sourceDir.resolve(basePackage);
-        URL url = SpringbootKBean.class.getClassLoader().getResource("snippet/Application.java");
-        JkPathFile.of(pack.resolve("Application.java")).createIfNotExist().fetchContentFrom(url);
-        url = SpringbootKBean.class.getClassLoader().getResource("snippet/Controller.java");
-        JkPathFile.of(pack.resolve("Controller.java")).createIfNotExist().fetchContentFrom(url);
-        Path testSourceDir = project.testing.compilation.layout
-                .getSources().getRootDirsOrZipFiles().get(0);
-        pack = testSourceDir.resolve(basePackage);
-        url = SpringbootKBean.class.getClassLoader().getResource("snippet/ControllerIT.java");
-        JkPathFile.of(pack.resolve("ControllerIT.java")).createIfNotExist().fetchContentFrom(url);
-        JkPathFile.of(project.compilation.layout.getResources()
-                .getRootDirsOrZipFiles().get(0).resolve("application.properties")).createIfNotExist();
-    }
-
-    void configureScaffold(
-            JkScaffold scaffold,
-            ScaffoldBuildKind scaffoldBuildKind,
-            JkProjectScaffold.BuildClassTemplate projectBuildClassTemplate) {
-
-        // Generate Build class
-        if (scaffoldBuildKind == ScaffoldBuildKind.LIB) {
-            String buildClassSource = "Build.java";
-            String code = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/" + buildClassSource));
-            String overriddenPluginDep = System.getProperty(OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
-            String injectClasspath = overriddenPluginDep != null ?
-                    overriddenPluginDep.replace("\\", "/") : "dev.jeka:springboot-plugin";
-            code = code.replace("${dependencyDescription}", injectClasspath);
-            code = code.replace("${springbootVersion}", latestSpringbootVersion());
-            final String jkClassCode = code;
-            if (projectBuildClassTemplate != JkProjectScaffold.BuildClassTemplate.PROPS) {
-                scaffold.setJekaClassCodeProvider(() -> jkClassCode);
-            }
-        } else if (scaffoldBuildKind == ScaffoldBuildKind.PROPS) {
-            String propsContent =
-                    JkConstants.CLASSPATH_INJECT_PROP + "=" + "dev.jeka:springboot-plugin\n" +
-                    JkConstants.DEFAULT_KBEAN_PROP + "=" + SpringbootKBean.class.getName() + "\n\n" +
-                    "springboot#springbootVersion=" + latestSpringbootVersion();
-            scaffold.addJekaPropsFileContent(propsContent);
-            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffold);
-            projectScaffold.createDependenciesTxt(
-                    Collections.singletonList("org.springframework.boot:spring-boot-starter-web"),
-                    Collections.emptyList(),
-                    Collections.singletonList("org.springframework.boot:spring-boot-starter-test"));
-        }
-
-        // Scaffold application sample
-        scaffold.extraActions.append(this::scaffoldSample);
-        String readmeContent = JkUtilsIO.read(SpringbootKBean.class.getClassLoader().getResource("snippet/README.md"));
-        scaffold.extraActions.append(() -> {
-            JkPathFile readmeFile = JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist();
-            readmeFile.write(readmeContent.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-        });
-
-    }
-
-    /*
-     * Returns the latest GA Spring-Boot version
-     */
-    private String latestSpringbootVersion() {
-        try {
-            List<String> springbootVersions = project.dependencyResolver
-                    .searchVersions(JkSpringModules.Boot.STARTER_PARENT);
-            return springbootVersions.stream()
-                    .sorted(JkVersion.VERSION_COMPARATOR.reversed())
-                    .findFirst().get();
-        } catch (Exception e) {
-            JkLog.warn(e.getMessage());
-            JkLog.warn("Cannot find latest springboot version, choose default : " + JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
-            return JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION;
-        }
     }
 
 }

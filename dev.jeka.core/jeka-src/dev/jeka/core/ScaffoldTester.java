@@ -1,6 +1,7 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -17,10 +18,15 @@ class ScaffoldTester extends JekaCommandLineExecutor {
     void run() {
 
         // Basic scaffold and checks
-        scaffoldAndCheckInTemp("self#scaffold -lv", "help", true);
-        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=REGULAR", "#help", true);
-        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=FLAT_FACADE", "#help", true);
-        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PROPS", "#help", true);
+        // scaffoldAndCheckInTemp("self#scaffold -lv", "help", true);
+        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=BUILD_CLASS", "#help", true);
+
+        Path tempDir = scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PROPS", "#help", false);
+        JkUtilsAssert.state(Files.exists(tempDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
+                "dependencies.txt has not been generated");
+        JkPathTree.of(tempDir).deleteRoot();
+
+
         scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PLUGIN", "#help", true);
 
 

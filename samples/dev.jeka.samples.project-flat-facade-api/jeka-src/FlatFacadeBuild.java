@@ -68,7 +68,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                         .and(Hint.before(JkCoordinateDependency.of("com.github.djeang:vincer-dom")),
                                 "commons-codec:commons-codec:1.16.0")
                         .minus("org.projectlombok:lombok")
-                        .withMoving(Hint.first(), "com.fasterxml.jackson.core:jackson-databind")
+                        .withMoving("com.fasterxml.jackson.core:jackson-databind", Hint.first())
 
                 )
                 .customizeTestDeps(deps -> deps

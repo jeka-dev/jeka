@@ -58,8 +58,18 @@ public class JkRepoProperties {
         this.properties = properties;
     }
 
+    /**
+     * Creates a new JkRepoProperties object from the specified JkProperties.
+     */
     public static JkRepoProperties of(JkProperties properties) {
         return new JkRepoProperties(properties);
+    }
+
+    /**
+     * Creates a new JkRepoProperties based on global configuration.
+     */
+    public static JkRepoProperties ofGlobalProperties() {
+        return of(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
     }
 
     /**

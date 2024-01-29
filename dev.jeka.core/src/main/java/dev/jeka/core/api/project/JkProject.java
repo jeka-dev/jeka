@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  * (or simply perform actions as deploying docker image) locally. By default, it generates
  * a regular binary jar, but it can be customized for your needs.
  */
-public class JkProject implements JkIdeSupportSupplier {
+public final class JkProject implements JkIdeSupportSupplier {
 
     /**
      * This constant represents the value "auto" and is used in {@link JkProjectPackaging#setMainClass(String)} (String)}

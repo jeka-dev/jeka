@@ -128,9 +128,9 @@ public final class SelfKBean extends KBean {
 
     @JkDoc("Creates a skeleton in the current working directory.")
     public void scaffold() {
-        JkScaffold scaffolder = JkScaffold.of(Paths.get(""));
-        this.scaffold.configure(scaffolder);
-        scaffolder.run();
+        //JkScaffold scaffolder = JkScaffold.of(Paths.get(""));
+        //this.scaffold.configure(scaffolder);
+        //scaffolder.run();
     }
 
     /**

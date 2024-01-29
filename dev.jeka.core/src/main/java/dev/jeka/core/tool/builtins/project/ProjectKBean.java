@@ -20,7 +20,6 @@ import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import org.w3c.dom.Document;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -146,9 +145,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     
     @JkDoc("Scaffold a JeKa project skeleton in working directory.")
     public void scaffold() {
-        JkScaffold scaffolder = JkScaffold.of(Paths.get(""));
-        this.scaffold.configure(scaffolder);
-        scaffolder.run();
+        JkProjectScaffold projectScaffold = new JkProjectScaffold(project);
+        this.scaffold.configure(projectScaffold);
+        if (this.layout.style == JkCompileLayout.Style.SIMPLE) {
+            projectScaffold.setUseSimpleStyle(true);
+        }
+        projectScaffold.run();
     }
 
     @Override
@@ -246,16 +248,16 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
 
         @JkDoc("Generate libs sub-folders for hosting local libraries")
-        private boolean generateLocalLibsFolders = false;
+        private boolean generateLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
-        private JkProjectScaffold.BuildClassTemplate template = JkProjectScaffold.BuildClassTemplate.FLAT_FACADE;
+        private JkProjectScaffold.Template template = JkProjectScaffold.Template.BUILD_CLASS;
 
         public JkProjectScaffoldOptions(JkProject project) {
             this.project = project;
         }
 
-        public JkProjectScaffold.BuildClassTemplate getTemplate() {
+        public JkProjectScaffold.Template getTemplate() {
             return template;
         }
 
@@ -284,18 +286,20 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public void configure(JkScaffold scaffold) {
             super.configure(scaffold);
             // Scaffold project structure including build class
-            JkProjectScaffold projectScaffold = JkProjectScaffold.of(project, scaffold);
-            projectScaffold.configureScaffold(template);
+            JkProjectScaffold projectScaffold = (JkProjectScaffold) scaffold;
+            projectScaffold.setTemplate(template);
 
             // Create 'project-dependencies.txt' file if needed
             List<String> compileDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
             List<String> runtimeDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
             List<String> testDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
-            projectScaffold.createDependenciesTxt(compileDeps, runtimeDeps, testDeps);
+            projectScaffold.compileDeps.addAll(compileDeps);
+            projectScaffold.runtimeDeps.addAll(runtimeDeps);
+            projectScaffold.testDeps.addAll(testDeps);
 
             // Create local lib folder structure if needed
-            if (generateLocalLibsFolders) {
-                projectScaffold.generateLocalLibsFolders();
+            if (generateLibsFolders) {
+                projectScaffold.setGenerateLibsFolders(true);
             }
         }
     }

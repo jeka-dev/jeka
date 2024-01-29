@@ -40,23 +40,12 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Specific Spring repo where to download spring artifacts. Not needed if you use official release.")
     private JkSpringRepo springRepo;
 
-    @JkDoc("Kind of build class to be scaffolded")
-    private final JkSpringbootProject.ScaffoldBuildKind scaffoldKind = JkSpringbootProject.ScaffoldBuildKind.LIB;
-
     @JkDoc("Scaffold a basic Spring-Boot application in package 'app'")
     public void scaffold() {
-        JkScaffold scaffold = JkScaffold.of(Paths.get(""));
 
         // For scaffolding projects
         getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
-            projectKBean.scaffold.configure(scaffold);  // Configure project concerns for scaffolding
-            JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project);
-            springbootProject.configureScaffold(  // Configure springboot concerns
-                    scaffold,
-                    scaffoldKind,
-                    projectKBean.scaffold.getTemplate());
-            scaffold.run(); // run scaffold
-            springbootProject.scaffoldSample(); // Add example app.
+            new SpringbootProjectScaffold(projectKBean.project).run();
         });
     }
 
@@ -108,15 +97,6 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create Bootable Jar : " + this.createBootJar);
         JkLog.info("Create original Jar : " + this.createOriginalJar);
         JkLog.info("Create .war file : " + this.createWarFile);
-    }
-
-    private void configureScaffold(JkScaffold scaffold) {
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
-            JkSpringbootProject.of(projectKBean.project)
-                    .configureScaffold(
-                            scaffold,
-                            scaffoldKind,
-                            projectKBean.scaffold.getTemplate()));
     }
 
     private void configure(JkProject project) {
