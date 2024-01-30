@@ -32,8 +32,8 @@ public class JkSelfScaffoldTest {
         selfScaffold.run();
 
         // cleanup
-        Desktop.getDesktop().open(baseDir.toFile());
-        //JkPathTree.of(baseDir).deleteRoot();
+        //Desktop.getDesktop().open(baseDir.toFile());
+        JkPathTree.of(baseDir).deleteRoot();
     }
 
 }

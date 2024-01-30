@@ -70,8 +70,8 @@ public class SpringbootProjectScaffoldTest {
         assertTrue(jekaContent.contains(JkConstants.DEFAULT_KBEAN_PROP + "=project"));
 
         // cleanup
-        Desktop.getDesktop().open(baseDir.toFile());
-        //JkPathTree.of(baseDir).deleteRoot();
+        //Desktop.getDesktop().open(baseDir.toFile());
+        JkPathTree.of(baseDir).deleteRoot();
     }
 
 }
