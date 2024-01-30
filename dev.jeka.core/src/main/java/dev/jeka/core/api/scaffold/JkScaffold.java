@@ -14,10 +14,10 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -134,30 +134,30 @@ public abstract class JkScaffold {
     }
 
     private void createOrUpdateJekaProps() {
-        JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
-        if (!jekaPropsFile.exists()) {
-            jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
-        }
-
+        StringBuilder sb = new StringBuilder();
         if (!JkUtilsString.isBlank(jekaDistribLocation)) {
-            String line = "jeka.distrib.location=" + jekaDistribLocation + "\n";
-            jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
 
             // -- we need to specify a version if distribution location is empty
         } else  {
             String effectiveJekaVersion = !JkUtilsString.isBlank(jekaVersion) ? jekaVersion : lastJekaVersion();
-            String line = "jeka.version=" + effectiveJekaVersion + "\n";
-            jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            sb.append("jeka.version=" + effectiveJekaVersion + "\n");
         }
 
         if (!JkUtilsString.isBlank(this.jekaDistribRepo)) {
-            String line = "jeka.distrib.repo=" + jekaDistribRepo + "\n";
-            jekaPropsFile.write(line.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            sb.append("jeka.distrib.repo=" + jekaDistribRepo + "\n");
         }
         if (!JkUtilsString.isBlank(this.jekaPropsExtraContent)) {
             String content = jekaPropsExtraContent.replace("\\n", "\n");
-            jekaPropsFile.write(content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            sb.append(content + "\n");
         }
+        String sorted = sortJekaPropContent(sb.toString());
+
+        JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
+        if (!jekaPropsFile.exists()) {
+            jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
+        }
+        jekaPropsFile.write(sorted, StandardOpenOption.APPEND);
     }
 
     private void createOrUpdateGitIgnore() {
@@ -210,6 +210,65 @@ public abstract class JkScaffold {
             JkPathFile.of(baseDir.resolve(relativePath)).createIfNotExist();
             JkUtilsPath.write(baseDir.resolve(relativePath), content.getBytes(StandardCharsets.UTF_8),
                     StandardOpenOption.WRITE);
+        }
+    }
+
+    private String sortJekaPropContent(String originalContent) {
+        List<String> sorted = Arrays.stream(originalContent.split("\n"))
+                .filter(line -> !line.trim().startsWith("#"))
+                .filter(line -> line.contains("="))
+                .sorted(new PropComparator())
+                .collect(Collectors.toCollection(LinkedList::new));
+        String lastPrefix = "";
+        for (ListIterator<String> it = sorted.listIterator(); it.hasNext();) {
+            String line = it.next();
+            String currentPrefix = extractPrefix(line);
+            if (!currentPrefix.equals(lastPrefix)) {
+               it.set("\n" + line);
+            }
+            lastPrefix = currentPrefix;
+        }
+        return String.join("\n", sorted);
+    }
+
+    private static String extractPrefix(String line) {
+        String key = JkUtilsString.substringBeforeFirst(line, "=");
+        String prefix = JkUtilsString.substringBeforeFirst(key, ".");
+        if (!prefix.equals(key)) {
+            return prefix + ".";
+        }
+        prefix = JkUtilsString.substringBeforeFirst(key, "#");
+        if (!prefix.equals(key)) {
+            return prefix + "#";
+        }
+        return key;
+    }
+
+    // Comparator that prioritize string starting with 'jeka.'
+    private static class PropComparator implements Comparator<String> {
+
+        public static final String JEKA_DOT = "jeka.";
+
+        @Override
+        public int compare(String o1, String o2) {
+            int compareJekaDot = compareJakeDotPrefix(o1, o2);
+            if (compareJekaDot != 0) {
+                return compareJekaDot;
+            }
+            return o1.compareTo(o2);
+        }
+
+        private static int compareJakeDotPrefix(String o1, String o2) {
+            if (o1.startsWith(JEKA_DOT + "version")) {
+                return -1;
+            }
+            if (o2.startsWith(JEKA_DOT + "version")) {
+                return 1;
+            }
+            if (o1.startsWith(JEKA_DOT)) {
+                return o2.startsWith(JEKA_DOT) ? 0 : -1;
+            }
+            return o2.startsWith(JEKA_DOT) ? 1 : 0;
         }
     }
 

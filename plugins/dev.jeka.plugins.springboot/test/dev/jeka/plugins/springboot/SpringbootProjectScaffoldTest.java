@@ -45,8 +45,8 @@ public class SpringbootProjectScaffoldTest {
         assertTrue(Files.isDirectory(baseDir.resolve("src/test/resources")));
 
         // cleanup
-        Desktop.getDesktop().open(baseDir.toFile());
-        //JkPathTree.of(baseDir).deleteRoot();
+        //Desktop.getDesktop().open(baseDir.toFile());
+        JkPathTree.of(baseDir).deleteRoot();
     }
 
     @Test
@@ -70,8 +70,8 @@ public class SpringbootProjectScaffoldTest {
         assertTrue(jekaContent.contains(JkConstants.DEFAULT_KBEAN_PROP + "=project"));
 
         // cleanup
-        //Desktop.getDesktop().open(baseDir.toFile());
-        JkPathTree.of(baseDir).deleteRoot();
+        Desktop.getDesktop().open(baseDir.toFile());
+        //JkPathTree.of(baseDir).deleteRoot();
     }
 
 }
