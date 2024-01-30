@@ -47,12 +47,15 @@ public final class SpringbootKBean extends KBean {
         // For scaffolding projects
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
         optionalProjectKBean.ifPresent(projectKBean -> {
-            new SpringbootProjectScaffold(projectKBean.project).run();
+            SpringbootProjectScaffold springbootProjectScaffold = new SpringbootProjectScaffold(projectKBean.project);
+            projectKBean.scaffold.applyTo(springbootProjectScaffold);
+            springbootProjectScaffold.run();
         });
 
         // for 'self' scaffolding
         if (!optionalProjectKBean.isPresent()) {
-            JkSelfScaffold selfScaffold = new JkSelfScaffold(load(SelfKBean.class));
+            SelfKBean selfKBean = load(SelfKBean.class);
+            JkSelfScaffold selfScaffold = new JkSelfScaffold(selfKBean);
             selfScaffold.run();
         }
 

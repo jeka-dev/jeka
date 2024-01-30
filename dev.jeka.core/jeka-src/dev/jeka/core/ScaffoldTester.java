@@ -22,17 +22,23 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         scaffoldAndCheckInTemp("self#scaffold self#scaffold.kind=APP -lv ", "self#test self#runMain", true);
         scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=BUILD_CLASS", "#help", true);
 
-        Path tempDir = scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PROPS", "#help", false);
+        // Scaffold template=PROPS + layout=SIMPLE
+        Path tempDir = scaffoldAndCheckInTemp(
+                "project#scaffold project#scaffold.template=PROPS project#layout.style=SIMPLE",
+                "project#pack", false);
         JkUtilsAssert.state(Files.exists(tempDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
                 "dependencies.txt has not been generated");
         JkPathTree.of(tempDir).deleteRoot();
 
-
-        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=PLUGIN", "#help", true);
-
+        // Scaffold for Jek  plugin
+        scaffoldAndCheckInTemp(
+                "project#scaffold project#scaffold.template=PLUGIN",
+                "project#pack", true);
 
         // Check IntelliJ + Eclipse metadata
-        Path workingDir = scaffoldAndCheckInTemp("project#scaffold", "project#clean project#pack", false);
+        Path workingDir = scaffoldAndCheckInTemp(
+                "project#scaffold",
+                "project#clean project#pack", false);
         runWithDistribJekaShell(workingDir, "eclipse#files");
         runWithDistribJekaShell(workingDir, "intellij#iml -D" + IntellijKBean.IML_SKIP_MODULE_XML_PROP + "=true");
         JkUtilsAssert.state(Files.exists(workingDir.resolve("src/main/java")),

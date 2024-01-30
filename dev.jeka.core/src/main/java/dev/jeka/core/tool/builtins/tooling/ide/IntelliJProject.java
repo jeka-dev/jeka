@@ -1,5 +1,6 @@
 package dev.jeka.core.tool.builtins.tooling.ide;
 
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
@@ -47,6 +48,21 @@ class IntelliJProject {
 
     public Path getModulesXmlPath() {
         return rootDir.resolve(".idea/modules.xml");
+    }
+
+    /**
+     * Regenerates the modules.xml file based on the .iml files found in the project  root directory and its subdirectories.
+     */
+    public void regenerateModulesXml() {
+        List<Path> imlFiles = findImlFiles();
+        generateModulesXml(imlFiles);
+    }
+
+    /**
+     * Finds all .iml files in the specified root directory and its subdirectories.
+     */
+    public List<Path> findImlFiles() {
+        return JkPathTree.of(rootDir).andMatching(true, "**.iml").getFiles();
     }
 
     /**

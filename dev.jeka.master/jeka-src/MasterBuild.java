@@ -106,6 +106,8 @@ class MasterBuild extends KBean {
         JkLog.endTask();
         if (runSamples) {
             JkLog.startTask("Running samples");
+
+
             SamplesTester samplesTester = new SamplesTester();
             PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
             if (jacocoForCore != null) {

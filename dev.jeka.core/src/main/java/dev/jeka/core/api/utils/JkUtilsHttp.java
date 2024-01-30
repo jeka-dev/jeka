@@ -1,11 +1,7 @@
 package dev.jeka.core.api.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
 
 public class JkUtilsHttp {
 
@@ -34,29 +30,54 @@ public class JkUtilsHttp {
      * Weak implementation of heath checker, but maybe good enough for certain scenario.
      */
     public static void checkUntilOk(String url, int timeoutMillis, int sleepMillis) {
-        int statusCode = 0;
         long start = System.currentTimeMillis();
 
-        while ((statusCode < 200 || statusCode >= 400) || (System.currentTimeMillis() - start) < timeoutMillis) {
+        while ( sinceStart(start) < timeoutMillis ) {
             try {
                 URL actualUrl = new URL(url);
                 HttpURLConnection connection = (HttpURLConnection) actualUrl.openConnection();
                 connection.setRequestMethod("GET");
                 connection.connect();
 
-                statusCode = connection.getResponseCode();
+                int statusCode = connection.getResponseCode();
                 System.out.printf("Pinging %s returned %s%n", url, statusCode);
-
-                // sleep for 2 seconds before the next request
-                if (statusCode < 200 || statusCode >= 400) {
-                    JkUtilsSystem.sleep(sleepMillis);
+                if (isOK(statusCode)) {
+                    break;
                 }
                 connection.disconnect();
+                JkUtilsSystem.sleep(sleepMillis);
             } catch (Exception e) {
                 System.out.println("Error pinging " + url + " :" + e.getMessage());
                 JkUtilsSystem.sleep(sleepMillis);
             }
         }
 
+    }
+
+    public static boolean isStatusOk(String url) {
+        try {
+            URL actualUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) actualUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+
+            int statusCode = connection.getResponseCode();
+            System.out.printf("Pinging %s returned %s%n", url, statusCode);
+            return isOK(statusCode);
+        } catch (ConnectException e) {
+           return false;  // can't connect may mean no server listen
+        } catch (ProtocolException | MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static boolean isOK(int statusCode) {
+        return statusCode >= 200 && statusCode < 400;
+    }
+
+    private static long sinceStart(long startTime) {
+        return System.currentTimeMillis() - startTime;
     }
 }

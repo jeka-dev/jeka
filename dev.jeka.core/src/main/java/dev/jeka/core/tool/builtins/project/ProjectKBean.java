@@ -59,7 +59,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring scaffold.
      */
-    public final JkProjectScaffoldOptions scaffold = new JkProjectScaffoldOptions(project);
+    public final JkProjectScaffoldOptions scaffold = new JkProjectScaffoldOptions();
 
     /**
      * Options for configuring directory layout.
@@ -146,10 +146,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Scaffold a JeKa project skeleton in working directory.")
     public void scaffold() {
         JkProjectScaffold projectScaffold = new JkProjectScaffold(project);
-        this.scaffold.configure(projectScaffold);
-        if (this.layout.style == JkCompileLayout.Style.SIMPLE) {
-            projectScaffold.setUseSimpleStyle(true);
-        }
+        this.scaffold.applyTo(projectScaffold);
         projectScaffold.run();
     }
 
@@ -242,10 +239,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     }
 
-    public static class JkProjectScaffoldOptions extends JkScaffoldOptions {
-
-        private final JkProject project;
-
+    public class JkProjectScaffoldOptions extends JkScaffoldOptions {
 
         @JkDoc("Generate libs sub-folders for hosting local libraries")
         private boolean generateLibsFolders = false;
@@ -253,17 +247,13 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("The template used for scaffolding the build class")
         private JkProjectScaffold.Template template = JkProjectScaffold.Template.BUILD_CLASS;
 
-        public JkProjectScaffoldOptions(JkProject project) {
-            this.project = project;
-        }
-
         public JkProjectScaffold.Template getTemplate() {
             return template;
         }
 
         public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
 
-        public static class DependenciesTxt {
+        public class DependenciesTxt {
 
             @JkDoc("Comma separated dependencies to include in project-dependencies.txt COMPILE section")
             public String compile;
@@ -274,7 +264,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             @JkDoc("Comma separated dependencies to include in project-dependencies.txt TEST section")
             public String test;
 
-            static List<String> toList(String description) {
+            List<String> toList(String description) {
                 if (description == null) {
                     return Collections.emptyList();
                 }
@@ -283,16 +273,17 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
 
         @Override
-        public void configure(JkScaffold scaffold) {
-            super.configure(scaffold);
+        public void applyTo(JkScaffold scaffold) {
+            super.applyTo(scaffold);
             // Scaffold project structure including build class
             JkProjectScaffold projectScaffold = (JkProjectScaffold) scaffold;
             projectScaffold.setTemplate(template);
+            projectScaffold.setUseSimpleStyle(ProjectKBean.this.layout.style == JkCompileLayout.Style.SIMPLE);
 
             // Create 'project-dependencies.txt' file if needed
-            List<String> compileDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.compile);
-            List<String> runtimeDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.runtime);
-            List<String> testDeps = JkProjectScaffoldOptions.DependenciesTxt.toList(dependenciesTxt.test);
+            List<String> compileDeps = dependenciesTxt.toList(dependenciesTxt.compile);
+            List<String> runtimeDeps = dependenciesTxt.toList(dependenciesTxt.runtime);
+            List<String> testDeps = dependenciesTxt.toList(dependenciesTxt.test);
             projectScaffold.compileDeps.addAll(compileDeps);
             projectScaffold.runtimeDeps.addAll(runtimeDeps);
             projectScaffold.testDeps.addAll(testDeps);

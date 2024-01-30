@@ -1,15 +1,10 @@
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkRunbase;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 /**
@@ -33,7 +28,7 @@ public class JkScaffoldOptions {
     @JkDoc("Add extra content at the end of the template jeka.properties file.")
     private Path extraJekaPropsContentPath;
 
-    public void configure(JkScaffold scaffold) {
+    public void applyTo(JkScaffold scaffold) {
 
         // add extra content to jeka.properties
         if (extraJekaProps != null) {

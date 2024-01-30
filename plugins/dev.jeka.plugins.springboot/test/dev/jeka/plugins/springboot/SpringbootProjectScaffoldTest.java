@@ -10,6 +10,7 @@ import dev.jeka.core.tool.JkConstants;
 import org.junit.Test;
 
 import java.awt.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -49,11 +50,10 @@ public class SpringbootProjectScaffoldTest {
     }
 
     @Test
-    public void scaffold_PropsWithSimpleLayout_ok() throws Exception {
+    public void scaffold_PropsWithSimpleLayout_ok() throws IOException {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
-
 
         new SpringbootProjectScaffold(project)
                 .setTemplate(JkProjectScaffold.Template.PROPS)
@@ -67,6 +67,26 @@ public class SpringbootProjectScaffoldTest {
         // Check default KBean is present
         String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();
         assertTrue(jekaContent.contains(JkConstants.DEFAULT_KBEAN_PROP + "=project"));
+
+        // cleanup
+        //Desktop.getDesktop().open(baseDir.toFile());
+        JkPathTree.of(baseDir).deleteRoot();
+    }
+
+    @Test
+    public void scaffold_buildClassWithSimpleLayout_ok() throws IOException {
+        Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
+        JkProject project = JkProject.of().setBaseDir(baseDir);
+        project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+
+        new SpringbootProjectScaffold(project)
+                .setTemplate(JkProjectScaffold.Template.BUILD_CLASS)
+                .setUseSimpleStyle(true).run();
+
+        // Check project layout
+        assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));
+        assertTrue(Files.exists(baseDir.resolve("src/app//Application.java")));
+        assertFalse(Files.isDirectory(baseDir.resolve("res")));
 
         // cleanup
         //Desktop.getDesktop().open(baseDir.toFile());

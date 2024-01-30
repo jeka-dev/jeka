@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -100,33 +101,23 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Generates ./idea/modules.xml file by grabbing all .iml files presents " +
             "in root or sub-directory of the project.")
     public void modulesXml() {
-        final Iterable<Path> imls = JkPathTree.of(getBaseDir()).andMatching(true, "**.iml").getFiles();
-        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir()).generateModulesXml(imls);
+        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir());
+        intelliJProject.regenerateModulesXml();
         JkLog.info("File generated at : " + intelliJProject.getModulesXmlPath());
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
-        Stream<Path> stream = JkPathTree.of(getBaseDir())
-                .andMatching(true, "**/" + JkConstants.JEKA_SRC_DIR, JkConstants.JEKA_SRC_DIR)
-                .andMatching(false, "**/" + JkConstants.OUTPUT_PATH + "/**")
-                .stream();
-        stream
-                .distinct()
-                .map(path -> path.getParent().getParent())
-                .map(path -> path == null ? getBaseDir() : path)
-                .forEach(this::generateImlExec);
+        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir());
+        List<Path> imlFiles = intelliJProject.findImlFiles();
+        imlFiles.forEach(this::generateImlExec);
     }
 
-    @JkDoc("Shorthand for intellij#allIml + intellij#modulesXml.")
-    public void fullProject() {
-        allIml();
-        modulesXml();
-    }
-
-    @JkDoc("Try to refresh project by deleting workspace.xml and touching iml file")
-    public void refresh() {
+    @JkDoc("Try to fix project by deleting workspace.xml and touching iml file")
+    public void fixProject() {
+        iml();
         IntelliJProject.find(getBaseDir()).deleteWorkspaceXml();
+        modulesXml();
         iml();;
     }
 

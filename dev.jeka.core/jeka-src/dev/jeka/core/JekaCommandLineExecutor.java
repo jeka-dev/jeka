@@ -46,14 +46,21 @@ public abstract class JekaCommandLineExecutor {
         runJeka(true, baseDir, cmdLine);
     }
 
+    protected JkProcess prepareWithBaseDirJekaShell(Path baseDir, String cmdLine) {
+       return prepareJeka(true, baseDir, cmdLine);
+    }
+
+
+
     protected void runWithDistribJekaShell(Path baseDir, String cmdLine) {
         runJeka(false, baseDir, cmdLine);
     }
 
-    protected void runJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
+    protected JkProcess prepareJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
         Path cmd = useBaseDirJeka ? baseDir.resolve(scriptName()) : jekaShellCmd;
         JkProcess process = JkProcess.of(cmd.toString())
                 .setWorkingDir(baseDir)
+                .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 //.setLogWithJekaDecorator(true)
                 .setFailOnError(true)
@@ -72,9 +79,11 @@ public abstract class JekaCommandLineExecutor {
             String arg = "-javaagent:" + jacocoAgentPath + "=destfile=" + jacocoReportFile + ",append=true";
             process.setEnv("JEKA_OPTS", arg);
         }
+        return process;
+    }
 
-        // Run process
-        process.exec();
+    protected void runJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
+        prepareJeka(useBaseDirJeka, baseDir, cmdLine).exec();
     }
 
     private static String scriptName() {

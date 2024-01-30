@@ -147,7 +147,7 @@ public class JkProjectScaffold extends JkScaffold {
             Path sourceDir =
                     project.compilation.layout.getSources().toList().get(0).getRoot();
             String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("pluginclass.snippet"));
-            JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxJkBean.java"))
+            JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxKBean.java"))
                     .createIfNotExist()
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));
         }
