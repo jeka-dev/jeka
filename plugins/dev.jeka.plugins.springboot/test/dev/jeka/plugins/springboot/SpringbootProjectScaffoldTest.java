@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 public class SpringbootProjectScaffoldTest {
 
-
     @Test
     public void scaffold_withBuildClass_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");

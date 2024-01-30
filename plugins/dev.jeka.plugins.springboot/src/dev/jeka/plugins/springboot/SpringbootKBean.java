@@ -9,6 +9,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
+import dev.jeka.core.tool.builtins.self.JkSelfScaffold;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
@@ -44,9 +45,17 @@ public final class SpringbootKBean extends KBean {
     public void scaffold() {
 
         // For scaffolding projects
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
+        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
+        optionalProjectKBean.ifPresent(projectKBean -> {
             new SpringbootProjectScaffold(projectKBean.project).run();
         });
+
+        // for 'self' scaffolding
+        if (!optionalProjectKBean.isPresent()) {
+            JkSelfScaffold selfScaffold = new JkSelfScaffold(load(SelfKBean.class));
+            selfScaffold.run();
+        }
+
     }
 
     @Override

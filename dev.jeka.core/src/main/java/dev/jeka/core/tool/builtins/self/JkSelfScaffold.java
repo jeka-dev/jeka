@@ -66,7 +66,7 @@ public class JkSelfScaffold extends JkScaffold {
         return baseCode.replace("${inject}", injectCode);
     }
 
-    private static String toJkInject(List<String> deps) {
+    protected static String toJkInject(List<String> deps) {
         List<String> injects = deps.stream()
                 .map(dep -> "@" + JkInjectClasspath.class.getSimpleName() + "(\"" + dep + "\")")
                 .collect(Collectors.toList());
