@@ -14,7 +14,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -89,6 +88,20 @@ public abstract class JkScaffold {
 
     protected JkRepoSet getDownloadRepos() {
         return downloadRepos;
+    }
+
+    protected String findLatestVersion(String moduleCoordinate, String defaultVersion) {
+        try {
+            List<String> springbootVersions = JkDependencyResolver.of(downloadRepos)
+                    .searchVersions(moduleCoordinate);
+            return springbootVersions.stream()
+                    .sorted(JkVersion.VERSION_COMPARATOR.reversed())
+                    .findFirst().get();
+        } catch (Exception e) {
+            JkLog.warn(e.getMessage());
+            JkLog.warn("Cannot find latest version for '%s, choose default : %s ", moduleCoordinate, defaultVersion);
+            return defaultVersion;
+        }
     }
 
     /**

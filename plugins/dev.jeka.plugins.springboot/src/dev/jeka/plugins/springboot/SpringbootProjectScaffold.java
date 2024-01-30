@@ -1,15 +1,11 @@
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkConstants;
 
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 class SpringbootProjectScaffold extends JkProjectScaffold {
 
@@ -25,19 +21,22 @@ class SpringbootProjectScaffold extends JkProjectScaffold {
         // Remove the default build class defined for project
         removeFileEntry(JkProjectScaffold.BUILD_CLASS_PATH);
 
-        String springbootLastVersion = JkSpringbootJars.findLatestSpringbootVersion(getDownloadRepos());
+        String lastSpringbootVersion = findLatestVersion(
+                JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
+                JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
 
         if (getTemplate() == Template.BUILD_CLASS) {
             String code = readSnippet("Build.java");
 
             // For testability purpose
-            String overriddenPluginDep = System.getProperty(JkSpringbootProject.OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
+            String overriddenPluginDep = System.getProperty(JkSpringbootProject
+                    .OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
             String injectClasspath = overriddenPluginDep != null ?
                     overriddenPluginDep.replace("\\", "/") : "dev.jeka:springboot-plugin";
 
             // Add customized build class
             code = code.replace("${dependencyDescription}", injectClasspath);
-            code = code.replace("${springbootVersion}", springbootLastVersion);
+            code = code.replace("${springbootVersion}", lastSpringbootVersion);
             addFileEntry(JkProjectScaffold.BUILD_CLASS_PATH, code);
 
         } else if (getTemplate() == Template.PROPS) {
@@ -45,7 +44,7 @@ class SpringbootProjectScaffold extends JkProjectScaffold {
             // Augment jeka.properties
             addJekaPropValue(JkConstants.CLASSPATH_INJECT_PROP + "=dev.jeka:springboot-plugin");
             addJekaPropValue("");
-            addJekaPropValue("springboot#springbootVersion=" + springbootLastVersion);
+            addJekaPropValue("springboot#springbootVersion=" + lastSpringbootVersion);
 
             // Add dependencies
             compileDeps.add("org.springframework.boot:spring-boot-starter-web");

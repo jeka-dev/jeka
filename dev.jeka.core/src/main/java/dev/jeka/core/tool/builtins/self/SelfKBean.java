@@ -7,7 +7,6 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -15,7 +14,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkRunbase;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 
@@ -50,7 +48,7 @@ public final class SelfKBean extends KBean {
     public String programArgs = "";
 
     @JkDoc
-    public final JkScaffoldOptions scaffold = new JkScaffoldOptions();
+    final SelfScaffoldOptions scaffold = new SelfScaffoldOptions();
 
     public final JkConsumers<JkManifest> manifestCustomizers = JkConsumers.of();
 
@@ -332,6 +330,13 @@ public final class SelfKBean extends KBean {
                 .makeFatJar(jarPath, getAppLibs(), JkPathMatcher.of());
         JkLog.endTask();
         JkLog.info("Jar created at : " + jarPath);
+    }
+
+    public static class SelfScaffoldOptions extends JkScaffoldOptions {
+
+        @JkDoc("Kind of Jeka base to generate.")
+        public JkSelfScaffold.Kind kind = JkSelfScaffold.Kind.JEKA_SCRIPT;
+
     }
 
 }
