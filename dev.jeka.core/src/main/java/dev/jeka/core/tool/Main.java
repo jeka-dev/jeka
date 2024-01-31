@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static dev.jeka.core.tool.Environment.standardOptions;
+import static dev.jeka.core.tool.Environment.cmdLineOptions;
 
 /**
  * Main class for launching Jeka from command line.
@@ -51,11 +51,11 @@ public final class Main {
                 return;
             }
             Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
-            JkLog.setDecorator(standardOptions.logStyle);
-            if (standardOptions.logBanner) {
+            JkLog.setDecorator(cmdLineOptions.logStyle);
+            if (cmdLineOptions.logBanner.isPresent()) {
                 displayIntro();
             }
-            if (standardOptions.logRuntimeInformation) {
+            if (cmdLineOptions.logRuntimeInformation.isPresent()) {
                 JkInit.displayRuntimeInfo();
             }
             String basedirProp = System.getProperty("jeka.current.basedir");
@@ -68,22 +68,22 @@ public final class Main {
             // By default, log working animation when working dir = base dir (this mean that we are not
             // invoking a tool packaged with JeKa.
             boolean logAnimation = baseDir.equals(Paths.get(""));
-            if (standardOptions.logAnimation != null) {
-                logAnimation = standardOptions.logAnimation;
+            if (cmdLineOptions.logAnimation != null) {
+                logAnimation = cmdLineOptions.logAnimation;
             }
             JkLog.setAcceptAnimation(logAnimation);
 
-            if (!standardOptions.logStartUp) {  // log in memory and flush in console only on error
+            if (!cmdLineOptions.logStartUp.isPresent()) {  // log in memory and flush in console only on error
                 JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
                 JkMemoryBufferLogDecorator.activateOnJkLog();
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
             final Engine engine = new Engine(baseDir);
             engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
-            if (standardOptions.logBanner) {
+            if (cmdLineOptions.logBanner.isPresent()) {
                 displayOutro(start);
             }
-            if (standardOptions.logDuration && !standardOptions.logBanner) {
+            if (cmdLineOptions.logDuration.isPresent() && !cmdLineOptions.logBanner.isPresent()) {
                 displayDuration(start);
             }
             System.exit(0); // Triggers shutdown hooks
@@ -98,7 +98,7 @@ public final class Main {
                 }
                 handleRegularException(e);
             }
-            if (standardOptions.logBanner) {
+            if (cmdLineOptions.logBanner.isPresent()) {
                 final int length = printAscii(true, "text-failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
@@ -110,13 +110,13 @@ public final class Main {
     }
 
     private static boolean shouldPrintExceptionDetails() {
-        return standardOptions.logVerbose
-                || standardOptions.logStackTrace;
+        return cmdLineOptions.logVerbose.isPresent()
+                || cmdLineOptions.logStackTrace.isPresent();
     }
 
     private static void handleRegularException(Throwable e) {
         System.err.println();
-        if (JkLog.isVerbose() || standardOptions.logStackTrace) {
+        if (JkLog.isVerbose() || cmdLineOptions.logStackTrace.isPresent()) {
             System.err.println("=============================== Stack Trace =============================================");
             e.printStackTrace(System.err);
             System.err.flush();
@@ -129,7 +129,7 @@ public final class Main {
         System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
         if (!JkLog.isVerbose()) {
             System.err.println("    -lv to increase log verbosity.");
-            if (!standardOptions.logStackTrace) {
+            if (!cmdLineOptions.logStackTrace.isPresent()) {
                 System.err.println("    -lst to log the full stacktrace of the thrown exception.");
             }
         }
@@ -151,7 +151,7 @@ public final class Main {
         }
         CommandLine commandLine = CommandLine.parse(args);
         JkLog.setAcceptAnimation(true);
-        if (!standardOptions.logStartUp) {
+        if (!cmdLineOptions.logStartUp.isPresent()) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }

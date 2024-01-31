@@ -11,50 +11,55 @@ import java.util.*;
  */
 class StandardOptions {
 
+    private static final List<Option<?>> ALL_OPTIONS = new LinkedList<>();
+
     Set<String> acceptedOptions = new HashSet<>();
 
-    boolean logIvyVerbose;
+    final Option<Void> logIvyVerbose = ofVoid("Log Ivy 'trace' level", "--log-ivy-verbose", "-liv");
 
-    boolean logVerbose;
+    final Option<Void> logVerbose = ofVoid("Log verbose messages", "--verbose", "-v");
 
-    Boolean logAnimation;
+    final Option<Void> logStackTrace = ofVoid("log the stacktrace when Jeka fail",
+            "--log-stacktrace", "-lst");
 
-    boolean logBanner;
+    final Option<Void> logBanner = ofVoid("log intro and outro banners", "--log-banner", "-lb");
 
-    boolean logDuration;
+    final Option<Void> logDuration = ofVoid("Log intro and outro banners", "--log-duration", "-ld");
 
-    boolean logStartUp;
+    final Option<Void> logStartUp = ofVoid("Log start-up information happening prior command executions",
+                                                  "--log-startup", "-lsu");
 
-    boolean logStackTrace;
+    final Option<Void> logRuntimeInformation = ofVoid("log Jeka runbase information as Jeka version, JDK version, working dir, classpath ...",
+            "--log-runtime-info", "-lri");
+
 
     JkLog.Style logStyle;
 
-    boolean logRuntimeInformation;
-
-    boolean ignoreCompileFail;
+    Boolean logAnimation;
 
     private final String kbeanName;
 
-    private final boolean cleanWork;
+    // behavioral option
 
-    private final boolean cleanOutput;
+    final Option<Void> cleanWork = ofVoid("Clean 'jeka-output' directory prior running.", "--clean-output", "-co");
+
+    final Option<Void> cleanOutput = ofVoid("Clean '.jeka-work' directory prior running.", "--clean-work", "-cw");
+
+    final Option<Void> ignoreCompileFail = ofVoid("Ignore when 'jeka-src compile fails", "--ignore-compile-fail", "-dci");
+
+
+
+
 
     private final Set<String> names = new HashSet<>();
 
-    StandardOptions(Map<String, String> map) {
-        this.logVerbose = valueOf(boolean.class, map, false, "Log.verbose", "lv");
-        this.logIvyVerbose = valueOf(boolean.class, map, false, "log.ivy.verbose", "liv");
+    StandardOptions(Map<String, String> map, String[] rawArgs) {
+        populateOptions(Arrays.asList(rawArgs));
+
         this.logAnimation = valueOf(boolean.class, map, null, "log.animation", "la");
-        this.logBanner = valueOf(boolean.class, map, false, "log.banner", "lb");
-        this.logDuration = valueOf(boolean.class, map, false, "log.duration", "ld");
-        this.logStartUp = valueOf(boolean.class, map, false, "log.setup", "lsu");
-        this.logStackTrace = valueOf(boolean.class, map, false, "log.stacktrace", "lst");
-        this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
         this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.FLAT, "log.style", "ls");
         this.kbeanName = valueOf(String.class, map, null, "kbean", Environment.KB_KEYWORD);
-        this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
-        this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
-        this.cleanOutput = valueOf(boolean.class, map, false, "clean.output", "co");
+
     }
 
     static boolean isDefaultKBeanDefined(Map<String, String> map) {
@@ -96,14 +101,6 @@ class StandardOptions {
         return kbeanName;
     }
 
-    boolean shouldCleanWorkDir() {
-        return cleanWork;
-    }
-
-    boolean shouldCleanOutputDir() {
-        return cleanOutput;
-    }
-
     @Override
     public String toString() {
         return "JkBean" + JkUtilsObject.toString(kbeanName) + ", LogVerbose=" + logVerbose
@@ -130,23 +127,73 @@ class StandardOptions {
         return defaultValue;
     }
 
+    private <T> Option<T> of(Class<T> type, T initialValue, String description, String ...names) {
+        Option<T> option = Option.of(type, initialValue, description, names);
+        ALL_OPTIONS.add(option);
+        return option;
+    }
+
+    private Option<Void> ofVoid(String description, String ...names) {
+        Option<Void> option = Option.of(Void.class, null, description, names);
+        ALL_OPTIONS.add(option);
+        return option;
+    }
+
+    private <T extends Enum<?>> Option<T> ofEnum(String description, T value, String ...names) {
+        Option<T> option = Option.of((Class<T>) value.getClass(), value, description, names);
+        ALL_OPTIONS.add(option);
+        return option;
+    }
+
+    private static void populateOptions(List<String> args) {
+        ALL_OPTIONS.forEach(option -> option.populateFrom(args));
+    }
+
     static class Option<T> {
 
+        private static final List<Option> ALL = new LinkedList<>();
+
         private T value;
+
+        private Class<T> type;
+
+        private boolean present;
 
         public final List<String> names;
 
         private final String description;
 
 
-        private Option(T value, List<String> names, String description) {
+        private Option(Class<T> type, T value, List<String> names, String description) {
             this.value = value;
             this.names = names;
             this.description = description;
         }
 
-        public static <T> Option<T> of(String description, T initialValue, String ...names) {
-            return new Option<>(initialValue, Collections.unmodifiableList(Arrays.asList(names)), description);
+        public static <T> Option<T> of(Class<T> type, T initialValue, String description, String ...names) {
+            return new Option<>(type, initialValue, Collections.unmodifiableList(Arrays.asList(names)), description);
         }
+
+        public boolean isPresent() {
+            return present;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        private void populateFrom(List<String> args) {
+            for (ListIterator<String> it = args.listIterator(); it.hasNext();) {
+                String arg = it.next();
+                if (names.contains(arg)) {
+                    this.present = true;
+                }
+                if (Void.class.equals(type)) {
+                    return;
+                }
+            }
+        }
+
     }
+
 }

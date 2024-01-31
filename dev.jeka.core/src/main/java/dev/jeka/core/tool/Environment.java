@@ -20,7 +20,7 @@ class Environment {
 
     static CommandLine commandLine = CommandLine.parse(new String[0]);
 
-    static StandardOptions standardOptions = new StandardOptions(Collections.emptyMap());
+    static StandardOptions cmdLineOptions = new StandardOptions(Collections.emptyMap(), new String[0]);
 
     static String[] originalArgs;
 
@@ -63,15 +63,15 @@ class Environment {
             optionProps.put(KB_KEYWORD, JkUtilsString.blankToNull(props.get(DEFAULT_KBEAN_PROP)));
         }
 
-        final StandardOptions standardOptions = new StandardOptions(optionProps);
-        if (standardOptions.logVerbose) {
+        final StandardOptions standardOptions = new StandardOptions(optionProps, commandLine.rawArgs());
+        if (standardOptions.logVerbose.isPresent()) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
-        if (standardOptions.logIvyVerbose) {
+        if (standardOptions.logIvyVerbose.isPresent()) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
         Environment.commandLine = commandLine;
-        Environment.standardOptions = standardOptions;
+        Environment.cmdLineOptions = standardOptions;
     }
 
     static String originalCmdLineAsString() {

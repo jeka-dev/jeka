@@ -290,7 +290,7 @@ public final class JkRunbase {
         Map<String, String> props = new HashMap<>();
 
         // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
-        if (bean.isMatchingName(Environment.standardOptions.kbeanName())) {
+        if (bean.isMatchingName(Environment.cmdLineOptions.kbeanName())) {
             props.putAll(properties.getAllStartingWith(Environment.KB_KEYWORD + "#", false));
         }
         props.putAll(properties.getAllStartingWith(beanName + "#", false));

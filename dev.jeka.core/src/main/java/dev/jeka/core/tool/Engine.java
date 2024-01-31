@@ -83,7 +83,7 @@ final class Engine {
         boolean hasJekaSrc = Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR))
                 || commandLine.involvedBeanNames().contains("scaffold");
         if (hasJekaSrc) {
-            boolean failOnError = !Environment.standardOptions.ignoreCompileFail && !commandLine.isHelp();
+            boolean failOnError = !Environment.cmdLineOptions.ignoreCompileFail.isPresent() && !commandLine.isHelp();
             result = resolveAndCompile(new HashMap<>(), true, failOnError);
             computedClasspath = result.classpath;
                     // the command deps has been included in cache for classpath resolution
@@ -115,10 +115,10 @@ final class Engine {
         // from the classpath.
         boolean ignoreMasterBeanNotFound = result == null ||
                 (!result.compileFailedProjects.getEntries().isEmpty() &&
-                Environment.standardOptions.ignoreCompileFail);
+                Environment.cmdLineOptions.ignoreCompileFail.isPresent());
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
-                Environment.standardOptions.kbeanName(), ignoreMasterBeanNotFound);
+                Environment.cmdLineOptions.kbeanName(), ignoreMasterBeanNotFound);
 
         // initialise runbase with resolved commands
         runbase.init(resolvedCommands);
@@ -132,7 +132,7 @@ final class Engine {
                     .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
-        if (Environment.standardOptions.logRuntimeInformation) {
+        if (Environment.cmdLineOptions.logRuntimeInformation.isPresent()) {
             JkLog.info("KBeans involved in this runbase : %s", runbase.getBeans());
             JkLog.info("JeKa class loader : ");
             int maxEntriesDisplayed = JkLog.isVerbose() ? Integer.MAX_VALUE : 6;
@@ -143,7 +143,7 @@ final class Engine {
         if (!hasJekaSrc) {
             JkLog.trace("You are not running Jeka inside a Jeka project.");
         }
-        if (!commandLine.hasMethodInvokations() && !Environment.standardOptions.logRuntimeInformation) {
+        if (!commandLine.hasMethodInvokations() && !Environment.cmdLineOptions.logRuntimeInformation.isPresent()) {
             JkLog.warn("This command contains no actions. Execute 'jeka help' to know about available actions.");
         }
         runbase.run(resolvedCommands);
@@ -162,7 +162,7 @@ final class Engine {
         }
         return "help".equals(Environment.originalCmdLineAsString())
                         && beanClassesResolver.getSourceTree().getFiles().isEmpty()
-                        && Environment.standardOptions.kbeanName() == null;
+                        && Environment.cmdLineOptions.kbeanName() == null;
     }
 
     private CompilationContext preCompile() {
@@ -212,12 +212,12 @@ final class Engine {
                     yetCompiledProjects.get(this.baseDir), false);
         }
         yetCompiledProjects.put(this.baseDir, JkPathSequence.of());
-        if (Environment.standardOptions.shouldCleanWorkDir()) {
+        if (Environment.cmdLineOptions.cleanWork.isPresent()) {
             Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
             JkLog.info("Clean .jaka-work directory " + workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
-        if (Environment.standardOptions.shouldCleanOutputDir()) {
+        if (Environment.cmdLineOptions.cleanOutput.isPresent()) {
             Path dir = baseDir.resolve(JkConstants.OUTPUT_PATH);
             JkLog.info("Clean jeka-output directory");
             JkPathTree.of(dir).deleteContent();
