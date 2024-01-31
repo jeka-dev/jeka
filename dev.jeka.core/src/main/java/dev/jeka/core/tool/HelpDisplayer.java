@@ -31,7 +31,7 @@ final class HelpDisplayer {
         System.out.println("  Execute KBean actions          : jeka myBean: myMethod myFieldA=8 myFieldB=false");
         System.out.println("  Execute Git hosted application : jeka -r https://github.com/djeang/jeka-spring-boot-thymeleaf-example self: runJar");
         System.out.println();
-        System.out.println(standardProperties());
+        System.out.println(StandardOptions.standardProperties());
         final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");
         if (compilationFailed) {
             sb.append("  [WARN] Compilation of jeka-src failed. Cannot provide information about KBean defined locally.\n");
@@ -67,37 +67,6 @@ final class HelpDisplayer {
         }
         beanDescription = beanDescription.trim();
         return new RenderItem(shortName, Collections.singletonList(beanDescription));
-    }
-
-    private static String standardProperties() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Options:\n");
-        List<RenderItem> items = new LinkedList<>();
-        items.add(option("help", "h", "display this message"));
-        items.add(option("log.style", "ls", "choose the display log style : INDENT(default), BRACE or DEBUG"));
-        items.add(option("log.verbose", "lv", "log 'trace' level"));
-        items.add(option("log.ivy.verbose", "liv",  " log 'trace' level + Ivy trace level"));
-        items.add(option("log.runtime.information", "lri",  " log Jeka runbase information at startup"));
-        items.add(option("log.animation", "la",  "log working animations on console"));
-        items.add(option("log.duration", "ld",  " log execution duration"));
-        items.add(option("log.runtime.info", "lri",  " log Jeka runbase information as Jeka version, JDK version, working dir, classpath ..."));
-        items.add(option("log.banner", "lb",  " log intro and outro banners"));
-        items.add(option("log.stacktrace", "lst",  " log the stacktrace when Jeka fail"));
-        items.add(option("log.setup", "lsu",  " log KBean setup process"));
-        items.add(option("kbean", Environment.KB_KEYWORD, " Specify the default KBean in command line. It can be its name, its simple class name or its fully qualified class name"));
-        items.add(option("clean.work", "cw",  " Delete all files cached in .jeka-work"));
-        items.add(option("no.help", "", "Does not display help if no method is invoked"));
-        items.add(option("def.compile.ignore-failure", "dci",  " Try to compile jeka-src classes. If fail, ignore failure and continue"));
-        new ItemContainer(items).render().forEach(item -> sb.append("  " + item + "\n"));
-        return sb.toString();
-    }
-
-    private static RenderItem option(String name, String shortHand, String desc) {
-        String key = "-" + name;
-        if (!JkUtilsString.isBlank(shortHand)) {
-            key = key + " (shorthand -" + shortHand + ")";
-        }
-        return new RenderItem(key, Collections.singletonList(JkUtilsString.capitalize(desc.trim())));
     }
 
     private static String shortcuts(Path baseDir) {

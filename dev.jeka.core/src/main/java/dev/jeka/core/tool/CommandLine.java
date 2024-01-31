@@ -10,10 +10,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -83,7 +80,7 @@ final class CommandLine {
         return rawArgs;
     }
 
-    List<JkBeanAction> getMasterBeanActions() {
+    List<JkBeanAction> getDefaultKBeanActions() {
         return beanActions.stream().filter(beanAction -> beanAction.beanName == null).collect(Collectors.toList());
     }
 

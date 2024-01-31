@@ -89,7 +89,7 @@ final class EngineKBeanClassResolver {
         // Resolve master KBean
         Class<? extends KBean> masterBeanClass = masterBeanClass(masterBeanName, !ignoreMasterBeanNotFound);
         List<EngineCommand> result = new LinkedList<>();
-        List<CommandLine.JkBeanAction> masterBeanActions = commandLine.getMasterBeanActions();
+        List<CommandLine.JkBeanAction> masterBeanActions = commandLine.getDefaultKBeanActions();
         if (masterBeanClass == null && !masterBeanActions.isEmpty() && !ignoreMasterBeanNotFound) {
             String suggest = "help".equals(Environment.originalCmdLineAsString()) ? " ( You mean '-help' ? )" : "";
             throw new JkException("No Master KBean has bean has been selected. "

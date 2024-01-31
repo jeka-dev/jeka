@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Paths;
@@ -73,100 +72,6 @@ class Environment {
         }
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
-    }
-
-    /**
-     * By convention, standard options start with upper case.
-     */
-    static class StandardOptions {
-
-        Set<String> acceptedOptions = new HashSet<>();
-
-        boolean logIvyVerbose;
-
-        boolean logVerbose;
-
-        Boolean logAnimation;
-
-        boolean logBanner;
-
-        boolean logDuration;
-
-        boolean logStartUp;
-
-        boolean logStackTrace;
-
-        JkLog.Style logStyle;
-
-        boolean logRuntimeInformation;
-
-        boolean ignoreCompileFail;
-
-        private final String kbeanName;
-
-        private final boolean cleanWork;
-
-        private final boolean cleanOutput;
-
-        private final Set<String> names = new HashSet<>();
-
-        StandardOptions (Map<String, String> map) {
-            this.logVerbose = valueOf(boolean.class, map, false, "Log.verbose", "lv");
-            this.logIvyVerbose = valueOf(boolean.class, map, false, "log.ivy.verbose", "liv");
-            this.logAnimation = valueOf(boolean.class, map, null, "log.animation", "la");
-            this.logBanner = valueOf(boolean.class, map, false,"log.banner", "lb");
-            this.logDuration = valueOf(boolean.class, map, false,"log.duration", "ld");
-            this.logStartUp = valueOf(boolean.class, map, false,"log.setup", "lsu");
-            this.logStackTrace = valueOf(boolean.class, map,false, "log.stacktrace", "lst");
-            this.logRuntimeInformation = valueOf(boolean.class, map, false, "log.runtime.info", "lri");
-            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.FLAT, "log.style", "ls");
-            this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
-            this.ignoreCompileFail = valueOf(boolean.class, map, false, "def.compile.ignore-failure", "dci");
-            this.cleanWork = valueOf(boolean.class, map, false, "clean.work", "cw");
-            this.cleanOutput = valueOf(boolean.class, map, false, "clean.output", "co");
-        }
-
-        private static boolean isDefaultKBeanDefined(Map<String, String> map) {
-            return map.containsKey(KB_KEYWORD) || map.containsKey("kbean");
-        }
-
-        String kbeanName() {
-            return kbeanName;
-        }
-
-        boolean shouldCleanWorkDir() {
-            return cleanWork;
-        }
-
-        boolean shouldCleanOutputDir() {
-            return cleanOutput;
-        }
-
-        @Override
-        public String toString() {
-            return "JkBean" + JkUtilsObject.toString(kbeanName) + ", LogVerbose=" + logVerbose
-                    + ", LogHeaders=" + logBanner;
-        }
-
-        private <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... optionNames) {
-            for (String name : optionNames) {
-                acceptedOptions.add(name);
-                this.names.add(name);
-                if (map.containsKey(name)) {
-                    String stringValue = map.get(name);
-                    if (type.equals(boolean.class) && stringValue == null) {
-                        return (T) Boolean.TRUE;
-                    }
-                    try {
-                        return (T) FieldInjector.parse(type, stringValue);
-                    } catch (IllegalArgumentException e) {
-                        throw new JkException("Property " + name + " has been set with improper value '"
-                                + stringValue + "' : " + e.getMessage());
-                    }
-                }
-            }
-            return defaultValue;
-        }
     }
 
     static String originalCmdLineAsString() {

@@ -72,10 +72,9 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
             Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
             runWithDistribJekaShell(path, scaffoldCmd);
 
-            JkUtilsAssert.state(!JkUtilsHttp.isStatusOk(url), "A server is already listening to %s", url);
-
-
             if (checkHttp) {
+                JkUtilsAssert.state(!JkUtilsHttp.isStatusOk(url), "A server is already listening to %s", url);
+
                 System.out.println("======= Checking health with HTTP ================== ");
                 System.out.println("Scaffold command " + scaffoldCmd);
 

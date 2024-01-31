@@ -340,7 +340,7 @@ public final class SelfKBean extends KBean {
         return ucl.toJkClassLoader().findClassesHavingMainMethod().stream()
                 .filter(candidate -> !candidate.startsWith("_"))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No main class found in classpath"));
+                .orElse("dev.jeka.core.tool.Main");
     }
 
     private void fatJar(Path jarPath) {
