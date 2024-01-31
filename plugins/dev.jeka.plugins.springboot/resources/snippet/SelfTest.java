@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import app.App;
 
 @SpringBootTest(classes = App.class)
-class BaseTest {
+class BaseIT {
 
 	@Test
 	void contextLoads() {

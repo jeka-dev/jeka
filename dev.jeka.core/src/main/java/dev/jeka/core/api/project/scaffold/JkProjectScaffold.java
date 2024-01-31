@@ -2,6 +2,7 @@ package dev.jeka.core.api.project.scaffold;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.scaffold.JkScaffold;
@@ -17,15 +18,16 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Consumer;
 
 /**
  * Provides features to scaffold projects.
  */
-public class JkProjectScaffold extends JkScaffold {
+public final class JkProjectScaffold extends JkScaffold {
 
-    protected static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Build.java";
+    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Build.java";
 
-    protected static final String SIMPLE_STYLE_PROP = "project#layout.style=SIMPLE";
+    public static final String SIMPLE_STYLE_PROP = "project#layout.style=SIMPLE";
 
     public enum Template {
         BUILD_CLASS, PROPS, PLUGIN
@@ -45,9 +47,23 @@ public class JkProjectScaffold extends JkScaffold {
 
     private Template template = Template.BUILD_CLASS;
 
-    public JkProjectScaffold(JkProject project) {
+    private final JkConsumers<JkProjectScaffold> customizers = JkConsumers.of();
+
+    private JkProjectScaffold(JkProject project) {
         super(project.getBaseDir());
         this.project = project;
+    }
+
+    public static JkProjectScaffold of(JkProject project) {
+        return new JkProjectScaffold(project);
+    }
+
+    /**
+     * Registers for customizers that will be applied at #run execution.
+     */
+    public JkProjectScaffold addCustomizer(Consumer<JkProjectScaffold> customizer) {
+        this.customizers.add(customizer);
+        return this;
     }
 
     /**
@@ -65,9 +81,6 @@ public class JkProjectScaffold extends JkScaffold {
         return this;
     }
 
-    public boolean isUseSimpleStyle() {
-        return useSimpleStyle;
-    }
 
     public JkProjectScaffold setUseSimpleStyle(boolean useSimpleStyle) {
         this.useSimpleStyle = useSimpleStyle;
@@ -79,9 +92,26 @@ public class JkProjectScaffold extends JkScaffold {
         return this;
     }
 
+    public String getSrcRelPath() {
+        return project.compilation.layout.getSources().getRootDirsOrZipFiles().get(0).toString();
+    }
+
+    public String getResRelPath() {
+        return project.compilation.layout.getResources().getRootDirsOrZipFiles().get(0).toString();
+    }
+
+    public String getTestRelPath() {
+        return project.testing.compilation.layout.getSources().getRootDirsOrZipFiles().get(0).toString();
+    }
+
+    public String getTestResPath() {
+        return project.testing.compilation.layout.getResources().getRootDirsOrZipFiles().get(0).toString();
+    }
+
     @Override
     public void run() {
         configureScaffold();
+        customizers.accept(this);
         super.run();
         generateProjectStructure();
         generateDependencyTxt();
@@ -90,7 +120,13 @@ public class JkProjectScaffold extends JkScaffold {
         }
     }
 
-    protected void removeFileEntry(String relativePath) {
+    /**
+     * Removes a file entry from the list of file entries. Ths give a chance to plugins
+     * to remove non-necessary files.
+     *
+     * @param relativePath the path, relative to base dir.
+     */
+    public void removeFileEntry(String relativePath) {
         ListIterator<JkFileEntry> it = fileEntries.listIterator();
         while (it.hasNext()) {
             JkFileEntry fileEntry = it.next();
@@ -104,7 +140,7 @@ public class JkProjectScaffold extends JkScaffold {
      * Configures scaffold to creates project structure, including build class, according
      * the specified template.
      */
-    protected void configureScaffold() {
+    private void configureScaffold() {
 
         if (useSimpleStyle) {
             project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
@@ -129,7 +165,7 @@ public class JkProjectScaffold extends JkScaffold {
     /**
      * Generate the jeka-agnostic project skeleton (src dirs)
      */
-    protected void generateProjectStructure() {
+    private void generateProjectStructure() {
         JkLog.info("Create source directories.");
         JkCompileLayout prodLayout = project.compilation.layout;
         prodLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);

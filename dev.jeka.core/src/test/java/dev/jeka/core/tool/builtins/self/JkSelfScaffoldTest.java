@@ -15,7 +15,7 @@ public class JkSelfScaffoldTest {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         SelfKBean.SelfScaffoldOptions options = new SelfKBean.SelfScaffoldOptions();
         options.kind = JkSelfScaffold.Kind.APP;
-        JkSelfScaffold selfScaffold = new JkSelfScaffold(baseDir, options);
+        JkSelfScaffold selfScaffold = JkSelfScaffold.of(baseDir, options);
         selfScaffold.run();
 
         // cleanup
@@ -28,7 +28,7 @@ public class JkSelfScaffoldTest {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         SelfKBean.SelfScaffoldOptions options = new SelfKBean.SelfScaffoldOptions();
         options.kind = JkSelfScaffold.Kind.JEKA_SCRIPT;
-        JkSelfScaffold selfScaffold = new JkSelfScaffold(baseDir, options);
+        JkSelfScaffold selfScaffold = JkSelfScaffold.of(baseDir, options);
         selfScaffold.run();
 
         // cleanup

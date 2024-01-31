@@ -9,6 +9,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import sun.java2d.loops.ProcessPath;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
@@ -29,33 +30,44 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         System.out.println("=================================");
 
         // Regular project
-        String scaffoldCmd = scaffoldArgs("project# springboot#scaffold");
+        String scaffoldCmd = scaffoldArgs("project# project#scaffold");
         String checkCmd = checkArgs("project#info project#pack -lsu project#version=0.0.1");
         RunChecker runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.checkCmd = checkCmd;
-        runChecker.checkHttpTimeout = 25*1000;
         runChecker.run();
 
         // Project with simple layout
-        scaffoldCmd = scaffoldArgs("project#layout.style=SIMPLE springboot#scaffold");
+        scaffoldCmd = scaffoldArgs("project#layout.style=SIMPLE springboot# project#scaffold");
         checkCmd = checkArgs("project#pack");
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.checkCmd = checkCmd;
-        runChecker.checkHttpTimeout = 8*1000;
         runChecker.run();
+
+        // Project with self springboot
+        scaffoldCmd = scaffoldArgs("self#scaffold springboot#");
+        checkCmd = checkArgs("self#test self#buildJar");
+        runChecker = new RunChecker();
+        runChecker.scaffoldCmd = scaffoldCmd;
+        runChecker.checkCmd = checkCmd;
+        runChecker.cleanup = false;
+        Path baseDir = runChecker.run();
+        JkUtilsAssert.state(!Files.exists(baseDir.resolve("src")),
+                "Self Springboot was scaffolded with project structure !");
+        JkPathTree.of(baseDir).deleteRoot();
     }
 
     private class RunChecker {
         String scaffoldCmd;
         String checkCmd;
+        boolean cleanup = true;
         boolean checkHttp = false;
         int checkHttpTimeout = 8000;
         int checkHttpSleep = 2000;
         String url = "http://localhost:8080";
 
-        void run() {
+        Path run() {
 
             Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
             runWithDistribJekaShell(path, scaffoldCmd);
@@ -82,8 +94,10 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 runWithBaseDirJekaShell(path, checkCmd);
             }
 
-
-            JkPathTree.of(path).deleteRoot();
+            if (checkHttp) {
+                JkPathTree.of(path).deleteRoot();
+            }
+            return path;
         }
 
     }

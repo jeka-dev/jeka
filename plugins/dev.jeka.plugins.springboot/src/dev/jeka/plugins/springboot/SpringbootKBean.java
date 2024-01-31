@@ -1,19 +1,14 @@
 package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
-import dev.jeka.core.tool.builtins.self.JkSelfScaffold;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
-import java.nio.file.Paths;
 import java.util.Optional;
 
 @JkDoc(
@@ -41,56 +36,17 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Specific Spring repo where to download spring artifacts. Not needed if you use official release.")
     private JkSpringRepo springRepo;
 
-    @JkDoc("Scaffold a basic Spring-Boot application in package 'app'")
-    public void scaffold() {
-
-        // For scaffolding projects
-        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
-        optionalProjectKBean.ifPresent(projectKBean -> {
-            SpringbootProjectScaffold springbootProjectScaffold = new SpringbootProjectScaffold(projectKBean.project);
-            projectKBean.scaffold.applyTo(springbootProjectScaffold);
-            springbootProjectScaffold.run();
-        });
-
-        // for 'self' scaffolding
-        if (!optionalProjectKBean.isPresent()) {
-            SelfKBean selfKBean = load(SelfKBean.class);
-            JkSelfScaffold selfScaffold = new JkSelfScaffold(selfKBean);
-            selfScaffold.run();
-        }
-
-    }
-
     @Override
     protected void init() {
 
-        // Spring-Boot KBean is intended to enhance either ProjectKBean nor SelfKBean.
-        // If none is present yet in the runbase, we assume that ProjectKBean should be instantiated implicitly
-        Optional<SelfKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(SelfKBean.class);
+        // Customize ProjectKBean if present
+        Optional<ProjectKBean> optionalProjectKBean = getRunbase().findInstanceOf(ProjectKBean.class);
+        if (optionalProjectKBean.isPresent()) {
+            customizeProjectKBean(optionalProjectKBean.get());
 
-        if (!optionalSelfAppKBean.isPresent()) {
-            JkLog.trace("No SelfKBean found in runbase. Assume SpringbootKBean is for configuring Project.");
-            load(ProjectKBean.class);
+            // Otherwise, force use SelfKBean
         } else {
-            JkLog.trace("SelfKBean found in runbase. Assume SpringbootKBean is for configuring SelfApp. ");
-            SelfKBean selfApp = optionalSelfAppKBean.get();
-
-            selfApp.setMainClass(SelfKBean.AUTO_FIND_MAIN_CLASS);
-            selfApp.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
-                    getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
-
-            selfApp.setJarMaker(path -> JkSpringbootJars.createBootJar(
-                    selfApp.getAppClasses(),
-                    selfApp.getAppLibs(),
-                    getRunbase().getDependencyResolver().getRepos(),
-                    path,
-                    selfApp.getManifest())
-            );
-        }
-
-        // Configure KBean Project if no selfApp KBean is present.
-        if (!optionalSelfAppKBean.isPresent()) {
-            configure(load(ProjectKBean.class).project);
+            customizeSelfKBean(load(SelfKBean.class));
         }
 
         // Configure Docker KBean to add port mapping on run
@@ -111,8 +67,12 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create .war file : " + this.createWarFile);
     }
 
-    private void configure(JkProject project) {
-        JkSpringbootProject springbootProject = JkSpringbootProject.of(project)
+    private void customizeProjectKBean(ProjectKBean projectKBean) {
+
+        // Customize scaffold
+        projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::adapt);
+
+        JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project)
                 .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
         if (springbootVersion != null) {
             springbootProject.includeParentBom(springbootVersion);
@@ -121,5 +81,25 @@ public final class SpringbootKBean extends KBean {
             springbootProject.addSpringRepo(springRepo);
         }
     }
+
+    private void customizeSelfKBean(SelfKBean selfKBean) {
+
+        // customize scaffold
+        selfKBean.getSelfScaffold().addCustomizer(SpringbootScaffold::adapt);
+
+        selfKBean.setMainClass(SelfKBean.AUTO_FIND_MAIN_CLASS);
+        selfKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
+                getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
+
+        selfKBean.setJarMaker(path -> JkSpringbootJars.createBootJar(
+                selfKBean.getAppClasses(),
+                selfKBean.getAppLibs(),
+                getRunbase().getDependencyResolver().getRepos(),
+                path,
+                selfKBean.getManifest())
+        );
+    }
+
+
 
 }

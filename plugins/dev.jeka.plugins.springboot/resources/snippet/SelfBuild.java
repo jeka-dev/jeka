@@ -1,3 +1,4 @@
+package _dev;
 
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkInjectClasspath;

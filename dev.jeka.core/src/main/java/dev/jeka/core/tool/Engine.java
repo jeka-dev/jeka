@@ -119,9 +119,10 @@ final class Engine {
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(commandLine,
                 Environment.standardOptions.kbeanName(), ignoreMasterBeanNotFound);
-        JkLog.startTask("Init runbase");
+
+        // initialise runbase with resolved commands
         runbase.init(resolvedCommands);
-        JkLog.endTask();
+
         JkLog.endTask();
         JkLog.endTask();
         JkLog.info("KBeans are ready to run.");
@@ -132,6 +133,7 @@ final class Engine {
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
         if (Environment.standardOptions.logRuntimeInformation) {
+            JkLog.info("KBeans involved in this runbase : %s", runbase.getBeans());
             JkLog.info("JeKa class loader : ");
             int maxEntriesDisplayed = JkLog.isVerbose() ? Integer.MAX_VALUE : 6;
             Arrays.stream(JkClassLoader.ofCurrent().toString(maxEntriesDisplayed).split("\n"))

@@ -86,11 +86,14 @@ public abstract class JkScaffold {
         return this;
     }
 
-    protected JkRepoSet getDownloadRepos() {
-        return downloadRepos;
-    }
-
-    protected String findLatestVersion(String moduleCoordinate, String defaultVersion) {
+    /**
+     * Finds the latest version for a given module coordinate. If the latest version cannot be found or an exception occurs,
+     * the method returns the default version.
+     *
+     * @param moduleCoordinate the coordinate of the module for which to find the latest version
+     * @param defaultVersion the default version to be returned if the latest version cannot be found
+     */
+    public String findLatestVersion(String moduleCoordinate, String defaultVersion) {
         try {
             List<String> springbootVersions = JkDependencyResolver.of(downloadRepos)
                     .searchVersions(moduleCoordinate);
@@ -124,7 +127,16 @@ public abstract class JkScaffold {
         JkLog.endTask();;
     }
 
-    protected final String lastJekaVersion() {
+    /**
+     * Returns the last version of the Jeka module.
+     * <p>
+     * This method searches for versions of the Jeka module in the specified download repositories.
+     * It filters out any snapshot versions and returns the last non-snapshot version found.
+     * If no versions are found, it logs a warning message and returns the current Jeka version.
+     *
+     * @return the last version of the Jeka module
+     */
+    public final String lastJekaVersion() {
         List<String> versions = JkDependencyResolver.of(downloadRepos)
                 .searchVersions(JkInfo.JEKA_MODULE_ID).stream()
                     .filter(version -> !JkVersion.of(version).isSnapshot())
@@ -137,13 +149,33 @@ public abstract class JkScaffold {
         return versions.get(versions.size() -1);
     }
 
-    protected static String readResource(Class<?> clazz, String resourceName) {
-        return JkUtilsIO.read(clazz.getResource(resourceName));
-    }
-
-    protected final void addFileEntry(String relativePath, String content) {
+    /**
+     * Adds a file entry to the list of file entries in the scaffold.
+     * The file entry consists of a relative path and its content.
+     * The file entry will be created or updated when the scaffold is run.
+     */
+    public final void addFileEntry(String relativePath, String content) {
         JkFileEntry fileEntry = JkFileEntry.of(Paths.get(relativePath), content);
         this.fileEntries.add(fileEntry);
+    }
+
+    /**
+     * Removes the file entries that start with the specified path prefix.
+     */
+    public final void removeFileEntriesStaringBy(Path pathPrefix) {
+        for (ListIterator<JkFileEntry> it = fileEntries.listIterator(); it.hasNext();) {
+            JkFileEntry entry = it.next();
+            if (entry.relativePath.startsWith(pathPrefix)) {
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Returns the content of a resource file as a string.
+     */
+    public static String readResource(Class<?> clazz, String resourceName) {
+        return JkUtilsIO.read(clazz.getResource(resourceName));
     }
 
     private void createOrUpdateJekaProps() {

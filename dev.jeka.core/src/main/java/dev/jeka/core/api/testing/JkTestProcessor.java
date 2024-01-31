@@ -80,6 +80,10 @@ public final class JkTestProcessor {
         return new JkTestProcessor();
     }
 
+    public static boolean isEngineTestPresent() {
+        return JkClassLoader.ofCurrent().isDefined(ENGINE_SERVICE);
+    }
+
     public JkJavaProcess getForkingProcess() {
         return forkingProcess;
     }

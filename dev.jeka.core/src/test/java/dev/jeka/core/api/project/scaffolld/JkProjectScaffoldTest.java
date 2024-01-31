@@ -23,15 +23,15 @@ public class JkProjectScaffoldTest {
     public void scaffold_withBuildClass_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
-        JkProjectScaffold projectScaffold = new JkProjectScaffold(project);
-        projectScaffold.setTemplate(JkProjectScaffold.Template.BUILD_CLASS);
+        JkProjectScaffold projectScaffold = JkProjectScaffold.of(project);
         projectScaffold.compileDeps.add("toto:titi:0.0.1");
         projectScaffold.runtimeDeps.add("foo:bar");
-        projectScaffold.setTemplate(JkProjectScaffold.Template.BUILD_CLASS);
-        projectScaffold.run();
-        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitIgnore")).readAsString();
+        projectScaffold
+                .setTemplate(JkProjectScaffold.Template.BUILD_CLASS)
+                .run();
 
         // check .gitIgnore
+        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitIgnore")).readAsString();
         assertTrue(gitIgnoreContent.contains("/.jeka-work"));
         assertTrue(gitIgnoreContent.contains("/jeka-output"));
 
@@ -53,9 +53,9 @@ public class JkProjectScaffoldTest {
     public void scaffold_withProps_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
-        JkProjectScaffold projectScaffold = new JkProjectScaffold(project);
-        projectScaffold.setTemplate(JkProjectScaffold.Template.PROPS);
-        projectScaffold.run();
+        JkProjectScaffold.of(project)
+            .setTemplate(JkProjectScaffold.Template.PROPS)
+            .run();
 
         // Check build class is absent
         assertFalse(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Build.java")));
@@ -75,7 +75,7 @@ public class JkProjectScaffoldTest {
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
 
-        new JkProjectScaffold(project).setUseSimpleStyle(true).run();
+        JkProjectScaffold.of(project).setUseSimpleStyle(true).run();
 
         // Check project layout
         assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));

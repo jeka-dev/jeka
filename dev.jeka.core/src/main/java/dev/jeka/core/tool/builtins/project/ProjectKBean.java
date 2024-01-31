@@ -77,6 +77,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
 
+    private JkProjectScaffold projectScaffold;
+
     @Override
     protected void init() {
         configureProject();
@@ -145,14 +147,19 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     
     @JkDoc("Scaffold a JeKa project skeleton in working directory.")
     public void scaffold() {
-        JkProjectScaffold projectScaffold = new JkProjectScaffold(project);
-        this.scaffold.applyTo(projectScaffold);
         projectScaffold.run();
     }
 
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         return project.getJavaIdeSupport();
+    }
+
+    /**
+     * Returns the project scaffold used by this KBean to perform #scaffold#
+     */
+    public JkProjectScaffold getProjectScaffold() {
+        return projectScaffold;
     }
 
     // ------- static classes for configuration
@@ -368,6 +375,10 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.compilation.addJavaCompilerOptions(
                     JkUtilsString.parseCommandline(compilation.compilerExtraArgs));
         }
+
+        // Configure scaffold
+        this.projectScaffold = JkProjectScaffold.of(project);
+        this.scaffold.applyTo(projectScaffold); // apply basic configuration from KBean fields
     }
 
 }

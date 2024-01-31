@@ -7,6 +7,8 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.builtins.self.JkSelfScaffold;
+import dev.jeka.core.tool.builtins.self.SelfKBean;
 import org.junit.Test;
 
 import java.awt.*;
@@ -17,21 +19,23 @@ import java.nio.file.Path;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class SpringbootProjectScaffoldTest {
+public class SpringbootScaffoldTest {
 
     @Test
-    public void scaffold_withBuildClass_ok() throws Exception {
+    public void scaffoldProject_withBuildClass_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
-        SpringbootProjectScaffold projectScaffold = new SpringbootProjectScaffold(project);
-        projectScaffold.setTemplate(JkProjectScaffold.Template.BUILD_CLASS);
+        JkProjectScaffold projectScaffold = JkProjectScaffold.of(project);
         projectScaffold.compileDeps.add("toto:titi:0.0.1");
         projectScaffold.runtimeDeps.add("foo:bar");
-        projectScaffold.setTemplate(JkProjectScaffold.Template.BUILD_CLASS);
-        projectScaffold.run();
-        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitIgnore")).readAsString();
+        projectScaffold
+                .setTemplate(JkProjectScaffold.Template.BUILD_CLASS)
+                .setTemplate(JkProjectScaffold.Template.BUILD_CLASS)
+                .addCustomizer(SpringbootScaffold::adapt)
+                .run();
 
         // check .gitIgnore
+        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitIgnore")).readAsString();
         assertTrue(gitIgnoreContent.contains("/.jeka-work"));
         assertTrue(gitIgnoreContent.contains("/jeka-output"));
 
@@ -50,14 +54,15 @@ public class SpringbootProjectScaffoldTest {
     }
 
     @Test
-    public void scaffold_PropsWithSimpleLayout_ok() throws IOException {
+    public void scaffoldProject_PropsWithSimpleLayout_ok() throws IOException {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
-
-        new SpringbootProjectScaffold(project)
+        JkProjectScaffold.of(project)
                 .setTemplate(JkProjectScaffold.Template.PROPS)
-                .setUseSimpleStyle(true).run();
+                .setUseSimpleStyle(true)
+                .addCustomizer(SpringbootScaffold::adapt)
+                .run();
 
         // Check project layout
         assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));
@@ -74,19 +79,37 @@ public class SpringbootProjectScaffoldTest {
     }
 
     @Test
-    public void scaffold_buildClassWithSimpleLayout_ok() throws IOException {
+    public void scaffoldProject_buildClassWithSimpleLayout_ok() throws IOException {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
 
-        new SpringbootProjectScaffold(project)
+        JkProjectScaffold.of(project)
                 .setTemplate(JkProjectScaffold.Template.BUILD_CLASS)
-                .setUseSimpleStyle(true).run();
+                .setUseSimpleStyle(true)
+                .addCustomizer(SpringbootScaffold::adapt)
+                .run();
 
         // Check project layout
         assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));
         assertTrue(Files.exists(baseDir.resolve("src/app//Application.java")));
         assertFalse(Files.isDirectory(baseDir.resolve("res")));
+
+        // cleanup
+        //Desktop.getDesktop().open(baseDir.toFile());
+        JkPathTree.of(baseDir).deleteRoot();
+    }
+
+    @Test
+    public void scaffoldSelf_withBuildClass_ok() throws Exception {
+        Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
+        SelfKBean.SelfScaffoldOptions options = new SelfKBean.SelfScaffoldOptions();
+        JkSelfScaffold.of(baseDir, options)
+                .addCustomizer(SpringbootScaffold::adapt)
+                .run();
+
+        // Should not include script class defined by default
+        assertFalse(Files.exists(baseDir.resolve(JkSelfScaffold.SCRIPT_CLASS_PATH)));
 
         // cleanup
         //Desktop.getDesktop().open(baseDir.toFile());

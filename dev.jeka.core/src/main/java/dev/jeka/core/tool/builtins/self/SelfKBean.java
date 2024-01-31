@@ -14,6 +14,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 
@@ -62,6 +63,13 @@ public final class SelfKBean extends KBean {
 
     private Consumer<Path> jarMaker = this::fatJar;
 
+    private JkSelfScaffold selfScaffold;
+
+    @Override
+    protected void init() {
+        selfScaffold = JkSelfScaffold.of(this);
+    }
+
     // We can not just run Application#main cause Spring-Boot seems
     // requiring that the Java process is launched using Spring-Boot application class
     @JkDoc("Launch application")
@@ -81,6 +89,11 @@ public final class SelfKBean extends KBean {
 
     @JkDoc("Launch test suite")
     public void test() {
+        if (!JkTestProcessor.isEngineTestPresent()) {
+            throw new JkException("No engine test class found in current classloader. " +
+                    "You should add @JkInjectClasspath(\"org.junit.jupiter:junit-jupiter\") dependencies" +
+                    "to the classpath for testing.");
+        }
         JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getAppClasses().getRoot());
         JkTestProcessor.of()
                 .setForkingProcess(true)
@@ -126,8 +139,7 @@ public final class SelfKBean extends KBean {
 
     @JkDoc("Creates a skeleton in the current working directory.")
     public void scaffold() {
-        JkSelfScaffold scaffolder = new JkSelfScaffold(this);
-        scaffolder.run();
+        selfScaffold.run();
     }
 
     /**
@@ -207,6 +219,15 @@ public final class SelfKBean extends KBean {
             return mainClassFinder.get();
         }
         return mainClass;
+    }
+
+    /**
+     * Returns the JkSelfScaffold object associated with this SelfKBean.
+     * The JkSelfScaffold provides methods for configuring the project scaffold,
+     * such as adding file entries and setting options.
+     */
+    public JkSelfScaffold getSelfScaffold() {
+        return selfScaffold;
     }
 
     /**

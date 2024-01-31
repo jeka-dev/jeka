@@ -235,6 +235,10 @@ public final class JkRunbase {
                 .distinct()
                 .forEach(this::load);
         JkLog.endTask();
+
+        // Once KBeans has bean initialised. #postInit is invoked on each, so they can act upon final settings
+        // of other KBeans
+        beans.values().forEach(KBean::postInit);
     }
 
     void assertValid() {

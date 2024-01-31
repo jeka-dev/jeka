@@ -50,6 +50,13 @@ public abstract class KBean {
     protected void init() {
     }
 
+    /**
+     * This method is called by JeKa engine, once all the KBeans present in the runbase has been initialised.
+     * Use this method if this KBean reads other KBean configurations.xx
+     */
+    protected void postInit() {
+    }
+
     @JkDoc(hide = true, value="Displays help about this KBean")
     public void help() {
         HelpDisplayer.helpJkBean(this);
