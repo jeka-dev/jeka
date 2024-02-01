@@ -444,7 +444,13 @@ public final class JkUtilsString {
             } else {
                 index = stringBuilder.lastIndexOf(" ", index + maxLineLength);
                 if (index == -1) {
-                    return input;  // Can't slice cause one word exceeds max size
+
+                    // One word is too long to fit, try best effort
+                    int newMaxLength = Arrays.stream(input.split(" |\n"))
+                            .map(String::length)
+                            .max(Comparator.naturalOrder())
+                            .orElse(input.length() +1);
+                    return wrapStringCharacterWise(input, newMaxLength);
                 }
                 stringBuilder.replace(index, index + 1, "\n");
                 index++;

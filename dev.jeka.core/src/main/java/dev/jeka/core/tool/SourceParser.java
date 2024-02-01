@@ -7,7 +7,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-class SourceParser {
+final class SourceParser {
 
     private final JkPathTree sources;
 
@@ -60,7 +60,7 @@ class SourceParser {
         AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.addDep(!privateFolder, CommandLine.toDependency(baseDir, value));
+            info.addDep(!privateFolder, CmdLine.toDependency(baseDir, value));
             return;
         }
 

@@ -18,9 +18,9 @@ class Environment {
         // Can't be instantiated
     }
 
-    static CommandLine commandLine = CommandLine.parse(new String[0]);
+    static CmdLine cmdLine = CmdLine.parse(new String[0]);
 
-    static StandardOptions cmdLineOptions = new StandardOptions(Collections.emptyMap(), new String[0]);
+    static CmdLineOptions cmdLineOptions = new CmdLineOptions(Collections.emptyMap(), new String[0]);
 
     static String[] originalArgs;
 
@@ -54,24 +54,24 @@ class Environment {
         JkLog.trace("Effective command line : " + effectiveCommandLineArgs);
 
         // Parse command line
-        final CommandLine commandLine = CommandLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
+        final CmdLine cmdLine = CmdLine.parse(effectiveCommandLineArgs.toArray(new String[0]));
 
-        final Map<String, String> optionProps = commandLine.getStandardOptions();
+        final Map<String, String> optionProps = cmdLine.getStandardOptions();
 
         // Set defaultKBean from properties if it has not been defined in cmd line
-        if (!StandardOptions.isDefaultKBeanDefined(optionProps)) {
+        if (!CmdLineOptions.isDefaultKBeanDefined(optionProps)) {
             optionProps.put(KB_KEYWORD, JkUtilsString.blankToNull(props.get(DEFAULT_KBEAN_PROP)));
         }
 
-        final StandardOptions standardOptions = new StandardOptions(optionProps, commandLine.rawArgs());
-        if (standardOptions.logVerbose.isPresent()) {
+        final CmdLineOptions cmdLineOptions = new CmdLineOptions(optionProps, cmdLine.rawArgs());
+        if (cmdLineOptions.logVerbose.isPresent()) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
-        if (standardOptions.logIvyVerbose.isPresent()) {
+        if (cmdLineOptions.logIvyVerbose.isPresent()) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
-        Environment.commandLine = commandLine;
-        Environment.cmdLineOptions = standardOptions;
+        Environment.cmdLine = cmdLine;
+        Environment.cmdLineOptions = cmdLineOptions;
     }
 
     static String originalCmdLineAsString() {

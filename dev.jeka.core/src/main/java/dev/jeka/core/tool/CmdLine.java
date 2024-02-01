@@ -3,8 +3,6 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
@@ -16,7 +14,7 @@ import java.util.stream.Collectors;
 /*
  * Holds information carried by the command line.
  */
-final class CommandLine {
+final class CmdLine {
 
     static final String KBEAN_SYMBOL = "#";
 
@@ -26,18 +24,18 @@ final class CommandLine {
 
     private final Map<String, String> systemProperties = new HashMap<>();
 
-    private final List<JkBeanAction> beanActions = new LinkedList<>();
+    private final List<KBeanAction> beanActions = new LinkedList<>();
 
     private final List<JkDependency> jekaSrcDependencies = new LinkedList<>();
 
     private String[] rawArgs;
 
-    private CommandLine() {
+    private CmdLine() {
         super();
     }
 
-    static CommandLine parse(String[] words) {
-        final CommandLine result = new CommandLine();
+    static CmdLine parse(String[] words) {
+        final CmdLine result = new CmdLine();
         for (String word : words) {
             if (word.startsWith("-D")) {
                 KeyValue keyValue = KeyValue.of(word.substring(2), false);
@@ -48,7 +46,7 @@ final class CommandLine {
             } else if (word.startsWith(AT_SYMBOL_CHAR)) {
                 result.jekaSrcDependencies.add(toDependency(Paths.get(""), word.substring(1)));
             } else {
-                result.beanActions.add(new JkBeanAction(word));
+                result.beanActions.add(new KBeanAction(word));
             }
         }
         result.rawArgs = words;
@@ -63,7 +61,7 @@ final class CommandLine {
         return systemProperties;
     }
 
-    List<JkBeanAction> getBeanActions() {
+    List<KBeanAction> getBeanActions() {
         return beanActions;
     }
 
@@ -80,7 +78,7 @@ final class CommandLine {
         return rawArgs;
     }
 
-    List<JkBeanAction> getDefaultKBeanActions() {
+    List<KBeanAction> getDefaultKBeanActions() {
         return beanActions.stream().filter(beanAction -> beanAction.beanName == null).collect(Collectors.toList());
     }
 
@@ -123,77 +121,6 @@ final class CommandLine {
             } else {
                 return coordinateDependency;
             }
-        }
-    }
-
-    /**
-     * Represents an action to be taken on a bean, such as invoking a method,
-     * injecting a property, or instantiating a bean.
-     */
-    static class JkBeanAction {
-
-        final EngineCommand.Action action;
-
-        final String beanName;
-
-        final String member; // method or property name
-
-        final String value; // if property
-
-        /*
-         * Creates a JkActionBean by parsing its textual representation, such as 'someBean#someValue=bar'.
-         */
-        JkBeanAction(String expression) {
-            final String beanExpression;
-            if (expression.contains(KBEAN_SYMBOL)) {
-                String before = JkUtilsString.substringBeforeFirst(expression, KBEAN_SYMBOL);
-
-                // Normally, if we want to refer to the default KBean, we can just mention '#someProperty'.
-                // However, if we want to refer to a such property from a property file, this won't work, as
-                // starting with a '#' will be interpreted as a comment.
-                // So we let the possibility of doing so, by using the 'kb#' member prefix in place of '#'.
-                if (Environment.KB_KEYWORD.equals(before)) {
-                    before = null;
-                }
-                this.beanName = JkUtilsString.isBlank(before) ? null : before;
-                beanExpression = JkUtilsString.substringAfterFirst(expression, KBEAN_SYMBOL);
-            } else {
-                System.err.println("Usage of '" + expression + "' is deprecated. Use '#" + expression + "' instead.");
-                this.beanName = null;
-                beanExpression = expression;
-            }
-            if (beanExpression.isEmpty()) {
-                this.action = EngineCommand.Action.BEAN_INSTANTIATION;
-                this.member = null;
-                this.value = null;
-            } else if (beanExpression.contains("=")) {
-                this.action = EngineCommand.Action.PROPERTY_INJECT;
-                this.member = JkUtilsString.substringBeforeFirst(beanExpression, "=");
-                JkUtilsAssert.argument(!this.member.isEmpty(), "Illegal expression " + expression);
-                this.value = JkUtilsString.substringAfterFirst(beanExpression, "=");
-            } else {
-                this.action = EngineCommand.Action.METHOD_INVOKE;
-                this.member = beanExpression;
-                this.value = null;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "action=" + action + ", beanName='" + beanName + '\'' + ", member='" + member + '\'' +
-                    ", value='" + value + '\'';
-        }
-
-        String shortDescription() {
-            String actionName = null;
-            if (action  == EngineCommand.Action.METHOD_INVOKE) {
-                actionName = "method";
-            } else if (action == EngineCommand.Action.PROPERTY_INJECT) {
-                actionName = "field";
-            } else {
-                actionName = "constructor";
-            }
-            return String.format("%s '%s'", actionName, member);
         }
     }
 

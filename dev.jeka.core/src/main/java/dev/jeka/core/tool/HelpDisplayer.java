@@ -31,7 +31,7 @@ final class HelpDisplayer {
         System.out.println("  Execute KBean actions          : jeka myBean: myMethod myFieldA=8 myFieldB=false");
         System.out.println("  Execute Git hosted application : jeka -r https://github.com/djeang/jeka-spring-boot-thymeleaf-example self: runJar");
         System.out.println();
-        System.out.println(StandardOptions.standardProperties());
+        System.out.println(CmdLineOptions.getHelpMessage());
         final StringBuilder sb = new StringBuilder().append("Local KBeans:\n");
         if (compilationFailed) {
             sb.append("  [WARN] Compilation of jeka-src failed. Cannot provide information about KBean defined locally.\n");
@@ -59,7 +59,7 @@ final class HelpDisplayer {
         if (isDefault) {
             shortName = shortName + " (default)";
         }
-        String beanDescription = new BeanDoc(beanClass).shortDescription();
+        String beanDescription = new KBeanDoc(beanClass).shortDescription();
         if (JkUtilsString.isBlank(beanDescription)) {
             beanDescription = "";
         } else if (!beanDescription.endsWith(".")) {
@@ -85,12 +85,12 @@ final class HelpDisplayer {
     }
 
     static void helpJkBean(KBean kBean) {
-        BeanDoc beanDescription = new BeanDoc(kBean.getClass());
+        KBeanDoc beanDescription = new KBeanDoc(kBean.getClass());
         JkLog.info(helpBeanDescription(beanDescription, kBean.getRunbase()));
         JkLog.info("Execute 'jeka -help' to get global help.\n");
     }
 
-    private static String helpBeanDescription(BeanDoc description, JkRunbase runbase) {
+    private static String helpBeanDescription(KBeanDoc description, JkRunbase runbase) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         List<RenderItem> items = new LinkedList<>();
@@ -109,7 +109,7 @@ final class HelpDisplayer {
             items.add(new RenderItem("Init", activationEffects));
         }
         new ItemContainer(items).render().forEach(line -> sb.append(line + "\n"));
-        sb.append(BeanDescription.renderItem(description.beanClass()).description(10));
+        sb.append(KBeanDescription.renderItem(description.beanClass()).description(10));
         sb.append(shortcuts(runbase.getBaseDir()));
         return sb.toString();
     }

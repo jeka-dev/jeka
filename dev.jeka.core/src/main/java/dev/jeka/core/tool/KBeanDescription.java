@@ -18,20 +18,20 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-final class BeanDescription {
+final class KBeanDescription {
 
     private final List<BeanMethod> beanMethods;
 
     private final List<BeanField> beanFields;
 
-    private BeanDescription(List<BeanMethod> beanMethods,
-                            List<BeanField> beanFields) {
+    private KBeanDescription(List<BeanMethod> beanMethods,
+                             List<BeanField> beanFields) {
         super();
         this.beanMethods = Collections.unmodifiableList(beanMethods);
         this.beanFields = Collections.unmodifiableList(beanFields);
     }
 
-    static BeanDescription renderItem(Class<? extends KBean> beanClass) {
+    static KBeanDescription renderItem(Class<? extends KBean> beanClass) {
         final List<BeanMethod> methods = new LinkedList<>();
         for (final Method method : executableMethods(beanClass)) {
             methods.add(BeanMethod.of(method));
@@ -43,7 +43,7 @@ final class BeanDescription {
                     nameAndField.name, nameAndField.rootClass));
         }
         Collections.sort(options);
-        return new BeanDescription(methods, options);
+        return new KBeanDescription(methods, options);
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {
@@ -97,14 +97,14 @@ final class BeanDescription {
         if (!methods.isEmpty()) {
             stringBuilder.append(JkUtilsString.padEnd("Methods", leftColumnLength, ' ')).append(":\n");
             List<RenderItem> items = methods.stream()
-                    .map(BeanDescription::renderItem).collect(Collectors.toList());
+                    .map(KBeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
         }
         if (!properties.isEmpty()) {
             stringBuilder.append(JkUtilsString.padEnd("Properties", leftColumnLength, ' ')).append(":\n");
             List<RenderItem> items = properties.stream()
-                    .map(BeanDescription::renderItem).collect(Collectors.toList());
+                    .map(KBeanDescription::renderItem).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
         }

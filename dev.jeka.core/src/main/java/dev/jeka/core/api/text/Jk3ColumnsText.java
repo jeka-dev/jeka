@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Utility class that allows formatting text into two columns.
- * Each column consists of a left and right section separated by a delimiter.
+ * Utility class that allows formatting text into many column.
+ * Each column has a minimum and maximum size.
  */
 public class Jk3ColumnsText {
 
@@ -129,6 +129,7 @@ public class Jk3ColumnsText {
             return Arrays.stream(JkUtilsString.wrapStringCharacterWise(original, size).split("\n"));
         }
     }
+
 
 
 }

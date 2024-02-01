@@ -32,7 +32,7 @@ public final class JkInit {
      */
     public static <T extends KBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
-        Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
+        Environment.cmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
         JkLog.setDecorator(Environment.cmdLineOptions.logStyle);
         if (Environment.cmdLineOptions.logRuntimeInformation.isPresent()) {
             displayRuntimeInfo();
@@ -49,7 +49,7 @@ public final class JkInit {
             EngineKBeanClassResolver engineKBeanClassResolver = new EngineKBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
-            commands.addAll(engineKBeanClassResolver.resolve(Environment.commandLine, KBean.name(clazz), false));
+            commands.addAll(engineKBeanClassResolver.resolve(Environment.cmdLine, KBean.name(clazz), false));
             JkRunbase runbase = JkRunbase.get(Paths.get(""));
             runbase.setImportedRunbaseDirs(getImportedProjects(clazz));
             JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
@@ -94,7 +94,7 @@ public final class JkInit {
     static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
-        sb.append("\nCommand Line      : " + String.join(" ", Arrays.asList(Environment.commandLine.rawArgs())));
+        sb.append("\nCommand Line      : " + String.join(" ", Arrays.asList(Environment.cmdLine.rawArgs())));
         sb.append("\nJava Home         : " + System.getProperty("java.home"));
         sb.append("\nJava Version      : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         sb.append("\nJeka Version      : " + JkInfo.getJekaVersion());

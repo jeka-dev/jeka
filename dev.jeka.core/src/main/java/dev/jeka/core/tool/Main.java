@@ -50,7 +50,7 @@ public final class Main {
                 System.out.println(JkInfo.getJekaVersion());
                 return;
             }
-            Environment.commandLine.getSystemProperties().forEach((k,v) -> System.setProperty(k, v));
+            Environment.cmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
             JkLog.setDecorator(cmdLineOptions.logStyle);
             if (cmdLineOptions.logBanner.isPresent()) {
                 displayIntro();
@@ -79,7 +79,7 @@ public final class Main {
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
             final Engine engine = new Engine(baseDir);
-            engine.execute(Environment.commandLine);   // log in memory are inactivated inside this method if it goes ok
+            engine.execute(Environment.cmdLine);   // log in memory are inactivated inside this method if it goes ok
             if (cmdLineOptions.logBanner.isPresent()) {
                 displayOutro(start);
             }
@@ -149,14 +149,14 @@ public final class Main {
                     "exec" , projectDir, args);
             return;
         }
-        CommandLine commandLine = CommandLine.parse(args);
+        CmdLine cmdLine = CmdLine.parse(args);
         JkLog.setAcceptAnimation(true);
         if (!cmdLineOptions.logStartUp.isPresent()) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
         final Engine engine = new Engine(projectDir);
-        engine.execute(commandLine);
+        engine.execute(cmdLine);
     }
 
     private static int printAscii(boolean error, String fileName) {

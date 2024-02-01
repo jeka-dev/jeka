@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-// TODO maybe to merge with BeanDescription
-class BeanDoc implements Comparable<BeanDoc> {
+// TODO maybe to merge with KBeanDescription
+final class KBeanDoc implements Comparable<KBeanDoc> {
 
     private static String longName(Class<?> clazz) {
         return clazz.getName();
@@ -27,7 +27,7 @@ class BeanDoc implements Comparable<BeanDoc> {
 
     private final Class<? extends KBean> clazz;
 
-    BeanDoc(Class<? extends KBean> clazz) {
+    KBeanDoc(Class<? extends KBean> clazz) {
         super();
         this.shortName = KBean.name(clazz);
         this.fullName = longName(clazz);
@@ -81,7 +81,7 @@ class BeanDoc implements Comparable<BeanDoc> {
     }
 
     @Override
-    public int compareTo(BeanDoc o) {
+    public int compareTo(KBeanDoc o) {
         return this.shortName.compareTo(o.shortName);
     }
 }

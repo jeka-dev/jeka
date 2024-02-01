@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Options accepted by command-line interface
  */
-class StandardOptions {
+class CmdLineOptions {
 
     private static final List<Option<?>> ALL_OPTIONS = new LinkedList<>();
 
@@ -48,12 +48,9 @@ class StandardOptions {
     final Option<Void> ignoreCompileFail = ofVoid("Ignore when 'jeka-src compile fails", "--ignore-compile-fail", "-dci");
 
 
-
-
-
     private final Set<String> names = new HashSet<>();
 
-    StandardOptions(Map<String, String> map, String[] rawArgs) {
+    CmdLineOptions(Map<String, String> map, String[] rawArgs) {
         populateOptions(Arrays.asList(rawArgs));
 
         this.logAnimation = valueOf(boolean.class, map, null, "log.animation", "la");
@@ -66,7 +63,7 @@ class StandardOptions {
         return map.containsKey(Environment.KB_KEYWORD) || map.containsKey("kbean");
     }
 
-    static String standardProperties() {
+    static String getHelpMessage() {
         StringBuilder sb = new StringBuilder();
         sb.append("Options:\n");
         List<HelpDisplayer.RenderItem> items = new LinkedList<>();

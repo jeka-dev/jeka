@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-class ParsedSourceInfo {
+final class ParsedSourceInfo {
 
     private JkDependencySet dependencies;
 
