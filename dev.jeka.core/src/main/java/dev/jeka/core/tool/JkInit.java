@@ -33,14 +33,14 @@ public final class JkInit {
     public static <T extends KBean> T instanceOf(Class<T> clazz, String... args) {
         Environment.initialize(args);
         Environment.cmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
-        JkLog.setDecorator(Environment.cmdLineOptions.logStyle);
-        if (Environment.cmdLineOptions.logRuntimeInformation.isPresent()) {
+        JkLog.setDecorator(Environment.logs.style);
+        if (Environment.logs.runtimeInformation) {
             displayRuntimeInfo();
             JkLog.info("JeKa Classpath : ");
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
         }
         boolean memoryBufferLogActivated = false;
-        if (!Environment.cmdLineOptions.logStartUp.isPresent() && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
+        if (!Environment.logs.startUp && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
             JkMemoryBufferLogDecorator.activateOnJkLog();
             JkLog.info("");   // To have a br prior the memory log is flushed
             memoryBufferLogActivated = true;
