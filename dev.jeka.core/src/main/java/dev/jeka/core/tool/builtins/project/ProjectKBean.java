@@ -170,7 +170,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public static class JkPackOptions {
 
         @JkDoc("Set the type of jar to produce for the main artifact.")
-        public JkProjectPackaging.JarType jarType;
+        public JkProjectPackaging.JarType jarType = JkProjectPackaging.JarType.REGULAR;
 
     }
 

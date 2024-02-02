@@ -50,7 +50,7 @@ public final class Main {
                 System.out.println(JkInfo.getJekaVersion());
                 return;
             }
-            Environment.cmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
+            Environment.parsedCmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
             JkLog.setDecorator(logs.style);
             if (logs.banner) {
                 displayIntro();
@@ -79,7 +79,7 @@ public final class Main {
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
             final Engine engine = new Engine(baseDir);
-            engine.execute(Environment.cmdLine);   // log in memory are inactivated inside this method if it goes ok
+            engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok
             if (logs.banner) {
                 displayOutro(start);
             }
@@ -113,9 +113,9 @@ public final class Main {
         return logs.verbose || logs.stackTrace;
     }
 
-    private static void handleRegularException(Throwable e) {
+    static void handleRegularException(Throwable e) {
         System.err.println();
-        if (JkLog.isVerbose() || logs.stackTrace) {
+        if (logs.verbose || logs.stackTrace) {
             System.err.println("=============================== Stack Trace =============================================");
             e.printStackTrace(System.err);
             System.err.flush();
@@ -148,17 +148,17 @@ public final class Main {
                     "exec" , projectDir, args);
             return;
         }
-        CmdLine cmdLine = CmdLine.parse(args);
+        ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
         JkLog.setAcceptAnimation(true);
         if (!logs.startUp) {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
         final Engine engine = new Engine(projectDir);
-        engine.execute(cmdLine);
+        engine.execute(parsedCmdLine);
     }
 
-    private static int printAscii(boolean error, String fileName) {
+    static int printAscii(boolean error, String fileName) {
         final InputStream inputStream = Main.class.getResourceAsStream(fileName);
         final List<String> lines = JkUtilsIO.readAsLines(inputStream);
         int i = 0;
@@ -175,22 +175,22 @@ public final class Main {
         return i;
     }
 
-    private static void displayIntro() {
+    static void displayIntro() {
         final int length = printAscii(false, "text-jeka.ascii");
         JkLog.info(JkUtilsString.repeat(" ", length) + "The 100%% Java Build Tool.\n");
     }
 
-    private static void displayOutro(long startTs) {
+    static void displayOutro(long startTs) {
         final int length = printAscii(false, "text-success.ascii");
         System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                 + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
     }
 
-    private static void displayDuration(long startTs) {
+    static void displayDuration(long startTs) {
         System.out.println("\nTotal run duration : " + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
     }
 
-    private static String[] filteredArgs(String[] originalArgs) {
+    static String[] filteredArgs(String[] originalArgs) {
         //System.out.println("=====original args = +" + Arrays.asList(originalArgs));
         if (originalArgs.length == 0) {
             return originalArgs;

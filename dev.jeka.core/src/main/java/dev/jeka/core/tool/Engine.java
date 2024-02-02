@@ -72,18 +72,18 @@ final class Engine {
     /**
      * Execute the specified command line in Jeka engine.
      */
-    void execute(CmdLine cmdLine) {
+    void execute(ParsedCmdLine parsedCmdLine) {
         JkLog.startTask("Compile jeka-src and initialize KBeans");
-        JkDependencySet commandLineDependencies = JkDependencySet.of(cmdLine.getJekaSrcDependencies());
+        JkDependencySet commandLineDependencies = JkDependencySet.of(parsedCmdLine.getJekaSrcDependencies());
         JkLog.trace("Dependencies injected in classpath from command line : " + commandLineDependencies);
         JkDependencySet dependenciesFromJekaProps = dependenciesFromJekaProps();
         JkLog.trace("Dependencies injected in classpath from jeka.properties : " + dependenciesFromJekaProps);
         final JkPathSequence computedClasspath;
         final CompilationResult result;
         boolean hasJekaSrc = Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR))
-                || cmdLine.involvedBeanNames().contains("scaffold");
+                || parsedCmdLine.involvedBeanNames().contains("scaffold");
         if (hasJekaSrc) {
-            boolean failOnError = !Environment.behavior.ignoreCompileFailure && !cmdLine.isHelp();
+            boolean failOnError = !Environment.behavior.ignoreCompileFailure && !parsedCmdLine.isHelp();
             result = resolveAndCompile(new HashMap<>(), true, failOnError);
             computedClasspath = result.classpath;
                     // the command deps has been included in cache for classpath resolution
@@ -117,7 +117,7 @@ final class Engine {
                 (!result.compileFailedProjects.getEntries().isEmpty() &&
                 Environment.behavior.ignoreCompileFailure);
 
-        List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(cmdLine,
+        List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(parsedCmdLine,
                 Environment.behavior.kbeanName, ignoreMasterBeanNotFound);
 
         // initialise runbase with resolved commands
@@ -143,8 +143,8 @@ final class Engine {
         if (!hasJekaSrc) {
             JkLog.trace("You are not running Jeka inside a Jeka project.");
         }
-        if (!cmdLine.hasMethodInvokations() && !Environment.logs.runtimeInformation) {
-            JkLog.warn("This command contains no actions. Execute 'jeka help' to know about available actions.");
+        if (!parsedCmdLine.hasMethodInvokations() && !Environment.logs.runtimeInformation) {
+            JkLog.warn("This command contains no actions. Execute 'jeka --help' to know about available actions.");
         }
         runbase.run(resolvedCommands);
     }
@@ -175,14 +175,14 @@ final class Engine {
         JkLog.traceEndTask();
 
         JkDependencySet jekaSrcDependencies = JkDependencySet.of()
-                .and(Environment.cmdLine.getJekaSrcDependencies())
+                .and(Environment.parsedCmdLine.getJekaSrcDependencies())
                 .and(parsedSourceInfo.getDependencies())
                 .and(dependenciesFromJekaProps());
         JkDependencySet exportedDependencies = jekaSrcDependencies;
         boolean hasPrivateDependencies = parsedSourceInfo.hasPrivateDependencies();
         if (hasPrivateDependencies) {
             exportedDependencies = JkDependencySet.of()
-                    .and(Environment.cmdLine.getJekaSrcDependencies())
+                    .and(Environment.parsedCmdLine.getJekaSrcDependencies())
                     .and(parsedSourceInfo.getExportedDependencies())
                     .and(dependenciesFromJekaProps());
         }
@@ -491,7 +491,7 @@ final class Engine {
             if (depString.trim().isEmpty()) {
                 continue;
             }
-            dependencies.add(CmdLine.toDependency(baseDir, depString.trim()));
+            dependencies.add(ParsedCmdLine.toDependency(baseDir, depString.trim()));
         }
         return JkDependencySet.of(dependencies);
     }

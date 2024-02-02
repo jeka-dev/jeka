@@ -22,8 +22,8 @@ class KBeanAction {
      */
     KBeanAction(String expression) {
         final String beanExpression;
-        if (expression.contains(CmdLine.KBEAN_SYMBOL)) {
-            String before = JkUtilsString.substringBeforeFirst(expression, CmdLine.KBEAN_SYMBOL);
+        if (expression.contains(ParsedCmdLine.KBEAN_SYMBOL)) {
+            String before = JkUtilsString.substringBeforeFirst(expression, ParsedCmdLine.KBEAN_SYMBOL);
 
             // Normally, if we want to refer to the default KBean, we can just mention '#someProperty'.
             // However, if we want to refer to a such property from a property file, this won't work, as
@@ -33,7 +33,7 @@ class KBeanAction {
                 before = null;
             }
             this.beanName = JkUtilsString.isBlank(before) ? null : before;
-            beanExpression = JkUtilsString.substringAfterFirst(expression, CmdLine.KBEAN_SYMBOL);
+            beanExpression = JkUtilsString.substringAfterFirst(expression, ParsedCmdLine.KBEAN_SYMBOL);
         } else {
             System.err.println("Usage of '" + expression + "' is deprecated. Use '#" + expression + "' instead.");
             this.beanName = null;

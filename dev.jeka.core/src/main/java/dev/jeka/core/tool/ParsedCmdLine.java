@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /*
  * Holds information carried by the command line.
  */
-final class CmdLine {
+final class ParsedCmdLine {
 
     static final String KBEAN_SYMBOL = "#";
 
@@ -30,12 +30,12 @@ final class CmdLine {
 
     private String[] rawArgs;
 
-    private CmdLine() {
+    private ParsedCmdLine() {
         super();
     }
 
-    static CmdLine parse(String[] words) {
-        final CmdLine result = new CmdLine();
+    static ParsedCmdLine parse(String[] words) {
+        final ParsedCmdLine result = new ParsedCmdLine();
         for (String word : words) {
             if (word.startsWith("-D")) {
                 KeyValue keyValue = KeyValue.of(word.substring(2), false);

@@ -60,7 +60,7 @@ final class SourceParser {
         AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.addDep(!privateFolder, CmdLine.toDependency(baseDir, value));
+            info.addDep(!privateFolder, ParsedCmdLine.toDependency(baseDir, value));
             return;
         }
 

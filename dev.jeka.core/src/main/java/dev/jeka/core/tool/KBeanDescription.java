@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
  */
 final class KBeanDescription {
 
-    private final List<BeanMethod> beanMethods;
+    final List<BeanMethod> beanMethods;
 
-    private final List<BeanField> beanFields;
+    final List<BeanField> beanFields;
 
     private KBeanDescription(List<BeanMethod> beanMethods,
                              List<BeanField> beanFields) {
@@ -173,17 +173,17 @@ final class KBeanDescription {
      */
     static final class BeanField implements Comparable<BeanField> {
 
-        private final String name;
+        final String name;
 
-        private final String description;
+        final String description;
 
         private final Object bean;
 
-        private final Object defaultValue;
+        final Object defaultValue;
 
         private final Class<?> rootDeclaringClass;
 
-        private final Class<?> type;
+        final Class<?> type;
 
         private final String injectedPropertyName;
 

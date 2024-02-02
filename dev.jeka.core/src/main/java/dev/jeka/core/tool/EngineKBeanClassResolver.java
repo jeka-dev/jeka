@@ -61,12 +61,12 @@ final class EngineKBeanClassResolver {
         this.jekaProperties = JkRunbase.localProperties(baseDir);
     }
 
-    List<EngineCommand> resolve(CmdLine cmdLine, String masterBeanName, boolean ignoreMasterBeanNotFound) {
+    List<EngineCommand> resolve(ParsedCmdLine parsedCmdLine, String masterBeanName, boolean ignoreMasterBeanNotFound) {
         JkLog.startTask("Resolve KBean classes");
 
         // Resolve involved KBean classes
         Map<String, Class<? extends KBean>> beanClasses = new HashMap<>();
-        Set<String> involvedKBeanNames = new HashSet<>(cmdLine.involvedBeanNames());
+        Set<String> involvedKBeanNames = new HashSet<>(parsedCmdLine.involvedBeanNames());
         involvedKBeanNames.addAll(getInvolvedKBeanNamesFromProperties());
         for (String beanName : involvedKBeanNames) {
             List<String> beanClassNames = JkUtilsIterable.concatLists(jekaSrcBeanClassNames(), globalBeanClassNames())
@@ -89,7 +89,7 @@ final class EngineKBeanClassResolver {
         // Resolve master KBean
         Class<? extends KBean> masterBeanClass = masterBeanClass(masterBeanName, !ignoreMasterBeanNotFound);
         List<EngineCommand> result = new LinkedList<>();
-        List<KBeanAction> masterBeanActions = cmdLine.getDefaultKBeanActions();
+        List<KBeanAction> masterBeanActions = parsedCmdLine.getDefaultKBeanActions();
         if (masterBeanClass == null && !masterBeanActions.isEmpty() && !ignoreMasterBeanNotFound) {
             String suggest = "help".equals(Environment.originalCmdLineAsString()) ? " ( You mean '-help' ? )" : "";
             throw new JkException("No Master KBean has bean has been selected. "
@@ -106,7 +106,7 @@ final class EngineKBeanClassResolver {
 
         // Resolve KBean actions
         List<KBeanAction> beanActions = new LinkedList<>(getBeanActionFromProperties());
-        beanActions.addAll(cmdLine.getBeanActions());
+        beanActions.addAll(parsedCmdLine.getBeanActions());
         beanActions.stream()
                 .map(action -> toEngineCommand(action, beanClasses))
                 .forEach(result::add);
@@ -329,8 +329,8 @@ final class EngineKBeanClassResolver {
     private List<String> getInvolvedKBeanNamesFromProperties() {
         Map<String, String> props = jekaProperties.getAllStartingWith("", true);
         return props.keySet().stream()
-                .filter(key -> key.contains(CmdLine.KBEAN_SYMBOL))
-                .map(key -> JkUtilsString.substringBeforeFirst(key, CmdLine.KBEAN_SYMBOL))
+                .filter(key -> key.contains(ParsedCmdLine.KBEAN_SYMBOL))
+                .map(key -> JkUtilsString.substringBeforeFirst(key, ParsedCmdLine.KBEAN_SYMBOL))
                 .distinct()
                 .collect(Collectors.toList());
     }
@@ -339,12 +339,12 @@ final class EngineKBeanClassResolver {
     private List<KBeanAction> getBeanActionFromProperties() {
         Map<String, String> props = jekaProperties.getAllStartingWith("", true);
         return props.entrySet().stream()
-                .filter(entry -> entry.getKey().contains(CmdLine.KBEAN_SYMBOL))
+                .filter(entry -> entry.getKey().contains(ParsedCmdLine.KBEAN_SYMBOL))
                 .map(entry -> {
 
                     // 'someBean#=' should be interpreted as 'someBean#'
-                    if (entry.getKey().endsWith(CmdLine.KBEAN_SYMBOL)) {
-                        return entry.getKey() + CmdLine.KBEAN_SYMBOL;
+                    if (entry.getKey().endsWith(ParsedCmdLine.KBEAN_SYMBOL)) {
+                        return entry.getKey() + ParsedCmdLine.KBEAN_SYMBOL;
                     }
                     return entry.getKey() + "=" + entry.getValue();
                 })

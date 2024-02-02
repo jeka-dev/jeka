@@ -19,12 +19,13 @@ class Environment {
         // Can't be instantiated
     }
 
-    static CmdLine cmdLine = CmdLine.parse(new String[0]);
+    static ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(new String[0]);
 
     static LogSettings logs = new LogSettings(false, false, false, false, false, false, JkLog.Style.FLAT, false, false);
 
     static BehaviorSettings behavior = new BehaviorSettings(null, false, false, false);
 
+    // TODO remove after picocli migration
     static String[] originalArgs;
 
     static void initialize(String[] commandLineArgs) {
@@ -35,20 +36,20 @@ class Environment {
 
 
         // Parse command line
-        final CmdLine parsedCmdLine = CmdLine.parse(effectiveCommandLine);
+        final ParsedCmdLine cmdLine = ParsedCmdLine.parse(effectiveCommandLine);
 
-        final Map<String, String> optionProps = parsedCmdLine.getStandardOptions();
+        final Map<String, String> optionProps = cmdLine.getStandardOptions();
 
         // Set defaultKBean from properties if it has not been defined in cmd line
         if (!CmdLineOptions.isDefaultKBeanDefined(optionProps)) {
             optionProps.put(KB_KEYWORD, JkUtilsString.blankToNull(props.get(DEFAULT_KBEAN_PROP)));
         }
 
-        final CmdLineOptions cmdLineOptions = new CmdLineOptions(optionProps, parsedCmdLine.rawArgs());
+        final CmdLineOptions cmdLineOptions = new CmdLineOptions(optionProps, cmdLine.rawArgs());
 
         logs = LogSettings.from(cmdLineOptions);
         behavior = BehaviorSettings.from(cmdLineOptions);
-        cmdLine = parsedCmdLine;
+        parsedCmdLine = cmdLine;
 
         if (logs.verbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
@@ -157,7 +158,7 @@ class Environment {
 
     }
 
-   private static String[] interpolatedCommandLine(String[] original, JkProperties props) {
+    static String[] interpolatedCommandLine(String[] original, JkProperties props) {
 
         List<String> effectiveCommandLineArgs = new LinkedList<>(Arrays.asList(original));
 

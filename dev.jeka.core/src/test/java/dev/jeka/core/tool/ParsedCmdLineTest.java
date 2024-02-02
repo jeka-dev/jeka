@@ -6,13 +6,13 @@ import org.junit.Test;
 
 import java.nio.file.Paths;
 
-public class CmdLineTest {
+public class ParsedCmdLineTest {
 
     @Test
     public void testToDependency() {
         Assert.assertEquals(JkCoordinateDependency.class,
-                CmdLine.toDependency(Paths.get(""), "commons-lang:commons-lang:2.63").getClass());
+                ParsedCmdLine.toDependency(Paths.get(""), "commons-lang:commons-lang:2.63").getClass());
         Assert.assertEquals(JkCoordinateDependency.class,
-                CmdLine.toDependency(Paths.get(""), "dev.jeka:a-jeka-module").getClass());
+                ParsedCmdLine.toDependency(Paths.get(""), "dev.jeka:a-jeka-module").getClass());
     }
 }
