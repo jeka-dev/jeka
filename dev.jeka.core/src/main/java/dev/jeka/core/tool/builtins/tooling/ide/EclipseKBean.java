@@ -19,18 +19,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-@JkDoc("Generates Eclipse files (.project and .classpath).")
+@JkDoc("Manages Eclipse metadata files")
 public final class EclipseKBean extends KBean {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
     boolean javadoc = false;
 
     /** If not null, this value will be used as the JRE container path when generating .classpath file.*/
-    @JkDoc({ "If not null, this value will be used as the JRE container path in .classpath." })
+    @JkDoc("If not null, this value will be used as the JRE container path in .classpath.")
     public String jreContainer = null;
 
     /** Flag to set whether 'all' task should use absolute paths instead of classpath variables */
-    @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute paths." })
+    @JkDoc("If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute paths.")
     public boolean useVarPath = true;
 
     private final Map<JkDependency, Properties> attributes = new HashMap<>();

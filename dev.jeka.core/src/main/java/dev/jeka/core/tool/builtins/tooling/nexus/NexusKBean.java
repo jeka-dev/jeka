@@ -11,7 +11,7 @@ import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 import java.util.function.Consumer;
 
-@JkDoc("Provides features to release Nexus repos (as OSSRH) after publication.")
+@JkDoc("Releases Nexus repositories (as OSSRH) after publication")
 public class NexusKBean extends KBean {
 
     @JkDoc("Comma separated filters for taking in account only repositories with specified profile names.")

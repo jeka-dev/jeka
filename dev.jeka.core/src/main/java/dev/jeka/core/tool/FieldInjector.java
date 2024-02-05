@@ -70,7 +70,7 @@ final class FieldInjector {
     }
 
     static List<Field> getPropertyFields(Class<?> clazz) {
-        return JkUtilsReflect.getAllDeclaredFields(clazz,true).stream()
+        return JkUtilsReflect.getDeclaredFieldsWithAnnotation(clazz,true).stream()
                 .filter(KBean::isPropertyField)
                 .collect(Collectors.toList());
     }

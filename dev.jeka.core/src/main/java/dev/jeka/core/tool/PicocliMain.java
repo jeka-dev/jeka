@@ -4,7 +4,6 @@ import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -41,15 +40,35 @@ public class PicocliMain {
         Environment.parsedCmdLine.getSystemProperties().forEach(System::setProperty);
         Environment.originalArgs = filteredArgs;
 
-        // Process with Picocli
-        PicocliMainCommand mainCommand = new PicocliMainCommand(baseDir);
 
-        CommandSpec mainCommandSpec = CommandSpec.forAnnotatedObject(mainCommand);
-        //mainCommandSpec.addSubcommand("project", PicocliCommands.fromKBeanClass(ProjectKBean.class));
-        CommandLine commandLine = new CommandLine(mainCommandSpec);
+        CommandLine stdHelpCmdLine = PicocliCommandSpecs.stdHelp();
+        CommandLine.ParseResult stdHelpParseResult = stdHelpCmdLine.parseArgs(augmentedArgs);
 
-        int exitCode = commandLine.execute(augmentedArgs);
-        System.exit(exitCode);
+        // Handle --help
+        // It needs to be fast and safe. Only loads KBeans found in current classpath
+        if (stdHelpParseResult.isUsageHelpRequested()) {
+
+            PicocliMainCommand mainCommand = new PicocliMainCommand(baseDir);
+            CommandSpec mainCommandSpec = CommandSpec.forAnnotatedObject(mainCommand);
+            CommandLine commandLine = new CommandLine(mainCommandSpec);
+
+            PicocliCommandSpecs.getStandardCommandSpecSafely(baseDir).forEach(commandSpec -> {
+                String name = commandSpec.name() + ":";
+                mainCommandSpec.addSubcommand(name, commandSpec);
+            });
+            commandLine.usage(commandLine.getOut());
+            System.exit(commandLine.getCommandSpec().exitCodeOnUsageHelp());
+        }
+
+        // Handle --version
+        if (stdHelpParseResult.isVersionHelpRequested()) {
+            stdHelpCmdLine.printVersionHelp(stdHelpCmdLine.getOut());
+            System.exit(stdHelpCmdLine.getCommandSpec().exitCodeOnVersionHelp());
+        }
+
+        // Handle all other cases : load KBeans classes present in
+        Engine engine = new Engine(baseDir);
+
     }
 
     // This class should lies outside PicocliMainCommand to be referenced inn annotation

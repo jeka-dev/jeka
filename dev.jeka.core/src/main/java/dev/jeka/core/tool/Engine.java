@@ -73,7 +73,6 @@ final class Engine {
      * Execute the specified command line in Jeka engine.
      */
     void execute(ParsedCmdLine parsedCmdLine) {
-        JkLog.startTask("Compile jeka-src and initialize KBeans");
         JkDependencySet commandLineDependencies = JkDependencySet.of(parsedCmdLine.getJekaSrcDependencies());
         JkLog.trace("Dependencies injected in classpath from command line : " + commandLineDependencies);
         JkDependencySet dependenciesFromJekaProps = dependenciesFromJekaProps();
@@ -114,7 +113,7 @@ final class Engine {
         // If jeka-src compilation failed, we ignore the master bean class because it may be absent
         // from the classpath.
         boolean ignoreMasterBeanNotFound = result == null ||
-                (!result.compileFailedProjects.getEntries().isEmpty() &&
+                (!result.baseDirsWithCompileFailure.getEntries().isEmpty() &&
                 Environment.behavior.ignoreCompileFailure);
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(parsedCmdLine,
@@ -124,11 +123,10 @@ final class Engine {
         runbase.init(resolvedCommands);
 
         JkLog.endTask();
-        JkLog.endTask();
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
-        if (result != null && !result.compileFailedProjects.getEntries().isEmpty()) {
-            JkLog.warn("Jeka-src compilation failed on base dirs " + result.compileFailedProjects.getEntries()
+        if (result != null && !result.baseDirsWithCompileFailure.getEntries().isEmpty()) {
+            JkLog.warn("Jeka-src compilation failed on base dirs " + result.baseDirsWithCompileFailure.getEntries()
                     .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
             JkLog.warn("As -dci option is on, the failure will be ignored.");
         }
@@ -234,7 +232,7 @@ final class Engine {
             CompilationResult compilationResult = importedProjectEngine.resolveAndCompile(yetCompiledProjects,
                     compileSources, failOnCompileError);
             importedProjectClasspath.addAll(compilationResult.classpath.getEntries());
-            failedProjects.addAll(compilationResult.compileFailedProjects.getEntries());
+            failedProjects.addAll(compilationResult.baseDirsWithCompileFailure.getEntries());
             importedProjectClasspathChanged = importedProjectClasspathChanged || compilationResult.classpathChanged;
         }
         JkPathSequence classpath = compilationContext.classpath.and(importedProjectClasspath).withoutDuplicates();
@@ -450,7 +448,7 @@ final class Engine {
 
     private static class CompilationResult {
 
-        final JkPathSequence compileFailedProjects;
+        final JkPathSequence baseDirsWithCompileFailure;
 
         final JkPathSequence classpath;
 
@@ -459,10 +457,10 @@ final class Engine {
 
         final boolean classpathChanged;
 
-        CompilationResult(JkPathSequence importedProjects, JkPathSequence compileFailedProjects,
+        CompilationResult(JkPathSequence importedProjects, JkPathSequence baseDirsWithCompileFailure,
                           JkPathSequence resultClasspath, boolean classpathChanged) {
             this.importedProjects = importedProjects;
-            this.compileFailedProjects = compileFailedProjects;
+            this.baseDirsWithCompileFailure = baseDirsWithCompileFailure;
             this.classpath = resultClasspath;
             this.classpathChanged = classpathChanged;
         }

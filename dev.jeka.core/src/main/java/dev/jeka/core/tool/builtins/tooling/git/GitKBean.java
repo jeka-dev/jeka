@@ -8,15 +8,15 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 
-@JkDoc({"Manages versioning of project (coming from ProjectJkBean) by extracting Git information.",
-        "The version is inferred from git using following logic : ",
-        "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT",
-        "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx",
-        "  - If last commit is tagged, version values [last tag on last commit]",
+@JkDoc("Provides project versioning by extracting Git information" + "\n" +
+        "The version is inferred from git using following logic : "+ "\n" +
+        "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT"+ "\n" +
+        "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx"+ "\n" +
+        "  - If last commit is tagged, version values [last tag on last commit]"+ "\n" +
         "The inferred version can be  applied to project.publication.maven.version and project.publication.ivy.publication, " +
                 "programmatically using 'handleVersioning' method."
-})
-public class GitKBean extends KBean {
+)
+public final class GitKBean extends KBean {
 
     @JkDoc("Some likes to tag versions using a prefix (e.g. using 'v1.3.1' for tagging version '1.3.1'. In this case, " +
             "you can set this value to 'v' or whatever prefix.")

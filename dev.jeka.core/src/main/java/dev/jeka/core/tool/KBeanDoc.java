@@ -35,7 +35,7 @@ final class KBeanDoc implements Comparable<KBeanDoc> {
     }
 
     public List<String> pluginDependencies() {
-        return JkUtilsReflect.getAllDeclaredFields(clazz, false).stream()
+        return JkUtilsReflect.getDeclaredFieldsWithAnnotation(clazz, false).stream()
                 .filter(field -> KBean.class.isAssignableFrom(field.getType()))
                 .map(Field::getType)
                 .map(Class::getName)

@@ -17,9 +17,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-@JkDoc("Build and run image based on SelfKBean or ProjectKBean present on the runbase. " +
-        "A running Docker daemon is mandatory.")
-public class DockerKBean extends KBean {
+@JkDoc("Builds and runs image based on project or 'jeka-src' (Requires a Docker daemon)")
+public final class DockerKBean extends KBean {
 
     @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")
     public String dockerRunParams = "";

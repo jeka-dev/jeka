@@ -392,18 +392,18 @@ public final class JkUtilsReflect {
      * Returns all fields declared in the class passed as argument or its
      * super classes annotated with the supplied annotation.
      */
-    public static List<Field> getAllDeclaredFields(Class<?> clazz,
-                                                   Class<? extends Annotation> annotationClass) {
+    public static List<Field> getDeclaredFieldsWithAnnotation(Class<?> clazz,
+                                                              Class<? extends Annotation> annotationClass) {
         final List<Field> result = new LinkedList<>();
         for (final Field field : clazz.getDeclaredFields()) {
-            final Object option = field.getAnnotation(annotationClass);
-            if (option != null) {
+            final Object annotation = field.getAnnotation(annotationClass);
+            if (annotation != null) {
                 result.add(field);
             }
         }
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null) {
-            result.addAll(getAllDeclaredFields(superClass, annotationClass));
+            result.addAll(getDeclaredFieldsWithAnnotation(superClass, annotationClass));
         }
         return result;
     }
@@ -411,12 +411,12 @@ public final class JkUtilsReflect {
     /**
      * Returns all fields declared in the class passed as argument or and its super classes.
      */
-    public static List<Field> getAllDeclaredFields(Class<?> clazz, boolean includeSuperClass) {
+    public static List<Field> getDeclaredFieldsWithAnnotation(Class<?> clazz, boolean includeSuperClass) {
         final List<Field> result = new LinkedList<>();
         Collections.addAll(result, clazz.getDeclaredFields());
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null && includeSuperClass) {
-            result.addAll(getAllDeclaredFields(superClass, true));
+            result.addAll(getDeclaredFieldsWithAnnotation(superClass, true));
         }
         return result;
     }

@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @JkDoc(
-        "KBean for application/library self-contained in jeka-src dir.\n" +
+        "Manages the build and execution of code located in 'jeka-src' directory\n" +
         "The application must contain a class with main method in order to : \n" +
         "  - Run application\n" +
         "  - Create bootable jar\n" +

@@ -78,7 +78,7 @@ public final class JkImportedKBeans {
     @SuppressWarnings("unchecked")
     private static List<KBean> computeDirects(KBean masterBean) {
         final List<KBean> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBean.getClass(), JkInjectRunbase.class);
+        final List<Field> fields = JkUtilsReflect.getDeclaredFieldsWithAnnotation(masterBean.getClass(), JkInjectRunbase.class);
         if (!fields.isEmpty()) {
             JkLog.trace("Projects imported by " + masterBean + " : " + fields);
         }

@@ -20,18 +20,28 @@ import java.util.stream.Collectors;
  */
 final class KBeanDescription {
 
+    final String header;
+
+    final String description;
+
     final List<BeanMethod> beanMethods;
 
     final List<BeanField> beanFields;
 
-    private KBeanDescription(List<BeanMethod> beanMethods,
-                             List<BeanField> beanFields) {
+    private KBeanDescription(
+            String headerDesc,
+            String desc,
+            List<BeanMethod> beanMethods,
+            List<BeanField> beanFields) {
+
         super();
+        this.header = headerDesc;
+        this.description = desc;
         this.beanMethods = Collections.unmodifiableList(beanMethods);
         this.beanFields = Collections.unmodifiableList(beanFields);
     }
 
-    static KBeanDescription renderItem(Class<? extends KBean> beanClass) {
+    static KBeanDescription of(Class<? extends KBean> beanClass) {
         final List<BeanMethod> methods = new LinkedList<>();
         for (final Method method : executableMethods(beanClass)) {
             methods.add(BeanMethod.of(method));
@@ -43,7 +53,31 @@ final class KBeanDescription {
                     nameAndField.name, nameAndField.rootClass));
         }
         Collections.sort(options);
-        return new KBeanDescription(methods, options);
+
+        // Grab header + description from content of @JkDoc
+        final JkDoc jkDoc = beanClass.getAnnotation(JkDoc.class);
+        final String header;
+        final String description;
+        final String fullDesc;
+        if (jkDoc == null) {
+            fullDesc = "";
+        } else {
+            fullDesc = jkDoc.value();
+        }
+        String[] lines = fullDesc.split("\n");
+        if (lines.length == 0) {
+            header = "";
+            description = "";
+        } else {
+            header = lines[0];
+            if (lines.length > 1) {
+                description = JkUtilsString.substringAfterFirst(fullDesc, "\n");
+            } else {
+                description = "";
+            }
+        }
+
+        return new KBeanDescription(header, description, methods, options);
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {
@@ -84,10 +118,10 @@ final class KBeanDescription {
     }
 
     private static boolean hasSubOption(Field field) {
-        return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
+        return !JkUtilsReflect.getDeclaredFieldsWithAnnotation(field.getType(), JkDoc.class).isEmpty();
     }
 
-    String description(int leftColumnLength) {
+    String asText(int leftColumnLength) {
         List<BeanMethod> methods = this.beanMethods;
         List<BeanField> properties =this.beanFields;
         if (methods.isEmpty() && properties.isEmpty()) {
@@ -97,29 +131,20 @@ final class KBeanDescription {
         if (!methods.isEmpty()) {
             stringBuilder.append(JkUtilsString.padEnd("Methods", leftColumnLength, ' ')).append(":\n");
             List<RenderItem> items = methods.stream()
-                    .map(KBeanDescription::renderItem).collect(Collectors.toList());
+                    .map(KBeanDescription::of).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
         }
         if (!properties.isEmpty()) {
             stringBuilder.append(JkUtilsString.padEnd("Properties", leftColumnLength, ' ')).append(":\n");
             List<RenderItem> items = properties.stream()
-                    .map(KBeanDescription::renderItem).collect(Collectors.toList());
+                    .map(KBeanDescription::of).collect(Collectors.toList());
             ItemContainer container = new ItemContainer(items);
             container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
         }
         return stringBuilder.toString();
     }
 
-    private List<BeanMethod> methodsOf(Class<?> runClass) {
-        return this.beanMethods.stream().filter(beanMethod -> runClass.equals(beanMethod.declaringClass))
-                .collect(Collectors.toList());
-    }
-
-    private List<BeanField> optionsOf(Class<?> runClass) {
-        return this.beanFields.stream().filter(beanField -> runClass.equals(beanField.rootDeclaringClass))
-                .collect(Collectors.toList());
-    }
 
     /**
      * Definition of method in a given class that can be called by Jeka.
@@ -290,7 +315,7 @@ final class KBeanDescription {
 
     }
 
-    static RenderItem renderItem(BeanMethod beanMethod) {
+    static RenderItem of(BeanMethod beanMethod) {
         String name = beanMethod.name;
         List<String> descLines = JkUtilsString.isBlank(beanMethod.description)
                 ? Collections.singletonList("No description available.")
@@ -298,7 +323,7 @@ final class KBeanDescription {
         return new RenderItem(name, descLines);
     }
 
-    static RenderItem renderItem(BeanField beanField) {
+    static RenderItem of(BeanField beanField) {
         String name = beanField.name;
         List<String> descLines = JkUtilsString.isBlank(beanField.description)
                 ? Collections.singletonList("No description available.")

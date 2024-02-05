@@ -22,7 +22,6 @@
 # - look in JEKA_USER_HOME/global.properties
 #
 
-# Execution time has been benchmarked to 100 ms excluding JAVA command invoke.
 
 set -e
 
@@ -706,5 +705,5 @@ fi
 if [ -z "$DRY_RUN" ]; then
   compute_JEKA_DIST_DIR "$BASE_DIR"
   compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
-  exec "$JAVA_CMD" $JEKA_OPTS "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
+  exec "$JAVA_CMD" $JEKA_OPTS "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.PicocliMain" "$@"
 fi

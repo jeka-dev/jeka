@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-@JkDoc("Generates Idea Intellij metadata files (*.iml and modules.xml).")
+@JkDoc("Manages Intellij metadata files")
 public final class IntellijKBean extends KBean {
 
     // Flag for skipping modules.xml creation when testing.

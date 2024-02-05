@@ -17,8 +17,8 @@ import dev.jeka.core.tool.builtins.self.SelfKBean;
 
 import java.util.Optional;
 
-@JkDoc("Provides a Maven Publication according ProjectKBean or SefApp found in the JkRunbase.")
-public class MavenKBean extends KBean {
+@JkDoc("Manages Maven publication for project and 'jeka-src'")
+public final class MavenKBean extends KBean {
 
     private JkMavenPublication mavenPublication;
 

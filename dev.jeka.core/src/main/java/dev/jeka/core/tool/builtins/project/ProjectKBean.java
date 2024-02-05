@@ -28,7 +28,7 @@ import java.util.List;
  * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkProperties}.
  * and a decoration for scaffolding.
  */
-@JkDoc("Provides a configured JkProject instance for building JVM based projects.")
+@JkDoc("Manages the build and execution of a JVM project hosted in the base directory")
 public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     // The underlying project managed by this KBean

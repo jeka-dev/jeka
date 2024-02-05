@@ -14,9 +14,9 @@ import java.lang.annotation.*;
 public @interface JkDoc {
 
     /**
-     * The text to display when help is requested.
+     * The text to display when help is requested. The first line is for short description (or heading).
      */
-    String[] value() default "";
+    String value() default "";
 
     /**
      * If true, the method/field won't be displayed in 'help' command.

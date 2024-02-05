@@ -5,11 +5,13 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
-import dev.jeka.core.tool.CommandLine.*;
+import dev.jeka.core.tool.CommandLine.Command;
+import dev.jeka.core.tool.CommandLine.Option;
+import dev.jeka.core.tool.CommandLine.ParseResult;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.Callable;
+import java.util.List;
 
 import static dev.jeka.core.tool.Environment.logs;
 
@@ -20,43 +22,70 @@ import static dev.jeka.core.tool.Environment.logs;
         versionProvider = PicocliMain.VersionProvider.class,
         usageHelpAutoWidth = true,
         customSynopsis = {
-            " ${COMMAND-NAME} [options] +<extra-classpath...> -D<prop-name=prop-value...> [COMMANDS]",
-            "   or   jeka -r <git_url|path|@alias> [options] [COMMANDS]",
-            "   or   jeka -r <git_url|path|@alias> [options] -p <program_args...>"
+            " ${COMMAND-NAME} [options] [COMMANDS]",
+            "           (for executing KBean actions)",
+            "   or   ${COMMAND-NAME} [options] -p [PROGRAM_ARGS]",
+            "           (for executing Java program)",
+            "",
+            "COMMANDS are in format: '<KBeanName:> [<propName>=[value]...] [methodName...]'",
+            "KBEANS are scripts implemented as Java beans. The name could be either the full or short name of the bean class. The first letter's case-sensitivity and the 'KBean' suffix are optional.",
+            "",
+            "Command line can be interpolated by using '::<shorthand>' reference ",
+            "to 'jeka.cmd.<shorthand>' property defined in global.properties file."
+
         },
         header = "Build and execute Java applications from source code.",
         description = {
             "",
             "Examples:",
             "  ${COMMAND-NAME} self: scaffold",
-            "         (create a simple code base)",
+            "         (create a basic code base by invoking 'scaffold' method on 'SelfKBean')",
             "  ${COMMAND-NAME} project: scaffold layout.style=SIMPLE",
-            "         (create a Java project with simple layout ≠ Maven)",
-            "  ${COMMAND-NAME} +dev.jeka:springboot-plugin springboot: project: scaffold ",
-            "         (create a Spring-Boot project using plugin)",
+            "         (create a project, specifying 'ProjectKBean.layout.style' prop value)",
+            "  ${COMMAND-NAME} -cp dev.jeka:springboot-plugin springboot: project: scaffold",
+            "         (create a Spring-Boot project using Spring-Boot plugin)",
+            "  ${COMMAND-NAME} myMethod myFieldA=8 myFieldB=false",
+            "         (set props and invoke method on the first KBean found in 'jeka-src')",
             "  ${COMMAND-NAME} intellij: iml ",
             "         (Generate metadata iml file for Intellij)",
             "  ${COMMAND-NAME} -r https://github.com/myorg/myrepo#0.0.1 self: runJar",
             "         (Run the application hosted in this Git repo with tag 0.0.1)",
+            "  ${COMMAND-NAME} -rp https://github.com/myorg/myscript#0.0.1 arg0 arg1 ...",
+            "         (Run the app with specified args, bypassing JeKa engine if possible)",
+            "  ${COMMAND-NAME} ::myscript arg0 arg1 ...",
+            "         (Same but using cmd interpolation defined in user global.properties)",
             ""
-}
+        },
+        optionListHeading = "Options:%n",
+        subcommandsRepeatable = true,
+        usageHelpWidth = 100,
+        commandListHeading = "%nStandard KBeans (always available):%n"
 )
-public class PicocliMainCommand implements Callable<Integer> {
+public class PicocliMainCommand {
 
     // injected by Main method
     final Path baseDir;
-
-    @Option(names = {"-v", "--verbose"},
-            description = "Log verbose messages.")
-    private boolean logVerbose;
 
     @Option(names = { "-c", "--clean-output"},
             description = "Delete jeka-output directory prior running.")
     private boolean cleanOutput;
 
-    @Option(names = { "--cw", "--clean-work"},
+    @Option(names = { "-cw", "--clean-work"},
             description = "Delete .jeka-work directory prior running.")
     private boolean cleanWork;
+
+    @Option(names = { "-cp", "--classpath"},
+            paramLabel = "<COORDINATE|PATH>",
+            split = ",",
+            description = {
+                "Add elements to the classpath as 'groupId:artifactId[:version]' coordinates or file-system paths."
+            }
+    )
+    private List<String> classpaths;
+
+    @Option(names = {"-p", "--program"},
+            description = "Indicate to run directly the built Java program when present, bypassing the JeKa execution engine.")
+    private boolean fakeProgram;  // Handled at shell level
 
     @Option(names = { "-i", "--info"},
             description = "Display info as versions, location, classpath,...")
@@ -65,37 +94,51 @@ public class PicocliMainCommand implements Callable<Integer> {
     @Option(names = { "-r", "--remote"},
             paramLabel = "LOCATION",
             description = "Specify remote code base location. LOCATION may be a folder path, Git url or an alias.")
-    private String fakeRemote;
+    private String fakeRemote;  // Handled at shell level
 
     @Option(names = { "-f", "--remote-fresh"},
             description = "Forcing Git update when used with '-r'.")
-    private boolean fakeRemoteFresh;
+    private boolean fakeRemoteFresh;  // Handled at shell level
 
-    @Option(names = { "--kb", "--kbean"},
+    @Option(names = { "-icf", "--ignore-fail"},
+            description = "Try to keep running JeKa even if jeka-src compilation fails.")
+    private boolean ignoreCompileFailure;
+
+    @Option(names = { "-kb", "--kbean"},
             paramLabel = "KBEAN",
             description = "Set the KBean name to use as default.")
     private String defaultKBean;
 
-    @Option(names = { "--lsu", "--log-startup"},
+    @Option(names = { "-D<name>"},
+            paramLabel = "<value>",
+            description = "Define system property")
+    private String[] fakeSysProp;  // Handled at shell level
+
+    @Option(names = {"-v", "--verbose"},
+            description = "Log verbose messages.")
+    private boolean logVerbose;
+
+    @Option(names = { "-lsu", "--log-startup"},
             description = "Log startup messages emitted during JeKa startup.")
     private boolean logStartUp;
 
-    @Option(names = { "--ls"},
+    @Option(names = { "-ls"},
             paramLabel = "STYLE",
             defaultValue = "FLAT",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
     private JkLog.Style logStyle = JkLog.Style.FLAT;
 
-    @Option(names = { "--icf", "--ignore-fail"},
-            description = "Try to keep running JeKa even if jeka-src compilation fails.")
-    private boolean ignoreCompileFailure;
+    @Option(names = {"--ivy-trace"},
+            description = "Log Ivy traces (very verbose)")
+    private boolean logIvyTrace;
+
 
     public PicocliMainCommand(Path baseDir) {
         this.baseDir = baseDir;
     }
 
-    @Override
-    public Integer call() throws Exception {
+
+    public int run(ParseResult parseResult) {
 
         final long start = System.nanoTime();
 
@@ -168,7 +211,7 @@ public class PicocliMainCommand implements Callable<Integer> {
     private Environment.LogSettings logSettings() {
         return new Environment.LogSettings(
                 logVerbose,
-                false,
+                logIvyTrace,
                 logStartUp,
                 false,
                 runtimeInfo,
@@ -181,8 +224,6 @@ public class PicocliMainCommand implements Callable<Integer> {
     private Environment.BehaviorSettings behaviorSettings() {
         return new Environment.BehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure);
     }
-
-
 
 }
 
