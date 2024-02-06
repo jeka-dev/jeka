@@ -28,7 +28,8 @@ import static dev.jeka.core.tool.Environment.logs;
             "           (for executing Java program)",
             "",
             "COMMANDS are in format: '<KBeanName:> [<propName>=[value]...] [methodName...]'",
-            "KBEANS are scripts implemented as Java beans. The name could be either the full or short name of the bean class. The first letter's case-sensitivity and the 'KBean' suffix are optional.",
+            "KBEANS are scripts implemented as Java beans. The name could be either the full or short name of the bean class.",
+            "The first letter's case-sensitivity and the 'KBean' suffix are optional.",
             "",
             "Command line can be interpolated by using '::<shorthand>' reference ",
             "to 'jeka.cmd.<shorthand>' property defined in global.properties file."
@@ -138,6 +139,8 @@ public class PicocliMainCommand {
     }
 
 
+
+
     public int run(ParseResult parseResult) {
 
         final long start = System.nanoTime();
@@ -205,11 +208,10 @@ public class PicocliMainCommand {
             }
             return 1;
         }
-
     }
 
-    private Environment.LogSettings logSettings() {
-        return new Environment.LogSettings(
+    EnvLogSettings logSettings() {
+        return new EnvLogSettings(
                 logVerbose,
                 logIvyTrace,
                 logStartUp,
@@ -221,8 +223,8 @@ public class PicocliMainCommand {
                 false);
     }
 
-    private Environment.BehaviorSettings behaviorSettings() {
-        return new Environment.BehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure);
+    EnvBehaviorSettings behaviorSettings() {
+        return new EnvBehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure);
     }
 
 }

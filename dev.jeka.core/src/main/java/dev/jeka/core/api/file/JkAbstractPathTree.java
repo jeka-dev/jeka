@@ -121,8 +121,6 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
      * Returns a path stream of all files of this tree. Returned paths are resolved against this tree root.
      * This means that if this tree root is absolute then streamed paths are absolute as well.
      * Note that the root folder is included in the returned stream.
-     * If this method is called for a zip tree instance, then it should be closed or called within
-     * <i>try-with-resources</i> statement in order to avoid resource leaks.
      */
     public Stream<Path> stream(FileVisitOption ...options) {
         if(!exists()) {

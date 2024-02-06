@@ -21,9 +21,9 @@ class Environment {
 
     static ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(new String[0]);
 
-    static LogSettings logs = new LogSettings(false, false, false, false, false, false, JkLog.Style.FLAT, false, false);
+    static EnvLogSettings logs = new EnvLogSettings(false, false, false, false, false, false, JkLog.Style.FLAT, false, false);
 
-    static BehaviorSettings behavior = new BehaviorSettings(null, false, false, false);
+    static EnvBehaviorSettings behavior = new EnvBehaviorSettings(null, false, false, false);
 
     // TODO remove after picocli migration
     static String[] originalArgs;
@@ -47,8 +47,8 @@ class Environment {
 
         final CmdLineOptions cmdLineOptions = new CmdLineOptions(optionProps, cmdLine.rawArgs());
 
-        logs = LogSettings.from(cmdLineOptions);
-        behavior = BehaviorSettings.from(cmdLineOptions);
+        logs = createLogSettings(cmdLineOptions);
+        behavior = createBehaviorSettings(cmdLineOptions);
         parsedCmdLine = cmdLine;
 
         if (logs.verbose) {
@@ -57,6 +57,29 @@ class Environment {
         if (logs.ivyVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         }
+    }
+
+    private static EnvLogSettings createLogSettings(CmdLineOptions cmdLineOptions) {
+        return new EnvLogSettings(
+                cmdLineOptions.logVerbose.isPresent(),
+                cmdLineOptions.logIvyVerbose.isPresent(),
+                cmdLineOptions.logStartUp.isPresent(),
+                cmdLineOptions.logStackTrace.isPresent(),
+                cmdLineOptions.logRuntimeInformation.isPresent(),
+                cmdLineOptions.logDuration.isPresent(),
+                cmdLineOptions.logStyle,
+                cmdLineOptions.logAnimation,
+                cmdLineOptions.logBanner.isPresent()
+        );
+    }
+
+    private static EnvBehaviorSettings createBehaviorSettings(CmdLineOptions cmdLineOptions) {
+        return new EnvBehaviorSettings(
+                cmdLineOptions.kbeanName(),
+                cmdLineOptions.cleanWork.isPresent(),
+                cmdLineOptions.cleanOutput.isPresent(),
+                cmdLineOptions.ignoreCompileFail.isPresent()
+        );
     }
 
     static String originalCmdLineAsString() {
@@ -71,91 +94,6 @@ class Environment {
     static boolean isPureVersionCmd() {
         return Environment.originalArgs.length == 1 &&
                 (Environment.originalArgs[0].equals("--version") || Environment.originalArgs[0].equals("-v"));
-    }
-
-    static class BehaviorSettings {
-
-        final String kbeanName;
-
-        final boolean cleanWork;
-
-        final boolean cleanOutput;
-
-        final boolean ignoreCompileFailure;
-
-
-        BehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean ignoreCompileFailure) {
-            this.kbeanName = kbeanName;
-            this.cleanWork = cleanWork;
-            this.cleanOutput = cleanOutput;
-            this.ignoreCompileFailure = ignoreCompileFailure;
-        }
-
-        static BehaviorSettings from(CmdLineOptions cmdLineOptions) {
-            return new BehaviorSettings(
-                    cmdLineOptions.kbeanName(),
-                    cmdLineOptions.cleanWork.isPresent(),
-                    cmdLineOptions.cleanOutput.isPresent(),
-                    cmdLineOptions.ignoreCompileFail.isPresent()
-            );
-        }
-
-        static boolean isDefaultKBeanDefined(Map<String, String> map) {
-            return map.containsKey(Environment.KB_KEYWORD) || map.containsKey("kbean");
-        }
-
-    }
-
-    // Log settings
-    static class LogSettings {
-
-        final boolean verbose;
-
-        final boolean ivyVerbose;
-
-        final boolean startUp;
-
-        final boolean stackTrace;
-
-        final boolean runtimeInformation;
-
-        final boolean totalDuration;
-
-        final JkLog.Style style;
-
-        final Boolean animation;
-
-        final boolean banner;
-
-        public LogSettings(boolean verbose, boolean ivyVerbose, boolean startUp,
-                           boolean stackTrace, boolean runtimeInformation, boolean totalDuration,
-                           JkLog.Style style, Boolean animation, boolean banner) {
-            this.verbose = verbose;
-            this.ivyVerbose = ivyVerbose;
-            this.startUp = startUp;
-            this.stackTrace = stackTrace;
-            this.runtimeInformation = runtimeInformation;
-            this.totalDuration = totalDuration;
-            this.style = style;
-            this.animation = animation;
-            this.banner = banner;
-        }
-
-        static LogSettings from(CmdLineOptions cmdLineOptions) {
-            return new LogSettings(
-                    cmdLineOptions.logVerbose.isPresent(),
-                    cmdLineOptions.logIvyVerbose.isPresent(),
-                    cmdLineOptions.logStartUp.isPresent(),
-                    cmdLineOptions.logStackTrace.isPresent(),
-                    cmdLineOptions.logRuntimeInformation.isPresent(),
-                    cmdLineOptions.logDuration.isPresent(),
-                    cmdLineOptions.logStyle,
-                    cmdLineOptions.logAnimation,
-                    cmdLineOptions.logBanner.isPresent()
-            );
-        }
-
-
     }
 
     static String[] interpolatedCommandLine(String[] original, JkProperties props) {
@@ -216,7 +154,6 @@ class Environment {
 
         final Option<Void> logRuntimeInformation = ofVoid("log Jeka runbase information as Jeka version, JDK version, working dir, classpath ...",
                 "--log-runtime-info", "-lri");
-
 
         JkLog.Style logStyle;
 

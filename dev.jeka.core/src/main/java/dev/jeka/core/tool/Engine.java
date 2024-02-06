@@ -125,6 +125,7 @@ final class Engine {
         JkLog.endTask();
         JkLog.info("KBeans are ready to run.");
         stopBusyIndicator();
+
         if (result != null && !result.baseDirsWithCompileFailure.getEntries().isEmpty()) {
             JkLog.warn("Jeka-src compilation failed on base dirs " + result.baseDirsWithCompileFailure.getEntries()
                     .stream().map(path -> "'" + projectName(path) + "'").collect(Collectors.toList()));
@@ -221,7 +222,6 @@ final class Engine {
             JkPathTree.of(dir).deleteContent();
         }
 
-
         JkLog.startTask("Scanning and compiling jeka-src for base dir %s", baseDir.toAbsolutePath());
         CompilationContext compilationContext = preCompile();
         List<Path> importedProjectClasspath = new LinkedList<>();
@@ -281,7 +281,7 @@ final class Engine {
                 compilationContext.classpathChanged || importedProjectClasspathChanged);
         JkRunbase runbase = JkRunbase.get(baseDir);
         runbase.setDependencyResolver(dependencyResolver);
-        runbase.setImportedRunbaseDirs(compilationResult.importedProjects);
+        runbase.setImportedRunbaseDirs(compilationResult.importedBaseDirs);
         runbase.setClasspath(compilationResult.classpath);
         runbase.setExportedClassPath(compilationContext.exportedClasspath);
         runbase.setExportedDependencies(compilationContext.exportedDependencies);
@@ -453,13 +453,13 @@ final class Engine {
         final JkPathSequence classpath;
 
         // Direct imported projects
-        final JkPathSequence importedProjects;
+        final JkPathSequence importedBaseDirs;
 
         final boolean classpathChanged;
 
-        CompilationResult(JkPathSequence importedProjects, JkPathSequence baseDirsWithCompileFailure,
+        CompilationResult(JkPathSequence importedBaseDirs, JkPathSequence baseDirsWithCompileFailure,
                           JkPathSequence resultClasspath, boolean classpathChanged) {
-            this.importedProjects = importedProjects;
+            this.importedBaseDirs = importedBaseDirs;
             this.baseDirsWithCompileFailure = baseDirsWithCompileFailure;
             this.classpath = resultClasspath;
             this.classpathChanged = classpathChanged;

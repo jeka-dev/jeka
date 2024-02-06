@@ -13,15 +13,20 @@ final class SourceParser {
 
     private final Path baseDir;
 
-   private SourceParser(Path baseDir, JkPathTree sources) {
+    private SourceParser(Path baseDir, JkPathTree sources) {
         this.sources = sources;
         this.baseDir = baseDir;
-   }
+    }
 
-   static SourceParser of(Path baseDir, JkPathTree sources) {
-       return new SourceParser(baseDir, sources);
-   }
+    static SourceParser of(Path baseDir, JkPathTree sources) {
+        return new SourceParser(baseDir, sources);
+    }
 
+    static SourceParser of(Path baseDir) {
+        JkPathTree sources = JkPathTree.of(baseDir.resolve(JkConstants.JEKA_SRC_DIR))
+               .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
+        return of(baseDir,sources);
+    }
 
     ParsedSourceInfo parse() {
         return sources.stream()

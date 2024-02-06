@@ -1,5 +1,11 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkProperties;
@@ -8,6 +14,8 @@ import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PicocliMain {
 
@@ -31,43 +39,55 @@ public class PicocliMain {
         final Path baseDir = basedirProp == null ? Paths.get("")
                 : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
 
-        // Interpolate command line with values found in properties
-        JkProperties props = JkRunbase.readProjectPropertiesRecursively(baseDir);
-        String[] augmentedArgs = Environment.interpolatedCommandLine(filteredArgs, props);
-
-        // TODO For now use the old parser -> migrate to picocli
-        Environment.parsedCmdLine = ParsedCmdLine.parse(augmentedArgs);
-        Environment.parsedCmdLine.getSystemProperties().forEach(System::setProperty);
-        Environment.originalArgs = filteredArgs;
-
-
-        CommandLine stdHelpCmdLine = PicocliCommandSpecs.stdHelp();
-        CommandLine.ParseResult stdHelpParseResult = stdHelpCmdLine.parseArgs(augmentedArgs);
-
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
-        if (stdHelpParseResult.isUsageHelpRequested()) {
+        if (isUsageHelpRequested(filteredArgs)) {
 
-            PicocliMainCommand mainCommand = new PicocliMainCommand(baseDir);
-            CommandSpec mainCommandSpec = CommandSpec.forAnnotatedObject(mainCommand);
-            CommandLine commandLine = new CommandLine(mainCommandSpec);
-
-            PicocliCommandSpecs.getStandardCommandSpecSafely(baseDir).forEach(commandSpec -> {
+            CommandLine commandLine = PicocliCommands.mainCommandLine(baseDir);
+            PicocliCommands.getStandardCommandSpecSafely(baseDir).forEach(commandSpec -> {
                 String name = commandSpec.name() + ":";
-                mainCommandSpec.addSubcommand(name, commandSpec);
+                commandLine.addSubcommand(name, commandSpec);
             });
             commandLine.usage(commandLine.getOut());
             System.exit(commandLine.getCommandSpec().exitCodeOnUsageHelp());
         }
 
         // Handle --version
-        if (stdHelpParseResult.isVersionHelpRequested()) {
-            stdHelpCmdLine.printVersionHelp(stdHelpCmdLine.getOut());
-            System.exit(stdHelpCmdLine.getCommandSpec().exitCodeOnVersionHelp());
+        if (isVersionHelpRequested(filteredArgs)) {
+            CommandLine commandLine = PicocliCommands.stdHelp();
+            commandLine.printVersionHelp(commandLine.getOut());
+            System.exit(commandLine.getCommandSpec().exitCodeOnVersionHelp());
         }
 
-        // Handle all other cases : load KBeans classes present in
-        Engine engine = new Engine(baseDir);
+        // Interpolate command line with values found in properties
+        JkProperties props = JkRunbase.readProjectPropertiesRecursively(baseDir);
+        String[] interpolatedArgs = Environment.interpolatedCommandLine(filteredArgs, props);
+
+        // Get shared dependency resolver
+        JkDependencyResolver dependencyResolver = dependencyResolver(baseDir);
+
+        // TODO For now use the old parser -> migrate to picocli
+        Environment.parsedCmdLine = ParsedCmdLine.parse(interpolatedArgs);
+        Environment.parsedCmdLine.getSystemProperties().forEach(System::setProperty);
+        Environment.originalArgs = filteredArgs;
+
+        // Add classpath mentioned in command-line
+        JkDependencySet cmdlineDeps = cmdlineDependencies(baseDir, interpolatedArgs);
+        JkPathSequence extraClasspath = dependencyResolver.resolve(cmdlineDeps).getFiles();
+        AppendableUrlClassloader.addEntriesOnContextClassLoader(extraClasspath);
+
+        // Fill Environment.LogSettings & Environment.BehaviorSettings
+        PicocliMainCommand mainCommand = new PicocliMainCommand(baseDir);
+        CommandSpec mainCommandSpec = CommandSpec.forAnnotatedObject(mainCommand);
+        CommandLine mainCommandLine = new CommandLine(mainCommandSpec);
+        mainCommandLine.parseArgs(interpolatedArgs);
+        Environment.logs = mainCommand.logSettings();
+        Environment.behavior = mainCommand.behaviorSettings();
+
+        // Resolve injected dependencies + compiled 'jeka-src'
+
+
+
 
     }
 
@@ -79,5 +99,32 @@ public class PicocliMain {
             return new String[] {JkInfo.getJekaVersion()};
         }
 
+    }
+
+    private static boolean isUsageHelpRequested(String[] args) {
+        return args.length == 0 || args[0].equals("--help") || args[0].equals("-h");
+    }
+
+    private static boolean isVersionHelpRequested(String[] args) {
+        return args.length > 0 && (args[0].equals("--version") || args[0].equals("-V"));
+    }
+
+    private static JkDependencySet cmdlineDependencies(Path baseDir, String[] cmdLineArgs) {
+        CommandLine cpCommandline = PicocliCommands.classPathCommand();
+        CommandLine.ParseResult cpParseResult = cpCommandline.parseArgs(cmdLineArgs);
+        List<String> cmdlineCpArgs = cpParseResult.matchedOptionValue("-cp", Collections.emptyList());
+        List<JkDependency> dependencies = cmdlineCpArgs.stream()
+                .map(String::trim)
+                .distinct()
+                .map(desc -> ParsedCmdLine.toDependency(baseDir, desc))
+                .collect(Collectors.toList());
+        return JkDependencySet.of(dependencies);
+    }
+
+    private static JkDependencyResolver dependencyResolver(Path baseDir) {
+        JkRepoSet repos = JkRepoProperties.of(JkRunbase.constructProperties(baseDir)).getDownloadRepos();
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
+        dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(true);
+        return dependencyResolver;
     }
 }

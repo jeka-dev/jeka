@@ -112,8 +112,8 @@ public final class JkProperties {
     /**
      * Returns the value associated with the specified property name or <code>null</code> if no value has been
      * specified for this name.
-     *
-     *  See <a href="https://google.github.io/styleguide/shellguide.html#s7.3-constants-and-environment-variable-names">Environment variable conventions</a>
+     * <p>
+     * See <a href="https://google.github.io/styleguide/shellguide.html#s7.3-constants-and-environment-variable-names">Environment variable conventions</a>
      */
     public String get(String propertyName) {
         String rawValue = getRawValue(propertyName);
@@ -121,6 +121,14 @@ public final class JkProperties {
             return null;
         }
         return interpolate(rawValue);
+    }
+
+    /**
+     * Returns the value associated with the specified property name or the defaultValue if no value has been
+     * specified for this name.
+     */
+    public String get(String propertyName, String defaultValue) {
+        return Optional.ofNullable(get(propertyName)).orElse(defaultValue);
     }
 
     /**
