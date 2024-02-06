@@ -451,6 +451,21 @@ public final class JkUtilsReflect {
         return (T) invokeMethod(instance, null, methodName, args);
     }
 
+    /**
+     * Returns a string representation of the given object.
+     */
+    public static String toString(Object object) {
+        if (object == null) {
+            return "[null]";
+        }
+        StringBuilder b = new StringBuilder("[" + object.getClass().getName() + "    ");
+        for (Field f : object.getClass().getDeclaredFields()) {
+            b.append(f.getName() + "=" + getFieldValue(object, f.getName()) + " ");
+        }
+        b.append(']');
+        return b.toString();
+    }
+
     private static Object invokeMethod(Object target, Class<?> clazz, String methodName,
             Object... args) {
         final boolean staticMethod = target == null;

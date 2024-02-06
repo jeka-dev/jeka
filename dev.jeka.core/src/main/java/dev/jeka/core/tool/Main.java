@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkInfo;
@@ -78,8 +79,26 @@ public final class Main {
                 JkMemoryBufferLogDecorator.activateOnJkLog();
                 JkLog.info("");   // To have a br prior the memory log is flushed
             }
-            final Engine engine = new Engine(baseDir);
-            engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok
+
+
+
+            //final Engine engine = new Engine(baseDir);
+            //engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok
+
+            // --- code replace for new engine
+
+            EngineBase engineBase = EngineBase.forLegacy(baseDir,
+                    JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
+            engineBase.resolveCommandEngine(Environment.parsedCmdLine.getBeanActions());
+            engineBase.initRunbase();
+            if (JkMemoryBufferLogDecorator.isActive()) {
+                JkBusyIndicator.stop();
+                JkMemoryBufferLogDecorator.inactivateOnJkLog();
+            }
+            engineBase.run();
+
+            // ------------
+
             if (logs.banner) {
                 displayOutro(start);
             }

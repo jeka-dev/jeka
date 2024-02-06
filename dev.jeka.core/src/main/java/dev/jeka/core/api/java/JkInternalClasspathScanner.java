@@ -26,6 +26,8 @@ public interface JkInternalClasspathScanner {
     List<String> findClassesMatchingAnnotations(ClassLoader classloader,
                                                 Predicate<List<String>> annotationPredicate);
 
+    List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, boolean ignoreVisibility);
+
     List<String> findClassesInheritingOrAnnotatesWith(ClassLoader classLoader,
                                                       Class<?> baseClass,
                                                       Predicate<String> scanElementFilter,

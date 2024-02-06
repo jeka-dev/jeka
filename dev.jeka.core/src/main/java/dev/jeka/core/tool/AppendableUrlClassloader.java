@@ -14,7 +14,15 @@ class AppendableUrlClassloader extends URLClassLoader {
         super(new URL[] {}, Thread.currentThread().getContextClassLoader());
     }
 
-    private void addEntry(Iterable<Path> path) {
+    AppendableUrlClassloader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
+    }
+
+    AppendableUrlClassloader copy() {
+        return new AppendableUrlClassloader(this.getURLs(), this.getParent());
+    }
+
+    void addEntry(Iterable<Path> path) {
         List<Path> paths = JkUtilsPath.disambiguate(path);
         paths.forEach(aPath -> addURL(JkUtilsPath.toUrl(aPath.toAbsolutePath().normalize())));
     }

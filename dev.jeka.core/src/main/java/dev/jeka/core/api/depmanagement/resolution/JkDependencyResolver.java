@@ -256,7 +256,7 @@ public final class JkDependencyResolver  {
         int fileCount = resolveResult.getFiles().getEntries().size();
         JkLog.info("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
         if (JkLog.isVerbose()) {
-            resolveResult.getFiles().forEach(path -> JkLog.info(path.toString()));
+            resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
         }
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {

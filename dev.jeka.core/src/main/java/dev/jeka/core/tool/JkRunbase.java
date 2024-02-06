@@ -137,8 +137,6 @@ public final class JkRunbase {
         return importedRunbaseDirs;
     }
 
-
-
     /**
      * Instantiates the specified KBean into this runbase, if it is not already present. <p>
      * As KBeans are singleton within a runbase, this method has no effect if the bean is already loaded.
@@ -290,7 +288,7 @@ public final class JkRunbase {
         Map<String, String> props = new HashMap<>();
 
         // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
-        if (bean.isMatchingName(Environment.behavior.kbeanName)) {
+        if (bean.isMatchingName(Environment.behavior.kbeanName.orElse(null))) {
             props.putAll(properties.getAllStartingWith(Environment.KB_KEYWORD + "#", false));
         }
         props.putAll(properties.getAllStartingWith(beanName + "#", false));

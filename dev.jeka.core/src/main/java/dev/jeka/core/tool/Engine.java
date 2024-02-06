@@ -117,7 +117,7 @@ final class Engine {
                 Environment.behavior.ignoreCompileFailure);
 
         List<EngineCommand> resolvedCommands = beanClassesResolver.resolve(parsedCmdLine,
-                Environment.behavior.kbeanName, ignoreMasterBeanNotFound);
+                Environment.behavior.kbeanName.orElse(null), ignoreMasterBeanNotFound);
 
         // initialise runbase with resolved commands
         runbase.init(resolvedCommands);

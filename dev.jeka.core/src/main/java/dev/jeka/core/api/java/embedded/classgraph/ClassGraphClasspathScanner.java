@@ -116,6 +116,31 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         return result;
     }
 
+    public List<String> findClassesExtending(
+             ClassLoader classLoader,
+             Class<?> baseClass,
+             boolean ignoreVisibility) {
+
+        ClassGraph classGraph = new ClassGraph()
+                .enableClassInfo()
+                .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
+                        "org.commonmark", "io.github.classgraph")
+                .disableNestedJarScanning()
+                .disableModuleScanning()
+                .ignoreParentClassLoaders()
+                .overrideClassLoaders(classLoader);
+        if (ignoreVisibility) {
+            classGraph = classGraph.ignoreClassVisibility();
+        }
+        try (ScanResult scanResult = classGraph.scan()) {
+            return scanResult.getAllClasses().stream()
+                    .filter(classInfo -> !classInfo.isAbstract())
+                    .filter(classInfo -> inheritOf(classInfo, baseClass.getName()))
+                    .map(ClassInfo::getName)
+                    .collect(Collectors.toList());
+        }
+    }
+
     public List<String> findClassesInheritingOrAnnotatesWith(ClassLoader classLoader,
                                                             Class<?> baseClass,
                                                             Predicate<String> scanElementFilter,
@@ -135,8 +160,8 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         }
         if (ignoreParentClassLoaders) {
             classGraph
-            .ignoreParentClassLoaders()
-            .overrideClassLoaders(classLoader);
+                .ignoreParentClassLoaders()
+                .overrideClassLoaders(classLoader);
         }
         if (ignoreVisibility) {
             classGraph = classGraph.ignoreClassVisibility();

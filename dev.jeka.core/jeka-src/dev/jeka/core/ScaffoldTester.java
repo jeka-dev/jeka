@@ -18,14 +18,14 @@ class ScaffoldTester extends JekaCommandLineExecutor {
     void run() {
 
         // Basic scaffold and checks
-        scaffoldAndCheckInTemp("self#scaffold", "#hello self#info", true);
+        scaffoldAndCheckInTemp("self#scaffold", "#hello self#info -v -Djeka.java.version=17", true);
         scaffoldAndCheckInTemp("self#scaffold self#scaffold.kind=APP -lv ", "self#test self#runMain", true);
         scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=BUILD_CLASS", "#help", true);
 
         // Scaffold template=PROPS + layout=SIMPLE
         Path tempDir = scaffoldAndCheckInTemp(
                 "project#scaffold project#scaffold.template=PROPS project#layout.style=SIMPLE",
-                "project#pack", false);
+                "project#pack -v", false);
         JkUtilsAssert.state(Files.exists(tempDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
                 "dependencies.txt has not been generated");
         JkPathTree.of(tempDir).deleteRoot();
