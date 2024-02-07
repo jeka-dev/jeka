@@ -8,11 +8,11 @@
 
 	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="dev.jeka.core/project-libs/compile-only">
+	<fileset id="libs" dir="dev.jeka.core/libs/compile-only">
 		<include name='**/*.jar' />
 	</fileset>
 
-	<fileset id="junit5-libs" dir="dev.jeka.core/project-libs/test">
+	<fileset id="junit5-libs" dir="dev.jeka.core/libs/test">
 		<include name='**/*.jar' />
 	</fileset>
 
@@ -26,7 +26,7 @@
 		<javac destdir="${bin}" encoding="UTF-8" includeantruntime="false">
 			<src path="dev.jeka.core/src/main/java" />
 
-			<!-- needed to include sample bbuilds into quality analysis -->
+			<!-- needed to include sample builds into quality analysis -->
 			<src path="plugins/dev.jeka.plugins.jacoco" />
 			<src path="plugins/dev.jeka.plugins.sonarqube" />
 			<classpath>
