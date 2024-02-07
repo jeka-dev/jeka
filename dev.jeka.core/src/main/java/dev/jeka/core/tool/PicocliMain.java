@@ -116,7 +116,7 @@ public class PicocliMain {
         List<JkDependency> dependencies = cmdlineCpArgs.stream()
                 .map(String::trim)
                 .distinct()
-                .map(desc -> ParsedCmdLine.toDependency(baseDir, desc))
+                .map(desc -> JkDependency.of(baseDir, desc))
                 .collect(Collectors.toList());
         return JkDependencySet.of(dependencies);
     }

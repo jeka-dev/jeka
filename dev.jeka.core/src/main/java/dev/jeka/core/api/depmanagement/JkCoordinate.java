@@ -127,11 +127,10 @@ public final class JkCoordinate {
 
     /**
      * Returns <code>true</code> if the specified candidate matches to a module description.
-     * @see #of(String)
      */
     public static boolean isCoordinateDescription(String candidate) {
         final String[] strings = candidate.split( ":");
-        return strings.length >= 2 && strings.length <= 5;
+        return strings.length >= 2 && strings.length <= 5 && !candidate.contains(" ");
     }
 
     /**

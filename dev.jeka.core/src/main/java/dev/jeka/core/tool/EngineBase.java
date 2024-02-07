@@ -17,6 +17,7 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.builtins.self.SelfKBean;
 
 import javax.tools.ToolProvider;
 import java.nio.file.Files;
@@ -129,6 +130,8 @@ class EngineBase {
             JkLog.info("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
+
+        // TODO move in main
         if (Environment.behavior.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
             JkLog.info("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
@@ -139,7 +142,7 @@ class EngineBase {
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
 
         // Compute and get the classpath from sub-dirs
-        List<EngineBase> subBaseDirs = parsedSourceInfo.dependencyProjects.stream()
+        List<EngineBase> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
                 .map(this::withBaseDir)
                 .collect(Collectors.toList());
         JkPathSequence addedClasspathFromSubDirs = subBaseDirs.stream()
@@ -149,13 +152,16 @@ class EngineBase {
 
         // compute classpath to look in for finding KBeans
         String classpathProp = properties.get(JkConstants.CLASSPATH_INJECT_PROP, "");
-        List<JkDependency> jekaPropsDeps = Arrays.stream(classpathProp.split("\n"))
+        List<JkDependency> jekaPropsDeps = Arrays.stream(classpathProp.split(" "))
+                .flatMap(desc -> Arrays.stream(desc.split(",")))     // handle ' ' or ',' separators
+                .map(String::trim)
                 .filter(desc -> ! desc.isEmpty())
-                .map(desc -> ParsedCmdLine.toDependency(baseDir, desc))
+                .map(desc -> JkDependency.of(baseDir, desc))
                 .collect(Collectors.toList());
         JkDependencySet dependencies = commandLineDependencies
                 .and(jekaPropsDeps)
-                .and(parsedSourceInfo.getDependencies());
+                .and(parsedSourceInfo.getDependencies())
+                .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
         JkPathSequence kbeanClasspath = dependencyResolver.resolve(dependencies).getFiles()
                 .and(JkLocator.getJekaJarPath());
 
@@ -174,12 +180,12 @@ class EngineBase {
         JkPathSequence runClasspath = compileClasspath.and(compileResult.extraClasspath);
 
         // If private dependencies has been defined, this means that jeka-src is supposed to host
-        // an application that want to control he classpath. Thus we only put the dependency explicitly
+        // an application that wants to control its classpath. Thus, we only put the dependency explicitly
         // exported.
         final JkPathSequence exportedClasspath;
         final JkDependencySet exportedDependencies;
         if (parsedSourceInfo.hasPrivateDependencies()) {
-            exportedDependencies = parsedSourceInfo.getExportedDependencies();
+            exportedDependencies = parsedSourceInfo.getExportedDependencies().andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
             exportedClasspath = dependencyResolver.resolve(parsedSourceInfo.getExportedDependencies()).getFiles();
         } else {
             exportedDependencies = parsedSourceInfo.getDependencies();
@@ -204,7 +210,7 @@ class EngineBase {
          List<String> kbeanClassNames = findKBeanClassNames();
 
          // Filter to find kbeans defined in jeka-src
-        // TODO this iteratate width deep-first algo. change it to breadth-first
+        // TODO this iterates width deep-first algo. change it to breadth-first
          List<String> localKbeanClassNames = JkPathTree.of(jekaSrcClassDir).getRelativeFiles().stream()
                  .filter(path -> path.getFileName().toString().endsWith(".class"))
                  .map(EngineBase::classNameFromClassFilePath)
@@ -342,7 +348,7 @@ class EngineBase {
 
          Optional<String> findKbeanClassName(String kbeanName) {
              if (kbeanName == null) {
-                 return Optional.of(defaultKbeanClassname);
+                 return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(SelfKBean.class.getName()));
              }
             return this.allKbeans.stream()
                     .filter(className -> KBean.nameMatches(className, kbeanName))

@@ -1,9 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -193,7 +190,7 @@ final class Engine {
                 jekaClasspath().and(cacheResult.classpath),
                 cacheResult.exportedClasspath,
                 exportedDependencies,
-                new LinkedList<>(parsedSourceInfo.dependencyProjects),
+                new LinkedList<>(parsedSourceInfo.importedBaseDirs),
                 parsedSourceInfo.compileOptions,
                 cacheResult.changed
         );
@@ -489,9 +486,9 @@ final class Engine {
             if (depString.trim().isEmpty()) {
                 continue;
             }
-            dependencies.add(ParsedCmdLine.toDependency(baseDir, depString.trim()));
+            dependencies.add(JkDependency.of(baseDir, depString.trim()));
         }
-        return JkDependencySet.of(dependencies);
+        return JkDependencySet.of(dependencies).andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
     }
 
     private JkProperties localProperties() {

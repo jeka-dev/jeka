@@ -15,13 +15,13 @@ class EngineCompilationUpdateTracker {
 
     private final static String LAST_UPDATE_FILE_NAME = "def-hash.txt";
 
-    private final Path projectBaseDir;
+    private final Path baseDir;
 
     // When a subproject is outdated then all projects are considered outdated as well
     private static boolean globallyOutdated;
 
-    EngineCompilationUpdateTracker(Path projectBaseDir) {
-        this.projectBaseDir = projectBaseDir;
+    EngineCompilationUpdateTracker(Path baseDir) {
+        this.baseDir = baseDir;
     }
 
     boolean isOutdated() {
@@ -54,7 +54,7 @@ class EngineCompilationUpdateTracker {
     }
 
     private long lastModifiedAccordingFileAttributes() {
-        Path jekaSrc = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         Stream<Path> stream = JkPathTree.of(jekaSrc).stream();
         return stream
                 .filter(path -> !Files.isDirectory(path))
@@ -67,18 +67,18 @@ class EngineCompilationUpdateTracker {
 
 
     private String hashString() {
-        String md5 = JkPathTree.of(projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR)).checksum("md5");
+        String md5 = JkPathTree.of(baseDir.resolve(JkConstants.JEKA_SRC_DIR)).checksum("md5");
         return md5 + ":" + JkJavaVersion.ofCurrent();
     }
 
     private JkPathFile flagFile() {
-        return JkPathFile.of(projectBaseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
+        return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
     }
 
 
     boolean isMissingBinaryFiles() {
-        Path work = projectBaseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
-        Path jekaSrc = projectBaseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        Path work = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
+        Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         return JkPathTree.of(work).count(Integer.MAX_VALUE, false) <
                 JkPathTree.of(jekaSrc).count(Integer.MAX_VALUE, false);
     }

@@ -1,6 +1,6 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.tool.JkJekaVersionCompatibilityChecker;
+import dev.jeka.core.tool.JkJekaVersionRanges;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
@@ -16,7 +16,7 @@ class Build extends KBean {
         );
 
         project.packaging.manifestCustomizer.add(manifest -> {
-            JkJekaVersionCompatibilityChecker.setCompatibilityRange(manifest,
+            JkJekaVersionRanges.setCompatibilityRange(manifest,
                     "${jekaVersion}",
                     "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
         });

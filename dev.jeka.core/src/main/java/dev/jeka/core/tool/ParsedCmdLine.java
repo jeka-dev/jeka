@@ -1,14 +1,13 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.system.JkInfo;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.depmanagement.JkDependency;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /*
@@ -44,7 +43,7 @@ final class ParsedCmdLine {
                 KeyValue keyValue = KeyValue.of(word.substring(1), true);
                 result.standardOptions.put(keyValue.key, keyValue.value);
             } else if (word.startsWith(AT_SYMBOL_CHAR)) {
-                result.jekaSrcDependencies.add(toDependency(Paths.get(""), word.substring(1)));
+                result.jekaSrcDependencies.add(JkDependency.of(Paths.get(""), word.substring(1)));
             } else {
                 result.beanActions.add(new KBeanAction(word));
             }
@@ -97,31 +96,6 @@ final class ParsedCmdLine {
                 .map(beanAction -> beanAction.beanName)
                 .distinct()
                 .collect(Collectors.toList());
-    }
-
-    static JkDependency toDependency(Path baseDir, String depDescription) {
-        boolean hasColon = JkCoordinate.isCoordinateDescription(depDescription);
-        if (!hasColon || (JkUtilsSystem.IS_WINDOWS &&
-                (depDescription.startsWith(":\\", 1)) || depDescription.startsWith(":/", 1) )) {
-            Path candidatePath = baseDir.resolve(depDescription);
-            if (Files.exists(candidatePath)) {
-                return JkFileSystemDependency.of(candidatePath);
-            } else {
-                JkLog.warn("Command line argument "
-                        + depDescription + " cannot be recognized as a file. " +
-                        "Is " + candidatePath.toAbsolutePath().normalize() + " an existing file ?");
-                return JkFileSystemDependency.of(candidatePath);
-            }
-        } else {
-            JkCoordinateDependency coordinateDependency = JkCoordinateDependency.of(depDescription);
-            boolean specifiedVersion = !coordinateDependency.getCoordinate().hasUnspecifiedVersion();
-            if (!specifiedVersion && coordinateDependency.getCoordinate().getModuleId().getGroup().equals("dev.jeka")) {
-                coordinateDependency = coordinateDependency.withVersion(JkVersion.of(JkInfo.getJekaVersion()));
-                return coordinateDependency;
-            } else {
-                return coordinateDependency;
-            }
-        }
     }
 
     private static class KeyValue {

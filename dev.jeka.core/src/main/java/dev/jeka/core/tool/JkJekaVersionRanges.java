@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A utility class to check if the Jeka related classes imported in Jeka classpath are compatible with
@@ -29,7 +29,7 @@ import java.util.Objects;
  *
  * @author Jerome Angibaud
  */
-public final class JkJekaVersionCompatibilityChecker {
+public final class JkJekaVersionRanges {
 
     /**
      * When publishing a plugin, authors can not guess which future version of Jeka will break compatibility.
@@ -55,7 +55,7 @@ public final class JkJekaVersionCompatibilityChecker {
      */
     public static final String MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY = "Jeka-Lowest-Compatible-Version";
 
-    private JkJekaVersionCompatibilityChecker() {}
+    private JkJekaVersionRanges() {}
 
     static void checkCompatibility(Class pluginClass, JkDependencyResolver resolver) {
         JkManifest manifest = JkManifest.of().loadFromClass(pluginClass);
@@ -128,13 +128,20 @@ public final class JkJekaVersionCompatibilityChecker {
      * Convenient method to set a Jeka Plugin compatibility range with Jeka versions.
      * @param lowestVersion Can be null
      * @param breakingChangeUrl Can be null
-     * @see JkJekaVersionCompatibilityChecker#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
+     * @see JkJekaVersionRanges#MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY
      * @See JkBean#MANIFEST_BREAKING_CHANGE_URL_ENTRY
      */
     public static void setCompatibilityRange(JkManifest manifest, String lowestVersion, String breakingChangeUrl) {
         manifest
                 .addMainAttribute(MANIFEST_LOWEST_JEKA_COMPATIBLE_VERSION_ENTRY, lowestVersion)
                 .addMainAttribute(MANIFEST_BREAKING_CHANGE_URL_ENTRY, breakingChangeUrl);
+    }
+
+    /**
+     * Sets the custom compatibility range for a JkManifest object.
+     */
+    public static Consumer<JkManifest> manifestCustomizer(String lowestVersion, String breakingChangeUrl) {
+        return (manifest) -> setCompatibilityRange(manifest, lowestVersion, breakingChangeUrl);
     }
 
     private static class CompatibilityCache {

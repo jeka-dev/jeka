@@ -58,7 +58,7 @@ public final class JkCoordinateDependency implements JkTransitivityDependency {
     }
 
     public static JkCoordinateDependency of(@JkDepSuggest String coordinate, Object ...tokens) {
-        return of(JkCoordinate.of(coordinate));
+        return of(JkCoordinate.of(coordinate, tokens));
     }
 
     /**

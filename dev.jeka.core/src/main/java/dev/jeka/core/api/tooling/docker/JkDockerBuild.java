@@ -7,6 +7,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -180,6 +181,8 @@ public class JkDockerBuild {
      * @param imageName The name of the image to be build. It may contains or not a tag name.
      */
     public void buildImage(String imageName) {
+        JkUtilsAssert.state(!JkUtilsString.isBlank(mainClass), "Class containing 'main' method is not set.");
+
         JkPathTree.of(tempBuildDir).deleteContent();
 
         List<Path> sanitizedLibs = sanitizedLibs();

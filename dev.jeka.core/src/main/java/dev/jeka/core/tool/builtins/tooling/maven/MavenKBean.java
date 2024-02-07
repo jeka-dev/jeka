@@ -25,9 +25,43 @@ public final class MavenKBean extends KBean {
     @JkDoc("whitespace count to indentSpri dependency code.")
     public int codeIndent = 4;
 
-    @Override
-    protected void init() {
+    @JkDoc("Display Maven Publication information on the console.")
+    public void info() {
+        JkLog.info(getMavenPublication().info());
+    }
 
+    @JkDoc("Publishes the Maven publication on the repositories specified inside this publication.")
+    public void publish() {
+        getMavenPublication().publish();
+    }
+
+    @JkDoc("Publishes the Maven publication on the local JeKa repository.")
+    public void publishLocal() {
+        getMavenPublication().publishLocal();
+    }
+
+    @JkDoc("Publishes the Maven publication on the local M2 repository. This is the local repository of Maven.")
+    public void publishLocalM2() {
+        getMavenPublication().publishLocalM2();
+    }
+
+    @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
+    public void showPomDeps()  {
+        JkLog.info(JkMavenProject.of(getBaseDir()).getDependencyAsJeKaCode(codeIndent));
+        JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
+    }
+
+    /**
+     * Returns the Maven Publication associated with this KBean
+     */
+    public JkMavenPublication getMavenPublication() {
+
+        // maven Can't be instantiated in init(), cause it will fail if there is no project or self kbean,
+        // that may happen when doing a 'showPomDeps'.
+
+        if (mavenPublication != null) {
+            return mavenPublication;
+        }
         // Configure with ProjectKBean if present
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
         if (optionalProjectKBean.isPresent()) {
@@ -50,38 +84,6 @@ public final class MavenKBean extends KBean {
 
         // Add Publish Repos from JKProperties
         mavenPublication.setRepos(getPublishReposFromProps());
-    }
-
-    @JkDoc("Display Maven Publication information on the console.")
-    public void info() {
-        JkLog.info(mavenPublication.info());
-    }
-
-    @JkDoc("Publishes the Maven publication on the repositories specified inside this publication.")
-    public void publish() {
-        mavenPublication.publish();
-    }
-
-    @JkDoc("Publishes the Maven publication on the local JeKa repository.")
-    public void publishLocal() {
-        mavenPublication.publishLocal();
-    }
-
-    @JkDoc("Publishes the Maven publication on the local M2 repository. This is the local repository of Maven.")
-    public void publishLocalM2() {
-        mavenPublication.publishLocalM2();
-    }
-
-    @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
-    public void showPomDeps()  {
-        JkLog.info(JkMavenProject.of(getBaseDir()).getDependencyAsJeKaCode(codeIndent));
-        JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
-    }
-
-    /**
-     * Returns the Maven Publication associated with this KBean
-     */
-    public JkMavenPublication getMavenPublication() {
         return mavenPublication;
     }
 

@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkInfo;
@@ -158,13 +159,13 @@ public final class Main {
     /**
      * Entry point to call Jeka on a given folder
      */
-    public static void exec(Path projectDir, String... args) {
+    public static void exec(Path baseDir, String... args) {
         ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader();
         if (!(originalClassloader instanceof URLClassLoader)) {
             final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {}, originalClassloader);
             Thread.currentThread().setContextClassLoader(urlClassLoader);
             JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main",
-                    "exec" , projectDir, args);
+                    "exec" , baseDir, args);
             return;
         }
         ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
@@ -173,8 +174,19 @@ public final class Main {
             JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
             JkMemoryBufferLogDecorator.activateOnJkLog();
         }
-        final Engine engine = new Engine(projectDir);
-        engine.execute(parsedCmdLine);
+
+        EngineBase engineBase = EngineBase.forLegacy(baseDir,
+                JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
+        engineBase.resolveCommandEngine(parsedCmdLine.getBeanActions());
+        engineBase.initRunbase();
+        if (JkMemoryBufferLogDecorator.isActive()) {
+            JkBusyIndicator.stop();
+            JkMemoryBufferLogDecorator.inactivateOnJkLog();
+        }
+        engineBase.run();
+
+        //final Engine engine = new Engine(projectDir);
+        //engine.execute(parsedCmdLine);
     }
 
     static int printAscii(boolean error, String fileName) {

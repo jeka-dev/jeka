@@ -67,8 +67,21 @@ public final class JkVersionProvider {
     /**
      * Returns the version to use with specified module.
      */
-    public JkVersion getVersionOf(JkModuleId jkModuleId) {
-        return this.map.get(jkModuleId);
+    public JkVersion getVersionOf(JkModuleId moduleId) {
+        JkVersion result = this.map.get(moduleId);
+        if (result != null) {
+            return result;
+        }
+
+        // look in wildcards
+        String moduleIdAsString = moduleId.toString();
+        return this.map.entrySet().stream()
+                .filter(entry -> entry.getKey().getName().endsWith("*"))
+                .filter(entry -> moduleIdAsString.startsWith(JkUtilsString
+                        .substringBeforeFirst(entry.getKey().toString(), "*")))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     public JkVersion getVersionOfOrUnspecified(JkModuleId moduleId) {

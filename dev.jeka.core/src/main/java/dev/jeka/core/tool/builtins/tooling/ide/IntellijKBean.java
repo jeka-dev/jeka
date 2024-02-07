@@ -196,4 +196,6 @@ public final class IntellijKBean extends KBean {
         return Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(getBaseDir()));
     }
 
+
+
 }

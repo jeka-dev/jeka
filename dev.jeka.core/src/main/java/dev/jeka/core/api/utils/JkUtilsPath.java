@@ -10,6 +10,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
@@ -205,6 +207,15 @@ public final class JkUtilsPath {
             throw new UncheckedIOException(e);
         }
     }
+
+    public static Stream<String> lines(Path file, Charset charset) {
+        try {
+            return Files.lines(file, charset);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 
     /**
      * Delegates to {@link Files#readAllBytes(Path)} (Path)

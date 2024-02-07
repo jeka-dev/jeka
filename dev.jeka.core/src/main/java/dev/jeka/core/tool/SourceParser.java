@@ -1,9 +1,11 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -38,7 +40,7 @@ final class SourceParser {
     static ParsedSourceInfo parse(Path file, Path baseDir) {
         ParsedSourceInfo result = new ParsedSourceInfo();
         boolean privateFile = isInPrivateFolder(file, baseDir);
-        JkUtilsPath.readAllLines(file).forEach(line -> augment(result, line, baseDir, privateFile));
+        JkUtilsPath.lines(file, StandardCharsets.UTF_8).forEach(line -> augment(result, line, baseDir, privateFile));
         return result;
     }
 
@@ -65,7 +67,7 @@ final class SourceParser {
         AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.addDep(!privateFolder, ParsedCmdLine.toDependency(baseDir, value));
+            info.addDep(!privateFolder, JkDependency.of(baseDir, value));
             return;
         }
 
@@ -73,7 +75,7 @@ final class SourceParser {
         annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.dependencyProjects.add(baseDir.resolve(value));
+            info.importedBaseDirs.add(baseDir.resolve(value));
             return;
         }
 

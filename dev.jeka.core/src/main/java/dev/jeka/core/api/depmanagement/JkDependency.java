@@ -1,5 +1,7 @@
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.utils.JkUtilsSystem;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -45,10 +47,32 @@ public interface JkDependency {
      * depending on the specified parameter stands for a path or a coordinate.
      */
     static JkDependency of(String pathOrCoordinate) {
-        if (pathOrCoordinate.contains(":")) {
+        if (isCoordinate(pathOrCoordinate)) {
             return JkCoordinateDependency.of(pathOrCoordinate.trim());
         }
         return JkFileSystemDependency.of(Paths.get(pathOrCoordinate));
+    }
+
+    /**
+     * Same as {@link #of(String)} but resolve relative paths against the specified base directory.
+     */
+    static JkDependency of(Path baseDir, String pathOrCoordinate) {
+        if (isCoordinate(pathOrCoordinate)) {
+            return JkCoordinateDependency.of(pathOrCoordinate.trim());
+        }
+        Path path = Paths.get(pathOrCoordinate);
+        path =  path.isAbsolute() ? path : baseDir.resolve(path);
+        return JkFileSystemDependency.of(path);
+    }
+
+    /**
+     * Determines whether the given String represents a coordinate or a file path.
+     */
+    static boolean isCoordinate(String pathOrCoordinate) {
+        boolean hasColon = pathOrCoordinate.contains(":");
+        boolean windowsFile = JkUtilsSystem.IS_WINDOWS &&
+                ( pathOrCoordinate.startsWith(":\\", 1) || pathOrCoordinate.startsWith(":/", 1) );
+        return hasColon && !windowsFile;
     }
 
 

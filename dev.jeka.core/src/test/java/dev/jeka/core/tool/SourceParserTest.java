@@ -38,7 +38,7 @@ public class SourceParserTest {
     @Test
     public void with2ProjectImports() {
         final LinkedHashSet<Path> projects = parseResource(("with-2-inject-projects.javasource"))
-                .dependencyProjects;
+                .importedBaseDirs;
         List<Path> projectList = new LinkedList<>(projects);
         Assert.assertEquals(2, projects.size());
         Assert.assertEquals("dev.jeka.core", projectList.get(0).getFileName().toString());

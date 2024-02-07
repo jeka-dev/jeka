@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.nio.file.Path;
@@ -11,22 +12,22 @@ import java.util.List;
 
 final class ParsedSourceInfo {
 
-    private JkDependencySet dependencies;
-
-    final LinkedHashSet<Path> dependencyProjects;
+    final LinkedHashSet<Path> importedBaseDirs;
 
     final List<String> compileOptions;
+
+    private JkDependencySet dependencies;
 
     private JkDependencySet exportedDependencies;
 
     ParsedSourceInfo(
             JkDependencySet dependencies,
-            LinkedHashSet<Path> dependencyProjects,
+            LinkedHashSet<Path> importedBaseDirs,
             List<String> compileOptions,
             JkDependencySet exportedDependencies) {
 
         this.dependencies = dependencies;
-        this.dependencyProjects = dependencyProjects;
+        this.importedBaseDirs = importedBaseDirs;
         this.compileOptions = compileOptions;
         this.exportedDependencies = exportedDependencies;
     }
@@ -41,8 +42,8 @@ final class ParsedSourceInfo {
         } else if (other.isEmpty()) {
             return this;
         }
-        LinkedHashSet<Path> mergedDependencyProjects = new LinkedHashSet<>(this.dependencyProjects);
-        mergedDependencyProjects.addAll(other.dependencyProjects);
+        LinkedHashSet<Path> mergedDependencyProjects = new LinkedHashSet<>(this.importedBaseDirs);
+        mergedDependencyProjects.addAll(other.importedBaseDirs);
         return new ParsedSourceInfo(
                 this.dependencies.and(other.dependencies),
                 mergedDependencyProjects,
@@ -72,7 +73,7 @@ final class ParsedSourceInfo {
     private boolean isEmpty() {
         return this.compileOptions.isEmpty() &&
                 this.exportedDependencies.getEntries().isEmpty() &&
-                this.dependencyProjects.isEmpty() &&
+                this.importedBaseDirs.isEmpty() &&
                 this.dependencies.getEntries().isEmpty();
     }
 
