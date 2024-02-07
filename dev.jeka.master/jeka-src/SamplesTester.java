@@ -11,6 +11,10 @@ class SamplesTester extends JekaCommandLineExecutor {
 
     void run() {
 
+        // Run Self-App
+        run("dev.jeka.samples.selfapp", "-Djeka.java.version=17 self#buildJar");
+        run("dev.jeka.samples.baselib", "self#buildJar");
+
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.springboot", "-lna  " +
                 "project#clean project#pack maven#publishLocal -cw -Djeka.java.version=17");
@@ -44,9 +48,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         run("dev.jeka.samples.junit5", "project#clean project#pack #checkReportGenerated " +
                 "project#tests.fork=true");
 
-        // Run Self-App
-       // run("dev.deja.samples.selfapp", "self#buildJar");
-       // run("dev.deja.samples.baselib", "self#buildJar");
+
     }
 
     private void run(String sampleDir, String cmdLine) {

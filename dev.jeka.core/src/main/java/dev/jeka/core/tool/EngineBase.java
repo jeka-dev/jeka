@@ -90,6 +90,10 @@ class EngineBase {
         this.properties = JkRunbase.constructProperties(baseDir);
         this.jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         this.jekaSrcClassDir = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
+
+        // In lenient mode, we ignore dep resolution failure
+        this.dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(
+                !behaviorSettings.ignoreCompileFailure);
     }
 
      static EngineBase of(Path baseDir, JkDependencyResolver dependencyResolver,
@@ -384,6 +388,9 @@ class EngineBase {
         // Prepare and return result
         extraClasspath = extraClasspath.and(jekaSrcClassDir);
         boolean globalSuccess = javaCompileSuccess && kotlinCompileResult.success;
+        if (!globalSuccess && !behaviorSettings.ignoreCompileFailure) {
+            throw new JkException("Compilation of %s failed.", jekaSrcDir);
+        }
         return new CompileResult(globalSuccess, extraClasspath);
     }
 
