@@ -168,9 +168,9 @@ download_and_unpack() {
   fi
 
   ## unpack
+  mkdir -p "$dir"
   if [ "$file_type" == "tar.gz" ]; then
-      mkdir -p "$dir"
-      gzip -cd "$temp_file" | tar xf - -C "$dir"
+    gzip -cd "$temp_file" | tar xf - -C "$dir"
   else
     unzip -qq -o "$temp_file" -d "$dir"
   fi
