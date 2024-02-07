@@ -43,6 +43,10 @@ class SamplesTester extends JekaCommandLineExecutor {
         run("dev.jeka.samples.junit5", "-lna project#cleanPack");
         run("dev.jeka.samples.junit5", "project#clean project#pack #checkReportGenerated " +
                 "project#tests.fork=true");
+
+        // Run Self-App
+       // run("dev.deja.samples.selfapp", "self#buildJar");
+       // run("dev.deja.samples.baselib", "self#buildJar");
     }
 
     private void run(String sampleDir, String cmdLine) {

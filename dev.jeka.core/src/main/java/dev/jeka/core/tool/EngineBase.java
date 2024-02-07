@@ -105,7 +105,7 @@ class EngineBase {
     // TODO remove after validation
     static EngineBase forLegacy(Path baseDir, JkDependencySet cmdlineDeps) {
         JkDependencyResolver depRes = JkDependencyResolver.of(
-                JkRepoProperties.ofGlobalProperties().getDownloadRepos());
+                JkRepoProperties.of(JkRunbase.constructProperties(baseDir)).getDownloadRepos());
         depRes.getDefaultParams().setFailOnDependencyResolutionError(true);
         return of(baseDir, depRes, cmdlineDeps, Environment.logs, Environment.behavior);
     }
@@ -119,7 +119,7 @@ class EngineBase {
      * Resolves dependencies and compiles and sources classes contained in jeka/def.
      * It returns a path sequence containing the resolved dependencies and result of compilation.
      */
-     ClasspathSetupResult resolveClasspaths() {
+     ClasspathSetupResult resolveClassPaths() {
 
         if (classpathSetupResult != null) {
             return classpathSetupResult;
@@ -146,7 +146,7 @@ class EngineBase {
                 .map(this::withBaseDir)
                 .collect(Collectors.toList());
         JkPathSequence addedClasspathFromSubDirs = subBaseDirs.stream()
-                .map(EngineBase::resolveClasspaths)
+                .map(EngineBase::resolveClassPaths)
                 .map(classpathSetupResult -> classpathSetupResult.runClasspath)
                 .reduce(JkPathSequence.of(), JkPathSequence::and);
 
@@ -200,7 +200,7 @@ class EngineBase {
 
     KBeanResolution resolveKBeans() {
          if (classpathSetupResult == null) {
-             resolveClasspaths();
+             resolveClassPaths();
          }
          if (kbeanResolution != null) {
              return kbeanResolution;
