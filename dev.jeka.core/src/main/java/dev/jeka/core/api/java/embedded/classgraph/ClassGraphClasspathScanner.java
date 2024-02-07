@@ -3,6 +3,7 @@ package dev.jeka.core.api.java.embedded.classgraph;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkInternalClasspathScanner;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.KBean;
 import io.github.classgraph.*;
 
 import java.io.File;
@@ -15,6 +16,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
+
+    private static final String[] REJECTED_PACKAGES = new String[] {"java", "javax", "org.apache", "org.bouncycastle",
+            "nonapi.io.github.classgraph", "org.springframework", "org.commonmark", "io.github.classgraph"};
 
     static ClassGraphClasspathScanner of() {
         return new ClassGraphClasspathScanner();
@@ -49,8 +53,8 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         ClassGraph classGraph = new ClassGraph()
                 .ignoreClassVisibility()
                 .enableClassInfo()
-                .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
-                        "org.commonmark", "io.github.classgraph");
+                .enableRealtimeLogging()
+                .rejectPackages(REJECTED_PACKAGES);
         if (ignoreClassVisibility) {
             classGraph = classGraph.ignoreClassVisibility();
         }
@@ -123,8 +127,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
-                .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
-                        "org.commonmark", "io.github.classgraph")
+                .rejectPackages(REJECTED_PACKAGES)
                 .disableNestedJarScanning()
                 .disableModuleScanning()
                 .ignoreParentClassLoaders()
@@ -132,10 +135,10 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         if (ignoreVisibility) {
             classGraph = classGraph.ignoreClassVisibility();
         }
-        try (ScanResult scanResult = classGraph.scan()) {
+        try (ScanResult scanResult = classGraph.scan(4)) {
             return scanResult.getAllClasses().stream()
                     .filter(classInfo -> !classInfo.isAbstract())
-                    .filter(classInfo -> inheritOf(classInfo, baseClass.getName()))
+                    .filter(classInfo -> classInfo.extendsSuperclass(KBean.class.getName()))
                     .map(ClassInfo::getName)
                     .collect(Collectors.toList());
         }

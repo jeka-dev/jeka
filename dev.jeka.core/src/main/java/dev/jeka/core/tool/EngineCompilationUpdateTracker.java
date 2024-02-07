@@ -1,19 +1,21 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
 
 class EngineCompilationUpdateTracker {
 
-    private final static String LAST_UPDATE_FILE_NAME = "def-hash.txt";
+    private final static String LAST_UPDATE_FILE_NAME = "jeka-src-hash.txt";
+
+    private final static String JEKA_SRC_CLASSPATH_FILE_NAME = "jeka-src-classpath.txt";
+
+    private final static String KOTLIN_LIBS_FILE_NAME = "jeka-kotlin-libs-path.txt";
 
     private final Path baseDir;
 
@@ -22,6 +24,14 @@ class EngineCompilationUpdateTracker {
 
     EngineCompilationUpdateTracker(Path baseDir) {
         this.baseDir = baseDir;
+    }
+
+    boolean needRecompile(JkPathSequence classpath) {
+        boolean result = isOutdated() || isMissingBinaryFiles() ||  !classpath.equals(readJekaSrcClasspath());
+        if (result) {
+            updateJekaSrcClasspath(classpath);
+        }
+        return result;
     }
 
     boolean isOutdated() {
@@ -44,6 +54,22 @@ class EngineCompilationUpdateTracker {
         flagFile().deleteIfExist();
     }
 
+    void updateKotlinLibs(JkPathSequence pathSequence) {
+        updatePath(kotlinLibsFile(), pathSequence);
+    }
+
+    JkPathSequence readKotlinLibsFile() {
+        return readPath(kotlinLibsFile());
+    }
+
+    void updateJekaSrcClasspath(JkPathSequence pathSequence) {
+        updatePath(jekaSrcClasspathFile(), pathSequence);
+    }
+
+    private JkPathSequence readJekaSrcClasspath() {
+        return readPath(jekaSrcClasspathFile());
+    }
+
     private boolean isWorkOutdated() {
         if (!flagFile().exists()) {
             return true;
@@ -53,18 +79,18 @@ class EngineCompilationUpdateTracker {
         return !flaggedHash.equals(currentHash);
     }
 
-    private long lastModifiedAccordingFileAttributes() {
-        Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        Stream<Path> stream = JkPathTree.of(jekaSrc).stream();
-        return stream
-                .filter(path -> !Files.isDirectory(path))
-                .peek(path -> JkLog.trace("read file attribute of " + path))
-                .map(path -> JkUtilsPath.getLastModifiedTime(path))
-                .map(optional -> optional.orElse(System.currentTimeMillis()))
-                .reduce(0L, Math::max);
+    private JkPathSequence readPath(JkPathFile pathFile) {
+        if (pathFile.exists()) {
+            String content = pathFile.readAsString();
+            return JkPathSequence.ofPathString(content);
+        }
+        return JkPathSequence.of();
     }
 
-
+    private void updatePath(JkPathFile pathFile, JkPathSequence pathSequence) {
+        String content = pathSequence.toPath();
+        pathFile.deleteIfExist().createIfNotExist().write(content);
+    }
 
     private String hashString() {
         String md5 = JkPathTree.of(baseDir.resolve(JkConstants.JEKA_SRC_DIR)).checksum("md5");
@@ -75,6 +101,13 @@ class EngineCompilationUpdateTracker {
         return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
     }
 
+    private JkPathFile kotlinLibsFile() {
+        return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(KOTLIN_LIBS_FILE_NAME));
+    }
+
+    private JkPathFile jekaSrcClasspathFile() {
+        return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JEKA_SRC_CLASSPATH_FILE_NAME));
+    }
 
     boolean isMissingBinaryFiles() {
         Path work = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);

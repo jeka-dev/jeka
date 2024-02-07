@@ -1,8 +1,6 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependency;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -77,13 +75,12 @@ class EngineBase {
     private JkRunbase runbase;
 
     private EngineBase(Path baseDir,
-                       JkDependencyResolver dependencyResolver,
+                       JkRepoSet downloadRepos,
                        JkDependencySet commandLineDependencies,
                        EnvLogSettings logSettings,
                        EnvBehaviorSettings behaviorSettings) {
 
         this.baseDir = baseDir;
-        this.dependencyResolver = dependencyResolver;
         this.commandLineDependencies = commandLineDependencies;
         this.logSettings = logSettings;
         this.behaviorSettings = behaviorSettings;
@@ -91,31 +88,53 @@ class EngineBase {
         this.jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         this.jekaSrcClassDir = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
 
+        // Set dependency resolver
+        this.dependencyResolver = JkDependencyResolver.of(downloadRepos)
+                .setUseFileSystemCache(true)
+                .setFileSystemCacheDir(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-src-deps"));
+
         // In lenient mode, we ignore dep resolution failure
         this.dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(
                 !behaviorSettings.ignoreCompileFailure);
     }
 
-     static EngineBase of(Path baseDir, JkDependencyResolver dependencyResolver,
+     static EngineBase of(Path baseDir, JkRepoSet downloadRepos,
                           JkDependencySet commandLineDependencies, EnvLogSettings logSettings,
                           EnvBehaviorSettings behaviorSettings) {
         Path path = baseDir.toAbsolutePath().normalize();
 
         // ensure only 1 baseProcessor per base
         return MAP.computeIfAbsent(path,
-                key -> new EngineBase(key, dependencyResolver, commandLineDependencies, logSettings, behaviorSettings));
+                key -> new EngineBase(key, downloadRepos, commandLineDependencies, logSettings, behaviorSettings));
     }
 
     // TODO remove after validation
     static EngineBase forLegacy(Path baseDir, JkDependencySet cmdlineDeps) {
-        JkDependencyResolver depRes = JkDependencyResolver.of(
-                JkRepoProperties.of(JkRunbase.constructProperties(baseDir)).getDownloadRepos());
-        depRes.getDefaultParams().setFailOnDependencyResolutionError(true);
-        return of(baseDir, depRes, cmdlineDeps, Environment.logs, Environment.behavior);
+        JkProperties props = JkRunbase.constructProperties(baseDir);
+        JkRepoSet repos = JkRepoProperties.of(props).getDownloadRepos();
+        return of(baseDir, repos, cmdlineDeps, Environment.logs, Environment.behavior);
+    }
+
+    private static String classNameFromClassFilePath(Path relativePath) {
+        final String dotName = relativePath.toString().replace('/', '.');
+        return JkUtilsString.substringBeforeLast(dotName, ".");
+    }
+
+    private static EngineCommand toEngineCommand(KBeanAction action,
+                                          Map<String, Class<? extends KBean>> beanClasses) {
+        Class<? extends KBean> beanClass = beanClasses.get(action.beanName);
+        JkUtilsAssert.state(beanClass != null, "Can't resolve KBean class for action %s", action);
+        return new EngineCommand(action.action, beanClass, action.member, action.value);
+    }
+
+    private static Optional<String> firstMatchingClassname(List<String> classNames, String candidate) {
+         return classNames.stream()
+                 .filter(className -> KBean.nameMatches(className, candidate))
+                 .findFirst();
     }
 
     EngineBase withBaseDir(Path baseDir) {
-        return of(baseDir, this.dependencyResolver, this.commandLineDependencies,
+        return of(baseDir, this.dependencyResolver.getRepos(), this.commandLineDependencies,
                 this.logSettings, this.behaviorSettings);
     }
 
@@ -125,9 +144,13 @@ class EngineBase {
      */
      ClasspathSetupResult resolveClassPaths() {
 
+
+
         if (classpathSetupResult != null) {
             return classpathSetupResult;
         }
+
+         JkLog.startTask("Resolve classpath for jeka-src");
 
         if (behaviorSettings.cleanWork) {
             Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
@@ -143,7 +166,9 @@ class EngineBase {
         }
 
         // Parse info from source code
+         JkLog.startTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
+        JkLog.endTask();
 
         // Compute and get the classpath from sub-dirs
         List<EngineBase> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
@@ -166,7 +191,7 @@ class EngineBase {
                 .and(jekaPropsDeps)
                 .and(parsedSourceInfo.getDependencies())
                 .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
-        JkPathSequence kbeanClasspath = dependencyResolver.resolve(dependencies).getFiles()
+        JkPathSequence kbeanClasspath = JkPathSequence.of(dependencyResolver.resolveFiles(dependencies))
                 .and(JkLocator.getJekaJarPath());
 
         // compute classpath for compiling 'jeka-src'
@@ -190,7 +215,8 @@ class EngineBase {
         final JkDependencySet exportedDependencies;
         if (parsedSourceInfo.hasPrivateDependencies()) {
             exportedDependencies = parsedSourceInfo.getExportedDependencies().andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
-            exportedClasspath = dependencyResolver.resolve(parsedSourceInfo.getExportedDependencies()).getFiles();
+            exportedClasspath = JkPathSequence.of(
+                    dependencyResolver.resolveFiles(parsedSourceInfo.getExportedDependencies()));
         } else {
             exportedDependencies = parsedSourceInfo.getDependencies();
             exportedClasspath = compileClasspath;
@@ -199,6 +225,7 @@ class EngineBase {
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
                 runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs);
+        JkLog.endTask();
         return classpathSetupResult;
     }
 
@@ -209,9 +236,12 @@ class EngineBase {
          if (kbeanResolution != null) {
              return kbeanResolution;
          }
+         JkLog.startTask("Resolve KBeans");
 
          // Find all KBean class available for this
+        JkLog.startTask("Scan classpath");
          List<String> kbeanClassNames = findKBeanClassNames();
+         JkLog.endTask();
 
          // Filter to find kbeans defined in jeka-src
         // TODO this iterates width deep-first algo. change it to breadth-first
@@ -236,7 +266,7 @@ class EngineBase {
          }
 
          kbeanResolution = new KBeanResolution(kbeanClassNames, localKbeanClassNames, initKbeanClassName, defaultKBeanClassName);
-         JkLog.trace(JkUtilsReflect.toString(kbeanResolution));
+         JkLog.endTask();
          return kbeanResolution;
     }
 
@@ -247,6 +277,7 @@ class EngineBase {
         if (this.kbeanResolution == null) {
             resolveKBeans();
         }
+        JkLog.startTask("Resolve KBean commands");
 
         // We need to run in the classpath computed in previous steps
         AppendableUrlClassloader.addEntriesOnContextClassLoader(this.classpathSetupResult.runClasspath);
@@ -271,6 +302,8 @@ class EngineBase {
         effectiveKeanActions.stream()
                 .map(action -> toEngineCommand(action, kbeanClasses))
                 .forEach(engineCommands::add);
+
+        JkLog.endTask();;
 
         return engineCommands;
     }
@@ -300,76 +333,35 @@ class EngineBase {
          runbase.run(engineCommands);
     }
 
-
-    static class ClasspathSetupResult {
-
-        public ClasspathSetupResult(boolean compileResult,
-                                    JkPathSequence runClasspath,  // The full classpath to run Jeka upon
-                                    JkPathSequence kbeanClasspath, // The classpath to find in KBeans
-                                    JkPathSequence exportedClasspath,
-                                    JkDependencySet exportedDependencies,
-                                    List<EngineBase> subBaseDirs) {
-            this.compileResult = compileResult;
-            this.runClasspath = runClasspath;
-            this.kbeanClasspath = kbeanClasspath;
-            this.exportedClasspah = exportedClasspath;
-            this.exportedDependencies = exportedDependencies;
-            this.subBaseDirs = subBaseDirs;
-        }
-
-        final JkPathSequence runClasspath;
-
-        final JkPathSequence kbeanClasspath;
-
-        final JkPathSequence exportedClasspah;
-
-        final List<EngineBase> subBaseDirs;
-
-        final JkDependencySet exportedDependencies;
-
-        final boolean compileResult;
-
-    }
-
-    static class KBeanResolution {
-
-
-        final List<String>  allKbeans;
-
-        final List<String> localKBean;
-
-        final String initKBeanClassname;
-
-        final String defaultKbeanClassname;
-
-        public KBeanResolution(List<String> allKbeans, List<String> localKBean,
-                               String initKBeanClassname, String defaultKbeanClassname) {
-            this.allKbeans = allKbeans;
-            this.localKBean = localKBean;
-            this.initKBeanClassname = initKBeanClassname;
-            this.defaultKbeanClassname = defaultKbeanClassname;
-        }
-
-         Optional<String> findKbeanClassName(String kbeanName) {
-             if (kbeanName == null) {
-                 return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(SelfKBean.class.getName()));
-             }
-            return this.allKbeans.stream()
-                    .filter(className -> KBean.nameMatches(className, kbeanName))
-                    .findFirst();
-        }
-    }
-
     private CompileResult compileJekaSrc(JkPathSequence classpath, List<String> compileOptions) {
 
-        JkPathTree.of(jekaSrcClassDir).deleteContent();
-        JkPathSequence extraClasspath = JkPathSequence.of();
+         JkPathSequence extraClasspath = JkPathSequence.of();
+         boolean hasKotlinSources = hasKotlinSource();
+
+         // Avoid compilation if sources didn't change
+         EngineCompilationUpdateTracker updateTracker = new EngineCompilationUpdateTracker(baseDir);
+         if (!updateTracker.needRecompile(classpath)) {
+             if (hasKotlinSources) {
+                 JkPathSequence kotlinStdLibPath = updateTracker.readKotlinLibsFile();
+                 extraClasspath = extraClasspath.and(kotlinStdLibPath);
+
+                 // TODO needed
+                 AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinStdLibPath);
+             }
+             extraClasspath = extraClasspath.and(jekaSrcClassDir);
+             return new CompileResult(true, extraClasspath);
+         }
+
+         // If sources has change, make a clean compile
+        // necessary ?
+        //JkPathTree.of(jekaSrcClassDir).deleteContent();
 
         // Compile Kotlin code if any
         KotlinCompileResult kotlinCompileResult = new KotlinCompileResult(true, JkPathSequence.of());
         if (hasKotlinSource()) {
             kotlinCompileResult = compileWithKotlin(classpath, compileOptions);
             extraClasspath = extraClasspath.and(kotlinCompileResult.kotlinLibPath);
+            updateTracker.updateKotlinLibs(kotlinCompileResult.kotlinLibPath);
 
             // TODO comment Why needed
             AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompileResult.kotlinLibPath);
@@ -386,6 +378,7 @@ class EngineBase {
         }
 
         // Prepare and return result
+        updateTracker.updateCompileFlag();
         extraClasspath = extraClasspath.and(jekaSrcClassDir);
         boolean globalSuccess = javaCompileSuccess && kotlinCompileResult.success;
         if (!globalSuccess && !behaviorSettings.ignoreCompileFailure) {
@@ -433,31 +426,6 @@ class EngineBase {
 
     }
 
-    private static class KotlinCompileResult {
-
-        final boolean success;
-
-        final JkPathSequence kotlinLibPath;
-
-
-        public KotlinCompileResult(boolean success, JkPathSequence kotlinLibPath) {
-            this.success = success;
-            this.kotlinLibPath = kotlinLibPath;
-        }
-    }
-
-    private static class CompileResult {
-
-        final boolean success;
-
-        private final JkPathSequence extraClasspath;
-
-        CompileResult(boolean success, JkPathSequence extraClasspath) {
-            this.success = success;
-            this.extraClasspath = extraClasspath;
-        }
-    }
-
     private List<String> findKBeanClassNames() {
 
          // Creates a classloader tailored for scanning
@@ -466,11 +434,6 @@ class EngineBase {
         scannedClassloader.addEntry(classpathSetupResult.kbeanClasspath);
 
          return JkInternalClasspathScanner.of().findClassesExtending(scannedClassloader, KBean.class, true);
-    }
-
-    private static String classNameFromClassFilePath(Path relativePath) {
-        final String dotName = relativePath.toString().replace('/', '.');
-        return JkUtilsString.substringBeforeLast(dotName, ".");
     }
 
     private Map<String, Class<? extends KBean>> resolveKBeanClasses(
@@ -494,13 +457,6 @@ class EngineBase {
 
     }
 
-    private static EngineCommand toEngineCommand(KBeanAction action,
-                                          Map<String, Class<? extends KBean>> beanClasses) {
-        Class<? extends KBean> beanClass = beanClasses.get(action.beanName);
-        JkUtilsAssert.state(beanClass != null, "Can't resolve KBean class for action %s", action);
-        return new EngineCommand(action.action, beanClass, action.member, action.value);
-    }
-
     private List<KBeanAction> getKBeanActionFromProperties() {
         Map<String, String> props = properties.getAllStartingWith("", true);
         return props.entrySet().stream()
@@ -517,10 +473,83 @@ class EngineBase {
                 .collect(Collectors.toList());
     }
 
-    private static Optional<String> firstMatchingClassname(List<String> classNames, String candidate) {
-         return classNames.stream()
-                 .filter(className -> KBean.nameMatches(className, candidate))
-                 .findFirst();
+    static class ClasspathSetupResult {
+
+        final JkPathSequence runClasspath;
+        final JkPathSequence kbeanClasspath;
+        final JkPathSequence exportedClasspah;
+        final List<EngineBase> subBaseDirs;
+        final JkDependencySet exportedDependencies;
+        final boolean compileResult;
+
+        public ClasspathSetupResult(boolean compileResult,
+                                    JkPathSequence runClasspath,  // The full classpath to run Jeka upon
+                                    JkPathSequence kbeanClasspath, // The classpath to find in KBeans
+                                    JkPathSequence exportedClasspath,
+                                    JkDependencySet exportedDependencies,
+                                    List<EngineBase> subBaseDirs) {
+            this.compileResult = compileResult;
+            this.runClasspath = runClasspath;
+            this.kbeanClasspath = kbeanClasspath;
+            this.exportedClasspah = exportedClasspath;
+            this.exportedDependencies = exportedDependencies;
+            this.subBaseDirs = subBaseDirs;
+        }
+
+    }
+
+    static class KBeanResolution {
+
+
+        final List<String>  allKbeans;
+
+        final List<String> localKBean;
+
+        final String initKBeanClassname;
+
+        final String defaultKbeanClassname;
+
+        public KBeanResolution(List<String> allKbeans, List<String> localKBean,
+                               String initKBeanClassname, String defaultKbeanClassname) {
+            this.allKbeans = allKbeans;
+            this.localKBean = localKBean;
+            this.initKBeanClassname = initKBeanClassname;
+            this.defaultKbeanClassname = defaultKbeanClassname;
+        }
+
+         Optional<String> findKbeanClassName(String kbeanName) {
+             if (kbeanName == null) {
+                 return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(SelfKBean.class.getName()));
+             }
+            return this.allKbeans.stream()
+                    .filter(className -> KBean.nameMatches(className, kbeanName))
+                    .findFirst();
+        }
+    }
+
+    private static class KotlinCompileResult {
+
+        final boolean success;
+
+        final JkPathSequence kotlinLibPath;
+
+
+        public KotlinCompileResult(boolean success, JkPathSequence kotlinLibPath) {
+            this.success = success;
+            this.kotlinLibPath = kotlinLibPath;
+        }
+    }
+
+    private static class CompileResult {
+
+        final boolean success;
+
+        private final JkPathSequence extraClasspath;
+
+        CompileResult(boolean success, JkPathSequence extraClasspath) {
+            this.success = success;
+            this.extraClasspath = extraClasspath;
+        }
     }
 
 }

@@ -163,9 +163,9 @@ class Environment {
 
         // behavioral option
 
-        final Option<Void> cleanWork = ofVoid("Clean 'jeka-output' directory prior running.", "--clean-output", "-co");
+        final Option<Void> cleanWork = ofVoid("Clean 'jeka-work' directory prior running.", "--clean-work", "-cw");
 
-        final Option<Void> cleanOutput = ofVoid("Clean '.jeka-work' directory prior running.", "--clean-work", "-cw");
+        final Option<Void> cleanOutput = ofVoid("Clean '.jeka-output' directory prior running.", "--clean-output", "-co");
 
         final Option<Void> ignoreCompileFail = ofVoid("Ignore when 'jeka-src compile fails", "--ignore-compile-fail", "-dci");
 
