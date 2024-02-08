@@ -46,6 +46,27 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         return new JkPathSequence(Collections.emptyList());
     }
 
+    /**
+     * Reads the contents of a file at the given path and returns a JkPathSequence object representing
+     * the paths extracted from the file contents.
+     * The file content is supposed to be have been written using {@link JkPathSequence#writeTo}
+     * <p>
+     * @throws UncheckedIOException if the file does not exist.
+     */
+    public static JkPathSequence readFrom(Path path) {
+        return JkPathSequence.ofPathString(JkPathFile.of(path).readAsString());
+    }
+
+    /**
+     * Same as {@link #readFrom} but returns an empty {@link JkPathSequence if the file does not exist.
+     */
+    public static JkPathSequence readFromQuietly(Path path) {
+        if (!Files.exists(path)) {
+            return JkPathSequence.of();
+        }
+        return JkPathSequence.ofPathString(JkPathFile.of(path).readAsString());
+    }
+
     public static JkPathSequence ofPathString(String pathString) {
         List<Path> paths = Arrays.stream(pathString.split(File.pathSeparator))
                 .filter(item -> !JkUtilsString.isBlank(item))
@@ -200,6 +221,13 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
 
     public boolean hasNonExisting() {
         return this.entries.stream().anyMatch(path -> !Files.exists(path));
+    }
+
+    /**
+     * Writes the contents of this JkPathSequence to the specified file path.
+     */
+    public void writeTo(Path path) {
+        JkPathFile.of(path).deleteIfExist().createIfNotExist().write(toPath());
     }
 
     @Override

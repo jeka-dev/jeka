@@ -344,7 +344,7 @@ public final class SelfKBean extends KBean {
     }
 
     private void fatJar(Path jarPath) {
-        JkLog.startTask("Making fat jar. It may takes a while ... ");
+        JkLog.startTask("Making fat jar. It may takes a while");
         JkJarPacker.of(getAppClasses())
                 .withManifest(getManifest())
                 .makeFatJar(jarPath, getAppLibs(), JkPathMatcher.of());

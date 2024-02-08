@@ -50,8 +50,6 @@ public abstract class JekaCommandLineExecutor {
        return prepareJeka(true, baseDir, cmdLine);
     }
 
-
-
     protected void runWithDistribJekaShell(Path baseDir, String cmdLine) {
         runJeka(false, baseDir, cmdLine);
     }

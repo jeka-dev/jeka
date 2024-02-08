@@ -55,19 +55,19 @@ class EngineCompilationUpdateTracker {
     }
 
     void updateKotlinLibs(JkPathSequence pathSequence) {
-        updatePath(kotlinLibsFile(), pathSequence);
+        pathSequence.writeTo(kotlinLibsFile());
     }
 
     JkPathSequence readKotlinLibsFile() {
-        return readPath(kotlinLibsFile());
+        return JkPathSequence.readFromQuietly(kotlinLibsFile());
     }
 
     void updateJekaSrcClasspath(JkPathSequence pathSequence) {
-        updatePath(jekaSrcClasspathFile(), pathSequence);
+        pathSequence.writeTo(jekaSrcClasspathFile());
     }
 
     private JkPathSequence readJekaSrcClasspath() {
-        return readPath(jekaSrcClasspathFile());
+        return JkPathSequence.readFrom(jekaSrcClasspathFile());
     }
 
     private boolean isWorkOutdated() {
@@ -79,19 +79,6 @@ class EngineCompilationUpdateTracker {
         return !flaggedHash.equals(currentHash);
     }
 
-    private JkPathSequence readPath(JkPathFile pathFile) {
-        if (pathFile.exists()) {
-            String content = pathFile.readAsString();
-            return JkPathSequence.ofPathString(content);
-        }
-        return JkPathSequence.of();
-    }
-
-    private void updatePath(JkPathFile pathFile, JkPathSequence pathSequence) {
-        String content = pathSequence.toPath();
-        pathFile.deleteIfExist().createIfNotExist().write(content);
-    }
-
     private String hashString() {
         String md5 = JkPathTree.of(baseDir.resolve(JkConstants.JEKA_SRC_DIR)).checksum("md5");
         return md5 + ":" + JkJavaVersion.ofCurrent();
@@ -101,12 +88,12 @@ class EngineCompilationUpdateTracker {
         return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(LAST_UPDATE_FILE_NAME));
     }
 
-    private JkPathFile kotlinLibsFile() {
-        return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(KOTLIN_LIBS_FILE_NAME));
+    private Path kotlinLibsFile() {
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(KOTLIN_LIBS_FILE_NAME);
     }
 
-    private JkPathFile jekaSrcClasspathFile() {
-        return JkPathFile.of(baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JEKA_SRC_CLASSPATH_FILE_NAME));
+    private Path jekaSrcClasspathFile() {
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JEKA_SRC_CLASSPATH_FILE_NAME);
     }
 
     boolean isMissingBinaryFiles() {

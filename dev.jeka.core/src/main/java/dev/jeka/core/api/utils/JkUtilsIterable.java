@@ -1,6 +1,10 @@
 package dev.jeka.core.api.utils;
 
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -258,6 +262,25 @@ public final class JkUtilsIterable {
             }
         }
         return sb.toString();
+    }
+
+    public static void writeStringsTo(Path path, String delimiter, List<String> strings) {
+        JkUtilsPath.createFileSafely(path);
+        String content = String.join(delimiter, strings);
+        JkUtilsPath.write(path, content.getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    public static List<String> readStringsFrom(Path path, String delimiter) {
+        String content = new String(JkUtilsPath.readAllBytes(path), StandardCharsets.UTF_8);
+        return Arrays.asList(content.split(delimiter));
+    }
+
+    public static List<String> readStringSafelyFrom(Path path, String delimiter) {
+        if (!Files.exists(path)) {
+            return Collections.emptyList();
+        }
+        return readStringsFrom(path, delimiter);
     }
 
 }

@@ -1,5 +1,6 @@
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.function.JkStreamDecorator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -95,6 +96,32 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
         return path ->  getRoot().relativize(path);
     }
 
+    /**
+     * A decorator class for Stream<Path> that provides additional functionality specific to path trees.
+     */
+    public class JkPathTreeStream extends JkStreamDecorator<Path> {
+
+        private JkPathTreeStream(Stream<Path> stream) {
+            super(stream);
+        }
+
+        /**
+         * Transforms to path relative o to the JkPathTree root dir.
+         */
+        public JkPathTreeStream relativizeFromRoot() {
+            stream.map(relativePathFunction());
+            return this;
+        }
+
+        /**
+         * Filters to exclude directories.
+         */
+        public JkPathTreeStream excludeDirectories() {
+            stream.filter(path -> !Files.isDirectory(path));
+            return this;
+        }
+    }
+
     // ------------------------- check exists --------------------------------------
 
     /**
@@ -118,18 +145,23 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
     // ----------------------- iterate over files ---------------------------------------------------
 
     /**
-     * Returns a path stream of all files of this tree. Returned paths are resolved against this tree root.
-     * This means that if this tree root is absolute then streamed paths are absolute as well.
-     * Note that the root folder is included in the returned stream.
+     * Returns a stream of paths in the directory tree rooted at the specified directory,
+     * filtered by the specified options. The result contains folders, including root.
+     * <p>
+     * The returned paths are <bold>NOT</bold> relatives to the root of this tree.
+     * <p>
+     * The returned stream provides means o filer file only, and transform to
+     * paths relative to root dir.
      */
-    public Stream<Path> stream(FileVisitOption ...options) {
+    public JkPathTreeStream stream(FileVisitOption ...options) {
         if(!exists()) {
-            return Stream.of();
+            return new JkPathTreeStream(Stream.of());
         }
         final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
         Path root = getRoot().toString().isEmpty() ? Paths.get(".") : getRoot();
-        return JkUtilsPath.walk(root, options)
+        Stream<Path> pathSteam = JkUtilsPath.walk(root, options)
                 .filter(path -> matcher.matches(root.relativize(path)));
+        return new JkPathTreeStream(pathSteam);
     }
 
     /**
@@ -528,5 +560,7 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
             JkPathFile.of(path).updateDigest(messageDigest);
         }
     }
+
+
 
 }

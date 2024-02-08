@@ -13,6 +13,7 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
@@ -108,7 +109,7 @@ class EngineBase {
                 key -> new EngineBase(key, downloadRepos, commandLineDependencies, logSettings, behaviorSettings));
     }
 
-    // TODO remove after validation
+    // TODO remove after validation of 0.11.x
     static EngineBase forLegacy(Path baseDir, JkDependencySet cmdlineDeps) {
         JkProperties props = JkRunbase.constructProperties(baseDir);
         JkRepoSet repos = JkRepoProperties.of(props).getDownloadRepos();
@@ -144,8 +145,6 @@ class EngineBase {
      */
      ClasspathSetupResult resolveClassPaths() {
 
-
-
         if (classpathSetupResult != null) {
             return classpathSetupResult;
         }
@@ -158,7 +157,7 @@ class EngineBase {
             JkPathTree.of(workDir).deleteContent();
         }
 
-        // TODO move in main
+        // That nice that this clean occurs here, cause it will happen for sub-basedir
         if (Environment.behavior.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
             JkLog.info("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
@@ -344,17 +343,10 @@ class EngineBase {
              if (hasKotlinSources) {
                  JkPathSequence kotlinStdLibPath = updateTracker.readKotlinLibsFile();
                  extraClasspath = extraClasspath.and(kotlinStdLibPath);
-
-                 // TODO needed
-                 AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinStdLibPath);
              }
              extraClasspath = extraClasspath.and(jekaSrcClassDir);
              return new CompileResult(true, extraClasspath);
          }
-
-         // If sources has change, make a clean compile
-        // necessary ?
-        //JkPathTree.of(jekaSrcClassDir).deleteContent();
 
         // Compile Kotlin code if any
         KotlinCompileResult kotlinCompileResult = new KotlinCompileResult(true, JkPathSequence.of());
@@ -362,9 +354,6 @@ class EngineBase {
             kotlinCompileResult = compileWithKotlin(classpath, compileOptions);
             extraClasspath = extraClasspath.and(kotlinCompileResult.kotlinLibPath);
             updateTracker.updateKotlinLibs(kotlinCompileResult.kotlinLibPath);
-
-            // TODO comment Why needed
-            AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompileResult.kotlinLibPath);
         }
 
         // Compile  Java
@@ -428,12 +417,29 @@ class EngineBase {
 
     private List<String> findKBeanClassNames() {
 
+         JkPathSequence kbeanClasspath = classpathSetupResult.kbeanClasspath;
+
+         // TODO local kbeans  should not be cached, at least not like this
+         Path classpathCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classpath.txt");
+         JkPathSequence cachedClasspath = JkPathSequence.readFromQuietly(classpathCache);
+         Path kbeanCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classes.txt");
+         if (cachedClasspath.equals(kbeanClasspath)) {
+
+             List<String> cachedKbeans = JkUtilsIterable.readStringsFrom(kbeanCache, "\n");
+             if (!cachedKbeans.isEmpty()) {
+                 return cachedKbeans;
+             }
+         }
+
          // Creates a classloader tailored for scanning
          AppendableUrlClassloader scannedClassloader =
                  ((AppendableUrlClassloader) JkUrlClassLoader.ofCurrent().get()).copy();
-        scannedClassloader.addEntry(classpathSetupResult.kbeanClasspath);
+         scannedClassloader.addEntry(classpathSetupResult.kbeanClasspath);
 
-         return JkInternalClasspathScanner.of().findClassesExtending(scannedClassloader, KBean.class, true);
+         List<String> result = JkInternalClasspathScanner.of().findClassesExtending(scannedClassloader, KBean.class, true);
+         kbeanClasspath.writeTo(classpathCache);
+         JkUtilsIterable.writeStringsTo(kbeanCache, "\n", result);
+         return result;
     }
 
     private Map<String, Class<? extends KBean>> resolveKBeanClasses(

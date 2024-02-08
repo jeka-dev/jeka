@@ -171,8 +171,8 @@ public final class Main {
         ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
         JkLog.setAcceptAnimation(true);
         if (!logs.startUp) {
-            JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
-            JkMemoryBufferLogDecorator.activateOnJkLog();
+            //JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
+            //JkMemoryBufferLogDecorator.activateOnJkLog();
         }
 
         EngineBase engineBase = EngineBase.forLegacy(baseDir,

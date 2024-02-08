@@ -142,7 +142,7 @@ public class JkQualifiedDependencySet {
      */
     public JkQualifiedDependencySet remove(JkDependency dependency) {
         List<JkQualifiedDependency> dependencies = entries.stream()
-                .filter(qDep -> !qDep.equals(dependency))  // TODO dDep is always != depedency as they are not from same class
+                .filter(qDep -> !qDep.equals(dependency))  // TODO dDep is always != dependency as they are not from same class
                 .collect(Collectors.toList());
         return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }

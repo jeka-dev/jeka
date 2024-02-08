@@ -6,7 +6,7 @@ import java.io.PrintStream;
 
 public class JkBusyIndicator {
 
-    private static final long WAIT_TIME = 40L;
+    private static final long WAIT_TIME = 50L;
 
     private static JkBusyIndicator instance;
 
@@ -49,24 +49,14 @@ public class JkBusyIndicator {
     }
 
     private void round() {
+        char[] ticSequence = new char[] {'/', '-', '\\', '|'};
         while (!stopped) {
-            printStream.print('/');
-            printStream.flush();
-            JkUtilsSystem.sleep(WAIT_TIME);
-            printStream.print('\b');
-            printStream.print('-');
-            printStream.flush();
-            JkUtilsSystem.sleep(WAIT_TIME);
-            printStream.print('\b');
-            printStream.print('\\');
-            printStream.flush();
-            JkUtilsSystem.sleep(WAIT_TIME);
-            printStream.print('\b');
-            printStream.print('|');
-            printStream.flush();
-            JkUtilsSystem.sleep(WAIT_TIME);
-            printStream.print('\b');
-            printStream.flush();
+            for (char ticChar : ticSequence) {
+                tic(ticChar);
+                if (stopped) {
+                    break;
+                }
+            }
         }
         printStream.print(' ');  // On some consoles, '\b' does only a cursor left move without deleting the content
         printStream.print('\b');
@@ -76,6 +66,13 @@ public class JkBusyIndicator {
             printStream.print('\b');
         }
         printStream.flush();
+    }
+
+    private void tic(char character) {
+        printStream.print(character);
+        printStream.flush();
+        JkUtilsSystem.sleep(WAIT_TIME);
+        printStream.print('\b');
     }
 
 }

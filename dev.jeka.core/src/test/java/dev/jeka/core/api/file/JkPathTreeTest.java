@@ -8,7 +8,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -234,6 +233,33 @@ public class JkPathTreeTest {
         assertFalse(tree.andMatching("subfolder/*.txt").getFiles().isEmpty());
         assertFalse(tree.andMatching("subfolder/*.txt", "*.txt").getFiles().isEmpty());
         assertFalse(tree.andMatching("subfolder/*.txt", "*.java").getFiles().isEmpty());
+    }
+
+    @Test
+    public void stream_relativeToCurrentDir_orAbsolute() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        Path first = JkPathTree.of(sampleFolder).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("No sample file found"));
+
+        // test with absolute root folder
+        assertTrue(sampleFolder.isAbsolute());
+        assertTrue(first.isAbsolute());
+
+        // Test with root being a relative pah
+        Path root = Paths.get("").toAbsolutePath().relativize(sampleFolder).normalize();
+        assertTrue("Root does not exist", Files.exists(root));
+        assertFalse(root.isAbsolute());
+        JkPathTree relPathTree = JkPathTree.of(root);
+        first = relPathTree.stream()
+                .filter(path -> !Files.isDirectory(path))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No sample file found"));
+        assertTrue(Files.exists(first));
+        System.out.println(root);
+        System.out.println(first);
+
     }
 
     @Test
