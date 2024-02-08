@@ -142,7 +142,7 @@ public final class Main {
             System.err.println("=========================================================================================");
             System.err.println();
         }
-        System.err.println("An error occurred during execution : " + e.getMessage());
+        System.err.println(e.getMessage());
         System.err.println("This could be caused by issues in the user code or settings, or potentially a bug in Jeka.");
         System.err.println("To investigate, relaunch command with options :");
         System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");

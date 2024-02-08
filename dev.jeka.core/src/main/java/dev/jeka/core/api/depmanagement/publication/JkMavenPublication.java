@@ -5,6 +5,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMvn;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -322,6 +323,10 @@ public final class JkMavenPublication {
         JkRepoSet bomRepos = this.bomResolverRepoSupplier.get().and(repos);
         JkDependencySet dependencySet = this.getDependencies()
                 .withResolvedBoms(bomRepos)
+
+                // for dev.jeka group artifacts, we may omit the version. his will be replaced by
+                // he curren Jeka one.
+                .andVersionProvider(JkVersionProvider.of("dev.jeka:*", JkInfo.getJekaVersion()))
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
 
