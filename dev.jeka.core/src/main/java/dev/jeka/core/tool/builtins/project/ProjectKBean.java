@@ -15,7 +15,10 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInjectProperty;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import org.w3c.dom.Document;
 
@@ -48,6 +51,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
      * Options for run tasks
      */
     public final JkRunOptions run = new JkRunOptions();
+
+    @JkDoc
+    private final JkDependenciesOptions dependencies = new JkDependenciesOptions();
 
     /**
      * Options for configuring testing tasks.
@@ -258,27 +264,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             return template;
         }
 
-        public final DependenciesTxt dependenciesTxt = new DependenciesTxt();
-
-        public class DependenciesTxt {
-
-            @JkDoc("Comma separated dependencies to include in project-dependencies.txt COMPILE section")
-            public String compile;
-
-            @JkDoc("Comma separated dependencies to include in project-dependencies.txt RUNTIME section")
-            public String runtime;
-
-            @JkDoc("Comma separated dependencies to include in project-dependencies.txt TEST section")
-            public String test;
-
-            List<String> toList(String description) {
-                if (description == null) {
-                    return Collections.emptyList();
-                }
-                return Arrays.asList(description.split(","));
-            }
-        }
-
         @Override
         public void applyTo(JkScaffold scaffold) {
             super.applyTo(scaffold);
@@ -288,9 +273,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             projectScaffold.setUseSimpleStyle(ProjectKBean.this.layout.style == JkCompileLayout.Style.SIMPLE);
 
             // Create 'project-dependencies.txt' file if needed
-            List<String> compileDeps = dependenciesTxt.toList(dependenciesTxt.compile);
-            List<String> runtimeDeps = dependenciesTxt.toList(dependenciesTxt.runtime);
-            List<String> testDeps = dependenciesTxt.toList(dependenciesTxt.test);
+            List<String> compileDeps = dependencies.toList(dependencies.compile);
+            List<String> runtimeDeps = dependencies.toList(dependencies.runtime);
+            List<String> testDeps = dependencies.toList(dependencies.test);
             projectScaffold.compileDeps.addAll(compileDeps);
             projectScaffold.runtimeDeps.addAll(runtimeDeps);
             projectScaffold.testDeps.addAll(testDeps);
@@ -379,6 +364,25 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         // Configure scaffold
         this.projectScaffold = JkProjectScaffold.of(project);
         this.scaffold.applyTo(projectScaffold); // apply basic configuration from KBean fields
+    }
+
+    private static class JkDependenciesOptions {
+
+        @JkDoc("Comma separated compile dependencies to include at scaffold time")
+        public String compile;
+
+        @JkDoc("Comma separated runtime dependencies to include at scaffold time")
+        public String runtime;
+
+        @JkDoc("Comma separated test dependencies to include at scaffold time")
+        public String test;
+
+        List<String> toList(String description) {
+            if (description == null) {
+                return Collections.emptyList();
+            }
+            return Arrays.asList(description.split(","));
+        }
     }
 
 }

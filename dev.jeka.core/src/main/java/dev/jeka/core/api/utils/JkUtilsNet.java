@@ -3,7 +3,7 @@ package dev.jeka.core.api.utils;
 import java.io.*;
 import java.net.*;
 
-public class JkUtilsHttp {
+public class JkUtilsNet {
 
     public static void assertResponseOk(HttpURLConnection con, String body) throws IOException {
         int code = con.getResponseCode();
@@ -70,6 +70,30 @@ public class JkUtilsHttp {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Checks if a port is open on a specified host.
+     *
+     * @param hostAndPort A string representing the host and port in the format "host:port"
+     * @param millis      The timeout value in milliseconds
+     */
+    public static boolean checkPortOpen(String hostAndPort, int millis) {
+        String[] hostPort = hostAndPort.split(":");
+        int portNum = Integer.parseInt(hostPort[1]);
+        return checkPortOpen(hostPort[0], portNum, millis);
+    }
+
+    /**
+     * Checks if a port is open on a specified host.
+     */
+    public static boolean checkPortOpen(String host, int port, int timeoutMillis) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(host, port), timeoutMillis);
+            return true; // If connect() succeeds, the port is open
+        } catch (IOException e) {
+            return false; // If connect() fails, the port is closed
         }
     }
 

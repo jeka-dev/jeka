@@ -1,13 +1,9 @@
 import dev.jeka.core.JekaCommandLineExecutor;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkProcHandler;
-import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsHttp;
+import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsSystem;
-import sun.java2d.loops.ProcessPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,7 +69,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
             runWithDistribJekaShell(path, scaffoldCmd);
 
             if (checkHttp) {
-                JkUtilsAssert.state(!JkUtilsHttp.isStatusOk(url), "A server is already listening to %s", url);
+                JkUtilsAssert.state(!JkUtilsNet.isStatusOk(url), "A server is already listening to %s", url);
 
                 System.out.println("======= Checking health with HTTP ================== ");
                 System.out.println("Scaffold command " + scaffoldCmd);
@@ -82,7 +78,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 JkProcHandler handler = prepareWithBaseDirJekaShell(path, checkCmd).execAsync();
 
                 // try to get a Ok response
-                JkUtilsHttp.checkUntilOk(url, checkHttpTimeout, checkHttpSleep);
+                JkUtilsNet.checkUntilOk(url, checkHttpTimeout, checkHttpSleep);
 
                 // destroy the sub-process
                 handler.getProcess().destroyForcibly();

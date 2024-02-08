@@ -24,6 +24,9 @@ public class SonarqubeKBean extends KBean {
     @JkDoc("If true, displays sonarqube output on console")
     public boolean logOutput = true;
 
+    @JkDoc("Ping the sonarqube server prior running analysis")
+    public boolean pingServer = true;
+
     public final JkSonarqube sonarqube = JkSonarqube.ofEmbedded();
 
     @JkDoc("Runs sonarQube analysis based on properties defined in this plugin. " +
@@ -43,6 +46,7 @@ public class SonarqubeKBean extends KBean {
         } else {
             sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), scannerVersion);
         }
+        sonarqube.setPingServer(pingServer);
         sonarqube.setLogOutput(logOutput);
         sonarqube.setProperties(getRunbase().getProperties());
     }

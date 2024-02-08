@@ -1,6 +1,9 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -14,7 +17,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 
@@ -437,7 +439,8 @@ class EngineBase {
                  ((AppendableUrlClassloader) JkUrlClassLoader.ofCurrent().get()).copy();
          scannedClassloader.addEntry(classpathSetupResult.kbeanClasspath);
 
-         List<String> result = JkInternalClasspathScanner.of().findClassesExtending(scannedClassloader, KBean.class, true);
+         List<String> result = JkInternalClasspathScanner.of()
+                 .findClassesExtending(scannedClassloader, KBean.class, true, true);
          kbeanClasspath.writeTo(classpathCache);
          JkUtilsIterable.writeStringsTo(kbeanCache, "\n", result);
          return result;

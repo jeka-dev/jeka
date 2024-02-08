@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsHttp;
+import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -207,7 +207,7 @@ public class JkNexusRepos {
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/xml");
         con.setReadTimeout(readTimeout);
-        JkUtilsHttp.assertResponseOk(con, null);
+        JkUtilsNet.assertResponseOk(con, null);
         JkLog.startTask("Querying staging repositories");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
@@ -226,7 +226,7 @@ public class JkNexusRepos {
         HttpURLConnection con = connection(url);
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/xml");
-        JkUtilsHttp.assertResponseOk(con, null);
+        JkUtilsNet.assertResponseOk(con, null);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
             Element root = doc.getDocumentElement();
@@ -250,7 +250,7 @@ public class JkNexusRepos {
             byte[] input = json.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
-        JkUtilsHttp.assertResponseOk(con, json);
+        JkUtilsNet.assertResponseOk(con, json);
         JkLog.endTask();
     }
 
@@ -271,7 +271,7 @@ public class JkNexusRepos {
             byte[] input = json.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
-        JkUtilsHttp.assertResponseOk(con, json);
+        JkUtilsNet.assertResponseOk(con, json);
         JkLog.endTask();
     }
 

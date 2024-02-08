@@ -12,10 +12,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkException;
 
@@ -76,6 +73,8 @@ public final class JkSonarqube {
     private String scannerVersion;
 
     private boolean logOutput = true;
+
+    private boolean pingServer = true;
 
     private JkSonarqube(JkRepoSet repos,
                         @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
@@ -161,11 +160,26 @@ public final class JkSonarqube {
     }
 
     /**
+     * Sets the flag whether to ping the server during SonarQube analysis.
+     */
+    public JkSonarqube setPingServer(boolean pingServer) {
+        this.pingServer = pingServer;
+        return this;
+    }
+
+    /**
      * Executes SonarQube analysis.
      */
     public void run() {
-        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("localhost");
+        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("https://localhost:9000");
+        if (pingServer) {
+            if (!JkUtilsNet.isStatusOk(hostUrl)) {
+                throw new JkException("The Sonarqube url %s is not available.%nCheck server " +
+                        "or disable this ping check (sonarqube#pingServer=false)", hostUrl);
+            }
+        }
         JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
+
         Path jar = getToolJar();
         JkProcResult procResult = javaProcess(jar)
                 .addParamsIf(JkLog.isVerbose(), "-X")

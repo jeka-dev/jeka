@@ -17,8 +17,32 @@ import java.util.stream.Collectors;
 
 class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
-    private static final String[] REJECTED_PACKAGES = new String[] {"java", "javax", "org.apache", "org.bouncycastle",
-            "nonapi.io.github.classgraph", "org.springframework", "org.commonmark", "io.github.classgraph"};
+    private static final String[] REJECTED_PACKAGES = new String[] {
+            "java",
+            "javax",
+            "com.sun",
+            "org.apache",
+            "org.bouncycastle",
+            "nonapi.io.github.classgraph",
+            "org.springframework",
+            "org.commonmark",
+            "io.github.classgraph",
+            "org.antlr",
+            "org.objectiveweb.asm",
+            "org.aspectj",
+            "com.google.api.client",
+            "com.google.common",
+            "org.h2",
+            "org.hibernate",
+            "jakarta.activation",
+            "jakarta.persistence",
+            "org.glassfish.jaxb",
+            "org.junit.platform",
+            "org.junit.jupiter",
+            "org.apache.logging",
+            "io.micrometer",
+            "org.mockito",
+    };
 
     static ClassGraphClasspathScanner of() {
         return new ClassGraphClasspathScanner();
@@ -73,11 +97,13 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     @Override
     public List<String> findClassesWithMainMethod(ClassLoader extraClassLoader) {
         final ClassGraph classGraph = new ClassGraph()
+                .rejectPackages(REJECTED_PACKAGES)
                 .enableClassInfo()
                 .enableMethodInfo()
                 .overrideClassLoaders(extraClassLoader)
                 .ignoreParentClassLoaders();
         final List<String> result;
+        // TODO filter can be in scanning phase
         try (ScanResult scanResult = classGraph.scan()) {
             result = new LinkedList<>();
             for (final ClassInfo classInfo : scanResult.getAllClasses()) {
@@ -123,7 +149,8 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
     public List<String> findClassesExtending(
              ClassLoader classLoader,
              Class<?> baseClass,
-             boolean ignoreVisibility) {
+             boolean scanJar,
+             boolean scanFolder) {
 
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
@@ -131,11 +158,16 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                 .disableNestedJarScanning()
                 .disableModuleScanning()
                 .ignoreParentClassLoaders()
-                .overrideClassLoaders(classLoader);
-        if (ignoreVisibility) {
-            classGraph = classGraph.ignoreClassVisibility();
+                .overrideClassLoaders(classLoader)
+                .ignoreClassVisibility();
+        if (!scanJar) {
+            classGraph.disableJarScanning();
         }
-        try (ScanResult scanResult = classGraph.scan(4)) {
+        if (!scanFolder) {
+            classGraph.disableDirScanning();
+        }
+
+        try (ScanResult scanResult = classGraph.scan()) {
             return scanResult.getAllClasses().stream()
                     .filter(classInfo -> !classInfo.isAbstract())
                     .filter(classInfo -> classInfo.extendsSuperclass(KBean.class.getName()))
@@ -153,8 +185,7 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                                                             Class<?> ... annotations) {
         ClassGraph classGraph = new ClassGraph()
                 .enableClassInfo()
-                .rejectPackages("java", "org.apache.ivy", "org.bouncycastle", "nonapi.io.github.classgraph",
-                        "org.commonmark", "io.github.classgraph")
+                .rejectPackages(REJECTED_PACKAGES)
                 .disableNestedJarScanning()
                 .disableModuleScanning()
                 .filterClasspathElements(scanElementFilter::test);

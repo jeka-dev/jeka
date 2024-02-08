@@ -3,7 +3,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomXPath;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsHttp;
+import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -130,7 +130,7 @@ public class JkCoordinateSearch {
         if (code == 404) {
             return null;
         }
-        JkUtilsHttp.assertResponseOk(con, null);
+        JkUtilsNet.assertResponseOk(con, null);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document domDoc = JkUtilsXml.documentFrom(in);
             JkDomDocument doc = JkDomDocument.of(domDoc);
