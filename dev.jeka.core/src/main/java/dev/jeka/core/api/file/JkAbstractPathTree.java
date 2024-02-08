@@ -20,6 +20,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -109,16 +110,14 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
          * Transforms to path relative o to the JkPathTree root dir.
          */
         public JkPathTreeStream relativizeFromRoot() {
-            stream.map(relativePathFunction());
-            return this;
+            return new JkPathTreeStream(map(relativePathFunction()));
         }
 
         /**
          * Filters to exclude directories.
          */
         public JkPathTreeStream excludeDirectories() {
-            stream.filter(path -> !Files.isDirectory(path));
-            return this;
+            return new JkPathTreeStream(this.filter(path -> !Files.isDirectory(path)));
         }
     }
 
@@ -148,6 +147,8 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
      * Returns a stream of paths in the directory tree rooted at the specified directory,
      * filtered by the specified options. The result contains folders, including root.
      * <p>
+     * The tree is traversed using a <i>deep first</i> algorithm.
+     * <p>
      * The returned paths are <bold>NOT</bold> relatives to the root of this tree.
      * <p>
      * The returned stream provides means o filer file only, and transform to
@@ -165,8 +166,29 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
     }
 
     /**
-     * Same as {@link #getFiles()} but returning paths relative to this tree root.
+     * Same as {@link #stream(FileVisitOption...)} but using a <i>breath-first</i>
+     * traversal algorithm.
      */
+    public JkPathTreeStream streamBreathFirst() {
+        if(!exists()) {
+            return new JkPathTreeStream(Stream.of());
+        }
+        final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
+        Path root = getRoot().toString().isEmpty() ? Paths.get(".") : getRoot();
+        Stream<Path> pathSteam = breadthFirstTraversal(getRoot())
+                .filter(path -> matcher.matches(root.relativize(path)));
+        return new JkPathTreeStream(pathSteam);
+    }
+
+
+
+    /**
+     * Same as {@link #getFiles()} but returning paths relative to this tree root.
+     *
+     * @deprecated Use {@link #stream(FileVisitOption...)} in combination with
+     * {@link JkPathTreeStream#relativizeFromRoot()} instead
+     */
+    @Deprecated
     public List<Path> getRelativeFiles() {
         try(Stream<Path> stream = stream()) {
             return stream
@@ -562,5 +584,31 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
     }
 
 
+    private static Stream<Path> breadthFirstTraversal(Path root) {
+        Queue<Path> queue = new ArrayDeque<>();
+        queue.offer(root);
+
+        Spliterator<Path> spliterator = new Spliterators.AbstractSpliterator<Path>(
+                Long.MAX_VALUE, Spliterator.ORDERED) {
+            @Override
+            public boolean tryAdvance(java.util.function.Consumer<? super Path> action) {
+                Path current = queue.poll();
+                if (current == null) {
+                    return false; // Signal to stop generating elements
+                }
+                try {
+                    if (Files.isDirectory(current)) {
+                        Files.list(current).forEach(queue::offer);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                action.accept(current);
+                return true;
+            }
+        };
+
+        return StreamSupport.stream(spliterator, false);
+    }
 
 }

@@ -23,8 +23,10 @@ import java.util.zip.ZipFile;
  * won't contain any classes.
  *
  * @author Jerome Angibaud
+ *
+ * @deprecated use JkPathSequence instead
  */
-// TODO remove in favor of JkPathSequence
+@Deprecated
 public final class JkClasspath implements Iterable<Path> {
 
     private static final long serialVersionUID = 1L;

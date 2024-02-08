@@ -243,8 +243,9 @@ class EngineBase {
          JkLog.endTask();
 
          // Filter to find kbeans defined in jeka-src
-        // TODO this iterates width deep-first algo. change it to breadth-first
-         List<String> localKbeanClassNames = JkPathTree.of(jekaSrcClassDir).getRelativeFiles().stream()
+         List<String> localKbeanClassNames = JkPathTree.of(jekaSrcClassDir).streamBreathFirst()
+                 .excludeDirectories()
+                 .relativizeFromRoot()
                  .filter(path -> path.getFileName().toString().endsWith(".class"))
                  .map(EngineBase::classNameFromClassFilePath)
                  .filter(kbeanClassNames::contains)

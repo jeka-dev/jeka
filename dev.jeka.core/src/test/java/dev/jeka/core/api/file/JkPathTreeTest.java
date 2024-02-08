@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
@@ -201,7 +202,6 @@ public class JkPathTreeTest {
         Files.delete(zip);
     }
 
-
     private static Path sampleDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
@@ -260,6 +260,27 @@ public class JkPathTreeTest {
         System.out.println(root);
         System.out.println(first);
 
+    }
+
+    @Test
+    public void streamBreathFirst_orderIsOk() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        JkPathTree pathTree = JkPathTree.of(sampleFolder);
+        pathTree.streamBreathFirst().forEach(System.out::println);
+        List<Path> paths = pathTree.streamBreathFirst().collect(Collectors.toList());
+        assertTrue(paths.get(3).startsWith(paths.get(1)));
+    }
+
+    @Test
+    public void stream_relativizeFromRootIsOk() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        JkPathTree pathTree = JkPathTree.of(sampleFolder);
+        pathTree.stream().filter(Files::isDirectory).forEach(System.out::println);
+        pathTree.stream().relativizeFromRoot().forEach(System.out::println);
     }
 
     @Test

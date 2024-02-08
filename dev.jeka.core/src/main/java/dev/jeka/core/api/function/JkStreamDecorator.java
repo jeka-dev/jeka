@@ -14,7 +14,7 @@ import java.util.stream.*;
  */
 public abstract class JkStreamDecorator<T> implements Stream<T> {
 
-    protected final Stream<T> stream;
+    private final Stream<T> stream;
 
     public JkStreamDecorator(Stream<T> stream) {
         this.stream = stream;
@@ -222,5 +222,5 @@ public abstract class JkStreamDecorator<T> implements Stream<T> {
         stream.close();
     }
 
-    // Implement other methods if needed, delegating to the internal stream
+
 }
