@@ -1,10 +1,14 @@
 package dev.jeka.core.api.system;
 
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * This decorator adds indentation for logs nested within a task.
@@ -15,7 +19,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     static final byte LINE_SEPARATOR = 10;
 
-    static final byte[] MARGIN_UNIT = ("   ").getBytes(UTF8);
+    static final byte[] MARGIN_UNIT = ("      ").getBytes(UTF8);
 
     private transient MarginStream marginOut;
 
@@ -52,10 +56,13 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             message = "[" + event.getType() + "] " + message;
         }
         if (logType == JkLog.Type.END_TASK) {
-            // do nothing
+            if (!JkUtilsString.isBlank(message)) {
+                JkUtilsIO.write(stream, MARGIN_UNIT);
+                stream.println(message);
+            }
         } else if (logType== JkLog.Type.START_TASK) {
             marginErr.flush();
-            out.println(message);
+            out.println("Task: " + message);
             marginOut.notifyStart();
             marginErr.notifyStart();
             marginErr.mustPrintMargin = true;

@@ -73,7 +73,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
     public void publishIvy(JkCoordinate coordinate,
                            List<JkIvyPublication.JkIvyPublishedArtifact> publishedArtifacts,
                            JkQualifiedDependencySet dependencies) {
-        JkLog.startTask( "Publish on Ivy repositories");
+        JkLog.startTask( "publish-on-ivy-repos");
         final ModuleDescriptor moduleDescriptor = IvyTranslatorToModuleDescriptor.toIvyPublishModuleDescriptor(
                 coordinate, dependencies, publishedArtifacts);
         final Ivy ivy = IvyTranslatorToIvy.toIvy(JkRepoSet.of(), JkResolutionParameters.of());
@@ -113,7 +113,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             final JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
             JkVersion version = coordinate.getVersion();
             if (!isMaven(resolver) && publishRepo.publishConfig.getVersionFilter().test(version)) {
-                JkLog.startTask("Publish for repository " + resolver);
+                JkLog.startTask("publish-to-repository " + resolver);
                 this.publishIvyArtifacts(resolver, publishedArtifacts, date, moduleDescriptor, ivySettings);
                 JkLog.endTask();
                 count++;
@@ -172,7 +172,8 @@ final class IvyInternalPublisher implements JkInternalPublisher {
             JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(moduleRevisionId);
             JkVersion version = coordinate.getVersion();
             if (isMaven(resolver) && publishRepo.publishConfig.getVersionFilter().test(version)) {
-                JkLog.startTask("Publish %s to Maven repo %s", coordinate, publishRepo.getUrl());
+                JkLog.startTask("publish-artifact-on-maven-repo");
+                JkLog.info("Publish artifact %s to repo %s", coordinate, publishRepo.getUrl());
                 boolean signatureRequired = publishRepo.publishConfig.isSignatureRequired();
                 JkFileSigner signer = publishRepo.publishConfig.getSigner();
                 if (signatureRequired && signer == null) {

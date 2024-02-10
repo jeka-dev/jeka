@@ -19,7 +19,7 @@ final class IvyMessageLogger extends AbstractMessageLogger {
             JkLog.warn(message);
             break;
         case Message.MSG_INFO:
-            JkLog.info(message);
+            JkLog.trace(message);  // This should not appear at jeka info level
             break;
         case Message.MSG_VERBOSE:
             if (JkLog.Verbosity.QUITE_VERBOSE.equals(JkLog.verbosity())) {

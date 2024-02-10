@@ -87,7 +87,7 @@ class MasterBuild extends KBean {
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
-        jacocoForCore.configureForAndApplyTo(coreBuild.load(ProjectKBean.class).project);
+        jacocoForCore.configureAndApplyTo(coreBuild.load(ProjectKBean.class).project);
 
         load(NexusKBean.class).configureNexusRepo(this::configureNexus);
     }
@@ -95,9 +95,9 @@ class MasterBuild extends KBean {
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() throws IOException {
 
-        JkLog.startTask("Building core and plugins");
+        JkLog.startTask("build-core-and-plugins");
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
-            JkLog.startTask("Packaging %s ...", bean);
+            JkLog.startTask("packaging %s", bean);
             JkLog.info(bean.project.getInfo());
             bean.clean();
             bean.pack();
@@ -105,7 +105,7 @@ class MasterBuild extends KBean {
         });
         JkLog.endTask();
         if (runSamples) {
-            JkLog.startTask("Running samples");
+            JkLog.startTask("run-samples");
 
 
             SamplesTester samplesTester = new SamplesTester();
@@ -115,11 +115,11 @@ class MasterBuild extends KBean {
                 pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
             }
 
-            // run sample including springboot scaffolding project
-            pluginScaffoldTester.run();
-
             // run samples
             samplesTester.run();
+
+            // run sample including springboot scaffolding project
+            pluginScaffoldTester.run();
 
             if (jacocoForCore != null) {
                 jacocoForCore.generateExport();
@@ -139,7 +139,7 @@ class MasterBuild extends KBean {
             bomPublication().publish();
             closeAndReleaseRepo();
             JkLog.endTask();
-            JkLog.startTask("Creating GitHub Release");
+            JkLog.startTask("create-github-release");
             Github github = new Github();
             github.ghToken = githubToken;
             github.publishGhRelease();
@@ -147,7 +147,7 @@ class MasterBuild extends KBean {
 
             // If not on 'master' branch, publish only locally
         } else {
-            JkLog.startTask("Publish locally");
+            JkLog.startTask("publish-locally");
             publishLocal();
             JkLog.endTask();
         }
@@ -179,7 +179,7 @@ class MasterBuild extends KBean {
         });
     }
 
-    @JkDoc("Publish all on local repo")
+    @JkDoc("publish-on-local-repo")
     public void publishLocal() {
         getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
         bomPublication().publishLocal();

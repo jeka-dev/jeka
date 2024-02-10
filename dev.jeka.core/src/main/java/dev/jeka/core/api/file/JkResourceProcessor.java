@@ -112,7 +112,7 @@ public final class JkResourceProcessor {
                 : outputDir;
         boolean hasResourceFiles  = resourceTrees.count(1, false) > 0;
         if (!hasResourceFiles) {
-            JkLog.info("No resources to process.");
+            JkLog.trace("No resources to process.");
             return;
         }
         JkLog.startTask("Copy resource files to %s", relativeOutputDir);

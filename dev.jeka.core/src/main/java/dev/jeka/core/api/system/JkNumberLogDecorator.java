@@ -56,16 +56,18 @@ public final class JkNumberLogDecorator extends JkLog.JkLogDecorator {
         }
         String message = event.getMessage();
         if (logType == JkLog.Type.END_TASK) {
-            err.flush();
-            String title = String.format("[%s End] %s: Done in %d milliseconds. ",
-                    toNumber(), message, event.getDurationMs());
-            out.println(title);
+            if (!event.getMessage().isEmpty()) {
+                err.flush();
+                out.println(event.getMessage());
+            }
+            out.println();
             endTask();
 
         } else if (logType == JkLog.Type.START_TASK) {
             startNewTask();
-            String title = String.format("[%s Start] %s", toNumber(), message);
+            String title = String.format("Task %s: %s", toNumber(), message);
             err.flush();
+            out.println();
             out.println(title);
         } else {
             stream.println(message);

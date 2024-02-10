@@ -126,7 +126,7 @@ public final class JkJacoco {
      * Concise method for configuring Jacoco based on the specified project and applying the settings to the designated
      * project's testProcessor.
      */
-    public JkJacoco configureForAndApplyTo(JkProject project) {
+    public JkJacoco configureAndApplyTo(JkProject project) {
         configureFor(project).applyTo(project.testing.testProcessor);
         return this;
     }
@@ -142,7 +142,11 @@ public final class JkJacoco {
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
             process.addAgent(toolProvider.getAgentJar(), agentOptions);
-            JkLog.info("Instrumenting tests with Jacoco agent options : " + agentOptions);
+            String message = "Instrument tests with Jacoco";
+            if (JkLog.isVerbose()) {
+                message += " agent options : " + agentOptions;
+            }
+            JkLog.info(message);
             testProcessor.setForkingProcess(process);
             testProcessor.postActions.append(this::generateExport);
         });
@@ -214,7 +218,7 @@ public final class JkJacoco {
      * Generates XML and HTML reports from the exec report file.
      */
     public void generateExport() {
-        JkLog.info("Jacoco internal report created at : " + execFile);
+        JkLog.trace("Jacoco internal report created at : " + execFile);
         if (!reportOptions.isEmpty()) {
             if (classDir == null) {
                 JkLog.warn("No class dir specified. Cannot run jacoco report.");
@@ -255,7 +259,7 @@ public final class JkJacoco {
                     .setLogCommand(JkLog.isVerbose())
                     .addParams(args)
                     .exec();
-            JkLog.info("Jacoco XML report generated at : %s", OUTPUT_XML_RELATIVE_PATH);
+            JkLog.trace("Jacoco XML report generated at : %s", OUTPUT_XML_RELATIVE_PATH);
         }
     }
 

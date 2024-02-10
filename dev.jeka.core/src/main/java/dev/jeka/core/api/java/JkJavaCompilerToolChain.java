@@ -167,19 +167,22 @@ public final class JkJavaCompilerToolChain {
                     " Specified options : " + printableOptions(options));
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
-            JkLog.info("No source files found in " + compileSpec.getSources());
+            JkLog.trace("No source files found in " + compileSpec.getSources());
             return true;
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compile " + compileSpec.getSources()+ " to " + outputDir;
+
         if (JkLog.isVerbose()) {
+            String message = "Compile " + compileSpec.getSources()+ " to " + outputDir;
             message = message + " using options : \n" + printableOptions(options);
+            JkLog.startTask(message);
         }
-        JkLog.startTask(message);
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
                 .orElse(compileSpec.minJavaVersion());
         final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
-        JkLog.endTask("Compilation " + (result ? "succeed" : "failed") + " in %d millis");
+        if (JkLog.isVerbose()) {
+            JkLog.endTask("Compilation " + (result ? "succeed" : "failed") + " in %d millis");
+        }
         return result;
     }
 

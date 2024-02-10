@@ -44,7 +44,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="project#clean make -lri -lsu -lst -lna -lv=false" />
+			<arg line="project#clean make -lri -lst" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /*
@@ -39,6 +41,9 @@ class EngineBase {
     private static final String[] PRIVATE_GLOB_PATTERN = new String[] { "**/_*", "_*"};
 
     private static final JkPathMatcher JAVA_JEKA_SRC_MATCHER = JkPathMatcher.of(true,"**.java")
+            .and(false,PRIVATE_GLOB_PATTERN);
+
+    private static final JkPathMatcher JAVA_CLASS_MATCHER = JkPathMatcher.of(true,"**.class")
             .and(false,PRIVATE_GLOB_PATTERN);
 
     private static final JkPathMatcher KOTLIN_JEKA_SRC_MATCHER = JkPathMatcher.of(true,"**.kt")
@@ -151,25 +156,25 @@ class EngineBase {
             return classpathSetupResult;
         }
 
-         JkLog.startTask("Resolve classpath for jeka-src");
+         JkLog.traceStartTask("Resolve classpath for jeka-src");
 
         if (behaviorSettings.cleanWork) {
             Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
-            JkLog.info("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
+            JkLog.trace("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
 
         // That nice that this clean occurs here, cause it will happen for sub-basedir
         if (Environment.behavior.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
-            JkLog.info("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
+            JkLog.trace("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
             JkPathTree.of(outputDir).deleteContent();
         }
 
         // Parse info from source code
-         JkLog.startTask("Scan jeka-src code for finding dependencies");
+         JkLog.traceStartTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
-        JkLog.endTask();
+        JkLog.traceEndTask();
 
         // Compute and get the classpath from sub-dirs
         List<EngineBase> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
@@ -192,8 +197,9 @@ class EngineBase {
                 .and(jekaPropsDeps)
                 .and(parsedSourceInfo.getDependencies())
                 .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
-        JkPathSequence kbeanClasspath = JkPathSequence.of(dependencyResolver.resolveFiles(dependencies))
-                .and(JkLocator.getJekaJarPath());
+
+       JkPathSequence kbeanClasspath = JkPathSequence.of(dependencyResolver.resolveFiles(dependencies))
+                         .and(JkLocator.getJekaJarPath());
 
         // compute classpath for compiling 'jeka-src'
         JkPathSequence compileClasspath = kbeanClasspath
@@ -202,9 +208,6 @@ class EngineBase {
 
         // Compile jeka-src
         CompileResult compileResult = compileJekaSrc(compileClasspath, parsedSourceInfo.compileOptions);
-
-        // Add jeka-src compiled class to kbean classpath
-        kbeanClasspath = kbeanClasspath.andPrepend(jekaSrcClassDir);
 
         // Add compile result to he run compile
         JkPathSequence runClasspath = compileClasspath.and(compileResult.extraClasspath);
@@ -226,26 +229,23 @@ class EngineBase {
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
                 runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs);
-        JkLog.endTask();
+        JkLog.traceEndTask();
         return classpathSetupResult;
     }
 
     KBeanResolution resolveKBeans() {
-         if (classpathSetupResult == null) {
-             resolveClassPaths();
-         }
-         if (kbeanResolution != null) {
+        if (classpathSetupResult == null) {
+            resolveClassPaths();
+        }
+        if (kbeanResolution != null) {
              return kbeanResolution;
-         }
-         JkLog.startTask("Resolve KBeans");
+        }
 
          // Find all KBean class available for this
-        JkLog.startTask("Scan classpath");
-         List<String> kbeanClassNames = findKBeanClassNames();
-         JkLog.endTask();
+        List<String> kbeanClassNames = findKBeanClassNames();
 
-         // Filter to find kbeans defined in jeka-src
-         List<String> localKbeanClassNames = JkPathTree.of(jekaSrcClassDir).streamBreathFirst()
+        // Filter to find kbeans defined in jeka-src
+        List<String> localKbeanClassNames = JkPathTree.of(jekaSrcClassDir).streamBreathFirst()
                  .excludeDirectories()
                  .relativizeFromRoot()
                  .filter(path -> path.getFileName().toString().endsWith(".class"))
@@ -268,7 +268,6 @@ class EngineBase {
          }
 
          kbeanResolution = new KBeanResolution(kbeanClassNames, localKbeanClassNames, initKbeanClassName, defaultKBeanClassName);
-         JkLog.endTask();
          return kbeanResolution;
     }
 
@@ -279,7 +278,6 @@ class EngineBase {
         if (this.kbeanResolution == null) {
             resolveKBeans();
         }
-        JkLog.startTask("Resolve KBean commands");
 
         // We need to run in the classpath computed in previous steps
         AppendableUrlClassloader.addEntriesOnContextClassLoader(this.classpathSetupResult.runClasspath);
@@ -304,8 +302,6 @@ class EngineBase {
         effectiveKeanActions.stream()
                 .map(action -> toEngineCommand(action, kbeanClasses))
                 .forEach(engineCommands::add);
-
-        JkLog.endTask();;
 
         return engineCommands;
     }
@@ -400,7 +396,10 @@ class EngineBase {
         if (JkLog.isVerbose()) {
             kotlinCompiler.addOption("-verbose");
         }
+
+        // perform compilation in console spinner
         boolean success = kotlinCompiler.compile(kotlinCompileSpec);
+
         return new KotlinCompileResult(success, kotlinCompiler.getStdJdk8Lib());
     }
 
@@ -415,35 +414,51 @@ class EngineBase {
             throw new JkException(NO_JDK_MSG);
         }
         return JkJavaCompilerToolChain.of().compile(javaCompileSpec);
-
     }
 
     private List<String> findKBeanClassNames() {
 
-         JkPathSequence kbeanClasspath = classpathSetupResult.kbeanClasspath;
+        JkInternalClasspathScanner scanner = JkInternalClasspathScanner.of();
 
-         // TODO local kbeans  should not be cached, at least not like this
-         Path classpathCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classpath.txt");
-         JkPathSequence cachedClasspath = JkPathSequence.readFromQuietly(classpathCache);
-         Path kbeanCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classes.txt");
-         if (cachedClasspath.equals(kbeanClasspath)) {
+        // Find classes in jeka-src-classes. As it is small scope, we don't need caching
+        final List<String> jekaSrcKBeans;
+        if (JkPathTree.of(jekaSrcClassDir).withMatcher(JAVA_CLASS_MATCHER).containFiles()) {
+            AppendableUrlClassloader srcClassloader = createScanClassloader(jekaSrcClassDir);
+            jekaSrcKBeans = scanner.findClassesExtending(srcClassloader, KBean.class, jekaSrcClassDir);
+        } else {
+            jekaSrcKBeans = Collections.emptyList();
+        }
 
+        // Find KBeans in dependencies. We need caching as there are potentially a lot of jars to scan
+        JkPathSequence kbeanClasspath = classpathSetupResult.kbeanClasspath;
+
+        // -- Look cached result in files
+        Path classpathCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classpath.txt");
+        JkPathSequence cachedClasspath = JkPathSequence.readFromQuietly(classpathCache);
+        Path kbeanCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classes.txt");
+
+        // -- If cache matches, returns cached resul
+        if (cachedClasspath.equals(kbeanClasspath)) {
              List<String> cachedKbeans = JkUtilsIterable.readStringsFrom(kbeanCache, "\n");
              if (!cachedKbeans.isEmpty()) {
-                 return cachedKbeans;
+                 List<String> result = new LinkedList<>(jekaSrcKBeans);
+                 result.addAll(cachedKbeans);
+                 return result;
              }
          }
 
-         // Creates a classloader tailored for scanning
-         AppendableUrlClassloader scannedClassloader =
-                 ((AppendableUrlClassloader) JkUrlClassLoader.ofCurrent().get()).copy();
-         scannedClassloader.addEntry(classpathSetupResult.kbeanClasspath);
+        // -- Scan deps
+        AppendableUrlClassloader depClassloader = createScanClassloader(classpathSetupResult.kbeanClasspath);
+        List<String> depsKBeans = scanner.findClassesExtending(depClassloader, KBean.class, true, true);
 
-         List<String> result = JkInternalClasspathScanner.of()
-                 .findClassesExtending(scannedClassloader, KBean.class, true, true);
-         kbeanClasspath.writeTo(classpathCache);
-         JkUtilsIterable.writeStringsTo(kbeanCache, "\n", result);
-         return result;
+        // -- Update cache
+        kbeanClasspath.writeTo(classpathCache);
+        JkUtilsIterable.writeStringsTo(kbeanCache, "\n", depsKBeans);
+
+        // Prepare and return result
+        List<String> result = new LinkedList<>(jekaSrcKBeans);
+        result.addAll(depsKBeans);
+        return result;
     }
 
     private Map<String, Class<? extends KBean>> resolveKBeanClasses(
@@ -500,7 +515,7 @@ class EngineBase {
                                     List<EngineBase> subBaseDirs) {
             this.compileResult = compileResult;
             this.runClasspath = runClasspath;
-            this.kbeanClasspath = kbeanClasspath;
+            this.kbeanClasspath = kbeanClasspath;  // does not contain jeka-src-classes
             this.exportedClasspah = exportedClasspath;
             this.exportedDependencies = exportedDependencies;
             this.subBaseDirs = subBaseDirs;
@@ -560,6 +575,14 @@ class EngineBase {
             this.success = success;
             this.extraClasspath = extraClasspath;
         }
+    }
+
+    private static AppendableUrlClassloader createScanClassloader(Iterable<Path> paths) {
+        // Creates a classloader tailored for scanning
+        AppendableUrlClassloader scannedClassloader =
+                ((AppendableUrlClassloader) JkUrlClassLoader.ofCurrent().get()).copy();
+        scannedClassloader.addEntry(paths);
+        return scannedClassloader;
     }
 
 }

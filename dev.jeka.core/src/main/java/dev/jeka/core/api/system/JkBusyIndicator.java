@@ -23,7 +23,7 @@ public class JkBusyIndicator {
         this.printStream = printStream;
     }
 
-    public static void start(String message) {
+    public static void start(PrintStream printStream, String message) {
         if (!JkLog.isAcceptAnimation()) {
             return;
         }
@@ -31,10 +31,11 @@ public class JkBusyIndicator {
             throw new IllegalStateException("A running instance of Busy Indicator is already running. " +
                     "Stop it prior starting a new one.");
         }
-        instance = new JkBusyIndicator(message, JkLog.getOutPrintStream());
+        instance = new JkBusyIndicator(message, printStream);
         instance.printStream.print(instance.text + " ");
         instance.printStream.flush();
         instance.thread = new Thread(instance::round);
+        instance.thread.setPriority(Thread.MIN_PRIORITY);
         instance.thread.setName("Jeka-busyIndicator");
         instance.thread.start();
     }
@@ -58,21 +59,21 @@ public class JkBusyIndicator {
                 }
             }
         }
-        printStream.print(' ');  // On some consoles, '\b' does only a cursor left move without deleting the content
-        printStream.print('\b');
+        printStream.write(' ');  // On some consoles, '\b' does only a cursor left move without deleting the content
+        printStream.write('\b');
         for (int i = 0; i <= instance.text.length(); i++) {
-            printStream.print('\b');
-            printStream.print(' ');
-            printStream.print('\b');
+            printStream.write('\b');
+            printStream.write(' ');
+            printStream.write('\b');
         }
         printStream.flush();
     }
 
     private void tic(char character) {
-        printStream.print(character);
+        printStream.write(character);
         printStream.flush();
         JkUtilsSystem.sleep(WAIT_TIME);
-        printStream.print('\b');
+        printStream.write('\b');
     }
 
 }

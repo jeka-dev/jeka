@@ -54,15 +54,19 @@ public class JkUtilsNet {
 
     }
 
-    public static boolean isStatusOk(String url) {
+    public static boolean isStatusOk(String url, boolean log) {
         try {
             URL actualUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) actualUrl.openConnection();
             connection.setRequestMethod("GET");
+            if (log) {
+                System.out.printf("Pinging %s ...", url);
+            }
             connection.connect();
-
             int statusCode = connection.getResponseCode();
-            System.out.printf("Pinging %s returned %s%n", url, statusCode);
+            if (log) {
+                System.out.printf(" result status %s%n", statusCode);
+            }
             return isOK(statusCode);
         } catch (ConnectException e) {
            return false;  // can't connect may mean no server listen

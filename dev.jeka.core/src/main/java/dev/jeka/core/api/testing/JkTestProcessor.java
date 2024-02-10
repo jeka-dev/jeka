@@ -159,11 +159,10 @@ public final class JkTestProcessor {
         }
         final JkTestResult result;
         preActions.run();
+        JkLog.startTask("execute-tests");
         if (forkingProcess == null) {
-            JkLog.startTask("Executing tests");
             result = launchInClassloader(extraTestClasspath, testSelection);
         } else {
-            JkLog.startTask("Execute tests in forked process");
             result = launchInForkedProcess(extraTestClasspath, testSelection);
         }
         postActions.run();

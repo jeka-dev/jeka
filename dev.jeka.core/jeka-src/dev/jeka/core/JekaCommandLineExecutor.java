@@ -65,7 +65,7 @@ public abstract class JekaCommandLineExecutor {
                 .addParamsIf(!cmdLine.contains("-Djeka.java.version="), "-Djeka.java.version=8")
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
                 .inheritJkLogOptions()
-                .addParams("-dcf", "-lst", "-cw", "-lsu", "-lri")
+                .addParams("-dcf", "-lst", "-lsu", "-lri")
 
 
                 // set explicitly jeka-core.jar to use, otherwise it may fetch a Jeka version from maven

@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
  */
 public class JkProjectCompilation {
 
-    public static final String RESOURCES_PROCESS_ACTION = "resources-process";
+    public static final String RESOURCES_PROCESS_ACTION = "process-resources";
 
-    public static final String JAVA_SOURCES_COMPILE_ACTION = "java-sources-compile";
+    public static final String JAVA_SOURCES_COMPILE_ACTION = "compile-java-sources";
 
     private final JkProject project;
 
@@ -158,6 +158,10 @@ public class JkProjectCompilation {
     public JkProjectCompilation addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {
         this.sourceGenerators.add(sourceGenerator);
         return this;
+    }
+
+    public boolean isDone() {
+        return done;
     }
 
     public List<Path> getGeneratedSourceDirs() {

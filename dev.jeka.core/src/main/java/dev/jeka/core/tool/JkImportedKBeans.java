@@ -122,7 +122,7 @@ public final class JkImportedKBeans {
     @SuppressWarnings("unchecked")
     private static <T extends KBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
-        JkLog.startTask("Import bean " + importedBeanClass + " from " + importedProjectDir);
+        JkLog.traceStartTask("Import bean " + importedBeanClass.getName() + " from " + importedProjectDir);
 
         // Not sure it is necessary. Is so, explain why.
         JkRunbase.get(importedProjectDir);
@@ -130,7 +130,7 @@ public final class JkImportedKBeans {
         JkRunbase.setBaseDirContext(importedProjectDir);
         final T result = JkRunbase.get(importedProjectDir).load(importedBeanClass);
         JkRunbase.setBaseDirContext(Paths.get(""));
-        JkLog.endTask();
+        JkLog.traceEndTask();
         return result;
     }
 

@@ -153,12 +153,12 @@ public final class JkRunbase {
             String projectDisplayName = baseDir.toString().isEmpty() ?
                     baseDir.toAbsolutePath().getFileName().toString()
                     : baseDir.toString();
-            JkLog.startTask("Instantiate KBean %s in project '%s'", beanClass, projectDisplayName);
+            JkLog.traceStartTask("Instantiate KBean %s in project '%s'", beanClass.getName(), projectDisplayName);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
-            JkLog.endTask();
+            JkLog.traceEndTask();
         }
         return result;
     }
@@ -226,13 +226,13 @@ public final class JkRunbase {
                 .collect(Collectors.toList());
 
         // Instantiate & register beans
-        JkLog.startTask("Register KBeans");
+        JkLog.traceStartTask("Register KBeans");
         commands.stream()
                 //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
                 .forEach(this::load);
-        JkLog.endTask();
+        JkLog.traceEndTask();
 
         // Once KBeans has bean initialised. #postInit is invoked on each, so they can act upon final settings
         // of other KBeans

@@ -166,7 +166,7 @@ public class JkRunnables implements Runnable {
         final boolean doLog = log;
         entries.forEach(entry -> {
             if (doLog) {
-                JkLog.startTask("running " + entry.name);
+                JkLog.startTask(entry.name);
             }
             entry.runnable.run();
             if (doLog) {

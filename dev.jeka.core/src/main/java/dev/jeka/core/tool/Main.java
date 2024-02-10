@@ -3,10 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.system.JkBusyIndicator;
-import dev.jeka.core.api.system.JkInfo;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -76,9 +73,9 @@ public final class Main {
             JkLog.setAcceptAnimation(logAnimation);
 
             if (!logs.startUp) {  // log in memory and flush in console only on error
-                JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
-                JkMemoryBufferLogDecorator.activateOnJkLog();
-                JkLog.info("");   // To have a br prior the memory log is flushed
+                //JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
+                //JkMemoryBufferLogDecorator.activateOnJkLog();
+                //JkLog.info("");   // To have a br prior the memory log is flushed
             }
 
 
@@ -90,12 +87,10 @@ public final class Main {
 
             EngineBase engineBase = EngineBase.forLegacy(baseDir,
                     JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
+            JkConsoleSpinner.of("Boot-Strapping JeKa...").run(engineBase::resolveKBeans);
             engineBase.resolveCommandEngine(Environment.parsedCmdLine.getBeanActions());
             engineBase.initRunbase();
-            if (JkMemoryBufferLogDecorator.isActive()) {
-                JkBusyIndicator.stop();
-                JkMemoryBufferLogDecorator.inactivateOnJkLog();
-            }
+
             engineBase.run();
 
             // ------------
@@ -113,9 +108,6 @@ public final class Main {
             if (e instanceof JkException && !shouldPrintExceptionDetails()) {
                 System.err.println(e.getMessage());
             } else {
-                if (JkMemoryBufferLogDecorator.isActive()) {
-                    JkMemoryBufferLogDecorator.flush();
-                }
                 handleRegularException(e);
             }
             if (logs.banner) {

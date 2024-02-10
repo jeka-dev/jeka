@@ -170,9 +170,9 @@ public class PicocliMainCommand {
                 JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
             }
             if (!logs.startUp) {  // log in memory and flush in console only on error
-                JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
-                JkMemoryBufferLogDecorator.activateOnJkLog();
-                JkLog.info("");   // To have a br prior the memory log is flushed
+                //JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
+              //  JkMemoryBufferLogDecorator.activateOnJkLog();
+                // JkLog.info("");   // To have a br prior the memory log is flushed
             }
             final Engine engine = new Engine(baseDir);
             engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok

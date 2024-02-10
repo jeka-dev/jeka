@@ -318,7 +318,7 @@ final class IvyPublisherForMaven {
         final Repository repository = this.resolver.getRepository();
         final String dest = completePath(destination);
         // Keep leading spaces for nice formatting with FLAT log decorator
-        JkLog.info("  Publish file " + dest);
+        JkLog.info("- " + dest);
         try {
             repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksumAlgos) {
@@ -326,14 +326,14 @@ final class IvyPublisherForMaven {
                 final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
                 Files.write(temp, checkSum.getBytes());
                 final String csDest = dest + "." + algo;
-                JkLog.info("  Publish file " + csDest);
+                JkLog.info("- " + csDest);
                 repository.put(null, temp.toFile(), csDest, overwrite);
                 Files.deleteIfExists(temp);
             }
             if (this.signer != null) {
                 final Path signed = signer.sign(source);
                 final String signedDest = dest + ".asc";
-                JkLog.info("  Publish file " + signedDest);
+                JkLog.info("- " + signedDest);
                 repository.put(null, signed.toFile(), signedDest, overwrite);
             }
         } catch (final IOException e) {

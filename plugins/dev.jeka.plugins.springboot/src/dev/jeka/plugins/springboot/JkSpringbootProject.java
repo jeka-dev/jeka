@@ -157,7 +157,7 @@ public final class JkSpringbootProject {
             project.compilation.runIfNeeded();
             project.testing.runIfNeeded();
         }
-        JkLog.startTask("Packaging bootable jar");
+        JkLog.startTask("pack-bootable-jar");
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
         final List<Path> embeddedJars = project.packaging.resolveRuntimeDependenciesAsFiles();
         JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target,

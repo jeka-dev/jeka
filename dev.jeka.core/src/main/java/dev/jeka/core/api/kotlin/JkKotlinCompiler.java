@@ -335,9 +335,9 @@ public final class JkKotlinCompiler {
         if (JkLog.verbosity().isVerbose()) {
             message = message + " to " + outputDir + " using options : " + String.join(" ", effectiveOptions);
         }
-        JkLog.startTask(message);
+        JkLog.traceStartTask(message);
         final Result result = run(compileSpec);
-        JkLog.endTask();
+        JkLog.traceEndTask();
         if (!result.success) {
             if (failOnError) {
                 throw new IllegalStateException("Kotlin compiler failed " + result.params);
@@ -390,8 +390,8 @@ public final class JkKotlinCompiler {
             JkLog.warn("No Kotlin source found in " + compileSpec.getSources());
             return new Result(true, Collections.emptyList());
         }
-        JkLog.info(sourcePaths.size() + " files to compile.");
-        JkLog.info("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
+        JkLog.trace(sourcePaths.size() + " files to compile.");
+        JkLog.trace("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
         JkAbstractProcess<?> kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
         JkKotlinJvmCompileSpec effectiveSpec = compileSpec.copy();
@@ -400,14 +400,14 @@ public final class JkKotlinCompiler {
             loggedOptions.add(plugin.toOption());
         }
         if (command != null) {
-            JkLog.info("Use kotlin compiler : " + command + " with options " + loggedOptions);
+            JkLog.trace("Use kotlin compiler : " + command + " with options " + loggedOptions);
             kotlincProcess = JkProcess.of(command)
                     .addParams(this.jvmOptions.stream()
                             .map(JkKotlinCompiler::toJavaOption)
                             .collect(Collectors.toList()));
         } else {
             JkLog.trace("Use Kotlin compiler using jars %s", jarsVersionAndTarget);
-            JkLog.info("Use Kotlin compiler with options %s", loggedOptions);
+            JkLog.trace("Use Kotlin compiler with options %s", loggedOptions);
             kotlincProcess = JkJavaProcess.ofJava( "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
                     .setClasspath(jarsVersionAndTarget.jars)
                     .addJavaOptions(this.jvmOptions)

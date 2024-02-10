@@ -240,7 +240,7 @@ public final class JkDependencyResolver  {
         String message = bomResolvedDependencies.getEntries().size() == 1 ?
                 "Resolve " + bomResolvedDependencies.getDependencies().get(0).toString()
                 : "Resolve " + bomResolvedDependencies.getEntries().size() + " declared dependencies";
-        JkLog.startTask(message);
+        JkLog.traceStartTask(message);
         JkResolveResult resolveResult;
         if (hasModule) {
             JkUtilsAssert.state(!effectiveRepos().getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
@@ -254,7 +254,7 @@ public final class JkDependencyResolver  {
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         int moduleCount = resolveResult.getInvolvedCoordinates().size();
         int fileCount = resolveResult.getFiles().getEntries().size();
-        JkLog.info("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
+        JkLog.trace("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
         if (JkLog.isVerbose()) {
             resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
         }
@@ -266,7 +266,7 @@ public final class JkDependencyResolver  {
             }
             JkLog.warn(report.toString());
         }
-        JkLog.endTask();
+        JkLog.traceEndTask();
         if (useInMemoryCache) {
             this.cachedResults.put(bomResolvedDependencies, resolveResult);
         }

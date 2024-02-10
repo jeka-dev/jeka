@@ -133,8 +133,12 @@ public class JkProjectTesting {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("Process tests");
-        this.project.compilation.runIfNeeded();
+        JkLog.startTask("process-tests");
+        if (!project.compilation.isDone()) {
+            JkLog.startTask("process-production-code");     // Make explicit task for clearer output
+            this.project.compilation.runIfNeeded();
+            JkLog.endTask();
+        }
         this.compilation.run();
         if (!JkPathTree.of(this.compilation.layout.resolveClassDir()).containFiles()) {
             JkLog.endTask("No tests to execute.");

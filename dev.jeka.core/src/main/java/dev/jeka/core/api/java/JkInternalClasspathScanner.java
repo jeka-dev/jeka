@@ -28,6 +28,8 @@ public interface JkInternalClasspathScanner {
 
     List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, boolean scanJars, boolean scanFolder);
 
+    List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, Path classDir);
+
     List<String> findClassesInheritingOrAnnotatesWith(ClassLoader classLoader,
                                                       Class<?> baseClass,
                                                       Predicate<String> scanElementFilter,
@@ -56,11 +58,10 @@ public interface JkInternalClasspathScanner {
             }
             String IMPL_CLASS = "dev.jeka.core.api.java.embedded.classgraph.ClassGraphClasspathScanner";
 
-            // Another version of classgraph may be present on the classpath
+            // Another version of classGraph may be present on the classpath
             // Some libraries as org.webjars:webjars-locator-core use it.
             // To for this library version mw need to create a dedicated classloader
             // with child first strategy.
-
             JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties,
                     "io.github.classgraph:classgraph:4.8.162");
             URL[] urls = JkPathSequence.of(classgraphJar.get())
@@ -76,19 +77,13 @@ public interface JkInternalClasspathScanner {
             if (clazz != null) {
                 return JkUtilsReflect.invokeStaticMethod(clazz, "of");
             }
-
             JkInternalEmbeddedClassloader internalClassloader = JkInternalEmbeddedClassloader
                     .ofMainEmbeddedLibs(classgraphJar.get());
-
-
             CACHED_INSTANCE = internalClassloader
                     .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
-
-
-
             JkUtilsAssert.argument(internalClassloader.get().isDefined(IMPL_CLASS), "Class %s not found in %s",
                 IMPL_CLASS,  "embedded lib");
-                 */
+            */
 
 
             return CACHED_INSTANCE;

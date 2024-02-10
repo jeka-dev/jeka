@@ -1,9 +1,14 @@
 package _dev;
 
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
+
+import java.io.Console;
 
 
 @JkInjectClasspath("dev.jeka:nodejs-plugin:0.11.x-SNAPSHOT")
@@ -16,6 +21,20 @@ class Build extends KBean {
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
         load(SelfKBean.class)
                 .setMainClass(null);
+    }
+
+    @JkDoc("Used by sample tests o check if this bean is considered as the default kbean")
+    public void ok() {
+        System.out.println("ok");
+    }
+
+    public void hello() {
+        // System.setOut(JkUtilsIO.nopPrintStream());
+        System.err.println("hello");
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(Build.class, args).hello();
     }
 
 }

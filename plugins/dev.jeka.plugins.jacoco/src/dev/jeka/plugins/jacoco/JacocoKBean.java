@@ -49,7 +49,7 @@ public class JacocoKBean extends KBean {
         if (!JkUtilsString.isBlank(this.agentOptions)) {
             jacoco.addAgentOptions(agentOptions.split(","));
         }
-        jacoco.configureForAndApplyTo(project);
+        jacoco.configureAndApplyTo(project);
     }
 
 }

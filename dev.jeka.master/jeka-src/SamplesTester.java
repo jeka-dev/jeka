@@ -13,7 +13,15 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Run Self-App
         run("dev.jeka.samples.selfapp", "-Djeka.java.version=17 self#buildJar");
-        run("dev.jeka.samples.baselib", "self#buildJar");
+
+        // Test also if the KBean hosted in jeka-src, is considered as the default KBean
+        run("dev.jeka.samples.baselib", "self#buildJar #ok");
+
+        // Test caching by running twice
+        Path sampleBaseDir = Paths.get("../samples/dev.jeka.samples.baselib").normalize();
+        runWithDistribJekaShell(sampleBaseDir, "#ok");
+        runWithDistribJekaShell(sampleBaseDir, "#ok");
+
 
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.springboot", "-lna  " +
@@ -30,8 +38,6 @@ class SamplesTester extends JekaCommandLineExecutor {
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.jacoco", "-lna +../../plugins/dev.jeka.plugins.jacoco project#cleanPack " +
                 "project#pack #checkGeneratedReport");
-
-
 
         // No Jeka deps test samples
         run("dev.jeka.samples.basic", "-kb=simpleProject #cleanPackPublish #checkedValue=A #checkValueIsA");

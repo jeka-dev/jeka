@@ -310,7 +310,7 @@ public final class JkProject implements JkIdeSupportSupplier {
      */
     public JkProject clean() {
         Path output = getOutputDir();
-        JkLog.info("Clean output directory " + output.toAbsolutePath().normalize());
+        JkLog.trace("Clean output directory " + output.toAbsolutePath().normalize());
         if (Files.exists(output)) {
             JkPathTree.of(output).deleteContent();
         }

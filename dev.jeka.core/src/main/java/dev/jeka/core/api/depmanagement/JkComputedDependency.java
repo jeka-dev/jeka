@@ -119,7 +119,7 @@ public class JkComputedDependency implements JkFileDependency {
     @Override
     public List<Path> getFiles() {
         if (this.hasMissingFilesOrEmptyDirs()) {
-            JkLog.startTask("Build dependency : " + this);
+            JkLog.startTask("build-dependency (%s)", this);
             runnable.run();
             JkLog.endTask();
         }

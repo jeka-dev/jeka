@@ -153,10 +153,14 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
              boolean scanFolder) {
 
         ClassGraph classGraph = new ClassGraph()
-                .enableClassInfo()
-                .rejectPackages(REJECTED_PACKAGES)
+                .disableNestedJarScanning()
+                .disableRuntimeInvisibleAnnotations()
                 .disableNestedJarScanning()
                 .disableModuleScanning()
+                .enableClassInfo()
+
+                .rejectPackages(REJECTED_PACKAGES)
+
                 .ignoreParentClassLoaders()
                 .overrideClassLoaders(classLoader)
                 .ignoreClassVisibility();
@@ -167,7 +171,34 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
             classGraph.disableDirScanning();
         }
 
-        try (ScanResult scanResult = classGraph.scan()) {
+        try (ScanResult scanResult = classGraph.scan(4)) {  // using 4 instead default don't change perf
+            return scanResult.getAllClasses().stream()
+                    .filter(classInfo -> !classInfo.isAbstract())
+                    .filter(classInfo -> classInfo.extendsSuperclass(KBean.class.getName()))
+                    .map(ClassInfo::getName)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, Path classDir) {
+        String pathElementPah = classDir.toAbsolutePath().normalize().toString();
+        ClassGraph classGraph = new ClassGraph()
+                .disableNestedJarScanning()
+                .disableRuntimeInvisibleAnnotations()
+                .disableNestedJarScanning()
+                .disableModuleScanning()
+                .disableJarScanning()
+                .enableClassInfo()
+
+                //.verbose()
+
+                .filterClasspathElements(path -> path.equals(pathElementPah))
+                .ignoreParentClassLoaders()
+                .overrideClassLoaders(classLoader)
+                .ignoreClassVisibility();
+
+        try (ScanResult scanResult = classGraph.scan()) {  // using 4 instead default don't change perf
             return scanResult.getAllClasses().stream()
                     .filter(classInfo -> !classInfo.isAbstract())
                     .filter(classInfo -> classInfo.extendsSuperclass(KBean.class.getName()))

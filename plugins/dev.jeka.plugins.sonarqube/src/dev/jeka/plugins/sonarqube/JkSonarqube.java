@@ -9,6 +9,7 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProperties;
@@ -171,23 +172,31 @@ public final class JkSonarqube {
      * Executes SonarQube analysis.
      */
     public void run() {
-        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("https://localhost:9000");
+        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("http://localhost:9000");
+
+        JkLog.startTask("run-sonar-analysis");
         if (pingServer) {
-            if (!JkUtilsNet.isStatusOk(hostUrl)) {
+            if (!JkUtilsNet.isStatusOk(hostUrl, JkLog.isVerbose())) {
                 throw new JkException("The Sonarqube url %s is not available.%nCheck server " +
                         "or disable this ping check (sonarqube#pingServer=false)", hostUrl);
             }
+            JkLog.info("Sonarqube server url : %s", hostUrl);
         }
-        JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
 
+        JkConsoleSpinner.of("Running Sonarqube")
+                .setAlternativeMassage("Running Sonarqube. It may take a while ...")
+                .run(this::runAndCheck);
+        JkLog.endTask("Sonar analysis performed in %d millis.");
+    }
+
+    private void runAndCheck() {
         Path jar = getToolJar();
         JkProcResult procResult = javaProcess(jar)
-                .addParamsIf(JkLog.isVerbose(), "-X")
+                .addParamsIf(JkLog.verbosity() == JkLog.Verbosity.QUITE_VERBOSE, "-X")
                 .exec();
         if (!procResult.hasSucceed()) {
             throw new JkException("SonarScanner command failed. Use--verbose to get more details.");
         }
-        JkLog.endTask();
     }
 
     /**
@@ -333,8 +342,7 @@ public final class JkSonarqube {
                 .setFailOnError(JkLog.isVerbose())
                 .addParams(toProperties())
                 .setLogCommand(JkLog.isVerbose())
-                .setInheritIO(logOutput)
-                .setLogWithJekaDecorator(false);
+                .setLogWithJekaDecorator(JkLog.isVerbose());
     }
 
     private List<String> toProperties() {
@@ -379,7 +387,7 @@ public final class JkSonarqube {
                 "Sonarqube has to run on JRE >= 11. You are running on version " + javaVersion);
         if (this.scannerVersion == null) {
             URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
-            JkLog.info("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
+            JkLog.trace("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
             return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
         JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",
@@ -401,7 +409,7 @@ public final class JkSonarqube {
             throw new IllegalStateException(sb.toString());
         }
         JkVersion effectiveVersion = resolveResult.getVersionOf(coordinate.getModuleId());  // Get effective version if specified one is '+'
-        JkLog.info("Run sonar scanner " + effectiveVersion);
+        JkLog.trace("Use sonar scanner %s", effectiveVersion);
         return resolveResult.getFiles().getEntries().get(0);
     }
 

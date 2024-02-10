@@ -16,14 +16,14 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
 
     private final PrintStream bufferStream = new PrintStream(byteArrayBufferStream);
 
-    private final PrintStream originalTargetOut;
+    private final PrintStream originalOut;
 
-    private final PrintStream originalTargetErr;
+    private final PrintStream originalErr;
 
     private JkMemoryBufferLogDecorator(JkLog.JkLogDecorator delegate) {
         this.delegate = delegate;
-        this.originalTargetOut = delegate.getTargetOut();
-        this.originalTargetErr = delegate.getTargetErr();
+        this.originalOut = delegate.getTargetOut();
+        this.originalErr = delegate.getTargetErr();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
     public static void inactivateOnJkLog() {
         JkUtilsAssert.state(jkLogInstance != null, "This decorator is not currently activated.");
         JkLog.JkLogDecorator delegate = jkLogInstance.delegate;
-        delegate.init(jkLogInstance.originalTargetOut, jkLogInstance.originalTargetErr);
+        delegate.init(jkLogInstance.originalOut, jkLogInstance.originalErr);
         jkLogInstance = null;
         JkLog.setDecorator(delegate);
     }

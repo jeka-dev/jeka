@@ -51,11 +51,10 @@ public final class JkFlatLogDecorator extends JkLog.JkLogDecorator {
                 err.flush();
                 out.println(event.getMessage());
             }
-            // Do nothing
         } else if (logType == JkLog.Type.START_TASK) {
             err.flush();
-            out.print(message);
-            out.println(" ...");
+            out.println();
+            out.println("Task: " + message);
         } else {
             stream.println(message);
         }

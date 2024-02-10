@@ -21,7 +21,7 @@ class Environment {
 
     static ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(new String[0]);
 
-    static EnvLogSettings logs = new EnvLogSettings(false, false, false, false, false, false, JkLog.Style.FLAT, false, false);
+    static EnvLogSettings logs = new EnvLogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false, false);
 
     static EnvBehaviorSettings behavior = new EnvBehaviorSettings(null, false, false, false);
 
@@ -176,7 +176,7 @@ class Environment {
             populateOptions(Arrays.asList(rawArgs));
 
             this.logAnimation = valueOf(boolean.class, map, null, "log.animation", "la");
-            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.FLAT, "log.style", "ls");
+            this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
             this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
 
         }

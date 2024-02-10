@@ -3,7 +3,6 @@ package _dev;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.SpringbootKBean;
@@ -30,11 +29,13 @@ class SelfAppBuild extends KBean {
     protected void init() {
 
         // configure image
-        load(DockerKBean.class).customize(dockerBuild -> dockerBuild
-                .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
-                .addExtraFile(getBaseDir().resolve("jeka/local.properties"), "/toto.txt")
-                .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
-        );
+        if (getRunbase().find(DockerKBean.class).isPresent()) {
+            load(DockerKBean.class).customize(dockerBuild -> dockerBuild
+                    .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
+                    .addExtraFile(getBaseDir().resolve("jeka/local.properties"), "/toto.txt")
+                    .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
+            );
+        }
     }
 
     public void clean() {

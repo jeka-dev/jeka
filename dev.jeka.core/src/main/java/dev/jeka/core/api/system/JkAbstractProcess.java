@@ -309,7 +309,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         if (JkLog.isVerbose()) {
             return this.command + " " + String.join(" ", parameters);
         }
-        return JkUtilsString.ellipse(this.command + " " + String.join(" ", parameters), 120);
+        String shortCommand = command.replace('\\', '/');
+        shortCommand = shortCommand.contains("/") ? JkUtilsString.substringAfterLast(shortCommand, "/")
+                : shortCommand;
+        return JkUtilsString.ellipse(shortCommand + " " + String.join(" ", parameters), 120);
     }
 
     /**

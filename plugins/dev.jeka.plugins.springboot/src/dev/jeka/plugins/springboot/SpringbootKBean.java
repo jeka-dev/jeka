@@ -50,12 +50,14 @@ public final class SpringbootKBean extends KBean {
         }
 
         // Configure Docker KBean to add port mapping on run
-        DockerKBean dockerKBean = load(DockerKBean.class);
-        dockerKBean.customize(dockerBuild -> {
-            if (dockerBuild.getExposedPorts().isEmpty()) {
-                dockerBuild.setExposedPorts(8080);
-            }
-        });
+        Optional<DockerKBean> optionalDockerKBean = getRunbase().find(DockerKBean.class);
+        if (optionalDockerKBean.isPresent()) {
+            optionalDockerKBean.get().customize(dockerBuild -> {
+                if (dockerBuild.getExposedPorts().isEmpty()) {
+                    dockerBuild.setExposedPorts(8080);
+                }
+            });
+        }
 
     }
 

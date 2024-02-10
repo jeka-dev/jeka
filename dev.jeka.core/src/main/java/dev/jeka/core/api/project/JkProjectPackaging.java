@@ -146,7 +146,7 @@ public class JkProjectPackaging {
      */
     public void createFatJar(Path target) {
         project.testing.runIfNeeded();
-        JkLog.startTask("Packing fat jar...");
+        JkLog.startTask("packing-fat-jar");
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(getManifest())

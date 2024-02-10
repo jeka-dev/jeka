@@ -18,7 +18,7 @@ import static dev.jeka.core.api.project.JkProjectCompilation.JAVA_SOURCES_COMPIL
 
 public class JkKotlinJvm {
 
-    public static final String KOTLIN_JVM_SOURCES_COMPILE_ACTION = "kotlin-jvm-sources-compile";
+    public static final String KOTLIN_JVM_SOURCES_COMPILE_ACTION = "compile-kotlin-jvm-sources";
 
     private final JkKotlinCompiler kotlinCompiler;
 
