@@ -223,7 +223,7 @@ class ProgressListeners {
         }
 
         private String bar() {
-            int count = (int) ((BAR_LENGTH * index) / testCount);
+            int count = (int) ((BAR_LENGTH * index) / Math.max(testCount, 1));
             count = Math.min(BAR_LENGTH, count);
             int spaceCount = BAR_LENGTH - count;
             return "[" + JkUtilsString.repeat("=", count) + JkUtilsString.repeat(" ", spaceCount) + "]";

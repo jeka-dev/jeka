@@ -36,11 +36,11 @@ class EngineCompilationUpdateTracker {
 
     boolean isOutdated() {
         if (globallyOutdated) {
-            JkLog.trace("Compilation cache outdated.");
+            JkLog.verbose("Compilation cache outdated.");
             return true;
         }
         boolean result = isWorkOutdated();
-        JkLog.trace("Cached compilation outdated : %s", result);
+        JkLog.verbose("Cached compilation outdated : %s", result);
         globallyOutdated = result;
         return result;
     }

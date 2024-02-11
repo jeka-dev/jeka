@@ -169,10 +169,14 @@ public class JkDependencySet {
     }
 
     public JkDependencySet andFiles(Hint hint, Iterable<Path> paths) {
+        List<Path> effectivePaths = JkUtilsPath.disambiguate(paths);
         if (JkUtilsPath.disambiguate(paths).isEmpty()) {
             return this;
         }
-        return and(hint, JkFileSystemDependency.of(paths));
+        List<JkFileSystemDependency> fileSystemDeps = effectivePaths.stream()
+                .map(JkFileSystemDependency::of)
+                .collect(Collectors.toList());
+        return and(hint, fileSystemDeps);
     }
 
     public JkDependencySet andFiles(Iterable<Path> paths) {
@@ -595,6 +599,11 @@ public class JkDependencySet {
                 .map(JkDependencyExclusion::of)
                 .collect(Collectors.toList());
         return withGlobalExclusions(depExcludes);
+    }
+
+    public JkDependencySet withoutDuplicate() {
+        List<JkDependency> deps = this.entries.stream().distinct().collect(Collectors.toList());
+        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
     }
 
     /**

@@ -22,22 +22,31 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class JkLog implements Serializable {
 
+    /**
+     * Type of events emitted by logs.
+     */
     public enum Type {
-        INFO, WARN, ERROR, TRACE, PROGRESS, START_TASK, END_TASK;
+        ERROR, WARN, INFO, TRACE, PROGRESS, START_TASK, END_TASK;
 
         public boolean isTraceWarnOrError() {
             return this == TRACE || this == WARN || this == ERROR;
         }
     }
 
+    /**
+     * Levels of logging
+     */
     public enum Verbosity {
-        MUTE, WARN_AND_ERRORS, NORMAL, VERBOSE, QUITE_VERBOSE;
+        MUTE, WARN_AND_ERRORS, INFO, VERBOSE, DEBUG;
 
         public boolean isVerbose() {
-            return this == VERBOSE || this == QUITE_VERBOSE;
+            return this == VERBOSE || this == DEBUG;
         }
     }
-    
+
+    /**
+     * Available style of logging displaying.
+     */
     public enum Style {
         BRACE(new JkBraceLogDecorator()),
         INDENT(new JkIndentLogDecorator()),
@@ -62,7 +71,7 @@ public final class JkLog implements Serializable {
 
     private static JkLogDecorator decorator = NO_OP_DECORATOR;
 
-    private static Verbosity verbosity = Verbosity.NORMAL;
+    private static Verbosity verbosity = Verbosity.INFO;
 
     private static AtomicInteger currentNestedTaskLevel = new AtomicInteger(0);
 
@@ -84,7 +93,8 @@ public final class JkLog implements Serializable {
 
     /**
      * By default, events are not consumed, meaning nothing appends when {@link #info(String, Object...)} (String),
-     * {@link #error(String)}, {@link #warn(String)} or {@link #trace(String)} are invoked.
+     * {@link #error(String, Object...)} (String)}, {@link #warn(String, Object...)} (String)}
+     * or {@link #verbose(String, Object...)} (String)} are invoked.
      * Therefore, users have to set explicitly a consumer using this method or {@link #setDecorator(Style)} ().
      */
     public static void setDecorator(JkLogDecorator newDecorator) {
@@ -123,8 +133,8 @@ public final class JkLog implements Serializable {
         verbosity = verbosityArg;
     }
 
-    public static boolean isAcceptAnimation() {
-        return acceptAnimation;
+    public static boolean isAnimationAccepted() {
+        return !acceptAnimation;
     }
 
     public static void setAcceptAnimation(boolean acceptAnimation) {
@@ -153,18 +163,24 @@ public final class JkLog implements Serializable {
         return decorator.getOut();
     }
 
+    public static void debug(String message, Object ...params) {
+        if (verbosity() == Verbosity.DEBUG) {
+            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
+        }
+    }
+
+    public static void verbose(String message, Object ...params) {
+        if (verbosity().isVerbose()) {
+            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
+        }
+    }
+
     public static void info(String message, Object... params) {
         consume(JkLogEvent.ofRegular(Type.INFO, String.format(message, params)));
     }
 
     public static void warn(String message, Object ... params) {
         consume(JkLogEvent.ofRegular(Type.WARN, String.format(message, params)));
-    }
-
-    public static void trace(String message, Object ...params) {
-        if (verbosity().isVerbose()) {
-            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
-        }
     }
 
     public static void error(String message, Object ...params) {
@@ -190,9 +206,9 @@ public final class JkLog implements Serializable {
     }
 
     /**
-     * Logs the start of the current task. !!!  Should be closed by {@link #traceEndTask()}.
+     * Logs the start of the current task. !!!  Should be closed by {@link #verboseEndTask()}.
      */
-    public static void traceStartTask(String message, Object ... params) {
+    public static void verboseStartTask(String message, Object ... params) {
         if (verbosity.isVerbose()) {
             startTask(message, params);
         }
@@ -228,7 +244,7 @@ public final class JkLog implements Serializable {
         endTask("");
     }
 
-    public static void traceEndTask() {
+    public static void verboseEndTask() {
         if (verbosity.isVerbose()) {
             endTask();
         }

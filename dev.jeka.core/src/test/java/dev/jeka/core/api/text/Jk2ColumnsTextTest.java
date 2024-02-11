@@ -1,5 +1,6 @@
 package dev.jeka.core.api.text;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -17,7 +18,9 @@ public class Jk2ColumnsTextTest {
                .add("title 6", "a desc \nwith breaking lines")
                .add("title 7", "description 7")
                .toString();
+        Assert.assertFalse(text.endsWith("\n"));
         System.out.println("------");
-        System.out.println(text);
+        System.out.print(text);
+        System.out.println("----");
     }
 }

@@ -192,7 +192,7 @@ public final class JkSonarqube {
     private void runAndCheck() {
         Path jar = getToolJar();
         JkProcResult procResult = javaProcess(jar)
-                .addParamsIf(JkLog.verbosity() == JkLog.Verbosity.QUITE_VERBOSE, "-X")
+                .addParamsIf(JkLog.verbosity() == JkLog.Verbosity.DEBUG, "-X")
                 .exec();
         if (!procResult.hasSucceed()) {
             throw new JkException("SonarScanner command failed. Use--verbose to get more details.");
@@ -387,7 +387,7 @@ public final class JkSonarqube {
                 "Sonarqube has to run on JRE >= 11. You are running on version " + javaVersion);
         if (this.scannerVersion == null) {
             URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
-            JkLog.trace("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
+            JkLog.verbose("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
             return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
         JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",
@@ -409,7 +409,7 @@ public final class JkSonarqube {
             throw new IllegalStateException(sb.toString());
         }
         JkVersion effectiveVersion = resolveResult.getVersionOf(coordinate.getModuleId());  // Get effective version if specified one is '+'
-        JkLog.trace("Use sonar scanner %s", effectiveVersion);
+        JkLog.verbose("Use sonar scanner %s", effectiveVersion);
         return resolveResult.getFiles().getEntries().get(0);
     }
 

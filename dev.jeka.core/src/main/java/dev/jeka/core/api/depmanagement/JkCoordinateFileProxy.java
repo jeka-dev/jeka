@@ -37,7 +37,7 @@ public final class JkCoordinateFileProxy {
     public Path get() {
         Path result = coordinate.cachePath();
         if (!Files.exists(result)) {
-            JkLog.trace("File %s not found in cache.", result);
+            JkLog.verbose("File %s not found in cache.", result);
             Path downloadPath = repoSet.get(coordinate);
             JkUtilsAssert.state(downloadPath != null, "Dependency %s not resolved", coordinate);
             JkUtilsAssert.state(result.equals(downloadPath),

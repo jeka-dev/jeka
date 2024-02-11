@@ -26,16 +26,16 @@ public class Github extends KBean {
     public void publishGhRelease() throws IOException {
         JkGit git = JkGit.of();
         if ("master".equals(git.getCurrentBranch())) {
-            JkLog.trace("Current branch is not master. Don't release.");
+            JkLog.verbose("Current branch is not master. Don't release.");
             return;  // only publish release from master branch
         }
         if (git.isWorkspaceDirty()) {
-            JkLog.trace("Git workspace is dirty. Don't release.");
+            JkLog.verbose("Git workspace is dirty. Don't release.");
             return;  // only publish release from master branch
         }
         String releaseNumber = git.extractSuffixFromLastCommitMessage("Release:");
         if (releaseNumber == null) {
-            JkLog.trace("No release tag found. Don't publish.");
+            JkLog.verbose("No release tag found. Don't publish.");
             return;
         }
         git.tagAndPush(releaseNumber);  // Tag the repo

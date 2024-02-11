@@ -31,7 +31,7 @@ class IntelliJProject {
     public static IntelliJProject find(Path from) {
         from = from.toAbsolutePath();
         if (isProjectRooDir(from)) {
-            JkLog.trace("Intellij Parent found at " + from);
+            JkLog.verbose("Intellij Parent found at " + from);
             return new IntelliJProject(from);
         }
         if (from.getParent() == null) {

@@ -24,7 +24,7 @@ public class JkBusyIndicator {
     }
 
     public static void start(PrintStream printStream, String message) {
-        if (!JkLog.isAcceptAnimation()) {
+        if (JkLog.isAnimationAccepted()) {
             return;
         }
         if (instance != null) {

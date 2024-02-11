@@ -32,7 +32,7 @@ final class FieldInjector {
     }
 
     static void injectAnnotatedProperties(Object target, JkProperties properties) {
-        JkLog.traceStartTask("Injecting JkProperties values into %s", target);
+        JkLog.verboseStartTask("Injecting JkProperties values into %s", target);
         for (final Field field : getPropertyFields(target.getClass())) {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty == null) {
@@ -50,23 +50,23 @@ final class FieldInjector {
                         throw new JkException("Property " + injectProperty.value() + " has been set with improper value '"
                                 + propertyValue + "' : " + e.getMessage());
                     }
-                    JkLog.trace("Inject property value %s in field %s.", value, field);
+                    JkLog.verbose("Inject property value %s in field %s.", value, field);
                     JkUtilsReflect.setFieldValue(target, field, value);
                 } else {
-                    JkLog.trace("No property %s declared to inject in field %s.", injectedPropName, field);
+                    JkLog.verbose("No property %s declared to inject in field %s.", injectedPropName, field);
                 }
 
                 // We explore nested field only if a naked @JKInjectProperty is present on the parent field.
                 // This is to avoid exploring on deep trees with potential recursive issues (as found on JkProject on ProjectKBean)
             } else {
-                JkLog.trace("Naked @JkInjectProperty found on field %s. Exploring nested fields for injection", field);
+                JkLog.verbose("Naked @JkInjectProperty found on field %s. Exploring nested fields for injection", field);
                 Object fieldValue = JkUtilsReflect.getFieldValue(target, field);
                 if (fieldValue != null) {
                     injectAnnotatedProperties(fieldValue, properties);
                 }
             }
         }
-        JkLog.traceEndTask();
+        JkLog.verboseEndTask();
     }
 
     static List<Field> getPropertyFields(Class<?> clazz) {

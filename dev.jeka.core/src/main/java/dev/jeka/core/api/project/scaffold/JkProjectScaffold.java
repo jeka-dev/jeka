@@ -166,7 +166,7 @@ public final class JkProjectScaffold extends JkScaffold {
      * Generate the jeka-agnostic project skeleton (src dirs)
      */
     private void generateProjectStructure() {
-        JkLog.info("Create source directories.");
+        JkLog.info("Create source directories");
         JkCompileLayout prodLayout = project.compilation.layout;
         prodLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
         prodLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);

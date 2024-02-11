@@ -88,11 +88,12 @@ public class Jk2ColumnsText {
     public String toString() {
         int effectiveLeftSize = adjustLeft ? Integer.min(largestOkLeft(), leftSize)
                 : leftSize;
-        return rows.stream()
+        String result = rows.stream()
                 .map(row -> row.format(effectiveLeftSize, maxSize, delimiter))
                 .flatMap(List::stream)
                 .map(line -> marginLeft + line)
                 .reduce("", (init, line) -> init + line + "\n");
+        return result.substring(0, result.length()-1); // remove last '\n'
     }
 
     private int largestOkLeft() {

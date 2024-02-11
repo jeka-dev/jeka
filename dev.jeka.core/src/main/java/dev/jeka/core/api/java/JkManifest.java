@@ -277,6 +277,20 @@ public final class JkManifest{
     }
 
     /**
+     * Returns a trimmed string representation of the manifest, removing tailing empty line
+     *
+     * @return a trimmed string representation of the manifest
+     */
+    public String asTrimedString() {
+        String manifest = asString();
+        int lastBr = manifest.lastIndexOf("\n");
+        if (lastBr != -1) {
+            manifest = manifest.substring(0, lastBr-1);
+        }
+        return manifest;
+    }
+
+    /**
      * Returns <code>true</code> if this manifest has no entry or has only
      * "Manifest-Version" entry.
      */

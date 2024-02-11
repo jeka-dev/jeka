@@ -36,7 +36,7 @@ public final class JkInit {
         JkLog.setDecorator(Environment.logs.style);
         if (Environment.logs.runtimeInformation) {
             displayRuntimeInfo();
-            JkLog.info("JeKa Classpath : ");
+            JkLog.info("JeKa Classpath    : ");
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
         }
         boolean memoryBufferLogActivated = false;
@@ -93,7 +93,7 @@ public final class JkInit {
 
     static void displayRuntimeInfo() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\nWorking Directory : " + System.getProperty("user.dir"));
+        sb.append("Working Directory : " + System.getProperty("user.dir"));
         sb.append("\nCommand Line      : " + String.join(" ", Arrays.asList(Environment.parsedCmdLine.rawArgs())));
         sb.append("\nJava Home         : " + System.getProperty("java.home"));
         sb.append("\nJava Version      : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
@@ -109,20 +109,8 @@ public final class JkInit {
         sb.append("\nDownload Repos    : " + JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
                 .map(JkRepo::getUrl).collect(Collectors.toList()));
         sb.append("\nProperties        :\n").append(properties.toKeyValueString("    "));
+        sb.deleteCharAt(sb.length()-1); // remove last br
         JkLog.info(sb.toString());
-    }
-
-    private static String propsAsString(String message, Map<String, String> props) {
-        StringBuilder sb = new StringBuilder();
-        if (props.isEmpty()) {
-            sb.append("\n" + message + " : none.");
-        } else if (props.size() <= 3) {
-            sb.append("\n" + message + " : " + JkUtilsIterable.toString(props));
-        } else {
-            sb.append("\n" + message + " : ");
-            JkUtilsIterable.toStrings(props).forEach(line -> sb.append("  " + line));
-        }
-        return sb.toString();
     }
 
     private static boolean embedded(Path jarFolder) {

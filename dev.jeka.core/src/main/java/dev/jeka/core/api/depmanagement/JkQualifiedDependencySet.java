@@ -419,14 +419,11 @@ public class JkQualifiedDependencySet {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(this.getClass().getName()).append("\n");
-        sb.append("Dependencies :\n");
-        this.entries.forEach(entry -> sb.append(entry).append("\n"));
-        sb.append("global exclusions :\n");
-        this.globalExclusions.forEach(exclusion -> sb.append(exclusion).append("\n"));
-        sb.append("Version provider :\n");
-        sb.append(versionProvider);
-        return sb.toString();
+        return "JkQualifiedDependencySet{" +
+                "entries=" + entries +
+                ", globalExclusions=" + globalExclusions +
+                ", versionProvider=" + versionProvider +
+                '}';
     }
 
     /**

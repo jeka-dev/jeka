@@ -112,17 +112,16 @@ public final class JkResourceProcessor {
                 : outputDir;
         boolean hasResourceFiles  = resourceTrees.count(1, false) > 0;
         if (!hasResourceFiles) {
-            JkLog.trace("No resources to process.");
+            JkLog.verbose("No resources to process");
             return;
         }
-        JkLog.startTask("Copy resource files to %s", relativeOutputDir);
+        JkLog.verbose("Copy resource files to %s", relativeOutputDir);
         for (final JkPathTree resourceTree : resourceTrees.toList()) {
             final AtomicInteger count = new AtomicInteger(0);
             if (!resourceTree.exists()) {
                 continue;
             }
-            resourceTree.stream().forEach(object -> {
-                Path path = (Path) object;
+            resourceTree.stream().forEach(path -> {
                 final Path relativePath = resourceTree.getRoot().relativize(path);
                 final Path out = outputDir.resolve(relativePath);
                 final Map<String, String> data = JkInterpolator.of(relativePath.toString(),
@@ -134,10 +133,8 @@ public final class JkResourceProcessor {
                     count.incrementAndGet();
                 }
             });
-            JkLog.info("%s processed from %s.", JkUtilsString.pluralize(count.get(), "file"),
-                    JkUtilsPath.relativizeFromWorkingDir(resourceTree.getRoot()));
+            JkLog.verbose("%s processed", JkUtilsString.pluralize(count.get(), "file"));
         }
-        JkLog.endTask();
     }
 
     /**

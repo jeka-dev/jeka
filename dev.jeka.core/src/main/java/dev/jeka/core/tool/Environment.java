@@ -55,7 +55,7 @@ class Environment {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
         if (logs.ivyVerbose) {
-            JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
+            JkLog.setVerbosity(JkLog.Verbosity.DEBUG);
         }
     }
 
@@ -122,7 +122,7 @@ class Environment {
                 }
             }
         }
-        JkLog.trace("Effective command line : " + effectiveCommandLineArgs);
+        JkLog.verbose("Effective command line : " + effectiveCommandLineArgs);
 
         return effectiveCommandLineArgs.toArray(new String[0]);
     }

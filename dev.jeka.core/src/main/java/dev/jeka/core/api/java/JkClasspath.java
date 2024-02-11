@@ -208,14 +208,14 @@ public final class JkClasspath implements Iterable<Path> {
             if (file.getFileName().toString().equals(WILD_CARD)) {
                 final Path parent = file.getParent();
                 if (!Files.exists(parent)) {
-                    JkLog.trace("File " + parent
+                    JkLog.verbose("File " + parent
                             + " does not exist : classpath entry " + file
                             + " will be ignored.");
                 } else {
                     result.addAll(JkPathTree.of(parent).andMatching(true,"*.jar").getFiles());
                 }
             } else if (!Files.exists(file)) {
-                JkLog.trace("File " + file + " does not exist : classpath entry "
+                JkLog.verbose("File " + file + " does not exist : classpath entry "
                         + file + " will be ignored.");
             } else if (Files.isRegularFile(file)) {
                 if (!JkUtilsString.endsWithAny(file.getFileName().toString().toLowerCase(), ".jar", ".zip")) {
@@ -237,7 +237,7 @@ public final class JkClasspath implements Iterable<Path> {
             final String candidateFolder = JkUtilsString.substringBeforeFirst(candidatePath, WILD_CARD);
             final Path parent = Paths.get(candidateFolder);
             if (!Files.exists(parent)) {
-                JkLog.trace("File " + parent
+                JkLog.verbose("File " + parent
                         + " does not exist : classpath entry " + candidatePath
                         + " will be ignored.");
             } else {

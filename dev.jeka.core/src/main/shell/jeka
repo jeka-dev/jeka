@@ -8,7 +8,7 @@
 # - if JEKA_JDK_HOME env var is specified, select it
 # - if a jeka.java.version property is specified
 #     - if a jeka.jdk.[version] property is specified, select it.
-#     - else, look in cache or download the proper JDK
+#     - else, look in cache or download the proper JƒDK
 # - else
 #   - if JAVA_HOME env var is specified, select it
 #   - else, look in cache and download default version (21)

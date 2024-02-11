@@ -43,7 +43,10 @@ public final class JkFileSystemDependency implements JkFileDependency {
 
     @Override
     public String toString() {
-        return "Files=" + files.toString();
+        if (files.size() == 1) {
+            return files.get(0).toString();
+        }
+        return "Files=" + files;
     }
 
     @Override

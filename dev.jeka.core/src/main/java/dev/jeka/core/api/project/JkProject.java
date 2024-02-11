@@ -276,7 +276,7 @@ public final class JkProject implements JkIdeSupportSupplier {
         JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
         Path artifactPath = artifactLocator.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
-            pack();
+            pack();  // TODO add buildJar method as in Self
         }
         JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
                 .setDestroyAtJvmShutdown(true)
@@ -310,7 +310,7 @@ public final class JkProject implements JkIdeSupportSupplier {
      */
     public JkProject clean() {
         Path output = getOutputDir();
-        JkLog.trace("Clean output directory " + output.toAbsolutePath().normalize());
+        JkLog.verbose("Clean output directory " + output.toAbsolutePath().normalize());
         if (Files.exists(output)) {
             JkPathTree.of(output).deleteContent();
         }
@@ -330,7 +330,7 @@ public final class JkProject implements JkIdeSupportSupplier {
         Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200).setAdjustLeft(true)
                 .add("ModuleId", moduleId)
                 .add("Version", getVersion() )
-                .add("Base Dir Location", this.getBaseDir().toAbsolutePath().normalize())
+                .add("Base Dir", this.getBaseDir().toAbsolutePath().normalize())
                 .add("Production Sources", compilation.layout.getInfo())
                 .add("Test Sources", testing.compilation.layout.getInfo())
                 .add("Java Version", jvmTargetVersion == null ? "Unspecified" : jvmTargetVersion  )
@@ -342,24 +342,21 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .add("Main Class Name", packaging.declaredMainClass())
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
-                .add("Manifest", "");
+                .add("Manifest", packaging.getManifest().asTrimedString()); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
+
+
         builder.append(columnsText.toString());
 
-        // add manifest
-        Arrays.stream(packaging.getManifest().asString().split("\n"))
-                .filter(line -> !JkUtilsString.isBlank(line))
-                .forEach(line -> builder.append("    " + line + "\n"));
 
         // add declared dependencies
         builder
-            .append("Declared Compile Deps    : " + compileDependencies.getEntries().size() + " elements.\n");
+            .append("\nCompile Dependencies          : \n");
         compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
         builder
-            .append("Declared Runtime Deps    : " + runtimeDependencies
-                .getEntries().size() + " elements.\n");
+            .append("Runtime Dependencies          : \n");
         runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
         builder
-            .append("Declared Test Deps       : " + testDependencies.getEntries().size() + " elements.\n");
+            .append("Test Dependencies             : \n");
         testDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
         return builder.toString();
     }

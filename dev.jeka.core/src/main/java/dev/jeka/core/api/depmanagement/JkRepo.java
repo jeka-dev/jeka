@@ -116,11 +116,11 @@ public final class JkRepo {
         String pwd = null;
         String githubToken = System.getenv("GITHUB_TOKEN");
         if (!JkUtilsString.isBlank(githubToken)) {
-            JkLog.trace("Github token found, configure repo %s with associate credential", baseUrl);
+            JkLog.verbose("Github token found, configure repo %s with associate credential", baseUrl);
             username = "GITHUB_TOKEN";
             pwd = githubToken;
         } else {
-            JkLog.trace("No Github token found to make credential on repo %s.", baseUrl);
+            JkLog.verbose("No Github token found to make credential on repo %s.", baseUrl);
         }
         JkRepo repo = of(baseUrl)
                 .setCredentials(JkRepoCredentials.of(username, pwd, "GitHub Package Registry"));

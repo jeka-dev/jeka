@@ -102,7 +102,7 @@ public final class JkJavaCompilerToolChain {
     private ToolOrProcess guess(JkJavaVersion javaVersion) {
         if (javaVersion == null) {
             if (jdkHints.preferTool && ToolProvider.getSystemJavaCompiler() != null) {
-                JkLog.trace("Use current JDK tool to compile.");
+                JkLog.verbose("Use current JDK tool to compile.");
                 return new ToolOrProcess(compileToolOrFail());
             }
             Path javaHome = Paths.get(System.getProperty("java.home"));
@@ -167,7 +167,7 @@ public final class JkJavaCompilerToolChain {
                     " Specified options : " + printableOptions(options));
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
-            JkLog.trace("No source files found in " + compileSpec.getSources());
+            JkLog.verbose("No source files found in " + compileSpec.getSources());
             return true;
         }
         JkUtilsPath.createDirectories(outputDir);

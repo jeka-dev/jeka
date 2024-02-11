@@ -154,7 +154,7 @@ public class JkProjectTesting {
      */
     public void runIfNeeded() {
         if (done) {
-            JkLog.trace("Tests has already been performed. Won't do it again.");
+            JkLog.verbose("Tests has already been performed. Won't do it again.");
         } else if (skipped) {
             JkLog.info("Tests are skipped. Won't perform.");
         } else {
@@ -214,7 +214,7 @@ public class JkProjectTesting {
             if (project.isIncludeTextAndLocalDependencies()) {
                 base = project.textAndLocalDeps().getTest().and(base);
             }
-            return base;
+            return base.withoutDuplicate();
         }
 
         @Override

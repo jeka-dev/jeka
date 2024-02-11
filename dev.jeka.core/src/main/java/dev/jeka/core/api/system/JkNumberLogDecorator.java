@@ -22,7 +22,7 @@ public final class JkNumberLogDecorator extends JkLog.JkLogDecorator {
 
     private transient PrintStream err;
 
-    private LinkedList<Integer> stack = new LinkedList<>();
+    private final LinkedList<Integer> stack = new LinkedList<>();
 
     private int next = 1;
 
@@ -87,12 +87,6 @@ public final class JkNumberLogDecorator extends JkLog.JkLogDecorator {
         return stack.stream().map(i -> Integer.toString(i)).collect(Collectors.joining("."));
     }
 
-    public void printHeader(String title) {
-        out.println(HEADER_LINE);
-        out.println(title);
-        out.println(HEADER_LINE);
-        out.flush();
-    }
 
 
 

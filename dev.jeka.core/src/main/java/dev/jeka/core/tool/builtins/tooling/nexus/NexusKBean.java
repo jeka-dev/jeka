@@ -23,7 +23,7 @@ public class NexusKBean extends KBean {
     protected void init() {
         MavenKBean mavenKBean = getRunbase().find(MavenKBean.class).orElse(null);
         if (mavenKBean == null) {
-            JkLog.trace("Nexus KBean cannot find MavenPublication KBean in runbase. Can't configure any repo.");
+            JkLog.verbose("Nexus KBean cannot find MavenPublication KBean in runbase. Can't configure any repo.");
         } else {
             configureMavenPublication(mavenKBean.getMavenPublication());
         }

@@ -240,7 +240,7 @@ public final class JkDependencyResolver  {
         String message = bomResolvedDependencies.getEntries().size() == 1 ?
                 "Resolve " + bomResolvedDependencies.getDependencies().get(0).toString()
                 : "Resolve " + bomResolvedDependencies.getEntries().size() + " declared dependencies";
-        JkLog.traceStartTask(message);
+        JkLog.verboseStartTask(message);
         JkResolveResult resolveResult;
         if (hasModule) {
             JkUtilsAssert.state(!effectiveRepos().getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
@@ -254,7 +254,7 @@ public final class JkDependencyResolver  {
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
         int moduleCount = resolveResult.getInvolvedCoordinates().size();
         int fileCount = resolveResult.getFiles().getEntries().size();
-        JkLog.trace("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
+        JkLog.verbose("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
         if (JkLog.isVerbose()) {
             resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
         }
@@ -266,7 +266,7 @@ public final class JkDependencyResolver  {
             }
             JkLog.warn(report.toString());
         }
-        JkLog.traceEndTask();
+        JkLog.verboseEndTask();
         if (useInMemoryCache) {
             this.cachedResults.put(bomResolvedDependencies, resolveResult);
         }
@@ -289,23 +289,25 @@ public final class JkDependencyResolver  {
         Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
         boolean nonExistingEntryOnFs = false;
         if (Files.exists(cacheFile)) {
-            JkLog.trace("Found cached resolve-classpath file %s for resolving %s", cacheFile, qualifiedDependencies);
+            JkLog.verbose("Found cached resolve-classpath file %s for resolving %s", cacheFile, qualifiedDependencies);
             JkPathSequence cachedPathSequence =
                     JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
-            JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
+            String cachedCpMsg = cachedPathSequence.getEntries().isEmpty() ? "[empty]" :
+                    "\n" + cachedPathSequence.toPathMultiLine("  ");
+            JkLog.verbose("Cached resolved classpath : " + cachedCpMsg);
             if (!cachedPathSequence.hasNonExisting()) {
                 return cachedPathSequence.getEntries();
             } else {
                 nonExistingEntryOnFs = true;
-                JkLog.trace("Cached resolved-classpath %s has non existing entries on local file system " +
+                JkLog.verbose("Cached resolved-classpath %s has non existing entries on local file system " +
                         ": need resolving %s", cacheFile, qualifiedDependencies);
             }
         }
         if (!nonExistingEntryOnFs) {
-            JkLog.trace("Cached resolved-classpath %s not found : need resolving %s", cacheFile, qualifiedDependencies);
+            JkLog.verbose("Cached resolved-classpath %s not found : need resolving %s", cacheFile, qualifiedDependencies);
         }
         JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
-        JkLog.trace("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
+        JkLog.verbose("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
         JkPathFile.of(cacheFile).createIfNotExist().write(result.toPath());
         return result.getEntries();
     }

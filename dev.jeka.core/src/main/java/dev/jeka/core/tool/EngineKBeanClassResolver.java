@@ -73,11 +73,11 @@ final class EngineKBeanClassResolver {
                     .stream().distinct().collect(Collectors.toList());
             List<String> matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
             if (matchingClassNames.isEmpty()) {  // maybe the cache is staled -> rescan classpath
-                JkLog.trace("KBean '%s' does not match any class names on %s. Rescan classpath", beanName, beanClassNames);
+                JkLog.verbose("KBean '%s' does not match any class names on %s. Rescan classpath", beanName, beanClassNames);
                 reloadGlobalBeanClassNames();
                 matchingClassNames = findClassesMatchingName(beanClassNames, beanName);
                 if (matchingClassNames.isEmpty()) {
-                    JkLog.trace("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClassNames);
+                    JkLog.verbose("KBean '%s' does not match any class names on %s. Fail.", beanName, beanClassNames);
                 }
             }
             Class<? extends KBean> selected = loadUniqueClass(matchingClassNames, beanName, !ignoreMasterBeanNotFound);
@@ -211,9 +211,9 @@ final class EngineKBeanClassResolver {
                 true,
                 ignoreParentClassLoader);
         if (JkLog.isVerbose()) {
-            JkLog.trace("Scanned classloader :  " + JkClassLoader.of(classLoader).getClasspath());
-            JkLog.trace("All KBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
-            cachedGlobalBeanClassName.forEach(className -> JkLog.trace("  " + className));
+            JkLog.verbose("Scanned classloader :  " + JkClassLoader.of(classLoader).getClasspath());
+            JkLog.verbose("All KBean classes scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+            cachedGlobalBeanClassName.forEach(className -> JkLog.verbose("  " + className));
         }
         storeGlobalKBeanClasses(cachedGlobalBeanClassName);
     }
@@ -277,8 +277,8 @@ final class EngineKBeanClassResolver {
                     true,
                     JkDoc.class);
             if (JkLog.isVerbose()) {
-                JkLog.trace("Classes from jeka-src scanned in " + (System.currentTimeMillis() - t0) + " ms.");
-                cachedJekaSrcBeanClassNames.forEach(className -> JkLog.trace("  " + className ));
+                JkLog.verbose("Classes from jeka-src scanned in " + (System.currentTimeMillis() - t0) + " ms.");
+                cachedJekaSrcBeanClassNames.forEach(className -> JkLog.verbose("  " + className ));
             }
         }
         return cachedJekaSrcBeanClassNames;

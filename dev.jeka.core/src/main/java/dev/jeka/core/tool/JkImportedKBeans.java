@@ -80,7 +80,7 @@ public final class JkImportedKBeans {
         final List<KBean> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getDeclaredFieldsWithAnnotation(masterBean.getClass(), JkInjectRunbase.class);
         if (!fields.isEmpty()) {
-            JkLog.trace("Projects imported by " + masterBean + " : " + fields);
+            JkLog.verbose("Projects imported by " + masterBean + " : " + fields);
         }
         for (final Field field : fields) {
             final JkInjectRunbase jkProject = field.getAnnotation(JkInjectRunbase.class);
@@ -122,7 +122,7 @@ public final class JkImportedKBeans {
     @SuppressWarnings("unchecked")
     private static <T extends KBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
-        JkLog.traceStartTask("Import bean " + importedBeanClass.getName() + " from " + importedProjectDir);
+        JkLog.verboseStartTask("Import bean " + importedBeanClass.getName() + " from " + importedProjectDir);
 
         // Not sure it is necessary. Is so, explain why.
         JkRunbase.get(importedProjectDir);
@@ -130,7 +130,7 @@ public final class JkImportedKBeans {
         JkRunbase.setBaseDirContext(importedProjectDir);
         final T result = JkRunbase.get(importedProjectDir).load(importedBeanClass);
         JkRunbase.setBaseDirContext(Paths.get(""));
-        JkLog.traceEndTask();
+        JkLog.verboseEndTask();
         return result;
     }
 

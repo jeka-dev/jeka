@@ -132,8 +132,8 @@ public final class JkImlGenerator {
         JkIdeSupport ideSupport = ideSupportSupplier == null ? null : ideSupportSupplier.get();
         Path dir = ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
         JkIml iml = JkIml.of().setModuleDir(dir);
-        JkLog.trace("Compute iml jeka-src classpath : " + jekaSrcClasspath);
-        JkLog.trace("Compute iml jeka-src imported projects : " + jekaSrcImportedProjects);
+        JkLog.verbose("Compute iml jeka-src classpath : " + jekaSrcClasspath);
+        JkLog.verbose("Compute iml jeka-src imported projects : " + jekaSrcImportedProjects);
         if (this.useVarPath) {
             iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir());
         }
@@ -158,7 +158,7 @@ public final class JkImlGenerator {
                     ideSupport.getDependencies(),
                     depResolver.getDefaultParams().copy().setFailOnDependencyResolutionError(failOnDepsResolutionError))
                     .getDependencyTree();
-            JkLog.trace("Dependencies resolved");
+            JkLog.verbose("Dependencies resolved");
             iml.component.getOrderEntries().addAll(projectOrderEntries(tree));  // too slow
             for (Path path : ideSupport.getGeneratedSourceDirs()) {
                 iml.component.getContent().addSourceFolder(path, false, null);
@@ -166,7 +166,7 @@ public final class JkImlGenerator {
         }
         iml.component.getOrderEntries().addAll(defOrderEntries());
         imlConfigurer.accept(iml);
-        JkLog.trace("Iml object generated");
+        JkLog.verbose("Iml object generated");
         return iml;
     }
 
@@ -319,7 +319,7 @@ public final class JkImlGenerator {
                 }
             }
         }
-        JkLog.trace("projectOrderEntries() took '%s ms", System.currentTimeMillis() - t0);
+        JkLog.verbose("projectOrderEntries() took '%s ms", System.currentTimeMillis() - t0);
         return new LinkedList(orderEntries.orderEntries);
     }
 

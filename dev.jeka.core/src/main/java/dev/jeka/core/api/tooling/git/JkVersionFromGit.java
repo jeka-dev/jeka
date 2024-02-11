@@ -55,12 +55,12 @@ public class JkVersionFromGit  {
         JkGit git = JkGit.of(baseDir);
         boolean dirty = git.isWorkspaceDirty();
         if (dirty) {
-            JkLog.trace("Git workspace is dirty. Use SNAPSHOT for version.");
+            JkLog.verbose("Git workspace is dirty. Use SNAPSHOT for version.");
             cachedVersion = git.getCurrentBranch() + JkVersion.SNAPSHOT_SUFIX;
         } else {
             cachedVersion =  git.getVersionFromTag(versionTagPrefix);
         }
-        JkLog.trace("Version inferred from Git : " + cachedVersion);
+        JkLog.verbose("Version inferred from Git : " + cachedVersion);
         return cachedVersion;
     }
 

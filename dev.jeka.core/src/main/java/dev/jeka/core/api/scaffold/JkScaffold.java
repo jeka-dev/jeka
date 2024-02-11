@@ -112,18 +112,17 @@ public abstract class JkScaffold {
      */
     protected void run() {
 
-        JkLog.startTask("Scaffolding");
+        JkLog.startTask("scaffold");
 
         // Create 'jeka-src' dir
         final Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        JkLog.info("Create " + jekaSrc);
+        JkLog.verbose("Create " + jekaSrc);
 
         JkUtilsPath.createDirectories(jekaSrc);
         createOrUpdateJekaProps();  // Create 'jeka.properties' file
         createOrUpdateGitIgnore();  // Create .gitignore
         createShellScripts();   // Shell scripts
         fileEntries.forEach(extraEntry -> extraEntry.write(baseDir));
-
         JkLog.endTask();;
     }
 
@@ -224,14 +223,14 @@ public abstract class JkScaffold {
     private void createShellScripts() {
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.bat");
         if (Files.exists(jekaBat)) {
-            JkLog.info("Create jeka.bat file");
+            JkLog.verbose("Create jeka.bat file");
             JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.bat"), StandardCopyOption.REPLACE_EXISTING);
         }
         Path jekaShell = JkLocator.getJekaHomeDir().resolve("jeka");
         if (Files.isDirectory(jekaShell)) {
             JkLog.warn("%s directory is still present. Cannot create jeka shell file in base directory.", jekaShell);
         } else if (Files.exists(jekaShell)) {
-            JkLog.info("Create jeka shell file");
+            JkLog.verbose("Create jeka shell file");
             JkUtilsPath.copy(jekaShell, baseDir.resolve("jeka"),
                     StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
             JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);

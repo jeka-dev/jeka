@@ -62,9 +62,9 @@ class EngineClasspathCache {
         } else {
             if (Files.exists(resolvedClasspathCache(scope))) {
                 JkPathSequence cachedPathSequence = readCachedResolvedClasspath(scope);
-                JkLog.trace("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
+                JkLog.verbose("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
                 if (cachedPathSequence.hasNonExisting()) {
-                    JkLog.trace("Cached classpath contains some non-existing element -> need resolve.");
+                    JkLog.verbose("Cached classpath contains some non-existing element -> need resolve.");
                     dependencyResolver.resolve(dependencies);
                 }
                 return new PartialResult(false, cachedPathSequence);
@@ -84,11 +84,11 @@ class EngineClasspathCache {
         if (Files.exists(cacheFile)) {
             String cachedContent = new String(JkUtilsPath.readAllBytes(cacheFile));
             if (content.equals(cachedContent)) {
-                JkLog.trace("unresolved-classpath file is still valid -> Jeka classpath will be determined from this.");
+                JkLog.verbose("unresolved-classpath file is still valid -> Jeka classpath will be determined from this.");
                 return false;
             }
         }
-        JkLog.trace("Update cached 'unresolved-classpath'.");
+        JkLog.verbose("Update cached 'unresolved-classpath'.");
         if (Files.exists(cacheFile.getParent())) {
             JkPathFile.of(cacheFile).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
         }

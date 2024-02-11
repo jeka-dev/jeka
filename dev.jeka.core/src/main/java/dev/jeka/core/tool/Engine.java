@@ -74,9 +74,9 @@ final class Engine {
      */
     void execute(ParsedCmdLine parsedCmdLine) {
         JkDependencySet commandLineDependencies = JkDependencySet.of(parsedCmdLine.getJekaSrcDependencies());
-        JkLog.trace("Dependencies injected in classpath from command line : " + commandLineDependencies);
+        JkLog.verbose("Dependencies injected in classpath from command line : " + commandLineDependencies);
         JkDependencySet dependenciesFromJekaProps = dependenciesFromJekaProps();
-        JkLog.trace("Dependencies injected in classpath from jeka.properties : " + dependenciesFromJekaProps);
+        JkLog.verbose("Dependencies injected in classpath from jeka.properties : " + dependenciesFromJekaProps);
         final JkPathSequence computedClasspath;
         final CompilationResult result;
         boolean hasJekaSrc = Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR))
@@ -140,7 +140,7 @@ final class Engine {
             System.out.println();
         }
         if (!hasJekaSrc) {
-            JkLog.trace("You are not running Jeka inside a Jeka project.");
+            JkLog.verbose("You are not running Jeka inside a Jeka project.");
         }
         if (!parsedCmdLine.hasMethodInvokations() && !Environment.logs.runtimeInformation) {
             JkLog.warn("This command contains no actions. Execute 'jeka --help' to know about available actions.");
@@ -167,11 +167,11 @@ final class Engine {
     private CompilationContext preCompile() {
 
         JkPathTree sourceTree = beanClassesResolver.getSourceTree();
-        JkLog.traceStartTask("Parsing source code of " + sourceTree);
+        JkLog.verboseStartTask("Parsing source code of " + sourceTree);
         EngineClasspathCache engineClasspathCache = new EngineClasspathCache(this.baseDir, dependencyResolver);
         final ParsedSourceInfo parsedSourceInfo =
                 SourceParser.of(this.baseDir, sourceTree).parse();
-        JkLog.traceEndTask();
+        JkLog.verboseEndTask();
 
         JkDependencySet jekaSrcDependencies = JkDependencySet.of()
                 .and(Environment.parsedCmdLine.getJekaSrcDependencies())
@@ -206,7 +206,7 @@ final class Engine {
     private CompilationResult resolveAndCompile(Map<Path, JkPathSequence> yetCompiledProjects, boolean compileSources,
                                              boolean failOnCompileError) {
         if (yetCompiledProjects.containsKey(this.baseDir)) {
-            JkLog.trace("Project '%s' already compiled. Skip", this.baseDir);
+            JkLog.verbose("Project '%s' already compiled. Skip", this.baseDir);
             return new CompilationResult(JkPathSequence.of(), JkPathSequence.of(),
                     yetCompiledProjects.get(this.baseDir), false);
         }
@@ -244,7 +244,7 @@ final class Engine {
         if (compileSources && this.beanClassesResolver.hasDefSource()) {
             boolean missingBinaryFiles = compilationTracker.isMissingBinaryFiles();
             if (missingBinaryFiles) {
-                JkLog.trace("Some binary files seem missing.");
+                JkLog.verbose("Some binary files seem missing.");
             }
             if (outdated || missingBinaryFiles) {
                 SingleCompileResult result = compileJekaSrc(classpath, compilationContext.compileOptions, failOnCompileError);
@@ -258,15 +258,15 @@ final class Engine {
             } else {
                 // We need to add kotlin libs in order to invoke local KBean compiled with kotlin
                 if (hasKotlinSource()) {
-                    JkLog.traceStartTask("Preparing for Kotlin");
+                    JkLog.verboseStartTask("Preparing for Kotlin");
                     JkProperties props = JkRunbase.constructProperties(baseDir);
                     String kotVer = props.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
                     JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer), "No jeka.kotlin.version property has been defined.");
                     JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer);
                     AppendableUrlClassloader.addEntriesOnContextClassLoader(kotlinCompiler.getStdLib());
-                    JkLog.traceEndTask();
+                    JkLog.verboseEndTask();
                 }
-                JkLog.trace("Last jeka-src classes are up-to-date : No need to compile.");
+                JkLog.verbose("Last jeka-src classes are up-to-date : No need to compile.");
             }
         } else if (outdated) {
             compilationTracker.updateCompileFlag();
@@ -344,7 +344,7 @@ final class Engine {
         } else {
             result = result.and(JkLocator.getJekaJarPath());
         }
-        JkLog.trace("Use Jeka " + result.normalized() + " for compilation.");
+        JkLog.verbose("Use Jeka " + result.normalized() + " for compilation.");
         return result.withoutDuplicates();
     }
 

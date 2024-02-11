@@ -176,7 +176,7 @@ public final class JkTestProcessor {
      */
     public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
         if (!testSelection.hasTestClasses()) {
-            JkLog.trace("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
+            JkLog.verbose("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
             return JkTestResult.of();
         }
         final JkTestResult result;

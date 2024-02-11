@@ -87,7 +87,7 @@ final class HelpDisplayer {
     static void helpJkBean(KBean kBean) {
         KBeanDoc beanDescription = new KBeanDoc(kBean.getClass());
         JkLog.info(helpBeanDescription(beanDescription, kBean.getRunbase()));
-        JkLog.info("Execute 'jeka -help' to get global help.\n");
+        JkLog.info("Execute 'jeka -help' to get global help.");
     }
 
     private static String helpBeanDescription(KBeanDoc description, JkRunbase runbase) {

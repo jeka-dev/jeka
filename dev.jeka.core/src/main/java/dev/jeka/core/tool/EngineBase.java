@@ -154,25 +154,25 @@ class EngineBase {
             return classpathSetupResult;
         }
 
-         JkLog.traceStartTask("Resolve classpath for jeka-src");
+         JkLog.verboseStartTask("Resolve classpath for jeka-src");
 
         if (behaviorSettings.cleanWork) {
             Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
-            JkLog.trace("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
+            JkLog.verbose("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
 
         // That nice that this clean occurs here, cause it will happen for sub-basedir
         if (Environment.behavior.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
-            JkLog.trace("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
+            JkLog.verbose("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
             JkPathTree.of(outputDir).deleteContent();
         }
 
         // Parse info from source code
-         JkLog.traceStartTask("Scan jeka-src code for finding dependencies");
+         JkLog.verboseStartTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
-        JkLog.traceEndTask();
+        JkLog.verboseEndTask();
 
         // Compute and get the classpath from sub-dirs
         List<EngineBase> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
@@ -227,7 +227,7 @@ class EngineBase {
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
                 runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs);
-        JkLog.traceEndTask();
+        JkLog.verboseEndTask();
         return classpathSetupResult;
     }
 

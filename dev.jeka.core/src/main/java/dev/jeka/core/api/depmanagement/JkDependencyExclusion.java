@@ -85,4 +85,12 @@ public final class JkDependencyExclusion {
         result = 31 * result + (artifactSpecification != null ? artifactSpecification.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "JkDependencyExclusion{" +
+                "moduleId=" + moduleId +
+                ", artifactSpecification=" + artifactSpecification +
+                '}';
+    }
 }

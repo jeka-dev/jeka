@@ -151,6 +151,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public void runJar() {
         this.run.runJar();
     }
+
+    @JkDoc("Run the compiled classes.")
+    public void runMain() {
+        this.run.runMain();
+    }
     
     @JkDoc("Scaffold a JeKa project skeleton in working directory.")
     public void scaffold() {
@@ -242,6 +247,13 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
                     .addParams(programArgs)
                     .exec();
         }
+
+        void runMain() {
+            project.prepareRunMain()
+                    .addJavaOptions(jvmOptions)
+                    .addParams(programArgs)
+                    .exec();
+        }
     }
 
     public static class JkPublishOptions {
@@ -314,7 +326,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     private void configureProject() {
         project.setBaseDir(getBaseDir());
-        if (!JkLog.isAcceptAnimation()) {
+        if (JkLog.isAnimationAccepted()) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }
@@ -349,7 +361,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
                     !JkJavaVersion.ofCurrent().equals(project.getJvmTargetVersion())) {
                 Path javaHome = jdks().getHome(project.getJvmTargetVersion());
                 if (javaHome != null) {
-                    JkLog.trace("Tests are configured to run using JDK %s", javaHome);
+                    JkLog.verbose("Tests are configured to run using JDK %s", javaHome);
                     javaProcess.setCommand(javaHome.resolve("bin/java").toString());
                 }
             }

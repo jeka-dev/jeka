@@ -90,7 +90,7 @@ public final class DockerKBean extends KBean {
     }
 
     private void configureForSelfApp(SelfKBean selfKBean) {
-        JkLog.trace("Configure DockerKBean for SelAppKBean " + selfKBean);
+        JkLog.verbose("Configure DockerKBean for SelAppKBean " + selfKBean);
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
                 : computeImageName(selfKBean.getModuleId(), selfKBean.getVersion(), selfKBean.getBaseDir());
@@ -105,7 +105,7 @@ public final class DockerKBean extends KBean {
     }
 
     private void configureForProject(ProjectKBean projectKBean) {
-        JkLog.trace("Configure DockerKBean for ProjectKBean " + projectKBean.project);
+        JkLog.verbose("Configure DockerKBean for ProjectKBean " + projectKBean.project);
         JkProject project = projectKBean.project;
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName

@@ -129,8 +129,8 @@ class MasterBuild extends KBean {
         getImportedKBeans().get(ProjectKBean.class, false).forEach(projectJkBean ->
                 JkVersionFromGit.of().handleVersioning(projectJkBean.project));
         String branch = JkGit.of().getCurrentBranch();
-        JkLog.trace("Current build branch: %s", branch);
-        JkLog.trace("current ossrhUser:  %s", ossrhUser);
+        JkLog.verbose("Current build branch: %s", branch);
+        JkLog.verbose("current ossrhUser:  %s", ossrhUser);
 
         // Publish artifacts only if we are on 'master' branch
         if (JkUtilsIterable.listOf("HEAD", "master", "0.11.x").contains(branch) && ossrhUser != null) {
