@@ -65,7 +65,7 @@ public class CoreBuild extends KBean {
             .testing
                 .testProcessor
                     .engineBehavior
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
+                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.BAR);
         project
             .packaging
                 .setMainClass("dev.jeka.core.tool.Main")

@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Plugin for building JVM language based projects. It comes with a {@link JkProject} pre-configured with {@link JkProperties}.
@@ -197,6 +198,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("Argument passed to the JVM if tests are executed in a forked process (example -Xms2G -Xmx2G).")
         public String jvmOptions;
 
+        @JkDoc("The style to use to show test execution progress.")
+        public JkTestProcessor.JkProgressOutputStyle progressStyle = JkTestProcessor.JkProgressOutputStyle.BAR;
+
     }
 
     public static class JkLayoutOptions {
@@ -216,7 +220,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public String javaVersion;
 
         @JkDoc("Extra arguments to be passed to the compiler (example -Xlint:unchecked).")
-        public String compilerExtraArgs;
+        public String compilerOptions;
 
     }
 
@@ -356,9 +360,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (tests.skip != null) {
             project.testing.setSkipped(tests.skip);
         }
-        if (compilation.compilerExtraArgs != null) {
-            project.compilation.addJavaCompilerOptions(
-                    JkUtilsString.parseCommandline(compilation.compilerExtraArgs));
+        project.testing.testProcessor.engineBehavior.setProgressDisplayer(
+                Optional.ofNullable(tests.progressStyle).orElse(JkTestProcessor.JkProgressOutputStyle.BAR));
+        if (compilation.compilerOptions != null) {
+            String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);
+            project.compilation.addJavaCompilerOptions(options);
+            project.testing.compilation.addJavaCompilerOptions(options);
         }
 
         // Configure scaffold

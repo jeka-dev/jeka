@@ -2,6 +2,7 @@ package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.java.JkClassLoader;
 
+import java.io.Console;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,6 +32,8 @@ public final class JkUtilsSystem {
     public static final boolean IS_MACOS = isMacos();
 
     public static final boolean IS_LINUX = isLinux();
+
+    public static final Console CONSOLE = System.console();
 
     private static final Class UNSAFE_CLASS = JkClassLoader.ofCurrent().loadIfExist("sun.misc.Unsafe");
 

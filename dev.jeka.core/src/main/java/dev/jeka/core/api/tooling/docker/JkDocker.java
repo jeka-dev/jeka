@@ -2,6 +2,7 @@ package dev.jeka.core.api.tooling.docker;
 
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 /**
  * Class providing utility methods for executing Docker commands.
@@ -53,6 +54,10 @@ public class JkDocker {
                 .setInheritIO(false)
                 .setLogWithJekaDecorator(false)
                 .exec().hasSucceed();
+    }
+
+    public static void assertPresent() {
+        JkUtilsAssert.state(isPresent(), "Operation halted. Docker client unresponsive. Is Docker daemon running?");
     }
 
 

@@ -38,7 +38,24 @@ public final class JkTestProcessor {
      * Style of progress mark to display on console while the tests are running.
      */
     public enum JkProgressOutputStyle implements Serializable {
-        FULL, TREE, ONE_LINE, SILENT, BAR
+        FULL,
+
+        TREE,
+
+        /**
+         * Print a test status at each unitary test execution.
+         */
+        STEP,
+
+        /**
+         * Don't print anything during whole test plan execution.
+         */
+        SILENT,
+
+        /**
+         * Display a progress bar with the name of the test currently on execution.
+         */
+        BAR
     }
 
     private static final String ENGINE_SERVICE = "org.junit.platform.engine.TestEngine";

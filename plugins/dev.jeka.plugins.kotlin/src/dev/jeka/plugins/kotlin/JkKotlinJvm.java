@@ -11,6 +11,7 @@ import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.kotlin.JkKotlinModules;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectCompilation;
+import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -77,11 +78,11 @@ public class JkKotlinJvm {
                 .customizeDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
                 .preCompileActions
                     .replaceOrInsertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileKotlin(project, kotlinSourceDir));
+                        () -> compileKotlinInSpinner(project, kotlinSourceDir));
         testCompile
                 .preCompileActions
                     .replaceOrInsertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileTestKotlin(project, kotlinTestSourceDir));
+                        () -> compileTestKotlinInSpinner(project, kotlinTestSourceDir));
 
         JkPathTree javaInKotlinDir = JkPathTree.of(project.getBaseDir().resolve(kotlinSourceDir));
         JkPathTree javaInKotlinTestDir = JkPathTree.of(project.getBaseDir().resolve(kotlinTestSourceDir));
@@ -108,6 +109,12 @@ public class JkKotlinJvm {
         return JkKotlinModules.versionProvider(kotlinCompiler.getVersion());
     }
 
+    private void compileKotlinInSpinner(JkProject javaProject, String kotlinSourceDir) {
+        JkConsoleSpinner.of("Compiling Kotlin sources")
+                .setAlternativeMassage("Compiling Kotlin sources. It may take a while...")
+                .run(() -> this.compileKotlin(javaProject, kotlinSourceDir));
+    }
+
     private void compileKotlin(JkProject javaProject, String kotlinSourceDir) {
         JkProjectCompilation compilation = javaProject.compilation;
         JkPathTreeSet sources = compilation.layout.resolveSources();
@@ -130,6 +137,12 @@ public class JkKotlinJvm {
                 .setTargetVersion(targetVersion)
                 .setSources(sources);
         kotlinCompiler.compile(compileSpec);
+    }
+
+    private void compileTestKotlinInSpinner(JkProject javaProject, String kotlinTestSourceDir) {
+        JkConsoleSpinner.of("Compiling Kotlin test sources")
+                .setAlternativeMassage("Compiling Kotlin stest ources. It may take a while...")
+                .run(() -> this.compileTestKotlin(javaProject, kotlinTestSourceDir));
     }
 
     private void compileTestKotlin(JkProject javaProject, String kotlinTestSourceDir) {

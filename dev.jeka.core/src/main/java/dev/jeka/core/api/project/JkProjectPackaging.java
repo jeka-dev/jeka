@@ -136,8 +136,10 @@ public class JkProjectPackaging {
      * Creates a binary jar at conventional location.
      */
     public Path createBinJar() {
+        JkLog.startTask("pack-jar");
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.ofMainArtifact("jar"));
         createBinJar(path);
+        JkLog.endTask("Jar created at " + path);
         return path;
     }
 
@@ -146,21 +148,21 @@ public class JkProjectPackaging {
      */
     public void createFatJar(Path target) {
         project.testing.runIfNeeded();
-        JkLog.startTask("packing-fat-jar");
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
-        JkLog.endTask();
     }
 
     /**
      * Creates a fat jar at conventional location.
      */
     public Path createFatJar() {
+        JkLog.startTask("pack-fat-jar");
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.of("fat", "jar"));
         createFatJar(path);
+        JkLog.endTask("Fat jar created at " + path);
         return path;
     }
 

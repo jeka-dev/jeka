@@ -110,7 +110,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         System.setProperty("jeka.java.version", "");
     }
 
-    // Test if -lsu let the distrib installation displayed on console
+    // Test if -lsu let the distrib installation displayed on console in verbose mode
     private void testLsu() {
         JkLog.info("============ Testing snapshot jeka version %s =============================", SNAPSHOT_VERSION);
 
@@ -121,7 +121,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path jekaShellPath = getJekaShellPath();
 
         // '-rc' is important to log git output
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "-lsu", "-la=false", "#ok")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "-lsu", "-v", "-la=false", "#ok")
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
                 .setCollectOutput(true)
@@ -130,7 +130,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .exec();
         String output = result.getOutput();
         JkUtilsAssert.state(!output.startsWith("ok"), "Command output was '%s', " +
-                "expecting output from distrib installation", output);
+                "expecting logs of distrib installation", output);
     }
 
 

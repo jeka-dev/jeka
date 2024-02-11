@@ -1,7 +1,6 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -87,7 +86,7 @@ public final class Main {
 
             EngineBase engineBase = EngineBase.forLegacy(baseDir,
                     JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
-            JkConsoleSpinner.of("Boot-Strapping JeKa...").run(engineBase::resolveKBeans);
+            JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
             engineBase.resolveCommandEngine(Environment.parsedCmdLine.getBeanActions());
             engineBase.initRunbase();
 
@@ -135,17 +134,9 @@ public final class Main {
             System.err.println();
         }
         System.err.println(e.getMessage());
-        System.err.println("This could be caused by issues in the user code or settings, or potentially a bug in Jeka.");
-        System.err.println("To investigate, relaunch command with options :");
-        System.err.println("    -ls=DEBUG to see code class/line where each log has been emitted.");
-        if (!JkLog.isVerbose()) {
-            System.err.println("    -lv to increase log verbosity.");
-            if (!logs.stackTrace) {
-                System.err.println("    -lst to log the full stacktrace of the thrown exception.");
-            }
-        }
-        System.err.println("If error reveals to coming from Jeka engine, please report it to " +
-                ": https://github.com/jerkar/jeka/issues");
+        System.err.println("You can investigate using -v, -lst or -ls=DEBUG options.");
+        System.err.println("If this originates from a bug, please report the issue at: " +
+                "https://github.com/jeka-dev/jeka/issues");
     }
 
     /**

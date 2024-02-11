@@ -182,7 +182,7 @@ public class JkProjectTesting {
             .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
             .engineBehavior
                 .setLegacyReportDir(reportDir)
-                .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.ONE_LINE);
+                .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.STEP);
         return result;
     }
 

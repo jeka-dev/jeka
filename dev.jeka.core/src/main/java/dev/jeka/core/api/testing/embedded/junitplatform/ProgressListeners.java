@@ -3,13 +3,16 @@ package dev.jeka.core.api.testing.embedded.junitplatform;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
-import org.apache.ivy.util.StringUtils;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+import javafx.scene.Parent;
 import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
 import java.io.PrintStream;
+import java.util.Optional;
 
 class ProgressListeners {
 
@@ -21,7 +24,7 @@ class ProgressListeners {
             case BAR: return new ProgressBarExecutionListener();
             case TREE: return new ProgressListeners.TreeProgressExecutionListener();
             case FULL: return new ProgressListeners.ConsoleProgressExecutionListener();
-            case ONE_LINE: return new ProgressListeners.OneLineProgressExecutionListener();
+            case STEP: return new StepProgressExecutionListener();
             case SILENT: return new SilentProgressExecutionListener();
             default: return null;
         }
@@ -98,39 +101,50 @@ class ProgressListeners {
 
     }
 
-    static class OneLineProgressExecutionListener implements TestExecutionListener {
+    /**
+     * Create a progress bar that print a test status char at each execution step.
+     * It reaches a maximum of 100 characters before creating a new line.
+     */
+    static class StepProgressExecutionListener implements TestExecutionListener {
 
         private final Silencer silencer = new Silencer();
+
+        int count = 0;
 
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
             long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
-            System.out.print("Launch " + testCount + " tests ");
+            System.out.println("Launch " + testCount + " tests ");
             System.out.flush();
+            silencer.silent(true);
         }
 
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
+            silencer.silent(false);
             System.out.println();
         }
 
         @Override
-        public void executionStarted(TestIdentifier testIdentifier) {
-            if(testIdentifier.getType().isTest()) {
-                System.out.print(".");
-                System.out.flush();
-                silencer.silent(true);
-            }
-        }
-
-        @Override
         public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
+            char symbol = statusSymbol(testExecutionResult.getStatus());
             if(testIdentifier.getType().isTest()) {
                 silencer.silent(false);
+                System.out.print(symbol);
+                System.out.flush();
+                count++;
+                if (count == 100) {
+                    System.out.println();
+                    count=0;
+                }
+                silencer.silent(true);
             }
         }
     }
 
+    /**
+     * A progress bar that display the current executed test.
+     */
     static class ProgressBarExecutionListener implements TestExecutionListener {
 
         private static final int BAR_LENGTH = 50;
@@ -150,7 +164,11 @@ class ProgressListeners {
             this.testPlan = testPlan;
             testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
             System.out.println("Launch " + testCount + " tests ");
+            String bootingLine = "Booting tests ...";
+            System.out.print(bootingLine);
+            charCount = bootingLine.length();
             System.out.flush();
+            silencer.silent(true);
         }
 
         @Override
@@ -177,9 +195,9 @@ class ProgressListeners {
 
                 // Delete current line
                 silencer.silent(false);
-                System.out.print(StringUtils.repeat("\b", charCount));
-                System.out.print(StringUtils.repeat(" ", charCount));
-                System.out.print(StringUtils.repeat("\b", charCount));
+                System.out.print(JkUtilsString.repeat("\b", charCount));
+                System.out.print(JkUtilsString.repeat(" ", charCount));
+                System.out.print(JkUtilsString.repeat("\b", charCount));
                 System.out.flush();
 
                 // Print new line
@@ -193,12 +211,11 @@ class ProgressListeners {
 
         private String line(TestIdentifier testIdentifier) {
             int digitLenght =  Long.toString(testCount).length();
-            return String.format("Executing test %s/%s %s %s",
+            return java.lang.String.format("Executing test %s/%s %s %s",
                     JkUtilsString.padStart(Integer.toString(index), digitLenght, '0'),
                     JkUtilsString.padStart(Long.toString(testCount), digitLenght, '0'),
                     bar(),
-                    testIdentifier.getParentId().orElse("") + "."
-                            + JkUtilsString.ellipse(testIdentifier.getDisplayName(), 50));
+                    friendlyName(testIdentifier));
         }
 
         private String bar() {
@@ -231,5 +248,28 @@ class ProgressListeners {
                 System.setErr(standardErrStream);
             }
         }
+    }
+
+    private static char statusSymbol(TestExecutionResult.Status status) {
+        if (JkUtilsSystem.CONSOLE == null) {
+            return '.';
+        }
+        if (status == TestExecutionResult.Status.ABORTED) {
+            return '-';
+        }
+        if (status == TestExecutionResult.Status.FAILED) {
+            return '✗';
+        }
+        return '✓';
+    }
+
+    private static String friendlyName(TestIdentifier testIdentifier) {
+        Optional<UniqueId> parentUniqueId = testIdentifier.getParentIdObject();
+        String prefix = "";
+        if (parentUniqueId.isPresent()) {
+            prefix = parentUniqueId.get().getLastSegment().getValue() + ".";
+        }
+        String candidate = prefix + testIdentifier.getDisplayName();
+        return JkUtilsString.ellipse(candidate, 80);
     }
 }

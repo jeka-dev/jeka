@@ -2,6 +2,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
 
@@ -271,6 +272,14 @@ public class JkProjectFlatFacade {
         project.testing.testSelection.addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
        return this;
+    }
+
+    /**
+     * Sets the style for displaying test progress during test execution.
+     */
+    public JkProjectFlatFacade setTestProgressStyle(JkTestProcessor.JkProgressOutputStyle style) {
+        project.testing.testProcessor.engineBehavior.setProgressDisplayer(style);
+        return this;
     }
 
     /**

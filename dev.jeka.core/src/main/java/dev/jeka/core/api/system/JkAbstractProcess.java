@@ -337,7 +337,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         final List<String> commands = computeEffectiveCommands();
         if (logCommand) {
             String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
-            JkLog.startTask("Start program : " + workingDirName + " " + this);
+            JkLog.startTask("start-program " + workingDirName + " " + this);
         }
         if (inheritIO) {
             JkLog.getOutPrintStream().flush();

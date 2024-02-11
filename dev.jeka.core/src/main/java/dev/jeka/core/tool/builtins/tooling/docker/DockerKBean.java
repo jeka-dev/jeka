@@ -60,6 +60,7 @@ public final class DockerKBean extends KBean {
 
     @JkDoc("Run Docker image and wait until termination.")
     public void run() {
+        JkDocker.assertPresent();
         String containerName = "jeka-" + dockerImageName.replace(':', '-');
         String args = String.format("-it --rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
                         + dockerRunParams + " --name %s %s",
@@ -89,7 +90,7 @@ public final class DockerKBean extends KBean {
     }
 
     private void configureForSelfApp(SelfKBean selfKBean) {
-        JkLog.info("Configure DockerKBean for SelAppKBean " + selfKBean);
+        JkLog.trace("Configure DockerKBean for SelAppKBean " + selfKBean);
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
                 : computeImageName(selfKBean.getModuleId(), selfKBean.getVersion(), selfKBean.getBaseDir());
@@ -104,7 +105,7 @@ public final class DockerKBean extends KBean {
     }
 
     private void configureForProject(ProjectKBean projectKBean) {
-        JkLog.info("Configure DockerKBean for ProjectKBean " + projectKBean.project);
+        JkLog.trace("Configure DockerKBean for ProjectKBean " + projectKBean.project);
         JkProject project = projectKBean.project;
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName

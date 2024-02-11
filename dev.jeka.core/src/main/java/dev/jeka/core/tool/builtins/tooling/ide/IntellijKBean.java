@@ -108,9 +108,16 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void allIml() {
-        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir());
-        List<Path> imlFiles = intelliJProject.findImlFiles();
-        imlFiles.forEach(this::generateImlExec);
+        JkPathTree.of(getBaseDir()).andMatching("**.iml").stream()
+                .map(path -> {
+                            if (path.getParent().getFileName().toString().equals(".idea")) {
+                                return path.getParent().getParent();
+                            } else {
+                                return path.getParent();
+                            }
+                        })
+                .distinct()
+                .forEach(this::generateImlExec);
     }
 
     @JkDoc("Try to fix project by deleting workspace.xml and touching iml file")

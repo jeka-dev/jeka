@@ -181,6 +181,8 @@ public class JkDockerBuild {
      * @param imageName The name of the image to be build. It may contains or not a tag name.
      */
     public void buildImage(String imageName) {
+        JkDocker.assertPresent();
+
         JkUtilsAssert.state(!JkUtilsString.isBlank(mainClass), "Class containing 'main' method is not set.");
 
         JkPathTree.of(tempBuildDir).deleteContent();

@@ -5,6 +5,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -137,23 +138,28 @@ public class JkNodeJs {
     }
 
     /**
-     * Configures the specified project to include a nodeJs build right after main compilation.
+     * Configures the specified project to include a Node.js build right after main compilation.
      *
      * @param project The project to configure
-     * @param clientBaseDir The path, relative to project base dir, of the nodeJs subproject.
+     * @param clientBaseDir The path of the Node.js subproject (relative to the base dir).
      * @param clientBuildDir The path, relative to @clientBaseDir of the directory containing the build result.
      * @param copyToDir If not empty, the result of the client  build will be copied to this directory in class dir (e.g. 'static').
-     * @param buildCommands The commands (npm o npx) to execute to build the nodeJs project.
+     * @param buildCommands The commands (npm o npx) to execute to build the Node.js project.
      */
     public JkNodeJs configure(JkProject project, String clientBaseDir, String clientBuildDir, String copyToDir,
                               String ...buildCommands) {
         Path baseDir = project.getBaseDir().resolve(clientBaseDir);
         Path buildDir = baseDir.resolve(clientBuildDir);
-        project.compilation.postCompileActions.append("NodeJs", () -> {
+        project.compilation.postCompileActions.append("build-js-project", () -> {
             this.setWorkingDir(baseDir);
-            Arrays.stream(buildCommands).forEach(this::exec);
-            if (!JkUtilsString.isBlank(clientBaseDir)) {
-                JkPathTree.of(buildDir).copyTo(project.compilation.layout.resolveClassDir().resolve(copyToDir));
+            JkConsoleSpinner.of("Building Node.js project")
+                    .setAlternativeMassage("Building Node.js project. It may take a while...")
+                    .run(() -> Arrays.stream(buildCommands).forEach(this::exec));
+            JkLog.info("JS project built in %s", baseDir.resolve(clientBuildDir));
+            if (!JkUtilsString.isBlank(copyToDir)) {
+                Path target = project.compilation.layout.resolveClassDir().resolve(copyToDir);
+                JkPathTree.of(buildDir).copyTo(target);
+                JkLog.info("Build copied to %s", target);
             }
 
         });
@@ -180,8 +186,7 @@ public class JkNodeJs {
                 .setFailOnError(true)
                 .setEnv("PATH", pathVar)
                 .setLogCommand(true)
-                .setInheritIO(false)
-                .setLogWithJekaDecorator(true);
+                .setLogWithJekaDecorator(JkLog.isVerbose());
     }
 
     private static boolean isBinaryPresent(Path installDir) {
