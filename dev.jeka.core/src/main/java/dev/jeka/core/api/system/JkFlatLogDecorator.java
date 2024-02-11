@@ -3,8 +3,6 @@ package dev.jeka.core.api.system;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 /**
  * This decorator shows minimalist task decoration...

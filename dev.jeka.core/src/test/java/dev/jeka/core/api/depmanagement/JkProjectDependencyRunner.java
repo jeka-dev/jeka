@@ -1,7 +1,6 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
-import dev.jeka.core.api.tooling.maven.JkMvn;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

@@ -199,7 +199,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public String jvmOptions;
 
         @JkDoc("The style to use to show test execution progress.")
-        public JkTestProcessor.JkProgressOutputStyle progressStyle = JkTestProcessor.JkProgressOutputStyle.BAR;
+        public JkTestProcessor.JkProgressOutputStyle progressStyle;
 
     }
 
@@ -359,6 +359,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         if (tests.skip != null) {
             project.testing.setSkipped(tests.skip);
+        }
+        // The style should not be forced by default as it is determined by the presence of a console,
+        // and the log level
+        if (tests.progressStyle != null) {
+            project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progressStyle);
         }
         project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                 Optional.ofNullable(tests.progressStyle).orElse(JkTestProcessor.JkProgressOutputStyle.BAR));

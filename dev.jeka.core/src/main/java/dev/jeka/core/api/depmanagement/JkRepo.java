@@ -14,7 +14,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository

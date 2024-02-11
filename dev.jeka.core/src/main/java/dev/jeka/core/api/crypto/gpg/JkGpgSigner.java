@@ -6,7 +6,6 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.tool.JkConstants;
 
 import java.io.InputStream;
 import java.io.OutputStream;

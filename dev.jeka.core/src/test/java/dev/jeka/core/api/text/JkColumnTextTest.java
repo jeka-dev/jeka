@@ -2,9 +2,6 @@ package dev.jeka.core.api.text;
 
 import org.junit.Test;
 
-import static dev.jeka.core.api.utils.JkUtilsIterable.listOf;
-import static org.junit.Assert.*;
-
 public class JkColumnTextTest {
 
     @Test

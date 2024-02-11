@@ -1,19 +1,14 @@
 package dev.jeka.core.api.tooling.maven;
 
-import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Convenient class wrapping maven process.

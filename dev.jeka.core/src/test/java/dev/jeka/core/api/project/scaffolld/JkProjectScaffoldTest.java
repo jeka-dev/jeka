@@ -9,7 +9,6 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import org.junit.Test;
 
-import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 

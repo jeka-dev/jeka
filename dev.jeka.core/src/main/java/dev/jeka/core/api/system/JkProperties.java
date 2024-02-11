@@ -2,9 +2,7 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="FAST BUILD" type="Application" factoryName="Application">
+  <configuration default="false" name="CORE BUILD skip test" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
     <module name="dev.jeka.core" />
     <option name="PROGRAM_PARAMETERS" value="project#clean project#pack project#tests.skip=true -lst -lsu -lv -v" />

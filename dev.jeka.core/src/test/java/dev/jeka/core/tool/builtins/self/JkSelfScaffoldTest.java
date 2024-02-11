@@ -1,11 +1,9 @@
 package dev.jeka.core.tool.builtins.self;
 
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.Test;
 
-import java.awt.*;
 import java.nio.file.Path;
 
 public class JkSelfScaffoldTest {

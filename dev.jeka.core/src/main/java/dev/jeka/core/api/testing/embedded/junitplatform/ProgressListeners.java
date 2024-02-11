@@ -4,7 +4,6 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
-import javafx.scene.Parent;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -23,13 +22,16 @@ class ProgressListeners {
         switch (progressDisplayer) {
             case BAR: return new ProgressBarExecutionListener();
             case TREE: return new ProgressListeners.TreeProgressExecutionListener();
-            case FULL: return new ProgressListeners.ConsoleProgressExecutionListener();
+            case PLAIN: return new ProgressListeners.ConsoleProgressExecutionListener();
             case STEP: return new StepProgressExecutionListener();
             case SILENT: return new SilentProgressExecutionListener();
             default: return null;
         }
     }
 
+    /**e.
+     * Execute test plan silently by silencing the system output and error streams.
+     */
     static class SilentProgressExecutionListener implements TestExecutionListener {
 
         private final Silencer silencer = new Silencer();
@@ -79,15 +81,17 @@ class ProgressListeners {
                 nestedLevel --;
             }
         }
-
     }
 
+    /**
+     * Print test under execution on console without silencing test output.
+     */
     static class ConsoleProgressExecutionListener implements TestExecutionListener {
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
             if(testIdentifier.getType().isTest()) {
-                System.out.println(testIdentifier);
+                System.out.println(friendlyName(testIdentifier));
             }
         }
 

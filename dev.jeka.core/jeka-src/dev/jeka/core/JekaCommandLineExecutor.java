@@ -1,6 +1,5 @@
 package dev.jeka.core;
 
-import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;

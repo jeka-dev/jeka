@@ -1,8 +1,5 @@
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.JkUtilsIO;
-
-import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.PrintStream;
 

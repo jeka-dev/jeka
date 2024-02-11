@@ -14,7 +14,8 @@ import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class PicocliMain {

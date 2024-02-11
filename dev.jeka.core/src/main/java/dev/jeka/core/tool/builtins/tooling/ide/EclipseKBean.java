@@ -12,7 +12,6 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.Main;
-import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

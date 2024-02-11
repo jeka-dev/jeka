@@ -9,6 +9,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
 import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -162,10 +163,6 @@ public class JkProjectTesting {
         }
     }
 
-    void reset() {
-        done = false;
-    }
-
     private void executeWithTestProcessor() {
         UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
         testSelection.setTestClassRoots(op);
@@ -182,8 +179,16 @@ public class JkProjectTesting {
             .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
             .engineBehavior
                 .setLegacyReportDir(reportDir)
-                .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.STEP);
+                .setProgressDisplayer(defaultProgressStyle());
         return result;
+    }
+
+    private static JkTestProcessor.JkProgressOutputStyle defaultProgressStyle() {
+        if (JkLog.isVerbose()) {
+            return JkTestProcessor.JkProgressOutputStyle.PLAIN;
+        }
+        return JkUtilsSystem.CONSOLE == null ? JkTestProcessor.JkProgressOutputStyle.STEP :
+                JkTestProcessor.JkProgressOutputStyle.BAR;
     }
 
     private JkTestSelection defaultTestSelection() {

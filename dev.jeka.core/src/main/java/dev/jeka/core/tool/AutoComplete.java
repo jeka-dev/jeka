@@ -15,36 +15,18 @@
  */
 package dev.jeka.core.tool;
 
-import static java.lang.String.format;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import dev.jeka.core.tool.CommandLine.Command;
-import dev.jeka.core.tool.CommandLine.HelpCommand;
-import dev.jeka.core.tool.CommandLine.IExecutionExceptionHandler;
-import dev.jeka.core.tool.CommandLine.IFactory;
+import dev.jeka.core.tool.CommandLine.*;
 import dev.jeka.core.tool.CommandLine.Model.ArgSpec;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
 import dev.jeka.core.tool.CommandLine.Model.PositionalParamSpec;
-import dev.jeka.core.tool.CommandLine.Option;
-import dev.jeka.core.tool.CommandLine.Parameters;
-import dev.jeka.core.tool.CommandLine.ParseResult;
-import dev.jeka.core.tool.CommandLine.Spec;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static java.lang.String.format;
 
 /**
  * Stand-alone tool that generates bash auto-complete scripts for picocli-based command line applications.

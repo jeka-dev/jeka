@@ -35,7 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.UnaryOperator;
 
 /**
  * {@link IvyInternalPublisher} delegates to this class for publishing to Maven

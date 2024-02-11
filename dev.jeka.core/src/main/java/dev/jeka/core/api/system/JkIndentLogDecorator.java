@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 /**
  * This decorator adds indentation for logs nested within a task.

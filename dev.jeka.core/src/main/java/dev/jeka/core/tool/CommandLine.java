@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.Locale.ENGLISH;
 import static dev.jeka.core.tool.CommandLine.Help.Column.Overflow.*;
+import static java.util.Locale.ENGLISH;
 
 /**
  * <p>
