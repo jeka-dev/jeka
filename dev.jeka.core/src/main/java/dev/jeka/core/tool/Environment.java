@@ -4,7 +4,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
-import jdk.nashorn.internal.runtime.options.Option;
 
 import java.nio.file.Paths;
 import java.util.*;

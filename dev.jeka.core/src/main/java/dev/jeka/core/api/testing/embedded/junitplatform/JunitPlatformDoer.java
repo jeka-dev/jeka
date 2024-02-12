@@ -134,11 +134,13 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
                 break;
         }
         String testId = failure.getTestIdentifier().getUniqueId();
-        String displayName = failure.getTestIdentifier().getDisplayName();
+        String displayName = ProgressListeners.friendlyName(failure.getTestIdentifier());
         Set<String> tags = failure.getTestIdentifier().getTags().stream().map(TestTag::toString)
                 .collect(Collectors.toSet());
         JkTestResult.JkTestIdentifier id = JkTestResult.JkTestIdentifier.of(type, testId, displayName, tags);
-        return JkTestResult.JkFailure.of(id, failure.getException().getMessage(),
+        return JkTestResult.JkFailure.of(id,
+                failure.getException().getClass().getName(),
+                failure.getException().getMessage(),
                 failure.getException().getStackTrace());
     }
 

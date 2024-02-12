@@ -254,6 +254,10 @@ public final class JkLog implements Serializable {
         return verbosity == Verbosity.VERBOSE;
     }
 
+    public static boolean isDebug() {
+        return isVerbose() || (verbosity == Verbosity.DEBUG);
+    }
+
     private static void consume(JkLogEvent event) {
         if (decorator == null) {
             return;

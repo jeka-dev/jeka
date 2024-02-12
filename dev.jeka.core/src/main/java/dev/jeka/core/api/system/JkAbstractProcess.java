@@ -336,7 +336,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     public JkProcResult exec() {
         final List<String> commands = computeEffectiveCommands();
         if (logCommand) {
-            String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
+            String workingDirName = this.workingDir == null ? "" : shortenWorkingDir() + ">";
             JkLog.startTask("start-program " + workingDirName + " " + this);
         }
         if (inheritIO) {
@@ -477,6 +477,19 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
                 .filter(Objects::nonNull)
                 .filter(param -> !param.isEmpty())
                 .collect(Collectors.toList());
+    }
+
+    private String shortenWorkingDir() {
+        int maxSize = 30;
+        String path = workingDir.toString();
+        if (JkLog.isDebug() ||  path.length() <= maxSize) {
+            return path;
+        }
+        if (workingDir.isAbsolute() && workingDir.getNameCount() > 2) {
+            System.out.println("---------------" + workingDir);
+            return workingDir.getRoot().toString() + workingDir.getName(0) + "/.../" + workingDir.getFileName();
+        }
+        return path;
     }
 
 }

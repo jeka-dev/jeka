@@ -12,6 +12,7 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkException;
 import org.junit.platform.launcher.core.LauncherConfig;
 
 import java.io.Serializable;
@@ -189,6 +190,11 @@ public final class JkTestProcessor {
         }
         postActions.run();
         JkLog.info("Result : " + result.getTestCount());
+        List<JkTestResult.JkFailure> failures = result.getFailures();
+        if (!failures.isEmpty()) {
+            JkLog.warn("%s failures found. First failure details: %n%s", failures.size(),
+                    failures.get(0).shortMessage(3));
+        }
         JkLog.endTask();
         return result;
     }

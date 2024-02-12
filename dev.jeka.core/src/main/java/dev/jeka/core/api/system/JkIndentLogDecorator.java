@@ -14,6 +14,8 @@ import java.nio.charset.Charset;
  */
 public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
+    private static final int CONSOLE_WIDTH = 140;
+
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     static final byte LINE_SEPARATOR = 10;
@@ -50,6 +52,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
         } else {
             err.flush();
         }
+        int marginWidth = JkLog.getCurrentNestedLevel() * (MARGIN_UNIT.length);
         String message = event.getMessage();
         if (event.getType().isTraceWarnOrError()) {
             message = "[" + event.getType() + "] " + message;
@@ -60,12 +63,23 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
                 stream.println(message);
             }
         } else if (logType== JkLog.Type.START_TASK) {
+            /*
+            if ((message.length() + marginWidth) >  CONSOLE_WIDTH) {
+                message = JkUtilsString.wrapStringCharacterWise(message, CONSOLE_WIDTH - marginWidth);
+            }
+
+             */
             marginErr.flush();
             out.println("Task: " + message);
             marginOut.notifyStart();
             marginErr.notifyStart();
             marginErr.mustPrintMargin = true;
         } else {
+            /*
+            if ((message.length() + marginWidth) >  CONSOLE_WIDTH) {
+                message = JkUtilsString.wrapStringCharacterWise(message, CONSOLE_WIDTH - marginWidth);
+            }
+             */
             stream.println(message);
         }
     }

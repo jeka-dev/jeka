@@ -1,5 +1,7 @@
 package dev.jeka.core.api.testing;
 
+import dev.jeka.core.api.utils.JkUtilsString;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
@@ -151,7 +153,7 @@ public final class JkTestResult implements Serializable {
         }
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PrintStream printStream = new PrintStream(os);
-            printStream.println("" + failures.size() + " test failures : ");
+            printStream.println( failures.size() + " test failures : ");
             printStream.println();
             printFailures(printStream);
             String message = os.toString("UTF8");
@@ -168,18 +170,22 @@ public final class JkTestResult implements Serializable {
 
         private final JkTestIdentifier testId;
 
+        private final String throwableClassName;
+
         private final String throwableMessage;
 
         private final StackTraceElement[] stackTraces;
 
-        private JkFailure(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] stacktraces) {
+        private JkFailure(JkTestIdentifier testId, String throwableClassname,
+                          String throwableMessage, StackTraceElement[] stacktraces) {
             this.testId = testId;
             this.throwableMessage = throwableMessage;
             this.stackTraces = stacktraces;
+            this.throwableClassName = throwableClassname;
         }
 
-        public static JkFailure of(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] stacktraces) {
-            return new JkFailure(testId, throwableMessage, stacktraces);
+        public static JkFailure of(JkTestIdentifier testId, String throwableClassname, String throwableMessage, StackTraceElement[] stacktraces) {
+            return new JkFailure(testId, throwableClassname, throwableMessage, stacktraces);
         }
 
         public JkTestIdentifier getTestId() {
@@ -202,6 +208,18 @@ public final class JkTestResult implements Serializable {
                     ", throwableMessage='" + throwableMessage + '\'' +
                     ", stacktraces=" + Arrays.toString(stackTraces) +
                     '}';
+        }
+
+        public String shortMessage(int stackTraceEl) {
+            StringBuilder result = new StringBuilder();
+            result.append(String.format("%s %n        %s",
+                    testId.displayName,
+                    JkUtilsString.wrapStringCharacterWise(throwableClassName + " : " + throwableMessage, 120)));
+            for (int i=0; i<= stackTraceEl && i < stackTraces.length; i++) {
+                result.append("\nat ").append(stackTraces[i]);
+            }
+            result.append("\n...");
+            return JkUtilsString.withLeftMargin(result.toString(), "        ");
         }
 
         void print(PrintStream printStream) {

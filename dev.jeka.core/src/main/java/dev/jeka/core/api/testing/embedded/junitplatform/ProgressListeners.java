@@ -271,7 +271,7 @@ class ProgressListeners {
         return '✓';
     }
 
-    private static String friendlyName(TestIdentifier testIdentifier) {
+    static String friendlyName(TestIdentifier testIdentifier) {
         Optional<UniqueId> parentUniqueId = testIdentifier.getParentIdObject();
         String prefix = "";
         if (parentUniqueId.isPresent()) {

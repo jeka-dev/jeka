@@ -10,9 +10,11 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -167,8 +169,8 @@ public class JkProjectTesting {
         UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
         testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
-        if (breakOnFailures) {
-            result.assertNoFailure();
+        if (!result.getFailures().isEmpty() && breakOnFailures) {
+            throw new JkException("Failures detected in test execution");
         }
     }
 

@@ -450,6 +450,9 @@ public final class JkUtilsString {
                             .map(String::length)
                             .max(Comparator.naturalOrder())
                             .orElse(input.length() +1);
+                    if (newMaxLength >= maxLineLength) {
+                        return input;
+                    }
                     return wrapStringCharacterWise(input, newMaxLength);
                 }
                 stringBuilder.replace(index, index + 1, "\n");
@@ -457,6 +460,17 @@ public final class JkUtilsString {
             }
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * Returns a string with a left margin added to each line.
+     * Each line in the provided paragraph will be prepended with the specified margin.
+     */
+    public static String withLeftMargin(String paragraph, String margin) {
+        String all = Arrays.stream(paragraph.split("\n"))
+                .map(line -> margin + line)
+                .reduce("",  (one, two) -> one + "\n" + two);
+        return all.substring(1); // remove first 'br'
     }
 
 }

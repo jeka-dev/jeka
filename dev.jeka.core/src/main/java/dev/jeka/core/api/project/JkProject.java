@@ -361,21 +361,16 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
                 .add("Manifest", packaging.getManifest().asTrimedString()); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
-
-
         builder.append(columnsText.toString());
 
-
-        // add declared dependencies
-        builder
-            .append("\nCompile Dependencies          : \n");
-        compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
-        builder
-            .append("Runtime Dependencies          : \n");
-        runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
-        builder
-            .append("Test Dependencies             : \n");
-        testDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
+        if (JkLog.isVerbose()) { // add declared dependencies
+            builder.append("\nCompile Dependencies          : \n");
+            compileDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
+            builder.append("Runtime Dependencies          : \n");
+            runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
+            builder.append("Test Dependencies             : \n");
+            testDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
+        }
         return builder.toString();
     }
 
@@ -442,6 +437,7 @@ public final class JkProject implements JkIdeSupportSupplier {
      * @see JkProject#packActions
      */
     public void pack() {
+        this.testing.runIfNeeded();
         this.packActions.run();
     }
 

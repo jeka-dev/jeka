@@ -36,8 +36,8 @@ public final class JkInit {
         JkLog.setDecorator(Environment.logs.style);
         if (Environment.logs.runtimeInformation) {
             displayRuntimeInfo();
-            JkLog.info("JeKa Classpath    : ");
-            JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.info("    " + item));
+            JkLog.verbose("JeKa Classpath    : ");
+            JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.verbose("    " + item));
         }
         boolean memoryBufferLogActivated = false;
         if (!Environment.logs.startUp && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
