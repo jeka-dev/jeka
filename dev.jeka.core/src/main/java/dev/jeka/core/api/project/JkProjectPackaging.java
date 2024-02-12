@@ -121,7 +121,6 @@ public class JkProjectPackaging {
      */
     public void createBinJar(Path target) {
         project.compilation.runIfNeeded();
-        project.testing.runIfNeeded();
         Path classDir = project.compilation.layout.resolveClassDir();
         if (!Files.exists(classDir)) {
             JkLog.warn("No class dir found : skip bin jar.");
@@ -148,7 +147,6 @@ public class JkProjectPackaging {
      */
     public void createFatJar(Path target) {
         project.compilation.runIfNeeded();
-        project.testing.runIfNeeded();
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(getManifest())

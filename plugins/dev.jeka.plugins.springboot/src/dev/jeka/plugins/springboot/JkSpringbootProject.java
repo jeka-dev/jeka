@@ -71,6 +71,7 @@ public final class JkSpringbootProject {
         if (createBootJar) {
             JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
+            project.setJarMaker(this::createBootJar);
             project.packActions.append("Make bootable jar", () -> createBootJar(artifactFile));
         }
         if (createWarFile) {
@@ -80,8 +81,7 @@ public final class JkSpringbootProject {
             project.packActions.append("Make war file", () -> warMaker.accept(artifactFile) );
         }
         if (createOriginalJar) {
-            JkArtifactId artifactId = ORIGINAL_ARTIFACT;
-            Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
+            Path artifactFile = project.artifactLocator.getArtifactPath(ORIGINAL_ARTIFACT);
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
             project.packActions.append("Make original jar", () -> makeBinJar.accept(artifactFile));
         }

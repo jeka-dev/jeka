@@ -20,4 +20,8 @@ class EnvBehaviorSettings {
         this.ignoreCompileFailure = ignoreCompileFailure;
     }
 
+    static EnvBehaviorSettings ofDefault() {
+        return new EnvBehaviorSettings(null, false, false, false);
+    }
+
 }

@@ -54,7 +54,7 @@ class EngineBase {
 
     private static final Map<Path, EngineBase> MAP = new HashMap<>();
 
-    private final Path baseDir;
+    final Path baseDir;
 
     private final JkDependencyResolver dependencyResolver;
 
@@ -251,22 +251,10 @@ class EngineBase {
                  .filter(kbeanClassNames::contains)
                  .collect(Collectors.toList());
 
-         // The KBean we can invoke methods on, without being specifically invoked
-         String defaultKBeanName = behaviorSettings.kbeanName
-                 .orElse(properties.get(JkConstants.DEFAULT_KBEAN_PROP));
-         String defaultKBeanClassName = firstMatchingClassname(kbeanClassNames, defaultKBeanName)
-                 .orElse(localKbeanClassNames.stream().findFirst().orElse(null));
-
-         // The first KBean to be initialized
-         final String initKbeanClassName;
-         if (localKbeanClassNames.contains(defaultKBeanClassName)) {
-             initKbeanClassName = defaultKBeanClassName;
-         } else {
-             initKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(defaultKBeanClassName);
-         }
-
-         kbeanResolution = new KBeanResolution(kbeanClassNames, localKbeanClassNames, initKbeanClassName, defaultKBeanClassName);
-         return kbeanResolution;
+        DefaultAndInitKBean defaultAndInitKBean = defaultAndInitKbean(kbeanClassNames, localKbeanClassNames);
+        kbeanResolution = new KBeanResolution(kbeanClassNames, localKbeanClassNames,
+                 defaultAndInitKBean.initKbeanClassName, defaultAndInitKBean.defaultKBeanClassName);
+        return kbeanResolution;
     }
 
     List<EngineCommand> resolveCommandEngine(List<KBeanAction> kBeanActionsFromCmdLine) {
@@ -327,6 +315,36 @@ class EngineBase {
              initRunbase();
          }
          runbase.run(engineCommands);
+    }
+
+    DefaultAndInitKBean defaultAndInitKbean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
+         return new DefaultAndInitKBean(kbeanClassNames, localKbeanClassNames);
+    }
+
+    JkRunbase getRunbase() {
+         return runbase;
+    }
+
+    // non-private for testing purpose
+    class DefaultAndInitKBean {
+
+         final String initKbeanClassName;
+
+         final String defaultKBeanClassName;
+
+         private DefaultAndInitKBean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
+             String defaultKBeanName = behaviorSettings.kbeanName
+                     .orElse(properties.get(JkConstants.DEFAULT_KBEAN_PROP));
+             defaultKBeanClassName = firstMatchingClassname(kbeanClassNames, defaultKBeanName)
+                     .orElse(localKbeanClassNames.stream().findFirst().orElse(null));
+
+             // The first KBean to be initialized
+             if (localKbeanClassNames.contains(defaultKBeanClassName)) {
+                 initKbeanClassName = defaultKBeanClassName;
+             } else {
+                 initKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(defaultKBeanClassName);
+             }
+         }
     }
 
     private CompileResult compileJekaSrc(JkPathSequence classpath, List<String> compileOptions) {
@@ -548,6 +566,11 @@ class EngineBase {
                     .filter(className -> KBean.nameMatches(className, kbeanName))
                     .findFirst();
         }
+    }
+
+    // For test-purpose only
+    void setKBeanResolution(KBeanResolution kbeanResolution) {
+         this.kbeanResolution = kbeanResolution;
     }
 
     private static class KotlinCompileResult {

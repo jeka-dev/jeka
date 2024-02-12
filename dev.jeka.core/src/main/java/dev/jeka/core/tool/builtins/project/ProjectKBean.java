@@ -377,8 +377,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (tests.progressStyle != null) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progressStyle);
         }
-        project.testing.testProcessor.engineBehavior.setProgressDisplayer(
-                Optional.ofNullable(tests.progressStyle).orElse(JkTestProcessor.JkProgressOutputStyle.BAR));
         if (compilation.compilerOptions != null) {
             String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);
             project.compilation.addJavaCompilerOptions(options);

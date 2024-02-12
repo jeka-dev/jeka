@@ -4,6 +4,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
+import jdk.nashorn.internal.runtime.options.Option;
 
 import java.nio.file.Paths;
 import java.util.*;
@@ -21,9 +22,9 @@ class Environment {
 
     static ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(new String[0]);
 
-    static EnvLogSettings logs = new EnvLogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false, false);
+    static EnvLogSettings logs = EnvLogSettings.ofDefault();
 
-    static EnvBehaviorSettings behavior = new EnvBehaviorSettings(null, false, false, false);
+    static EnvBehaviorSettings behavior = EnvBehaviorSettings.ofDefault();
 
     // TODO remove after picocli migration
     static String[] originalArgs;
@@ -59,6 +60,8 @@ class Environment {
         }
     }
 
+
+
     private static EnvLogSettings createLogSettings(CmdLineOptions cmdLineOptions) {
         return new EnvLogSettings(
                 cmdLineOptions.logVerbose.isPresent(),
@@ -73,6 +76,12 @@ class Environment {
         );
     }
 
+    // For testing purpose
+    static EnvLogSettings createLogSettings(String ...rawArgs) {
+        CmdLineOptions cmdLineOptions = new CmdLineOptions(new HashMap<>(), rawArgs);
+        return createLogSettings(cmdLineOptions);
+    }
+
     private static EnvBehaviorSettings createBehaviorSettings(CmdLineOptions cmdLineOptions) {
         return new EnvBehaviorSettings(
                 cmdLineOptions.kbeanName(),
@@ -80,6 +89,12 @@ class Environment {
                 cmdLineOptions.cleanOutput.isPresent(),
                 cmdLineOptions.ignoreCompileFail.isPresent()
         );
+    }
+
+    // For testing purpose
+    static EnvBehaviorSettings createBehaviorSettings(String ...rawArgs) {
+        CmdLineOptions cmdLineOptions = new CmdLineOptions(new HashMap<>(), rawArgs);
+        return createBehaviorSettings(cmdLineOptions);
     }
 
     static String originalCmdLineAsString() {
@@ -159,7 +174,7 @@ class Environment {
 
         Boolean logAnimation;
 
-        private final String kbeanName;
+       // private final String kbeanName;
 
         // behavioral option
 
@@ -169,6 +184,7 @@ class Environment {
 
         final Option<Void> ignoreCompileFail = ofVoid("Ignore when 'jeka-src compile fails", "--ignore-compile-fail", "-dci");
 
+        final Option<String> kbeanName = of(String.class, null, "Define default KBean", "--kbean", "-kb");
 
         private final Set<String> names = new HashSet<>();
 
@@ -177,7 +193,7 @@ class Environment {
 
             this.logAnimation = valueOf(boolean.class, map, null, "log.animation", "la");
             this.logStyle = valueOf(JkLog.Style.class, map, JkLog.Style.INDENT, "log.style", "ls");
-            this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
+            //this.kbeanName = valueOf(String.class, map, null, "kbean", KB_KEYWORD);
 
         }
 
@@ -186,7 +202,7 @@ class Environment {
         }
 
         String kbeanName() {
-            return kbeanName;
+            return kbeanName.getValue();
         }
 
         @Override
@@ -253,6 +269,7 @@ class Environment {
 
 
             private Option(Class<T> type, T value, List<String> names, String description) {
+                this.type =type;
                 this.value = value;
                 this.names = names;
                 this.description = description;
@@ -273,11 +290,22 @@ class Environment {
             private void populateFrom(List<String> args) {
                 for (ListIterator<String> it = args.listIterator(); it.hasNext();) {
                     String arg = it.next();
-                    if (names.contains(arg)) {
+                    String optionName = arg;
+                    String optionValue = null;
+                    if (arg.contains("=")) {
+                       optionName = JkUtilsString.substringBeforeFirst(arg, "=");
+                       optionValue = JkUtilsString.substringAfterFirst(arg, "=");
+                    }
+                    if (names.contains(optionName)) {
                         this.present = true;
+                    } else {
+                        continue;
                     }
                     if (Void.class.equals(type)) {
                         return;
+                    }
+                    if (String.class.equals(type)) {
+                        this.value = (T) optionValue;
                     }
                 }
             }

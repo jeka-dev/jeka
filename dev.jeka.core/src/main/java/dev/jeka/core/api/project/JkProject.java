@@ -7,6 +7,7 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
@@ -75,6 +76,8 @@ public final class JkProject implements JkIdeSupportSupplier {
      */
     public final JkRunnables packActions = JkRunnables.of();
 
+    private Consumer<Path> jarMaker;
+
     /**
      * Object responsible for resolving dependencies.
      */
@@ -140,7 +143,8 @@ public final class JkProject implements JkIdeSupportSupplier {
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseInMemoryCache(true);
-        packActions.set(packaging::createBinJar);
+        jarMaker = packaging::createBinJar;
+        packActions.set(() -> jarMaker.accept(artifactLocator.getMainArtifactPath()));
     }
 
     /**
@@ -251,13 +255,27 @@ public final class JkProject implements JkIdeSupportSupplier {
 
     // ------------------------- Run ---------------------------
 
+
+    /**
+     * Sets a {@link Runnable} to create the JAR used by {@link #prepareRunJar(boolean)}
+     */
+    public JkProject setJarMaker(Consumer<Path> jarMaker) {
+        this.jarMaker = jarMaker;
+        return this;
+    }
+
     /**
      * Creates {@link JkProcess} to execute the main method for this project.
      */
     public JkJavaProcess prepareRunMain() {
-        compilation.runIfNeeded();
+        Path classDir = compilation.layout.resolveClassDir();
+        if (!JkPathTree.of(classDir).containFiles()) {
+            compilation.run();
+        }
+        JkPathSequence classpath = JkPathSequence.of(this.compilation.layout.resolveClassDir())
+                .and(this.packaging.resolveRuntimeDependenciesAsFiles());
         return JkJavaProcess.ofJava(this.packaging.getMainClass())
-                .setClasspath(this.packaging.resolveRuntimeDependenciesAsFiles())
+                .setClasspath(classpath)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setInheritIO(true);
@@ -276,7 +294,7 @@ public final class JkProject implements JkIdeSupportSupplier {
         JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
         Path artifactPath = artifactLocator.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
-            pack();  // TODO add buildJar method as in Self
+            jarMaker.accept(artifactPath);
         }
         JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
                 .setDestroyAtJvmShutdown(true)
@@ -433,6 +451,8 @@ public final class JkProject implements JkIdeSupportSupplier {
     public boolean isIncludeTextAndLocalDependencies() {
         return includeTextAndLocalDependencies;
     }
+
+
 
     /**
      * Specifies if the project dependencies should include those mentioned in <i>jeka/project-dependencies.txt</i> flat file.

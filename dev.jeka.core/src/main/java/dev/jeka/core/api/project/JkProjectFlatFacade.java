@@ -44,9 +44,9 @@ public class JkProjectFlatFacade {
      */
     public JkProjectFlatFacade setMainArtifactJarType(JkProjectPackaging.JarType jarType) {
         if (jarType == JkProjectPackaging.JarType.REGULAR) {
-            project.packActions.set(project.packaging::createBinJar);
+            project.setJarMaker(project.packaging::createBinJar);
         } else if (jarType == JkProjectPackaging.JarType.FAT) {
-            project.packActions.set(() -> project.packaging.createFatJar(project.artifactLocator.getMainArtifactPath()));
+            project.setJarMaker(project.packaging::createFatJar);
         } else {
             throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
         }

@@ -23,7 +23,7 @@ class EnvLogSettings {
 
     final boolean banner;
 
-    public EnvLogSettings(boolean verbose, boolean ivyVerbose, boolean startUp,
+    EnvLogSettings(boolean verbose, boolean ivyVerbose, boolean startUp,
                           boolean stackTrace, boolean runtimeInformation, boolean totalDuration,
                           JkLog.Style style, Boolean animation, boolean banner) {
         this.verbose = verbose;
@@ -36,6 +36,12 @@ class EnvLogSettings {
         this.animation = animation;
         this.banner = banner;
     }
+
+    static EnvLogSettings ofDefault() {
+        return new EnvLogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false, false);
+    }
+
+
 
 
 }

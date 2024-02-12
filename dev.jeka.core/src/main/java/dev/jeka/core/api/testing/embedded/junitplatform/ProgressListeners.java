@@ -117,8 +117,8 @@ class ProgressListeners {
 
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
-            long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
-            System.out.println("Launch " + testCount + " tests ");
+            long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isContainer());
+            System.out.println("Found " + testCount + " test containers ");
             System.out.flush();
             silencer.silent(true);
         }
@@ -132,7 +132,7 @@ class ProgressListeners {
         @Override
         public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
             char symbol = statusSymbol(testExecutionResult.getStatus());
-            if(testIdentifier.getType().isTest()) {
+            if(testIdentifier.getType().isContainer()) {
                 silencer.silent(false);
                 System.out.print(symbol);
                 System.out.flush();
@@ -166,8 +166,12 @@ class ProgressListeners {
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
             this.testPlan = testPlan;
-            testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isTest());
-            System.out.println("Launch " + testCount + " tests ");
+
+            // TODO wrong way for counting, parametrized test won't bbe taken in account
+            // and method containing the parametrized test, will be considered as Container
+            testCount = testPlan.countTestIdentifiers(TestIdentifier::isContainer);
+
+            System.out.println("Found " + testCount + " test containers ");
             String bootingLine = "Booting tests ...";
             System.out.print(bootingLine);
             charCount = bootingLine.length();
@@ -194,7 +198,7 @@ class ProgressListeners {
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
-            if(testIdentifier.getType().isTest()) {
+            if(testIdentifier.getType().isContainer()) {
                 index++;
 
                 // Delete current line
