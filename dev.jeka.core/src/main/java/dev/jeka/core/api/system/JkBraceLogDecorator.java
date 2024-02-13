@@ -67,7 +67,7 @@ public final class JkBraceLogDecorator extends JkLog.JkLogDecorator {
             marginOut.pendingStart = false;
             marginErr.pendingStart = false;
         } else {
-            if (event.getType().isTraceWarnOrError()) {
+            if (event.getType().isMessageType()) {
                 message = "[" + event.getType() + "] " + message;
             }
             if (event.getType() == JkLog.Type.ERROR || event.getType() == JkLog.Type.WARN) {

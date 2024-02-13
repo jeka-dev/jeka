@@ -54,7 +54,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
         }
         int marginWidth = JkLog.getCurrentNestedLevel() * (MARGIN_UNIT.length);
         String message = event.getMessage();
-        if (event.getType().isTraceWarnOrError()) {
+        if (event.getType().isMessageType()) {
             message = "[" + event.getType() + "] " + message;
         }
         if (logType == JkLog.Type.END_TASK) {

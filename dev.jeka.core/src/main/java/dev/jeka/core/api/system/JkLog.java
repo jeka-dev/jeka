@@ -26,10 +26,10 @@ public final class JkLog implements Serializable {
      * Type of events emitted by logs.
      */
     public enum Type {
-        ERROR, WARN, INFO, TRACE, PROGRESS, START_TASK, END_TASK;
+        ERROR, WARN, INFO, VERBOSE, DEBUG, PROGRESS, START_TASK, END_TASK;
 
-        public boolean isTraceWarnOrError() {
-            return this == TRACE || this == WARN || this == ERROR;
+        public boolean isMessageType() {
+            return this == VERBOSE || this == WARN || this == ERROR || this == DEBUG;
         }
     }
 
@@ -165,13 +165,13 @@ public final class JkLog implements Serializable {
 
     public static void debug(String message, Object ...params) {
         if (verbosity() == Verbosity.DEBUG) {
-            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
+            consume(JkLogEvent.ofRegular(Type.DEBUG, String.format(message, params)));
         }
     }
 
     public static void verbose(String message, Object ...params) {
         if (verbosity().isVerbose()) {
-            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
+            consume(JkLogEvent.ofRegular(Type.VERBOSE, String.format(message, params)));
         }
     }
 
