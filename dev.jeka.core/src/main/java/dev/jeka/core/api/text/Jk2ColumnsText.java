@@ -1,5 +1,6 @@
 package dev.jeka.core.api.text;
 
+import com.sun.rowset.internal.Row;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Arrays;
@@ -93,6 +94,9 @@ public class Jk2ColumnsText {
                 .flatMap(List::stream)
                 .map(line -> marginLeft + line)
                 .reduce("", (init, line) -> init + line + "\n");
+        if (result.isEmpty()) {
+            return "";
+        }
         return result.substring(0, result.length()-1); // remove last '\n'
     }
 

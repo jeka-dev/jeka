@@ -186,8 +186,11 @@ public class JkProjectTesting {
     }
 
     private static JkTestProcessor.JkProgressOutputStyle defaultProgressStyle() {
-        if (JkLog.isVerbose()) {
+        if (JkLog.isDebug()) {
             return JkTestProcessor.JkProgressOutputStyle.PLAIN;
+        }
+        if (!JkLog.isAnimationAccepted()) {
+            return JkTestProcessor.JkProgressOutputStyle.STEP;
         }
         return JkUtilsSystem.CONSOLE == null ? JkTestProcessor.JkProgressOutputStyle.STEP :
                 JkTestProcessor.JkProgressOutputStyle.BAR;
