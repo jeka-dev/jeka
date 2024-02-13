@@ -1,6 +1,5 @@
 package dev.jeka.core.api.text;
 
-import com.sun.rowset.internal.Row;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Arrays;
