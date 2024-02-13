@@ -289,25 +289,25 @@ public final class JkDependencyResolver  {
         Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
         boolean nonExistingEntryOnFs = false;
         if (Files.exists(cacheFile)) {
-            JkLog.verbose("Found cached resolve-classpath file %s for resolving %s", cacheFile, qualifiedDependencies);
+            JkLog.debug("Found cached resolve-classpath file %s for resolving %s", cacheFile, qualifiedDependencies);
             JkPathSequence cachedPathSequence =
                     JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
             String cachedCpMsg = cachedPathSequence.getEntries().isEmpty() ? "[empty]" :
                     "\n" + cachedPathSequence.toPathMultiLine("  ");
-            JkLog.verbose("Cached resolved classpath : " + cachedCpMsg);
+            JkLog.debug("Cached resolved classpath : " + cachedCpMsg);
             if (!cachedPathSequence.hasNonExisting()) {
                 return cachedPathSequence.getEntries();
             } else {
                 nonExistingEntryOnFs = true;
-                JkLog.verbose("Cached resolved-classpath %s has non existing entries on local file system " +
+                JkLog.debug("Cached resolved-classpath %s has non existing entries on local file system " +
                         ": need resolving %s", cacheFile, qualifiedDependencies);
             }
         }
         if (!nonExistingEntryOnFs) {
-            JkLog.verbose("Cached resolved-classpath %s not found : need resolving %s", cacheFile, qualifiedDependencies);
+            JkLog.debug("Cached resolved-classpath %s not found : need resolving %s", cacheFile, qualifiedDependencies);
         }
         JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
-        JkLog.verbose("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
+        JkLog.debug("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
         JkPathFile.of(cacheFile).createIfNotExist().write(result.toPath());
         return result.getEntries();
     }

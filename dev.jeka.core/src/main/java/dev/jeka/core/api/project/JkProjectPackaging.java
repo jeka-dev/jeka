@@ -296,6 +296,4 @@ public class JkProjectPackaging {
         return true;
     }
 
-
-
 }

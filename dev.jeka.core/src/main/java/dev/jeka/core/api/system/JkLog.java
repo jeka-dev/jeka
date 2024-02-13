@@ -215,6 +215,15 @@ public final class JkLog implements Serializable {
     }
 
     /**
+     * Logs the start of the current task. !!!  Should be closed by {@link #verboseEndTask()}.
+     */
+    public static void debugStartTask(String message, Object ... params) {
+        if (verbosity == Verbosity.DEBUG) {
+            startTask(message, params);
+        }
+    }
+
+    /**
      * Logs the end of the current task with a specific message. The specified message is formatted by String#format passing
      * the duration time in milliseconds as argument. So if your message contains '%d', it will be replaced by
      * the duration taken to complete the current task.
@@ -246,6 +255,12 @@ public final class JkLog implements Serializable {
 
     public static void verboseEndTask() {
         if (verbosity.isVerbose()) {
+            endTask();
+        }
+    }
+
+    public static void debugEndTask() {
+        if (verbosity == Verbosity.DEBUG) {
             endTask();
         }
     }

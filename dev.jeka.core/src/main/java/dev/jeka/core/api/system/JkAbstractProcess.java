@@ -486,7 +486,6 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             return path;
         }
         if (workingDir.isAbsolute() && workingDir.getNameCount() > 2) {
-            System.out.println("---------------" + workingDir);
             return workingDir.getRoot().toString() + workingDir.getName(0) + "/.../" + workingDir.getFileName();
         }
         return path;

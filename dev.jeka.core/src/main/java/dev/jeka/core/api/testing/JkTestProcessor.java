@@ -12,7 +12,6 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkException;
 import org.junit.platform.launcher.core.LauncherConfig;
 
 import java.io.Serializable;
@@ -79,7 +78,9 @@ public final class JkTestProcessor {
 
     private static final String JUNIT_PLATFORM_REPORTING_MODULE = "org.junit.platform:junit-platform-reporting";
 
-    private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
+    private JkJavaProcess forkingProcess = JkJavaProcess
+            .ofJava(JkTestProcessor.class.getName())
+            .setFailOnError(false)
             .setDestroyAtJvmShutdown(true);  // Tests are forked by default
 
     public final JkEngineBehavior engineBehavior;
@@ -88,7 +89,7 @@ public final class JkTestProcessor {
 
     public final JkRunnables postActions = JkRunnables.of();
 
-    private String junitPlatformVersion = "1.8.2";
+    private String junitPlatformVersion = "1.9.3";
 
     private JvmHints jvmHints = JvmHints.ofDefault();
 
@@ -192,8 +193,8 @@ public final class JkTestProcessor {
         JkLog.info("Result : " + result.getTestCount());
         List<JkTestResult.JkFailure> failures = result.getFailures();
         if (!failures.isEmpty()) {
-            JkLog.warn("%s failures found. First failure details: %n%s", failures.size(),
-                    failures.get(0).shortMessage(3));
+            String message = failures.size() == 1 ? "%s failure found:" : "%s failures found. First failure detail:";
+            JkLog.warn(message + " %n%s", failures.size(), failures.get(0).shortMessage(3));
         }
         JkLog.endTask();
         return result;
@@ -217,12 +218,11 @@ public final class JkTestProcessor {
                 .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
         JkJavaProcess clonedProcess = forkingProcess.copy()
                 .setLogCommand(JkLog.isVerbose())
-                .setFailOnError(true)
                 .setClasspath(classpath)
                 .addParams(arg);
         Path specificJdkHome = this.jvmHints.javaHome();
         if (specificJdkHome != null) {
-            JkLog.info("Run tests on JVM %s", specificJdkHome);
+            JkLog.verbose("Run tests on JVM %s", specificJdkHome);
             clonedProcess.setCommand(specificJdkHome.resolve("bin/java").toString());
         }
         clonedProcess.exec();

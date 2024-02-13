@@ -10,7 +10,7 @@ import java.util.Set;
 
 public final class JkTestResult implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -855794466882934307L;
 
     private final long timeStarted;
 
@@ -72,7 +72,7 @@ public final class JkTestResult implements Serializable {
 
     public static class JkCount implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = -6936658324403096375L;
 
         private final long found;
 
@@ -166,7 +166,7 @@ public final class JkTestResult implements Serializable {
 
     public static final class JkFailure implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = -2836260954120708050L;
 
         private final JkTestIdentifier testId;
 
@@ -202,7 +202,6 @@ public final class JkTestResult implements Serializable {
 
         @Override
         public String toString() {
-            System.out.println();
             return "{" +
                     "testId=" + testId +
                     ", throwableMessage='" + throwableMessage + '\'' +
@@ -219,6 +218,7 @@ public final class JkTestResult implements Serializable {
                 result.append("\nat ").append(stackTraces[i]);
             }
             result.append("\n...");
+            result.append("\nFind more details in jeka-output/test-report or relaunch using -d option.");
             return JkUtilsString.withLeftMargin(result.toString(), "        ");
         }
 
@@ -233,7 +233,7 @@ public final class JkTestResult implements Serializable {
 
     public static final class JkTestIdentifier implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 6798288174695984997L;
 
         private final JkType type;
 

@@ -153,12 +153,12 @@ public final class JkRunbase {
             String projectDisplayName = baseDir.toString().isEmpty() ?
                     baseDir.toAbsolutePath().getFileName().toString()
                     : baseDir.toString();
-            JkLog.verboseStartTask("Instantiate KBean %s in project '%s'", beanClass.getName(), projectDisplayName);
+            JkLog.debugStartTask("Instantiate KBean %s in project '%s'", beanClass.getName(), projectDisplayName);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
-            JkLog.verboseEndTask();
+            JkLog.debugEndTask();
         }
         return result;
     }
@@ -220,19 +220,19 @@ public final class JkRunbase {
     }
 
     void init(List<EngineCommand> commands) {
-        JkLog.verbose("Initialize JkRunbase with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
+        JkLog.debug("Initialize JkRunbase with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
         this.fieldInjections = commands.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .collect(Collectors.toList());
 
         // Instantiate & register beans
-        JkLog.verboseStartTask("Register KBeans");
+        JkLog.debugStartTask("Register KBeans");
         commands.stream()
                 //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
                 .map(EngineCommand::getBeanClass)
                 .distinct()
                 .forEach(this::load);
-        JkLog.verboseEndTask();
+        JkLog.debugEndTask();
 
         // Once KBeans has bean initialised. #postInit is invoked on each, so they can act upon final settings
         // of other KBeans

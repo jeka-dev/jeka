@@ -115,6 +115,8 @@ class ProgressListeners {
 
         int count = 0;
 
+        int charCount;
+
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
             long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isContainer());
@@ -126,7 +128,6 @@ class ProgressListeners {
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
             silencer.silent(false);
-            System.out.println();
         }
 
         @Override
@@ -182,18 +183,7 @@ class ProgressListeners {
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
             silencer.silent(false);
-            System.out.println();
             System.out.flush();
-        }
-
-        @Override
-        public void executionSkipped(TestIdentifier testIdentifier, String reason) {
-            if (testIdentifier.isTest()) {
-                index ++;
-            } else {
-                int children = testPlan.getDescendants(testIdentifier).size();
-                index += children;
-            }
         }
 
         @Override
@@ -201,20 +191,33 @@ class ProgressListeners {
             if(testIdentifier.getType().isContainer()) {
                 index++;
 
-                // Delete current line
-                silencer.silent(false);
-                System.out.print(JkUtilsString.repeat("\b", charCount));
-                System.out.print(JkUtilsString.repeat(" ", charCount));
-                System.out.print(JkUtilsString.repeat("\b", charCount));
-                System.out.flush();
+                deleteCurrentLine();  // may need to delete booting line
 
                 // Print new line
+                silencer.silent(false);
                 String line = line(testIdentifier);
                 charCount = line.length();
                 System.out.print(line);
                 System.out.flush();
                 silencer.silent(true);
             }
+        }
+
+        @Override
+        public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
+            if (testIdentifier.getType().isContainer()) {
+               deleteCurrentLine();
+            }
+        }
+
+        private void deleteCurrentLine() {
+            silencer.silent(false);
+            System.out.print(JkUtilsString.repeat("\b", charCount));
+            System.out.print(JkUtilsString.repeat(" ", charCount));
+            System.out.print(JkUtilsString.repeat("\b", charCount));
+            System.out.flush();
+            charCount = 0;
+            silencer.silent(true);
         }
 
         private String line(TestIdentifier testIdentifier) {

@@ -78,7 +78,7 @@ final class IvyInternalPublisher implements JkInternalPublisher {
         final Ivy ivy = IvyTranslatorToIvy.toIvy(JkRepoSet.of(), JkResolutionParameters.of());
         int publishCount = publishIvyArtifacts(publishedArtifacts, Instant.now(), moduleDescriptor, ivy.getSettings());
         if (publishCount == 0) {
-            JkLog.warn("No Ivy repository matching for " + coordinate + " found. Configured repos are "
+            JkLog.warn("No Ivy repository matching for " + coordinate + " found. \nConfigured repos are "
                     + publishRepos);
         }
         JkLog.endTask();

@@ -97,7 +97,7 @@ class MasterBuild extends KBean {
 
         JkLog.startTask("build-core-and-plugins");
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
-            JkLog.startTask("packaging %s", bean);
+            JkLog.startTask("package %s", bean);
             JkLog.info(bean.project.getInfo());
             bean.clean();
             bean.pack();
@@ -106,8 +106,6 @@ class MasterBuild extends KBean {
         JkLog.endTask();
         if (runSamples) {
             JkLog.startTask("run-samples");
-
-
             SamplesTester samplesTester = new SamplesTester();
             PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
             if (jacocoForCore != null) {
@@ -120,7 +118,6 @@ class MasterBuild extends KBean {
 
             // run sample including springboot scaffolding project
             pluginScaffoldTester.run();
-
             if (jacocoForCore != null) {
                 jacocoForCore.generateExport();
             }
