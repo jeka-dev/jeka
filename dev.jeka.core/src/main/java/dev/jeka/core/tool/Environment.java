@@ -54,18 +54,15 @@ class Environment {
         if (logs.verbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
-        if (logs.ivyVerbose) {
+        if (logs.debug) {
             JkLog.setVerbosity(JkLog.Verbosity.DEBUG);
         }
     }
 
-
-
     private static EnvLogSettings createLogSettings(CmdLineOptions cmdLineOptions) {
         return new EnvLogSettings(
                 cmdLineOptions.logVerbose.isPresent(),
-                cmdLineOptions.logIvyVerbose.isPresent(),
-                cmdLineOptions.logStartUp.isPresent(),
+                cmdLineOptions.debug.isPresent(),
                 cmdLineOptions.logStackTrace.isPresent(),
                 cmdLineOptions.logRuntimeInformation.isPresent(),
                 cmdLineOptions.logDuration.isPresent(),
@@ -152,7 +149,7 @@ class Environment {
 
         Set<String> acceptedOptions = new HashSet<>();
 
-        final Option<Void> logIvyVerbose = ofVoid("Log Ivy 'trace' level", "--log-ivy-verbose", "-liv");
+        final Option<Void> debug = ofVoid("Log debug messages", "--debug");
 
         final Option<Void> logVerbose = ofVoid("Log verbose messages", "--verbose", "-v");
 
@@ -162,9 +159,6 @@ class Environment {
         final Option<Void> logBanner = ofVoid("log intro and outro banners", "--log-banner", "-lb");
 
         final Option<Void> logDuration = ofVoid("Log intro and outro banners", "--log-duration", "-ld");
-
-        final Option<Void> logStartUp = ofVoid("Log start-up information happening prior command executions",
-                                                      "--log-startup", "-lsu");
 
         final Option<Void> logRuntimeInformation = ofVoid("log Jeka runbase information as Jeka version, JDK version, working dir, classpath ...",
                 "--log-runtime-info", "-lri");

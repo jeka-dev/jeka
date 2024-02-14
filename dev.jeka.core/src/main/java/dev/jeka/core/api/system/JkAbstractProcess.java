@@ -306,13 +306,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     @Override
     public String toString() {
+        int maxLength = 120;
         if (JkLog.isVerbose()) {
-            return this.command + " " + String.join(" ", parameters);
+            return this.command + " " + JkUtilsString.readableCommandAgs(parameters);
         }
         String shortCommand = command.replace('\\', '/');
         shortCommand = shortCommand.contains("/") ? JkUtilsString.substringAfterLast(shortCommand, "/")
                 : shortCommand;
-        return JkUtilsString.ellipse(shortCommand + " " + String.join(" ", parameters), 120);
+        return JkUtilsString.ellipse(shortCommand + " " + String.join(" ", parameters), maxLength);
     }
 
     /**

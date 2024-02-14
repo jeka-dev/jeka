@@ -4,6 +4,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -164,7 +165,7 @@ public final class JkJavaCompilerToolChain {
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
             throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler." +
-                    " Specified options : " + printableOptions(options));
+                    " Specified options : " + JkUtilsString.readableCommandAgs(options));
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
             JkLog.verbose("No source files found in " + compileSpec.getSources());
@@ -174,7 +175,7 @@ public final class JkJavaCompilerToolChain {
 
         if (JkLog.isVerbose()) {
             String message = "Compile " + compileSpec.getSources()+ " to " + outputDir;
-            message = message + " using options : \n" + printableOptions(options);
+            message = message + " using options : \n" + JkUtilsString.readableCommandAgs(options);
             JkLog.startTask(message);
         }
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
@@ -191,14 +192,6 @@ public final class JkJavaCompilerToolChain {
      */
     public boolean compile(JkJavaCompileSpec compileSpec) {
         return compile(null, compileSpec);
-    }
-
-    private static String printableOptions(List<String> options) {
-        StringBuilder sb = new StringBuilder();
-        options.stream()
-                .flatMap(item -> Stream.of(item.split(File.pathSeparator)))
-                .forEach(item -> sb.append(item + "\n"));
-        return sb.toString();
     }
 
     private boolean runCompiler(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {

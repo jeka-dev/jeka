@@ -7,9 +7,7 @@ class EnvLogSettings {
 
     final boolean verbose;
 
-    final boolean ivyVerbose;
-
-    final boolean startUp;
+    final boolean debug;
 
     final boolean stackTrace;
 
@@ -23,12 +21,11 @@ class EnvLogSettings {
 
     final boolean banner;
 
-    EnvLogSettings(boolean verbose, boolean ivyVerbose, boolean startUp,
+    EnvLogSettings(boolean verbose, boolean debug,
                           boolean stackTrace, boolean runtimeInformation, boolean totalDuration,
                           JkLog.Style style, Boolean animation, boolean banner) {
         this.verbose = verbose;
-        this.ivyVerbose = ivyVerbose;
-        this.startUp = startUp;
+        this.debug = debug;
         this.stackTrace = stackTrace;
         this.runtimeInformation = runtimeInformation;
         this.totalDuration = totalDuration;
@@ -38,7 +35,7 @@ class EnvLogSettings {
     }
 
     static EnvLogSettings ofDefault() {
-        return new EnvLogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false, false);
+        return new EnvLogSettings(false, false, false, false, false, JkLog.Style.INDENT, false, false);
     }
 
 

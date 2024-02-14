@@ -448,8 +448,6 @@ public final class JkProject implements JkIdeSupportSupplier {
         return includeTextAndLocalDependencies;
     }
 
-
-
     /**
      * Specifies if the project dependencies should include those mentioned in <i>jeka/project-dependencies.txt</i> flat file.
      * Values <code>true</code> by default.

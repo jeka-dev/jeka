@@ -1,8 +1,10 @@
 package dev.jeka.core.api.utils;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Utility class for dealing with strings.
@@ -471,6 +473,19 @@ public final class JkUtilsString {
                 .map(line -> margin + line)
                 .reduce("",  (one, two) -> one + "\n" + two);
         return all.substring(1); // remove first 'br'
+    }
+
+    /**
+     * Returns a readable representation of command line arguments.
+     * Each option in the provided list is split by the platform's file separator and concatenated
+     * with a new line character (\n).
+     */
+    public static String readableCommandAgs(List<String> options) {
+        StringBuilder sb = new StringBuilder();
+        options.stream()
+                .flatMap(item -> Stream.of(item.split(File.pathSeparator)))
+                .forEach(item -> sb.append(item + "\n"));
+        return sb.toString();
     }
 
 }

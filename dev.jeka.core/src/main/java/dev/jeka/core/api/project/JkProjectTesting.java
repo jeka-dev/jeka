@@ -137,6 +137,11 @@ public class JkProjectTesting {
      */
     public void run() {
         JkLog.startTask("process-tests");
+        if (skipped) {
+            JkLog.info("Skipped");
+            JkLog.endTask();
+            return;
+        }
         if (!project.compilation.isDone()) {
             JkLog.startTask("process-production-code");     // Make explicit task for clearer output
             this.project.compilation.runIfNeeded();
@@ -157,8 +162,6 @@ public class JkProjectTesting {
     public void runIfNeeded() {
         if (done) {
             JkLog.verbose("Tests has already been performed. Won't do it again.");
-        } else if (skipped) {
-            JkLog.info("Tests are skipped. Won't perform.");
         } else {
             run();
             done = true;

@@ -40,7 +40,7 @@ class EngineCompilationUpdateTracker {
             return true;
         }
         boolean result = isWorkOutdated();
-        JkLog.verbose("Cached compilation outdated : %s", result);
+        JkLog.debug("Cached compilation outdated : %s", result);
         globallyOutdated = result;
         return result;
     }

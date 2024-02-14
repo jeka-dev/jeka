@@ -1,6 +1,7 @@
 package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -221,13 +222,13 @@ public final class JkProperties {
         return result.toString();
     }
 
-    public String toKeyValueString(String margin) {
+    public String toKeyValueString(String margin, int maxNameSize, int maxTotalSize) {
         Set<String> keys = find("");
         JkProperties systemLess = systemLess();
         if (systemLess == null) {
             return "";
         }
-        Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200)
+        Jk2ColumnsText columnsText = Jk2ColumnsText.of(maxNameSize, maxTotalSize)
                 .setAdjustLeft(true).setMarginLeft(margin);
         for (String key : keys) {
             if (systemLess.get(key) == null) {
@@ -248,6 +249,36 @@ public final class JkProperties {
             columnsText.add(key, right);
         }
         return columnsText.toString();
+    }
+
+    public JkColumnText toColumnText(int maxNameSize, int maxValueSize) {
+        Set<String> keys = find("");
+        JkProperties systemLess = systemLess();
+        if (systemLess == null) {
+            return JkColumnText.ofSingle(maxValueSize, maxValueSize);
+        }
+        JkColumnText columnsText = JkColumnText
+                .ofSingle(1, maxNameSize)
+                .addColumn(1, maxValueSize)
+                .addColumn(5, 60);
+        for (String key : keys) {
+            if (systemLess.get(key) == null) {
+                continue;
+            }
+            String value = get(key);
+            if (key.toLowerCase().endsWith("password")
+                    || key.toLowerCase().endsWith("secret")
+                    || key.toLowerCase().endsWith("token")
+                    || key.toLowerCase().endsWith("pwd")) {
+                value = "***";
+            }
+            String source = getSourceDefining(key).source;
+            if (source.endsWith("global.properties")) {
+                source = "global.properties";
+            }
+            columnsText.add(key, value, source);
+        }
+        return columnsText;
     }
 
     private JkProperties getSourceDefining(String key) {

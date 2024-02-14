@@ -8,6 +8,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -40,7 +41,7 @@ public final class JkInit {
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.verbose("    " + item));
         }
         boolean memoryBufferLogActivated = false;
-        if (!Environment.logs.startUp && !JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
+        if (!JkMemoryBufferLogDecorator.isActive()) {  // log in memory and flush in console only on error
             JkMemoryBufferLogDecorator.activateOnJkLog();
             JkLog.info("");   // To have a br prior the memory log is flushed
             memoryBufferLogActivated = true;
@@ -73,7 +74,6 @@ public final class JkInit {
             }
             throw e;
         }
-
     }
 
     /**
@@ -92,25 +92,24 @@ public final class JkInit {
     }
 
     static void displayRuntimeInfo() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Working Directory : " + System.getProperty("user.dir"));
-        sb.append("\nCommand Line      : " + String.join(" ", Arrays.asList(Environment.parsedCmdLine.rawArgs())));
-        sb.append("\nJava Home         : " + System.getProperty("java.home"));
-        sb.append("\nJava Version      : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
-        sb.append("\nJeka Version      : " + JkInfo.getJekaVersion());
+        Jk2ColumnsText txt = Jk2ColumnsText.of(18, 150);
+        txt.add("Working Directory", System.getProperty("user.dir"));
+        txt.add("Command Line",  String.join(" ", Arrays.asList(Environment.parsedCmdLine.rawArgs())));
+        txt.add("Java Home",  System.getProperty("java.home"));
+        txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        txt.add("Jeka Version",  JkInfo.getJekaVersion());
+
         if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
-            sb.append("\nJeka Home         : " + bootDir().normalize() + " ( embedded !!! )");
+            txt.add("Jeka Home", bootDir().normalize() + " ( embedded !!! )");
         } else {
-            sb.append("\nJeka Home         : " + JkLocator.getJekaHomeDir().normalize());
+            txt.add("Jeka Home", JkLocator.getJekaHomeDir().normalize());
         }
-        sb.append("\nJeka User Home    : " + JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
-        sb.append("\nJeka Cache Dir    : " + JkLocator.getCacheDir().toAbsolutePath().normalize());
+        txt.add("Jeka User Home", JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
+        txt.add("Jeka Cache Dir",  JkLocator.getCacheDir().toAbsolutePath().normalize());
         JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
-        sb.append("\nDownload Repos    : " + JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
+        txt.add("Download Repos", JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
                 .map(JkRepo::getUrl).collect(Collectors.toList()));
-        sb.append("\nProperties        :\n").append(properties.toKeyValueString("    "));
-        sb.deleteCharAt(sb.length()-1); // remove last br
-        JkLog.info(sb.toString());
+        JkLog.info(txt.toString());
     }
 
     private static boolean embedded(Path jarFolder) {
@@ -133,7 +132,5 @@ public final class JkInit {
                 .collect(Collectors.toList());
         return JkPathSequence.of(paths).withoutDuplicates();
     }
-
-
 
 }

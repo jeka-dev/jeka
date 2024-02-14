@@ -14,6 +14,8 @@ public final class JkColumnText {
 
     private String separator = "  ";
 
+    private String marginLeft = "";
+
     private int numColumns;
 
     private final List<Integer> minColumnSizes = new LinkedList<>();
@@ -61,6 +63,14 @@ public final class JkColumnText {
     }
 
     /**
+     * Sets the left margin to lead the whole result
+     */
+    public JkColumnText setMarginLeft(String marginLeft) {
+        this.marginLeft = marginLeft;
+        return this;
+    }
+
+    /**
      * Adds a row by providing text for each column.
      */
     public JkColumnText add(String ... row) {
@@ -79,6 +89,8 @@ public final class JkColumnText {
             int nestedLineCount = lineCountForRow(rowIndex);
             for (int nestedLineIndex = 0; nestedLineIndex < nestedLineCount; nestedLineIndex++) {
 
+                sb.append(marginLeft);
+
                 // Compute the content of each nested line
                 String[] row = rows.get(rowIndex);
                 for (int columnIndex = 0; columnIndex< numColumns; columnIndex++) {
@@ -94,6 +106,9 @@ public final class JkColumnText {
                 }
                 sb.append("\n");
             }
+        }
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() -1);
         }
         return sb.toString();
     }
@@ -114,9 +129,14 @@ public final class JkColumnText {
     private int computeColumnSize(int columnIndex) {
         int minSize = minColumnSizes.get(columnIndex);
         int maxSize = maxColumnSizes.get(columnIndex);
-        int longestText = maxTextSize(columnIndex);
-        int sup = Integer.min(maxSize, longestText);
-        return Integer.min(sup, minSize);
+        int result = maxTextSize(columnIndex);
+        if (result > maxSize) {
+            result = maxSize;
+        }
+        if (result < minSize) {
+            result = minSize;
+        }
+        return result;
     }
 
     private int maxTextSize(int columnIndex) {

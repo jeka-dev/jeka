@@ -154,25 +154,25 @@ class EngineBase {
             return classpathSetupResult;
         }
 
-         JkLog.verboseStartTask("Resolve classpath for jeka-src");
+        JkLog.debugStartTask("Resolve classpath for jeka-src");
 
         if (behaviorSettings.cleanWork) {
             Path workDir = baseDir.resolve(JkConstants.JEKA_WORK_PATH);
-            JkLog.verbose("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
+            JkLog.debug("Clean .jaka-work directory  %s ", workDir.toAbsolutePath().normalize());
             JkPathTree.of(workDir).deleteContent();
         }
 
         // That nice that this clean occurs here, cause it will happen for sub-basedir
         if (Environment.behavior.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
-            JkLog.verbose("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
+            JkLog.debug("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
             JkPathTree.of(outputDir).deleteContent();
         }
 
         // Parse info from source code
-         JkLog.verboseStartTask("Scan jeka-src code for finding dependencies");
+         JkLog.debugStartTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
-        JkLog.verboseEndTask();
+        JkLog.debugEndTask();
 
         // Compute and get the classpath from sub-dirs
         List<EngineBase> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
@@ -216,7 +216,8 @@ class EngineBase {
         final JkPathSequence exportedClasspath;
         final JkDependencySet exportedDependencies;
         if (parsedSourceInfo.hasPrivateDependencies()) {
-            exportedDependencies = parsedSourceInfo.getExportedDependencies().andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
+            exportedDependencies = parsedSourceInfo.getExportedDependencies()
+                    .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
             exportedClasspath = JkPathSequence.of(
                     dependencyResolver.resolveFiles(parsedSourceInfo.getExportedDependencies()));
         } else {
@@ -227,7 +228,7 @@ class EngineBase {
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
                 runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs);
-        JkLog.verboseEndTask();
+        JkLog.debugEndTask();
         return classpathSetupResult;
     }
 
@@ -301,7 +302,7 @@ class EngineBase {
          runbase = JkRunbase.get(baseDir);
          runbase.setDependencyResolver(dependencyResolver);
          runbase.setClasspath(classpathSetupResult.runClasspath);
-         runbase.setExportedClassPath(classpathSetupResult.exportedClasspah);
+         runbase.setExportedClassPath(classpathSetupResult.exportedClasspath);
          runbase.setExportedDependencies(classpathSetupResult.exportedDependencies);
          runbase.assertValid(); // fail-fast. bugfix purpose
 
@@ -345,6 +346,10 @@ class EngineBase {
                  initKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(defaultKBeanClassName);
              }
          }
+    }
+
+    ClasspathSetupResult getClasspathSetupResult() {
+         return classpathSetupResult;
     }
 
     private CompileResult compileJekaSrc(JkPathSequence classpath, List<String> compileOptions) {
@@ -518,7 +523,7 @@ class EngineBase {
 
         final JkPathSequence runClasspath;
         final JkPathSequence kbeanClasspath;
-        final JkPathSequence exportedClasspah;
+        final JkPathSequence exportedClasspath;
         final List<EngineBase> subBaseDirs;
         final JkDependencySet exportedDependencies;
         final boolean compileResult;
@@ -532,7 +537,7 @@ class EngineBase {
             this.compileResult = compileResult;
             this.runClasspath = runClasspath;
             this.kbeanClasspath = kbeanClasspath;  // does not contain jeka-src-classes
-            this.exportedClasspah = exportedClasspath;
+            this.exportedClasspath = exportedClasspath;
             this.exportedDependencies = exportedDependencies;
             this.subBaseDirs = subBaseDirs;
         }

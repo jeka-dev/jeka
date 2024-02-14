@@ -119,19 +119,15 @@ public class PicocliMainCommand {
             description = "Log verbose messages.")
     private boolean logVerbose;
 
-    @Option(names = { "-lsu", "--log-startup"},
-            description = "Log startup messages emitted during JeKa startup.")
-    private boolean logStartUp;
-
     @Option(names = { "-ls"},
             paramLabel = "STYLE",
             defaultValue = "FLAT",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
     private JkLog.Style logStyle = JkLog.Style.FLAT;
 
-    @Option(names = {"--ivy-trace"},
-            description = "Log Ivy traces (very verbose)")
-    private boolean logIvyTrace;
+    @Option(names = {"--debug"},
+            description = "Log debug level (very verbose)")
+    private boolean logDebug;
 
 
     public PicocliMainCommand(Path baseDir) {
@@ -168,11 +164,6 @@ public class PicocliMainCommand {
         try {
             if (logVerbose) {
                 JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-            }
-            if (!logs.startUp) {  // log in memory and flush in console only on error
-                //JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
-              //  JkMemoryBufferLogDecorator.activateOnJkLog();
-                // JkLog.info("");   // To have a br prior the memory log is flushed
             }
             final Engine engine = new Engine(baseDir);
             engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok
@@ -213,8 +204,7 @@ public class PicocliMainCommand {
     EnvLogSettings logSettings() {
         return new EnvLogSettings(
                 logVerbose,
-                logIvyTrace,
-                logStartUp,
+                logDebug,
                 false,
                 runtimeInfo,
                 false,

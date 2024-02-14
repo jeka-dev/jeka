@@ -126,19 +126,19 @@ public class JkProjectPackaging {
             JkLog.warn("No class dir found : skip bin jar.");
             return;
         }
+        JkLog.startTask("create-bin-jar");
         JkJarPacker.of(classDir)
                 .withManifest(getManifest())
                 .makeJar(target);
+        JkLog.endTask("Jar created at " + target);
     }
 
     /**
      * Creates a binary jar at conventional location.
      */
     public Path createBinJar() {
-        JkLog.startTask("pack-jar");
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.ofMainArtifact("jar"));
         createBinJar(path);
-        JkLog.endTask("Jar created at " + path);
         return path;
     }
 
@@ -148,10 +148,12 @@ public class JkProjectPackaging {
     public void createFatJar(Path target) {
         project.compilation.runIfNeeded();
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
+        JkLog.startTask("create-fat-jar");
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
+        JkLog.endTask("Jar created at " + target);
     }
 
     /**

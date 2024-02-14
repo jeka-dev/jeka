@@ -1,8 +1,10 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -57,11 +59,9 @@ public final class Main {
                 JkInit.displayRuntimeInfo();
             }
             String basedirProp = System.getProperty("jeka.current.basedir");
-            //System.out.println("---- prop jeka.current.basedir : " + basedirProp);
+
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
-            //System.out.println("---- actual base dir : " + baseDir);
-            //System.out.println("---- actual base dir absolute : " + baseDir.toAbsolutePath().normalize());
 
             // By default, log working animation when working dir = base dir (this mean that we are not
             // invoking a tool packaged with JeKa.
@@ -71,28 +71,38 @@ public final class Main {
             }
             JkLog.setAcceptAnimation(logAnimation);
 
-            if (!logs.startUp) {  // log in memory and flush in console only on error
-                //JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
-                //JkMemoryBufferLogDecorator.activateOnJkLog();
-                //JkLog.info("");   // To have a br prior the memory log is flushed
-            }
-
-
-
-            //final Engine engine = new Engine(baseDir);
-            //engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok
-
-            // --- code replace for new engine
-
             EngineBase engineBase = EngineBase.forLegacy(baseDir,
                     JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
             JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
-            engineBase.resolveCommandEngine(Environment.parsedCmdLine.getBeanActions());
+            if (logs.runtimeInformation) {
+                JkLog.info(Jk2ColumnsText.of(18, 150)
+                        .add("Init KBean", engineBase.resolveKBeans().initKBeanClassname)
+                        .add("Default KBean", engineBase.resolveKBeans().defaultKbeanClassname)
+                        .toString());
+                JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
+                JkLog.info("Properties         :");
+                JkLog.info(properties.toColumnText(30, 90)
+                                .setMarginLeft("    ")
+                                .setSeparator(" | ").toString());
+
+                JkPathSequence cp = engineBase.getClasspathSetupResult().runClasspath;
+                JkLog.info("Jeka Classpath     :");
+                cp.forEach(entry -> JkLog.info("    " + entry));
+            }
+
+            List<EngineCommand> engineCommands =
+                    engineBase.resolveCommandEngine(Environment.parsedCmdLine.getBeanActions());
+            if (logs.runtimeInformation) {
+                JkLog.info("Commands           :");
+                JkLog.info(EngineCommand.toColumnText(engineCommands)
+                        .setSeparator(" | ")
+                        .setMarginLeft("    ")
+                        .toString());
+                JkLog.info("");
+            }
             engineBase.initRunbase();
 
             engineBase.run();
-
-            // ------------
 
             if (logs.banner) {
                 displayOutro(start);
@@ -153,10 +163,6 @@ public final class Main {
         }
         ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
         JkLog.setAcceptAnimation(true);
-        if (!logs.startUp) {
-            //JkBusyIndicator.start("Preparing Jeka classes and instance (Use -lsu option for details)");
-            //JkMemoryBufferLogDecorator.activateOnJkLog();
-        }
 
         EngineBase engineBase = EngineBase.forLegacy(baseDir,
                 JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
