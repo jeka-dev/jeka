@@ -142,7 +142,9 @@ public final class JkProject implements JkIdeSupportSupplier {
         compilation = JkProjectCompilation.ofProd(this);
         testing = new JkProjectTesting(this);
         packaging = new JkProjectPackaging(this);
-        dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral()).setUseInMemoryCache(true);
+        dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
+                .setDisplaySpinner(true)
+                .setUseInMemoryCache(true);
         jarMaker = packaging::createBinJar;
         packActions.set(() -> jarMaker.accept(artifactLocator.getMainArtifactPath()));
     }

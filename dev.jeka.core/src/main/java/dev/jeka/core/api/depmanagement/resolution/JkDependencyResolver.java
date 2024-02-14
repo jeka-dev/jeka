@@ -4,6 +4,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkConstants;
@@ -11,10 +12,8 @@ import dev.jeka.core.tool.JkConstants;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
@@ -44,6 +43,8 @@ public final class JkDependencyResolver  {
     private boolean useInMemoryCache;
 
     private boolean useFileSystemCache;
+
+    private boolean displaySpinner;
 
     private Path fileSystemCacheDir = Paths.get(JkConstants.JEKA_WORK_PATH).resolve("dep-cache");
 
@@ -124,6 +125,14 @@ public final class JkDependencyResolver  {
      */
     public JkDependencyResolver setFileSystemCacheDir(Path cacheDir) {
         this.fileSystemCacheDir = cacheDir;
+        return this;
+    }
+
+    /**
+     * Sets whether to display a spinner during the resolution process.
+     */
+    public JkDependencyResolver setDisplaySpinner(boolean displaySpinner) {
+        this.displaySpinner = displaySpinner;
         return this;
     }
 
@@ -225,6 +234,17 @@ public final class JkDependencyResolver  {
                 return result;
             }
         }
+        AtomicReference<JkResolveResult> result = new AtomicReference<>();
+        if (displaySpinner) {
+            JkConsoleSpinner.of("Resolve Dependencies")
+                    .setAlternativeMassage("Resolve Dependencies ...")
+                    .run(() -> result.set(doResolve(qualifiedDependencies, params)));
+            return result.get();
+        }
+        return doResolve(qualifiedDependencies, params);
+    }
+
+    private JkResolveResult doResolve(JkQualifiedDependencySet qualifiedDependencies, JkResolutionParameters params) {
         JkQualifiedDependencySet bomResolvedDependencies = replacePomDependencyByVersionProvider(qualifiedDependencies);
         List<JkDependency> allDependencies = bomResolvedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies

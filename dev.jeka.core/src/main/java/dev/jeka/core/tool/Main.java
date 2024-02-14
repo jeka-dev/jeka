@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.Environment.logs;
 
@@ -82,7 +83,7 @@ public final class Main {
                 JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
                 JkLog.info("Properties         :");
                 JkLog.info(properties.toColumnText(30, 90)
-                                .setMarginLeft("    ")
+                                .setMarginLeft("   | ")
                                 .setSeparator(" | ").toString());
 
                 JkPathSequence cp = engineBase.getClasspathSetupResult().runClasspath;
@@ -96,11 +97,20 @@ public final class Main {
                 JkLog.info("Commands           :");
                 JkLog.info(EngineCommand.toColumnText(engineCommands)
                         .setSeparator(" | ")
-                        .setMarginLeft("    ")
+                        .setMarginLeft("   | ")
                         .toString());
-                JkLog.info("");
             }
             engineBase.initRunbase();
+
+            if (logs.runtimeInformation) {
+                List<String> beanNames = engineBase.getRunbase().getBeans().stream()
+                        .map(Object::getClass)
+                        .map(KBean::name)
+                        .collect(Collectors.toList());
+                JkLog.info("Involved KBeans    :", beanNames);
+                JkLog.info("    " + String.join(", ", beanNames));
+               JkLog.info("");
+            }
 
             engineBase.run();
 

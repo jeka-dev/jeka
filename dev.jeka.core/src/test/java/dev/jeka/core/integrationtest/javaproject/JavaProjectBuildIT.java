@@ -20,29 +20,6 @@ import java.nio.file.Paths;
 
 public class JavaProjectBuildIT {
 
-    @Test
-    public void resolve_dependencyOfTypeProject_resultWithProjectIdeDir() throws Exception {
-        Path root = unzipToDir("sample-multiproject.zip");
-
-        JkProject baseProject = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .customizeCompileDeps(deps -> deps
-                        .and("com.google.guava:guava:23.0")).getProject();
-
-        JkProject coreProject = JkProject.of().setBaseDir(root.resolve("core")).flatFacade()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .customizeCompileDeps(deps -> deps.and(baseProject.toDependency()))
-                .getProject();
-
-        JkResolveResult resolveResult = coreProject.compilation.resolveDependencies();
-
-        Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size()); // base dir and guava
-        JkResolvedDependencyNode dependencyNode = resolveResult.getDependencyTree().getChildren().get(0);
-        Assert.assertFalse(dependencyNode.isModuleNode());
-        JkResolvedDependencyNode.JkFileNodeInfo nodeInfo = (JkResolvedDependencyNode.JkFileNodeInfo) dependencyNode.getNodeInfo();
-        Assert.assertEquals(baseProject.getBaseDir(), nodeInfo.computationOrigin().getIdeProjectDir());
-    }
-
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
         final Path dest = Files.createTempDirectory(JavaProjectBuildIT.class.getName());
         final Path zip = Paths.get(JavaProjectBuildIT.class.getResource(zipName).toURI());

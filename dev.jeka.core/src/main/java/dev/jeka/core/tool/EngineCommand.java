@@ -64,9 +64,9 @@ class EngineCommand {
     }
 
     static JkColumnText toColumnText(List<EngineCommand> commands) {
-        JkColumnText columnText = JkColumnText.ofSingle(1, 12)  // action type
-                .addColumn(1, 30)  // Bean
-                .addColumn(1, 30)  // member
+        JkColumnText columnText = JkColumnText.ofSingle(1, 59)  // KBean
+                .addColumn(1, 15)  // Bean
+                .addColumn(1, 50)  // member
                 .addColumn(1, 80);  // value
         List<EngineCommand> sortedCommands = commands.stream()
                 .sorted(displayComparator()).collect(Collectors.toList());

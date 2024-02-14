@@ -121,6 +121,9 @@ class ProgressListeners {
         public void testPlanExecutionStarted(TestPlan testPlan) {
             long testCount = testPlan.countTestIdentifiers(testIdentifier -> testIdentifier.getType().isContainer());
             System.out.println("Found " + testCount + " test containers ");
+            String bootingLine = "Booting tests ...";
+            System.out.print(bootingLine);
+            charCount = bootingLine.length();
             System.out.flush();
             silencer.silent(true);
         }
@@ -128,6 +131,7 @@ class ProgressListeners {
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
             silencer.silent(false);
+            deleteLastChars(charCount);
         }
 
         @Override
@@ -136,12 +140,14 @@ class ProgressListeners {
             if(testIdentifier.getType().isContainer()) {
                 silencer.silent(false);
                 System.out.print(symbol);
-                System.out.flush();
                 count++;
+                charCount++;
                 if (count == 100) {
                     System.out.println();
                     count=0;
+                    charCount++;
                 }
+                System.out.flush();
                 silencer.silent(true);
             }
         }
@@ -162,11 +168,8 @@ class ProgressListeners {
 
         private long testCount;
 
-        private TestPlan testPlan;
-
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
-            this.testPlan = testPlan;
 
             // TODO wrong way for counting, parametrized test won't bbe taken in account
             // and method containing the parametrized test, will be considered as Container
@@ -212,9 +215,7 @@ class ProgressListeners {
 
         private void deleteCurrentLine() {
             silencer.silent(false);
-            System.out.print(JkUtilsString.repeat("\b", charCount));
-            System.out.print(JkUtilsString.repeat(" ", charCount));
-            System.out.print(JkUtilsString.repeat("\b", charCount));
+            deleteLastChars(charCount);
             System.out.flush();
             charCount = 0;
             silencer.silent(true);
@@ -259,6 +260,12 @@ class ProgressListeners {
                 System.setErr(standardErrStream);
             }
         }
+    }
+
+    private static void deleteLastChars(int charCount) {
+        System.out.print(JkUtilsString.repeat("\b", charCount));
+        System.out.print(JkUtilsString.repeat(" ", charCount));
+        System.out.print(JkUtilsString.repeat("\b", charCount));
     }
 
     private static char statusSymbol(TestExecutionResult.Status status) {

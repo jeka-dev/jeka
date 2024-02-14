@@ -280,9 +280,7 @@ public class DependencySetResolutionIT {
                         .and("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);
-        JkResolveResult resolveResult = project.compilation.resolveDependencies();
-        resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
-        JkPathSequence paths = resolveResult.getFiles();
+        JkPathSequence paths = JkPathSequence.of(project.compilation.resolveDependenciesAsFiles());
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
         assertEquals(3, paths.getEntries().size());
     }
@@ -296,9 +294,7 @@ public class DependencySetResolutionIT {
                         .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);
-        JkResolveResult resolveResult = project.compilation.resolveDependencies();
-        resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
-        JkPathSequence paths = resolveResult.getFiles();
+        JkPathSequence paths = JkPathSequence.of(project.compilation.resolveDependenciesAsFiles());
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
         assertEquals(1, paths.getEntries().size());
         // the order Ivy resolve classifiers cannot be controlled

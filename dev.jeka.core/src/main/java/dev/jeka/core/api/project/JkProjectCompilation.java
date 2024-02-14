@@ -82,7 +82,6 @@ public class JkProjectCompilation {
         return this;
     }
 
-
     public void generateSources() {
         for (JkProjectSourceGenerator sourceGenerator : sourceGenerators) {
             JkLog.startTask("Generate sources with " + sourceGenerator);
@@ -137,14 +136,6 @@ public class JkProjectCompilation {
     public JkProjectCompilation customizeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
-    }
-
-    public JkResolveResult resolveDependencies() {
-        if (cachedResolveResult != null) {
-            return cachedResolveResult;
-        }
-        cachedResolveResult = project.dependencyResolver.resolve(getDependencies());
-        return cachedResolveResult;
     }
 
     public List<Path> resolveDependenciesAsFiles() {
