@@ -64,11 +64,14 @@ public class JkProjectCompilation {
         resourceProcessor = JkResourceProcessor.of();
         preCompileActions = JkRunnables.of()
                 .setLogTasks(true)
+                .setTaskSuffix(taskSuffix())
                 .append(RESOURCES_PROCESS_ACTION, this::processResources);
         compileActions = JkRunnables.of()
                 .setLogTasks(true)
+                .setTaskSuffix(taskSuffix())
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
         postCompileActions = JkRunnables.of()
+                .setTaskSuffix(taskSuffix())
                 .setLogTasks(true);
         layout = initialLayout();
     }
@@ -203,6 +206,10 @@ public class JkProjectCompilation {
 
     protected String purpose() {
         return "production";
+    }
+
+    private String taskSuffix() {
+        return "production".equals(this.purpose()) ? "" : " (" + this.purpose() + ")";
     }
 
 }

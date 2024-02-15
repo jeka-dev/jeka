@@ -16,6 +16,8 @@ public class JkRunnables implements Runnable {
 
     private boolean log;
 
+    private String taskSuffix = "";
+
     private JkRunnables() {
     }
 
@@ -159,6 +161,14 @@ public class JkRunnables implements Runnable {
     }
 
     /**
+     * Sets the displayed suffix for the task.
+     */
+    public  JkRunnables setTaskSuffix(String suffix) {
+        this.taskSuffix = suffix;
+        return this;
+    }
+
+    /**
      * Executes the {@link Runnable}s, in the order of the execution chain.
      */
     @Override
@@ -166,7 +176,7 @@ public class JkRunnables implements Runnable {
         final boolean doLog = log;
         entries.forEach(entry -> {
             if (doLog) {
-                JkLog.startTask(entry.name);
+                JkLog.startTask(entry.name + taskSuffix);
             }
             entry.runnable.run();
             if (doLog) {

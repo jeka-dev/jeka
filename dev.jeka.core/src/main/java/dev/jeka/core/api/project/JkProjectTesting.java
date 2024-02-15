@@ -212,7 +212,7 @@ public class JkProjectTesting {
 
         @Override
         protected String purpose() {
-            return "test";
+            return "tests";
         }
 
         @Override

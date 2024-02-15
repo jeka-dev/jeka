@@ -149,19 +149,19 @@ class Environment {
 
         Set<String> acceptedOptions = new HashSet<>();
 
-        final Option<Void> debug = ofVoid("Log debug messages", "--debug");
+        final Option<Void> debug = ofVoid("Log debug messages", "--debug", "-d");
 
         final Option<Void> logVerbose = ofVoid("Log verbose messages", "--verbose", "-v");
 
         final Option<Void> logStackTrace = ofVoid("log the stacktrace when Jeka fail",
-                "--log-stacktrace", "-lst");
+                "--stacktrace", "-st");
 
         final Option<Void> logBanner = ofVoid("log intro and outro banners", "--log-banner", "-lb");
 
         final Option<Void> logDuration = ofVoid("Log intro and outro banners", "--log-duration", "-ld");
 
         final Option<Void> logRuntimeInformation = ofVoid("log Jeka runbase information as Jeka version, JDK version, working dir, classpath ...",
-                "--log-runtime-info", "-lri");
+                "--runtime-info", "-ri");
 
         JkLog.Style logStyle;
 

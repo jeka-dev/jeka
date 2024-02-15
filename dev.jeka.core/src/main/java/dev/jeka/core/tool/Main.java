@@ -143,7 +143,7 @@ public final class Main {
     }
 
     private static boolean shouldPrintExceptionDetails() {
-        return logs.verbose || logs.debug || logs.stackTrace;
+        return logs.debug || logs.stackTrace;
     }
 
     static void printException(Throwable e) {
