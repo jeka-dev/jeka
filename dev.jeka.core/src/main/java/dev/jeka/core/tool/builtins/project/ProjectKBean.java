@@ -126,7 +126,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     }
 
     @JkDoc("Displays resolved dependency trees on console.")
-    public final void depTree() {
+    public void depTree() {
         project.displayDependencyTree();
     }
 

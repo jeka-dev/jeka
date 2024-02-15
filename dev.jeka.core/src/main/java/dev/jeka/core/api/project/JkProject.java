@@ -586,19 +586,16 @@ public final class JkProject implements JkIdeSupportSupplier {
     }
 
     private void displayDependencyTree(String purpose, JkDependencySet deps) {
-        JkLog.info("-----------------------------------------------------------");
-        JkLog.info("Resolving Dependencies for " + purpose + " : ");
-        JkLog.info("-----------------------------------------------------------");
         final JkResolveResult resolveResult = dependencyResolver.resolve(deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
-        JkLog.info("-----------------------------------------");
+        JkLog.info("------------------------------------------------------------");
         JkLog.info("Dependency tree for " + purpose + " : ");
-        JkLog.info("-----------------------------------------");
+        JkLog.info("------------------------------------------------------------");
         JkLog.info(String.join("\n", tree.toStrings()));
         JkLog.info("");
-        JkLog.info("-----------------------------------------");
+        JkLog.info("----------------------------------");
         JkLog.info("Classpath for " + purpose + " : ");
-        JkLog.info("-----------------------------------------");
+        JkLog.info("----------------------------------");
         resolveResult.getFiles().getEntries().forEach(path -> JkLog.info(path.getFileName().toString()));
         JkLog.info("");
     }
