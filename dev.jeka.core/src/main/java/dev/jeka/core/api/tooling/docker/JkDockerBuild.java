@@ -75,10 +75,12 @@ public class JkDockerBuild {
      * Adapts this JkDockerBuild instance to build the specified JkProject.
      */
     public JkDockerBuild adaptTo(JkProject project) {
+        String mainClass = project.packaging.getMainClass();
+        JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project.");
         return this
                 .setClasses(JkPathTree.of(project.compilation.layout.resolveClassDir()))
                 .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
-                .setMainClass(project.packaging.getMainClass());
+                .setMainClass(mainClass);
     }
 
     /**

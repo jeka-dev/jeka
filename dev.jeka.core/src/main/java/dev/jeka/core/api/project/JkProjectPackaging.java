@@ -269,7 +269,8 @@ public class JkProjectPackaging {
     private String findMainClass() {
         JkUrlClassLoader ucl = JkUrlClassLoader.of(project.compilation.layout.resolveClassDir(),
                 ClassLoader.getSystemClassLoader());
-        return ucl.toJkClassLoader().findUniqueMainClass();
+        return ucl.toJkClassLoader().findClassesHavingMainMethod().stream()
+                .findFirst().orElse(null);
     }
 
     private JkPathTreeSet getFatJarExtraContent() {

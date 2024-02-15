@@ -126,7 +126,6 @@ public final class SelfKBean extends KBean {
         sb.append("Manifest     : ").append("\n");
         Arrays.stream(getManifest().asString().split("\n"))
                 .forEach(line -> sb.append("  " + line + "\n"));
-
         JkLog.info(sb.toString());
     }
 

@@ -30,7 +30,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         // Test with injecting plugin dep via "+"
         run("dev.jeka.samples.sonarqube", "-lri -v " +
                 "+../../plugins/dev.jeka.plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar " +
-                "project#cleanPack sonarqube# -Djeka.java.version=17");
+                "project#cleanPack project#info sonarqube# -Djeka.java.version=17");
 
         // Test with injecting plugin dep via jeka.properties file
         run("dev.jeka.samples.protobuf", "-liv project#cleanPack");

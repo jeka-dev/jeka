@@ -71,8 +71,9 @@ class EngineCommand {
         List<EngineCommand> sortedCommands = commands.stream()
                 .sorted(displayComparator()).collect(Collectors.toList());
         for (EngineCommand cmd : sortedCommands) {
+            String member = cmd.action == Action.METHOD_INVOKE ? cmd.member + "()" : cmd.member;
             columnText.add(cmd.beanClass.getSimpleName(), cmd.action.name,
-                    JkUtilsString.nullToEmpty(cmd.member), JkUtilsString.nullToEmpty(cmd.value));
+                    JkUtilsString.nullToEmpty(member), JkUtilsString.nullToEmpty(cmd.value));
         }
         return columnText;
     }

@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class JkClassLoader {
@@ -282,19 +283,6 @@ public class JkClassLoader {
      */
     public List<String> findClassesHavingMainMethod() {
         return JkInternalClasspathScanner.of().findClassesWithMainMethod(this.delegate);
-    }
-
-    /**
-     * Returns the unique class name having a <code>main</code> method.
-     * @throws IllegalStateException If no class, or several classes, found with main method.
-     */
-    public String findUniqueMainClass() {
-        List<String> candidates = findClassesHavingMainMethod();
-        JkUtilsAssert.state(!candidates.isEmpty(), "No class with main method found. Add one to " +
-                "jeka-src folder in order to run.");
-        JkUtilsAssert.state(candidates.size() == 1, "Multiple classes with main method found %s, please pickup " +
-                "one and mention it in #setMainClass.", candidates);
-        return candidates.get(0);
     }
 
     /**

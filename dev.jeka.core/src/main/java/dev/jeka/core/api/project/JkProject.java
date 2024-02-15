@@ -16,6 +16,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -270,13 +271,15 @@ public final class JkProject implements JkIdeSupportSupplier {
      * Creates {@link JkProcess} to execute the main method for this project.
      */
     public JkJavaProcess prepareRunMain() {
+        String mainClass = packaging.getMainClass();
+        JkUtilsAssert.state(mainClass != null, "No main class defined or found on this project.");
         Path classDir = compilation.layout.resolveClassDir();
         if (!JkPathTree.of(classDir).containFiles()) {
             compilation.run();
         }
         JkPathSequence classpath = JkPathSequence.of(this.compilation.layout.resolveClassDir())
                 .and(this.packaging.resolveRuntimeDependenciesAsFiles());
-        return JkJavaProcess.ofJava(this.packaging.getMainClass())
+        return JkJavaProcess.ofJava(mainClass)
                 .setClasspath(classpath)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
@@ -347,6 +350,18 @@ public final class JkProject implements JkIdeSupportSupplier {
         JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
         JkDependencySet testDependencies = testing.compilation.getDependencies();
         StringBuilder builder = new StringBuilder();
+
+        String declaredMainClassName = packaging.declaredMainClass();
+        if (JkProject.AUTO_FIND_MAIN_CLASS.equals(declaredMainClassName)) {
+            if (JkPathTree.of(compilation.layout.resolveClassDir()).exists()) {
+                String effectiveMainClassName = packaging.getMainClass();
+                if (effectiveMainClassName == null) {
+                    effectiveMainClassName = "not main class found";
+                }
+                declaredMainClassName += " (" + effectiveMainClassName + ")";
+            }
+        }
+
         Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200).setAdjustLeft(true)
                 .add("ModuleId", moduleId)
                 .add("Version", getVersion() )
@@ -359,7 +374,7 @@ public final class JkProject implements JkIdeSupportSupplier {
                         .count(Integer.MAX_VALUE, false))
                 .add("Test Source file count       ", testing.compilation.layout.resolveSources()
                         .count(Integer.MAX_VALUE, false))
-                .add("Main Class Name", packaging.declaredMainClass())
+                .add("Main Class Name", declaredMainClassName)
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
                 .add("Manifest", packaging.getManifest().asTrimedString()); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
