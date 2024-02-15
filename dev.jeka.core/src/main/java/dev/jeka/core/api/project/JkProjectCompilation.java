@@ -106,7 +106,7 @@ public class JkProjectCompilation {
      */
     public void runIfNeeded() {
         if (done) {
-            JkLog.verbose(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
+            JkLog.debug(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
         } else {
             run();
             done = true;

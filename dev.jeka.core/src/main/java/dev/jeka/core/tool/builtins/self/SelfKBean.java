@@ -131,7 +131,7 @@ public final class SelfKBean extends KBean {
     }
 
     @JkDoc("Display exported dependency tree on console.")
-    public void showDepTree() {
+    public void depTree() {
         String output = getRunbase().getDependencyResolver().resolve(getRunbase().getExportedDependencies())
                 .getDependencyTree().toStringTree();
         JkLog.info(output);
