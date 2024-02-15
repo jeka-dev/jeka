@@ -123,7 +123,9 @@ public final class Main {
             System.exit(0); // Triggers shutdown hooks
         } catch (final Throwable e) {
             JkBusyIndicator.stop();
-            JkLog.error(e.getMessage());
+            if (e.getMessage() != null) {
+                JkLog.error(e.getMessage());
+            }
             System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
             System.err.println("If this originates from a bug, please report the issue at: " +
                     "https://github.com/jeka-dev/jeka/issues");

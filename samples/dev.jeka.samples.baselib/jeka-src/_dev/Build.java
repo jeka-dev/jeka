@@ -1,14 +1,11 @@
 package _dev;
 
-import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkInjectClasspath;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
-
-import java.io.Console;
 
 
 @JkInjectClasspath("dev.jeka:nodejs-plugin:0.11.x-SNAPSHOT")
@@ -19,7 +16,7 @@ class Build extends KBean {
     protected void init() {
         load(IntellijKBean.class)
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-        load(SelfKBean.class)
+        load(BaseKBean.class)
                 .setMainClass(null);
     }
 

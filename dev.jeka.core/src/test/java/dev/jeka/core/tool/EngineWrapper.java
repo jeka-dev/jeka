@@ -4,8 +4,8 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.EclipseKBean;
@@ -70,7 +70,7 @@ class EngineWrapper {
     private static EngineBase.KBeanResolution kBeanResolution(EngineBase engineBase,
                                                               Class<? extends KBean>... localKBeanClasses) {
         List<Class<? extends KBean>> allKBeanClasses = new LinkedList<>();
-        allKBeanClasses.add(SelfKBean.class);
+        allKBeanClasses.add(BaseKBean.class);
         allKBeanClasses.add(ProjectKBean.class);
         allKBeanClasses.add(MavenKBean.class);
         allKBeanClasses.add(GitKBean.class);

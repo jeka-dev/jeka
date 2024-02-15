@@ -40,7 +40,7 @@ import static dev.jeka.core.tool.Environment.logs;
             "",
             "Examples:",
             "  ${COMMAND-NAME} self: scaffold",
-            "         (create a basic code base by invoking 'scaffold' method on 'SelfKBean')",
+            "         (create a basic code base by invoking 'scaffold' method on 'BaseKBean')",
             "  ${COMMAND-NAME} project: scaffold layout.style=SIMPLE",
             "         (create a project, specifying 'ProjectKBean.layout.style' prop value)",
             "  ${COMMAND-NAME} -cp dev.jeka:springboot-plugin springboot: project: scaffold",

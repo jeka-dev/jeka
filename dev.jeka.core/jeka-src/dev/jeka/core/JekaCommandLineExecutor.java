@@ -1,5 +1,6 @@
 package dev.jeka.core;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -59,12 +60,12 @@ public abstract class JekaCommandLineExecutor {
                 .setWorkingDir(baseDir)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
-                //.setLogWithJekaDecorator(true)
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setFailOnError(true)
                 .addParamsIf(!cmdLine.contains("-Djeka.java.version="), "-Djeka.java.version=8")
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
                 .inheritJkLogOptions()
-                .addParams("-dcf", "-lst", "-lsu", "-lri")
+                .addParams("-dcf", "--stacktrace", "-lsu", "-ri")
 
 
                 // set explicitly jeka-core.jar to use, otherwise it may fetch a Jeka version from maven

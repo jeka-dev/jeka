@@ -12,8 +12,8 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
 
 import java.util.Optional;
 
@@ -70,15 +70,15 @@ public final class MavenKBean extends KBean {
         optionalProjectKBean.ifPresent(
                 projectKBean -> mavenPublication = JkProjectPublications.mavenPublication(projectKBean.project));
 
-        // If ProjectKBean is absent, try to configure wih SelfKBean if present
+        // If ProjectKBean is absent, try to configure wih BaseKBean if present
         if (!optionalProjectKBean.isPresent()) {
-            getRunbase().findInstanceOf(SelfKBean.class).ifPresent(selfAppKBean -> {
+            getRunbase().findInstanceOf(BaseKBean.class).ifPresent(selfAppKBean -> {
                 mavenPublication = createMavenPublication(selfAppKBean);
             });
         }
 
         if (mavenPublication == null) {
-            throw new IllegalStateException("No ProjectKBean of SelfKBean found on runbase " + getBaseDir() + ". " +
+            throw new IllegalStateException("No ProjectKBean of BaseKBean found on runbase " + getBaseDir() + ". " +
                     "The MavenPublication KBean can't be configurated.");
         }
 
@@ -88,22 +88,22 @@ public final class MavenKBean extends KBean {
     }
 
     /**
-     * Creates a Maven Publication based on the specified SelfKBean.
+     * Creates a Maven Publication based on the specified BaseKBean.
      */
-    public static JkMavenPublication createMavenPublication(SelfKBean selfKBean) {
-        JkArtifactLocator artifactLocator = JkArtifactLocator.of(selfKBean.getBaseDir(),
-                selfKBean.getJarPathBaseName());
+    public static JkMavenPublication createMavenPublication(BaseKBean baseKBean) {
+        JkArtifactLocator artifactLocator = JkArtifactLocator.of(baseKBean.getBaseDir(),
+                baseKBean.getJarPathBaseName());
         return JkMavenPublication.of(artifactLocator)
-                .setModuleIdSupplier(selfKBean::getModuleId)
-                .setVersionSupplier(selfKBean::getVersion)
+                .setModuleIdSupplier(baseKBean::getModuleId)
+                .setVersionSupplier(baseKBean::getVersion)
                 .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        selfKBean.getRunbase().getExportedDependencies(),
-                        selfKBean.getRunbase().getExportedDependencies(),
+                        baseKBean.getRunbase().getExportedDependencies(),
+                        baseKBean.getRunbase().getExportedDependencies(),
                         JkCoordinate.ConflictStrategy.TAKE_FIRST))
-                .setBomResolutionRepos(selfKBean.getRunbase().getDependencyResolver()::getRepos)
+                .setBomResolutionRepos(baseKBean.getRunbase().getDependencyResolver()::getRepos)
                 .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
-                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, selfKBean::createSourceJar)
-                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, selfKBean::createJavadocJar);
+                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, baseKBean::createSourceJar)
+                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, baseKBean::createJavadocJar);
     }
 
     private JkRepoSet getPublishReposFromProps() {

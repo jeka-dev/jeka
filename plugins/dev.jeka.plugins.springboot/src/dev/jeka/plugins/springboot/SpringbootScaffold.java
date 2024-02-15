@@ -4,7 +4,7 @@ import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.builtins.self.JkSelfScaffold;
+import dev.jeka.core.tool.builtins.base.JkBasefScaffold;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -61,12 +61,12 @@ class SpringbootScaffold {
         projectScaffold.addFileEntry(pack + "/ControllerIT.java", readSnippet("ControllerIT.java"));
     }
 
-    static void adapt(JkSelfScaffold selfScaffold) {
+    static void adapt(JkBasefScaffold baseScaffold) {
 
         // Remove build class defined by default
-        selfScaffold.removeFileEntriesStaringBy(Paths.get(JkConstants.JEKA_SRC_DIR));
+        baseScaffold.removeFileEntriesStaringBy(Paths.get(JkConstants.JEKA_SRC_DIR));
 
-        String lastSpringbootVersion = selfScaffold.findLatestVersion(
+        String lastSpringbootVersion = baseScaffold.findLatestVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
                 JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
 
@@ -77,7 +77,7 @@ class SpringbootScaffold {
         List<String> devDeps = JkUtilsIterable.listOf("org.springframework.boot:spring-boot-starter-test");
 
         // Build class code
-        String buildClassCode = readSnippet("SelfBuild.java");
+        String buildClassCode = readSnippet("BaseBuild.java");
 
         // -- For testability purpose
         String overriddenPluginDep = System.getProperty(JkSpringbootProject
@@ -86,18 +86,17 @@ class SpringbootScaffold {
                 overriddenPluginDep.replace("\\", "/") : "dev.jeka:springboot-plugin";
         buildClassCode = buildClassCode.replace("${springboot-plugin}", injectClasspath);
 
-        buildClassCode = buildClassCode.replace("${inject}", JkSelfScaffold.toJkInject(devDeps));
-        selfScaffold.addFileEntry(JkSelfScaffold.BUILD_CLASS_PATH, buildClassCode);
+        buildClassCode = buildClassCode.replace("${inject}", JkBasefScaffold.toJkInject(devDeps));
+        baseScaffold.addFileEntry(JkBasefScaffold.BUILD_CLASS_PATH, buildClassCode);
 
         // Test code
-        //selfScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/test/BaseIT.java", readSnippet("SelfTest.java"));
-        selfScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/test/ControllerIT.java", readSnippet("SelfControllerIT.java"));
+        baseScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/test/ControllerIT.java", readSnippet("BaseControllerIT.java"));
 
         // App code
-        String appCode = readSnippet("SelfApplication.java");
-        appCode = appCode.replace("${inject}", JkSelfScaffold.toJkInject(deps));
-        selfScaffold.addFileEntry(JkSelfScaffold.APP_CLASS_PATH, appCode);
-        selfScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/app/Controller.java", readSnippet("Controller.java"));
+        String appCode = readSnippet("BaseApplication.java");
+        appCode = appCode.replace("${inject}", JkBasefScaffold.toJkInject(deps));
+        baseScaffold.addFileEntry(JkBasefScaffold.APP_CLASS_PATH, appCode);
+        baseScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/app/Controller.java", readSnippet("Controller.java"));
 
     }
 

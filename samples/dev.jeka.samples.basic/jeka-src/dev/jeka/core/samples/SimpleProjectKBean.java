@@ -98,7 +98,7 @@ public class SimpleProjectKBean extends KBean {
     }
 
     public void showDependencies() {
-        projectKBean.showDepTreesAsXml();
+        projectKBean.depTreeAsXml();
     }
     
     public static void main(String[] args) {

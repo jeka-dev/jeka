@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.self;
+package dev.jeka.core.tool.builtins.base;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 
-public class JkSelfScaffoldTest {
+public class JkBasefScaffoldTest {
 
     @Test
     public void scaffold_app_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
-        SelfKBean.SelfScaffoldOptions options = new SelfKBean.SelfScaffoldOptions();
-        options.kind = JkSelfScaffold.Kind.APP;
-        JkSelfScaffold selfScaffold = JkSelfScaffold.of(baseDir, options);
+        BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
+        options.kind = JkBasefScaffold.Kind.APP;
+        JkBasefScaffold selfScaffold = JkBasefScaffold.of(baseDir, options);
         selfScaffold.run();
 
         // cleanup
@@ -24,9 +24,9 @@ public class JkSelfScaffoldTest {
     @Test
     public void scaffold_script_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
-        SelfKBean.SelfScaffoldOptions options = new SelfKBean.SelfScaffoldOptions();
-        options.kind = JkSelfScaffold.Kind.JEKA_SCRIPT;
-        JkSelfScaffold selfScaffold = JkSelfScaffold.of(baseDir, options);
+        BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
+        options.kind = JkBasefScaffold.Kind.JEKA_SCRIPT;
+        JkBasefScaffold selfScaffold = JkBasefScaffold.of(baseDir, options);
         selfScaffold.run();
 
         // cleanup

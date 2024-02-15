@@ -130,11 +130,11 @@ public final class JkTestResult implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                    "found=" + found +
+                    "tests found=" + found +
                     ", started=" + started +
                     ", skipped=" + skipped +
                     ", aborted=" + aborted +
-                    ", succeded=" + succeeded +
+                    ", succeed=" + succeeded +
                     ", failed=" + failed +
                     '}';
         }

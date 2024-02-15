@@ -236,8 +236,8 @@ public final class JkDependencyResolver  {
         }
         AtomicReference<JkResolveResult> result = new AtomicReference<>();
         if (displaySpinner) {
-            JkConsoleSpinner.of("Resolve Dependencies")
-                    .setAlternativeMassage("Resolve Dependencies ...")
+            JkConsoleSpinner.of("Resolve dependencies")
+                    .setAlternativeMassage("Resolve dependencies ...")
                     .run(() -> result.set(doResolve(qualifiedDependencies, params)));
             return result.get();
         }

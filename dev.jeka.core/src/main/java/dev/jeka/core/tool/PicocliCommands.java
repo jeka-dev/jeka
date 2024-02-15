@@ -5,7 +5,7 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.EclipseKBean;
@@ -69,7 +69,7 @@ class PicocliCommands {
     static List<CommandSpec> getStandardCommandSpecSafely(Path baseDir) {
         try {
             List<Class<? extends KBean>> kbeanClasses = JkUtilsIterable.listOf(
-                    SelfKBean.class,
+                    BaseKBean.class,
                     ProjectKBean.class,
                     MavenKBean.class,
                     GitKBean.class,

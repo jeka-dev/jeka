@@ -5,8 +5,8 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
 import java.util.Optional;
@@ -44,9 +44,9 @@ public final class SpringbootKBean extends KBean {
         if (optionalProjectKBean.isPresent()) {
             customizeProjectKBean(optionalProjectKBean.get());
 
-            // Otherwise, force use SelfKBean
+            // Otherwise, force use BaseKBean
         } else {
-            customizeSelfKBean(load(SelfKBean.class));
+            customizeSelfKBean(load(BaseKBean.class));
         }
 
         // Configure Docker KBean to add port mapping on run
@@ -84,21 +84,21 @@ public final class SpringbootKBean extends KBean {
         }
     }
 
-    private void customizeSelfKBean(SelfKBean selfKBean) {
+    private void customizeSelfKBean(BaseKBean baseKBean) {
 
         // customize scaffold
-        selfKBean.getSelfScaffold().addCustomizer(SpringbootScaffold::adapt);
+        baseKBean.getSelfScaffold().addCustomizer(SpringbootScaffold::adapt);
 
-        selfKBean.setMainClass(SelfKBean.AUTO_FIND_MAIN_CLASS);
-        selfKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
+        baseKBean.setMainClass(BaseKBean.AUTO_FIND_MAIN_CLASS);
+        baseKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
                 getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
 
-        selfKBean.setJarMaker(path -> JkSpringbootJars.createBootJar(
-                selfKBean.getAppClasses(),
-                selfKBean.getAppLibs(),
+        baseKBean.setJarMaker(path -> JkSpringbootJars.createBootJar(
+                baseKBean.getAppClasses(),
+                baseKBean.getAppLibs(),
                 getRunbase().getDependencyResolver().getRepos(),
                 path,
-                selfKBean.getManifest())
+                baseKBean.getManifest())
         );
     }
 

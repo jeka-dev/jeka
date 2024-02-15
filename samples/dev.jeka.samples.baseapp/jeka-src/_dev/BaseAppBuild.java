@@ -10,9 +10,9 @@ import dev.jeka.plugins.springboot.SpringbootKBean;
 @JkInjectClasspath("org.springframework.boot:spring-boot-starter-test")
 
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
-class SelfAppBuild extends KBean {
+class BaseAppBuild extends KBean {
 
-    SelfAppBuild() {
+    BaseAppBuild() {
 
         load(SpringbootKBean.class);  // Needed only to produce bootable Spring-Boot jar and add default port
 

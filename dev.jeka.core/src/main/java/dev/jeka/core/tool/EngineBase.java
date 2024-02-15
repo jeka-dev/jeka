@@ -18,7 +18,7 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 
 import javax.tools.ToolProvider;
 import java.nio.file.Files;
@@ -566,7 +566,7 @@ class EngineBase {
 
          Optional<String> findKbeanClassName(String kbeanName) {
              if (kbeanName == null) {
-                 return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(SelfKBean.class.getName()));
+                 return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(BaseKBean.class.getName()));
              }
             return this.allKbeans.stream()
                     .filter(className -> KBean.nameMatches(className, kbeanName))

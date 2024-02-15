@@ -1,4 +1,4 @@
-package dev.jeka.core.tool.builtins.self;
+package dev.jeka.core.tool.builtins.base;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."
 )
-public final class SelfKBean extends KBean {
+public final class BaseKBean extends KBean {
 
     /**
      * Represents the value "auto" usable in {@link #setMainClass(String)}
@@ -49,7 +49,7 @@ public final class SelfKBean extends KBean {
     public String programArgs = "";
 
     @JkDoc
-    final SelfScaffoldOptions scaffold = new SelfScaffoldOptions();
+    final BaseScaffoldOptions scaffold = new BaseScaffoldOptions();
 
     public final JkConsumers<JkManifest> manifestCustomizers = JkConsumers.of();
 
@@ -63,11 +63,11 @@ public final class SelfKBean extends KBean {
 
     private Consumer<Path> jarMaker = this::fatJar;
 
-    private JkSelfScaffold selfScaffold;
+    private JkBasefScaffold selfScaffold;
 
     @Override
     protected void init() {
-        selfScaffold = JkSelfScaffold.of(this);
+        selfScaffold = JkBasefScaffold.of(this);
     }
 
     // We can not just run Application#main cause Spring-Boot seems
@@ -158,25 +158,25 @@ public final class SelfKBean extends KBean {
     /**
      * Sets the jarMaker for creating a runnable fat jar.
      */
-    public SelfKBean setJarMaker(Consumer<Path> jarMaker) {
+    public BaseKBean setJarMaker(Consumer<Path> jarMaker) {
         this.jarMaker = jarMaker;
         return this;
     }
 
     /**
-     * Sets the version supplier for this SelfKBean. The version represents the
+     * Sets the version supplier for this BaseKBean. The version represents the
      * version of the application/library.
      */
-    public SelfKBean setVersionSupplier(Supplier<JkVersion> versionSupplier) {
+    public BaseKBean setVersionSupplier(Supplier<JkVersion> versionSupplier) {
         this.versionSupplier = versionSupplier;
         return this;
     }
 
     /**
-     * Sets the version for this SelfKBean. The version represents the
+     * Sets the version for this BaseKBean. The version represents the
      * version of the application/library.
      */
-    public SelfKBean setVersion(String version) {
+    public BaseKBean setVersion(String version) {
         this.versionSupplier = ()  -> JkVersion.of(version);
         return this;
     }
@@ -203,7 +203,7 @@ public final class SelfKBean extends KBean {
      *
      * @param moduleId The module ID formatted as <i>group:name</i>.
      */
-    public SelfKBean setModuleId(String moduleId) {
+    public BaseKBean setModuleId(String moduleId) {
         this.moduleId = JkModuleId.of(moduleId);
         return this;
     }
@@ -221,11 +221,11 @@ public final class SelfKBean extends KBean {
     }
 
     /**
-     * Returns the JkSelfScaffold object associated with this SelfKBean.
-     * The JkSelfScaffold provides methods for configuring the project scaffold,
+     * Returns the JkBasefScaffold object associated with this BaseKBean.
+     * The JkBasefScaffold provides methods for configuring the project scaffold,
      * such as adding file entries and setting options.
      */
-    public JkSelfScaffold getSelfScaffold() {
+    public JkBasefScaffold getSelfScaffold() {
         return selfScaffold;
     }
 
@@ -243,7 +243,7 @@ public final class SelfKBean extends KBean {
      * providing the name of the main class to use in the project. This can be used for running
      * the project or building Docker images.
      */
-    public SelfKBean setMainClassFinder(Supplier<String> mainClassFinder) {
+    public BaseKBean setMainClassFinder(Supplier<String> mainClassFinder) {
         this.mainClassFinder = mainClassFinder;
         return this;
     }
@@ -351,10 +351,10 @@ public final class SelfKBean extends KBean {
         JkLog.info("Jar created at : " + jarPath);
     }
 
-    public static class SelfScaffoldOptions extends JkScaffoldOptions {
+    public static class BaseScaffoldOptions extends JkScaffoldOptions {
 
         @JkDoc("Kind of Jeka base to generate.")
-        public JkSelfScaffold.Kind kind = JkSelfScaffold.Kind.JEKA_SCRIPT;
+        public JkBasefScaffold.Kind kind = JkBasefScaffold.Kind.JEKA_SCRIPT;
 
     }
 

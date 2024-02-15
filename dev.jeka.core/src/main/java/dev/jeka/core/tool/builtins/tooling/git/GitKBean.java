@@ -6,7 +6,7 @@ import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 
 @JkDoc("Provides project versioning by extracting Git information" + "\n" +
         "The version is inferred from git using following logic : "+ "\n" +
@@ -22,7 +22,7 @@ public final class GitKBean extends KBean {
             "you can set this value to 'v' or whatever prefix.")
     public String versionTagPrefix = "";
 
-    @JkDoc("If true, this Kbean will handle versioning og ProjectKBean or SelfKBean found in the JkRunbase.")
+    @JkDoc("If true, this Kbean will handle versioning og ProjectKBean or BaseKBean found in the JkRunbase.")
     public boolean handleVersioning;
 
     public final JkGit git = JkGit.of(getBaseDir());
@@ -33,7 +33,7 @@ public final class GitKBean extends KBean {
     protected void init() {
         versionFromGit = JkVersionFromGit.of(getBaseDir(), versionTagPrefix);
         if (handleVersioning) {
-            getRunbase().findInstanceOf(SelfKBean.class).ifPresent(selfKBean ->
+            getRunbase().findInstanceOf(BaseKBean.class).ifPresent(selfKBean ->
                     versionFromGit.handleVersioning(selfKBean));
             getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
                     versionFromGit.handleVersioning(projectKBean.project));

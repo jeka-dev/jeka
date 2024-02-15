@@ -3,7 +3,7 @@ package dev.jeka.core.api.tooling.git;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.tool.builtins.self.SelfKBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,15 +83,15 @@ public class JkVersionFromGit  {
     }
 
     /**
-     * Configures the specified selfKBean to use git version for publishing and adds git info to the manifest.
+     * Configures the specified baseKBean to use git version for publishing and adds git info to the manifest.
      */
-    public void handleVersioning(SelfKBean selfKBean) {
-        if (selfKBean.getVersion().isUnspecified()) {
-            selfKBean.setVersionSupplier(this::getVersionAsJkVersion);
+    public void handleVersioning(BaseKBean baseKBean) {
+        if (baseKBean.getVersion().isUnspecified()) {
+            baseKBean.setVersionSupplier(this::getVersionAsJkVersion);
         }
-        JkGit git = JkGit.of(selfKBean.getBaseDir());
+        JkGit git = JkGit.of(baseKBean.getBaseDir());
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
-        selfKBean.manifestCustomizers.add(manifest -> manifest
+        baseKBean.manifestCustomizers.add(manifest -> manifest
                 .addMainAttribute("Git-commit", commit)
                 .addMainAttribute("Git-branch", git.getCurrentBranch()));
     }

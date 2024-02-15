@@ -484,6 +484,7 @@ public final class JkUtilsString {
         StringBuilder sb = new StringBuilder();
         options.stream()
                 .flatMap(item -> Stream.of(item.split(File.pathSeparator)))
+                .filter(item -> !JkUtilsString.isBlank(item))
                 .forEach(item -> sb.append(margin + item + "\n"));
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() -1);
