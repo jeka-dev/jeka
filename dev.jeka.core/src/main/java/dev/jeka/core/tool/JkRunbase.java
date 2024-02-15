@@ -251,9 +251,10 @@ public final class JkRunbase {
                 try {
                     method = bean.getClass().getMethod(engineCommand.getMember());
                 } catch (NoSuchMethodException e) {
+                    String dir = (Paths.get("").toAbsolutePath().equals(getBaseDir())) ? ""
+                            : " (from " + getBaseDir() + ")";
                     throw new JkException("No public no-args method '" + engineCommand.getMember() + "' found on KBean "
-                            + bean.getClass() + "\nWas declared in base dir "
-                            + getBaseDir().toAbsolutePath().normalize());
+                            + bean.getClass() + dir);
                 }
                 JkUtilsReflect.invoke(bean, method);
             }

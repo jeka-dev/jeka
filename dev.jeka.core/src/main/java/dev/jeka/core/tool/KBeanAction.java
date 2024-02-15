@@ -35,7 +35,6 @@ class KBeanAction {
             this.beanName = JkUtilsString.isBlank(before) ? null : before;
             beanExpression = JkUtilsString.substringAfterFirst(expression, ParsedCmdLine.KBEAN_SYMBOL);
         } else {
-            System.err.println("Usage of '" + expression + "' is deprecated. Use '#" + expression + "' instead.");
             this.beanName = null;
             beanExpression = expression;
         }

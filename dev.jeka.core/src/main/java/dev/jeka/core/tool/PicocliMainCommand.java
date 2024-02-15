@@ -180,7 +180,7 @@ public class PicocliMainCommand {
             e.getStackTrace();
             if (e instanceof JkException) {
                 if (logs.verbose) {
-                    Main.handleRegularException(e);
+                    Main.printException(e);
                 } else {
                     System.err.println(e.getMessage());
                 }
@@ -188,7 +188,7 @@ public class PicocliMainCommand {
                 if (JkMemoryBufferLogDecorator.isActive()) {
                     JkMemoryBufferLogDecorator.flush();
                 }
-                Main.handleRegularException(e);
+                Main.printException(e);
             }
             if (logs.banner) {
                 final int length = Main.printAscii(true, "text-failed.ascii");

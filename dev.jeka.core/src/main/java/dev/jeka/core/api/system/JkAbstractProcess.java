@@ -308,7 +308,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     public String toString() {
         int maxLength = 120;
         if (JkLog.isVerbose()) {
-            return this.command + " " + JkUtilsString.readableCommandAgs(parameters);
+            return this.command + " " + JkUtilsString.readableCommandAgs("", parameters);
         }
         String shortCommand = command.replace('\\', '/');
         shortCommand = shortCommand.contains("/") ? JkUtilsString.substringAfterLast(shortCommand, "/")

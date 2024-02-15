@@ -480,11 +480,14 @@ public final class JkUtilsString {
      * Each option in the provided list is split by the platform's file separator and concatenated
      * with a new line character (\n).
      */
-    public static String readableCommandAgs(List<String> options) {
+    public static String readableCommandAgs(String margin, List<String> options) {
         StringBuilder sb = new StringBuilder();
         options.stream()
                 .flatMap(item -> Stream.of(item.split(File.pathSeparator)))
-                .forEach(item -> sb.append(item + "\n"));
+                .forEach(item -> sb.append(margin + item + "\n"));
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() -1);
+        }
         return sb.toString();
     }
 

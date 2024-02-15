@@ -123,11 +123,13 @@ public final class Main {
             System.exit(0); // Triggers shutdown hooks
         } catch (final Throwable e) {
             JkBusyIndicator.stop();
+            JkLog.error(e.getMessage());
+            System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
+            System.err.println("If this originates from a bug, please report the issue at: " +
+                    "https://github.com/jeka-dev/jeka/issues");
             JkLog.restoreToInitialState();
-            if (e instanceof JkException && !shouldPrintExceptionDetails()) {
-                System.err.println(e.getMessage());
-            } else {
-                handleRegularException(e);
+            if ( (!(e instanceof JkException)) || shouldPrintExceptionDetails()) {
+                printException(e);
             }
             if (logs.banner) {
                 final int length = printAscii(true, "text-failed.ascii");
@@ -141,22 +143,17 @@ public final class Main {
     }
 
     private static boolean shouldPrintExceptionDetails() {
-        return logs.verbose || logs.stackTrace;
+        return logs.verbose || logs.debug || logs.stackTrace;
     }
 
-    static void handleRegularException(Throwable e) {
+    static void printException(Throwable e) {
         System.err.println();
         if (logs.verbose || logs.stackTrace) {
             System.err.println("=============================== Stack Trace =============================================");
             e.printStackTrace(System.err);
             System.err.flush();
             System.err.println("=========================================================================================");
-            System.err.println();
         }
-        System.err.println(e.getMessage());
-        System.err.println("You can investigate using -v, -lst or -ls=DEBUG options.");
-        System.err.println("If this originates from a bug, please report the issue at: " +
-                "https://github.com/jeka-dev/jeka/issues");
     }
 
     /**

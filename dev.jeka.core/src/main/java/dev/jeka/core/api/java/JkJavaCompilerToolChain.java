@@ -165,7 +165,7 @@ public final class JkJavaCompilerToolChain {
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
             throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler." +
-                    " Specified options : " + JkUtilsString.readableCommandAgs(options));
+                    " Specified options : " + JkUtilsString.readableCommandAgs("    ", options));
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
             JkLog.verbose("No source files found in " + compileSpec.getSources());
@@ -174,9 +174,11 @@ public final class JkJavaCompilerToolChain {
         JkUtilsPath.createDirectories(outputDir);
 
         if (JkLog.isVerbose()) {
-            String message = "Compile " + compileSpec.getSources()+ " to " + outputDir;
-            message = message + " using options : \n" + JkUtilsString.readableCommandAgs(options);
-            JkLog.startTask(message);
+            JkLog.startTask("compile");
+            JkLog.info("sources      : " + compileSpec.getSources());
+            JkLog.info("to           : " + compileSpec.getOutputDir());
+            JkLog.info("with options : " );
+            JkLog.info(JkUtilsString.readableCommandAgs("    ", options));
         }
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
                 .orElse(compileSpec.minJavaVersion());
