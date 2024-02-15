@@ -51,10 +51,10 @@ class EngineClasspathCache {
             JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
             String treeASString = resolveResult.getDependencyTree().toStringTree();
             if (treeASString.trim().isEmpty()) {  // Nicer output
-                JkLog.info("Dependency tree of jeka-src : empty.");
+                JkLog.debug("Dependency tree of jeka-src : empty.");
             } else {
-                JkLog.info("Dependency tree of jeka-src :");
-                JkLog.info(resolveResult.getDependencyTree().toStringTree());
+                JkLog.debug("Dependency tree of jeka-src :");
+                JkLog.debug(resolveResult.getDependencyTree().toStringTree());
             }
             JkPathSequence pathSequence = resolveResult.getFiles();
             storeResolvedClasspath(scope, pathSequence);
@@ -62,9 +62,9 @@ class EngineClasspathCache {
         } else {
             if (Files.exists(resolvedClasspathCache(scope))) {
                 JkPathSequence cachedPathSequence = readCachedResolvedClasspath(scope);
-                JkLog.verbose("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
+                JkLog.debug("Cached resolved-classpath : \n" + cachedPathSequence.toPathMultiLine("  "));
                 if (cachedPathSequence.hasNonExisting()) {
-                    JkLog.verbose("Cached classpath contains some non-existing element -> need resolve.");
+                    JkLog.debug("Cached classpath contains some non-existing element -> need resolve.");
                     dependencyResolver.resolve(dependencies);
                 }
                 return new PartialResult(false, cachedPathSequence);
@@ -84,11 +84,11 @@ class EngineClasspathCache {
         if (Files.exists(cacheFile)) {
             String cachedContent = new String(JkUtilsPath.readAllBytes(cacheFile));
             if (content.equals(cachedContent)) {
-                JkLog.verbose("unresolved-classpath file is still valid -> Jeka classpath will be determined from this.");
+                JkLog.debug("unresolved-classpath file is still valid -> Jeka classpath will be determined from this.");
                 return false;
             }
         }
-        JkLog.verbose("Update cached 'unresolved-classpath'.");
+        JkLog.debug("Update cached 'unresolved-classpath'.");
         if (Files.exists(cacheFile.getParent())) {
             JkPathFile.of(cacheFile).createIfNotExist().write(content.getBytes(StandardCharsets.UTF_8));
         }

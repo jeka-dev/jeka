@@ -77,20 +77,9 @@ public class JkRepoPropertiesTest {
     }
 
     @Test
-    public void testToSmartString() {
-        Map<String, String> map = new HashMap<>();
-        map.put("toto", "totovalue");
-        map.put("java.home", "iiii");
-        JkProperties props = JkProperties.ofSysPropsThenEnv()
-                .withFallback(JkProperties.ofMap("map", map));
-        System.out.println(props.toKeyValueString("", 30, 200));
-    }
-
-    @Test
     public void testToColumnText() {
         Map<String, String> map = new HashMap<>();
-        System.out.println(JkProperties.ofMap(map).toColumnText(1, 1).toString());
-
+        System.out.println(JkProperties.ofMap(map).toColumnText(1, 1, false).toString());
     }
 
     @Test

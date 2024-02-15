@@ -82,13 +82,13 @@ public final class Main {
                         .toString());
                 JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
                 JkLog.info("Properties         :");
-                JkLog.info(properties.toColumnText(30, 90)
+                JkLog.info(properties.toColumnText(30, 90, !JkLog.isVerbose())
                                 .setMarginLeft("   | ")
                                 .setSeparator(" | ").toString());
 
                 JkPathSequence cp = engineBase.getClasspathSetupResult().runClasspath;
                 JkLog.info("Jeka Classpath     :");
-                cp.forEach(entry -> JkLog.info("    " + entry));
+                cp.forEach(entry -> JkLog.info("   | " + entry));
             }
 
             List<EngineCommand> engineCommands =

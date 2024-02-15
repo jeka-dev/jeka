@@ -319,12 +319,13 @@ public final class JkDependencyResolver  {
                 return cachedPathSequence.getEntries();
             } else {
                 nonExistingEntryOnFs = true;
-                JkLog.debug("Cached resolved-classpath %s has non existing entries on local file system " +
+                JkLog.debug(150, "Cached resolved-classpath %s has non existing entries on local file system " +
                         ": need resolving %s", cacheFile, qualifiedDependencies);
             }
         }
         if (!nonExistingEntryOnFs) {
-            JkLog.debug("Cached resolved-classpath %s not found : need resolving %s", cacheFile, qualifiedDependencies);
+            JkLog.debug(150, "Cached resolved-classpath %s not found : need resolving %s", cacheFile,
+                    qualifiedDependencies);
         }
         JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
         JkLog.debug("Creating resolved-classpath %s for storing dep resolution.", cacheFile);

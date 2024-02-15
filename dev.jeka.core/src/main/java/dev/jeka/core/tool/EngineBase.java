@@ -299,6 +299,7 @@ class EngineBase {
          }
          JkUtilsAssert.state(engineCommands != null, "Resolve engineCommand prior running");
 
+         JkRunbase.setMasterBaseDir(baseDir); // master base dir is used to display relative path on console output
          runbase = JkRunbase.get(baseDir);
          runbase.setDependencyResolver(dependencyResolver);
          runbase.setClasspath(classpathSetupResult.runClasspath);

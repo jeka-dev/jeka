@@ -44,6 +44,8 @@ public final class JkRunbase {
 
     private static final Map<Path, JkRunbase> RUNTIMES = new LinkedHashMap<>();
 
+    private static Path masterBaseDir;
+
     private final Path baseDir;
 
     private JkDependencyResolver dependencyResolver;
@@ -70,8 +72,8 @@ public final class JkRunbase {
     /**
      * Returns the JkRunbase instance associated with the specified project base directory.
      */
-    public static JkRunbase get(Path projectBaseDir) {
-        return RUNTIMES.computeIfAbsent(projectBaseDir, path -> new JkRunbase(path));
+    public static JkRunbase get(Path baseDir) {
+        return RUNTIMES.computeIfAbsent(baseDir, path -> new JkRunbase(path));
     }
 
     static JkRunbase getCurrentContextBaseDir() {
@@ -79,8 +81,12 @@ public final class JkRunbase {
     }
 
     static void setBaseDirContext(Path baseDir) {
-        JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Project " + baseDir + " not found.");
+        JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Base dir " + baseDir + " not found.");
         BASE_DIR_CONTEXT.set(baseDir);
+    }
+
+    static void setMasterBaseDir(Path baseDir) {
+        masterBaseDir = baseDir;
     }
 
     private static Path getBaseDirContext() {
@@ -150,10 +156,9 @@ public final class JkRunbase {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         T result = (T) beans.get(beanClass);
         if (result == null) {
-            String projectDisplayName = baseDir.toString().isEmpty() ?
-                    baseDir.toAbsolutePath().getFileName().toString()
-                    : baseDir.toString();
-            JkLog.debugStartTask("Instantiate KBean %s in project '%s'", beanClass.getName(), projectDisplayName);
+            String relBaseDir = relBaseDir().toString();
+            String subBaseLabel = relBaseDir.isEmpty() ? "" : "(in " + relBaseDir + ")";
+            JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiate(beanClass, consumer);
@@ -306,8 +311,8 @@ public final class JkRunbase {
                     Set<String> usedProperties =
                             FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(), action.getValue()));
                     if (usedProperties.isEmpty()) {
-                        throw new JkException("Field %s do not exist in KBean %s (runbase %s)",
-                                action.getMember(), bean.getClass().getName(), getBaseDir());
+                        throw new JkException("Field %s do not exist in KBean %s (base dir %s)",
+                                action.getMember(), bean.getClass().getName(), relBaseDir());
                     }
                 });
     }
@@ -349,9 +354,16 @@ public final class JkRunbase {
     @Override
     public String toString() {
         return "JkRunbase{" +
-                "projectBaseDir=" + baseDir +
+                "baseDir=" + relBaseDir() +
                 ", beans=" + beans.keySet() +
                 '}';
+    }
+
+    private Path relBaseDir() {
+        if (masterBaseDir != null && baseDir.startsWith(masterBaseDir)) {
+            return masterBaseDir.relativize(baseDir);
+        }
+        return baseDir;
     }
 
 }

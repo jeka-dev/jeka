@@ -222,44 +222,22 @@ public final class JkProperties {
         return result.toString();
     }
 
-    public String toKeyValueString(String margin, int maxNameSize, int maxTotalSize) {
+    /**
+     * Converts the properties to a formatted column text representation.
+     *
+     * @param keyMaxLength The maximum length of the key column.
+     * @param valueMaxLength The maximum length of the value column.
+     * @param canTruncate Flag indicating whether the values can be truncated if they exceed the maximum length.
+     */
+    public JkColumnText toColumnText(int keyMaxLength, int valueMaxLength, boolean canTruncate) {
         Set<String> keys = find("");
         JkProperties systemLess = systemLess();
         if (systemLess == null) {
-            return "";
-        }
-        Jk2ColumnsText columnsText = Jk2ColumnsText.of(maxNameSize, maxTotalSize)
-                .setAdjustLeft(true).setMarginLeft(margin);
-        for (String key : keys) {
-            if (systemLess.get(key) == null) {
-                continue;
-            }
-            String value = get(key);
-            if (key.toLowerCase().endsWith("password")
-                    || key.toLowerCase().endsWith("secret")
-                    || key.toLowerCase().endsWith("token")
-                    || key.toLowerCase().endsWith("pwd")) {
-                value = "***";
-            }
-            String source = getSourceDefining(key).source;
-            if (source.endsWith("global.properties")) {
-                source = "globbal.properties";
-            }
-            String right = value + " [" + source + "]";
-            columnsText.add(key, right);
-        }
-        return columnsText.toString();
-    }
-
-    public JkColumnText toColumnText(int maxNameSize, int maxValueSize) {
-        Set<String> keys = find("");
-        JkProperties systemLess = systemLess();
-        if (systemLess == null) {
-            return JkColumnText.ofSingle(maxValueSize, maxValueSize);
+            return JkColumnText.ofSingle(valueMaxLength, valueMaxLength);
         }
         JkColumnText columnsText = JkColumnText
-                .ofSingle(1, maxNameSize)
-                .addColumn(1, maxValueSize)
+                .ofSingle(1, keyMaxLength)
+                .addColumn(1, valueMaxLength)
                 .addColumn(5, 60);
         for (String key : keys) {
             if (systemLess.get(key) == null) {
@@ -275,6 +253,12 @@ public final class JkProperties {
             String source = getSourceDefining(key).source;
             if (source.endsWith("global.properties")) {
                 source = "global.properties";
+            }
+            if (canTruncate && value != null && value.length() > valueMaxLength) {
+                value = JkUtilsString.ellipse(value, valueMaxLength-3);
+            }
+            if (canTruncate && key.length() > keyMaxLength) {
+                key = JkUtilsString.ellipse(key, keyMaxLength-3);
             }
             columnsText.add(key, value, source);
         }

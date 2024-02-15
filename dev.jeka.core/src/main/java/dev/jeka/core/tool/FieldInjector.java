@@ -32,7 +32,8 @@ final class FieldInjector {
     }
 
     static void injectAnnotatedProperties(Object target, JkProperties properties) {
-        JkLog.debugStartTask("Injecting JkProperties values into %s", target);
+        JkLog.debugStartTask("Injecting properties values into %s", target);
+        boolean injected = false;
         for (final Field field : getPropertyFields(target.getClass())) {
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             if (injectProperty == null) {
@@ -52,21 +53,24 @@ final class FieldInjector {
                     }
                     JkLog.debug("Inject property value %s in field %s.", value, field);
                     JkUtilsReflect.setFieldValue(target, field, value);
+                    injected = true;
                 } else {
-                    JkLog.debug("No property %s declared to inject in field %s.", injectedPropName, field);
+                    JkLog.debug(150, "No property %s declared to inject in field %s.", injectedPropName, field);
                 }
 
                 // We explore nested field only if a naked @JKInjectProperty is present on the parent field.
                 // This is to avoid exploring on deep trees with potential recursive issues (as found on JkProject on ProjectKBean)
             } else {
-                JkLog.debug("Naked @JkInjectProperty found on field %s. Exploring nested fields for injection", field);
+                JkLog.debug(150, "Naked @JkInjectProperty found on field %s. Exploring nested fields for injection", field);
                 Object fieldValue = JkUtilsReflect.getFieldValue(target, field);
                 if (fieldValue != null) {
                     injectAnnotatedProperties(fieldValue, properties);
+                    injected = true;
                 }
             }
         }
-        JkLog.debugEndTask();
+        String message = injected ? "" : "No value injected.";
+        JkLog.debugEndTask(message);
     }
 
     static List<Field> getPropertyFields(Class<?> clazz) {

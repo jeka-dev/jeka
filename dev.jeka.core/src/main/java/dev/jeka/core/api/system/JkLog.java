@@ -2,6 +2,7 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.PrintStream;
@@ -169,6 +170,13 @@ public final class JkLog implements Serializable {
         }
     }
 
+    public static void debug(int maxLength, String message, Object ...params) {
+        if (verbosity() == Verbosity.DEBUG) {
+            consume(JkLogEvent.ofRegular(Type.DEBUG, JkUtilsString.wrapStringCharacterWise(
+                    String.format(message, params), maxLength)));
+        }
+    }
+
     public static void verbose(String message, Object ...params) {
         if (verbosity().isVerbose()) {
             consume(JkLogEvent.ofRegular(Type.VERBOSE, String.format(message, params)));
@@ -262,6 +270,12 @@ public final class JkLog implements Serializable {
     public static void debugEndTask() {
         if (verbosity == Verbosity.DEBUG) {
             endTask();
+        }
+    }
+
+    public static void debugEndTask(String message) {
+        if (verbosity == Verbosity.DEBUG) {
+            endTask(message);
         }
     }
 
