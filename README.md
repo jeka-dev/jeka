@@ -2,7 +2,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/jeka-core)](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22)
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
-
 #  What is JeKa ?
 
 <img src="./docs/images/knight-color-logo.svg" width="100" align="left" hspace="15"  />
