@@ -3,6 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.PrintStream;
@@ -18,6 +19,10 @@ class PicoCliHelp {
     private static final String SECTION_STD_KBEANS_HEADING = "stdKBeanHeading";
 
     private static final String SECTION_STD_KBEANS_DETAILS = "stdKbeanDetails";
+
+    private static final String SECTION_SHORTHANDS_HEADING = "shorthandHeading";
+
+    private static final String SECTION_SHORTHANDS_DETAILS = "shortHandDetails";
 
     static void printUsageHelp(PrintStream printStream) {
         CommandLine commandLine = PicocliCommands.mainCommandLine();
@@ -42,8 +47,10 @@ class PicoCliHelp {
     static void printCommandHelp(JkPathSequence classpath,
                                  List<String> kbeanClassNames,
                                  String defaultKBeanClassName,
+                                 JkProperties props,
                                  PrintStream printStream) {
-        commandHelp(classpath, kbeanClassNames, defaultKBeanClassName).usage(printStream, colorScheme());
+        commandHelp(classpath, kbeanClassNames, defaultKBeanClassName, props)
+                .usage(printStream, colorScheme());
     }
 
     // return false if kbeanName does not math any KBean
@@ -59,9 +66,11 @@ class PicoCliHelp {
         return true;
     }
 
-    private static CommandLine commandHelp(JkPathSequence classpath,
-                                   List<String> kbeanClassNames,
-                                   String defaultKBeanClassName) {
+    private static CommandLine commandHelp(
+            JkPathSequence classpath,
+            List<String> kbeanClassNames,
+            String defaultKBeanClassName,
+            JkProperties props) {
 
         ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
 
@@ -132,6 +141,19 @@ class PicoCliHelp {
             index = keys.indexOf(dev.jeka.core.tool.CommandLine.Model.UsageMessageSpec.SECTION_KEY_FOOTER_HEADING);
             keys.add(index, SECTION_OTHER_KBEANS_HEADING);
             keys.add(index + 1, SECTION_OTHER_KBEANS_DETAILS);
+            commandLine.setHelpSectionKeys(keys);
+        }
+
+        // Add Section for shortcut
+        Map<String, String> shorthands = cmdShortHand(props);
+        if (!shorthands.isEmpty()) {
+            commandLine.getHelpSectionMap().put(SECTION_SHORTHANDS_HEADING,
+                    help -> help.createHeading("\nShorthands\n"));
+            commandLine.getHelpSectionMap().put(SECTION_SHORTHANDS_DETAILS,
+                    help -> help.createTextTable(shorthands).toString());
+            index = keys.indexOf(dev.jeka.core.tool.CommandLine.Model.UsageMessageSpec.SECTION_KEY_FOOTER_HEADING);
+            keys.add(index, SECTION_SHORTHANDS_HEADING);
+            keys.add(index + 1, SECTION_SHORTHANDS_DETAILS);
             commandLine.setHelpSectionKeys(keys);
         }
 
@@ -214,5 +236,12 @@ class PicoCliHelp {
         commandSpec.name(KBean.name(kbeanClass) + ":");
         commandSpec.usageMessage().header(kBeanDescription.header);
         return commandSpec;
+    }
+
+    private static Map<String, String> cmdShortHand(JkProperties props) {
+        return props.getAllStartingWith(JkConstants.CMD_PREFIX_PROP, false).entrySet().stream()
+                .filter(entry -> !entry.getKey().startsWith("_"))
+                .collect(Collectors.toMap(entry -> String.format("@|yellow ::%s|@", entry.getKey()),
+                        Map.Entry::getValue));
     }
 }

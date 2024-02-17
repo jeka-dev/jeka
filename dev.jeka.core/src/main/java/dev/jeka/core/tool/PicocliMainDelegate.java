@@ -81,7 +81,7 @@ class PicocliMainDelegate {
                 PicoCliHelp.printCommandHelp(
                                 engineBase.resolveClassPaths().runClasspath,
                                 kBeanResolution.allKbeans,
-                                kBeanResolution.defaultKbeanClassname, System.out);
+                                kBeanResolution.defaultKbeanClassname, props, System.out);
                 System.exit(0);
             }
             boolean found = PicoCliHelp.printKBeanHelp(
