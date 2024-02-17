@@ -21,9 +21,15 @@ class EnvLogSettings {
 
     final boolean banner;
 
-    EnvLogSettings(boolean verbose, boolean debug,
-                          boolean stackTrace, boolean runtimeInformation, boolean totalDuration,
-                          JkLog.Style style, Boolean animation, boolean banner) {
+    EnvLogSettings(boolean verbose,
+                   boolean debug,
+                   boolean stackTrace,
+                   boolean runtimeInformation,
+                   boolean totalDuration,
+                   JkLog.Style style,
+                   Boolean animation,
+                   boolean banner) {
+
         this.verbose = verbose;
         this.debug = debug;
         this.stackTrace = stackTrace;

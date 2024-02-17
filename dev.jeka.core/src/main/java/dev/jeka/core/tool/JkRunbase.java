@@ -337,6 +337,7 @@ public final class JkRunbase {
 
     // Reads the properties from the baseDir/jeka/local.properties
     // Takes also in account properties defined in parent project dirs if any.
+    // this doen't take in account System and global props
     static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
         Path baseDir = projectBaseDir.toAbsolutePath().normalize();
         Path projectPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);

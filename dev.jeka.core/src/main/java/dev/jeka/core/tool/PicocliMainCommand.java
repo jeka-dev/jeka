@@ -1,5 +1,7 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
@@ -12,6 +14,7 @@ import dev.jeka.core.tool.CommandLine.ParseResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.Environment.logs;
 
@@ -19,7 +22,7 @@ import static dev.jeka.core.tool.Environment.logs;
         mixinStandardHelpOptions = true,
         sortOptions = false,
         showDefaultValues = true,
-        versionProvider = PicocliMain.VersionProvider.class,
+        versionProvider = PicocliMainDelegate.VersionProvider.class,
         usageHelpAutoWidth = true,
         customSynopsis = {
             " ${COMMAND-NAME} [options] [COMMANDS]",
@@ -27,7 +30,8 @@ import static dev.jeka.core.tool.Environment.logs;
             "   or   ${COMMAND-NAME} [options] -p [PROGRAM_ARGS]",
             "           (for executing Java program)",
             "",
-            "COMMANDS are in format: '<KBeanName:> [<propName>=[value]...] [methodName...]'",
+            "COMMANDS are in format: '<kbeanName:> [<propName>=[value]...] [methodName...]'",
+            "",
             "KBEANS are scripts implemented as Java beans. The name could be either the full or short name of the bean class.",
             "The first letter's case-sensitivity and the 'KBean' suffix are optional.",
             "",
@@ -39,7 +43,7 @@ import static dev.jeka.core.tool.Environment.logs;
         description = {
             "",
             "Examples:",
-            "  ${COMMAND-NAME} self: scaffold",
+            "  ${COMMAND-NAME} base: scaffold",
             "         (create a basic code base by invoking 'scaffold' method on 'BaseKBean')",
             "  ${COMMAND-NAME} project: scaffold layout.style=SIMPLE",
             "         (create a project, specifying 'ProjectKBean.layout.style' prop value)",
@@ -64,14 +68,11 @@ import static dev.jeka.core.tool.Environment.logs;
 )
 public class PicocliMainCommand {
 
-    // injected by Main method
-    final Path baseDir;
-
     @Option(names = { "-c", "--clean-output"},
             description = "Delete jeka-output directory prior running.")
     private boolean cleanOutput;
 
-    @Option(names = { "-cw", "--clean-work"},
+    @Option(names = { "--cw", "--clean-work"},
             description = "Delete .jeka-work directory prior running.")
     private boolean cleanWork;
 
@@ -119,7 +120,11 @@ public class PicocliMainCommand {
             description = "Log verbose messages.")
     private boolean logVerbose;
 
-    @Option(names = { "-ls"},
+    @Option(names = {"--st", "--stacktrace"},
+            description = "Log verbose messages.")
+    private boolean logStacktrace;
+
+    @Option(names = { "--ls"},
             paramLabel = "STYLE",
             defaultValue = "FLAT",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
@@ -128,78 +133,6 @@ public class PicocliMainCommand {
     @Option(names = {"--debug"},
             description = "Log debug level (very verbose)")
     private boolean logDebug;
-
-
-    public PicocliMainCommand(Path baseDir) {
-        this.baseDir = baseDir;
-    }
-
-
-
-
-    public int run(ParseResult parseResult) {
-
-        final long start = System.nanoTime();
-
-        // Set environment
-        Environment.logs = logSettings();
-        Environment.behavior = behaviorSettings();
-
-        JkLog.setDecorator(logs.style);
-        if (logs.banner) {
-            Main.displayIntro();
-        }
-        if (logs.runtimeInformation) {
-            JkInit.displayRuntimeInfo();
-        }
-
-        // By default, log working animation when working dir = base dir (this mean that we are not
-        // invoking a tool packaged with JeKa.
-        boolean logAnimation = baseDir.equals(Paths.get(""));
-        if (logs.animation != null) {
-            logAnimation = logs.animation;
-        }
-        JkLog.setAcceptAnimation(logAnimation);
-
-        try {
-            if (logVerbose) {
-                JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-            }
-            final Engine engine = new Engine(baseDir);
-            engine.execute(Environment.parsedCmdLine);   // log in memory are inactivated inside this method if it goes ok
-            if (logs.banner) {
-                Main.displayOutro(start);
-            }
-            if (logs.totalDuration && !logs.banner) {
-                Main.displayDuration(start);
-            }
-            return 0;
-        } catch (final Throwable e) {
-            JkBusyIndicator.stop();
-            JkLog.restoreToInitialState();
-            e.getStackTrace();
-            if (e instanceof JkException) {
-                if (logs.verbose) {
-                    Main.printException(e);
-                } else {
-                    System.err.println(e.getMessage());
-                }
-            } else {
-                if (JkMemoryBufferLogDecorator.isActive()) {
-                    JkMemoryBufferLogDecorator.flush();
-                }
-                Main.printException(e);
-            }
-            if (logs.banner) {
-                final int length = Main.printAscii(true, "text-failed.ascii");
-                System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
-                        + JkUtilsTime.durationInSeconds(start) + " seconds.");
-            } else {
-                System.err.println("Failed !");
-            }
-            return 1;
-        }
-    }
 
     EnvLogSettings logSettings() {
         return new EnvLogSettings(
@@ -215,6 +148,16 @@ public class PicocliMainCommand {
 
     EnvBehaviorSettings behaviorSettings() {
         return new EnvBehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure);
+    }
+
+    JkDependencySet dependencies() {
+        if (classpaths == null) {
+            return JkDependencySet.of();
+        }
+        List<JkDependency> dependencies = classpaths.stream()
+                .map(JkDependency::of)
+                .collect(Collectors.toList());
+        return JkDependencySet.of(dependencies);
     }
 
 }

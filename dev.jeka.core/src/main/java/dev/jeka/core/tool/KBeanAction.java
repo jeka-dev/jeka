@@ -71,4 +71,5 @@ class KBeanAction {
         }
         return String.format("%s '%s'", actionName, member);
     }
+
 }

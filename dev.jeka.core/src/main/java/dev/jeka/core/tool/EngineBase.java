@@ -107,7 +107,9 @@ class EngineBase {
      static EngineBase of(Path baseDir, JkRepoSet downloadRepos,
                           JkDependencySet commandLineDependencies, EnvLogSettings logSettings,
                           EnvBehaviorSettings behaviorSettings) {
+
         Path path = baseDir.toAbsolutePath().normalize();
+
 
         // ensure only 1 baseProcessor per base
         return MAP.computeIfAbsent(path,

@@ -114,7 +114,8 @@ final class KBeanDescription {
                 result.addAll(subOpts);
             }
         }
-        return result;
+        return result.stream().filter(nameAndField -> !Modifier.isFinal(nameAndField.field.getModifiers()))
+                .collect(Collectors.toList());
     }
 
     private static boolean hasSubOption(Field field) {
@@ -153,9 +154,9 @@ final class KBeanDescription {
      */
     static final class BeanMethod implements Comparable<BeanMethod> {
 
-        private final String name;
+        final String name;
 
-        private final String description;
+        final String description;
 
         private final Class<?> declaringClass;
 
@@ -198,6 +199,8 @@ final class KBeanDescription {
      */
     static final class BeanField implements Comparable<BeanField> {
 
+        final Field field;
+
         final String name;
 
         final String description;
@@ -212,9 +215,10 @@ final class KBeanDescription {
 
         private final String injectedPropertyName;
 
-        private BeanField(String name, String description, Object bean, Object defaultValue,
+        private BeanField(Field field, String name, String description, Object bean, Object defaultValue,
                           Class<?> type, Class<?> declaringClass, String injectedPropertyName) {
             super();
+            this.field = field;
             this.name = name;
             this.description = description;
             this.bean = bean;
@@ -237,7 +241,15 @@ final class KBeanDescription {
             final Object defaultValue = value(instance, name);
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             final String propertyName = injectProperty != null ? injectProperty.value() : null;
-            return new BeanField(name, descr, instance, defaultValue, type, rootDeclaringClass, propertyName);
+            return new BeanField(
+                    field,
+                    name,
+                    descr,
+                    instance,
+                    defaultValue,
+                    type,
+                    rootDeclaringClass,
+                    propertyName);
         }
 
         private static Object value(Object runInstance, String optName) {
