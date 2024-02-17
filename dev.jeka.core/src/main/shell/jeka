@@ -585,12 +585,12 @@ get_or_download_jdk() {
   if [ ! -d "$jdk_cache_dir" ]; then
     if [ -z "$JDK_DOWNLOAD_OS" ]; then
       msg "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
-      msg "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or a property in ~/jeka/global.properties file." 1>&2
+      msg "You may workaround this problem by specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
       exit 1
     fi
     if [ -z "$JDK_DOWNLOAD_ARCH" ]; then
       msg "Unable to download JDK, unsupported Architecture: $(uname -m)" 1>&2
-      msg "You may workaround the problem in specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
+      msg "You may workaround this problem by specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
       exit 1
     fi
     local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"

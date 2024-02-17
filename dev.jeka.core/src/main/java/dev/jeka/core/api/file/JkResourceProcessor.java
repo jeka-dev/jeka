@@ -84,7 +84,7 @@ public final class JkResourceProcessor {
      * @see #addInterpolators(Iterable)
      */
     public JkResourceProcessor addInterpolator(String acceptPattern, String... keyValues) {
-        return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny(keyValues));
+        return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny((Object[]) keyValues));
     }
 
     /**

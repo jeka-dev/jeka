@@ -242,7 +242,7 @@ public final class JkRepo {
     }
 
     public JkRepo setHttpHeaders(String ...keysAndValues) {
-        return setHttpHeaders(JkUtilsIterable.mapOfAny(keysAndValues));
+        return setHttpHeaders(JkUtilsIterable.mapOfAny((Object[]) keysAndValues));
     }
 
     public JkRepo setHttpHeaders(Map<String, String> headers) {

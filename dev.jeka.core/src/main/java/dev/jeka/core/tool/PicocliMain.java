@@ -81,6 +81,7 @@ public class PicocliMain {
         PicocliMainCommand mainCommand = new PicocliMainCommand(baseDir);
         CommandSpec mainCommandSpec = CommandSpec.forAnnotatedObject(mainCommand);
         CommandLine mainCommandLine = new CommandLine(mainCommandSpec);
+        mainCommandLine.setUnmatchedArgumentsAllowed(true);
         mainCommandLine.parseArgs(interpolatedArgs);
         Environment.logs = mainCommand.logSettings();
         Environment.behavior = mainCommand.behaviorSettings();
