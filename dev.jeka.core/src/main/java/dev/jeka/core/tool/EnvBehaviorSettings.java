@@ -12,16 +12,19 @@ class EnvBehaviorSettings {
 
     final boolean ignoreCompileFailure;
 
+    final Optional<String> commandHelp;
 
-    EnvBehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean ignoreCompileFailure) {
+    EnvBehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean ignoreCompileFailure,
+                        String commandHelp) {
         this.kbeanName = Optional.ofNullable(kbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
         this.ignoreCompileFailure = ignoreCompileFailure;
+        this.commandHelp = Optional.ofNullable(commandHelp);
     }
 
     static EnvBehaviorSettings ofDefault() {
-        return new EnvBehaviorSettings(null, false, false, false);
+        return new EnvBehaviorSettings(null, false, false, false, null);
     }
 
 }

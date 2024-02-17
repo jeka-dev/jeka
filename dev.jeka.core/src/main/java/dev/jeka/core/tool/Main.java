@@ -56,13 +56,17 @@ public final class Main {
             if (logs.banner) {
                 displayIntro();
             }
-            if (logs.runtimeInformation) {
-                JkInit.displayRuntimeInfo();
-            }
+
             String basedirProp = System.getProperty("jeka.current.basedir");
+
+
 
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
+
+            if (logs.runtimeInformation) {
+                JkInit.displayRuntimeInfo(baseDir);
+            }
 
             // By default, log working animation when working dir = base dir (this mean that we are not
             // invoking a tool packaged with JeKa.

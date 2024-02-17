@@ -5,7 +5,6 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
@@ -38,34 +37,24 @@ class PicocliMainDelegate {
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
         if (isUsageHelpRequested(filteredArgs)) {
-
-            CommandLine commandLine = PicocliCommands.mainCommandLine();
-            PicocliCommands.getStandardCommandSpecSafely().forEach(commandSpec -> {
-                String name = commandSpec.name() + ":";
-                commandLine.addSubcommand(name, commandSpec);
-            });
-            commandLine.usage(commandLine.getOut(), PicoCliHelp.colorScheme());
-            System.exit(commandLine.getCommandSpec().exitCodeOnUsageHelp());
+            PicoCliHelp.printUsageHelp(System.out);
+            System.exit(0);
         }
 
         // Handle --version
         if (isVersionHelpRequested(filteredArgs)) {
-            CommandLine commandLine = PicocliCommands.stdHelp();
-            commandLine.printVersionHelp(commandLine.getOut());
-            System.exit(commandLine.getCommandSpec().exitCodeOnVersionHelp());
+            PicoCliHelp.printVersionHelp(System.out);
+            System.exit(0);
         }
 
         // Interpolate command line with values found in properties
         JkProperties props = JkRunbase.constructProperties(baseDir);
         String[] interpolatedArgs = Environment.interpolatedCommandLine(filteredArgs, props);
 
-        // Get shared dependency resolver
-        JkDependencyResolver dependencyResolver = dependencyResolver(baseDir);
-
         // first, parse only options
         PicocliMainCommand mainCommand = new PicocliMainCommand();
         CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
-        String[] options = Arrays.stream(filteredArgs)
+        String[] options = Arrays.stream(interpolatedArgs)
                 .filter(arg -> arg.startsWith("-"))
                 .toArray(String[]::new);
         commandLine.parseArgs(options);
@@ -84,16 +73,23 @@ class PicocliMainDelegate {
             logRuntimeInfoChapter1(engineBase, props);
         }
 
-        // Creating a classloader augmented wih classpath from Previous step
-        // And use it to create a command line
-        ClassLoader classLoader = JkUrlClassLoader.of(engineBase.resolveClassPaths().runClasspath).get();
-        EngineBase.KBeanResolution kBeanResolution = engineBase.resolveKBeans();
-        PicoCliHelp
-                .helpEntryPoint(
-                    classLoader,
+        // Handle context help
+        if (behavior.commandHelp.isPresent()) {
+            EngineBase.KBeanResolution kBeanResolution = engineBase.resolveKBeans();
+            String kbeanName = behavior.commandHelp.get();
+            if (JkUtilsString.isBlank(kbeanName)) {
+                PicoCliHelp.printCommandHelp(
+                                engineBase.resolveClassPaths().runClasspath,
+                                kBeanResolution.allKbeans,
+                                kBeanResolution.defaultKbeanClassname, System.out);
+                System.exit(0);
+            }
+            boolean found = PicoCliHelp.printKBeanHelp(
+                    engineBase.resolveClassPaths().runClasspath,
                     kBeanResolution.allKbeans,
-                    kBeanResolution.defaultKbeanClassname)
-                .usage(System.out, PicoCliHelp.colorScheme());
+                    kbeanName, System.out);
+            System.exit(found ? 0 : 1);
+        }
     }
 
     // This class should lies outside PicocliMainCommand to be referenced inn annotation
@@ -127,7 +123,7 @@ class PicocliMainDelegate {
             displayIntro();
         }
         if (logSettings.runtimeInformation) {
-            JkInit.displayRuntimeInfo();
+            JkInit.displayRuntimeInfo(baseDir);
         }
 
         // By default, log working animation when working dir = base dir (this mean that we are not

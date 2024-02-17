@@ -23,7 +23,8 @@ public final class DockerKBean extends KBean {
     @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")
     public String dockerRunParams = "";
 
-    @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version.")
+    @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
+            "If not set, the image name will be inferred form project info.")
     public String dockerImageName;
 
     /**
@@ -53,12 +54,12 @@ public final class DockerKBean extends KBean {
         optionalProjectKBean.ifPresent(this::configureForProject);
     }
 
-    @JkDoc("Build Docker image in local registry.")
+    @JkDoc("Builds Docker image in local registry.")
     public void build() {
         dockerBuild().buildImage(dockerImageName);
     }
 
-    @JkDoc("Run Docker image and wait until termination.")
+    @JkDoc("Runs Docker image and wait until termination.")
     public void run() {
         JkDocker.assertPresent();
         String containerName = "jeka-" + dockerImageName.replace(':', '-');

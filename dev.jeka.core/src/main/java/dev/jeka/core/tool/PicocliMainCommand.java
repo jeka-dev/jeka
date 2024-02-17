@@ -2,21 +2,13 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkMemoryBufferLogDecorator;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Command;
 import dev.jeka.core.tool.CommandLine.Option;
-import dev.jeka.core.tool.CommandLine.ParseResult;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static dev.jeka.core.tool.Environment.logs;
 
 @Command(name = "jeka",
         mixinStandardHelpOptions = true,
@@ -25,9 +17,9 @@ import static dev.jeka.core.tool.Environment.logs;
         versionProvider = PicocliMainDelegate.VersionProvider.class,
         usageHelpAutoWidth = true,
         customSynopsis = {
-            " ${COMMAND-NAME} [options] [COMMANDS]",
+            " @|yellow ${COMMAND-NAME} [options] [COMMAND...] |@",
             "           (for executing KBean actions)",
-            "   or   ${COMMAND-NAME} [options] -p [PROGRAM_ARGS]",
+            "   or   @|yellow ${COMMAND-NAME} [options] -p [PROGRAM_ARG...] |@",
             "           (for executing Java program)",
             "",
             "COMMANDS are in format: '<kbeanName:> [<propName>=[value]...] [methodName...]'",
@@ -43,23 +35,28 @@ import static dev.jeka.core.tool.Environment.logs;
         description = {
             "",
             "Examples:",
-            "  ${COMMAND-NAME} base: scaffold",
+            "  @|yellow ${COMMAND-NAME} base: scaffold |@",
             "         (create a basic code base by invoking 'scaffold' method on 'BaseKBean')",
-            "  ${COMMAND-NAME} project: scaffold layout.style=SIMPLE",
+            "  @|yellow ${COMMAND-NAME} project: scaffold layout.style=SIMPLE |@",
             "         (create a project, specifying 'ProjectKBean.layout.style' prop value)",
-            "  ${COMMAND-NAME} -cp dev.jeka:springboot-plugin springboot: project: scaffold",
+            "  @|yellow ${COMMAND-NAME} -cp dev.jeka:springboot-plugin springboot: project: scaffold |@",
             "         (create a Spring-Boot project using Spring-Boot plugin)",
-            "  ${COMMAND-NAME} myMethod myFieldA=8 myFieldB=false",
-            "         (set props and invoke method on the first KBean found in 'jeka-src')",
-            "  ${COMMAND-NAME} intellij: iml ",
+            "  @|yellow ${COMMAND-NAME} myMethod myFieldA=8 myFieldB=false |@",
+            "         (set props and invoke method on the default KBean)",
+            "  @|yellow ${COMMAND-NAME} intellij: iml |@",
             "         (Generate metadata iml file for Intellij)",
-            "  ${COMMAND-NAME} -r https://github.com/myorg/myrepo#0.0.1 self: runJar",
+            "  @|yellow ${COMMAND-NAME} -r https://github.com/myorg/myrepo#0.0.1 self: runJar |@",
             "         (Run the application hosted in this Git repo with tag 0.0.1)",
-            "  ${COMMAND-NAME} -rp https://github.com/myorg/myscript#0.0.1 arg0 arg1 ...",
+            "  @|yellow ${COMMAND-NAME} -rp https://github.com/myorg/myscript#0.0.1 arg0 arg1 ... |@",
             "         (Run the app with specified args, bypassing JeKa engine if possible)",
-            "  ${COMMAND-NAME} ::myscript arg0 arg1 ...",
+            "  @|yellow ${COMMAND-NAME} ::myscript arg0 arg1 ... |@",
             "         (Same but using cmd interpolation defined in user global.properties)",
             ""
+        },
+        footer = {
+            "",
+            "Execute @|yellow jeka -cmd |@ to get a list of available commands.",
+            "Execute @|yellow jeka -i |@ to get base information."
         },
         optionListHeading = "Options:%n",
         subcommandsRepeatable = true,
@@ -72,7 +69,7 @@ public class PicocliMainCommand {
             description = "Delete jeka-output directory prior running.")
     private boolean cleanOutput;
 
-    @Option(names = { "--cw", "--clean-work"},
+    @Option(names = { "-cw", "--clean-work"},
             description = "Delete .jeka-work directory prior running.")
     private boolean cleanWork;
 
@@ -120,11 +117,11 @@ public class PicocliMainCommand {
             description = "Log verbose messages.")
     private boolean logVerbose;
 
-    @Option(names = {"--st", "--stacktrace"},
+    @Option(names = {"-st", "--stacktrace"},
             description = "Log verbose messages.")
     private boolean logStacktrace;
 
-    @Option(names = { "--ls"},
+    @Option(names = { "-ls"},
             paramLabel = "STYLE",
             defaultValue = "FLAT",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
@@ -133,6 +130,13 @@ public class PicocliMainCommand {
     @Option(names = {"--debug"},
             description = "Log debug level (very verbose)")
     private boolean logDebug;
+
+    @Option(names = {"-cmd", "--commands"},
+            paramLabel = "<|kbeanName>",
+            description = "Display contextual help on commands",
+            arity = "0..1",
+            fallbackValue = " ")
+    private String commandHelp;
 
     EnvLogSettings logSettings() {
         return new EnvLogSettings(
@@ -147,7 +151,7 @@ public class PicocliMainCommand {
     }
 
     EnvBehaviorSettings behaviorSettings() {
-        return new EnvBehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure);
+        return new EnvBehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure, commandHelp);
     }
 
     JkDependencySet dependencies() {

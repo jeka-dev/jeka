@@ -36,7 +36,7 @@ public final class JkInit {
         Environment.parsedCmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
         JkLog.setDecorator(Environment.logs.style);
         if (Environment.logs.runtimeInformation) {
-            displayRuntimeInfo();
+            displayRuntimeInfo(Paths.get(""));
             JkLog.verbose("JeKa Classpath    : ");
             JkClassLoader.ofCurrent().getClasspath().getEntries().forEach(item -> JkLog.verbose("    " + item));
         }
@@ -91,9 +91,10 @@ public final class JkInit {
         return bean;
     }
 
-    static void displayRuntimeInfo() {
+    static void displayRuntimeInfo(Path baseDir) {
         Jk2ColumnsText txt = Jk2ColumnsText.of(18, 150);
         txt.add("Working Directory", System.getProperty("user.dir"));
+        txt.add("Base Directory", baseDir.toAbsolutePath());
         txt.add("Command Line",  String.join(" ", Arrays.asList(Environment.parsedCmdLine.rawArgs())));
         txt.add("Java Home",  System.getProperty("java.home"));
         txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));

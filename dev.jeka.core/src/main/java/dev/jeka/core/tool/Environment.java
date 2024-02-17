@@ -83,7 +83,8 @@ class Environment {
                 cmdLineOptions.kbeanName(),
                 cmdLineOptions.cleanWork.isPresent(),
                 cmdLineOptions.cleanOutput.isPresent(),
-                cmdLineOptions.ignoreCompileFail.isPresent()
+                cmdLineOptions.ignoreCompileFail.isPresent(),
+                null
         );
     }
 

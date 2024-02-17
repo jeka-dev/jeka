@@ -13,16 +13,15 @@ import dev.jeka.core.tool.builtins.base.BaseKBean;
         "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT"+ "\n" +
         "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx"+ "\n" +
         "  - If last commit is tagged, version values [last tag on last commit]"+ "\n" +
-        "The inferred version can be  applied to project.publication.maven.version and project.publication.ivy.publication, " +
+        "The inferred version can be applied to project.publication.maven.version and project.publication.ivy.publication, " +
                 "programmatically using 'handleVersioning' method."
 )
 public final class GitKBean extends KBean {
 
-    @JkDoc("Some likes to tag versions using a prefix (e.g. using 'v1.3.1' for tagging version '1.3.1'. In this case, " +
-            "you can set this value to 'v' or whatever prefix.")
+    @JkDoc("Some prefer to prefix version tags like 'v1.3.1' for version '1.3.1'. In such cases, this value can be set to 'v' or any chosen prefix")
     public String versionTagPrefix = "";
 
-    @JkDoc("If true, this Kbean will handle versioning og ProjectKBean or BaseKBean found in the JkRunbase.")
+    @JkDoc("If true, this Kbean will handle versioning of ProjectKBean or BaseKBean found in the runbase.")
     public boolean handleVersioning;
 
     public final JkGit git = JkGit.of(getBaseDir());
@@ -46,24 +45,24 @@ public final class GitKBean extends KBean {
         git.tagRemote();
     }
 
-    @JkDoc("Display version supplied to the project.")
+    @JkDoc("Displays version supplied to the project.")
     public void showVersion() {
         JkLog.info(gerVersionFromGit().getVersion());
     }
 
-    @JkDoc("Handle versioning of the project managed in the projectKBean. " +
+    @JkDoc("Handles versioning of the project managed in the projectKBean. " +
             "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
     public void handleProjectVersioning() {
         getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
                 gerVersionFromGit().handleVersioning(projectKBean.project));
     }
 
-    @JkDoc("Display last git tag in current branch")
+    @JkDoc("Displays last git tag in current branch")
     public void lastTag() {
         System.out.println(JkGit.of(getBaseDir()).setLogWithJekaDecorator(false).getLatestTag());
     }
 
-    @JkDoc("Display all commit messages since last tag")
+    @JkDoc("Displays all commit messages since last tag")
     public void lastCommitMessages() {
         JkGit.of(getBaseDir()).setLogWithJekaDecorator(false)
                 .getCommitMessagesSinceLastTag().forEach(msg -> System.out.println("- " + msg));
