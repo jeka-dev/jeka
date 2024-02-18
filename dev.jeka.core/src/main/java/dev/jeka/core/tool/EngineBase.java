@@ -172,7 +172,7 @@ class EngineBase {
         }
 
         // Parse info from source code
-         JkLog.debugStartTask("Scan jeka-src code for finding dependencies");
+        JkLog.debugStartTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
         JkLog.debugEndTask();
 

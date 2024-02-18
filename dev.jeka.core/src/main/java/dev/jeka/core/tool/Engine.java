@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  *     <li>declared in command-line, using '+'</li>
  * </ul>
  */
+@Deprecated
 final class Engine {
 
     private static final String[] PRIVATE_GLOB_PATTERN = new String[] { "**/_*", "_*"};
