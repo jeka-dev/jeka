@@ -83,6 +83,8 @@ public final class JkLog implements Serializable {
     // if false, no working animation should be displayed.
     private static boolean acceptAnimation = true;
 
+    private static boolean showTaskDuration;
+
     private static LinkedList<Long> getStartTimes() {
         LinkedList<Long> result = START_TIMES.get();
         if (result == null) {
@@ -140,6 +142,14 @@ public final class JkLog implements Serializable {
 
     public static void setAcceptAnimation(boolean acceptAnimation) {
         JkLog.acceptAnimation = acceptAnimation;
+    }
+
+    public static boolean isShowTaskDuration() {
+        return showTaskDuration;
+    }
+
+    public static void setShowTaskDuration(boolean showTaskDuration) {
+        JkLog.showTaskDuration = showTaskDuration;
     }
 
     static Style getDecoratorStyle() {

@@ -2,6 +2,7 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,8 +14,6 @@ import java.nio.charset.Charset;
  * This decorator adds indentation for logs nested within a task.
  */
 public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
-
-    private static final int CONSOLE_WIDTH = 140;
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -52,7 +51,6 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
         } else {
             err.flush();
         }
-        int marginWidth = JkLog.getCurrentNestedLevel() * (MARGIN_UNIT.length);
         String message = event.getMessage();
         if (event.getType().isMessageType()) {
             message = "[" + event.getType() + "] " + message;
@@ -61,25 +59,17 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             if (!JkUtilsString.isBlank(message)) {
                 JkUtilsIO.write(stream, MARGIN_UNIT);
                 stream.println(message);
+            } else if (JkLog.isShowTaskDuration()) {
+                JkUtilsIO.write(stream, MARGIN_UNIT);
+                stream.printf("Duration %s millis.%n", JkUtilsTime.formatMillis(event.getDurationMs()));
             }
         } else if (logType== JkLog.Type.START_TASK) {
-            /*
-            if ((message.length() + marginWidth) >  CONSOLE_WIDTH) {
-                message = JkUtilsString.wrapStringCharacterWise(message, CONSOLE_WIDTH - marginWidth);
-            }
-
-             */
             marginErr.flush();
             out.println("Task: " + message);
             marginOut.notifyStart();
             marginErr.notifyStart();
             marginErr.mustPrintMargin = true;
         } else {
-            /*
-            if ((message.length() + marginWidth) >  CONSOLE_WIDTH) {
-                message = JkUtilsString.wrapStringCharacterWise(message, CONSOLE_WIDTH - marginWidth);
-            }
-             */
             stream.println(message);
         }
     }

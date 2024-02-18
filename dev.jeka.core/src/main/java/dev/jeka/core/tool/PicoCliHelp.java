@@ -82,7 +82,7 @@ class PicoCliHelp {
             beanDescription = KBeanDescription.of(defaultKBeanClass);
             main = PicocliCommands.fromKBeanDesc(beanDescription);
         } else {
-            main = dev.jeka.core.tool.CommandLine.Model.CommandSpec.create().name("anonymous");
+            main = dev.jeka.core.tool.CommandLine.Model.CommandSpec.create().name("");
         }
 
         // Configure Usage

@@ -159,7 +159,7 @@ class Environment {
 
         final Option<Void> logBanner = ofVoid("log intro and outro banners", "--log-banner", "-lb");
 
-        final Option<Void> logDuration = ofVoid("Log intro and outro banners", "--log-duration", "-ld");
+        final Option<Void> logDuration = ofVoid("Log task durations", "--log-duration", "-ld");
 
         final Option<Void> logRuntimeInformation = ofVoid("log Jeka runbase information as Jeka version, JDK version, working dir, classpath ...",
                 "--runtime-info", "-ri");

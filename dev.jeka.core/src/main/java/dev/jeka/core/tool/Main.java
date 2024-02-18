@@ -76,6 +76,8 @@ public final class Main {
             }
             JkLog.setAcceptAnimation(logAnimation);
 
+            JkLog.setShowTaskDuration(logs.duration);
+
             EngineBase engineBase = EngineBase.forLegacy(baseDir,
                     JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
             JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
@@ -121,7 +123,7 @@ public final class Main {
             if (logs.banner) {
                 displayOutro(start);
             }
-            if (logs.totalDuration && !logs.banner) {
+            if (logs.duration && !logs.banner) {
                 displayDuration(start);
             }
             System.exit(0); // Triggers shutdown hooks
@@ -140,7 +142,7 @@ public final class Main {
             if (logs.banner) {
                 final int length = printAscii(true, "text-failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
-                        + JkUtilsTime.durationInSeconds(start) + " seconds.");
+                        + JkUtilsTime.formatMillis(System.currentTimeMillis() - start));
             } else {
                 System.err.println("Failed !");
             }
@@ -216,15 +218,14 @@ public final class Main {
     static void displayOutro(long startTs) {
         final int length = printAscii(false, "text-success.ascii");
         System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
-                + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+                + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs));
     }
 
     static void displayDuration(long startTs) {
-        System.out.println("\nTotal run duration : " + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+        System.out.println("\nTotal run duration : " + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs) );
     }
 
     static String[] filteredArgs(String[] originalArgs) {
-        //System.out.println("=====original args = +" + Arrays.asList(originalArgs));
         if (originalArgs.length == 0) {
             return originalArgs;
         }

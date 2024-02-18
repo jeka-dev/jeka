@@ -1,6 +1,7 @@
 package dev.jeka.core.api.utils;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -54,4 +55,30 @@ public final class JkUtilsTime {
         return (endNano - startNano) / 1000000;
     }
 
+    /**
+     * Formats the given duration in milliseconds into a human-readable string.
+     * The format of the string is combination of hours, minutes, seconds, and milliseconds.
+     *
+     * @param durationInMillis The duration in milliseconds.
+     * @return The formatted string representing the duration.
+     */
+    public static String formatMillis(long durationInMillis) {
+        Duration duration = Duration.ofMillis(durationInMillis);
+        long hours = duration.toHours();
+        long minutes = duration.minusHours(hours).toMinutes();
+        long seconds = duration.minusHours(hours).minusMinutes(minutes).getSeconds();
+        long millis = duration.minusHours(hours).minusMinutes(minutes).minusSeconds(seconds).toMillis();
+        String result = "";
+        if (hours > 0) {
+            result += hours + "h";
+        }
+        if (minutes > 0) {
+            result += millis + "m";
+        }
+        if (seconds > 0) {
+            result += seconds + "s";
+        }
+        result += millis + "ms";
+        return result;
+    }
 }

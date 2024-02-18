@@ -22,10 +22,10 @@ public final class MavenKBean extends KBean {
 
     private JkMavenPublication mavenPublication;
 
-    @JkDoc("whitespace count to indentSpri dependency code.")
+    @JkDoc("Indentation size for 'showPomDeps' output.")
     public int codeIndent = 4;
 
-    @JkDoc("Display Maven Publication information on the console.")
+    @JkDoc("Displays Maven publication information on the console.")
     public void info() {
         JkLog.info(getMavenPublication().info());
     }

@@ -13,7 +13,7 @@ class EnvLogSettings {
 
     final boolean runtimeInformation;
 
-    final boolean totalDuration;
+    final boolean duration;
 
     final JkLog.Style style;
 
@@ -25,7 +25,7 @@ class EnvLogSettings {
                    boolean debug,
                    boolean stackTrace,
                    boolean runtimeInformation,
-                   boolean totalDuration,
+                   boolean duration,
                    JkLog.Style style,
                    Boolean animation,
                    boolean banner) {
@@ -34,7 +34,7 @@ class EnvLogSettings {
         this.debug = debug;
         this.stackTrace = stackTrace;
         this.runtimeInformation = runtimeInformation;
-        this.totalDuration = totalDuration;
+        this.duration = duration;
         this.style = style;
         this.animation = animation;
         this.banner = banner;

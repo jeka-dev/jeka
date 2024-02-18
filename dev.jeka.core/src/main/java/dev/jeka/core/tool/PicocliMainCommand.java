@@ -24,7 +24,8 @@ import java.util.stream.Collectors;
             "",
             "COMMANDS are in format: '<kbeanName:> [<propName>=[value]...] [methodName...]'",
             "",
-            "KBEANS are scripts implemented as Java beans. The name could be either the full or short name of the bean class.",
+            "KBEANS are scripts implemented as Java beans.",
+            "The name could be either the full or short name of the bean class.",
             "The first letter's case-sensitivity and the 'KBean' suffix are optional.",
             "",
             "Command line can be interpolated by using '::<shorthand>' reference ",
@@ -117,9 +118,17 @@ public class PicocliMainCommand {
             description = "Log verbose messages.")
     private boolean logVerbose;
 
+    @Option(names = {"--debug"},
+            description = "Log debug level (very verbose)")
+    private boolean logDebug;
+
     @Option(names = {"-st", "--stacktrace"},
             description = "Log verbose messages.")
     private boolean logStacktrace;
+
+    @Option(names = {"-ld", "--duration"},
+            description = "Log task durations")
+    private boolean logDuration;
 
     @Option(names = { "-ls"},
             paramLabel = "STYLE",
@@ -127,16 +136,17 @@ public class PicocliMainCommand {
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
     private JkLog.Style logStyle = JkLog.Style.FLAT;
 
-    @Option(names = {"--debug"},
-            description = "Log debug level (very verbose)")
-    private boolean logDebug;
-
     @Option(names = {"-cmd", "--commands"},
             paramLabel = "<|kbeanName>",
             description = "Display contextual help on commands",
             arity = "0..1",
             fallbackValue = " ")
     private String commandHelp;
+
+    @Option(names = {"-la", "--animations"},
+            description = "Display animations on console",
+            arity = "0..1")
+    private Boolean logAnimations;
 
     EnvLogSettings logSettings() {
         return new EnvLogSettings(
@@ -146,7 +156,7 @@ public class PicocliMainCommand {
                 runtimeInfo,
                 false,
                 logStyle,
-                null,
+                logAnimations,
                 false);
     }
 

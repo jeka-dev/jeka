@@ -134,6 +134,7 @@ class PicocliMainDelegate {
             logAnimation = logSettings.animation;
         }
         JkLog.setAcceptAnimation(logAnimation);
+        JkLog.setShowTaskDuration(logSettings.duration);
     }
 
     private static void displayIntro() {
