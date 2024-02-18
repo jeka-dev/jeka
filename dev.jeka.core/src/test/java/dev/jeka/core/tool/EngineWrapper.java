@@ -63,7 +63,7 @@ class EngineWrapper {
         engineBase.resolveClassPaths();
         engineBase.setKBeanResolution(kBeanResolution);
         ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
-        engineBase.resolveCommandEngine(parsedCmdLine.getBeanActions());
+        engineBase.resolveEngineCommand(parsedCmdLine.getBeanActions());
         engineBase.run();
     }
 

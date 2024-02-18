@@ -28,7 +28,10 @@ import java.util.stream.Collectors;
  *  - according KBean short name.
  *
  * @author Jerome Angibaud
+ *
+ * Note : This class should be replaced by a mechanism that leverages the #EngineBase class.
  */
+@Deprecated
 final class EngineKBeanClassResolver {
 
     private static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
@@ -115,12 +118,6 @@ final class EngineKBeanClassResolver {
         JkLog.info("Master KBean : " + masterBeanClass);
         return Collections.unmodifiableList(result);
     }
-
-    void setClasspath(JkPathSequence classpath, boolean classpathChanged) {
-        this.classpath = classpath;
-        this.useStoredCache = !classpathChanged;
-    }
-
     private Class<? extends KBean> masterBeanClass(String masterBeanName, boolean failIfNotFound) {
         if (masterBeanName == null) {
             if (jekaSrcBeanClassNames().isEmpty()) {
@@ -176,7 +173,7 @@ final class EngineKBeanClassResolver {
                 .collect(Collectors.toList());
     }
 
-    List<String> globalBeanClassNames() {
+    private List<String> globalBeanClassNames() {
         if (cachedGlobalBeanClassName == null) {
             if (useStoredCache) {
                 List<String> storedClassNames = readKbeanClasses();
@@ -218,25 +215,12 @@ final class EngineKBeanClassResolver {
         storeGlobalKBeanClasses(cachedGlobalBeanClassName);
     }
 
-    List<Class<? extends KBean>> jekaSrcBeanClasses() {
+    private List<Class<? extends KBean>> jekaSrcBeanClasses() {
         List result = jekaSrcBeanClassNames().stream()
                 .sorted()
                 .map(className -> JkClassLoader.ofCurrent().load(className))
                 .collect(Collectors.toList());
         return result;
-    }
-
-    boolean hasDefSource() {
-        if (!Files.exists(jekaSourceDir)) {
-            return false;
-        }
-        return JkPathTree.of(jekaSourceDir).andMatching(true,
-                "**.java", "*.java", "**.kt", "*.kt").count(0, false) > 0;
-    }
-
-    boolean hasClassesInWorkDir() {
-        return JkPathTree.of(jekaSrcClassDir).andMatching(true, "**.class")
-                .count(0, false) > 0;
     }
 
     List<String> readKbeanClasses() {
@@ -245,11 +229,6 @@ final class EngineKBeanClassResolver {
             return Collections.emptyList();
         }
         return JkUtilsPath.readAllLines(store);
-    }
-
-    JkPathTree getSourceTree() {
-        return JkPathTree.of(jekaSourceDir)
-                .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
     private List<String> jekaSrcBeanClassNames() {
@@ -310,10 +289,6 @@ final class EngineKBeanClassResolver {
         return beanClassNameCandidates.stream()
                 .filter(className -> KBean.nameMatches(className, name))
                 .collect(Collectors.toList());
-    }
-
-    private JkPathTree defSources() {
-        return JkPathTree.of(this.jekaSourceDir).withMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
     }
 
     private void storeGlobalKBeanClasses(List<String> classNames) {

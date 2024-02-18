@@ -71,7 +71,7 @@ final class HelpDisplayer {
 
     private static String shortcuts(Path baseDir) {
         StringBuilder sb = new StringBuilder();
-        Map<String, String> props = JkExternalToolApi.getCmdShortcutsProperties(baseDir);
+        Map<String, String> props = JkExternalToolApi.getCmdShorthandsProperties(baseDir);
         if (props.isEmpty()) {
             return "";
         }

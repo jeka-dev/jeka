@@ -26,7 +26,7 @@ final class SourceParser {
 
     static SourceParser of(Path baseDir) {
         JkPathTree sources = JkPathTree.of(baseDir.resolve(JkConstants.JEKA_SRC_DIR))
-               .andMatcher(Engine.JAVA_OR_KOTLIN_SOURCE_MATCHER);
+               .andMatcher(EngineBase.JAVA_OR_KOTLIN_SOURCE_MATCHER);
         return of(baseDir,sources);
     }
 

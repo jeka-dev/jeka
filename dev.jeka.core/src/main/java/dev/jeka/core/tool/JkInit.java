@@ -49,8 +49,10 @@ public final class JkInit {
         try {
             EngineKBeanClassResolver engineKBeanClassResolver = new EngineKBeanClassResolver(Paths.get(""));
             List<EngineCommand> commands = new LinkedList<>();
+
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, clazz, null, null));
             commands.addAll(engineKBeanClassResolver.resolve(Environment.parsedCmdLine, KBean.name(clazz), false));
+
             JkRunbase runbase = JkRunbase.get(Paths.get(""));
             runbase.setImportedRunbaseDirs(getImportedProjects(clazz));
             JkProperties properties = JkRunbase.constructProperties(Paths.get(""));

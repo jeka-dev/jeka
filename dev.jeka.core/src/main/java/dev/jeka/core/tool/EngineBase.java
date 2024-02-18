@@ -47,6 +47,16 @@ class EngineBase {
     private static final JkPathMatcher KOTLIN_JEKA_SRC_MATCHER = JkPathMatcher.of(true,"**.kt")
             .and(false, PRIVATE_GLOB_PATTERN);
 
+    private static final JkPathMatcher JAVA_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.java")
+            .and(false, "**/_*", "_*");
+
+    private static final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true,"**.kt")
+            .and(false, "**/_*", "_*");
+
+    static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER);
+
+
+
     private static final String NO_JDK_MSG = String.format(
             "The running Java platform %s is not a valid JDK (no javac found).%n" +
             "Please provide a JDK by specifying 'jeka.java.version' in jeka.properties file.%n" +
@@ -260,7 +270,7 @@ class EngineBase {
         return kbeanResolution;
     }
 
-    List<EngineCommand> resolveCommandEngine(List<KBeanAction> kBeanActionsFromCmdLine) {
+    List<EngineCommand> resolveEngineCommand(List<KBeanAction> kBeanActionsFromCmdLine) {
         if (engineCommands != null) {
             return engineCommands;
         }
@@ -269,7 +279,7 @@ class EngineBase {
         }
 
         // We need to run in the classpath computed in previous steps
-        AppendableUrlClassloader.addEntriesOnContextClassLoader(this.classpathSetupResult.runClasspath);
+        //AppendableUrlClassloader.addEntriesOnContextClassLoader(this.classpathSetupResult.runClasspath);
 
         // -- Gather KbeanActions from props and command line (command line should override props)
         List<KBeanAction> effectiveKeanActions = new LinkedList<>(getKBeanActionFromProperties());
@@ -447,7 +457,8 @@ class EngineBase {
         // Find classes in jeka-src-classes. As it is small scope, we don't need caching
         final List<String> jekaSrcKBeans;
         if (JkPathTree.of(jekaSrcClassDir).withMatcher(JAVA_CLASS_MATCHER).containFiles()) {
-            AppendableUrlClassloader srcClassloader = createScanClassloader(jekaSrcClassDir);
+            ClassLoader srcClassloader = JkUrlClassLoader.of(jekaSrcClassDir).get();
+            //AppendableUrlClassloader srcClassloader = createScanClassloader(jekaSrcClassDir);
             jekaSrcKBeans = scanner.findClassesExtending(srcClassloader, KBean.class, jekaSrcClassDir);
         } else {
             jekaSrcKBeans = Collections.emptyList();
@@ -472,7 +483,7 @@ class EngineBase {
          }
 
         // -- Scan deps
-        AppendableUrlClassloader depClassloader = createScanClassloader(classpathSetupResult.kbeanClasspath);
+        ClassLoader depClassloader = JkUrlClassLoader.of(classpathSetupResult.kbeanClasspath).get();
         List<String> depsKBeans = scanner.findClassesExtending(depClassloader, KBean.class, true, true);
 
         // -- Update cache
@@ -604,14 +615,6 @@ class EngineBase {
             this.success = success;
             this.extraClasspath = extraClasspath;
         }
-    }
-
-    private static AppendableUrlClassloader createScanClassloader(Iterable<Path> paths) {
-        // Creates a classloader tailored for scanning
-        AppendableUrlClassloader scannedClassloader =
-                ((AppendableUrlClassloader) JkUrlClassLoader.ofCurrent().get()).copy();
-        scannedClassloader.addEntry(paths);
-        return scannedClassloader;
     }
 
 }

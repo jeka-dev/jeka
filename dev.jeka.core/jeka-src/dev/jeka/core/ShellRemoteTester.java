@@ -24,6 +24,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
     }
 
     void run() {
+        JkLog.startTask("test-remote");
         testWithRemoteGitHttp();
         try {
             testWithSnapshotDistribVersion();
@@ -34,12 +35,11 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         }
         testWithSpecificJavaVersion();
         testLsu();
+        JkLog.endTask();
     }
 
     private void testWithRemoteGitHttp() {
-        JkLog.info("============ Testing 'jeka -r %s #ok =============================", GIT_URL);
         Path jekaShellPath = getJekaShellPath();
-
 
         // Test without alias
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "#ok")
@@ -53,7 +53,6 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
     }
 
     private void testWithSnapshotDistribVersion() throws IOException, InterruptedException {
-        JkLog.info("============ Testing snapshot jeka version %s =============================", SNAPSHOT_VERSION);
 
         // Delete cached distrib to force reloading
         Path cachedDistrib = JkLocator.getCacheDir().resolve("distributions").resolve(SNAPSHOT_VERSION);
@@ -80,7 +79,6 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
     private void testWithSpecificJavaVersion() {
         String javaVersion = "20";
-        JkLog.info("============ Testing specific Java version %s =========================", javaVersion);
 
         String distro = "corretto";
         // Delete cached distrib to force reloading
@@ -110,7 +108,6 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
     // Test if -lsu let the distrib installation displayed on console in verbose mode
     private void testLsu() {
-        JkLog.info("============ Testing snapshot jeka version %s =============================", SNAPSHOT_VERSION);
 
         // Delete cached distrib to force reloading
         Path cachedDistrib = JkLocator.getCacheDir().resolve("distributions").resolve(SNAPSHOT_VERSION);

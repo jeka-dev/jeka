@@ -3,6 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -35,14 +36,6 @@ public final class Main {
      * Entry point for Jeka application when launched from command-line
      */
     public static void main(String[] args) {
-        if (!(Thread.currentThread().getContextClassLoader() instanceof AppendableUrlClassloader)) {
-            final URLClassLoader urlClassLoader = new AppendableUrlClassloader();
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-            final Object[] argArray = new Object[] {args};
-            JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, Main.class.getName(),
-                    "main" , argArray);
-            return;
-        }
         final long start = System.nanoTime();
         try {
             String[] filteredArgs = filteredArgs(args);
@@ -58,8 +51,6 @@ public final class Main {
             }
 
             String basedirProp = System.getProperty("jeka.current.basedir");
-
-
 
             final Path baseDir = basedirProp == null ? Paths.get("")
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
@@ -97,8 +88,12 @@ public final class Main {
                 cp.forEach(entry -> JkLog.info("   | " + entry));
             }
 
+            // Change current classloader as we need to have deps and compiled jeka-src class in.
+            ClassLoader augmentedClassloader = JkUrlClassLoader.of(engineBase.resolveClassPaths().runClasspath).get();
+            Thread.currentThread().setContextClassLoader(augmentedClassloader);
+
             List<EngineCommand> engineCommands =
-                    engineBase.resolveCommandEngine(Environment.parsedCmdLine.getBeanActions());
+                    engineBase.resolveEngineCommand(Environment.parsedCmdLine.getBeanActions());
             if (logs.runtimeInformation) {
                 JkLog.info("Commands           :");
                 JkLog.info(EngineCommand.toColumnText(engineCommands)
@@ -181,7 +176,7 @@ public final class Main {
 
         EngineBase engineBase = EngineBase.forLegacy(baseDir,
                 JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
-        engineBase.resolveCommandEngine(parsedCmdLine.getBeanActions());
+        engineBase.resolveEngineCommand(parsedCmdLine.getBeanActions());
         engineBase.initRunbase();
         if (JkMemoryBufferLogDecorator.isActive()) {
             JkBusyIndicator.stop();

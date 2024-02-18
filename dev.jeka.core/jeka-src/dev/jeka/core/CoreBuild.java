@@ -104,7 +104,7 @@ public class CoreBuild extends KBean {
         JkPathFile.of(distrib.get("jekau")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
             testScaffolding();
-            new ShellRemoteTester().run();  // Test 'jeka -r https://......git'
+            new ShellRemoteTester().run();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
         zipDistrib(distrib.getRoot(), distribFile);

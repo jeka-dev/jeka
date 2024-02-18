@@ -7,14 +7,13 @@ import dev.jeka.core.tool.CommandLine.Command;
 import dev.jeka.core.tool.CommandLine.Option;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Command(name = "jeka",
         mixinStandardHelpOptions = true,
         sortOptions = false,
         showDefaultValues = true,
-        versionProvider = PicocliMainDelegate.VersionProvider.class,
+        versionProvider = PicocliMain.VersionProvider.class,
         usageHelpAutoWidth = true,
         customSynopsis = {
             " @|yellow ${COMMAND-NAME} [options] [COMMAND...] |@",
