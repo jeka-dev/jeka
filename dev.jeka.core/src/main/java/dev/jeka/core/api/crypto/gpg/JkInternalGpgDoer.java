@@ -40,8 +40,10 @@ public interface JkInternalGpgDoer {
                     "org.bouncycastle:bcprov-jdk15on:" + bouncyCastleVersion);
             JkCoordinateFileProxy bcOpenPgpApiJar = JkCoordinateFileProxy.ofStandardRepos(properties,
                     "org.bouncycastle:bcpg-jdk15on:" + bouncyCastleVersion);
-            CACHED_INSTANCE =  JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(bcOpenPgpApiJar.get(), bcProviderJar.get())
-                    .createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
+            CACHED_INSTANCE =  JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(
+                            bcOpenPgpApiJar.get(),
+                            bcProviderJar.get()
+                    ).createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
             return CACHED_INSTANCE;
         }
 

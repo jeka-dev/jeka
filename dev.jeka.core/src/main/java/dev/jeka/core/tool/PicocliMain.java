@@ -5,10 +5,7 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.system.JkConsoleSpinner;
-import dev.jeka.core.api.system.JkInfo;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -19,11 +16,16 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static dev.jeka.core.tool.Environment.logs;
 
 class PicocliMain {
 
     // Method called by reflection in Main
-    public static void doMain(String[] args) {
+    public static void main(String[] args) {
+
+        long startTime = System.currentTimeMillis();
 
         // Remove -r arguments sent by shell script
         CmdLineArgs filteredArgs = new CmdLineArgs(args).withoutShellArgs();
@@ -36,13 +38,13 @@ class PicocliMain {
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
         if (filteredArgs.isUsageHelpRequested()) {
-            PicoCliHelp.printUsageHelp(System.out);
+            PicocliHelp.printUsageHelp(System.out);
             System.exit(0);
         }
 
         // Handle --version
         if (filteredArgs.isVersionHelpRequested()) {
-            PicoCliHelp.printVersionHelp(System.out);
+            PicocliHelp.printVersionHelp(System.out);
             System.exit(0);
         }
 
@@ -50,48 +52,76 @@ class PicocliMain {
         JkProperties props = JkRunbase.constructProperties(baseDir);
         CmdLineArgs interpolatedArgs = filteredArgs.interpolated(props);
 
-        // first, parse only options
-        PicocliMainCommand mainCommand = new PicocliMainCommand();
-        CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
-        commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
-        EnvLogSettings logs = mainCommand.logSettings();
-        EnvBehaviorSettings behavior = mainCommand.behaviorSettings();
-        JkDependencySet dependencies = mainCommand.dependencies();
+        try {
 
-        // setup logging
-        setupLogging(logs, baseDir);
+            // first, parse only options
+            PicocliMainCommand mainCommand = new PicocliMainCommand();
+            CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
+            commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
+            EnvLogSettings logs = mainCommand.logSettings();
+            EnvBehaviorSettings behavior = mainCommand.behaviorSettings();
+            JkDependencySet dependencies = mainCommand.dependencies();
 
-        // Compile and resolve deps for jeka-src
-        JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
-        EngineBase engineBase = EngineBase.of(baseDir, downloadRepos, dependencies, logs, behavior);
-        JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
-        if (logs.runtimeInformation) {
-            logRuntimeInfoChapter1(engineBase, props);
-        }
+            // setup logging
+            setupLogging(logs, baseDir);
 
-        // Augment current classloader with resolved deps and compiled classes
-        ClassLoader augmentedClassloader = JkUrlClassLoader.of(engineBase.resolveClassPaths().runClasspath).get();
-        Thread.currentThread().setContextClassLoader(augmentedClassloader);
-
-        // Handle context help
-        if (behavior.commandHelp.isPresent()) {
-            EngineBase.KBeanResolution kBeanResolution = engineBase.resolveKBeans();
-            String kbeanName = behavior.commandHelp.get();
-            if (JkUtilsString.isBlank(kbeanName)) {
-                PicoCliHelp.printCmdHelp(
-                                engineBase.resolveClassPaths().runClasspath,
-                                kBeanResolution.allKbeans,
-                                kBeanResolution.defaultKbeanClassname, props, System.out);
-                System.exit(0);
+            // Compile and resolve deps for jeka-src
+            JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
+            EngineBase engineBase = EngineBase.of(baseDir, downloadRepos, dependencies, logs, behavior);
+            JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
+            if (logs.runtimeInformation) {
+                logRuntimeInfoBase(engineBase, props);
             }
-            boolean found = PicoCliHelp.printKBeanHelp(
-                    engineBase.resolveClassPaths().runClasspath,
-                    kBeanResolution.allKbeans,
-                    kbeanName, System.out);
-            System.exit(found ? 0 : 1);
+            EngineBase.KBeanResolution kBeanResolution = engineBase.getKbeanResolution();
+            EngineBase.ClasspathSetupResult classpathSetupResult = engineBase.getClasspathSetupResult();
+
+            // Augment current classloader with resolved deps and compiled classes
+            ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
+            Thread.currentThread().setContextClassLoader(augmentedClassloader);
+
+            // Handle context help
+            if (behavior.commandHelp.isPresent()) {
+                String kbeanName = behavior.commandHelp.get();
+                if (JkUtilsString.isBlank(kbeanName)) {
+                    PicocliHelp.printCmdHelp(
+                                    engineBase.resolveClassPaths().runClasspath,
+                                    kBeanResolution.allKbeans,
+                                    kBeanResolution.defaultKbeanClassname, props, System.out);
+                    System.exit(0);
+                }
+                boolean found = PicocliHelp.printKBeanHelp(
+                        engineBase.resolveClassPaths().runClasspath,
+                        kBeanResolution.allKbeans,
+                        kbeanName, System.out);
+                System.exit(found ? 0 : 1);
+            }
+
+            // Parse command line to get action beans
+            List<KBeanAction> kBeanActions = PicocliParser.parse(interpolatedArgs, kBeanResolution);
+            List<EngineCommand> engineCommands = engineBase.resolveEngineCommand(kBeanActions);
+            if (logs.runtimeInformation) {
+                logRuntimeInfoEngineCommands(engineCommands);
+            }
+
+            // Run
+            engineBase.initRunbase();
+            if (logs.runtimeInformation) {
+                logRuntimeInfoRun(engineBase.getRunbase());
+            }
+            engineBase.run();
+
+        } catch (CommandLine.ParameterException e) {
+            JkBusyIndicator.stop();
+            CommandLine commandLine = e.getCommandLine();
+            commandLine.getErr().println("ERROR: " + e.getMessage());
+            commandLine.getErr().println("Try 'jeka --commands' for more information.");
+            System.exit(1);
+        } catch (Throwable t) {
+            handleGenericThrowable(t, startTime);
+            System.exit(1);
         }
-
-
+        logOutro(startTime);
+        System.exit(0);
     }
 
     // This class should lies outside PicocliMainCommand to be referenced inn annotation
@@ -156,7 +186,7 @@ class PicocliMain {
         return i;
     }
 
-    private static void logRuntimeInfoChapter1(EngineBase engineBase, JkProperties props) {
+    private static void logRuntimeInfoBase(EngineBase engineBase, JkProperties props) {
         JkLog.info(Jk2ColumnsText.of(18, 150)
                 .add("Init KBean", engineBase.resolveKBeans().initKBeanClassname)
                 .add("Default KBean", engineBase.resolveKBeans().defaultKbeanClassname)
@@ -168,6 +198,68 @@ class PicocliMain {
         JkPathSequence cp = engineBase.getClasspathSetupResult().runClasspath;
         JkLog.info("Jeka Classpath     :");
         cp.forEach(entry -> JkLog.info("   | " + entry));
+    }
+
+    private static void logRuntimeInfoEngineCommands(List<EngineCommand> engineCommands) {
+        JkLog.info("Commands           :");
+        JkLog.info(EngineCommand.toColumnText(engineCommands)
+                .setSeparator(" | ")
+                .setMarginLeft("   | ")
+                .toString());
+    }
+
+    private static void logRuntimeInfoRun(JkRunbase runbase) {
+        List<String> beanNames = runbase.getBeans().stream()
+                .map(Object::getClass)
+                .map(KBean::name)
+                .collect(Collectors.toList());
+        JkLog.info("Involved KBeans    :", beanNames);
+        JkLog.info("    " + String.join(", ", beanNames));
+        JkLog.info("");
+    }
+
+    private static void logOutro(long start) {
+        if (logs.banner) {
+            displayOutro(start);
+        }
+        if (logs.duration && !logs.banner) {
+            displayDuration(start);
+        }
+    }
+
+    private static void handleGenericThrowable(Throwable t, long start) {
+        JkBusyIndicator.stop();
+        if (t.getMessage() != null) {
+            JkLog.error(t.getMessage());
+        }
+        System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
+        System.err.println("If this originates from a bug, please report the issue at: " +
+                "https://github.com/jeka-dev/jeka/issues");
+        JkLog.restoreToInitialState();
+        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails()) {
+            printException(t);
+        }
+        if (logs.banner) {
+            final int length = printAscii(true, "text-failed.ascii");
+            System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
+                    + JkUtilsTime.formatMillis(System.currentTimeMillis() - start));
+        } else {
+            System.err.println("Failed !");
+        }
+    }
+
+    private static boolean shouldPrintExceptionDetails() {
+        return logs.debug || logs.stackTrace;
+    }
+
+    private static void printException(Throwable e) {
+        System.err.println();
+        if (logs.verbose || logs.stackTrace) {
+            System.err.println("=============================== Stack Trace =============================================");
+            e.printStackTrace(System.err);
+            System.err.flush();
+            System.err.println("=========================================================================================");
+        }
     }
 
 }

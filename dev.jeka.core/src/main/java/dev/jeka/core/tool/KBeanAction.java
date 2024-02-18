@@ -75,64 +75,7 @@ class KBeanAction {
                 ", value='" + value + '\'';
     }
 
-    // Return KBean action for a single scoped kbean subcommands
-    CreateResult createFrom(CmdLineArgs args, EngineBase.KBeanResolution resolution) {
 
-        // Find KBean class tto which apply the args
-        String firstArg = args.get()[0];
-        final String kbeanName;
-        final  String kbeanClassName;
-        final String[] methodOrFieldArgs;
-        if (CmdLineArgs.isKbeanRef(firstArg)) {
-            kbeanName = firstArg.substring(0, firstArg.length()-1);
-            kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(null);
-            methodOrFieldArgs = Arrays.copyOfRange(args.get(), 1, args.get().length);
-        } else {
-            kbeanName = "defaultKbean";
-            kbeanClassName = resolution.defaultKbeanClassname;
-            methodOrFieldArgs = args.get();
-        }
-        if (kbeanClassName == null) {
-            return new CreateResult(kbeanName, null);
-        }
-        Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
-
-        // Create a PicoCli commandLine to parse
-        KBeanDescription kBeanDescription = KBeanDescription.of(kbeanClass, false);
-        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(kBeanDescription));
-        CommandLine.ParseResult parseResult = commandLine.parseArgs(methodOrFieldArgs);
-
-        List<KBeanAction> kBeanActions = new LinkedList<>();
-
-        // Add init action
-        kBeanActions.add(new KBeanAction(BEAN_INSTANTIATION, kbeanClassName, null, null));
-
-        // Add field actions
-        for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
-            String name = optionSpec.names()[0];
-            Object value = parseResult.matchedOptionValue(name, null);
-            KBeanAction kBeanAction = new KBeanAction(PROPERTY_INJECT, kbeanName, name, value);
-            kBeanActions.add(kBeanAction);
-        }
-
-
-
-
-
-        return new CreateResult(null, kBeanActions);
-    }
-
-    static class CreateResult {
-
-        final String unmatchedKBean;
-
-        final List<KBeanAction> kBeanActions;
-
-        CreateResult(String unmatchedKBean, List<KBeanAction> kBeanActions) {
-            this.unmatchedKBean = unmatchedKBean;
-            this.kBeanActions = kBeanActions;
-        }
-    }
 
     String shortDescription() {
         String actionName = null;

@@ -10,7 +10,7 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class PicoCliHelp {
+class PicocliHelp {
 
     private static final String SECTION_OTHER_KBEANS_HEADING = "otherKBeanHeading";
 

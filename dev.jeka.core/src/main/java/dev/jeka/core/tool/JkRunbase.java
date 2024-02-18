@@ -35,6 +35,9 @@ import java.util.stream.Collectors;
  */
 public final class JkRunbase {
 
+    // TODO remove after removing legacy Main method
+    public static boolean convertFieldValues = true;
+
     // Experiment for invoking 'KBean#init()' method lately, once all KBean has been instantiated
     // Note : Calling all KBeans init() methods in a later stage then inside 'load' methods
     //        leads in difficult problems as the order the KBeans should be initialized.
@@ -303,17 +306,26 @@ public final class JkRunbase {
         // Inject properties on fields with @JkInjectProperty
         FieldInjector.injectAnnotatedProperties(bean, properties);
 
-        // Inject from command line
+        // Inject field
         fieldInjections.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
                 .forEach(action -> {
-                    Set<String> usedProperties =
-                            FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(),
-                                    Objects.toString(action.getValue())));
-                    if (usedProperties.isEmpty()) {
-                        throw new JkException("Field %s do not exist in KBean %s (base dir %s)",
-                                action.getMember(), bean.getClass().getName(), relBaseDir());
+
+                    // remove this after removing legacy main
+                    if (JkRunbase.convertFieldValues) {
+                        Set<String> usedProperties =
+                                FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(),
+                                        Objects.toString(action.getValue())));
+
+                        if (usedProperties.isEmpty()) {
+                            throw new JkException("Field %s do not exist in KBean %s (base dir %s)",
+                                    action.getMember(), bean.getClass().getName(), relBaseDir());
+                        }
+
+                    // PicocliMain
+                    } else {
+                        FieldInjector.setValue(bean, action.getMember(), action.getValue());
                     }
                 });
     }

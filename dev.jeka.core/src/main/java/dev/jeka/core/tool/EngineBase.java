@@ -339,6 +339,14 @@ class EngineBase {
          return runbase;
     }
 
+    ClasspathSetupResult getClasspathSetupResult() {
+        return classpathSetupResult;
+    }
+
+    KBeanResolution getKbeanResolution() {
+        return kbeanResolution;
+    }
+
     // non-private for testing purpose
     class DefaultAndInitKBean {
 
@@ -359,10 +367,6 @@ class EngineBase {
                  initKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(defaultKBeanClassName);
              }
          }
-    }
-
-    ClasspathSetupResult getClasspathSetupResult() {
-         return classpathSetupResult;
     }
 
     private CompileResult compileJekaSrc(JkPathSequence classpath, List<String> compileOptions) {

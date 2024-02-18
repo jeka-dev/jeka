@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;

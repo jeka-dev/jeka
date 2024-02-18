@@ -15,6 +15,25 @@ import java.util.stream.Collectors;
 
 final class FieldInjector {
 
+
+    static void setValue(Object target, String propName, Object value) {
+        if (propName.contains(".")) {
+            String first = JkUtilsString.substringBeforeFirst(propName, ".");
+            String remaining = JkUtilsString.substringAfterFirst(propName, ".");
+            Object child = JkUtilsReflect.getFieldValue(target, first);
+            if (child == null) {
+                String msg = String.format("Compound property '%s' on class '%s' should not value 'null'" +
+                        " right after been instantiate.%n. Please instantiate this property in %s constructor",
+                        first, target.getClass().getName(), target.getClass().getSimpleName());
+                throw new JkException(msg);
+            }
+            setValue(child, remaining, value);
+        }
+        Field field = JkUtilsReflect.getField(target.getClass(), propName);
+        JkUtilsReflect.setFieldValue(target, field, value);
+    }
+
+
     // Unlikely value meaning we cannot recognize the field type
     private static final String UNHANDLED_TYPE = "-- UNHANDLED TYPE °ê%76§ù><$$";
 
