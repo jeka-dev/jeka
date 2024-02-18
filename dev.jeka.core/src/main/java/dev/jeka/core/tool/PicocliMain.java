@@ -25,6 +25,8 @@ class PicocliMain {
     // Method called by reflection in Main
     public static void main(String[] args) {
 
+        JkRunbase.convertFieldValues = false;
+
         long startTime = System.currentTimeMillis();
 
         // Remove -r arguments sent by shell script
@@ -97,7 +99,7 @@ class PicocliMain {
             }
 
             // Parse command line to get action beans
-            List<KBeanAction> kBeanActions = PicocliParser.parse(interpolatedArgs, kBeanResolution);
+            List<KBeanAction> kBeanActions = PicocliParser.parse(interpolatedArgs.withoutOptions(), kBeanResolution);
             List<EngineCommand> engineCommands = engineBase.resolveEngineCommand(kBeanActions);
             if (logs.runtimeInformation) {
                 logRuntimeInfoEngineCommands(engineCommands);
@@ -112,9 +114,10 @@ class PicocliMain {
 
         } catch (CommandLine.ParameterException e) {
             JkBusyIndicator.stop();
+            String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
             CommandLine commandLine = e.getCommandLine();
-            commandLine.getErr().println("ERROR: " + e.getMessage());
-            commandLine.getErr().println("Try 'jeka --commands' for more information.");
+            commandLine.getErr().println(errorTxt + e.getMessage());
+            commandLine.getErr().println("Try 'jeka --commands' or 'jeka -cmd' for more information.");
             System.exit(1);
         } catch (Throwable t) {
             handleGenericThrowable(t, startTime);
