@@ -109,7 +109,7 @@ final class HelpDisplayer {
             items.add(new RenderItem("Init", activationEffects));
         }
         new ItemContainer(items).render().forEach(line -> sb.append(line + "\n"));
-        sb.append(KBeanDescription.of(description.beanClass()).asText(10));
+        sb.append(KBeanDescription.of(description.beanClass(), true).asText(10));
         sb.append(shortcuts(runbase.getBaseDir()));
         return sb.toString();
     }

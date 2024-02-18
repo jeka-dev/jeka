@@ -1,7 +1,15 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import static dev.jeka.core.tool.EngineCommand.Action.BEAN_INSTANTIATION;
+import static dev.jeka.core.tool.EngineCommand.Action.PROPERTY_INJECT;
 
 /**
  * Represents an action to be taken on a bean, such as invoking a method,
@@ -15,7 +23,14 @@ class KBeanAction {
 
     final String member; // method or property name
 
-    final String value; // if property
+    final Object value; // if property
+
+    public KBeanAction(EngineCommand.Action action, String beanName, String member, Object value) {
+        this.action = action;
+        this.beanName = beanName;
+        this.member = member;
+        this.value = value;
+    }
 
     /*
      * Creates a JkActionBean by parsing its textual representation, such as 'someBean#someValue=bar'.
@@ -39,11 +54,11 @@ class KBeanAction {
             beanExpression = expression;
         }
         if (beanExpression.isEmpty()) {
-            this.action = EngineCommand.Action.BEAN_INSTANTIATION;
+            this.action = BEAN_INSTANTIATION;
             this.member = null;
             this.value = null;
         } else if (beanExpression.contains("=")) {
-            this.action = EngineCommand.Action.PROPERTY_INJECT;
+            this.action = PROPERTY_INJECT;
             this.member = JkUtilsString.substringBeforeFirst(beanExpression, "=");
             JkUtilsAssert.argument(!this.member.isEmpty(), "Illegal expression " + expression);
             this.value = JkUtilsString.substringAfterFirst(beanExpression, "=");
@@ -60,11 +75,70 @@ class KBeanAction {
                 ", value='" + value + '\'';
     }
 
+    // Return KBean action for a single scoped kbean subcommands
+    CreateResult createFrom(CmdLineArgs args, EngineBase.KBeanResolution resolution) {
+
+        // Find KBean class tto which apply the args
+        String firstArg = args.get()[0];
+        final String kbeanName;
+        final  String kbeanClassName;
+        final String[] methodOrFieldArgs;
+        if (CmdLineArgs.isKbeanRef(firstArg)) {
+            kbeanName = firstArg.substring(0, firstArg.length()-1);
+            kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(null);
+            methodOrFieldArgs = Arrays.copyOfRange(args.get(), 1, args.get().length);
+        } else {
+            kbeanName = "defaultKbean";
+            kbeanClassName = resolution.defaultKbeanClassname;
+            methodOrFieldArgs = args.get();
+        }
+        if (kbeanClassName == null) {
+            return new CreateResult(kbeanName, null);
+        }
+        Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
+
+        // Create a PicoCli commandLine to parse
+        KBeanDescription kBeanDescription = KBeanDescription.of(kbeanClass, false);
+        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(kBeanDescription));
+        CommandLine.ParseResult parseResult = commandLine.parseArgs(methodOrFieldArgs);
+
+        List<KBeanAction> kBeanActions = new LinkedList<>();
+
+        // Add init action
+        kBeanActions.add(new KBeanAction(BEAN_INSTANTIATION, kbeanClassName, null, null));
+
+        // Add field actions
+        for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
+            String name = optionSpec.names()[0];
+            Object value = parseResult.matchedOptionValue(name, null);
+            KBeanAction kBeanAction = new KBeanAction(PROPERTY_INJECT, kbeanName, name, value);
+            kBeanActions.add(kBeanAction);
+        }
+
+
+
+
+
+        return new CreateResult(null, kBeanActions);
+    }
+
+    static class CreateResult {
+
+        final String unmatchedKBean;
+
+        final List<KBeanAction> kBeanActions;
+
+        CreateResult(String unmatchedKBean, List<KBeanAction> kBeanActions) {
+            this.unmatchedKBean = unmatchedKBean;
+            this.kBeanActions = kBeanActions;
+        }
+    }
+
     String shortDescription() {
         String actionName = null;
         if (action == EngineCommand.Action.METHOD_INVOKE) {
             actionName = "method";
-        } else if (action == EngineCommand.Action.PROPERTY_INJECT) {
+        } else if (action == PROPERTY_INJECT) {
             actionName = "field";
         } else {
             actionName = "constructor";

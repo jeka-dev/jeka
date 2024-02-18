@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
@@ -13,10 +12,8 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import dev.jeka.core.tool.builtins.tooling.nexus.NexusKBean;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 class PicocliCommands {
 
@@ -43,11 +40,6 @@ class PicocliCommands {
         return new CommandLine(commandSpec);
     }
 
-    static CommandSpec fromKBeanClass(Class<? extends KBean> kbeanClass) {
-        KBeanDescription beanDesc = KBeanDescription.of(kbeanClass);
-        return fromKBeanDesc(beanDesc);
-    }
-
     static CommandSpec fromKBeanDesc(KBeanDescription beanDesc) {
         CommandSpec spec = CommandSpec.create();
         beanDesc.beanFields.forEach(beanField -> {
@@ -62,7 +54,8 @@ class PicocliCommands {
             OptionSpec optionSpec = OptionSpec.builder(beanField.name)
                     .description(description + acceptedValues)
                     .type(beanField.type)
-                    .showDefaultValue(CommandLine.Help.Visibility.ALWAYS)
+                    .showDefaultValue(beanDesc.includeDefaultValues ?
+                            CommandLine.Help.Visibility.ALWAYS : CommandLine.Help.Visibility.NEVER)
                     .hideParamSyntax(false)
                     .defaultValue(defaultValue)
                     .paramLabel("<" + beanField.type.getSimpleName() + ">")
@@ -82,22 +75,5 @@ class PicocliCommands {
         return spec;
     }
 
-    /*
-     * Method for "--help" : should not fail, and be fast !!!
-     * It has been measured at 100ms
-     */
-    static List<CommandSpec> getStandardCommandSpecSafely() {
-        try {
-            return STANDARD_KBEAN_CLASSES.stream()
-                    .map(PicocliCommands::fromKBeanClass)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            JkLog.warn("Error while reading standard KBeans definitions : %s", e.getMessage());
-            if (JkLog.isVerbose()) {
-                e.printStackTrace();
-            }
-            return Collections.emptyList();
-        }
-    }
 
 }

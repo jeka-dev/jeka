@@ -44,12 +44,12 @@ class PicoCliHelp {
         commandLine.printVersionHelp(printStream);
     }
 
-    static void printCommandHelp(JkPathSequence classpath,
-                                 List<String> kbeanClassNames,
-                                 String defaultKBeanClassName,
-                                 JkProperties props,
-                                 PrintStream printStream) {
-        commandHelp(classpath, kbeanClassNames, defaultKBeanClassName, props)
+    static void printCmdHelp(JkPathSequence classpath,
+                             List<String> kbeanClassNames,
+                             String defaultKBeanClassName,
+                             JkProperties props,
+                             PrintStream printStream) {
+        cmdHelp(classpath, kbeanClassNames, defaultKBeanClassName, props)
                 .usage(printStream, colorScheme());
     }
 
@@ -66,7 +66,7 @@ class PicoCliHelp {
         return true;
     }
 
-    private static CommandLine commandHelp(
+    private static CommandLine cmdHelp(
             JkPathSequence classpath,
             List<String> kbeanClassNames,
             String defaultKBeanClassName,
@@ -79,7 +79,7 @@ class PicoCliHelp {
         KBeanDescription beanDescription = null;
         if (defaultKBeanClassName != null) {
             Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(defaultKBeanClassName);
-            beanDescription = KBeanDescription.of(defaultKBeanClass);
+            beanDescription = KBeanDescription.of(defaultKBeanClass, true);
             main = PicocliCommands.fromKBeanDesc(beanDescription);
         } else {
             main = dev.jeka.core.tool.CommandLine.Model.CommandSpec.create().name("");
@@ -93,8 +93,8 @@ class PicoCliHelp {
         if (defaultKBeanClassName != null) {
             synopsis.add(String.format("Default KBean @|yellow %s:|@ (%s)",
                     KBean.name(defaultKBeanClassName), defaultKBeanClassName));
-            if (!JkUtilsString.isBlank(beanDescription.header)) {
-                synopsis.add("Description  : " + beanDescription.header);
+            if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
+                synopsis.add("Description  : " + beanDescription.synopsisHeader);
             }
             synopsis.add("\nFields");
         }
@@ -106,9 +106,9 @@ class PicoCliHelp {
         // Add section for Standard KBeans
         Map<String, String> stdKBeans = new LinkedHashMap<>();
         for (Class<? extends KBean> kbeanClass : PicocliCommands.STANDARD_KBEAN_CLASSES) {
-            KBeanDescription description = KBeanDescription.of(kbeanClass);
+            KBeanDescription description = KBeanDescription.of(kbeanClass, false);
             String name = KBean.name(kbeanClass);
-            stdKBeans.put( String.format("@|yellow %s:|@", name), description.header);
+            stdKBeans.put( String.format("@|yellow %s:|@", name), description.synopsisHeader);
         }
         CommandLine commandLine = new CommandLine(main);
         commandLine.getHelpSectionMap().put(SECTION_STD_KBEANS_HEADING,
@@ -131,8 +131,8 @@ class PicoCliHelp {
             Map<String, Class<? extends KBean>> kbeanNameClassMap = beanNameClassMap(classLoader, others);
             Map<String, String> kbeans = new HashMap<>();
             for (Map.Entry<String, Class<? extends KBean>> entry : kbeanNameClassMap.entrySet()) {
-                KBeanDescription description = KBeanDescription.of(entry.getValue());
-                kbeans.put(String.format("@|yellow %s:|@", entry.getKey()), description.header);
+                KBeanDescription description = KBeanDescription.of(entry.getValue(), false);
+                kbeans.put(String.format("@|yellow %s:|@", entry.getKey()), description.synopsisHeader);
             }
             commandLine.getHelpSectionMap().put(SECTION_OTHER_KBEANS_HEADING,
                     help -> help.createHeading("\nOther KBeans\n"));
@@ -178,7 +178,7 @@ class PicoCliHelp {
 
         ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
-        KBeanDescription beanDescription = KBeanDescription.of(defaultKBeanClass);
+        KBeanDescription beanDescription = KBeanDescription.of(defaultKBeanClass, true);
         CommandLine.Model.CommandSpec main = PicocliCommands.fromKBeanDesc(beanDescription);
 
         // Configure Usage
@@ -187,11 +187,11 @@ class PicoCliHelp {
         synopsis.add(String.format("KBean @|yellow %s:|@ (%s)",
                     KBean.name(kbeanName), kbeanClassName));
         synopsis.add("");
-        if (!JkUtilsString.isBlank(beanDescription.header)) {
-            String header = beanDescription.header.trim();
+        if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
+            String header = beanDescription.synopsisHeader.trim();
             header = header.endsWith(".") ? header : header + ".";
             synopsis.add(header);
-            List<String> descLines = Arrays.asList(beanDescription.description.split("\n"));
+            List<String> descLines = Arrays.asList(beanDescription.synopsisDetail.split("\n"));
             synopsis.addAll(descLines);
             if (!descLines.isEmpty()) {
                 synopsis.add("");
@@ -231,10 +231,10 @@ class PicoCliHelp {
     }
 
     private static CommandLine.Model.CommandSpec simpleFromKbeanClass(Class<? extends KBean> kbeanClass) {
-        KBeanDescription kBeanDescription = KBeanDescription.of(kbeanClass);
+        KBeanDescription kBeanDescription = KBeanDescription.of(kbeanClass, false);
         CommandLine.Model.CommandSpec commandSpec = dev.jeka.core.tool.CommandLine.Model.CommandSpec.create();
         commandSpec.name(KBean.name(kbeanClass) + ":");
-        commandSpec.usageMessage().header(kBeanDescription.header);
+        commandSpec.usageMessage().header(kBeanDescription.synopsisHeader);
         return commandSpec;
     }
 

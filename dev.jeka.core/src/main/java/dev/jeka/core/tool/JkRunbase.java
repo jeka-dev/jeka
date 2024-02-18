@@ -309,7 +309,8 @@ public final class JkRunbase {
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
                 .forEach(action -> {
                     Set<String> usedProperties =
-                            FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(), action.getValue()));
+                            FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(),
+                                    Objects.toString(action.getValue())));
                     if (usedProperties.isEmpty()) {
                         throw new JkException("Field %s do not exist in KBean %s (base dir %s)",
                                 action.getMember(), bean.getClass().getName(), relBaseDir());

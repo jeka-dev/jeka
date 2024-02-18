@@ -20,64 +20,62 @@ import java.util.stream.Collectors;
  */
 final class KBeanDescription {
 
-    final String header;
+    final String synopsisHeader;
 
-    final String description;
+    final String synopsisDetail;
 
     final List<BeanMethod> beanMethods;
 
     final List<BeanField> beanFields;
 
+    final boolean includeDefaultValues;
+
     private KBeanDescription(
-            String headerDesc,
-            String desc,
+            String synopsisHeader,
+            String synopsisDetail,
             List<BeanMethod> beanMethods,
-            List<BeanField> beanFields) {
+            List<BeanField> beanFields,
+            boolean includeDefaultValues) {
 
         super();
-        this.header = headerDesc;
-        this.description = desc;
+        this.synopsisHeader = synopsisHeader;
+        this.synopsisDetail = synopsisDetail;
         this.beanMethods = Collections.unmodifiableList(beanMethods);
         this.beanFields = Collections.unmodifiableList(beanFields);
+        this.includeDefaultValues = includeDefaultValues;
     }
 
-    static KBeanDescription of(Class<? extends KBean> beanClass) {
+    static KBeanDescription of(Class<? extends KBean> beanClass, boolean computeDefaultValue) {
         final List<BeanMethod> methods = new LinkedList<>();
         for (final Method method : executableMethods(beanClass)) {
             methods.add(BeanMethod.of(method));
         }
         Collections.sort(methods);
-        final List<BeanField> options = new LinkedList<>();
+        final List<BeanField> beanFields = new LinkedList<>();
         for (final NameAndField nameAndField : fields(beanClass, "", true, null)) {
-            options.add(BeanField.of(beanClass, nameAndField.field,
-                    nameAndField.name, nameAndField.rootClass));
+            beanFields.add(BeanField.of(beanClass, nameAndField.field,
+                    nameAndField.name, nameAndField.rootClass, computeDefaultValue));
         }
-        Collections.sort(options);
+        Collections.sort(beanFields);
 
         // Grab header + description from content of @JkDoc
         final JkDoc jkDoc = beanClass.getAnnotation(JkDoc.class);
         final String header;
-        final String description;
-        final String fullDesc;
-        if (jkDoc == null) {
-            fullDesc = "";
-        } else {
-            fullDesc = jkDoc.value();
-        }
+        final String detail;
+        final String fullDesc = jkDoc == null ? "" : jkDoc.value();
         String[] lines = fullDesc.split("\n");
         if (lines.length == 0) {
             header = "";
-            description = "";
+            detail = "";
         } else {
             header = lines[0];
             if (lines.length > 1) {
-                description = JkUtilsString.substringAfterFirst(fullDesc, "\n");
+                detail = JkUtilsString.substringAfterFirst(fullDesc, "\n");
             } else {
-                description = "";
+                detail = "";
             }
         }
-
-        return new KBeanDescription(header, description, methods, options);
+        return new KBeanDescription(header, detail, methods, beanFields, computeDefaultValue);
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {
@@ -215,8 +213,14 @@ final class KBeanDescription {
 
         private final String injectedPropertyName;
 
-        private BeanField(Field field, String name, String description, Object bean, Object defaultValue,
-                          Class<?> type, Class<?> declaringClass, String injectedPropertyName) {
+        private BeanField(
+                Field field,
+                String name,
+                String description,
+                Object bean,
+                Object defaultValue,
+                Class<?> type, Class<?> declaringClass, String injectedPropertyName) {
+
             super();
             this.field = field;
             this.name = name;
@@ -228,7 +232,13 @@ final class KBeanDescription {
             this.injectedPropertyName = injectedPropertyName;
         }
 
-        static BeanField of(Class<? extends KBean> beanClass, Field field, String name, Class<?> rootDeclaringClass) {
+        static BeanField of(
+                Class<? extends KBean> beanClass,
+                Field field,
+                String name,
+                Class<?> rootDeclaringClass,
+                boolean computeDefaultValue) {
+
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
             final String descr;
             if (jkDoc != null) {
@@ -237,8 +247,8 @@ final class KBeanDescription {
                 descr = null;
             }
             final Class<?> type = field.getType();
-            Object instance = JkUtilsReflect.newInstance(beanClass);
-            final Object defaultValue = value(instance, name);
+            Object instance = computeDefaultValue ? JkUtilsReflect.newInstance(beanClass) : null;
+            Object defaultValue = computeDefaultValue ? value(instance, name) : null;
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             final String propertyName = injectProperty != null ? injectProperty.value() : null;
             return new BeanField(
@@ -268,6 +278,9 @@ final class KBeanDescription {
 
         @Override
         public int compareTo(BeanField other) {
+            if (this.bean == null || other.bean == null) { // maybe null if we don't compute default values
+                return 0;
+            }
             if (this.bean.getClass().equals(other.bean.getClass())) {
                 return this.name.compareTo(other.name);
             }
@@ -275,14 +288,6 @@ final class KBeanDescription {
                 return -1;
             }
             return 1;
-        }
-
-        String description(String displayName, String margin) {
-            String desc = description != null ? description : "No description available.";
-            String oneLineDesc = desc.replace("\n", " ");
-            String envPart = injectedPropertyName == null ? "" : ", property: " + injectedPropertyName;
-            return String.format("%s  %s  : %s (type: %s, default: %s%s)\n",
-                    margin, displayName, oneLineDesc, type(), defaultValue, envPart);
         }
 
         private String type() {

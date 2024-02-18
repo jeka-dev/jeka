@@ -6,6 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class EngineCommand {
@@ -27,9 +28,9 @@ class EngineCommand {
 
     private final String member;
 
-    private final String value;  // for properties only
+    private final Object value;  // for properties only
 
-    EngineCommand(Action action, Class<? extends KBean> beanClass, String valueOrMethod, String value) {
+    EngineCommand(Action action, Class<? extends KBean> beanClass, String valueOrMethod, Object value) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         this.action = action;
         this.beanClass = beanClass;
@@ -49,7 +50,7 @@ class EngineCommand {
         return member;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -73,7 +74,7 @@ class EngineCommand {
         for (EngineCommand cmd : sortedCommands) {
             String member = cmd.action == Action.METHOD_INVOKE ? cmd.member + "()" : cmd.member;
             columnText.add(cmd.beanClass.getSimpleName(), cmd.action.name,
-                    JkUtilsString.nullToEmpty(member), JkUtilsString.nullToEmpty(cmd.value));
+                    JkUtilsString.nullToEmpty(member), JkUtilsString.nullToEmpty(Objects.toString(cmd.value)));
         }
         return columnText;
     }

@@ -3,7 +3,6 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkInfo;
@@ -18,7 +17,6 @@ import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 class PicocliMainDelegate {
@@ -27,7 +25,7 @@ class PicocliMainDelegate {
     public static void doMain(String[] args) {
 
         // Remove -r arguments sent by shell script
-        String[] filteredArgs = Main.filteredArgs(args);
+        CmdLineArgs filteredArgs = new CmdLineArgs(args).withoutShellArgs();
 
         // Get the code base directory sent by script shell
         String basedirProp = System.getProperty("jeka.current.basedir");
@@ -36,34 +34,31 @@ class PicocliMainDelegate {
 
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
-        if (isUsageHelpRequested(filteredArgs)) {
+        if (filteredArgs.isUsageHelpRequested()) {
             PicoCliHelp.printUsageHelp(System.out);
             System.exit(0);
         }
 
         // Handle --version
-        if (isVersionHelpRequested(filteredArgs)) {
+        if (filteredArgs.isVersionHelpRequested()) {
             PicoCliHelp.printVersionHelp(System.out);
             System.exit(0);
         }
 
         // Interpolate command line with values found in properties
         JkProperties props = JkRunbase.constructProperties(baseDir);
-        String[] interpolatedArgs = Environment.interpolatedCommandLine(filteredArgs, props);
+        CmdLineArgs interpolatedArgs = filteredArgs.interpolated(props);
 
         // first, parse only options
         PicocliMainCommand mainCommand = new PicocliMainCommand();
         CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
-        String[] options = Arrays.stream(interpolatedArgs)
-                .filter(arg -> arg.startsWith("-"))
-                .toArray(String[]::new);
-        commandLine.parseArgs(options);
+        commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
         EnvLogSettings logs = mainCommand.logSettings();
         EnvBehaviorSettings behavior = mainCommand.behaviorSettings();
         JkDependencySet dependencies = mainCommand.dependencies();
 
-        // setup log engine
-        setLogs(logs, baseDir);
+        // setup logging
+        setupLogging(logs, baseDir);
 
         // Compile and resolve deps for jeka-src
         JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
@@ -78,7 +73,7 @@ class PicocliMainDelegate {
             EngineBase.KBeanResolution kBeanResolution = engineBase.resolveKBeans();
             String kbeanName = behavior.commandHelp.get();
             if (JkUtilsString.isBlank(kbeanName)) {
-                PicoCliHelp.printCommandHelp(
+                PicoCliHelp.printCmdHelp(
                                 engineBase.resolveClassPaths().runClasspath,
                                 kBeanResolution.allKbeans,
                                 kBeanResolution.defaultKbeanClassname, props, System.out);
@@ -90,6 +85,8 @@ class PicocliMainDelegate {
                     kbeanName, System.out);
             System.exit(found ? 0 : 1);
         }
+
+
     }
 
     // This class should lies outside PicocliMainCommand to be referenced inn annotation
@@ -102,22 +99,7 @@ class PicocliMainDelegate {
 
     }
 
-    private static boolean isUsageHelpRequested(String[] args) {
-        return args.length == 0 || args[0].equals("--help") || args[0].equals("-h");
-    }
-
-    private static boolean isVersionHelpRequested(String[] args) {
-        return args.length > 0 && (args[0].equals("--version") || args[0].equals("-V"));
-    }
-
-    private static JkDependencyResolver dependencyResolver(Path baseDir) {
-        JkRepoSet repos = JkRepoProperties.of(JkRunbase.constructProperties(baseDir)).getDownloadRepos();
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
-        dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(true);
-        return dependencyResolver;
-    }
-
-    private static void setLogs(EnvLogSettings logSettings, Path baseDir) {
+    private static void setupLogging(EnvLogSettings logSettings, Path baseDir) {
         JkLog.setDecorator(logSettings.style);
         if (logSettings.banner) {
             displayIntro();
