@@ -39,10 +39,10 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
     }
 
     private void testWithRemoteGitHttp() {
-        Path jekaShellPath = getJekaShellPath();
+        Path jekaShellPath = getJekaShellPath().resolveSibling("jekap");
 
         // Test without alias
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "#ok")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "ok")
                 .setLogCommand(true)
                 .setCollectStdout(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
@@ -58,10 +58,10 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path cachedDistrib = JkLocator.getCacheDir().resolve("distributions").resolve(SNAPSHOT_VERSION);
         JkPathTree.of(cachedDistrib).createIfNotExist().deleteRoot();
 
-        Path jekaShellPath = getJekaShellPath();
+        Path jekaShellPath = getJekaShellPath().resolveSibling("jekap");
 
         // Test without alias
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL,  "#ok")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL,  "ok")
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
@@ -85,11 +85,11 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path cachedJdk= JkLocator.getCacheDir().resolve("jdks").resolve(distro + "-" + javaVersion);
         JkPathTree.of(cachedJdk).createIfNotExist().deleteRoot();
 
-        Path jekaShellPath = getJekaShellPath();
+        Path jekaShellPath = getJekaShellPath().resolveSibling("jekap");
 
         // Test without alias
         // We pass 'jeka.java.version" in cmdLine args to test this feature
-        JkProcResult procResult =JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "#ok",
+        JkProcResult procResult =JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "ok",
                         "-Djeka.java.version=" + javaVersion)
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)

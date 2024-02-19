@@ -52,7 +52,8 @@ class PicocliParser {
         final  String kbeanClassName;
         final String[] methodOrFieldArgs;
         if (CmdLineArgs.isKbeanRef(firstArg)) {
-            kbeanName = firstArg.substring(0, firstArg.length() - 1);
+            String name = firstArg.substring(0, firstArg.length() - 1);
+            kbeanName = name.isEmpty() ? resolution.defaultKbeanClassname : name;
             kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(null);
             methodOrFieldArgs = Arrays.copyOfRange(args.get(), 1, args.get().length);
         } else {
@@ -64,7 +65,7 @@ class PicocliParser {
             CommandLine cmdLine = allKBeanCommandLine(resolution.allKbeans, source);
             String msg = kbeanName == null ?
                     "No default KBean defined. You need to precise on which kbean apply '" + firstArg + "'"
-                    : "No KBean names '" + kbeanName + "' found.";
+                    : "No KBean found for name '" + kbeanName + "'.";
             throw new CommandLine.ParameterException(cmdLine, msg);
         }
         Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
