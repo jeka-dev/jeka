@@ -85,7 +85,7 @@ public final class JkExternalToolApi {
      * the specified base dir context.
      */
     public static Map<String, String> getCmdShorthandsProperties(Path baseDir) {
-        Map<String, String> result = JkRunbase.readProjectPropertiesRecursively(baseDir)
+        Map<String, String> result = JkRunbase.readBasePropertiesRecursively(baseDir)
                 .getAllStartingWith(JkConstants.CMD_PREFIX_PROP, false);
         List<String> keys = new LinkedList<>(result.keySet());
         keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
@@ -97,7 +97,7 @@ public final class JkExternalToolApi {
      * Returns the properties defined from the specifies base dir..
      */
     public static JkProperties getProperties(Path baseDir) {
-        return JkRunbase.readProjectPropertiesRecursively(baseDir);
+        return JkRunbase.readBasePropertiesRecursively(baseDir);
     }
 
     /**

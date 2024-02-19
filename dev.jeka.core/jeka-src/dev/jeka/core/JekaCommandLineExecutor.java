@@ -60,16 +60,20 @@ public abstract class JekaCommandLineExecutor {
         if (cmdLine.startsWith("% ")) {
             cmdLine = cmdLine.substring(2);
         }
+        boolean showOutput = JkLog.isVerbose();
+        //boolean showOutput = true;
         JkProcess process = JkProcess.of(cmdProg)
                 .setWorkingDir(baseDir)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
-                .setLogWithJekaDecorator(JkLog.isVerbose())
+                .setLogWithJekaDecorator(showOutput)
+                .setCollectStdout(!showOutput)
+                .setCollectStderr(!showOutput)
                 .setFailOnError(true)
                 .addParamsIf(!cmdLine.contains("-Djeka.java.version="), "-Djeka.java.version=8")
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
-                .inheritJkLogOptions()
-                .addParams("-dcf", "--stacktrace", "-lsu", "-ri")
+                //.inheritJkLogOptions()
+                .addParams("--stacktrace")
 
 
                 // set explicitly jeka-core.jar to use, otherwise it may fetch a Jeka version from maven

@@ -18,8 +18,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.tool.Environment.logs;
-
 class PicocliMain {
 
     // Method called by reflection in Main
@@ -54,18 +52,23 @@ class PicocliMain {
         JkProperties props = JkRunbase.constructProperties(baseDir);
         CmdLineArgs interpolatedArgs = filteredArgs.interpolated(props);
 
+        EnvLogSettings logs = EnvLogSettings.ofDefault();
+
+        // Keep current classloader to restore in case of exception
+        final ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader();
+
         try {
 
             // first, parse only options
             PicocliMainCommand mainCommand = new PicocliMainCommand();
             CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
             commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
-            EnvLogSettings logs = mainCommand.logSettings();
+            logs = mainCommand.logSettings();
             EnvBehaviorSettings behavior = mainCommand.behaviorSettings();
             JkDependencySet dependencies = mainCommand.dependencies();
 
             // setup logging
-            setupLogging(logs, baseDir);
+            setupLogging(logs, baseDir, interpolatedArgs.get());
 
             // Compile and resolve deps for jeka-src
             JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
@@ -81,7 +84,7 @@ class PicocliMain {
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
-            // Handle context help
+            // Handle context help (--commands)
             if (behavior.commandHelp.isPresent()) {
                 String kbeanName = behavior.commandHelp.get();
                 if (JkUtilsString.isBlank(kbeanName)) {
@@ -99,7 +102,11 @@ class PicocliMain {
             }
 
             // Parse command line to get action beans
-            List<KBeanAction> kBeanActions = PicocliParser.parse(interpolatedArgs.withoutOptions(), kBeanResolution);
+            JkProperties jekaProps = JkRunbase.readBaseProperties(baseDir);
+            List<KBeanAction> kBeanActions = PicocliParser.parse(
+                    interpolatedArgs.withoutOptions(),
+                    jekaProps,
+                    kBeanResolution);
             List<EngineCommand> engineCommands = engineBase.resolveEngineCommand(kBeanActions);
             if (logs.runtimeInformation) {
                 logRuntimeInfoEngineCommands(engineCommands);
@@ -112,6 +119,8 @@ class PicocliMain {
             }
             engineBase.run();
 
+            logOutro(logs, startTime);
+
         } catch (CommandLine.ParameterException e) {
             JkBusyIndicator.stop();
             String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
@@ -120,10 +129,10 @@ class PicocliMain {
             commandLine.getErr().println("Try 'jeka --commands' or 'jeka -cmd' for more information.");
             System.exit(1);
         } catch (Throwable t) {
-            handleGenericThrowable(t, startTime);
+            Thread.currentThread().setContextClassLoader(originalClassloader);
+            handleGenericThrowable(t, startTime, logs);
             System.exit(1);
         }
-        logOutro(startTime);
         System.exit(0);
     }
 
@@ -137,13 +146,18 @@ class PicocliMain {
 
     }
 
-    private static void setupLogging(EnvLogSettings logSettings, Path baseDir) {
+    private static void setupLogging(EnvLogSettings logSettings, Path baseDir, String[] cmdLine) {
         JkLog.setDecorator(logSettings.style);
         if (logSettings.banner) {
             displayIntro();
         }
         if (logSettings.runtimeInformation) {
-            JkInit.displayRuntimeInfo(baseDir);
+            JkInit.displayRuntimeInfo(baseDir, cmdLine);
+        }
+        if (logSettings.debug) {
+            JkLog.setVerbosity(JkLog.Verbosity.DEBUG);
+        } else if(logSettings.verbose) {
+            JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
 
         // By default, log working animation when working dir = base dir (this mean that we are not
@@ -221,7 +235,7 @@ class PicocliMain {
         JkLog.info("");
     }
 
-    private static void logOutro(long start) {
+    private static void logOutro(EnvLogSettings logs, long start) {
         if (logs.banner) {
             displayOutro(start);
         }
@@ -230,17 +244,18 @@ class PicocliMain {
         }
     }
 
-    private static void handleGenericThrowable(Throwable t, long start) {
+    private static void handleGenericThrowable(Throwable t, long start, EnvLogSettings logs) {
         JkBusyIndicator.stop();
+        JkLog.restoreToInitialState();
         if (t.getMessage() != null) {
-            JkLog.error(t.getMessage());
+            System.err.println(t.getMessage());
         }
         System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
         System.err.println("If this originates from a bug, please report the issue at: " +
                 "https://github.com/jeka-dev/jeka/issues");
-        JkLog.restoreToInitialState();
-        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails()) {
-            printException(t);
+
+        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails(logs)) {
+            printException(logs, t);
         }
         if (logs.banner) {
             final int length = printAscii(true, "text-failed.ascii");
@@ -251,11 +266,11 @@ class PicocliMain {
         }
     }
 
-    private static boolean shouldPrintExceptionDetails() {
+    private static boolean shouldPrintExceptionDetails(EnvLogSettings logs) {
         return logs.debug || logs.stackTrace;
     }
 
-    private static void printException(Throwable e) {
+    private static void printException(EnvLogSettings logs, Throwable e) {
         System.err.println();
         if (logs.verbose || logs.stackTrace) {
             System.err.println("=============================== Stack Trace =============================================");

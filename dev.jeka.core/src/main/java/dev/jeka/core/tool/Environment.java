@@ -31,7 +31,7 @@ class Environment {
     static void initialize(String[] commandLineArgs) {
         originalArgs = commandLineArgs;
 
-        JkProperties props = JkRunbase.readProjectPropertiesRecursively(Paths.get(""));
+        JkProperties props = JkRunbase.readBasePropertiesRecursively(Paths.get(""));
         String[] effectiveCommandLine = interpolatedCommandLine(commandLineArgs, props);
 
 

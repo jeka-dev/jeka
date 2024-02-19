@@ -69,7 +69,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
      * Options for configuring directory layout.
      */
     @JkDoc
-    private final JkLayoutOptions layout = new JkLayoutOptions();
+    public final JkLayoutOptions layout = new JkLayoutOptions();
 
     /**
      * Options for configuring compilation.

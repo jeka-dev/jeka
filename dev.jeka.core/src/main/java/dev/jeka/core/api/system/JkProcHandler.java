@@ -34,7 +34,7 @@ public class JkProcHandler {
     /**
      * Returns true if the executed process has collected output.
      * <p>
-     * To collect output, process has to be configured explicitly by invoking {@link JkAbstractProcess#setCollectOutput(boolean)}.
+     * To collect output, process has to be configured explicitly by invoking {@link JkAbstractProcess#setCollectStdout(boolean)}.
      */
     public boolean hasCollectedOutput() {
         return outputStream != null;

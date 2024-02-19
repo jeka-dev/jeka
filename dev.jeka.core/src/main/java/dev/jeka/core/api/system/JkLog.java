@@ -171,7 +171,7 @@ public final class JkLog implements Serializable {
         if (Verbosity.MUTE == verbosity()) {
             return NO_OP_STREAM;
         }
-        return decorator.getOut();
+        return decorator.getErr();
     }
 
     public static void debug(String message, Object ...params) {

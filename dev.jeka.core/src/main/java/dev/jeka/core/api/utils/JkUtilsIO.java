@@ -297,6 +297,15 @@ public final class JkUtilsIO {
         }
     }
 
+    public static void flush(OutputStream outputStream) {
+        try {
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        ;
+    }
+
     /**
      * Serializes a given Java object to the specified file.
      */

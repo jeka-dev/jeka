@@ -14,25 +14,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/../plugins/dev.jeka.plugins.sonarqube/jeka/output/classes" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/../plugins/dev.jeka.plugins.jacoco/jeka/output/classes" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module" module-name="dev.jeka.core" exported="" scope="TEST" />
+    <orderEntry type="module" module-name="dev.jeka.core" exported="" />
     <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" exported="" scope="TEST" />
     <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" exported="" scope="TEST" />
     <orderEntry type="module" module-name="dev.jeka.plugins.springboot" exported="" scope="TEST" />

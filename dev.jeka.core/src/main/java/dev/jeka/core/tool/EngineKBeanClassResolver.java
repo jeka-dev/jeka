@@ -102,7 +102,7 @@ final class EngineKBeanClassResolver {
         }
         beanClasses.put(null, masterBeanClass);
         if (masterBeanClass != null) {
-            result.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, masterBeanClass,
+            result.add(new EngineCommand(EngineCommand.Action.BEAN_INIT, masterBeanClass,
                     null, null));
         }
 

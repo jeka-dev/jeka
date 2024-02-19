@@ -56,7 +56,7 @@ public final class Main {
                     : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
 
             if (logs.runtimeInformation) {
-                JkInit.displayRuntimeInfo(baseDir);
+                JkInit.displayRuntimeInfo(baseDir, filteredArgs);
             }
 
             // By default, log working animation when working dir = base dir (this mean that we are not

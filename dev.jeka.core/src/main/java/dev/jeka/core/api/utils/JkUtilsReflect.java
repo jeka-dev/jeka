@@ -98,7 +98,8 @@ public final class JkUtilsReflect {
             setAccessibleIfNeeded(field);
             field.set(object, value);
         } catch (final Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(String.format("Error while setting value '%s'(class %s) on field %s",
+                    value, value.getClass().getName(), field), e);
         }
     }
 

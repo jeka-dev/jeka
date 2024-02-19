@@ -1,15 +1,10 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import static dev.jeka.core.tool.EngineCommand.Action.BEAN_INSTANTIATION;
-import static dev.jeka.core.tool.EngineCommand.Action.PROPERTY_INJECT;
+import static dev.jeka.core.tool.EngineCommand.Action.BEAN_INIT;
+import static dev.jeka.core.tool.EngineCommand.Action.SET_FIELD_VALUE;
 
 /**
  * Represents an action to be taken on a bean, such as invoking a method,
@@ -54,16 +49,16 @@ class KBeanAction {
             beanExpression = expression;
         }
         if (beanExpression.isEmpty()) {
-            this.action = BEAN_INSTANTIATION;
+            this.action = BEAN_INIT;
             this.member = null;
             this.value = null;
         } else if (beanExpression.contains("=")) {
-            this.action = PROPERTY_INJECT;
+            this.action = SET_FIELD_VALUE;
             this.member = JkUtilsString.substringBeforeFirst(beanExpression, "=");
             JkUtilsAssert.argument(!this.member.isEmpty(), "Illegal expression " + expression);
             this.value = JkUtilsString.substringAfterFirst(beanExpression, "=");
         } else {
-            this.action = EngineCommand.Action.METHOD_INVOKE;
+            this.action = EngineCommand.Action.INVOKE;
             this.member = beanExpression;
             this.value = null;
         }
@@ -79,9 +74,9 @@ class KBeanAction {
 
     String shortDescription() {
         String actionName = null;
-        if (action == EngineCommand.Action.METHOD_INVOKE) {
+        if (action == EngineCommand.Action.INVOKE) {
             actionName = "method";
-        } else if (action == PROPERTY_INJECT) {
+        } else if (action == SET_FIELD_VALUE) {
             actionName = "field";
         } else {
             actionName = "constructor";

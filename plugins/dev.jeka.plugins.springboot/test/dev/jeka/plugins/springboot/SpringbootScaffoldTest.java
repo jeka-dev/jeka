@@ -8,7 +8,7 @@ import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
-import dev.jeka.core.tool.builtins.base.JkBasefScaffold;
+import dev.jeka.core.tool.builtins.base.JkBaseScaffold;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -103,12 +103,12 @@ public class SpringbootScaffoldTest {
     public void scaffoldSelf_withBuildClass_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
-        JkBasefScaffold.of(baseDir, options)
+        JkBaseScaffold.of(baseDir, options)
                 .addCustomizer(SpringbootScaffold::adapt)
                 .run();
 
         // Should not include script class defined by default
-        assertFalse(Files.exists(baseDir.resolve(JkBasefScaffold.SCRIPT_CLASS_PATH)));
+        assertFalse(Files.exists(baseDir.resolve(JkBaseScaffold.SCRIPT_CLASS_PATH)));
 
         // cleanup
         //Desktop.getDesktop().open(baseDir.toFile());

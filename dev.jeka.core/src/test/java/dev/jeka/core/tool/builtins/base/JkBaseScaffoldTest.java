@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 
-public class JkBasefScaffoldTest {
+public class JkBaseScaffoldTest {
 
     @Test
     public void scaffold_app_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
-        options.kind = JkBasefScaffold.Kind.APP;
-        JkBasefScaffold selfScaffold = JkBasefScaffold.of(baseDir, options);
+        options.kind = JkBaseScaffold.Kind.APP;
+        JkBaseScaffold selfScaffold = JkBaseScaffold.of(baseDir, options);
         selfScaffold.run();
 
         // cleanup
@@ -25,8 +25,8 @@ public class JkBasefScaffoldTest {
     public void scaffold_script_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
-        options.kind = JkBasefScaffold.Kind.JEKA_SCRIPT;
-        JkBasefScaffold selfScaffold = JkBasefScaffold.of(baseDir, options);
+        options.kind = JkBaseScaffold.Kind.JEKA_SCRIPT;
+        JkBaseScaffold selfScaffold = JkBaseScaffold.of(baseDir, options);
         selfScaffold.run();
 
         // cleanup

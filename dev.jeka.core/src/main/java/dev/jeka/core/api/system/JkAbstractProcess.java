@@ -39,7 +39,9 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     private boolean redirectErrorStream;
 
-    private boolean collectOutput;
+    private boolean collectStdout;
+
+    private boolean collectStderr;
 
     // By default, streams are redirected with gobbler mechanism to not bypass JkLog decorator.
     private boolean inheritIO = false;
@@ -48,8 +50,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     protected JkAbstractProcess(JkAbstractProcess<?> other) {
         this.command = other.command;
-        this.parameters = new LinkedList(other.parameters);
-        this.env = new HashMap(other.env);
+        this.parameters = new LinkedList<>(other.parameters);
+        this.env = new HashMap<>(other.env);
         this.failOnError = other.failOnError;
         this.logCommand = other.logCommand;
         this.logWithJekaDecorator = other.logWithJekaDecorator;
@@ -57,7 +59,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         this.destroyAtJvmShutdown = other.destroyAtJvmShutdown;
         this.inheritIO = other.inheritIO;
         this.redirectErrorStream = other.redirectErrorStream;
-        this.collectOutput = other.collectOutput;
+        this.collectStdout = other.collectStdout;
+        this.collectStderr = other.collectStderr;
     }
 
     protected abstract T copy();
@@ -71,15 +74,28 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
-     * Sets the flag to indicate whether the output of the process should be collected.
+     * Sets the flag to indicate whether the std out of the process should be collected.
      * <p>
-     * This is mandatory to collect output if we want to get the get the {@link JkProcResult#getOutput()}
+     * This is mandatory to collect output if we want to get the get the {@link JkProcResult#getStdout()}
      * after process execution.
      * <p>
      * Initial value is <code>false</code>.
      */
-    public T setCollectOutput(boolean collectOutput) {
-        this.collectOutput = collectOutput;
+    public T setCollectStdout(boolean collectStdout) {
+        this.collectStdout = collectStdout;
+        return (T) this;
+    }
+
+    /**
+     * Sets the flag to indicate whether the std err of the process should be collected.
+     * <p>
+     * This is mandatory to collect output if we want to get the get the {@link JkProcResult#getStdout()}
+     * after process execution.
+     * <p>
+     * Initial value is <code>false</code>.
+     */
+    public T setCollectStderr(boolean collectStderr) {
+        this.collectStderr = collectStderr;
         return (T) this;
     }
 
@@ -306,13 +322,11 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     @Override
     public String toString() {
-        int maxLength = 120;
+        int maxLength = 150;
         if (JkLog.isVerbose()) {
             return this.command + " " + JkUtilsString.readableCommandAgs("", parameters);
         }
-        String shortCommand = command.replace('\\', '/');
-        shortCommand = shortCommand.contains("/") ? JkUtilsString.substringAfterLast(shortCommand, "/")
-                : shortCommand;
+        String shortCommand = shortenCommand();
         return JkUtilsString.ellipse(shortCommand + " " + String.join(" ", parameters), maxLength);
     }
 
@@ -337,21 +351,29 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     public JkProcResult exec() {
         final List<String> commands = computeEffectiveCommands();
         if (logCommand) {
-            String workingDirName = this.workingDir == null ? "" : shortenWorkingDir() + ">";
-            JkLog.startTask("start-program " + workingDirName + " " + this);
+            String cmd = shortenCommand() +  " " + shortenArgs(100);
+            JkLog.startTask("start-program >" + cmd);
+            if (JkLog.isVerbose()) {
+                printContextualInfo();
+            }
         }
         if (inheritIO) {
             JkLog.getOutPrintStream().flush();
             JkLog.getErrPrintStream().flush();
         }
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final OutputStream collectRecipientOs = collectOutput ? byteArrayOutputStream : JkUtilsIO.nopOutputStream();
-        int exitCode = runProcess(commands,collectRecipientOs);
+        ByteArrayOutputStream collectOutBaos = new ByteArrayOutputStream();
+        ByteArrayOutputStream collectErrBaos = new ByteArrayOutputStream();
+        final OutputStream collectStdoutStream = collectStdout ? collectOutBaos : JkUtilsIO.nopOutputStream();
+        final OutputStream collectStderrStream = collectStderr ? collectErrBaos : JkUtilsIO.nopOutputStream();
+        int exitCode = runProcess(commands, collectStdoutStream, collectStderrStream);
         if (logCommand) {
             JkLog.endTask();
         }
-        return new JkProcResult(exitCode, collectOutput ? byteArrayOutputStream.toString() : null);
+        return new JkProcResult(
+                exitCode,
+                collectStdout ? collectOutBaos.toByteArray() : null,
+                collectStderr ? collectErrBaos.toByteArray() : null);
     }
 
     /**
@@ -372,7 +394,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
         // Collect the output of sub-process if it has been required to.
         ByteArrayOutputStream baos = null;
-        if (!inheritIO && this.collectOutput) {
+        if (!inheritIO && this.collectStdout) {
             baos = new ByteArrayOutputStream();
             JkUtilsIO.newStreamGobbler(process, process.getInputStream(), JkUtilsIO.nopOutputStream(), baos);
         }
@@ -407,7 +429,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         return process;
     }
 
-    private int runProcess(List<String> commands, OutputStream collectRecipientOs) {
+    private int runProcess(List<String> commands, OutputStream collectStdoutStream,
+                           OutputStream collectStderrStream) {
         final Process process = runProcessAsync(commands);
 
         // Initialize stream globber so output stream of subprocess does not bybass decorators 
@@ -418,14 +441,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         // TODO find a better criteria to turn off the globber
         // Apparently, the globber is needed to return result
         if (!inheritIO) {
-            OutputStream consoleOutputStream = logWithJekaDecorator ?
+            OutputStream consoleOutStream = logWithJekaDecorator ?
                     JkLog.getOutPrintStream() : JkUtilsIO.nopOutputStream();
             OutputStream consoleErrStream = logWithJekaDecorator ?
                     JkLog.getErrPrintStream() : JkUtilsIO.nopOutputStream();
             outputStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getInputStream(),
-                    consoleOutputStream, collectRecipientOs);
+                    consoleOutStream, collectStdoutStream);
             errorStreamGobbler = JkUtilsIO.newStreamGobbler(process, process.getErrorStream(),
-                    consoleErrStream, JkUtilsIO.nopOutputStream());
+                    consoleErrStream, collectStderrStream);
         }
 
         int exitCode;
@@ -441,6 +464,21 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             errorStreamGobbler.join();
         }
         if (exitCode != 0 && failOnError) {
+            JkLog.error("Process exited with error code %s", exitCode);
+            printContextualInfo();
+            if (collectStdout) {
+                ByteArrayOutputStream collectedStdout = (ByteArrayOutputStream) collectStdoutStream;
+                JkLog.error("Std out was ===============================================");
+                JkUtilsIO.write(JkLog.getErrPrintStream(), collectedStdout.toByteArray());
+                JkLog.getErrPrintStream().flush();
+            }
+            if (collectStderr) {
+                ByteArrayOutputStream collectedStdErr = (ByteArrayOutputStream) collectStderrStream;
+                JkLog.error("Std err was ===============================================");
+                JkUtilsIO.write(JkLog.getErrPrintStream(), collectedStdErr.toByteArray());
+                JkLog.getErrPrintStream().flush();
+            }
+
             throw new IllegalStateException("Process " + String.join(" ", ellipse(commands))
                     + "\nhas returned with error code " + exitCode);
         }
@@ -480,6 +518,20 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
                 .collect(Collectors.toList());
     }
 
+    private String fullCmdLine() {
+        return command + " " + String.join(" ", parameters);
+    }
+
+    private String shortenArgs(int maxWidth) {
+        String singleLine = String.join(" ", parameters);
+        return JkUtilsString.ellipse(singleLine, maxWidth);
+    }
+
+    private String shortenCommand() {
+        Path path = Paths.get(command);
+        return path.getFileName().toString();
+    }
+
     private String shortenWorkingDir() {
         int maxSize = 30;
         String path = workingDir.toString();
@@ -490,6 +542,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             return workingDir.getRoot().toString() + workingDir.getName(0) + "/.../" + workingDir.getFileName();
         }
         return path;
+    }
+
+    private void printContextualInfo() {
+        String workingDirName = this.workingDir == null ? "." : shortenWorkingDir();
+        JkLog.info("working dir   : %s", workingDirName);
+        JkLog.info("command path  : %s", command);
+        JkLog.info("full cmd line : %s", fullCmdLine());
+        JkLog.getOutPrintStream().flush();
     }
 
 }

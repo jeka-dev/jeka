@@ -7,6 +7,7 @@ import dev.jeka.core.tool.CommandLine.Command;
 import dev.jeka.core.tool.CommandLine.Option;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Command(name = "jeka",
@@ -131,9 +132,8 @@ public class PicocliMainCommand {
 
     @Option(names = { "-ls"},
             paramLabel = "STYLE",
-            defaultValue = "FLAT",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
-    private JkLog.Style logStyle = JkLog.Style.FLAT;
+    private JkLog.Style logStyle = JkLog.Style.INDENT;
 
     @Option(names = {"-cmd", "--commands"},
             paramLabel = "<|kbeanName>",
@@ -147,13 +147,18 @@ public class PicocliMainCommand {
             arity = "0..1")
     private Boolean logAnimations;
 
+    @Option(names = "-D", mapFallbackValue = "") // allow -Dkey
+    void setProperty(Map<String, String> props) {
+        props.forEach(System::setProperty);
+    }
+
     EnvLogSettings logSettings() {
         return new EnvLogSettings(
                 logVerbose,
                 logDebug,
-                false,
+                logStacktrace,
                 runtimeInfo,
-                false,
+                logDuration,
                 logStyle,
                 logAnimations,
                 false);

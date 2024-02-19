@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class JkBasefScaffold extends JkScaffold {
+public final class JkBaseScaffold extends JkScaffold {
 
     public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/Build.java";
 
@@ -35,9 +35,9 @@ public final class JkBasefScaffold extends JkScaffold {
 
     private final BaseKBean.BaseScaffoldOptions selfScaffoldOption;
 
-    private final JkConsumers<JkBasefScaffold> customizers = JkConsumers.of();
+    private final JkConsumers<JkBaseScaffold> customizers = JkConsumers.of();
 
-    private JkBasefScaffold(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
+    private JkBaseScaffold(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
         super(baseDir);
         this.selfScaffoldOption = scaffoldOptions;
     }
@@ -45,7 +45,7 @@ public final class JkBasefScaffold extends JkScaffold {
     /**
      * Adds a customizer to this instance, that will be executed at {@link #run()} execution.
      */
-    public JkBasefScaffold addCustomizer(Consumer<JkBasefScaffold> customizer) {
+    public JkBaseScaffold addCustomizer(Consumer<JkBaseScaffold> customizer) {
         this.customizers.add(customizer);
         return this;
     }
@@ -53,14 +53,14 @@ public final class JkBasefScaffold extends JkScaffold {
     /**
      * Creates an instance initialized with the base directory and scaffold options..
      */
-    public static JkBasefScaffold of(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
-        return new JkBasefScaffold(baseDir, scaffoldOptions);
+    public static JkBaseScaffold of(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
+        return new JkBaseScaffold(baseDir, scaffoldOptions);
     }
 
     /**
-     * Creates an instance of JkBasefScaffold initialized with the given BaseKBean.
+     * Creates an instance of JkBaseScaffold initialized with the given BaseKBean.
      */
-    public static JkBasefScaffold of(BaseKBean baseKBean) {
+    public static JkBaseScaffold of(BaseKBean baseKBean) {
         return of(baseKBean.getBaseDir(), baseKBean.scaffold);
     }
 
@@ -68,7 +68,7 @@ public final class JkBasefScaffold extends JkScaffold {
      * Sets the flag to include Junit dependencies in the scaffold.
      * Initial value is <code>true</code>.
      */
-    public JkBasefScaffold setIncludeJunit(boolean includeJunit) {
+    public JkBaseScaffold setIncludeJunit(boolean includeJunit) {
         this.includeJunit = includeJunit;
         return this;
     }
@@ -102,10 +102,8 @@ public final class JkBasefScaffold extends JkScaffold {
         return Collections.singletonList(moduleId + ":" + lastVersion);
     }
 
-
-
     private String code(String snippetName, List<String> ...deps) {
-        String baseCode = readResource(JkBasefScaffold.class, snippetName);
+        String baseCode = readResource(JkBaseScaffold.class, snippetName);
         List<String> allDeps = JkUtilsIterable.concatLists(deps);
         String injectCode = toJkInject(allDeps);
         return baseCode.replace("${inject}", injectCode);

@@ -5,7 +5,7 @@
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="MasterBuild" />
     <module name="dev.jeka.master" />
-    <option name="PROGRAM_PARAMETERS" value="project#clean make publishLocal -lri -cw -ld -co" />
+    <option name="PROGRAM_PARAMETERS" value="project#clean make publishLocal -lri -cw -ld -co -v" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

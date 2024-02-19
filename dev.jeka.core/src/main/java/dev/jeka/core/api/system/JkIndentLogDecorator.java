@@ -61,7 +61,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
                 stream.println(message);
             } else if (JkLog.isShowTaskDuration()) {
                 JkUtilsIO.write(stream, MARGIN_UNIT);
-                stream.printf("Duration %s millis.%n", JkUtilsTime.formatMillis(event.getDurationMs()));
+                stream.printf("Duration %s%n", JkUtilsTime.formatMillis(event.getDurationMs()));
             }
         } else if (logType== JkLog.Type.START_TASK) {
             marginErr.flush();

@@ -230,7 +230,7 @@ public final class JkRunbase {
     void init(List<EngineCommand> commands) {
         JkLog.debug("Initialize JkRunbase with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
         this.fieldInjections = commands.stream()
-                .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
+                .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.SET_FIELD_VALUE)
                 .collect(Collectors.toList());
 
         // Instantiate & register beans
@@ -254,7 +254,7 @@ public final class JkRunbase {
     void run(List<EngineCommand> commands) {
         for (EngineCommand engineCommand : commands) {
             KBean bean = load(engineCommand.getBeanClass());
-            if (engineCommand.getAction() == EngineCommand.Action.METHOD_INVOKE) {
+            if (engineCommand.getAction() == EngineCommand.Action.INVOKE) {
                 Method method;
                 try {
                     method = bean.getClass().getMethod(engineCommand.getMember());
@@ -308,7 +308,7 @@ public final class JkRunbase {
 
         // Inject field
         fieldInjections.stream()
-                .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.PROPERTY_INJECT)
+                .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.SET_FIELD_VALUE)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
                 .forEach(action -> {
 
@@ -332,7 +332,7 @@ public final class JkRunbase {
 
     static JkProperties constructProperties(Path baseDir) {
         JkProperties result = JkProperties.ofSysPropsThenEnv()
-                    .withFallback(readProjectPropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir)));
+                    .withFallback(readBasePropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir)));
         Path globalPropertiesFile = JkLocator.getGlobalPropertiesFile();
         if (Files.exists(globalPropertiesFile)) {
             result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
@@ -348,21 +348,28 @@ public final class JkRunbase {
         return JkProperties.ofFile(localPropFile);
     }
 
-    // Reads the properties from the baseDir/jeka/local.properties
+    // Reads the properties from the baseDir/jeka.properties and its ancestors.
     // Takes also in account properties defined in parent project dirs if any.
     // this doen't take in account System and global props
-    static JkProperties readProjectPropertiesRecursively(Path projectBaseDir) {
-        Path baseDir = projectBaseDir.toAbsolutePath().normalize();
-        Path projectPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
-        JkProperties result = JkProperties.EMPTY;
-        if (Files.exists(projectPropertiesFile)) {
-            result = JkProperties.ofFile(JkUtilsPath.relativizeFromWorkingDir(projectPropertiesFile));
-        }
-        Path parentProject = baseDir.getParent();
-        if (parentProject != null && Files.exists(parentProject.resolve(JkConstants.PROPERTIES_FILE))) {
-            result = result.withFallback(readProjectPropertiesRecursively(parentProject));
+    static JkProperties readBasePropertiesRecursively(Path baseDir) {
+        baseDir = baseDir.toAbsolutePath().normalize();
+        JkProperties result = readBaseProperties(baseDir);
+        Path parentDir = baseDir.getParent();
+
+        // Stop if parent dir has no jeka.properties file
+        if (parentDir != null && Files.exists(parentDir.resolve(JkConstants.PROPERTIES_FILE))) {
+            result = result.withFallback(readBasePropertiesRecursively(parentDir));
         }
         return result;
+    }
+
+    // Reads the properties from the baseDir/jeka.properties
+    static JkProperties readBaseProperties(Path baseDir) {
+        Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
+        if (Files.exists(jekaPropertiesFile)) {
+            return JkProperties.ofFile(jekaPropertiesFile);
+        }
+        return JkProperties.EMPTY;
     }
 
     @Override

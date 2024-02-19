@@ -33,6 +33,12 @@ class CmdLineArgs {
         return new CmdLineArgs(interpolatedCommandLine(args, properties));
     }
 
+    CmdLineArgs and(CmdLineArgs other) {
+        List<String> allArgs = Arrays.asList(args);
+        allArgs.addAll(Arrays.asList(other.args));
+        return new CmdLineArgs(allArgs.toArray(new String[0]));
+    }
+
     CmdLineArgs withOptionsOnly() {
         String[] options = Arrays.stream(args)
                 .filter(arg -> arg.startsWith("-"))

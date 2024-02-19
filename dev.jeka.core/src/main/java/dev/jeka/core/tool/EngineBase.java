@@ -270,7 +270,8 @@ class EngineBase {
         return kbeanResolution;
     }
 
-    List<EngineCommand> resolveEngineCommand(List<KBeanAction> kBeanActionsFromCmdLine) {
+    // TODO may merge KBeanAction and Engine commands
+    List<EngineCommand> resolveEngineCommand(List<KBeanAction> kBeanActions) {
         if (engineCommands != null) {
             return engineCommands;
         }
@@ -278,14 +279,7 @@ class EngineBase {
             resolveKBeans();
         }
 
-        // We need to run in the classpath computed in previous steps
-        //AppendableUrlClassloader.addEntriesOnContextClassLoader(this.classpathSetupResult.runClasspath);
-
-        // -- Gather KbeanActions from props and command line (command line should override props)
-        List<KBeanAction> effectiveKeanActions = new LinkedList<>(getKBeanActionFromProperties());
-        effectiveKeanActions.addAll(kBeanActionsFromCmdLine);
-
-        Map<String, Class<? extends KBean>> kbeanClasses = resolveKBeanClasses(effectiveKeanActions);
+        Map<String, Class<? extends KBean>> kbeanClasses = resolveKBeanClasses(kBeanActions);
 
         // Construct EngineCommands
         this.engineCommands = new LinkedList<>();
@@ -293,12 +287,12 @@ class EngineBase {
         // -- If there is an initBean it should be initialized first
         if (kbeanResolution.initKBeanClassname != null) {
             Class initBeanClass = JkClassLoader.ofCurrent().load(kbeanResolution.initKBeanClassname);
-            engineCommands.add(new EngineCommand(EngineCommand.Action.BEAN_INSTANTIATION, initBeanClass,
+            engineCommands.add(new EngineCommand(EngineCommand.Action.BEAN_INIT, initBeanClass,
                     null, null));
         }
 
         // -- Add other actions
-        effectiveKeanActions.stream()
+        kBeanActions.stream()
                 .map(action -> toEngineCommand(action, kbeanClasses))
                 .forEach(engineCommands::add);
 

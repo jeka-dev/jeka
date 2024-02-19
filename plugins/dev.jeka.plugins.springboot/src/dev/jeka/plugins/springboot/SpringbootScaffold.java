@@ -4,7 +4,7 @@ import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.builtins.base.JkBasefScaffold;
+import dev.jeka.core.tool.builtins.base.JkBaseScaffold;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -61,7 +61,7 @@ class SpringbootScaffold {
         projectScaffold.addFileEntry(pack + "/ControllerIT.java", readSnippet("ControllerIT.java"));
     }
 
-    static void adapt(JkBasefScaffold baseScaffold) {
+    static void adapt(JkBaseScaffold baseScaffold) {
 
         // Remove build class defined by default
         baseScaffold.removeFileEntriesStaringBy(Paths.get(JkConstants.JEKA_SRC_DIR));
@@ -86,16 +86,16 @@ class SpringbootScaffold {
                 overriddenPluginDep.replace("\\", "/") : "dev.jeka:springboot-plugin";
         buildClassCode = buildClassCode.replace("${springboot-plugin}", injectClasspath);
 
-        buildClassCode = buildClassCode.replace("${inject}", JkBasefScaffold.toJkInject(devDeps));
-        baseScaffold.addFileEntry(JkBasefScaffold.BUILD_CLASS_PATH, buildClassCode);
+        buildClassCode = buildClassCode.replace("${inject}", JkBaseScaffold.toJkInject(devDeps));
+        baseScaffold.addFileEntry(JkBaseScaffold.BUILD_CLASS_PATH, buildClassCode);
 
         // Test code
         baseScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/test/ControllerIT.java", readSnippet("BaseControllerIT.java"));
 
         // App code
         String appCode = readSnippet("BaseApplication.java");
-        appCode = appCode.replace("${inject}", JkBasefScaffold.toJkInject(deps));
-        baseScaffold.addFileEntry(JkBasefScaffold.APP_CLASS_PATH, appCode);
+        appCode = appCode.replace("${inject}", JkBaseScaffold.toJkInject(deps));
+        baseScaffold.addFileEntry(JkBaseScaffold.APP_CLASS_PATH, appCode);
         baseScaffold.addFileEntry(JkConstants.JEKA_SRC_DIR + "/app/Controller.java", readSnippet("Controller.java"));
 
     }

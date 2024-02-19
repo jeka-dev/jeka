@@ -233,6 +233,11 @@ public abstract class JkScaffold {
             JkLog.verbose("Create jeka shell file");
             JkUtilsPath.copy(jekaShell, baseDir.resolve("jeka"),
                     StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+
+            // TODO temp for testung with picocli
+            JkUtilsPath.copy(jekaShell.resolveSibling("jekap"), baseDir.resolve("jekap"),
+                    StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+
             JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
         }
     }

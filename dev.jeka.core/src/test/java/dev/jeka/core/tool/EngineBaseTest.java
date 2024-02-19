@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -14,12 +15,12 @@ public class EngineBaseTest {
     @Test
     public void projectHelp_ok() {
         ///JkLog.setDecorator(JkLog.Style.FLAT);
-        EngineWrapper.of().run("project#help").cleanDir();
+        new EngineWrapper().run("project#help").cleanDir();
     }
 
     @Test
     public void defaultKBeanAsName_ok() {
-        JkProject project = EngineWrapper.of().run("-kb=project", "#tests.skip=true", "#layout.style=SIMPLE")
+        JkProject project = new EngineWrapper().run("-kb=project", "#tests.skip=true", "#layout.style=SIMPLE")
                 .load(ProjectKBean.class).project;
         assertTrue(project.testing.isSkipped());
         assertEquals("src", project.compilation.layout.getSources().toList().get(0).getRoot().toString());
@@ -27,14 +28,24 @@ public class EngineBaseTest {
 
     @Test
     public void publicNestedProp_ok() {
-        NestedProp nestedProp = EngineWrapper.of(NestedProp.class).run("#options.foo=a")
+        NestedProp nestedProp = new EngineWrapper(NestedProp.class).run("#options.foo=a")
                 .find(NestedProp.class).get();
         Assert.assertEquals("a", nestedProp.options.foo);
     }
 
+    @Test
+    public void picocliEnum_ok() {
+        JkRunbase.convertFieldValues = false;
+        try {
+            ProjectKBean projectKBean = new PicocliEngineWrapper()
+                    .run("project:", "scaffold.template=PROPS", "layout.style=SIMPLE")
+                    .load(ProjectKBean.class);
+            assertEquals(JkCompileLayout.Style.SIMPLE, projectKBean.layout.style);
+        } finally {
+            JkRunbase.convertFieldValues = true;
+        }
 
-
-
+    }
 
     static class NestedProp extends KBean {
 
@@ -45,6 +56,5 @@ public class EngineBaseTest {
         }
 
     }
-
 
 }

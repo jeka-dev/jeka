@@ -174,7 +174,7 @@ public final class JkKotlinCompiler {
         if (cachedVersion != null) {
             return cachedVersion;
         }
-        List<String> lines = JkProcess.of(command, "-version").setCollectOutput(true).exec().getOutputMultiline();
+        List<String> lines = JkProcess.of(command, "-version").setCollectStdout(true).exec().getStdoutAsMultiline();
         String line = lines.get(0);
         cachedVersion=  line.split(" ")[2].trim();
         return cachedVersion;

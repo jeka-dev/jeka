@@ -33,7 +33,7 @@ class SamplesTester extends JekaCommandLineExecutor {
                 "project#cleanPack project#info sonarqube# -Djeka.java.version=17");
 
         // Test with injecting plugin dep via jeka.properties file
-        run("dev.jeka.samples.protobuf", "-liv project#cleanPack");
+        run("dev.jeka.samples.protobuf", "% -iv project: cleanPack");
 
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.jacoco", "-lna +../../plugins/dev.jeka.plugins.jacoco project#cleanPack " +

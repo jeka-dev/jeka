@@ -2,6 +2,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -28,8 +29,11 @@ final class FieldInjector {
                 throw new JkException(msg);
             }
             setValue(child, remaining, value);
+            return;
         }
         Field field = JkUtilsReflect.getField(target.getClass(), propName);
+        JkUtilsAssert.state(field != null, "Null field found for class %s and field %s",
+                target.getClass().getName(), propName);
         JkUtilsReflect.setFieldValue(target, field, value);
     }
 

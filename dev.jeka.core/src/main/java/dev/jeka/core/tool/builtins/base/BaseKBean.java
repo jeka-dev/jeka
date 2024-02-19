@@ -63,11 +63,11 @@ public final class BaseKBean extends KBean {
 
     private Consumer<Path> jarMaker = this::fatJar;
 
-    private JkBasefScaffold selfScaffold;
+    private JkBaseScaffold selfScaffold;
 
     @Override
     protected void init() {
-        selfScaffold = JkBasefScaffold.of(this);
+        selfScaffold = JkBaseScaffold.of(this);
     }
 
     // We can not just run Application#main cause Spring-Boot seems
@@ -221,11 +221,11 @@ public final class BaseKBean extends KBean {
     }
 
     /**
-     * Returns the JkBasefScaffold object associated with this BaseKBean.
-     * The JkBasefScaffold provides methods for configuring the project scaffold,
+     * Returns the JkBaseScaffold object associated with this BaseKBean.
+     * The JkBaseScaffold provides methods for configuring the project scaffold,
      * such as adding file entries and setting options.
      */
-    public JkBasefScaffold getSelfScaffold() {
+    public JkBaseScaffold getSelfScaffold() {
         return selfScaffold;
     }
 
@@ -354,7 +354,7 @@ public final class BaseKBean extends KBean {
     public static class BaseScaffoldOptions extends JkScaffoldOptions {
 
         @JkDoc("Kind of Jeka base to generate.")
-        public JkBasefScaffold.Kind kind = JkBasefScaffold.Kind.JEKA_SCRIPT;
+        public JkBaseScaffold.Kind kind = JkBaseScaffold.Kind.JEKA_SCRIPT;
 
     }
 

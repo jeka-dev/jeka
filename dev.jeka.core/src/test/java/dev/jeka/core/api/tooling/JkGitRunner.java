@@ -11,8 +11,9 @@ public class JkGitRunner {
     public static void main(String[] args) {
         String line = JkGit.of()
                 .addParams("show", "-s", "--pretty=%d", "HEAD")
-                .setCollectOutput(true)
-                .exec().getOutputMultiline().get(0);
+                .setCollectStdout(true)
+                .exec()
+                .getStdoutAsString();
         System.out.println(line);
         List<String> allItems = Arrays.asList(line.split(","));
         System.out.println(allItems.get(0));

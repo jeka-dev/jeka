@@ -18,29 +18,29 @@ class ScaffoldTester extends JekaCommandLineExecutor {
     void run() {
 
         // Basic scaffold and checks
-        scaffoldAndCheckInTemp("base#scaffold", "#hello base#info -v -Djeka.java.version=17", true);
-        scaffoldAndCheckInTemp("base#scaffold base#scaffold.kind=APP -lv ", "base#test base#runMain", true);
-        scaffoldAndCheckInTemp("project#scaffold project#scaffold.template=BUILD_CLASS", "#help", true);
+        scaffoldAndCheckInTemp("% base: scaffold -v", "% hello base: info -v -Djeka.java.version=17", true);
+        scaffoldAndCheckInTemp("% base: scaffold scaffold.kind=APP -vi", "% base: test runMain", true);
+        scaffoldAndCheckInTemp("% project: scaffold scaffold.template=BUILD_CLASS", "% -cmd", true);
 
         // Scaffold template=PROPS + layout=SIMPLE
         Path tempDir = scaffoldAndCheckInTemp(
-                "project#scaffold project#scaffold.template=PROPS project#layout.style=SIMPLE",
-                "project#pack -v", false);
+                "% project: scaffold.template=PROPS layout.style=SIMPLE scaffold",
+                "% project: pack -v", false);
         JkUtilsAssert.state(Files.exists(tempDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
                 "dependencies.txt has not been generated");
         JkPathTree.of(tempDir).deleteRoot();
 
         // Scaffold for Jeka  plugin
         scaffoldAndCheckInTemp(
-                "project#scaffold project#scaffold.template=PLUGIN",
-                "project#pack", true);
+                "% project: scaffold scaffold.template=PLUGIN",
+                "% project: pack", true);
 
         // Check IntelliJ + Eclipse metadata
         Path workingDir = scaffoldAndCheckInTemp(
-                "project#scaffold",
-                "project#clean project#pack", false);
-        runWithDistribJekaShell(workingDir, "eclipse#files");
-        runWithDistribJekaShell(workingDir, "intellij#iml -D" + IntellijKBean.IML_SKIP_MODULE_XML_PROP + "=true");
+                "% project: scaffold",
+                "% project: clean pack", false);
+        runWithDistribJekaShell(workingDir, "% eclipse: files");
+        runWithDistribJekaShell(workingDir, "% intellij: iml -D" + IntellijKBean.IML_SKIP_MODULE_XML_PROP + "=true");
         JkUtilsAssert.state(Files.exists(workingDir.resolve("src/main/java")),
                 "No source tree has been created when scaffolding Java.");
         JkPathTree.of(workingDir).deleteRoot();

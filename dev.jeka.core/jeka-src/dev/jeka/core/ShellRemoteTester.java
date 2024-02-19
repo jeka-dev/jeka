@@ -44,10 +44,10 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         // Test without alias
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "#ok")
                 .setLogCommand(true)
-                .setCollectOutput(true)
+                .setCollectStdout(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
-        String output = result.getOutput();
+        String output = result.getStdoutAsString();
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
                 "expecting 'ok' followed by a breaking line)", output);
     }
@@ -64,7 +64,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL,  "#ok")
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(false)
-                .setCollectOutput(true)
+                .setCollectStdout(true)
                 .redirectErrorStream(false)
                 .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
                 .setEnv("jeka.version", SNAPSHOT_VERSION)
@@ -72,7 +72,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
         // Tests if messages written in stderr by jeka shell are not
         // collected in the output
-        String output = result.getOutput();
+        String output = result.getStdoutAsString();
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
                 "expecting 'ok' followed by a breaking line)", output);
     }
@@ -94,13 +94,13 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
                 .redirectErrorStream(false)
-                .setCollectOutput(true)
+                .setCollectStdout(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .setEnv("jeka.java.distrib", distro)
                 //.setEnv("jeka.java.version", "20")
                 .exec();
         JkUtilsAssert.state(Files.exists(cachedJdk),"Jdk not downloaded at %s", cachedJdk);
-        String output = procResult.getOutput();
+        String output = procResult.getStdoutAsString();
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
                 "expecting ending with 'ok 'followed by a breaking line)", output);
         System.setProperty("jeka.java.version", "");
@@ -119,11 +119,11 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "-lsu", "-v", "-la=false", "#ok")
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
-                .setCollectOutput(true)
+                .setCollectStdout(true)
                 .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
                 .setEnv("jeka.version", SNAPSHOT_VERSION)
                 .exec();
-        String output = result.getOutput();
+        String output = result.getStdoutAsString();
         JkUtilsAssert.state(!output.startsWith("ok"), "Command output was '%s', " +
                 "expecting logs of distrib installation", output);
     }

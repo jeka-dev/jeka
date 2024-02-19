@@ -65,7 +65,7 @@ final class ParsedCmdLine {
 
     boolean hasMethodInvokations() {
         return beanActions.stream()
-                .anyMatch(item -> item.action == EngineCommand.Action.METHOD_INVOKE);
+                .anyMatch(item -> item.action == EngineCommand.Action.INVOKE);
     }
 
     List<JkDependency> getJekaSrcDependencies() {

@@ -51,23 +51,25 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Returns the current branch name.
      */
     public String getCurrentBranch() {
-        List<String> branches = this.copy()
+        String branch = this.copy()
                 .addParams("branch", "--show-current")
                 .setLogWithJekaDecorator(false)
-                .setCollectOutput(true)
-                .exec().getOutputMultiline();
-        if (branches.isEmpty()) {
+                .setCollectStdout(true)
+                .exec()
+                .getStdoutAsString()
+                .replace("\n", "");
+        if (JkUtilsString.isBlank(branch)) {
             return null;
         }
-        return branches.get(0);
+        return branch;
     }
 
     /**
      * Checks if the local branch is in sync with the remote branch.
      */
     public boolean isSyncWithRemote() {
-        String local = copy().setParams("rev-parse", "@").setCollectOutput(true).exec().getOutput();
-        String remote = copy().setParams("rev-parse", "@{u}").setCollectOutput(true).exec().getOutput();
+        String local = copy().setParams("rev-parse", "@").setCollectStdout(true).exec().getStdoutAsString();
+        String remote = copy().setParams("rev-parse", "@{u}").setCollectStdout(true).exec().getStdoutAsString();
         return local.equals(remote);
     }
 
@@ -81,20 +83,25 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return !copy()
                 .setParams("diff", "HEAD", "--stat")
                 .setLogWithJekaDecorator(false)
-                .setCollectOutput(true)
-                .exec().getOutput().isEmpty();
+                .setCollectStdout(true)
+                .exec()
+                .getStdoutAsString()
+                .replace("\n", "")
+                .isEmpty();
     }
 
     /**
      * Returns the current commit of the Git repository.
      */
     public String getCurrentCommit() {
-        List<String> commits =  copy()
+        String commit = copy()
                 .setParams("rev-parse", "HEAD")
                 .setLogWithJekaDecorator(false)
-                .setCollectOutput(true)
-                .exec().getOutputMultiline();
-        return commits.isEmpty() ? null : commits.get(0);
+                .setCollectStdout(true)
+                .exec()
+                .getStdoutAsString()
+                .replace("\n", "");
+        return commit.isEmpty() ? null : commit;
     }
 
     /**
@@ -104,8 +111,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return copy()
                 .setParams("tag", "-l", "--points-at", "HEAD")
                 .setLogWithJekaDecorator(false)
-                .setCollectOutput(true)
-                .exec().getOutputMultiline()
+                .setCollectStdout(true)
+                .exec().getStdoutAsMultiline()
                 .stream()
                     .filter(tag -> !tag.isEmpty())
                     .collect(Collectors.toList());
@@ -119,8 +126,9 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return copy()
                 .setParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
                 .setLogWithJekaDecorator(false)
-                .setCollectOutput(true)
-                .exec().getOutputMultiline();
+                .setCollectStdout(true)
+                .exec()
+                .getStdoutAsMultiline();
     }
 
     /**
@@ -223,7 +231,10 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
             JkLog.verbose("Git detached branch. Infer version from exact matching tag.");
             return this.copy()
                     .setParams("describe", "--tags", "--exact-match")
-                    .setCollectOutput(true).exec().getOutput();
+                    .setCollectStdout(true)
+                    .exec()
+                    .getStdoutAsString()
+                    .replace("\n", "");
         }
         if (tags.isEmpty() || dirty) {
             return branch + "-SNAPSHOT";
@@ -258,9 +269,9 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         JkUtilsAssert.state(latestTag != null, "Latest tag not found");
         List<String> rawResults = copy()
                 .setParams("log", "--oneline", getLatestTag() + "..HEAD")
-                .setCollectOutput(true)
+                .setCollectStdout(true)
                 .exec()
-                .getOutputMultiline();
+                .getStdoutAsMultiline();
         List<String> result = new LinkedList<>();
         for (String line : rawResults) {
             String cleaned = JkUtilsString.substringAfterFirst(line, " "); // remove commit hash
@@ -277,9 +288,9 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public String getLatestTag() {
         List<String> tags = copy().setParams("describe", "--tags", "--abbrev=0")
-                .setCollectOutput(true)
+                .setCollectStdout(true)
                 .exec()
-                .getOutputMultiline();
+                .getStdoutAsMultiline();
         return tags.isEmpty() ? null : tags.get(0);
     }
 

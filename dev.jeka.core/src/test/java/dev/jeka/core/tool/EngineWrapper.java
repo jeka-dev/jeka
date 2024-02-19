@@ -26,13 +26,8 @@ class EngineWrapper {
 
     EngineBase engineBase;
 
-    private EngineWrapper(Class<? extends KBean>[] localKBeanClasses) {
+    protected EngineWrapper(Class<? extends KBean> ...localKBeanClasses) {
         this.localKBeanClasses = localKBeanClasses;
-    }
-
-    @SafeVarargs
-    static EngineWrapper of(Class<? extends KBean>... localKBeans) {
-        return new EngineWrapper(localKBeans);
     }
 
     EngineWrapper run(String... args) {
@@ -59,11 +54,11 @@ class EngineWrapper {
         return engineBase.getRunbase().load(kbeanClass);
     }
 
-    private static void run(EngineBase engineBase, EngineBase.KBeanResolution kBeanResolution, String[] args) {
+    private void run(EngineBase engineBase, EngineBase.KBeanResolution kBeanResolution, String[] args) {
         engineBase.resolveClassPaths();
         engineBase.setKBeanResolution(kBeanResolution);
-        ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
-        engineBase.resolveEngineCommand(parsedCmdLine.getBeanActions());
+        List<KBeanAction> kBeanActions = parse(args, kBeanResolution);
+        engineBase.resolveEngineCommand(kBeanActions);
         engineBase.run();
     }
 
@@ -87,5 +82,10 @@ class EngineWrapper {
         return new EngineBase.KBeanResolution(
                 allKBeans, localKBeans, defaultAndInitKBean.initKbeanClassName,
                 defaultAndInitKBean.defaultKBeanClassName);
+    }
+
+    protected List<KBeanAction> parse(String[] args, EngineBase.KBeanResolution kBeanResolution) {
+        ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
+        return parsedCmdLine.getBeanActions();
     }
 }
