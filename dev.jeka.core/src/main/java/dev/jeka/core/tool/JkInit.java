@@ -28,6 +28,19 @@ public final class JkInit {
     private JkInit() {
     }
 
+    public static JkRunbase runbase(boolean skipCompile, String ...args) {
+        String[] extraArg = skipCompile ? new String[] {"-sk"} : new String[0];
+        String[] effectiveArgs = JkUtilsIterable.concat(args, extraArg);
+        return PicocliMain.doMain(effectiveArgs);
+    }
+
+    public static <T extends KBean> T kbean(Class<T> clazz, String... args) {
+        String[] effectiveArgs = JkUtilsIterable.concat(args, new String[] {"-kb=" + clazz.getName()});
+        return runbase(true, effectiveArgs).load(clazz);
+    }
+
+
+
     /**
      * Creates an instance of the specified Jeka class and displays information about this class andPrepending environment.
      */

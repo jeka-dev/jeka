@@ -250,7 +250,8 @@ class MasterBuild extends KBean {
 
 
     public static void main(String[] args) throws Exception {
-        JkInit.instanceOf(MasterBuild.class, args).make();
+        JkInit.kbean(MasterBuild.class, args).make();
+        //JkInit.instanceOf(MasterBuild.class, args).make();
     }
 
     static class BuildFast {

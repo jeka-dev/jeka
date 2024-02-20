@@ -181,7 +181,6 @@ class EngineBase {
         // That is nice that this clean occurs here, because it will happen for sub-basedir as well.
         if (behaviorSettings.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
-            JkLog.debug("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
             JkPathTree.of(outputDir).deleteContent();
             JkLog.verbose("Clean %s dir", outputDir);
         }
@@ -201,11 +200,6 @@ class EngineBase {
                 .map(classpathSetupResult -> classpathSetupResult.runClasspath)
                 .reduce(JkPathSequence.of(), JkPathSequence::and);
 
-        if (skipJekaSrc) {
-            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs);
-            return this.classpathSetupResult;
-        }
-
         // compute classpath to look in for finding KBeans
         String classpathProp = properties.get(JkConstants.CLASSPATH_INJECT_PROP, "");
         List<JkDependency> jekaPropsDeps = Arrays.stream(classpathProp.split(" "))
@@ -221,6 +215,12 @@ class EngineBase {
 
        JkPathSequence kbeanClasspath = JkPathSequence.of(dependencyResolver.resolveFiles(dependencies))
                          .and(JkLocator.getJekaJarPath());
+
+         if (skipJekaSrc) {
+             JkLog.debugEndTask();
+             this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs, kbeanClasspath);
+             return this.classpathSetupResult;
+         }
 
         // compute classpath for compiling 'jeka-src'
         JkPathSequence compileClasspath = kbeanClasspath
@@ -465,7 +465,7 @@ class EngineBase {
 
         // Find classes in jeka-src-classes. As it is small scope, we don't need caching
         final List<String> jekaSrcKBeans;
-        if (JkPathTree.of(jekaSrcClassDir).withMatcher(JAVA_CLASS_MATCHER).containFiles()) {
+        if (JkPathTree.of(jekaSrcClassDir).withMatcher(JAVA_CLASS_MATCHER).containFiles() && !skipJekaSrc) {
             ClassLoader srcClassloader = JkUrlClassLoader.of(jekaSrcClassDir).get();
             //AppendableUrlClassloader srcClassloader = createScanClassloader(jekaSrcClassDir);
             jekaSrcKBeans = scanner.findClassesExtending(srcClassloader, KBean.class, jekaSrcClassDir);
@@ -482,7 +482,8 @@ class EngineBase {
         Path kbeanCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classes.txt");
 
         // -- If cache matches, returns cached resul
-        if (cachedClasspath.equals(kbeanClasspath)) {
+        // -- kbeanCache file may not exist is compilation is skipped
+        if ( cachedClasspath.equals(kbeanClasspath) && Files.exists(kbeanCache)) {
              List<String> cachedKbeans = JkUtilsIterable.readStringsFrom(kbeanCache, "\n");
              if (!cachedKbeans.isEmpty()) {
                  List<String> result = new LinkedList<>(jekaSrcKBeans);
@@ -493,7 +494,16 @@ class EngineBase {
 
         // -- Scan deps
         ClassLoader depClassloader = JkUrlClassLoader.of(classpathSetupResult.kbeanClasspath).get();
-        List<String> depsKBeans = scanner.findClassesExtending(depClassloader, KBean.class, true, true);
+
+        // If we skip jeka-src, we need look in KBean classes in parent classloaders as we are
+        // probably relying on IDE classloader.
+        boolean ignoreParentClassloaders = !skipJekaSrc;
+        List<String> depsKBeans = scanner.findClassesExtending(
+                depClassloader,
+                KBean.class,
+                ignoreParentClassloaders,
+                true,
+                true);
 
         // -- Update cache
         kbeanClasspath.writeTo(classpathCache);
@@ -628,19 +638,18 @@ class EngineBase {
 
     private ClasspathSetupResult compileLessClasspathResult(
             ParsedSourceInfo parsedSourceInfo,
-            List<EngineBase> subBaseDirs) {
+            List<EngineBase> subBaseDirs,
+            JkPathSequence classpath) {
 
         return new ClasspathSetupResult(
                 true,
-                JkPathSequence.of(),
-                JkPathSequence.of(),
+                classpath,
+                classpath,
                 JkPathSequence.of(
                         dependencyResolver.resolveFiles(parsedSourceInfo.getExportedDependencies())),
                 parsedSourceInfo.getExportedDependencies()
                         .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER),
                 subBaseDirs);
     }
-
-
 
 }

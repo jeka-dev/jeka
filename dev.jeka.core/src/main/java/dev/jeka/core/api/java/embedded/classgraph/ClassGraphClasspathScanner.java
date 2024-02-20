@@ -146,9 +146,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
         return result;
     }
 
+    @Override
     public List<String> findClassesExtending(
              ClassLoader classLoader,
              Class<?> baseClass,
+             boolean ignoreParentClassloaders,
              boolean scanJar,
              boolean scanFolder) {
 
@@ -161,9 +163,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
                 .rejectPackages(REJECTED_PACKAGES)
 
-                .ignoreParentClassLoaders()
                 .overrideClassLoaders(classLoader)
                 .ignoreClassVisibility();
+        if (ignoreParentClassloaders) {
+            classGraph.ignoreParentClassLoaders();
+        }
         if (!scanJar) {
             classGraph.disableJarScanning();
         }

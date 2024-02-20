@@ -84,6 +84,7 @@ class Environment {
                 cmdLineOptions.cleanWork.isPresent(),
                 cmdLineOptions.cleanOutput.isPresent(),
                 cmdLineOptions.ignoreCompileFail.isPresent(),
+                false,
                 null
         );
     }

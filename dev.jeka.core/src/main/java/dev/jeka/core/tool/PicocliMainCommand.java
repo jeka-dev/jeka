@@ -109,6 +109,10 @@ public class PicocliMainCommand {
             description = "Set the KBean name to use as default.")
     private String defaultKBean;
 
+    @Option(names = { "-sk", "--skip-compile"},
+            description = "Do not compile jeka-src")
+    private boolean skipCompile;
+
     @Option(names = { "-D<name>"},
             paramLabel = "<value>",
             description = "Define system property")
@@ -165,7 +169,13 @@ public class PicocliMainCommand {
     }
 
     EnvBehaviorSettings behaviorSettings() {
-        return new EnvBehaviorSettings(defaultKBean, cleanWork, cleanOutput, ignoreCompileFailure, commandHelp);
+        return new EnvBehaviorSettings(
+                defaultKBean,
+                cleanWork,
+                cleanOutput,
+                ignoreCompileFailure,
+                skipCompile,
+                commandHelp);
     }
 
     JkDependencySet dependencies() {

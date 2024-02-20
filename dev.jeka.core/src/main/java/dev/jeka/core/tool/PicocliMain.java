@@ -20,10 +20,14 @@ import java.util.stream.Collectors;
 
 class PicocliMain {
 
-    // Method called by reflection in Main
     public static void main(String[] args) {
+        doMain(args);
+    }
 
-        JkRunbase.convertFieldValues = false;
+    // Method called by reflection in Main
+    static JkRunbase doMain(String[] args) {
+
+        dev.jeka.core.tool.JkRunbase.convertFieldValues = false;
 
         long startTime = System.currentTimeMillis();
 
@@ -49,10 +53,12 @@ class PicocliMain {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = JkRunbase.constructProperties(baseDir);
+        JkProperties props = dev.jeka.core.tool.JkRunbase.constructProperties(baseDir);
         CmdLineArgs interpolatedArgs = filteredArgs.interpolated(props);
 
         EnvLogSettings logs = EnvLogSettings.ofDefault();
+
+        EngineBase engineBase = null;
 
         try {
 
@@ -69,7 +75,8 @@ class PicocliMain {
 
             // Instantiate the Engine
             JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
-            EngineBase engineBase = EngineBase.of(baseDir, false, downloadRepos, dependencies, logs, behavior);
+            engineBase = EngineBase.of(baseDir, behavior.skipCompile,
+                    downloadRepos, dependencies, logs, behavior);
 
             // Compile jeka-src and resolve its dependencies
             JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
@@ -103,7 +110,7 @@ class PicocliMain {
             }
 
             // Parse command line to get action beans
-            JkProperties jekaProps = JkRunbase.readBaseProperties(baseDir);
+            JkProperties jekaProps = dev.jeka.core.tool.JkRunbase.readBaseProperties(baseDir);
             List<KBeanAction> kBeanActions = PicocliParser.parse(
                     interpolatedArgs.withoutOptions(),
                     jekaProps,
@@ -133,7 +140,7 @@ class PicocliMain {
             handleGenericThrowable(t, startTime, logs);
             System.exit(1);
         }
-        System.exit(0);
+        return engineBase.getRunbase();
     }
 
     // This class should lies outside PicocliMainCommand to be referenced inn annotation
@@ -277,6 +284,18 @@ class PicocliMain {
             e.printStackTrace(System.err);
             System.err.flush();
             System.err.println("=========================================================================================");
+        }
+    }
+
+    static class MainResult {
+
+        final int exitCode;
+
+        final JkRunbase runbase;
+
+        MainResult(int exitCode, JkRunbase runbase) {
+            this.exitCode = exitCode;
+            this.runbase = runbase;
         }
     }
 

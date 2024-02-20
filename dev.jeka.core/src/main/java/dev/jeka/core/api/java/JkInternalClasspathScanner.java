@@ -22,20 +22,30 @@ public interface JkInternalClasspathScanner {
 
     List<String> findClassesWithMainMethod(ClassLoader extraClassLoader);
 
-    List<String> findClassesMatchingAnnotations(ClassLoader classloader,
-                                                Predicate<List<String>> annotationPredicate);
+    List<String> findClassesMatchingAnnotations(
+            ClassLoader classloader,
+            Predicate<List<String>> annotationPredicate);
 
-    List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, boolean scanJars, boolean scanFolder);
+    List<String> findClassesExtending(
+            ClassLoader classLoader,
+            Class<?> baseClass,
+            boolean ignoreParentClassloaders,
+            boolean scanJars,
+            boolean scanFolder);
 
-    List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, Path classDir);
+    List<String> findClassesExtending(
+            ClassLoader classLoader,
+            Class<?> baseClass,
+            Path classDir);
 
-    List<String> findClassesInheritingOrAnnotatesWith(ClassLoader classLoader,
-                                                      Class<?> baseClass,
-                                                      Predicate<String> scanElementFilter,
-                                                      Predicate<Path> returnElementFilter,
-                                                      boolean ignoreVisibility,
-                                                      boolean ignoreParentClassloaders,
-                                                      Class<?> ... annotations);
+    List<String> findClassesInheritingOrAnnotatesWith(
+            ClassLoader classLoader,
+            Class<?> baseClass,
+            Predicate<String> scanElementFilter,
+            Predicate<Path> returnElementFilter,
+            boolean ignoreVisibility,
+            boolean ignoreParentClassloaders,
+            Class<?> ... annotations);
 
     Set<Class<?>> loadClassesHavingSimpleNameMatching(Predicate<String> predicate);
 
