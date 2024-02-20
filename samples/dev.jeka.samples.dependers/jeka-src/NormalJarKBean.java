@@ -45,7 +45,7 @@ public class NormalJarKBean extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarKBean.class).cleanPack();
+        JkInit.kbean(NormalJarKBean.class).cleanPack();
     }
 
 }

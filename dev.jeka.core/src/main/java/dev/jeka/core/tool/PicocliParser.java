@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
@@ -72,6 +73,9 @@ class PicocliParser {
             String msg = kbeanName == null ?
                     "No default KBean defined. You need to precise on which kbean apply '" + firstArg + "'"
                     : "No KBean found for name '" + kbeanName + "'";
+            if (JkLog.isVerbose()) {
+                msg = msg + ". Available KBeans : \n    " + String.join("\n    ", resolution.allKbeans);
+            }
             throw new CommandLine.ParameterException(cmdLine, msg + origin);
         }
         Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);

@@ -95,7 +95,7 @@ class Junit5Build extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(Junit5Build.class, args).cleanPack();
+        JkInit.kbean(Junit5Build.class, args).cleanPack();
     }
 
 }

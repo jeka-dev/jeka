@@ -41,7 +41,7 @@ public class JacocoSampleBuild extends KBean {
     }
 
     public static void main(String[] args) {
-        JacocoSampleBuild build = JkInit.instanceOf(JacocoSampleBuild.class);
+        JacocoSampleBuild build = JkInit.kbean(JacocoSampleBuild.class);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         build.cleanOutput();
         build.projectKBean.test();

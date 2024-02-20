@@ -100,7 +100,7 @@ public class SignedArtifactsKBean extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(SignedArtifactsKBean.class, args).cleanPackPublish();
+        JkInit.kbean(SignedArtifactsKBean.class, args).cleanPackPublish();
     }
    
 }

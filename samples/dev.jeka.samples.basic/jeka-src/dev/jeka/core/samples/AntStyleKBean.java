@@ -151,7 +151,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(AntStyleKBean.class, args).cleanPackPublish();
+        JkInit.kbean(AntStyleKBean.class, args).cleanPackPublish();
     }
 
 }

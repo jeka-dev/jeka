@@ -31,7 +31,7 @@ class Build extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).hello();
+        JkInit.kbean(Build.class, args).hello();
     }
 
 }

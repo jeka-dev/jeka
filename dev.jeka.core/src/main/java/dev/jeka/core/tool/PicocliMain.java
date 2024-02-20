@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -8,13 +9,16 @@ import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -143,6 +147,39 @@ class PicocliMain {
         return engineBase.getRunbase();
     }
 
+    static void displayRuntimeInfo(Path baseDir, String[] cmdLine) {
+        Jk2ColumnsText txt = Jk2ColumnsText.of(18, 150);
+        txt.add("Working Directory", System.getProperty("user.dir"));
+        txt.add("Base Directory", baseDir.toAbsolutePath());
+        txt.add("Command Line",  String.join(" ", Arrays.asList(cmdLine)));
+        txt.add("Java Home",  System.getProperty("java.home"));
+        txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        txt.add("Jeka Version",  JkInfo.getJekaVersion());
+
+        if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
+            txt.add("Jeka Home", Paths.get(JkConstants.JEKA_BOOT_DIR).normalize() + " ( embedded !!! )");
+        } else {
+            txt.add("Jeka Home", JkLocator.getJekaHomeDir().normalize());
+        }
+        txt.add("Jeka User Home", JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
+        txt.add("Jeka Cache Dir",  JkLocator.getCacheDir().toAbsolutePath().normalize());
+        JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
+        txt.add("Download Repos", JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
+                .map(JkRepo::getUrl).collect(Collectors.toList()));
+        JkLog.info(txt.toString());
+    }
+
+    private static boolean embedded(Path jarFolder) {
+        if (!Files.exists(bootDir())) {
+            return false;
+        }
+        return JkUtilsPath.isSameFile(bootDir(), jarFolder);
+    }
+
+    private static Path bootDir() {
+        return Paths.get(JkConstants.JEKA_BOOT_DIR);
+    }
+
     // This class should lies outside PicocliMainCommand to be referenced inn annotation
     static class VersionProvider implements CommandLine.IVersionProvider {
 
@@ -159,7 +196,7 @@ class PicocliMain {
             displayIntro();
         }
         if (logSettings.runtimeInformation) {
-            JkInit.displayRuntimeInfo(baseDir, cmdLine);
+            displayRuntimeInfo(baseDir, cmdLine);
         }
         if (logSettings.debug) {
             JkLog.setVerbosity(JkLog.Verbosity.DEBUG);

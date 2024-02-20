@@ -248,21 +248,22 @@ class MasterBuild extends KBean {
         return result;
     }
 
-
+    /**
+     * Build + test + publish
+     */
     public static void main(String[] args) throws Exception {
         JkInit.kbean(MasterBuild.class, args).make();
-        //JkInit.instanceOf(MasterBuild.class, args).make();
     }
 
     static class BuildFast {
         public static void main(String[] args) {
-            JkInit.instanceOf(MasterBuild.class, args).buildFast();
+            JkInit.kbean(MasterBuild.class, args).buildFast();
         }
     }
 
     static class ShowVersion {
         public static void main(String[] args) {
-            System.out.println(JkInit.instanceOf(GitKBean.class, args).gerVersionFromGit().getVersion());
+            System.out.println(JkInit.kbean(GitKBean.class, args).gerVersionFromGit().getVersion());
         }
     }
 

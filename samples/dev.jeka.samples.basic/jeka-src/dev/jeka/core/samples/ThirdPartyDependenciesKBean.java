@@ -54,7 +54,7 @@ public class ThirdPartyDependenciesKBean extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(ThirdPartyDependenciesKBean.class, args).cleanPack();
+        JkInit.kbean(ThirdPartyDependenciesKBean.class, args).cleanPack();
     }
 
 }

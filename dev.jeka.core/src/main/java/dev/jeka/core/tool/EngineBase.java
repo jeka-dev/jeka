@@ -536,22 +536,6 @@ class EngineBase {
 
     }
 
-    private List<KBeanAction> getKBeanActionFromProperties() {
-        Map<String, String> props = properties.getAllStartingWith("", true);
-        return props.entrySet().stream()
-                .filter(entry -> entry.getKey().contains(ParsedCmdLine.KBEAN_SYMBOL))
-                .map(entry -> {
-
-                    // 'someBean#=' should be interpreted as 'someBean#'
-                    if (entry.getKey().endsWith(ParsedCmdLine.KBEAN_SYMBOL)) {
-                        return entry.getKey() + ParsedCmdLine.KBEAN_SYMBOL;
-                    }
-                    return entry.getKey() + "=" + entry.getValue();
-                })
-                .map(KBeanAction::new)
-                .collect(Collectors.toList());
-    }
-
     static class ClasspathSetupResult {
 
         final JkPathSequence runClasspath;

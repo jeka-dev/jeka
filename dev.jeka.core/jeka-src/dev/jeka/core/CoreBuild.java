@@ -187,12 +187,12 @@ public class CoreBuild extends KBean {
 
     // This method has to be run in dev.jeka.core (this module root) working directory
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, args).cleanPack();
+        JkInit.kbean(CoreBuild.class, args).cleanPack();
     }
 
     public static class RunBuildAndIT {
         public static void main(String[] args) {
-            CoreBuild coreBuild = JkInit.instanceOf(CoreBuild.class, args, "-runIT");
+            CoreBuild coreBuild = JkInit.kbean(CoreBuild.class, args, "-runIT");
             coreBuild.project.pack();
         }
     }

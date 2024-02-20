@@ -60,7 +60,7 @@ public class SpringbootSampleBuild extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(SpringbootSampleBuild.class, args).projectKBean.info();
+        JkInit.kbean(SpringbootSampleBuild.class, args).projectKBean.info();
     }
 
 }

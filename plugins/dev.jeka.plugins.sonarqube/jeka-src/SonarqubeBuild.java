@@ -40,7 +40,7 @@ class SonarqubeBuild extends KBean {
     }
 
     public static void main(String[] args) {
-        SonarqubeBuild build = JkInit.instanceOf(SonarqubeBuild.class);
+        SonarqubeBuild build = JkInit.kbean(SonarqubeBuild.class);
         build.cleanPack();
         build.load(MavenKBean.class).publishLocal();
     }
