@@ -70,17 +70,12 @@ public final class JkJavaCompilerToolChain {
         return this;
     }
 
-
     /**
      * Sets the underlying compiler with the specified process. The process is typically a 'javac' command.
      */
     public JkJavaCompilerToolChain setJavacProcess(JkProcess compileProcess) {
         this.toolOrProcess = new ToolOrProcess(null, compileProcess);
         return this;
-    }
-
-    public JkJavaCompilerToolChain setJavacProcessJavaHome(Path javaHome) {
-        return this.setJavacProcess(JkProcess.of(javaHome.resolve("bin/javac").toString()));
     }
 
     /**
@@ -178,7 +173,7 @@ public final class JkJavaCompilerToolChain {
             JkLog.info("sources      : " + compileSpec.getSources());
             JkLog.info("to           : " + compileSpec.getOutputDir());
             JkLog.info("with options : " );
-            JkLog.info(JkUtilsString.readableCommandAgs("    ", options));
+            JkLog.info(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
         }
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
                 .orElse(compileSpec.minJavaVersion());
@@ -215,10 +210,6 @@ public final class JkJavaCompilerToolChain {
         return task.call();
     }
 
-    private static boolean runOnProcess(JkJavaCompileSpec compileSpec, Path javaHome) {
-        return runOnProcess(compileSpec, JkProcess.of(javaHome + "/bin/javac"));
-    }
-
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Compile using command " + process.getCommand());
         final List<String> sourcePaths = new LinkedList<>();
@@ -227,22 +218,6 @@ public final class JkJavaCompilerToolChain {
         process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
         JkLog.info(sourcePaths.size() + " files to compile.");
         return process.exec().hasSucceed();
-    }
-
-    private static JavaCompiler getDefaultCompilerToolOrFail() {
-        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        if (compiler == null) {
-            String javaHome = System.getProperty("java.home");
-            throw new IllegalStateException("The current Java Platform " + javaHome + " does not provide compiler."  +
-                    "Try another JDK or specify property jeka.jdk.[version]=/path/to/jdk");
-        }
-        return compiler;
-    }
-
-    // Visible for testing
-    static String runningJdkVersion() {
-        final String fullVersion = System.getProperty("java.version");
-        return runningJdkVersion(fullVersion);
     }
 
     // Visible for testing
@@ -255,10 +230,6 @@ public final class JkJavaCompilerToolChain {
             return items[1];
         }
         return items[0];
-    }
-
-    private String[] forkOptions() {
-        return forkParams == null ? new String[0] : forkParams;
     }
 
     @SuppressWarnings("rawtypes")
@@ -324,6 +295,16 @@ public final class JkJavaCompilerToolChain {
                  throw new IllegalStateException("Neither compilation tool or process has been specified.");
              }
          }
+    }
+
+    private static void loadOptionsIfNeeded(JkJavaCompileSpec compileSpec) {
+        if (JkLog.isVerbose()) {
+            JkLog.startTask("compile");
+            JkLog.info("sources      : " + compileSpec.getSources());
+            JkLog.info("to           : " + compileSpec.getOutputDir());
+            JkLog.info("with options : " );
+            JkLog.info(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
+        }
     }
 
 }

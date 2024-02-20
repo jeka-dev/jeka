@@ -15,8 +15,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="dev.jeka.core" exported="" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" exported="" scope="TEST" />
-    <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" exported="" scope="TEST" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.jacoco" exported="" />
+    <orderEntry type="module" module-name="dev.jeka.plugins.sonarqube" exported="" />
     <orderEntry type="module" module-name="dev.jeka.plugins.springboot" exported="" scope="TEST" />
     <orderEntry type="module" module-name="dev.jeka.plugins.nodejs" exported="" scope="TEST" />
     <orderEntry type="module" module-name="dev.jeka.plugins.kotlin" exported="" scope="TEST" />

@@ -54,9 +54,6 @@ class PicocliMain {
 
         EnvLogSettings logs = EnvLogSettings.ofDefault();
 
-        // Keep current classloader to restore in case of exception
-        final ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader();
-
         try {
 
             // first, parse only options
@@ -70,13 +67,17 @@ class PicocliMain {
             // setup logging
             setupLogging(logs, baseDir, interpolatedArgs.get());
 
-            // Compile and resolve deps for jeka-src
+            // Instantiate the Engine
             JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
-            EngineBase engineBase = EngineBase.of(baseDir, downloadRepos, dependencies, logs, behavior);
+            EngineBase engineBase = EngineBase.of(baseDir, false, downloadRepos, dependencies, logs, behavior);
+
+            // Compile jeka-src and resolve its dependencies
             JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
             if (logs.runtimeInformation) {
                 logRuntimeInfoBase(engineBase, props);
             }
+
+            // Resolve KBeans
             EngineBase.KBeanResolution kBeanResolution = engineBase.getKbeanResolution();
             EngineBase.ClasspathSetupResult classpathSetupResult = engineBase.getClasspathSetupResult();
 
@@ -129,7 +130,6 @@ class PicocliMain {
             commandLine.getErr().println("Try 'jeka --commands' or 'jeka -cmd' for more information.");
             System.exit(1);
         } catch (Throwable t) {
-            Thread.currentThread().setContextClassLoader(originalClassloader);
             handleGenericThrowable(t, startTime, logs);
             System.exit(1);
         }

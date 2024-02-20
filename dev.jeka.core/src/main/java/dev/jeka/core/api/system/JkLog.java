@@ -290,11 +290,11 @@ public final class JkLog implements Serializable {
     }
 
     public static boolean isVerbose() {
-        return verbosity == Verbosity.VERBOSE;
+        return isDebug() || verbosity == Verbosity.VERBOSE;
     }
 
     public static boolean isDebug() {
-        return isVerbose() || (verbosity == Verbosity.DEBUG);
+        return  verbosity == Verbosity.DEBUG;
     }
 
     private static void consume(JkLogEvent event) {

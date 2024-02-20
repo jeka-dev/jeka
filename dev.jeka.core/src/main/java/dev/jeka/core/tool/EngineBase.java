@@ -66,6 +66,8 @@ class EngineBase {
 
     final Path baseDir;
 
+    private final boolean skipJekaSrc;
+
     private final JkDependencyResolver dependencyResolver;
 
     private final JkDependencySet commandLineDependencies;
@@ -91,12 +93,14 @@ class EngineBase {
     private JkRunbase runbase;
 
     private EngineBase(Path baseDir,
+                       boolean skipJekaSrc,
                        JkRepoSet downloadRepos,
                        JkDependencySet commandLineDependencies,
                        EnvLogSettings logSettings,
                        EnvBehaviorSettings behaviorSettings) {
 
         this.baseDir = baseDir;
+        this.skipJekaSrc = skipJekaSrc;
         this.commandLineDependencies = commandLineDependencies;
         this.logSettings = logSettings;
         this.behaviorSettings = behaviorSettings;
@@ -114,7 +118,7 @@ class EngineBase {
                 !behaviorSettings.ignoreCompileFailure);
     }
 
-     static EngineBase of(Path baseDir, JkRepoSet downloadRepos,
+     static EngineBase of(Path baseDir, boolean skipJekaSrc, JkRepoSet downloadRepos,
                           JkDependencySet commandLineDependencies, EnvLogSettings logSettings,
                           EnvBehaviorSettings behaviorSettings) {
 
@@ -123,14 +127,14 @@ class EngineBase {
 
         // ensure only 1 baseProcessor per base
         return MAP.computeIfAbsent(path,
-                key -> new EngineBase(key, downloadRepos, commandLineDependencies, logSettings, behaviorSettings));
+                key -> new EngineBase(key, skipJekaSrc, downloadRepos, commandLineDependencies, logSettings, behaviorSettings));
     }
 
     // TODO remove after validation of 0.11.x
     static EngineBase forLegacy(Path baseDir, JkDependencySet cmdlineDeps) {
         JkProperties props = JkRunbase.constructProperties(baseDir);
         JkRepoSet repos = JkRepoProperties.of(props).getDownloadRepos();
-        return of(baseDir, repos, cmdlineDeps, Environment.logs, Environment.behavior);
+        return of(baseDir, false, repos, cmdlineDeps, Environment.logs, Environment.behavior);
     }
 
     private static String classNameFromClassFilePath(Path relativePath) {
@@ -152,7 +156,7 @@ class EngineBase {
     }
 
     EngineBase withBaseDir(Path baseDir) {
-        return of(baseDir, this.dependencyResolver.getRepos(), this.commandLineDependencies,
+        return of(baseDir, this.skipJekaSrc, this.dependencyResolver.getRepos(), this.commandLineDependencies,
                 this.logSettings, this.behaviorSettings);
     }
 
@@ -191,10 +195,16 @@ class EngineBase {
         List<EngineBase> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
                 .map(this::withBaseDir)
                 .collect(Collectors.toList());
+
         JkPathSequence addedClasspathFromSubDirs = subBaseDirs.stream()
                 .map(EngineBase::resolveClassPaths)
                 .map(classpathSetupResult -> classpathSetupResult.runClasspath)
                 .reduce(JkPathSequence.of(), JkPathSequence::and);
+
+        if (skipJekaSrc) {
+            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs);
+            return this.classpathSetupResult;
+        }
 
         // compute classpath to look in for finding KBeans
         String classpathProp = properties.get(JkConstants.CLASSPATH_INJECT_PROP, "");
@@ -541,7 +551,7 @@ class EngineBase {
         final JkDependencySet exportedDependencies;
         final boolean compileResult;
 
-        public ClasspathSetupResult(boolean compileResult,
+        ClasspathSetupResult(boolean compileResult,
                                     JkPathSequence runClasspath,  // The full classpath to run Jeka upon
                                     JkPathSequence kbeanClasspath, // The classpath to find in KBeans
                                     JkPathSequence exportedClasspath,
@@ -615,5 +625,22 @@ class EngineBase {
             this.extraClasspath = extraClasspath;
         }
     }
+
+    private ClasspathSetupResult compileLessClasspathResult(
+            ParsedSourceInfo parsedSourceInfo,
+            List<EngineBase> subBaseDirs) {
+
+        return new ClasspathSetupResult(
+                true,
+                JkPathSequence.of(),
+                JkPathSequence.of(),
+                JkPathSequence.of(
+                        dependencyResolver.resolveFiles(parsedSourceInfo.getExportedDependencies())),
+                parsedSourceInfo.getExportedDependencies()
+                        .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER),
+                subBaseDirs);
+    }
+
+
 
 }

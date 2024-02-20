@@ -34,7 +34,7 @@ class EngineWrapper {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-engine-base-");
         EnvLogSettings logSettings = Environment.createLogSettings(args);
         EnvBehaviorSettings behaviorSettings = Environment.createBehaviorSettings(args);
-        engineBase = EngineBase.of(baseDir, JkRepoSet.ofLocal(),
+        engineBase = EngineBase.of(baseDir, false, JkRepoSet.ofLocal(),
                 JkDependencySet.of(), logSettings, behaviorSettings);
         EngineBase.KBeanResolution kBeanResolution = kBeanResolution(engineBase, localKBeanClasses);
         run(engineBase, kBeanResolution, args);
