@@ -6,6 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +47,10 @@ class PicocliParser {
     private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, EngineBase.KBeanResolution resolution,
                                                           String source) {
 
+        if (args.get().length == 0) {
+            return Collections.emptyList();
+        }
+
         // Find KBean class tto which apply the args
         String firstArg = args.get()[0];
         final String kbeanName;
@@ -63,10 +68,11 @@ class PicocliParser {
         }
         if (kbeanClassName == null) {
             CommandLine cmdLine = allKBeanCommandLine(resolution.allKbeans, source);
+            String origin = source.isEmpty() ? "." : " (from " + source + ").";
             String msg = kbeanName == null ?
                     "No default KBean defined. You need to precise on which kbean apply '" + firstArg + "'"
-                    : "No KBean found for name '" + kbeanName + "'.";
-            throw new CommandLine.ParameterException(cmdLine, msg);
+                    : "No KBean found for name '" + kbeanName + "'";
+            throw new CommandLine.ParameterException(cmdLine, msg + origin);
         }
         Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
 

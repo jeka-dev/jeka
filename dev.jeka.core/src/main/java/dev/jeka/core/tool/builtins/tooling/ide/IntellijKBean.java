@@ -79,7 +79,7 @@ public final class IntellijKBean extends KBean {
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        JkLog.info("Iml file generated at " + imlPath);
+        JkLog.info("Iml file generated at " + getBaseDir().relativize(imlPath));
         if ("true".equals(getRunbase().getProperties().get(IML_SKIP_MODULE_XML_PROP))) {
             return;
         }

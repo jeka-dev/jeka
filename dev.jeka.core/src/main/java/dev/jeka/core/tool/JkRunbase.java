@@ -49,6 +49,7 @@ public final class JkRunbase {
 
     private static Path masterBaseDir;
 
+    // Relative Path
     private final Path baseDir;
 
     private JkDependencyResolver dependencyResolver;
@@ -67,9 +68,9 @@ public final class JkRunbase {
 
     private final Map<Class<? extends KBean>, KBean> beans = new LinkedHashMap<>();
 
-    private JkRunbase(Path projectBaseDir) {
-        this.baseDir = projectBaseDir;
-        this.properties = constructProperties(projectBaseDir);
+    private JkRunbase(Path baseDir) {
+        this.baseDir = baseDir;
+        this.properties = constructProperties(baseDir);
     }
 
     /**

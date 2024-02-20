@@ -323,7 +323,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     private void configureProject() {
         project.setBaseDir(getBaseDir());
-        if (JkLog.isAnimationAccepted()) {
+        if (!JkLog.isAnimationAccepted()) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressOutputStyle.SILENT);
         }

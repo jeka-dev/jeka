@@ -53,7 +53,8 @@ public final class JkInit {
             commands.add(new EngineCommand(EngineCommand.Action.BEAN_INIT, clazz, null, null));
             commands.addAll(engineKBeanClassResolver.resolve(Environment.parsedCmdLine, KBean.name(clazz), false));
 
-            JkRunbase runbase = JkRunbase.get(Paths.get(""));
+            JkRunbase.setMasterBaseDir(Paths.get("").toAbsolutePath());
+            JkRunbase runbase = JkRunbase.get(Paths.get("").toAbsolutePath());
             runbase.setImportedRunbaseDirs(getImportedProjects(clazz));
             JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
             JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();

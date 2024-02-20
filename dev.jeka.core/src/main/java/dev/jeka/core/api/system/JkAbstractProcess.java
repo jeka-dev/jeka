@@ -278,7 +278,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         if (JkLog.isVerbose()) {
             addParams("-lv");
         }
-        if(JkLog.isAnimationAccepted()) {
+        if(!JkLog.isAnimationAccepted()) {
             addParams("-lna");
         }
         return (T) this;

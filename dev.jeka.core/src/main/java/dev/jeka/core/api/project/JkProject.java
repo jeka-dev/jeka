@@ -578,6 +578,15 @@ public final class JkProject implements JkIdeSupportSupplier {
         return this;
     }
 
+    String relativeLocationLabel() {
+        Path workingDir = Paths.get("").toAbsolutePath();
+        Path baseDir = getBaseDir().toAbsolutePath().normalize();
+        if (workingDir.equals(baseDir)) {
+            return "";
+        }
+        return " [from " + workingDir.relativize(baseDir) + "]";
+    }
+
     private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
         JkResolveResult resolveResult = dependencyResolver.resolve(deps);
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();

@@ -209,7 +209,8 @@ public class JkProjectCompilation {
     }
 
     private String taskSuffix() {
-        return "production".equals(this.purpose()) ? "" : " (" + this.purpose() + ")";
+        return "production".equals(this.purpose()) ? "" : " (" + this.purpose() + ")"
+                + project.relativeLocationLabel();
     }
 
 }

@@ -174,11 +174,12 @@ class EngineBase {
             JkPathTree.of(workDir).deleteContent();
         }
 
-        // That nice that this clean occurs here, cause it will happen for sub-basedir
-        if (Environment.behavior.cleanOutput) {
+        // That is nice that this clean occurs here, because it will happen for sub-basedir as well.
+        if (behaviorSettings.cleanOutput) {
             Path outputDir = baseDir.resolve(JkConstants.OUTPUT_PATH);
             JkLog.debug("Clean jeka-output directory %s", outputDir.toAbsolutePath().normalize());
             JkPathTree.of(outputDir).deleteContent();
+            JkLog.verbose("Clean %s dir", outputDir);
         }
 
         // Parse info from source code

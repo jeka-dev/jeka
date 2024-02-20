@@ -25,7 +25,8 @@ public class JkConsoleSpinner {
 
     public void run(Runnable runnable) {
         Console console = System.console();
-        if (console == null || JkLog.isVerbose() || JkLog.isAnimationAccepted()) {
+        if (console == null || JkLog.isVerbose() || !JkLog.isAnimationAccepted()
+                || JkMemoryBufferLogDecorator.isActive()) {
             if (alternativeMassage != null) {
                 JkLog.info(alternativeMassage);
             }

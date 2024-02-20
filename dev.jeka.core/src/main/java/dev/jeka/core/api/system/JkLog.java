@@ -80,7 +80,7 @@ public final class JkLog implements Serializable {
 
     private static Style decoratorStyle;
 
-    // if false, no working animation should be displayed.
+    // if false, no animation should be displayed.
     private static boolean acceptAnimation = true;
 
     private static boolean showTaskDuration;
@@ -137,7 +137,7 @@ public final class JkLog implements Serializable {
     }
 
     public static boolean isAnimationAccepted() {
-        return !acceptAnimation;
+        return acceptAnimation;
     }
 
     public static void setAcceptAnimation(boolean acceptAnimation) {

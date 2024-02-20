@@ -26,24 +26,24 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         System.out.println("=================================");
 
         // Regular project
-        String scaffoldCmd = scaffoldArgs("project# project#scaffold");
-        String checkCmd = checkArgs("project#info project#pack -lsu project#version=0.0.1");
+        String scaffoldCmd = scaffoldArgs("project: scaffold");
+        String checkCmd = checkArgs("project: info pack version=0.0.1");
         RunChecker runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.checkCmd = checkCmd;
         runChecker.run();
 
         // Project with simple layout
-        scaffoldCmd = scaffoldArgs("project#layout.style=SIMPLE springboot# project#scaffold");
-        checkCmd = checkArgs("project#pack");
+        scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold");
+        checkCmd = checkArgs("project: pack");
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.checkCmd = checkCmd;
         runChecker.run();
 
         // Project with self springboot
-        scaffoldCmd = scaffoldArgs("base#scaffold springboot#");
-        checkCmd = checkArgs("base#test base#buildJar");
+        scaffoldCmd = scaffoldArgs("base: scaffold springboot:");
+        checkCmd = checkArgs("base: test buildJar");
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.checkCmd = checkCmd;
@@ -75,7 +75,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 System.out.println("Scaffold command " + scaffoldCmd);
 
                 // launch checker in separate process
-                JkProcHandler handler = prepareWithBaseDirJekaShell(path, checkCmd).execAsync();
+                JkProcHandler handler = prepareWithBaseDirJekaShell(path, "% " + checkCmd).execAsync();
 
                 // try to get a Ok response
                 JkUtilsNet.checkUntilOk(url, checkHttpTimeout, checkHttpSleep);
@@ -86,7 +86,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 JkUtilsAssert.state(ended, "Can't kill process");
 
             } else {
-                runWithBaseDirJekaShell(path, checkCmd);
+                runWithBaseDirJekaShell(path, "% " + checkCmd);
             }
 
             if (checkHttp) {
