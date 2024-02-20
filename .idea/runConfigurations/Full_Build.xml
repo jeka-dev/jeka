@@ -5,7 +5,7 @@
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="MasterBuild" />
     <module name="dev.jeka.master" />
-    <option name="PROGRAM_PARAMETERS" value="make -cw -ld -c" />
+    <option name="PROGRAM_PARAMETERS" value="-cw -ld -c" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

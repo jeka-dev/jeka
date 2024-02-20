@@ -39,7 +39,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
     }
 
     private void testWithRemoteGitHttp() {
-        Path jekaShellPath = getJekaShellPath().resolveSibling("jekap");
+        Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "ok")
@@ -58,7 +58,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path cachedDistrib = JkLocator.getCacheDir().resolve("distributions").resolve(SNAPSHOT_VERSION);
         JkPathTree.of(cachedDistrib).createIfNotExist().deleteRoot();
 
-        Path jekaShellPath = getJekaShellPath().resolveSibling("jekap");
+        Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL,  "ok")
@@ -85,7 +85,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path cachedJdk= JkLocator.getCacheDir().resolve("jdks").resolve(distro + "-" + javaVersion);
         JkPathTree.of(cachedJdk).createIfNotExist().deleteRoot();
 
-        Path jekaShellPath = getJekaShellPath().resolveSibling("jekap");
+        Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
         // We pass 'jeka.java.version" in cmdLine args to test this feature

@@ -2,8 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.HelpDisplayer.ItemContainer;
-import dev.jeka.core.tool.HelpDisplayer.RenderItem;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -52,7 +50,8 @@ final class KBeanDescription {
         }
         Collections.sort(methods);
         final List<BeanField> beanFields = new LinkedList<>();
-        for (final NameAndField nameAndField : fields(beanClass, "", true, null)) {
+        List<NameAndField> nameAndFields =  fields(beanClass, "", true, null);
+        for (final NameAndField nameAndField : nameAndFields) {
             beanFields.add(BeanField.of(beanClass, nameAndField.field,
                     nameAndField.name, nameAndField.rootClass, computeDefaultValue));
         }
@@ -104,7 +103,8 @@ final class KBeanDescription {
                 continue;
             }
             final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
-            if (!hasSubOption(field)) {
+
+            if (isTerminal(field.getType())) {  // optimization to avoid non necessary discoveries
                 result.add(new NameAndField(prefix + field.getName(), field, rootClass));
             } else {
                 final List<NameAndField> subOpts = fields(field.getType(), prefix + field.getName() + ".", false,
@@ -112,36 +112,15 @@ final class KBeanDescription {
                 result.addAll(subOpts);
             }
         }
-        return result.stream().filter(nameAndField -> !Modifier.isFinal(nameAndField.field.getModifiers()))
+        return result.stream()
+                .filter(nameAndField -> !Modifier.isFinal(nameAndField.field.getModifiers()))
                 .collect(Collectors.toList());
     }
 
-    private static boolean hasSubOption(Field field) {
-        return !JkUtilsReflect.getDeclaredFieldsWithAnnotation(field.getType(), JkDoc.class).isEmpty();
-    }
-
-    String asText(int leftColumnLength) {
-        List<BeanMethod> methods = this.beanMethods;
-        List<BeanField> properties =this.beanFields;
-        if (methods.isEmpty() && properties.isEmpty()) {
-            return "";
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        if (!methods.isEmpty()) {
-            stringBuilder.append(JkUtilsString.padEnd("Methods", leftColumnLength, ' ')).append(":\n");
-            List<RenderItem> items = methods.stream()
-                    .map(KBeanDescription::of).collect(Collectors.toList());
-            ItemContainer container = new ItemContainer(items);
-            container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
-        }
-        if (!properties.isEmpty()) {
-            stringBuilder.append(JkUtilsString.padEnd("Properties", leftColumnLength, ' ')).append(":\n");
-            List<RenderItem> items = properties.stream()
-                    .map(KBeanDescription::of).collect(Collectors.toList());
-            ItemContainer container = new ItemContainer(items);
-            container.render().forEach(line -> stringBuilder.append("  " + line + "\n"));
-        }
-        return stringBuilder.toString();
+    // For nested props, JkDoc must be present on the class or one of its fields.
+    private static boolean isTerminal(Class<?> fieldType) {
+        return !fieldType.isAnnotationPresent(JkDoc.class) &&
+                JkUtilsReflect.getDeclaredFieldsWithAnnotation(fieldType, JkDoc.class).isEmpty();
     }
 
 
@@ -290,25 +269,6 @@ final class KBeanDescription {
             return 1;
         }
 
-        private String type() {
-            if (type.isEnum()) {
-                return "Enum of " + enumValues(type);
-            }
-            return this.type.getSimpleName();
-        }
-
-        private static String enumValues(Class<?> enumClass) {
-            final Object[] values = enumClass.getEnumConstants();
-            final StringBuilder result = new StringBuilder();
-            for (int i = 0; i < values.length; i++) {
-                result.append(values[i].toString());
-                if (i + 1 < values.length) {
-                    result.append(", ");
-                }
-            }
-            return result.toString();
-        }
-
     }
 
     private static class NameAndField {
@@ -331,28 +291,5 @@ final class KBeanDescription {
         }
 
     }
-
-    static RenderItem of(BeanMethod beanMethod) {
-        String name = beanMethod.name;
-        List<String> descLines = JkUtilsString.isBlank(beanMethod.description)
-                ? Collections.singletonList("No description available.")
-                : RenderItem.split(beanMethod.description);
-        return new RenderItem(name, descLines);
-    }
-
-    static RenderItem of(BeanField beanField) {
-        String name = beanField.name;
-        List<String> descLines = JkUtilsString.isBlank(beanField.description)
-                ? Collections.singletonList("No description available.")
-                : RenderItem.split(beanField.description);
-        LinkedList result = new LinkedList(descLines);
-        String last = (String) result.pollLast();
-        last = last + "  [" + beanField.type() + "  default=" + beanField.defaultValue + "]";
-        result.add(last);
-        return new RenderItem(name, result);
-    }
-
-
-
 
 }

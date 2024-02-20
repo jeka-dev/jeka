@@ -22,12 +22,13 @@ import java.util.stream.Collectors;
 
 class EngineWrapper {
 
-    final Class<? extends KBean>[] localKBeanClasses;
+    final Class<? extends KBean>[] jekaSrcKBeanClasses;
 
     EngineBase engineBase;
 
-    protected EngineWrapper(Class<? extends KBean> ...localKBeanClasses) {
-        this.localKBeanClasses = localKBeanClasses;
+    @SafeVarargs
+    EngineWrapper(Class<? extends KBean> ...jekaSrcKBeanClasses) {
+        this.jekaSrcKBeanClasses = jekaSrcKBeanClasses;
     }
 
     EngineWrapper run(String... args) {
@@ -36,7 +37,7 @@ class EngineWrapper {
         EnvBehaviorSettings behaviorSettings = Environment.createBehaviorSettings(args);
         engineBase = EngineBase.of(baseDir, false, JkRepoSet.ofLocal(),
                 JkDependencySet.of(), logSettings, behaviorSettings);
-        EngineBase.KBeanResolution kBeanResolution = kBeanResolution(engineBase, localKBeanClasses);
+        EngineBase.KBeanResolution kBeanResolution = kBeanResolution(engineBase, jekaSrcKBeanClasses);
         run(engineBase, kBeanResolution, args);
         return this;
     }
@@ -62,8 +63,9 @@ class EngineWrapper {
         engineBase.run();
     }
 
+    @SafeVarargs
     private static EngineBase.KBeanResolution kBeanResolution(EngineBase engineBase,
-                                                              Class<? extends KBean>... localKBeanClasses) {
+                                                              Class<? extends KBean>... jekaSrcKBeanClasses) {
         List<Class<? extends KBean>> allKBeanClasses = new LinkedList<>();
         allKBeanClasses.add(BaseKBean.class);
         allKBeanClasses.add(ProjectKBean.class);
@@ -73,19 +75,18 @@ class EngineWrapper {
         allKBeanClasses.add(IntellijKBean.class);
         allKBeanClasses.add(EclipseKBean.class);
         allKBeanClasses.add(NexusKBean.class);
-        allKBeanClasses.addAll(Arrays.asList(localKBeanClasses));
+        allKBeanClasses.addAll(Arrays.asList(jekaSrcKBeanClasses));
         List<String> allKBeans = allKBeanClasses.stream().map(Class::getName).collect(Collectors.toList());
-        List<String> localKBeans = Arrays.stream(localKBeanClasses).map(Class::getName).collect(Collectors.toList());
+        List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
 
-        EngineBase.DefaultAndInitKBean defaultAndInitKBean = engineBase.defaultAndInitKbean(allKBeans, localKBeans);
+        EngineBase.DefaultAndInitKBean defaultAndInitKBean = engineBase.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
 
         return new EngineBase.KBeanResolution(
-                allKBeans, localKBeans, defaultAndInitKBean.initKbeanClassName,
+                allKBeans, jekaSrcKBeans, defaultAndInitKBean.initKbeanClassName,
                 defaultAndInitKBean.defaultKBeanClassName);
     }
 
-    protected List<KBeanAction> parse(String[] args, EngineBase.KBeanResolution kBeanResolution) {
-        ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
-        return parsedCmdLine.getBeanActions();
+    private List<KBeanAction> parse(String[] args, EngineBase.KBeanResolution kBeanResolution) {
+        return PicocliParser.parse(new CmdLineArgs(args), kBeanResolution);
     }
 }

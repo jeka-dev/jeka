@@ -57,11 +57,6 @@ public abstract class KBean {
     protected void postInit() {
     }
 
-    @JkDoc(hide = true, value="Displays help about this KBean")
-    public void help() {
-        HelpDisplayer.helpJkBean(this);
-    }
-
     /**
      * Returns the base directory of the project. In single projects, base dir = working dir.
      * When working in multi-project (aka multi-module project), the base dir will be

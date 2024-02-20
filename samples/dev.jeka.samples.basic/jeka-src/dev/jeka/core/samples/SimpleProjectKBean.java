@@ -102,7 +102,7 @@ public class SimpleProjectKBean extends KBean {
     }
     
     public static void main(String[] args) {
-	    SimpleProjectKBean bean = JkInit.instanceOf(SimpleProjectKBean.class, args, "checkedValue=A");
+	    SimpleProjectKBean bean = JkInit.kbean(SimpleProjectKBean.class, args, "checkedValue=A");
         bean.cleanPackPublish();
         bean.checkValueIsA();
     }

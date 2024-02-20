@@ -59,7 +59,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc
     private final JkTestOptions tests = new JkTestOptions();
 
-
     /**
      * Options for configuring scaffold.
      */

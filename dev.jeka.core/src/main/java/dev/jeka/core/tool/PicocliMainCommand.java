@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
         mixinStandardHelpOptions = true,
         sortOptions = false,
         showDefaultValues = true,
-        versionProvider = PicocliMain.VersionProvider.class,
+        versionProvider = Main.VersionProvider.class,
         usageHelpAutoWidth = true,
         customSynopsis = {
             " @|yellow ${COMMAND-NAME} [options] [COMMAND...] |@",

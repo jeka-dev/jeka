@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="CORE BUILD skip test" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.PicocliMain" />
+    <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
     <module name="dev.jeka.core" />
     <option name="PROGRAM_PARAMETERS" value="project: pack tests.skip=true -c --stacktrace" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />

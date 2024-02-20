@@ -1,195 +1,237 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
+import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.jeka.core.tool.Environment.logs;
+class Main {
 
-/**
- * Main class for launching Jeka from command line.
- *
- * @author Jerome Angibaud
- */
-public final class Main {
-
-    private static final String REMOTE_OPTION = "-r";
-
-    /**
-     * Entry point for Jeka application when launched from command-line
-     */
     public static void main(String[] args) {
-        final long start = System.nanoTime();
+        doMain(args);
+    }
+
+    // Method called by reflection in Main
+    static JkRunbase doMain(String[] args) {
+
+        dev.jeka.core.tool.JkRunbase.convertFieldValues = false;
+
+        long startTime = System.currentTimeMillis();
+
+        // Remove -r arguments sent by shell script
+        CmdLineArgs filteredArgs = new CmdLineArgs(args).withoutShellArgs();
+
+        // Get the code base directory sent by script shell
+        String basedirProp = System.getProperty("jeka.current.basedir");
+        final Path baseDir = basedirProp == null ? Paths.get("")
+                : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
+
+        // Handle --help
+        // It needs to be fast and safe. Only loads KBeans found in current classpath
+        if (filteredArgs.isUsageHelpRequested()) {
+            PicocliHelp.printUsageHelp(System.out);
+            System.exit(0);
+        }
+
+        // Handle --version
+        if (filteredArgs.isVersionHelpRequested()) {
+            PicocliHelp.printVersionHelp(System.out);
+            System.exit(0);
+        }
+
+        // Interpolate command line with values found in properties
+        JkProperties props = dev.jeka.core.tool.JkRunbase.constructProperties(baseDir);
+        CmdLineArgs interpolatedArgs = filteredArgs.interpolated(props);
+
+        EnvLogSettings logs = EnvLogSettings.ofDefault();
+
+        EngineBase engineBase = null;
+
         try {
-            String[] filteredArgs = filteredArgs(args);
-            Environment.initialize(filteredArgs);
-            if (Environment.isPureVersionCmd()) {
-                System.out.println(JkInfo.getJekaVersion());
-                return;
-            }
-            Environment.parsedCmdLine.getSystemProperties().forEach((k, v) -> System.setProperty(k, v));
-            JkLog.setDecorator(logs.style);
-            if (logs.banner) {
-                displayIntro();
-            }
 
-            String basedirProp = System.getProperty("jeka.current.basedir");
+            // first, parse only options
+            PicocliMainCommand mainCommand = new PicocliMainCommand();
+            CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
+            commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
+            logs = mainCommand.logSettings();
+            EnvBehaviorSettings behavior = mainCommand.behaviorSettings();
+            JkDependencySet dependencies = mainCommand.dependencies();
 
-            final Path baseDir = basedirProp == null ? Paths.get("")
-                    : Paths.get("").toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
+            // setup logging
+            setupLogging(logs, baseDir, interpolatedArgs.get());
 
-            if (logs.runtimeInformation) {
-                PicocliMain.displayRuntimeInfo(baseDir, filteredArgs);
-            }
+            // Instantiate the Engine
+            JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
+            engineBase = EngineBase.of(baseDir, behavior.skipCompile,
+                    downloadRepos, dependencies, logs, behavior);
 
-            // By default, log working animation when working dir = base dir (this mean that we are not
-            // invoking a tool packaged with JeKa.
-            boolean logAnimation = baseDir.equals(Paths.get(""));
-            if (logs.animation != null) {
-                logAnimation = logs.animation;
-            }
-            JkLog.setAcceptAnimation(logAnimation);
-
-            JkLog.setShowTaskDuration(logs.duration);
-
-            EngineBase engineBase = EngineBase.forLegacy(baseDir,
-                    JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
+            // Compile jeka-src and resolve its dependencies
             JkConsoleSpinner.of("Booting JeKa...").run(engineBase::resolveKBeans);
             if (logs.runtimeInformation) {
-                JkLog.info(Jk2ColumnsText.of(18, 150)
-                        .add("Init KBean", engineBase.resolveKBeans().initKBeanClassname)
-                        .add("Default KBean", engineBase.resolveKBeans().defaultKbeanClassname)
-                        .toString());
-                JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
-                JkLog.info("Properties         :");
-                JkLog.info(properties.toColumnText(30, 90, !JkLog.isVerbose())
-                                .setMarginLeft("   | ")
-                                .setSeparator(" | ").toString());
-
-                JkPathSequence cp = engineBase.getClasspathSetupResult().runClasspath;
-                JkLog.info("Jeka Classpath     :");
-                cp.forEach(entry -> JkLog.info("   | " + entry));
+                logRuntimeInfoBase(engineBase, props);
             }
 
-            // Change current classloader as we need to have deps and compiled jeka-src class in.
-            ClassLoader augmentedClassloader = JkUrlClassLoader.of(engineBase.resolveClassPaths().runClasspath).get();
+            // Resolve KBeans
+            EngineBase.KBeanResolution kBeanResolution = engineBase.getKbeanResolution();
+            EngineBase.ClasspathSetupResult classpathSetupResult = engineBase.getClasspathSetupResult();
+
+            // Augment current classloader with resolved deps and compiled classes
+            ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
-            List<EngineCommand> engineCommands =
-                    engineBase.resolveEngineCommand(Environment.parsedCmdLine.getBeanActions());
-            if (logs.runtimeInformation) {
-                JkLog.info("Commands           :");
-                JkLog.info(EngineCommand.toColumnText(engineCommands)
-                        .setSeparator(" | ")
-                        .setMarginLeft("   | ")
-                        .toString());
+            // Handle context help (--commands)
+            if (behavior.commandHelp.isPresent()) {
+                String kbeanName = behavior.commandHelp.get();
+                if (JkUtilsString.isBlank(kbeanName)) {
+                    PicocliHelp.printCmdHelp(
+                                    engineBase.resolveClassPaths().runClasspath,
+                                    kBeanResolution.allKbeans,
+                                    kBeanResolution.defaultKbeanClassname, props, System.out);
+                    System.exit(0);
+                }
+                boolean found = PicocliHelp.printKBeanHelp(
+                        engineBase.resolveClassPaths().runClasspath,
+                        kBeanResolution.allKbeans,
+                        kbeanName, System.out);
+                System.exit(found ? 0 : 1);
             }
+
+            // Parse command line to get action beans
+            JkProperties jekaProps = dev.jeka.core.tool.JkRunbase.readBaseProperties(baseDir);
+            List<KBeanAction> kBeanActions = PicocliParser.parse(
+                    interpolatedArgs.withoutOptions(),
+                    jekaProps,
+                    kBeanResolution);
+            List<EngineCommand> engineCommands = engineBase.resolveEngineCommand(kBeanActions);
+            if (logs.runtimeInformation) {
+                logRuntimeInfoEngineCommands(engineCommands);
+            }
+
+            // Run
             engineBase.initRunbase();
-
             if (logs.runtimeInformation) {
-                List<String> beanNames = engineBase.getRunbase().getBeans().stream()
-                        .map(Object::getClass)
-                        .map(KBean::name)
-                        .collect(Collectors.toList());
-                JkLog.info("Involved KBeans    :", beanNames);
-                JkLog.info("    " + String.join(", ", beanNames));
-               JkLog.info("");
+                logRuntimeInfoRun(engineBase.getRunbase());
             }
-
             engineBase.run();
 
-            if (logs.banner) {
-                displayOutro(start);
-            }
-            if (logs.duration && !logs.banner) {
-                displayDuration(start);
-            }
-            System.exit(0); // Triggers shutdown hooks
-        } catch (final Throwable e) {
+            logOutro(logs, startTime);
+
+        } catch (CommandLine.ParameterException e) {
             JkBusyIndicator.stop();
-            if (e.getMessage() != null) {
-                JkLog.error(e.getMessage());
-            }
-            System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
-            System.err.println("If this originates from a bug, please report the issue at: " +
-                    "https://github.com/jeka-dev/jeka/issues");
-            JkLog.restoreToInitialState();
-            if ( (!(e instanceof JkException)) || shouldPrintExceptionDetails()) {
-                printException(e);
-            }
-            if (logs.banner) {
-                final int length = printAscii(true, "text-failed.ascii");
-                System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
-                        + JkUtilsTime.formatMillis(System.currentTimeMillis() - start));
-            } else {
-                System.err.println("Failed !");
-            }
+            String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
+            CommandLine commandLine = e.getCommandLine();
+            commandLine.getErr().println(errorTxt + e.getMessage());
+            commandLine.getErr().println("Try 'jeka --commands' or 'jeka -cmd' for more information.");
+            System.exit(1);
+        } catch (Throwable t) {
+            handleGenericThrowable(t, startTime, logs);
             System.exit(1);
         }
+        return engineBase.getRunbase();
     }
 
-    private static boolean shouldPrintExceptionDetails() {
-        return logs.debug || logs.stackTrace;
-    }
+    static void displayRuntimeInfo(Path baseDir, String[] cmdLine) {
+        Jk2ColumnsText txt = Jk2ColumnsText.of(18, 150);
+        txt.add("Working Directory", System.getProperty("user.dir"));
+        txt.add("Base Directory", baseDir.toAbsolutePath());
+        txt.add("Command Line",  String.join(" ", Arrays.asList(cmdLine)));
+        txt.add("Java Home",  System.getProperty("java.home"));
+        txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        txt.add("Jeka Version",  JkInfo.getJekaVersion());
 
-    static void printException(Throwable e) {
-        System.err.println();
-        if (logs.verbose || logs.stackTrace) {
-            System.err.println("=============================== Stack Trace =============================================");
-            e.printStackTrace(System.err);
-            System.err.flush();
-            System.err.println("=========================================================================================");
+        if ( embedded(JkLocator.getJekaHomeDir().normalize())) {
+            txt.add("Jeka Home", Paths.get(JkConstants.JEKA_BOOT_DIR).normalize() + " ( embedded !!! )");
+        } else {
+            txt.add("Jeka Home", JkLocator.getJekaHomeDir().normalize());
         }
+        txt.add("Jeka User Home", JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
+        txt.add("Jeka Cache Dir",  JkLocator.getCacheDir().toAbsolutePath().normalize());
+        JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
+        txt.add("Download Repos", JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
+                .map(JkRepo::getUrl).collect(Collectors.toList()));
+        JkLog.info(txt.toString());
     }
 
-    /**
-     * Entry point to call Jeka on a given folder
-     */
-    public static void exec(Path baseDir, String... args) {
-        ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader();
-        if (!(originalClassloader instanceof URLClassLoader)) {
-            final URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {}, originalClassloader);
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-            JkClassLoader.of(urlClassLoader).invokeStaticMethod(false, "dev.jeka.core.tool.Main",
-                    "exec" , baseDir, args);
-            return;
+    private static boolean embedded(Path jarFolder) {
+        if (!Files.exists(bootDir())) {
+            return false;
         }
-        ParsedCmdLine parsedCmdLine = ParsedCmdLine.parse(args);
-        JkLog.setAcceptAnimation(true);
-
-        EngineBase engineBase = EngineBase.forLegacy(baseDir,
-                JkDependencySet.of(Environment.parsedCmdLine.getJekaSrcDependencies()));
-        engineBase.resolveEngineCommand(parsedCmdLine.getBeanActions());
-        engineBase.initRunbase();
-        if (JkMemoryBufferLogDecorator.isActive()) {
-            JkBusyIndicator.stop();
-            JkMemoryBufferLogDecorator.inactivateOnJkLog();
-        }
-        engineBase.run();
-
-        //final Engine engine = new Engine(projectDir);
-        //engine.execute(parsedCmdLine);
+        return JkUtilsPath.isSameFile(bootDir(), jarFolder);
     }
 
-    static int printAscii(boolean error, String fileName) {
-        final InputStream inputStream = Main.class.getResourceAsStream(fileName);
+    private static Path bootDir() {
+        return Paths.get(JkConstants.JEKA_BOOT_DIR);
+    }
+
+    // This class should lies outside PicocliMainCommand to be referenced inn annotation
+    static class VersionProvider implements CommandLine.IVersionProvider {
+
+        @Override
+        public String[] getVersion() throws Exception {
+            return new String[] {JkInfo.getJekaVersion()};
+        }
+
+    }
+
+    private static void setupLogging(EnvLogSettings logSettings, Path baseDir, String[] cmdLine) {
+        JkLog.setDecorator(logSettings.style);
+        if (logSettings.banner) {
+            displayIntro();
+        }
+        if (logSettings.runtimeInformation) {
+            displayRuntimeInfo(baseDir, cmdLine);
+        }
+        if (logSettings.debug) {
+            JkLog.setVerbosity(JkLog.Verbosity.DEBUG);
+        } else if(logSettings.verbose) {
+            JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
+        }
+
+        // By default, log working animation when working dir = base dir (this mean that we are not
+        // invoking a tool packaged with JeKa.
+        Path workingDir = Paths.get("");
+        boolean logAnimation = baseDir.equals(workingDir);
+        if (logSettings.animation != null) {
+            logAnimation = logSettings.animation;
+        }
+        JkLog.setAcceptAnimation(logAnimation);
+        JkLog.setShowTaskDuration(logSettings.duration);
+    }
+
+    private static void displayIntro() {
+        final int length = printAscii(false, "text-jeka.ascii");
+        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100%% Java Build Tool.\n");
+    }
+
+    private static void displayOutro(long startTs) {
+        final int length = printAscii(false, "text-success.ascii");
+        System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
+                + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+    }
+
+    private static void displayDuration(long startTs) {
+        System.out.println("\nTotal run duration : " + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+    }
+
+    private static int printAscii(boolean error, String fileName) {
+        final InputStream inputStream = MainLegacy.class.getResourceAsStream(fileName);
         final List<String> lines = JkUtilsIO.readAsLines(inputStream);
         int i = 0;
         for (final String line : lines) {
@@ -205,38 +247,93 @@ public final class Main {
         return i;
     }
 
-    static void displayIntro() {
-        final int length = printAscii(false, "text-jeka.ascii");
-        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100%% Java Build Tool.\n");
+    private static void logRuntimeInfoBase(EngineBase engineBase, JkProperties props) {
+        JkLog.info(Jk2ColumnsText.of(18, 150)
+                .add("Init KBean", engineBase.resolveKBeans().initKBeanClassname)
+                .add("Default KBean", engineBase.resolveKBeans().defaultKbeanClassname)
+                .toString());
+        JkLog.info("Properties         :");
+        JkLog.info(props.toColumnText(30, 90, !JkLog.isVerbose())
+                .setMarginLeft("   | ")
+                .setSeparator(" | ").toString());
+        JkPathSequence cp = engineBase.getClasspathSetupResult().runClasspath;
+        JkLog.info("Jeka Classpath     :");
+        cp.forEach(entry -> JkLog.info("   | " + entry));
     }
 
-    static void displayOutro(long startTs) {
-        final int length = printAscii(false, "text-success.ascii");
-        System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
-                + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs));
+    private static void logRuntimeInfoEngineCommands(List<EngineCommand> engineCommands) {
+        JkLog.info("Commands           :");
+        JkLog.info(EngineCommand.toColumnText(engineCommands)
+                .setSeparator(" | ")
+                .setMarginLeft("   | ")
+                .toString());
     }
 
-    static void displayDuration(long startTs) {
-        System.out.println("\nTotal run duration : " + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs) );
+    private static void logRuntimeInfoRun(JkRunbase runbase) {
+        List<String> beanNames = runbase.getBeans().stream()
+                .map(Object::getClass)
+                .map(KBean::name)
+                .collect(Collectors.toList());
+        JkLog.info("Involved KBeans    :", beanNames);
+        JkLog.info("    " + String.join(", ", beanNames));
+        JkLog.info("");
     }
 
-    static String[] filteredArgs(String[] originalArgs) {
-        if (originalArgs.length == 0) {
-            return originalArgs;
+    private static void logOutro(EnvLogSettings logs, long start) {
+        if (logs.banner) {
+            displayOutro(start);
         }
-        List<String> result = new LinkedList<>(Arrays.asList(originalArgs));
-        String first =result.get(0);
-        if (JkUtilsIterable.listOf("-r", "-rc").contains(first)) {
-            result.remove(0);
-            result.remove(0);
-        } else if (first.startsWith("@")) {   // remove remote @alias
-            result.remove(0);
+        if (logs.duration && !logs.banner) {
+            displayDuration(start);
         }
-        //System.out.println("=====filterd args = +" + result);
-        return result.toArray(new String[0]);
     }
 
-    private Main() {
+    private static void handleGenericThrowable(Throwable t, long start, EnvLogSettings logs) {
+        JkBusyIndicator.stop();
+        JkLog.restoreToInitialState();
+        if (t.getMessage() != null) {
+            System.err.println(t.getMessage());
+        }
+        System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
+        System.err.println("If this originates from a bug, please report the issue at: " +
+                "https://github.com/jeka-dev/jeka/issues");
+
+        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails(logs)) {
+            printException(logs, t);
+        }
+        if (logs.banner) {
+            final int length = printAscii(true, "text-failed.ascii");
+            System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
+                    + JkUtilsTime.formatMillis(System.currentTimeMillis() - start));
+        } else {
+            System.err.println("Failed !");
+        }
+    }
+
+    private static boolean shouldPrintExceptionDetails(EnvLogSettings logs) {
+        return logs.debug || logs.stackTrace;
+    }
+
+    private static void printException(EnvLogSettings logs, Throwable e) {
+        System.err.println();
+        if (logs.verbose || logs.stackTrace) {
+            System.err.println("=============================== Stack Trace =============================================");
+            e.printStackTrace(System.err);
+            System.err.flush();
+            System.err.println("=========================================================================================");
+        }
+    }
+
+    static class MainResult {
+
+        final int exitCode;
+
+        final JkRunbase runbase;
+
+        MainResult(int exitCode, JkRunbase runbase) {
+            this.exitCode = exitCode;
+            this.runbase = runbase;
+        }
     }
 
 }

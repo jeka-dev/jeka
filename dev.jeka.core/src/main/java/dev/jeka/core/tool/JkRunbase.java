@@ -324,7 +324,7 @@ public final class JkRunbase {
                                     action.getMember(), bean.getClass().getName(), relBaseDir());
                         }
 
-                    // PicocliMain
+                    // Main
                     } else {
                         FieldInjector.setValue(bean, action.getMember(), action.getValue());
                     }

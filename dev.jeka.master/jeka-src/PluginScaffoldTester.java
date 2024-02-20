@@ -75,7 +75,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 System.out.println("Scaffold command " + scaffoldCmd);
 
                 // launch checker in separate process
-                JkProcHandler handler = prepareWithBaseDirJekaShell(path, "% " + checkCmd).execAsync();
+                JkProcHandler handler = prepareWithBaseDirJekaShell(path, checkCmd).execAsync();
 
                 // try to get a Ok response
                 JkUtilsNet.checkUntilOk(url, checkHttpTimeout, checkHttpSleep);
@@ -86,7 +86,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 JkUtilsAssert.state(ended, "Can't kill process");
 
             } else {
-                runWithBaseDirJekaShell(path, "% " + checkCmd);
+                runWithBaseDirJekaShell(path, checkCmd);
             }
 
             if (checkHttp) {
@@ -101,7 +101,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
         // inject springboot-plugin.jar both as a jeka dependencies (for running plugin)
         // And as a substitute of  @JkInjectClasspath("${jeka.springboot.plugin.dependency}") in scaffolded project
-        return String.format(original + " -Djeka.springboot.plugin.dependency=%s +%s",
+        return String.format(original + " -Djeka.springboot.plugin.dependency=%s -cp=%s",
                 sprinbootPluginJar,
                 sprinbootPluginJar);
     }

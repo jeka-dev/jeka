@@ -36,7 +36,7 @@ class PicocliParser {
                 .collect(Collectors.toList());
     }
 
-    static List<KBeanAction> parse(JkProperties properties, EngineBase.KBeanResolution resolution) {
+    private static List<KBeanAction> parse(JkProperties properties, EngineBase.KBeanResolution resolution) {
         return properties.getAllStartingWith("", true).entrySet().stream()
                 .filter(entry -> KbeanAndField.isKBeanAndField(entry.getKey()))
                 .map(entry -> KbeanAndField.of(entry.getKey(), entry.getValue()))
@@ -45,6 +45,9 @@ class PicocliParser {
                 .collect(Collectors.toList());
     }
 
+    /*
+     * Scoped args contains only arguments scoped to a unique KBean
+     */
     private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, EngineBase.KBeanResolution resolution,
                                                           String source) {
 

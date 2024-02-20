@@ -62,7 +62,7 @@ public class SimpleWarKBean extends KBean {
     }
     
     public static void main(String[] args) {
-	    JkInit.instanceOf(SimpleWarKBean.class, args, "-LS=DEBUG").cleanPackRun();
+	    JkInit.kbean(SimpleWarKBean.class, args, "-LS=DEBUG").cleanPackRun();
     }
 
 

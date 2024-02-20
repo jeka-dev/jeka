@@ -56,13 +56,9 @@ public abstract class JekaCommandLineExecutor {
 
     protected JkProcess prepareJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
         Path cmd = useBaseDirJeka ? baseDir.resolve(scriptName()) : jekaShellCmd;
-        String cmdProg = cmdLine.startsWith("% ") ? cmd.toString() + "p" : cmd.toString();
-        if (cmdLine.startsWith("% ")) {
-            cmdLine = cmdLine.substring(2);
-        }
         boolean showOutput = JkLog.isVerbose();
         //boolean showOutput = true;
-        JkProcess process = JkProcess.of(cmdProg)
+        JkProcess process = JkProcess.of(cmd.toString())
                 .setWorkingDir(baseDir)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)

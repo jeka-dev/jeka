@@ -8,7 +8,7 @@ import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.Main;
+import dev.jeka.core.tool.MainLegacy;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -190,7 +190,7 @@ public final class IntellijKBean extends KBean {
 
     private void generateImlExec(Path moduleDir) {
         JkLog.startTask("Generate iml file on '%s'", moduleDir);
-        Main.exec(moduleDir, "intellij#iml", "-dci");
+        MainLegacy.exec(moduleDir, "intellij#iml", "-dci");
         JkLog.endTask();
     }
 

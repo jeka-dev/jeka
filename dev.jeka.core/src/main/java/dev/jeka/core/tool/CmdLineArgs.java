@@ -33,12 +33,6 @@ class CmdLineArgs {
         return new CmdLineArgs(interpolatedCommandLine(args, properties));
     }
 
-    CmdLineArgs and(CmdLineArgs other) {
-        List<String> allArgs = Arrays.asList(args);
-        allArgs.addAll(Arrays.asList(other.args));
-        return new CmdLineArgs(allArgs.toArray(new String[0]));
-    }
-
     CmdLineArgs withOptionsOnly() {
         String[] options = Arrays.stream(args)
                 .filter(arg -> arg.startsWith("-"))
@@ -79,7 +73,7 @@ class CmdLineArgs {
     }
 
     static boolean isKbeanRef(String arg) {
-        return arg.endsWith(":");
+        return arg.endsWith(PicocliParser.KBEAN_CMD_SUFFIX);
     }
 
     private static String[] filterShellArgs(String[] originalArgs) {
@@ -94,7 +88,6 @@ class CmdLineArgs {
         } else if (first.startsWith("@")) {   // remove remote @alias
             result.remove(0);
         }
-        //System.out.println("=====filterd args = +" + result);
         return result.toArray(new String[0]);
     }
 
