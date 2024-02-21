@@ -5,7 +5,6 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -73,11 +72,9 @@ public interface JkInternalClasspathScanner {
             // with child-first strategy.
             JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties,
                     "io.github.classgraph:classgraph:4.8.162");
-            URL[] urls = JkPathSequence.of(classgraphJar.get())
-                    .and(JkInternalEmbeddedClassloader.embeddedLibs())
-                    .toUrls();
             ClassLoader parentClassloader = JkInternalClasspathScanner.class.getClassLoader();
-            ChildFirstClassLoader childFirstClassLoader = new ChildFirstClassLoader(urls, parentClassloader);
+            JkInternalChildFirstClassLoader childFirstClassLoader = JkInternalChildFirstClassLoader.of(classgraphJar.get(),
+                    parentClassloader);
             Class clazz = JkClassLoader.of(childFirstClassLoader).load(IMPL_CLASS);
             CACHED_INSTANCE = JkUtilsReflect.invokeStaticMethod(clazz, "of");
 

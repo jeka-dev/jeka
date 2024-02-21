@@ -2,8 +2,8 @@ package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkUrlFileProxy;
+import dev.jeka.core.api.java.JkInternalChildFirstClassLoader;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
@@ -57,15 +57,22 @@ public interface JkInternalDependencyResolver {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
         }
+        /*
         return InternalVvyClassloader.get().createCrossClassloaderProxy(
                 JkInternalDependencyResolver.class, factoryClassName, "of", repos);
+
+         */
+        factoryClass = JkClassLoader.of(InternalVvyClassloader.get()).load(factoryClassName);
+
+
+        return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
     }
 
     class InternalVvyClassloader {
 
-        private static JkInternalEmbeddedClassloader IVY_CLASSLOADER;
+        private static ClassLoader IVY_CLASSLOADER;
 
-        public static JkInternalEmbeddedClassloader get() {
+        public static ClassLoader get() {
             if (IVY_CLASSLOADER != null) {
                 return IVY_CLASSLOADER;
             }
@@ -73,7 +80,9 @@ public interface JkInternalDependencyResolver {
             if (!Files.exists(targetPath) || !ivyJarValid(targetPath)) {
                 downloadIvy(targetPath);
             }
-            IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(targetPath);
+            ClassLoader parentClassloader = InternalVvyClassloader.class.getClassLoader();
+            IVY_CLASSLOADER = JkInternalChildFirstClassLoader.of(targetPath, parentClassloader);
+            //IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(targetPath);
             return IVY_CLASSLOADER;
         }
 

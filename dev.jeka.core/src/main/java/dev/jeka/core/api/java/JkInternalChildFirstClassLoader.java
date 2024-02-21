@@ -1,20 +1,40 @@
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathSequence;
+
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-class ChildFirstClassLoader extends URLClassLoader {
+/**
+ * Not part of public API
+ */
+public class JkInternalChildFirstClassLoader extends URLClassLoader {
 
     private final ClassLoader sysClzLoader;
 
-    public ChildFirstClassLoader(URL[] urls, ClassLoader parent) {
+    private JkInternalChildFirstClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
         sysClzLoader = getSystemClassLoader();
+    }
+
+    public static JkInternalChildFirstClassLoader of(Iterable<Path> paths, ClassLoader parent) {
+        URL[] urls = JkPathSequence.of(paths)
+                .and(JkInternalEmbeddedClassloader.embeddedLibs())
+                .toUrls();
+        return new JkInternalChildFirstClassLoader(urls, parent);
+    }
+
+    public static JkInternalChildFirstClassLoader of(Iterable<Path> paths) {
+        URL[] urls = JkPathSequence.of(paths)
+                .and(JkInternalEmbeddedClassloader.embeddedLibs())
+                .toUrls();
+        return new JkInternalChildFirstClassLoader(urls, Thread.currentThread().getContextClassLoader());
     }
 
     @Override
