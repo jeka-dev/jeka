@@ -35,9 +35,6 @@ import java.util.stream.Collectors;
  */
 public final class JkRunbase {
 
-    // TODO remove after removing legacy Main method
-    public static boolean convertFieldValues = true;
-
     // Experiment for invoking 'KBean#init()' method lately, once all KBean has been instantiated
     // Note : Calling all KBeans init() methods in a later stage then inside 'load' methods
     //        leads in difficult problems as the order the KBeans should be initialized.
@@ -216,10 +213,6 @@ public final class JkRunbase {
         this.classpath = pathSequence;
     }
 
-    void setImportedRunbaseDirs(JkPathSequence importedRunbaseDirs) {
-        this.importedRunbaseDirs = importedRunbaseDirs;
-    }
-
     void setExportedClassPath(JkPathSequence exportedClassPath) {
         this.exportedClasspath = exportedClassPath;
     }
@@ -298,9 +291,10 @@ public final class JkRunbase {
         Map<String, String> props = new HashMap<>();
 
         // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
-        if (bean.isMatchingName(Environment.behavior.kbeanName.orElse(null))) {
-            props.putAll(properties.getAllStartingWith(Environment.KB_KEYWORD + "#", false));
-        }
+        //if (bean.isMatchingName(Environment.behavior.kbeanName.orElse(null))) {
+        //    props.putAll(properties.getAllStartingWith("kb#", false));
+        //}
+
         props.putAll(properties.getAllStartingWith(beanName + "#", false));
         FieldInjector.inject(bean, props);
 
@@ -312,22 +306,7 @@ public final class JkRunbase {
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.SET_FIELD_VALUE)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
                 .forEach(action -> {
-
-                    // remove this after removing legacy main
-                    if (JkRunbase.convertFieldValues) {
-                        Set<String> usedProperties =
-                                FieldInjector.inject(bean, JkUtilsIterable.mapOf(action.getMember(),
-                                        Objects.toString(action.getValue())));
-
-                        if (usedProperties.isEmpty()) {
-                            throw new JkException("Field %s do not exist in KBean %s (base dir %s)",
-                                    action.getMember(), bean.getClass().getName(), relBaseDir());
-                        }
-
-                    // Main
-                    } else {
-                        FieldInjector.setValue(bean, action.getMember(), action.getValue());
-                    }
+                    FieldInjector.setValue(bean, action.getMember(), action.getValue());
                 });
     }
 
@@ -341,17 +320,12 @@ public final class JkRunbase {
         return result;
     }
 
-    static JkProperties localProperties(Path baseDir) {
-        Path localPropFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
-        if (!Files.exists(localPropFile)) {
-            return JkProperties.EMPTY;
-        }
-        return JkProperties.ofFile(localPropFile);
-    }
-
-    // Reads the properties from the baseDir/jeka.properties and its ancestors.
-    // Takes also in account properties defined in parent project dirs if any.
-    // this doen't take in account System and global props
+    /*
+     * Reads the properties from the baseDir/jeka.properties and its ancestors.
+     *
+     * Takes also in account properties defined in parent project dirs if any.
+     * this doen't take in account System and global props
+     */
     static JkProperties readBasePropertiesRecursively(Path baseDir) {
         baseDir = baseDir.toAbsolutePath().normalize();
         JkProperties result = readBaseProperties(baseDir);

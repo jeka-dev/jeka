@@ -2,6 +2,9 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * Class for instantiating builds while displaying meaningful information about environment on console.
  */
@@ -19,7 +22,8 @@ public final class JkInit {
     public static JkRunbase runbase(boolean skipCompile, String ...args) {
         String[] extraArg = skipCompile ? new String[] {"-sk"} : new String[0];
         String[] effectiveArgs = JkUtilsIterable.concat(args, extraArg);
-        return Main.doMain(effectiveArgs);
+        Path baseDir = Paths.get("");
+        return Main.exec(baseDir, effectiveArgs);
     }
 
     /**

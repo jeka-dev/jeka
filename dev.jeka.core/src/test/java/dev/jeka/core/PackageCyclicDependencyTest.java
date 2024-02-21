@@ -1,11 +1,11 @@
 package dev.jeka.core;
 
-import dev.jeka.core.tool.MainLegacy;
 import dev.jeka.core.wrapper.Booter;
 import jdepend.framework.JDepend;
 import jdepend.framework.JavaClass;
 import jdepend.framework.JavaPackage;
 import jdepend.framework.PackageFilter;
+import org.apache.ivy.Main;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,7 +26,7 @@ public class PackageCyclicDependencyTest {
     @Test
     public void codeBase_hasNoCyclicDependency() throws Exception {
         final String packagePrefix = "dev.jeka.core";
-        final File classDir = Paths.get(MainLegacy.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
+        final File classDir = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
         PackageAnalyser packageAnalyser = PackageAnalyser.of(classDir, packagePrefix);
         final String cycle = packageAnalyser.cycle();
         assertTrue(cycle, cycle == null);

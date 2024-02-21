@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
@@ -46,6 +45,7 @@ class PicocliCommands {
         beanDesc.beanFields.forEach(beanField -> {
             String defaultValue = beanField.defaultValue == null  ? CommandLine.Option.NULL_VALUE
                     : Objects.toString(beanField.defaultValue);
+            beanField.
             String description = beanField.description == null ?
                     "No description." : beanField.description;
             description = description.trim();

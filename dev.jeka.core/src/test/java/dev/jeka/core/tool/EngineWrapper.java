@@ -24,7 +24,7 @@ class EngineWrapper {
 
     final Class<? extends KBean>[] jekaSrcKBeanClasses;
 
-    EngineBase engineBase;
+    Engine engine;
 
     @SafeVarargs
     EngineWrapper(Class<? extends KBean> ...jekaSrcKBeanClasses) {
@@ -33,39 +33,45 @@ class EngineWrapper {
 
     EngineWrapper run(String... args) {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-engine-base-");
-        EnvLogSettings logSettings = Environment.createLogSettings(args);
-        EnvBehaviorSettings behaviorSettings = Environment.createBehaviorSettings(args);
-        engineBase = EngineBase.of(baseDir, false, JkRepoSet.ofLocal(),
+
+        CmdLineArgs cmdArgs = new CmdLineArgs(args);
+        PicocliMainCommand mainCommand = new PicocliMainCommand();
+        CommandLine cmdLine = new CommandLine(mainCommand);
+        cmdLine.parseArgs(cmdArgs.withOptionsOnly().get());
+        LogSettings logSettings = mainCommand.logSettings();
+        BehaviorSettings behaviorSettings = mainCommand.behaviorSettings();
+
+        engine = Engine.of(baseDir, false, JkRepoSet.ofLocal(),
                 JkDependencySet.of(), logSettings, behaviorSettings);
-        EngineBase.KBeanResolution kBeanResolution = kBeanResolution(engineBase, jekaSrcKBeanClasses);
-        run(engineBase, kBeanResolution, args);
+        Engine.KBeanResolution kBeanResolution = kBeanResolution(engine, jekaSrcKBeanClasses);
+        run(engine, kBeanResolution, args);
         return this;
     }
 
     EngineWrapper cleanDir() {
-        JkPathTree.of(engineBase.baseDir).deleteRoot();
+        JkPathTree.of(engine.baseDir).deleteRoot();
         return this;
     }
 
     <T extends KBean> Optional<T> find(Class<T> kbeanClass) {
-        return engineBase.getRunbase().find(kbeanClass);
+        return engine.getRunbase().find(kbeanClass);
     }
 
     <T extends KBean> T load(Class<T> kbeanClass) {
-        return engineBase.getRunbase().load(kbeanClass);
+        return engine.getRunbase().load(kbeanClass);
     }
 
-    private void run(EngineBase engineBase, EngineBase.KBeanResolution kBeanResolution, String[] args) {
-        engineBase.resolveClassPaths();
-        engineBase.setKBeanResolution(kBeanResolution);
+    private void run(Engine engine, Engine.KBeanResolution kBeanResolution, String[] args) {
+        engine.resolveClassPaths();
+        engine.setKBeanResolution(kBeanResolution);
         List<KBeanAction> kBeanActions = parse(args, kBeanResolution);
-        engineBase.resolveEngineCommand(kBeanActions);
-        engineBase.run();
+        engine.resolveEngineCommand(kBeanActions);
+        engine.run();
     }
 
     @SafeVarargs
-    private static EngineBase.KBeanResolution kBeanResolution(EngineBase engineBase,
-                                                              Class<? extends KBean>... jekaSrcKBeanClasses) {
+    private static Engine.KBeanResolution kBeanResolution(Engine engine,
+                                                          Class<? extends KBean>... jekaSrcKBeanClasses) {
         List<Class<? extends KBean>> allKBeanClasses = new LinkedList<>();
         allKBeanClasses.add(BaseKBean.class);
         allKBeanClasses.add(ProjectKBean.class);
@@ -79,14 +85,14 @@ class EngineWrapper {
         List<String> allKBeans = allKBeanClasses.stream().map(Class::getName).collect(Collectors.toList());
         List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
 
-        EngineBase.DefaultAndInitKBean defaultAndInitKBean = engineBase.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
+        Engine.DefaultAndInitKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
 
-        return new EngineBase.KBeanResolution(
+        return new Engine.KBeanResolution(
                 allKBeans, jekaSrcKBeans, defaultAndInitKBean.initKbeanClassName,
                 defaultAndInitKBean.defaultKBeanClassName);
     }
 
-    private List<KBeanAction> parse(String[] args, EngineBase.KBeanResolution kBeanResolution) {
+    private List<KBeanAction> parse(String[] args, Engine.KBeanResolution kBeanResolution) {
         return PicocliParser.parse(new CmdLineArgs(args), kBeanResolution);
     }
 }

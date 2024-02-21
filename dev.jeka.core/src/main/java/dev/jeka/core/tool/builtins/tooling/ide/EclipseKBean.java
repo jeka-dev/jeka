@@ -11,7 +11,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.MainLegacy;
+import dev.jeka.core.tool.Main;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -95,7 +95,7 @@ public final class EclipseKBean extends KBean {
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startTask("Generate Eclipse files on " + projectFolder);
-            MainLegacy.exec(projectFolder, "eclipse#files");
+            Main.exec(projectFolder, "eclipse#files");
             JkLog.endTask();
         }
     }

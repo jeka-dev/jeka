@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 final class FieldInjector {
 
-
     static void setValue(Object target, String propName, Object value) {
         if (propName.contains(".")) {
             String first = JkUtilsString.substringBeforeFirst(propName, ".");
@@ -36,7 +35,6 @@ final class FieldInjector {
                 target.getClass().getName(), propName);
         JkUtilsReflect.setFieldValue(target, field, value);
     }
-
 
     // Unlikely value meaning we cannot recognize the field type
     private static final String UNHANDLED_TYPE = "-- UNHANDLED TYPE °ê%76§ù><$$";
@@ -101,8 +99,6 @@ final class FieldInjector {
                 .filter(KBean::isPropertyField)
                 .collect(Collectors.toList());
     }
-
-
 
     private static Set<String> inject(Object target, Field field, Map<String, String> props, String prefix) {
         final String name = field.getName();

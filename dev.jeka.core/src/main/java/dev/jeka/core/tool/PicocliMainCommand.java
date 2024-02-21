@@ -156,20 +156,19 @@ public class PicocliMainCommand {
         props.forEach(System::setProperty);
     }
 
-    EnvLogSettings logSettings() {
-        return new EnvLogSettings(
+    LogSettings logSettings() {
+        return new LogSettings(
                 logVerbose,
                 logDebug,
                 logStacktrace,
                 runtimeInfo,
                 logDuration,
                 logStyle,
-                logAnimations,
-                false);
+                logAnimations);
     }
 
-    EnvBehaviorSettings behaviorSettings() {
-        return new EnvBehaviorSettings(
+    BehaviorSettings behaviorSettings() {
+        return new BehaviorSettings(
                 defaultKBean,
                 cleanWork,
                 cleanOutput,

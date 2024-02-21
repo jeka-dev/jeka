@@ -2,7 +2,7 @@ package dev.jeka.core.tool;
 
 import java.util.Optional;
 
-class EnvBehaviorSettings {
+class BehaviorSettings {
 
     final Optional<String> kbeanName;
 
@@ -17,8 +17,8 @@ class EnvBehaviorSettings {
     final Optional<String> commandHelp;
 
 
-    EnvBehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean ignoreCompileFailure,
-                        boolean skipCompile, String commandHelp) {
+    BehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean ignoreCompileFailure,
+                     boolean skipCompile, String commandHelp) {
         this.kbeanName = Optional.ofNullable(kbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
@@ -27,8 +27,8 @@ class EnvBehaviorSettings {
         this.commandHelp = Optional.ofNullable(commandHelp);
     }
 
-    static EnvBehaviorSettings ofDefault() {
-        return new EnvBehaviorSettings(null, false, false, false, false, null);
+    static BehaviorSettings ofDefault() {
+        return new BehaviorSettings(null, false, false, false, false, null);
     }
 
 }

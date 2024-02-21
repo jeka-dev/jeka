@@ -36,10 +36,10 @@ public class PicocliParserTest {
         return PicocliParser.parse(cmdArgs, kBeanResolution());
     }
 
-    private static EngineBase.KBeanResolution kBeanResolution() {
+    private static Engine.KBeanResolution kBeanResolution() {
         List<String> kbeanClasses = PicocliCommands.STANDARD_KBEAN_CLASSES.stream()
                 .map(Class::getName).collect(Collectors.toList());
-        return new EngineBase.KBeanResolution(
+        return new Engine.KBeanResolution(
                 kbeanClasses,
                 Collections.emptyList(),
                 null,

@@ -23,20 +23,20 @@ class PicocliParser {
      * The field injections declared after override ones declared before.
      * This means that command line overrides fields declared in jeka.properties
      */
-    public static List<KBeanAction> parse(CmdLineArgs args, JkProperties props, EngineBase.KBeanResolution resolution) {
+    public static List<KBeanAction> parse(CmdLineArgs args, JkProperties props, Engine.KBeanResolution resolution) {
         KBeanActionContainer kBeanActionContainer = new KBeanActionContainer();
         kBeanActionContainer.addAll(parse(props, resolution));
         kBeanActionContainer.addAll(parse(args, resolution));
         return kBeanActionContainer.kBeanActions;
     }
 
-    static List<KBeanAction> parse(CmdLineArgs args, EngineBase.KBeanResolution resolution) {
+    static List<KBeanAction> parse(CmdLineArgs args, Engine.KBeanResolution resolution) {
         return args.splitByKbeanContext().stream()
                 .flatMap(scopedArgs -> createFromScopedArgs(scopedArgs, resolution, "").stream())
                 .collect(Collectors.toList());
     }
 
-    private static List<KBeanAction> parse(JkProperties properties, EngineBase.KBeanResolution resolution) {
+    private static List<KBeanAction> parse(JkProperties properties, Engine.KBeanResolution resolution) {
         return properties.getAllStartingWith("", true).entrySet().stream()
                 .filter(entry -> KbeanAndField.isKBeanAndField(entry.getKey()))
                 .map(entry -> KbeanAndField.of(entry.getKey(), entry.getValue()))
@@ -48,7 +48,7 @@ class PicocliParser {
     /*
      * Scoped args contains only arguments scoped to a unique KBean
      */
-    private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, EngineBase.KBeanResolution resolution,
+    private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, Engine.KBeanResolution resolution,
                                                           String source) {
 
         if (args.get().length == 0) {

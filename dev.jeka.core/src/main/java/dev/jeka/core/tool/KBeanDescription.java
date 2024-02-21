@@ -104,7 +104,7 @@ final class KBeanDescription {
             }
             final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
 
-            if (isTerminal(field.getType())) {  // optimization to avoid non necessary discoveries
+            if (isTerminal(field.getType())) {  // optimization to avoid costly discoveries
                 result.add(new NameAndField(prefix + field.getName(), field, rootClass));
             } else {
                 final List<NameAndField> subOpts = fields(field.getType(), prefix + field.getName() + ".", false,

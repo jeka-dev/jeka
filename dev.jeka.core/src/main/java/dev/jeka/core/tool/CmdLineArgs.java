@@ -85,8 +85,6 @@ class CmdLineArgs {
         if (JkUtilsIterable.listOf("-r", "-rc").contains(first)) {
             result.remove(0);
             result.remove(0);
-        } else if (first.startsWith("@")) {   // remove remote @alias
-            result.remove(0);
         }
         return result.toArray(new String[0]);
     }

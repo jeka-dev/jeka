@@ -9,7 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class EngineBaseTest {
+public class EngineTest {
 
     @Test
     public void defaultKBeanAsName_ok() {
@@ -28,16 +28,10 @@ public class EngineBaseTest {
 
     @Test
     public void picocliEnum_ok() {
-        JkRunbase.convertFieldValues = false;
-        try {
-            ProjectKBean projectKBean = new EngineWrapper()
-                    .run("project:", "scaffold.template=PROPS", "layout.style=SIMPLE")
-                    .load(ProjectKBean.class);
-            assertEquals(JkCompileLayout.Style.SIMPLE, projectKBean.layout.style);
-        } finally {
-            JkRunbase.convertFieldValues = true;
-        }
-
+        ProjectKBean projectKBean = new EngineWrapper()
+                .run("project:", "scaffold.template=PROPS", "layout.style=SIMPLE")
+                .load(ProjectKBean.class);
+        assertEquals(JkCompileLayout.Style.SIMPLE, projectKBean.layout.style);
     }
 
     static class NestedProp extends KBean {

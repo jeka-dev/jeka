@@ -3,7 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.system.JkLog;
 
 // Log settings
-class EnvLogSettings {
+class LogSettings {
 
     final boolean verbose;
 
@@ -19,16 +19,13 @@ class EnvLogSettings {
 
     final Boolean animation;
 
-    final boolean banner;
-
-    EnvLogSettings(boolean verbose,
-                   boolean debug,
-                   boolean stackTrace,
-                   boolean runtimeInformation,
-                   boolean duration,
-                   JkLog.Style style,
-                   Boolean animation,
-                   boolean banner) {
+    LogSettings(boolean verbose,
+                boolean debug,
+                boolean stackTrace,
+                boolean runtimeInformation,
+                boolean duration,
+                JkLog.Style style,
+                Boolean animation) {
 
         this.verbose = verbose;
         this.debug = debug;
@@ -37,11 +34,10 @@ class EnvLogSettings {
         this.duration = duration;
         this.style = style;
         this.animation = animation;
-        this.banner = banner;
     }
 
-    static EnvLogSettings ofDefault() {
-        return new EnvLogSettings(false, false, false, false, false, JkLog.Style.INDENT, false, false);
+    static LogSettings ofDefault() {
+        return new LogSettings(false, false, false, false, false, JkLog.Style.INDENT, false);
     }
 
 
