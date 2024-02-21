@@ -13,7 +13,7 @@ The *SonarqubeKBean* does not launch automatically. The method `SonarqubeKBean#r
 jeka.classpath.inject=dev.jeka:sonarqube-plugin
 
 # Optional : define a command short-cut to build a project and launch Sonarqube analysis in a row.
-jeka.cmd.buildQuality=project#cleanPack sonarqube#run
+jeka.cmd.buildQuality=project: pack sonarqube: run
 
 # Optional tool settings
 sonarqube#scannerVersion=5.0.1.3006
