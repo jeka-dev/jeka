@@ -97,7 +97,7 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
             final int result = Runtime.getRuntime().exec(command).waitFor();
             return result == 0;
         } catch (final Exception e) {  //NOSONAR
-            JkLog.verbose("Error while executing command '" + command + "' : " + e.getMessage());
+            JkLog.verbose("Error while executing command '%s' : %s", command, e.getMessage());
             return false;
         }
     }

@@ -281,7 +281,7 @@ public final class JkUrlClassLoader {
         final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.getFullClasspath()) {
             if (Files.isRegularFile(file)) {
-                JkLog.verbose("Scanning " + file + " for META-INF/services.");
+                JkLog.verbose("Scanning %s for META-INF/services.", file);
                 final ZipFile zipFile = JkUtilsZip.getZipFile(file.toFile());
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
@@ -294,7 +294,7 @@ public final class JkUrlClassLoader {
                                 entry.getName(), "/");
                         final Class<?> serviceClass = this.toJkClassLoader().loadIfExist(serviceName);
                         if (serviceClass != null) {
-                            JkLog.verbose("Found service providers for : " + serviceName);
+                            JkLog.verbose("Found service providers for : %s", serviceName);
                             serviceClasses.add(serviceClass);
                         }
                     }
@@ -315,7 +315,7 @@ public final class JkUrlClassLoader {
             }
         }
         for (final Class<?> serviceClass : serviceClasses) {
-            JkLog.verbose("Reload service providers for : " + serviceClass.getName());
+            JkLog.verbose("Reload service providers for : %s", serviceClass.getName());
             ServiceLoader.loadInstalled(serviceClass).reload();
         }
         return this;

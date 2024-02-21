@@ -387,7 +387,7 @@ public final class JkSonarqube {
                 "Sonarqube has to run on JRE >= 11. You are running on version " + javaVersion);
         if (this.scannerVersion == null) {
             URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
-            JkLog.verbose("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
+            JkLog.verbose("Use embedded sonar scanner : %s", SCANNER_JAR_NAME_46);
             return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
         }
         JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",

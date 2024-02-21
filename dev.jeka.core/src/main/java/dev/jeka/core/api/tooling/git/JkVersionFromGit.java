@@ -60,7 +60,7 @@ public class JkVersionFromGit  {
         } else {
             cachedVersion =  git.getVersionFromTag(versionTagPrefix);
         }
-        JkLog.verbose("Version inferred from Git : " + cachedVersion);
+        JkLog.verbose("Version inferred from Git : %s", cachedVersion);
         return cachedVersion;
     }
 

@@ -6,10 +6,7 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class PicocliParser {
@@ -21,17 +18,17 @@ class PicocliParser {
      * The field injections declared after override ones declared before.
      * This means that command line overrides fields declared in jeka.properties
      */
-    public static List<KBeanAction> parse(CmdLineArgs args, JkProperties props, Engine.KBeanResolution resolution) {
+    public static KBeanAction.Container parse(CmdLineArgs args, JkProperties props, Engine.KBeanResolution resolution) {
         KBeanAction.Container container = new KBeanAction.Container();
         container.addAll(parseSysProps(args, resolution));
         container.addAll(parsePropertyFile(props, resolution));
         container.addAll(parseCmdLineArgs(args, resolution));
-        return container.toList();
+        return container;
     }
 
-    static List<KBeanAction> parseCmdLineArgs(CmdLineArgs args, Engine.KBeanResolution resolution) {
+    private static List<KBeanAction> parseCmdLineArgs(CmdLineArgs args, Engine.KBeanResolution resolution) {
         return args.splitByKbeanContext().stream()
-                .flatMap(scopedArgs -> createFromScopedArgs(scopedArgs, resolution, "").stream())
+                .flatMap(scopedArgs -> createFromScopedArgs(scopedArgs, resolution, "cmd line").stream())
                 .collect(Collectors.toList());
     }
 
@@ -65,7 +62,11 @@ class PicocliParser {
                     continue;
                 }
                 Object value = commandSpec.findOption(beanField.name).getValue();
-                actions.add(KBeanAction.ofSetValue(kbeanClassName, beanField.name, value, ENV_SYS_PROP_SOURCE));
+
+                // To avoid 'null' field-set, skip when sys prop = default value
+                if (!Objects.equals(value, beanField.defaultValue)) {
+                    actions.add(KBeanAction.ofSetValue(kbeanClass, beanField.name, value, ENV_SYS_PROP_SOURCE));
+                }
             }
         }
         return actions;
@@ -97,7 +98,7 @@ class PicocliParser {
 
         // Add init action
         List<KBeanAction> kBeanActions = new LinkedList<>();
-        kBeanActions.add(KBeanAction.ofInit(kbeanClassName));
+        kBeanActions.add(KBeanAction.ofInit(kbeanClass));
 
         // Add field-injection
 
@@ -116,14 +117,14 @@ class PicocliParser {
         for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
             String name = optionSpec.names()[0];
             Object value = parseResult.matchedOptionValue(name, null);
-            KBeanAction kBeanAction = KBeanAction.ofSetValue(kbeanName, name, value, source);
+            KBeanAction kBeanAction = KBeanAction.ofSetValue(kbeanClass, name, value, source);
             kBeanActions.add(kBeanAction);
         }
 
         // Add Method invokes
         Arrays.stream(methodOrFieldArgs)
                 .filter(availableMethodNames::contains)
-                .forEach(name -> kBeanActions.add(KBeanAction.ofInvoke(kbeanName, name)));
+                .forEach(name -> kBeanActions.add(KBeanAction.ofInvoke(kbeanClass, name)));
         return kBeanActions;
     }
 

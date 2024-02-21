@@ -390,8 +390,8 @@ public final class JkKotlinCompiler {
             JkLog.warn("No Kotlin source found in " + compileSpec.getSources());
             return new Result(true, Collections.emptyList());
         }
-        JkLog.verbose(sourcePaths.size() + " files to compile.");
-        JkLog.verbose("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
+        JkLog.verbose("%s files to compile.", sourcePaths.size());
+        JkLog.verbose("Kotlin version : %s, Target JVM : %s", getVersion() ,compileSpec.getTargetVersion() );
         JkAbstractProcess<?> kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
         JkKotlinJvmCompileSpec effectiveSpec = compileSpec.copy();
@@ -400,7 +400,7 @@ public final class JkKotlinCompiler {
             loggedOptions.add(plugin.toOption());
         }
         if (command != null) {
-            JkLog.verbose("Use kotlin compiler : " + command + " with options " + loggedOptions);
+            JkLog.verbose("Use kotlin compiler : %s with options %s", command, loggedOptions);
             kotlincProcess = JkProcess.of(command)
                     .addParams(this.jvmOptions.stream()
                             .map(JkKotlinCompiler::toJavaOption)

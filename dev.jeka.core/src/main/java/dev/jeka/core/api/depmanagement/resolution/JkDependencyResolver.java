@@ -272,10 +272,11 @@ public final class JkDependencyResolver  {
         final JkResolvedDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(
                 allDependencies);
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
-        int moduleCount = resolveResult.getInvolvedCoordinates().size();
-        int fileCount = resolveResult.getFiles().getEntries().size();
-        JkLog.verbose("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
+
         if (JkLog.isVerbose()) {
+            int moduleCount = resolveResult.getInvolvedCoordinates().size();
+            int fileCount = resolveResult.getFiles().getEntries().size();
+            JkLog.verbose("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
             resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
         }
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
@@ -309,12 +310,15 @@ public final class JkDependencyResolver  {
         Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
         boolean nonExistingEntryOnFs = false;
         if (Files.exists(cacheFile)) {
-            JkLog.debug("Found cached resolve-classpath file %s for resolving %s", cacheFile, qualifiedDependencies);
+            if (JkLog.isDebug()) {
+                JkLog.info("Resolving %n%s", qualifiedDependencies.toStringMultiline("  "));
+                JkLog.info("Found cached resolve-classpath file %s", cacheFile);
+            }
             JkPathSequence cachedPathSequence =
                     JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
             String cachedCpMsg = cachedPathSequence.getEntries().isEmpty() ? "[empty]" :
                     "\n" + cachedPathSequence.toPathMultiLine("  ");
-            JkLog.debug("Cached resolved classpath : " + cachedCpMsg);
+            JkLog.debug("Cached resolved classpath :%s", cachedCpMsg);
             if (!cachedPathSequence.hasNonExisting()) {
                 return cachedPathSequence.getEntries();
             } else {

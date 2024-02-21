@@ -55,7 +55,8 @@ public class JkQualifiedDependency {
 
     @Override
     public String toString() {
-        return "'" + qualifier + "' " + dependency;
+        String qualifierName = qualifier == null ? "" :  "[" + qualifier + "] ";
+        return qualifierName + dependency;
     }
 
     public JkQualifiedDependency withQualifier(String qualifier) {

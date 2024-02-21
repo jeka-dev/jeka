@@ -32,7 +32,7 @@ public final class GitKBean extends KBean {
     protected void init() {
         versionFromGit = JkVersionFromGit.of(getBaseDir(), versionTagPrefix);
         if (handleVersioning) {
-            getRunbase().findInstanceOf(BaseKBean.class).ifPresent(selfKBean ->
+            getRunbase().find(BaseKBean.class).ifPresent(selfKBean ->
                     versionFromGit.handleVersioning(selfKBean));
             getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
                     versionFromGit.handleVersioning(projectKBean.project));

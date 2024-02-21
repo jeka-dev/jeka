@@ -120,7 +120,7 @@ public final class IntellijKBean extends KBean {
         iml();
         IntelliJProject.find(getBaseDir()).deleteWorkspaceXml();
         modulesXml();
-        iml();;
+        iml();
     }
 
     /**

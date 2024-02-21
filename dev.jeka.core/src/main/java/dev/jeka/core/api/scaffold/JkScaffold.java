@@ -116,7 +116,7 @@ public abstract class JkScaffold {
 
         // Create 'jeka-src' dir
         final Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        JkLog.verbose("Create " + jekaSrc);
+        JkLog.verbose("Create %s", jekaSrc);
 
         JkUtilsPath.createDirectories(jekaSrc);
         createOrUpdateJekaProps();  // Create 'jeka.properties' file

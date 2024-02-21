@@ -294,10 +294,13 @@ public final class JkUtilsString {
      * string is longer than the specified max length. Otherwise, the specified string is returned as is.
      */
     public static String ellipse(String string, int max) {
+        if (string.length() <= 3) {
+            return string;
+        }
         if (string.length() <= max || max < 0) {
             return string;
         }
-        return string.substring(0, max) + "...";
+        return string.substring(0, max-3) + "...";
     }
 
     /**

@@ -41,7 +41,7 @@ public final class DockerKBean extends KBean {
 
     @Override
     protected void init() {
-        Optional<BaseKBean> optionalSelfAppKBean = getRunbase().findInstanceOf(BaseKBean.class);
+        Optional<BaseKBean> optionalSelfAppKBean = getRunbase().find(BaseKBean.class);
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
        /*
         if (optionalProjectKBean.isPresent() && optionalProjectKBean.isPresent()) {
@@ -91,7 +91,7 @@ public final class DockerKBean extends KBean {
     }
 
     private void configureForSelfApp(BaseKBean baseKBean) {
-        JkLog.verbose("Configure DockerKBean for SelAppKBean " + baseKBean);
+        JkLog.verbose("Configure DockerKBean for SelAppKBean %s", baseKBean);
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName
                 : computeImageName(baseKBean.getModuleId(), baseKBean.getVersion(), baseKBean.getBaseDir());
@@ -106,7 +106,7 @@ public final class DockerKBean extends KBean {
     }
 
     private void configureForProject(ProjectKBean projectKBean) {
-        JkLog.verbose("Configure DockerKBean for ProjectKBean " + projectKBean.project);
+        JkLog.verbose("Configure DockerKBean for ProjectKBean %s", projectKBean.project);
         JkProject project = projectKBean.project;
         this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
                 ? dockerImageName

@@ -99,7 +99,7 @@ public class JkCoordinateSearch {
                 throw new UncheckedIOException(e);
             }
             if (result == null) {
-                JkLog.verbose("No API found at " + url + " (404).");
+                JkLog.verbose("No API found at %s (404).", url);
                 baseCandidtate = getParentUrl(baseCandidtate);
                 if (baseCandidtate == null) {
                     break;

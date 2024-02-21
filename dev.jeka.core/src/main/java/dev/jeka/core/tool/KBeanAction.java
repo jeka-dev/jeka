@@ -1,20 +1,38 @@
 package dev.jeka.core.tool;
 
-import java.util.Collections;
+import dev.jeka.core.api.text.JkColumnText;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
+
+import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static dev.jeka.core.tool.EngineCommand.Action.*;
+import static dev.jeka.core.tool.KBeanAction.Action.*;
 
 /**
  * Represents an action to be taken on a bean, such as invoking a method,
  * injecting a property, or instantiating a bean.
  */
-class KBeanAction {
+class KBeanAction implements Comparable<KBeanAction> {
 
-    final EngineCommand.Action action;
+    enum Action {
 
-    final String beanName;
+        SET_FIELD_VALUE("set-value"), INVOKE("invoke"), BEAN_INIT("initialize");
+
+        private final String name;
+
+        Action(String name) {
+            this.name = name;
+        }
+    }
+
+    final Action type;
+
+    final Class<? extends KBean> beanClass;
 
     final String member; // method or property name
 
@@ -22,30 +40,80 @@ class KBeanAction {
 
     final String valueSource;
 
-    private KBeanAction(EngineCommand.Action action, String beanName, String member, Object value, String valueSource) {
-        this.action = action;
-        this.beanName = beanName;
+    private KBeanAction(Action type, Class<? extends KBean> beanClass, String member, Object value, String valueSource) {
+        this.type = type;
+        this.beanClass = beanClass;
         this.member = member;
         this.value = value;
         this.valueSource = valueSource;
     }
 
-    static KBeanAction ofInit(String beanName) {
-        return new KBeanAction(EngineCommand.Action.BEAN_INIT, beanName, null, null, null);
+    static KBeanAction ofInit(Class<? extends KBean> beanClass) {
+        return new KBeanAction(Action.BEAN_INIT, beanClass, null, null, null);
     }
 
-    static KBeanAction ofInvoke(String beanName, String methodName) {
-        return new KBeanAction(EngineCommand.Action.INVOKE, beanName, methodName, null, null);
+    static KBeanAction ofInvoke(Class<? extends KBean> beanClass, String methodName) {
+        return new KBeanAction(Action.INVOKE, beanClass, methodName, null, null);
     }
 
-    static KBeanAction ofSetValue(String beanName, String fieldName, Object value, String source) {
-        return new KBeanAction(EngineCommand.Action.SET_FIELD_VALUE, beanName, fieldName, value, source);
+    static KBeanAction ofSetValue(Class<? extends KBean> beanClass, String fieldName, Object value, String source) {
+        return new KBeanAction(Action.SET_FIELD_VALUE, beanClass, fieldName, value, source);
     }
 
     @Override
     public String toString() {
-        return "action=" + action + ", beanName='" + beanName + '\'' + ", member='" + member + '\'' +
-                ", value='" + value + '\'' + ", source=" + valueSource;
+        if (type == Action.BEAN_INIT) {
+            return beanClass.getName() + ".init()";
+        }
+        if (type == Action.INVOKE) {
+            return beanClass.getName() + "." + member + "()";
+        }
+        return beanClass.getName() + "." + member + "=" + value + "  [from " + valueSource + "]";
+    }
+
+    @Override
+    public int compareTo(KBeanAction other) {
+        if (this.beanClass.equals(other.beanClass)) {
+            if (this.type == Action.INVOKE && other.type != Action.INVOKE) {
+                return 1;
+            }
+            if (this.type != Action.INVOKE && other.type == Action.INVOKE) {
+                return -1;
+            }
+            if (this.type == BEAN_INIT) {
+                return -1;
+            }
+            if (other.type == BEAN_INIT) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    Method method() {
+        JkUtilsAssert.state(type == INVOKE, "Can get method only on INVOKE action type, was %s", this);
+        return JkUtilsReflect.getMethod(beanClass, member);
+    }
+
+    public Comparator<KBeanAction> compareTo() {
+
+        return (c1, c2) -> {
+            if (c1.beanClass.equals(c2.beanClass)) {
+                if (c1.type == Action.INVOKE && c2.type != Action.INVOKE) {
+                    return 1;
+                }
+                if (c1.type != Action.INVOKE && c2.type == Action.INVOKE) {
+                    return -1;
+                }
+                if (c1.type == BEAN_INIT) {
+                    return -1;
+                }
+                if (c2.type == BEAN_INIT) {
+                    return 1;
+                }
+            }
+            return 0;
+        };
     }
 
     static class Container {
@@ -53,33 +121,57 @@ class KBeanAction {
         private final List<KBeanAction> kBeanActions = new LinkedList<>();
 
         List<KBeanAction> toList() {
-            return Collections.unmodifiableList(kBeanActions);
+            return kBeanActions.stream().sorted().collect(Collectors.toList());
+        }
+
+        List<KBeanAction> findSetValues(Class<? extends KBean> kbeanClass) {
+            return kBeanActions.stream()
+                    .filter(action -> action.type == Action.SET_FIELD_VALUE)
+                    .filter(action -> action.beanClass.equals(kbeanClass))
+                    .collect(Collectors.toList());
+        }
+
+        List<KBeanAction> findInvokes() {
+            return kBeanActions.stream()
+                    .filter(action -> action.type == INVOKE)
+                    .collect(Collectors.toList());
         }
 
         void addAll(List<KBeanAction> kBeanActions) {
             kBeanActions.forEach(this::add);
         }
 
+        void addInitBean(Class<? extends KBean> inintKBeanClass) {
+            KBeanAction present = kBeanActions.stream()
+                            .filter(action -> action.type == BEAN_INIT)
+                            .filter(action -> action.beanClass.equals(inintKBeanClass))
+                            .findFirst().orElse(null);
+            if (present != null) {
+                kBeanActions.remove(present);
+            }
+            kBeanActions.add(0, KBeanAction.ofInit(inintKBeanClass));
+        }
+
         void add(KBeanAction kBeanAction) {
 
             // Always add invokes
-            if (kBeanAction.action == INVOKE) {
+            if (kBeanAction.type == INVOKE) {
                 kBeanActions.add(kBeanAction);
 
             // Add instantiation only if it has not been already done
-            } else if (kBeanAction.action == BEAN_INIT) {
+            } else if (kBeanAction.type == BEAN_INIT) {
                 boolean present = kBeanActions.stream()
-                        .filter(kBeanAction1 -> kBeanAction1.action == BEAN_INIT)
-                        .anyMatch(kBeanAction1 -> kBeanAction.beanName.equals(kBeanAction1.beanName));
+                        .filter(kBeanAction1 -> kBeanAction1.type == BEAN_INIT)
+                        .anyMatch(kBeanAction1 -> kBeanAction.beanClass.equals(kBeanAction1.beanClass));
                 if (!present) {
                     kBeanActions.add(kBeanAction);
                 }
 
             // If field inject has already bean declared on same bean/field, it is replaced
-            } else if (kBeanAction.action == SET_FIELD_VALUE) {
+            } else if (kBeanAction.type == SET_FIELD_VALUE) {
                 KBeanAction present = kBeanActions.stream()
-                        .filter(kBeanAction1 -> kBeanAction1.action == SET_FIELD_VALUE)
-                        .filter(kBeanAction1 -> kBeanAction.beanName.equals(kBeanAction1.beanName))
+                        .filter(kBeanAction1 -> kBeanAction1.type == SET_FIELD_VALUE)
+                        .filter(kBeanAction1 -> kBeanAction.beanClass.equals(kBeanAction1.beanClass))
                         .filter(kBeanAction1 -> kBeanAction.member.equals(kBeanAction1.member))
                         .findFirst().orElse(null);
                 if (present == null) {
@@ -91,5 +183,25 @@ class KBeanAction {
                 }
             }
         }
+
+        JkColumnText toColumnText() {
+            JkColumnText columnText = JkColumnText.ofSingle(1, 20)  // actionType
+                    .addColumn(1, 50)  // member
+                    .addColumn(1, 16); // source
+            List<KBeanAction> sortedCommands = this.kBeanActions.stream()
+                    .sorted().collect(Collectors.toList());
+            for (KBeanAction action : sortedCommands) {
+                String member = action.type == Action.INVOKE ? action.member + "()" : action.member + "=" + action.value;
+                member = action.type == BEAN_INIT ? "init" : member;
+                columnText.add(
+                        action.beanClass.getSimpleName(),
+                        JkUtilsString.nullToEmpty(member),
+                        JkUtilsString.nullToEmpty(action.valueSource)
+                );
+            }
+            return columnText;
+        }
+
+
     }
 }

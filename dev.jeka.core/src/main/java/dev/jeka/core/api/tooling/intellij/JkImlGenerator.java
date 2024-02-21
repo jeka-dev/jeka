@@ -132,8 +132,8 @@ public final class JkImlGenerator {
         JkIdeSupport ideSupport = ideSupportSupplier == null ? null : ideSupportSupplier.get();
         Path dir = ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
         JkIml iml = JkIml.of().setModuleDir(dir);
-        JkLog.verbose("Compute iml jeka-src classpath : " + jekaSrcClasspath);
-        JkLog.verbose("Compute iml jeka-src imported projects : " + jekaSrcImportedProjects);
+        JkLog.verbose("Compute iml jeka-src classpath : %s", jekaSrcClasspath);
+        JkLog.verbose("Compute iml jeka-src imported projects : %s", jekaSrcImportedProjects);
         if (this.useVarPath) {
             iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir());
         }

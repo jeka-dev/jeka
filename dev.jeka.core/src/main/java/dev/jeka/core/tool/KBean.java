@@ -139,7 +139,7 @@ public abstract class KBean {
      */
     public KBean cleanOutput() {
         Path output = getOutputDir();
-        JkLog.verbose("Clean output directory " + output.toAbsolutePath().normalize());
+        JkLog.verbose("Clean output directory %s", output.toAbsolutePath().normalize());
         if (Files.exists(output)) {
             JkPathTree.of(output).deleteContent();
         }

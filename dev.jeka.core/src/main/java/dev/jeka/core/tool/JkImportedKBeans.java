@@ -80,7 +80,7 @@ public final class JkImportedKBeans {
         final List<KBean> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getDeclaredFieldsWithAnnotation(masterBean.getClass(), JkInjectRunbase.class);
         if (!fields.isEmpty()) {
-            JkLog.verbose("Projects imported by " + masterBean + " : " + fields);
+            JkLog.verbose("Projects imported by %s : %s", masterBean, fields);
         }
         for (final Field field : fields) {
             final JkInjectRunbase jkProject = field.getAnnotation(JkInjectRunbase.class);

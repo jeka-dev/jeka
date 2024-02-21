@@ -426,6 +426,21 @@ public class JkQualifiedDependencySet {
                 '}';
     }
 
+    public String toStringMultiline(String margin) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(margin).append("Dependencies    :\n");
+        entries.forEach(dep -> sb.append(margin + "  " + dep + "\n"));
+        sb.append(margin).append("Exclusions      :\n");
+        globalExclusions.forEach(exclusion -> sb.append(margin + "  " + exclusion + "\n"));
+        sb.append(margin).append("Version Provider:\n");
+        versionProvider.toMap().entrySet()
+                .forEach(entry -> sb.append(margin + "  " + entry.getKey() + " : " + entry.getValue() + "\n"));
+        if (sb.charAt(sb.length() -1)  == '\n') {
+            sb.deleteCharAt(sb.length() -1);
+        }
+        return sb.toString();
+    }
+
     /**
      * Computes the MD5 hash of the current instance and returns it as a string.
      * The string is suitable to be used as a file name.

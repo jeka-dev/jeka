@@ -471,7 +471,7 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
                 JkUtilsSystem.sleep(millis);
                 List<FileChange> fileChanges = getFileChanges(watchService, watchKeys);
                 if (!fileChanges.isEmpty()) {
-                    JkLog.verbose("File change detected : " + fileChanges);
+                    JkLog.verbose("File change detected : %s", fileChanges);
                     fileChangeConsumer.accept(fileChanges);
                 }
             }
@@ -508,7 +508,7 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
                 if (Files.isDirectory(filePath) && ENTRY_CREATE.equals(watchEvent.kind())) {
                     it.add(
                             JkUtilsPath.register(filePath, watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY));
-                    JkLog.verbose("Watch directory " + filePath);
+                    JkLog.verbose("Watch directory %s", filePath);
                 }
                 Path relPath = this.getRoot().relativize(filePath);
 

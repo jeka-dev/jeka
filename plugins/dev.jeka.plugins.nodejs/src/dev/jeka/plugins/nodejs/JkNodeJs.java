@@ -199,10 +199,10 @@ public class JkNodeJs {
     private static void download(String version) {
         JkPathFile tempZip = JkPathFile.of(JkUtilsPath.createTempFile("nodejs-downloded", ""));
         String url = constructDownloadUrl(version);
-        JkLog.verbose("Downloading " + url + "... ");
+        JkLog.verbose("Downloading %s...", url);
         tempZip.fetchContentFrom(constructDownloadUrl(version));
         Path distribPath = getDistribPath(version);
-        JkLog.verbose("unpack " + url + " to " + distribPath);
+        JkLog.verbose("unpack %s to %s", url, distribPath);
         if (JkUtilsSystem.IS_WINDOWS) {
             try (JkZipTree zipTree = JkZipTree.of(tempZip.get())) {
                 zipTree.goTo(nodeArchiveFolderName(version)).copyTo(distribPath, StandardCopyOption.REPLACE_EXISTING);

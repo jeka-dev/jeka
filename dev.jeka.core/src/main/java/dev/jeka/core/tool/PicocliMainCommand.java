@@ -137,7 +137,7 @@ public class PicocliMainCommand {
     @Option(names = { "-ls"},
             paramLabel = "STYLE",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
-    private JkLog.Style logStyle = JkLog.Style.INDENT;
+    private final JkLog.Style logStyle = JkLog.Style.INDENT;
 
     @Option(names = {"-cmd", "--commands"},
             paramLabel = "<|kbeanName>",

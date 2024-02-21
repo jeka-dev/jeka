@@ -545,7 +545,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     private void printContextualInfo() {
-        String workingDirName = this.workingDir == null ? "." : shortenWorkingDir();
+        String workingDirName = this.workingDir == null ? "." : workingDir.toString();
         JkLog.info("working dir   : %s", workingDirName);
         JkLog.info("command path  : %s", command);
         JkLog.info("full cmd line : %s", fullCmdLine());

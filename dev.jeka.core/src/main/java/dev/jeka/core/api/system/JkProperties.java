@@ -8,6 +8,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,12 @@ public final class JkProperties {
         Properties properties = new Properties();
         try (InputStream is = new FileInputStream(propertyFile.toFile())) {
             properties.load(is);
-            return ofMap(propertyFile.toString(), JkUtilsIterable.propertiesToMap(properties));
+            Path workingDir = Paths.get("").toAbsolutePath();
+            String source = propertyFile.toString();
+            if (propertyFile.isAbsolute() && propertyFile.startsWith(workingDir)) {
+                source = workingDir.relativize(propertyFile).toString();
+            }
+            return ofMap(source, JkUtilsIterable.propertiesToMap(properties));
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException(propertyFile + " not found");
         } catch (IOException e) {

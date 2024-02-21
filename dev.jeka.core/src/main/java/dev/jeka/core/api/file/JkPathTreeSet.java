@@ -335,7 +335,7 @@ public final class JkPathTreeSet {
                         .flatMap(tree -> tree.getFileChanges(watchService, watchKeys).stream())
                         .collect(Collectors.toList());
                 if (!fileChanges.isEmpty()) {
-                    JkLog.verbose("File change detected : " + fileChanges);
+                    JkLog.verbose("File change detected : %s", fileChanges);
                     fileChangeConsumer.accept(fileChanges);
                 }
             }

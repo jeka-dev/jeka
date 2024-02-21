@@ -69,8 +69,8 @@ class EngineWrapper {
     private void run(Engine engine, Engine.KBeanResolution kBeanResolution, JkProperties props, String[] args) {
         engine.resolveClassPaths();
         engine.setKBeanResolution(kBeanResolution);
-        List<KBeanAction> kBeanActions = parse(args, props, kBeanResolution);
-        engine.resolveEngineCommand(kBeanActions);
+        KBeanAction.Container kBeanActions = parse(args, props, kBeanResolution);
+        engine.initRunbase(kBeanActions);
         engine.run();
     }
 
@@ -97,7 +97,7 @@ class EngineWrapper {
                 defaultAndInitKBean.defaultKBeanClassName);
     }
 
-    private List<KBeanAction> parse(String[] args, JkProperties props, Engine.KBeanResolution kBeanResolution) {
+    private KBeanAction.Container parse(String[] args, JkProperties props, Engine.KBeanResolution kBeanResolution) {
         return PicocliParser.parse(new CmdLineArgs(args), props, kBeanResolution);
     }
 }

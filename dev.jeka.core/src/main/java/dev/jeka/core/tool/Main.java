@@ -116,17 +116,20 @@ public class Main {
 
             // Parse command line to get action beans
             JkProperties jekaProps = dev.jeka.core.tool.JkRunbase.readBaseProperties(baseDir);
-            List<KBeanAction> kBeanActions = PicocliParser.parse(
+            KBeanAction.Container actionContainer = PicocliParser.parse(
                     interpolatedArgs.withoutOptions(),
                     jekaProps,
                     kBeanResolution);
-            List<EngineCommand> engineCommands = engine.resolveEngineCommand(kBeanActions);
+
+            // Prepend the init bean in action container
+            kBeanResolution.findInitBeanClass().ifPresent(actionContainer::addInitBean);
+
             if (logs.runtimeInformation) {
-                logRuntimeInfoEngineCommands(engineCommands);
+                logRuntimeInfoEngineCommands(actionContainer);
             }
 
             // Run
-            engine.initRunbase();
+            engine.initRunbase(actionContainer);
             if (logs.runtimeInformation) {
                 logRuntimeInfoRun(engine.getRunbase());
             }
@@ -232,9 +235,9 @@ public class Main {
         cp.forEach(entry -> JkLog.info("   | " + entry));
     }
 
-    private static void logRuntimeInfoEngineCommands(List<EngineCommand> engineCommands) {
+    private static void logRuntimeInfoEngineCommands(KBeanAction.Container actionContainer) {
         JkLog.info("Commands           :");
-        JkLog.info(EngineCommand.toColumnText(engineCommands)
+        JkLog.info(actionContainer.toColumnText()
                 .setSeparator(" | ")
                 .setMarginLeft("   | ")
                 .toString());

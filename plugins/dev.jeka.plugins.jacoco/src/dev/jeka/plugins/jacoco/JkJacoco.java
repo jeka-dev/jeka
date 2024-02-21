@@ -218,7 +218,7 @@ public final class JkJacoco {
      * Generates XML and HTML reports from the exec report file.
      */
     public void generateExport() {
-        JkLog.verbose("Jacoco internal report created at : " + execFile);
+        JkLog.verbose("Jacoco internal report created at : %s", execFile);
         if (!reportOptions.isEmpty()) {
             if (classDir == null) {
                 JkLog.warn("No class dir specified. Cannot run jacoco report.");

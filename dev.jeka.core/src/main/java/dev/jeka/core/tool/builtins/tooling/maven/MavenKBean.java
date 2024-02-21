@@ -72,7 +72,7 @@ public final class MavenKBean extends KBean {
 
         // If ProjectKBean is absent, try to configure wih BaseKBean if present
         if (!optionalProjectKBean.isPresent()) {
-            getRunbase().findInstanceOf(BaseKBean.class).ifPresent(selfAppKBean -> {
+            getRunbase().find(BaseKBean.class).ifPresent(selfAppKBean -> {
                 mavenPublication = createMavenPublication(selfAppKBean);
             });
         }

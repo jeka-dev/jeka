@@ -6,17 +6,17 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Execution context associated with a base directory.
@@ -44,8 +44,7 @@ public final class JkRunbase {
 
     private static Path masterBaseDir;
 
-    // Relative Path
-    private final Path baseDir;
+    private final Path baseDir; // Relative Path
 
     private JkDependencyResolver dependencyResolver;
 
@@ -55,9 +54,11 @@ public final class JkRunbase {
 
     private JkDependencySet exportedDependencies;
 
-    private JkPathSequence importedRunbaseDirs = JkPathSequence.of();
+    private final JkPathSequence importedRunbaseDirs = JkPathSequence.of();
 
-    private List<EngineCommand> fieldInjections = Collections.emptyList();
+    // An empty container has to be present at instantiation time for sub-runbase, as
+    // they are not initialized with any KbeanActions
+    private KBeanAction.Container actionContainer = new KBeanAction.Container();
 
     private final JkProperties properties;
 
@@ -73,50 +74,6 @@ public final class JkRunbase {
      */
     public static JkRunbase get(Path baseDir) {
         return RUNTIMES.computeIfAbsent(baseDir, path -> new JkRunbase(path));
-    }
-
-    static JkRunbase getCurrentContextBaseDir() {
-        return get(getBaseDirContext());
-    }
-
-    static void setBaseDirContext(Path baseDir) {
-        JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Base dir " + baseDir + " not found.");
-        BASE_DIR_CONTEXT.set(baseDir);
-    }
-
-    static void setMasterBaseDir(Path baseDir) {
-        masterBaseDir = baseDir;
-    }
-
-    private static Path getBaseDirContext() {
-        return Optional.ofNullable(BASE_DIR_CONTEXT.get()).orElseGet(() -> {
-            setBaseDirContext(Paths.get(""));
-            return BASE_DIR_CONTEXT.get();
-        });
-    }
-
-    private static void setValue(Object target, String propName, Object value) {
-        if (propName.contains(".")) {
-            String first = JkUtilsString.substringBeforeFirst(propName, ".");
-            String remaining = JkUtilsString.substringAfterFirst(propName, ".");
-            Object child = JkUtilsReflect.getFieldValue(target, first);
-            if (child == null) {
-                String msg = String.format("Compound property '%s' on class '%s' should not value 'null'" +
-                        " right after been instantiate.%n. Please instantiate this property in %s constructor",
-                        first, target.getClass().getName(), target.getClass().getSimpleName());
-                throw new JkException(msg);
-            }
-            setValue(child, remaining, value);
-            return;
-        }
-        Field field = JkUtilsReflect.getField(target.getClass(), propName);
-        JkUtilsAssert.state(field != null, "Null field found for class %s and field %s",
-                target.getClass().getName(), propName);
-        JkUtilsReflect.setFieldValue(target, field, value);
-    }
-
-    Path getBaseDir() {
-        return baseDir;
     }
 
     /**
@@ -180,7 +137,7 @@ public final class JkRunbase {
             JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
-            result = this.instantiate(beanClass, consumer);
+            result = this.instantiateKBean(beanClass, consumer);
             BASE_DIR_CONTEXT.set(previousProject);
             JkLog.debugEndTask();
         }
@@ -203,15 +160,6 @@ public final class JkRunbase {
     }
 
     /**
-     * Returns the first KBean being an instance of the specified class, present in this runbase.
-     */
-    public <T extends KBean> Optional<T> findInstanceOf(Class<T> beanClass) {
-        return (Optional<T>) beans.values().stream()
-                .filter(beanClass::isInstance)
-                .findFirst();
-    }
-
-    /**
      * Returns the list of registered KBeans. A KBean is registered when it has been identified as the default KBean or
      * when {@link #load(Class)} is invoked.
      */
@@ -219,8 +167,16 @@ public final class JkRunbase {
         return new LinkedList<>(beans.values());
     }
 
+    /**
+     * Returns the JkProperties object associated with the current instance of JkRunbase.
+     * JkProperties is a class that holds key-value pairs of properties relevant to the execution of Jeka build tasks.
+     */
     public JkProperties getProperties() {
         return this.properties;
+    }
+
+    Path getBaseDir() {
+        return baseDir;
     }
 
     void setDependencyResolver(JkDependencyResolver resolverArg) {
@@ -239,23 +195,21 @@ public final class JkRunbase {
         this.exportedDependencies = exportedDependencies;
     }
 
-    void init(List<EngineCommand> commands) {
-        JkLog.debug("Initialize JkRunbase with \n" + JkUtilsIterable.toMultiLineString(commands, "  "));
-        this.fieldInjections = commands.stream()
-                .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.SET_FIELD_VALUE)
-                .collect(Collectors.toList());
+    void init(KBeanAction.Container actionContainer) {
+        if (JkLog.isDebug()) {
+            JkLog.debug("Initialize JkRunbase with \n" + actionContainer.toColumnText());
+        }
+        this.actionContainer = actionContainer;
 
-        // Instantiate & register beans
         JkLog.debugStartTask("Register KBeans");
-        commands.stream()
-                //.filter(engineCommand -> engineCommand.getAction() != EngineCommand.Action.PROPERTY_INJECT)
-                .map(EngineCommand::getBeanClass)
+        actionContainer.toList().stream()
+                .map(kbeanAction -> kbeanAction.beanClass)
                 .distinct()
-                .forEach(this::load);
+                .forEach(this::load);  // register kbeans
         JkLog.debugEndTask();
 
-        // Once KBeans has bean initialised. #postInit is invoked on each, so they can act upon final settings
-        // of other KBeans
+        // Once KBeans has bean initialised. #postInit is invoked on each,
+        // so they can act upon final settings of other KBeans.
         beans.values().forEach(KBean::postInit);
     }
 
@@ -263,21 +217,10 @@ public final class JkRunbase {
         JkUtilsAssert.state(dependencyResolver != null, "Dependency resolver can't be null.");
     }
 
-    void run(List<EngineCommand> commands) {
-        for (EngineCommand engineCommand : commands) {
-            KBean bean = load(engineCommand.getBeanClass());
-            if (engineCommand.getAction() == EngineCommand.Action.INVOKE) {
-                Method method;
-                try {
-                    method = bean.getClass().getMethod(engineCommand.getMember());
-                } catch (NoSuchMethodException e) {
-                    String dir = (Paths.get("").toAbsolutePath().equals(getBaseDir())) ? ""
-                            : " (from " + getBaseDir() + ")";
-                    throw new JkException("No public no-args method '" + engineCommand.getMember() + "' found on KBean "
-                            + bean.getClass() + dir);
-                }
-                JkUtilsReflect.invoke(bean, method);
-            }
+    void run(KBeanAction.Container actionContainer) {
+        for (KBeanAction kBeanAction : actionContainer.findInvokes()) {
+            KBean bean = load(kBeanAction.beanClass);
+            JkUtilsReflect.invoke(bean, kBeanAction.method());
         }
     }
 
@@ -285,35 +228,23 @@ public final class JkRunbase {
         beans.put(kbeanClass, kbean);
     }
 
-    private <T extends KBean> T instantiate(Class<T> beanClass, Consumer<T> consumer) {
-        if (Modifier.isAbstract(beanClass.getModifiers())) {
-            throw new JkException("KBean class " + beanClass + " in " + this.baseDir
-                    + " is abstract and therefore cannot be instantiated. Please, use a concrete type to declare imported KBeans.");
-        }
-        T bean = JkUtilsReflect.newInstance(beanClass);
-        consumer.accept(bean);
-
-        // We must inject fields after instance creation cause in the KBean
-        // constructor, fields of child classes are not yet initialized.
-
-            injectFieldValues(bean);
-            bean.init();
-
-        return bean;
-    }
-
     // inject values in fields from command-line and properties.
     void injectFieldValues(KBean bean) {
-        // Inject properties having name matching with a bean field
+        this.actionContainer.findSetValues(bean.getClass()).forEach(
+                action -> setValue(bean, action.member, action.value));
+    }
 
+    static JkRunbase getCurrentContextBaseDir() {
+        return get(getBaseDirContext());
+    }
 
-        // Inject field
-        fieldInjections.stream()
-                .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.SET_FIELD_VALUE)
-                .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
-                .forEach(action -> {
-                    setValue(bean, action.getMember(), action.getValue());
-                });
+    static void setBaseDirContext(Path baseDir) {
+        JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Base dir " + baseDir + " not found.");
+        BASE_DIR_CONTEXT.set(baseDir);
+    }
+
+    static void setMasterBaseDir(Path baseDir) {
+        masterBaseDir = baseDir;
     }
 
     static JkProperties constructProperties(Path baseDir) {
@@ -330,7 +261,7 @@ public final class JkRunbase {
      * Reads the properties from the baseDir/jeka.properties and its ancestors.
      *
      * Takes also in account properties defined in parent project dirs if any.
-     * this doen't take in account System and global props
+     * this doesn't take in account System and global props.
      */
     static JkProperties readBasePropertiesRecursively(Path baseDir) {
         baseDir = baseDir.toAbsolutePath().normalize();
@@ -355,10 +286,26 @@ public final class JkRunbase {
 
     @Override
     public String toString() {
-        return "JkRunbase{" +
-                "baseDir=" + relBaseDir() +
-                ", beans=" + beans.keySet() +
-                '}';
+        return String.format("JkRunbase{ baseDir=%s, beans=%s }", relBaseDir(), beans.keySet());
+    }
+
+    private <T extends KBean> T instantiateKBean(Class<T> beanClass, Consumer<T> consumer) {
+        T bean = JkUtilsReflect.newInstance(beanClass);
+        consumer.accept(bean);
+
+        // We must inject fields after instance creation cause in the KBean
+        // constructor, fields of child classes are not yet initialized.
+        injectFieldValues(bean);
+
+        bean.init();
+        return bean;
+    }
+
+    private static Path getBaseDirContext() {
+        return Optional.ofNullable(BASE_DIR_CONTEXT.get()).orElseGet(() -> {
+            setBaseDirContext(Paths.get(""));
+            return BASE_DIR_CONTEXT.get();
+        });
     }
 
     private Path relBaseDir() {
@@ -366,6 +313,27 @@ public final class JkRunbase {
             return masterBaseDir.relativize(baseDir);
         }
         return baseDir;
+    }
+
+    private static void setValue(Object target, String propName, Object value) {
+        if (propName.contains(".")) {
+            String first = JkUtilsString.substringBeforeFirst(propName, ".");
+            String remaining = JkUtilsString.substringAfterFirst(propName, ".");
+            Object child = JkUtilsReflect.getFieldValue(target, first);
+            if (child == null) {
+                String msg = String.format(
+                        "Compound property '%s' on class '%s' should not value 'null'" +
+                        " right after been instantiate.%n. Please instantiate this property in %s constructor",
+                        first, target.getClass().getName(), target.getClass().getSimpleName());
+                throw new JkException(msg);
+            }
+            setValue(child, remaining, value);
+            return;
+        }
+        Field field = JkUtilsReflect.getField(target.getClass(), propName);
+        JkUtilsAssert.state(field != null, "Null field found for class %s and field %s",
+                target.getClass().getName(), propName);
+        JkUtilsReflect.setFieldValue(target, field, value);
     }
 
 }

@@ -333,7 +333,7 @@ public final class JkProject implements JkIdeSupportSupplier {
      */
     public JkProject clean() {
         Path output = getOutputDir();
-        JkLog.verbose("Clean output directory " + output.toAbsolutePath().normalize());
+        JkLog.verbose("Clean output directory %s", output.toAbsolutePath().normalize());
         if (Files.exists(output)) {
             JkPathTree.of(output).deleteContent();
         }

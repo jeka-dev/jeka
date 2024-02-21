@@ -148,7 +148,7 @@ class CmdLineArgs {
                 }
             }
         }
-        JkLog.verbose("Effective command line : " + effectiveCommandLineArgs);
+        JkLog.verbose("Effective command line : %s", effectiveCommandLineArgs);
 
         return effectiveCommandLineArgs.toArray(new String[0]);
     }

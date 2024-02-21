@@ -106,7 +106,7 @@ public final class JkJavadocProcessor {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
         boolean verbose = JkUtilsObject.firstNonNull(displayOutput, JkLog.isVerbose());
-        JkLog.verbose(javadocExe.toString());
+        JkLog.verbose("%s", javadocExe);
         LinkedHashSet packages = computePackages(srcDirs);
         if (packages.isEmpty()) {
             JkLog.warn("No package detected. Skip Javadoc.");
@@ -161,7 +161,7 @@ public final class JkJavadocProcessor {
             options.add("-quiet");
         }
         options.addAll(this.options);
-        JkLog.verbose(options.toString());
+        JkLog.verbose("%s", options);
         return options;
     }
 

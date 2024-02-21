@@ -96,12 +96,8 @@ public final class JkColumnText {
                 for (int columnIndex = 0; columnIndex< numColumns; columnIndex++) {
                     int columnSize = computeColumnSize(columnIndex);
                     String cellText = row[columnIndex];
-                    String[] wrappedCellTextLines = JkUtilsString.wrapStringCharacterWise(cellText, columnSize)
-                            .split("\n");
-
-                    String wrappedLine = nestedLineIndex >= wrappedCellTextLines.length ? ""
-                            : wrappedCellTextLines[nestedLineIndex];
-                    String padded = JkUtilsString.padEnd(wrappedLine,  columnSize, ' ');
+                    String ellipse = JkUtilsString.ellipse(cellText, columnSize);
+                    String padded = JkUtilsString.padEnd(ellipse,  columnSize, ' ');
                     sb.append(padded).append(separator);
                 }
                 sb.append("\n");

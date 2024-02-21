@@ -87,7 +87,7 @@ class Engine {
 
     private KBeanResolution kbeanResolution;
 
-    private List<EngineCommand> engineCommands;
+    private KBeanAction.Container actionContainer;
 
     private JkRunbase runbase;
 
@@ -132,13 +132,6 @@ class Engine {
     private static String classNameFromClassFilePath(Path relativePath) {
         final String dotName = relativePath.toString().replace('/', '.');
         return JkUtilsString.substringBeforeLast(dotName, ".");
-    }
-
-    private static EngineCommand toEngineCommand(KBeanAction action,
-                                          Map<String, Class<? extends KBean>> beanClasses) {
-        Class<? extends KBean> beanClass = beanClasses.get(action.beanName);
-        JkUtilsAssert.state(beanClass != null, "Can't resolve KBean class for action %s", action);
-        return new EngineCommand(action.action, beanClass, action.member, action.value, action.valueSource);
     }
 
     private static Optional<String> firstMatchingClassname(List<String> classNames, String candidate) {
@@ -273,40 +266,11 @@ class Engine {
         return kbeanResolution;
     }
 
-    // TODO may merge KBeanAction and Engine commands
-    List<EngineCommand> resolveEngineCommand(List<KBeanAction> kBeanActions) {
-        if (engineCommands != null) {
-            return engineCommands;
-        }
-        if (this.kbeanResolution == null) {
-            resolveKBeans();
-        }
-
-        Map<String, Class<? extends KBean>> kbeanClasses = resolveKBeanClasses(kBeanActions);
-
-        // Construct EngineCommands
-        this.engineCommands = new LinkedList<>();
-
-        // -- If there is an initBean it should be initialized first
-        if (kbeanResolution.initKBeanClassname != null) {
-            Class initBeanClass = JkClassLoader.ofCurrent().load(kbeanResolution.initKBeanClassname);
-            engineCommands.add(new EngineCommand(EngineCommand.Action.BEAN_INIT, initBeanClass,
-                    null, null, null));
-        }
-
-        // -- Add other actions
-        kBeanActions.stream()
-                .map(action -> toEngineCommand(action, kbeanClasses))
-                .forEach(engineCommands::add);
-
-        return engineCommands;
-    }
-
-    JkRunbase initRunbase() {
+    JkRunbase initRunbase(KBeanAction.Container actionContainer) {
          if (runbase != null) {
              return runbase;
          }
-         JkUtilsAssert.state(engineCommands != null, "Resolve engineCommand prior running");
+         this.actionContainer = actionContainer;
 
          JkRunbase.setMasterBaseDir(baseDir); // master base dir is used to display relative path on console output
          runbase = JkRunbase.get(baseDir);
@@ -317,15 +281,15 @@ class Engine {
          runbase.assertValid(); // fail-fast. bugfix purpose
 
          // initialise runbase with resolved commands
-         runbase.init(engineCommands);
+         runbase.init(actionContainer);
          return runbase;
     }
 
     void run() {
          if (runbase == null) {
-             initRunbase();
+             initRunbase(actionContainer);
          }
-         runbase.run(engineCommands);
+         runbase.run(actionContainer);
     }
 
     DefaultAndInitKBean defaultAndInitKbean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
@@ -507,27 +471,6 @@ class Engine {
         return result;
     }
 
-    private Map<String, Class<? extends KBean>> resolveKBeanClasses(
-            List<KBeanAction> kbeanActions) {
-
-        // Resolve involved KBean classes
-        final Map<String, Class<? extends KBean>> beanClasses = new HashMap<>();
-
-        // -- find involved kbeans
-        List<String> involvedKBeanNames = kbeanActions.stream()
-                .map(kBeanAction -> kBeanAction.beanName)
-                .distinct()
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        for (String kbeanName : involvedKBeanNames) {
-            String className = kbeanResolution.findKbeanClassName(kbeanName)
-                    .orElseThrow(() -> new JkException("No KBean found with name : " + kbeanName));
-            beanClasses.computeIfAbsent(kbeanName, key -> JkClassLoader.ofCurrent().load(className));
-        }
-        return beanClasses;
-
-    }
-
     static class ClasspathSetupResult {
 
         final JkPathSequence runClasspath;
@@ -579,6 +522,11 @@ class Engine {
             return this.allKbeans.stream()
                     .filter(className -> KBean.nameMatches(className, kbeanName))
                     .findFirst();
+        }
+
+        Optional<Class<? extends KBean>> findInitBeanClass() {
+            return initKBeanClassname == null ? Optional.empty() : Optional.of(JkClassLoader.ofCurrent()
+                    .load(initKBeanClassname));
         }
     }
 

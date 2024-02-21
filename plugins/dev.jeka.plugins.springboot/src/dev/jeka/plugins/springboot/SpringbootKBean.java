@@ -40,7 +40,7 @@ public final class SpringbootKBean extends KBean {
     protected void init() {
 
         // Customize ProjectKBean if present
-        Optional<ProjectKBean> optionalProjectKBean = getRunbase().findInstanceOf(ProjectKBean.class);
+        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
         if (optionalProjectKBean.isPresent()) {
             customizeProjectKBean(optionalProjectKBean.get());
 
