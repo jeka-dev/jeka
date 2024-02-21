@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class CmdLineArgsTest {
 
     @Test
-    public void splitByKbeanContext() {
+    public void splitByKbeanContext_ok() {
         List<CmdLineArgs> split = new CmdLineArgs("boo", "bar=2",  "project:", "version=1.0").splitByKbeanContext();
         assertEquals(2, split.size());
         assertEquals(2, split.get(0).get().length);

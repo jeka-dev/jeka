@@ -29,12 +29,15 @@ class EngineCommand {
 
     private final Object value;  // for properties only
 
-    EngineCommand(Action action, Class<? extends KBean> beanClass, String valueOrMethod, Object value) {
+    private final String source;
+
+    EngineCommand(Action action, Class<? extends KBean> beanClass, String valueOrMethod, Object value, String source) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         this.action = action;
         this.beanClass = beanClass;
         this.member = valueOrMethod;
         this.value = value;
+        this.source = source;
     }
 
     public Action getAction() {
@@ -67,14 +70,19 @@ class EngineCommand {
         JkColumnText columnText = JkColumnText.ofSingle(1, 59)  // KBean
                 .addColumn(1, 15)  // Bean
                 .addColumn(1, 50)  // member
-                .addColumn(1, 80);  // value
+                .addColumn(1, 80)  // value
+                .addColumn(1, 16); // source
         List<EngineCommand> sortedCommands = commands.stream()
                 .sorted(displayComparator()).collect(Collectors.toList());
         for (EngineCommand cmd : sortedCommands) {
             String member = cmd.action == Action.INVOKE ? cmd.member + "()" : cmd.member;
-            columnText.add(cmd.beanClass.getSimpleName(), cmd.action.name,
+            columnText.add(
+                    cmd.beanClass.getSimpleName(),
+                    cmd.action.name,
                     JkUtilsString.nullToEmpty(member),
-                    cmd.value == null ? "" : cmd.value.toString());
+                    cmd.value == null ? "" : cmd.value.toString(),
+                    JkUtilsString.nullToEmpty(cmd.source)
+            );
         }
         return columnText;
     }

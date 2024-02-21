@@ -6,17 +6,18 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
- * Description of methods and fields exposed by a KBean.
+ * This describes the methods and fields exposed by a KBean,
+ * which are obtained through reflection
  *
  * @author Jerome Angibaud
  */
 final class KBeanDescription {
+
+    private static final Map<Class<? extends KBean>, KBeanDescription> CACHE = new HashMap<>();
 
     final String synopsisHeader;
 
@@ -44,6 +45,10 @@ final class KBeanDescription {
     }
 
     static KBeanDescription of(Class<? extends KBean> beanClass, boolean computeDefaultValue) {
+        if (CACHE.containsKey(beanClass)) {
+            return CACHE.get(beanClass);
+        }
+
         final List<BeanMethod> methods = new LinkedList<>();
         for (final Method method : executableMethods(beanClass)) {
             methods.add(BeanMethod.of(method));
@@ -74,7 +79,11 @@ final class KBeanDescription {
                 detail = "";
             }
         }
-        return new KBeanDescription(header, detail, methods, beanFields, computeDefaultValue);
+        KBeanDescription result = new KBeanDescription(header, detail, methods, beanFields, computeDefaultValue);
+        if (computeDefaultValue) {
+            CACHE.put(beanClass, result);
+        }
+        return result;
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {
@@ -97,7 +106,7 @@ final class KBeanDescription {
 
     private static List<NameAndField> fields(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
         final List<NameAndField> result = new LinkedList<>();
-        for (final Field field : FieldInjector.getPropertyFields(clazz)) {
+        for (final Field field : getPropertyFields(clazz)) {
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
             if (jkDoc != null && jkDoc.hide()) {
                 continue;
@@ -121,6 +130,12 @@ final class KBeanDescription {
     private static boolean isTerminal(Class<?> fieldType) {
         return !fieldType.isAnnotationPresent(JkDoc.class) &&
                 JkUtilsReflect.getDeclaredFieldsWithAnnotation(fieldType, JkDoc.class).isEmpty();
+    }
+
+    private static List<Field> getPropertyFields(Class<?> clazz) {
+        return JkUtilsReflect.getDeclaredFieldsWithAnnotation(clazz,true).stream()
+                .filter(KBean::isPropertyField)
+                .collect(Collectors.toList());
     }
 
 
@@ -186,11 +201,9 @@ final class KBeanDescription {
 
         final Object defaultValue;
 
-        private final Class<?> rootDeclaringClass;
-
         final Class<?> type;
 
-        private final String injectedPropertyName;
+        final String injectedPropertyName;
 
         private BeanField(
                 Field field,
@@ -198,7 +211,8 @@ final class KBeanDescription {
                 String description,
                 Object bean,
                 Object defaultValue,
-                Class<?> type, Class<?> declaringClass, String injectedPropertyName) {
+                Class<?> type,
+                String injectedPropertyName) {
 
             super();
             this.field = field;
@@ -207,7 +221,6 @@ final class KBeanDescription {
             this.bean = bean;
             this.defaultValue = defaultValue;
             this.type = type;
-            this.rootDeclaringClass = declaringClass;
             this.injectedPropertyName = injectedPropertyName;
         }
 
@@ -237,7 +250,6 @@ final class KBeanDescription {
                     instance,
                     defaultValue,
                     type,
-                    rootDeclaringClass,
                     propertyName);
         }
 

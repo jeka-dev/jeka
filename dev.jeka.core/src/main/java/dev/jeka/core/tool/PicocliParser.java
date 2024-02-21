@@ -7,16 +7,14 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static dev.jeka.core.tool.EngineCommand.Action.*;
 
 class PicocliParser {
 
-    static final String KBEAN_CMD_SUFFIX = ":";
+    private static final String ENV_SYS_PROP_SOURCE = "env-sysProps";
 
     /**
      * Parse both jeka.properties and command line to get KBean action.
@@ -24,19 +22,20 @@ class PicocliParser {
      * This means that command line overrides fields declared in jeka.properties
      */
     public static List<KBeanAction> parse(CmdLineArgs args, JkProperties props, Engine.KBeanResolution resolution) {
-        KBeanActionContainer kBeanActionContainer = new KBeanActionContainer();
-        kBeanActionContainer.addAll(parse(props, resolution));
-        kBeanActionContainer.addAll(parse(args, resolution));
-        return kBeanActionContainer.kBeanActions;
+        KBeanAction.Container container = new KBeanAction.Container();
+        container.addAll(parseSysProps(args, resolution));
+        container.addAll(parsePropertyFile(props, resolution));
+        container.addAll(parseCmdLineArgs(args, resolution));
+        return container.toList();
     }
 
-    static List<KBeanAction> parse(CmdLineArgs args, Engine.KBeanResolution resolution) {
+    static List<KBeanAction> parseCmdLineArgs(CmdLineArgs args, Engine.KBeanResolution resolution) {
         return args.splitByKbeanContext().stream()
                 .flatMap(scopedArgs -> createFromScopedArgs(scopedArgs, resolution, "").stream())
                 .collect(Collectors.toList());
     }
 
-    private static List<KBeanAction> parse(JkProperties properties, Engine.KBeanResolution resolution) {
+    private static List<KBeanAction> parsePropertyFile(JkProperties properties, Engine.KBeanResolution resolution) {
         return properties.getAllStartingWith("", true).entrySet().stream()
                 .filter(entry -> KbeanAndField.isKBeanAndField(entry.getKey()))
                 .map(entry -> KbeanAndField.of(entry.getKey(), entry.getValue()))
@@ -45,35 +44,48 @@ class PicocliParser {
                 .collect(Collectors.toList());
     }
 
+    private static List<KBeanAction> parseSysProps(CmdLineArgs args, Engine.KBeanResolution resolution) {
+        List<String> involvedKBeanClasses = args.splitByKbeanContext().stream()
+                .map(CmdLineArgs::findKbeanName)
+                .map(resolution::findKbeanClassName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<KBeanAction> actions = new LinkedList<>();
+        for (String kbeanClassName : involvedKBeanClasses) {
+            Class<? extends  KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
+            KBeanDescription desc = KBeanDescription.of(kbeanClass, true);
+            CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc));
+            commandLine.parseArgs();
+            CommandSpec commandSpec = commandLine.getCommandSpec();
+            for (KBeanDescription.BeanField beanField : desc.beanFields) {
+                if (beanField.injectedPropertyName == null) {
+                    continue;
+                }
+                Object value = commandSpec.findOption(beanField.name).getValue();
+                actions.add(KBeanAction.ofSetValue(kbeanClassName, beanField.name, value, ENV_SYS_PROP_SOURCE));
+            }
+        }
+        return actions;
+    }
+
     /*
      * Scoped args contains only arguments scoped to a unique KBean
      */
     private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, Engine.KBeanResolution resolution,
                                                           String source) {
 
-        if (args.get().length == 0) {
-            return Collections.emptyList();
-        }
+        String kbeanName = args.findKbeanName();
+        String kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(null);
+        final String[] methodOrFieldArgs = args.trunkKBeanRef().get();
 
-        // Find KBean class tto which apply the args
-        String firstArg = args.get()[0];
-        final String kbeanName;
-        final  String kbeanClassName;
-        final String[] methodOrFieldArgs;
-        if (CmdLineArgs.isKbeanRef(firstArg)) {
-            String name = firstArg.substring(0, firstArg.length() - 1);
-            kbeanName = name.isEmpty() ? resolution.defaultKbeanClassname : name;
-            kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(null);
-            methodOrFieldArgs = Arrays.copyOfRange(args.get(), 1, args.get().length);
-        } else {
-            kbeanName = null;
-            kbeanClassName = resolution.defaultKbeanClassname;
-            methodOrFieldArgs = args.get();
-        }
         if (kbeanClassName == null) {
             CommandLine cmdLine = allKBeanCommandLine(resolution.allKbeans, source);
             String origin = source.isEmpty() ? "." : " (from " + source + ").";
-            String msg = kbeanName == null ?
+            String firstArg = args.isEmpty() ? "" : args.get()[0];
+            String msg = JkUtilsString.isBlank(kbeanName)  ?
                     "No default KBean defined. You need to precise on which kbean apply '" + firstArg + "'"
                     : "No KBean found for name '" + kbeanName + "'";
             if (JkLog.isVerbose()) {
@@ -85,7 +97,7 @@ class PicocliParser {
 
         // Add init action
         List<KBeanAction> kBeanActions = new LinkedList<>();
-        kBeanActions.add(new KBeanAction(BEAN_INIT, kbeanClassName, null, null));
+        kBeanActions.add(KBeanAction.ofInit(kbeanClassName));
 
         // Add field-injection
 
@@ -104,20 +116,19 @@ class PicocliParser {
         for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
             String name = optionSpec.names()[0];
             Object value = parseResult.matchedOptionValue(name, null);
-            KBeanAction kBeanAction = new KBeanAction(SET_FIELD_VALUE, kbeanName, name, value);
+            KBeanAction kBeanAction = KBeanAction.ofSetValue(kbeanName, name, value, source);
             kBeanActions.add(kBeanAction);
         }
 
         // Add Method invokes
         Arrays.stream(methodOrFieldArgs)
                 .filter(availableMethodNames::contains)
-                .forEach(name -> kBeanActions.add(new KBeanAction(INVOKE, kbeanName, name, null)));
-
+                .forEach(name -> kBeanActions.add(KBeanAction.ofInvoke(kbeanName, name)));
         return kBeanActions;
     }
 
     /**
-     * @param source comming from cmd line ("") or property file ("jeka.property')
+     * @param source coming from cmd line ("") or property file ("jeka.property')
      */
     private static CommandLine allKBeanCommandLine(List<String> kbeanClassNames, String source) {
         CommandSpec commandSpec = CommandSpec.create();
@@ -159,49 +170,9 @@ class PicocliParser {
         }
 
         CmdLineArgs toCommandLineArgs() {
-            return new CmdLineArgs(kbean + KBEAN_CMD_SUFFIX, field + "=" + JkUtilsString.nullToEmpty(value));
+            return new CmdLineArgs(kbean + JkConstants.KBEAN_CMD_SUFFIX, field + "=" + JkUtilsString.nullToEmpty(value));
         }
 
     }
 
-    private static class KBeanActionContainer {
-
-        private final List<KBeanAction> kBeanActions = new LinkedList<>();
-
-        void addAll(List<KBeanAction> kBeanActions) {
-            kBeanActions.forEach(this::add);
-        }
-
-        void add(KBeanAction kBeanAction) {
-
-            // Always add invokes
-            if (kBeanAction.action == INVOKE) {
-                kBeanActions.add(kBeanAction);
-
-            // Add instantiation only if it has not been already done
-            } else if (kBeanAction.action == BEAN_INIT) {
-                boolean present = kBeanActions.stream()
-                        .filter(kBeanAction1 -> kBeanAction1.action == BEAN_INIT)
-                        .anyMatch(kBeanAction1 -> kBeanAction.beanName.equals(kBeanAction1.beanName));
-                if (!present) {
-                    kBeanActions.add(kBeanAction);
-                }
-
-            // If field inject has already bean declared on same bean/field, it is replaced
-            } else if (kBeanAction.action == SET_FIELD_VALUE) {
-                KBeanAction present = kBeanActions.stream()
-                        .filter(kBeanAction1 -> kBeanAction1.action == SET_FIELD_VALUE)
-                        .filter(kBeanAction1 -> kBeanAction.beanName.equals(kBeanAction1.beanName))
-                        .filter(kBeanAction1 -> kBeanAction.member.equals(kBeanAction1.member))
-                        .findFirst().orElse(null);
-                if (present == null) {
-                    kBeanActions.add(kBeanAction);
-                } else {
-                    int index = kBeanActions.indexOf(present);
-                    kBeanActions.remove(index);
-                    kBeanActions.add(index, kBeanAction);
-                }
-            }
-        }
-    }
 }

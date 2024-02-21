@@ -138,7 +138,7 @@ class Engine {
                                           Map<String, Class<? extends KBean>> beanClasses) {
         Class<? extends KBean> beanClass = beanClasses.get(action.beanName);
         JkUtilsAssert.state(beanClass != null, "Can't resolve KBean class for action %s", action);
-        return new EngineCommand(action.action, beanClass, action.member, action.value);
+        return new EngineCommand(action.action, beanClass, action.member, action.value, action.valueSource);
     }
 
     private static Optional<String> firstMatchingClassname(List<String> classNames, String candidate) {
@@ -291,7 +291,7 @@ class Engine {
         if (kbeanResolution.initKBeanClassname != null) {
             Class initBeanClass = JkClassLoader.ofCurrent().load(kbeanResolution.initKBeanClassname);
             engineCommands.add(new EngineCommand(EngineCommand.Action.BEAN_INIT, initBeanClass,
-                    null, null));
+                    null, null, null));
         }
 
         // -- Add other actions
@@ -573,7 +573,7 @@ class Engine {
         }
 
          Optional<String> findKbeanClassName(String kbeanName) {
-             if (kbeanName == null) {
+             if (JkUtilsString.isBlank(kbeanName)) {
                  return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(BaseKBean.class.getName()));
              }
             return this.allKbeans.stream()

@@ -30,13 +30,14 @@ public class Main {
         // Get the code base directory sent by script shell
         String basedirProp = System.getProperty("jeka.current.basedir");
         Path workingDir = Paths.get("");
-        final Path baseDir = basedirProp == null ? workingDir
-                : workingDir.toAbsolutePath().normalize().relativize(Paths.get(basedirProp));
-
+        Path baseDir = basedirProp == null ? workingDir : Paths.get(basedirProp);
+        if (baseDir.startsWith(workingDir)) {
+            baseDir = workingDir.relativize(baseDir);
+        }
         exec(baseDir, filteredArgs);
     }
 
-    // TODO Make non-public, replace by a call creating a new OS process
+    // TODO Make non-public. Replace by a call creating a new OS process
     public static JkRunbase exec(Path baseDir, String ...args) {
 
         long startTime = System.currentTimeMillis();
@@ -150,7 +151,7 @@ public class Main {
     static void displayRuntimeInfo(Path baseDir, String[] cmdLine) {
         Jk2ColumnsText txt = Jk2ColumnsText.of(18, 150);
         txt.add("Working Directory", System.getProperty("user.dir"));
-        txt.add("Base Directory", baseDir.toAbsolutePath());
+        txt.add("Base Directory", baseDir);
         txt.add("Command Line",  String.join(" ", Arrays.asList(cmdLine)));
         txt.add("Java Home",  System.getProperty("java.home"));
         txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));

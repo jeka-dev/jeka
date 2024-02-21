@@ -6,8 +6,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class EngineTest {
 
@@ -23,7 +22,17 @@ public class EngineTest {
     public void publicNestedProp_ok() {
         NestedProp nestedProp = new EngineWrapper(NestedProp.class).run("options.foo=a")
                 .find(NestedProp.class).get();
-        Assert.assertEquals("a", nestedProp.options.foo);
+        assertEquals("a", nestedProp.options.foo);
+    }
+
+    @Test
+    public void injectedProperty_ok() {
+        NestedProp nestedProp = new EngineWrapper(NestedProp.class).run()
+                .find(NestedProp.class).get();
+        System.out.println(nestedProp.options.path);
+        assertNotNull(nestedProp.options.path);
+        assertNotEquals("null", nestedProp.options.path);
+        assertFalse(nestedProp.options.path.startsWith("-"));
     }
 
     @Test
@@ -41,6 +50,9 @@ public class EngineTest {
         @JkDoc
         public static class Options {
             public String foo = "";
+
+            @JkInjectProperty("PATH")
+            public String path;
         }
 
     }

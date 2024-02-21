@@ -47,12 +47,41 @@ class CmdLineArgs {
         return new CmdLineArgs(options);
     }
 
+    boolean isEmpty() {
+        return args.length == 0;
+    }
+
     boolean isUsageHelpRequested() {
         return args.length == 0 || args[0].equals("--help") || args[0].equals("-h");
     }
 
     boolean isVersionHelpRequested() {
         return args.length > 0 && (args[0].equals("--version") || args[0].equals("-V"));
+    }
+
+    /**
+     * Returns the KBean name at the start of this cmdArgs.
+     * return "" (empty) if not specified explicitly.
+     */
+    String findKbeanName() {
+        if (args.length == 0 || args[0].isEmpty()
+                || args[0].equals(KBEAN_CMD_SUFFIX) || !isKbeanRef(args[0])) {
+            return "";
+        }
+        return args[0].substring(0, args[0].length() - 1);
+    }
+
+    /**
+     * Returns same args without leading kbean name arg, if any.
+     */
+    CmdLineArgs trunkKBeanRef() {
+        if (args.length == 0) {
+            return this;
+        }
+        if (isKbeanRef(args[0])) {
+            return new CmdLineArgs(Arrays.copyOfRange(args, 1, args.length));
+        }
+        return this;
     }
 
     List<CmdLineArgs> splitByKbeanContext() {
@@ -72,8 +101,8 @@ class CmdLineArgs {
         return result;
     }
 
-    static boolean isKbeanRef(String arg) {
-        return arg.endsWith(PicocliParser.KBEAN_CMD_SUFFIX);
+    private static boolean isKbeanRef(String arg) {
+        return arg.endsWith(KBEAN_CMD_SUFFIX);
     }
 
     private static String[] filterShellArgs(String[] originalArgs) {

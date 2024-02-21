@@ -3,6 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -31,7 +32,11 @@ class EngineWrapper {
         this.jekaSrcKBeanClasses = jekaSrcKBeanClasses;
     }
 
-    EngineWrapper run(String... args) {
+    EngineWrapper run(String ...args) {
+        return run(JkProperties.EMPTY, args);
+    }
+
+    EngineWrapper run(JkProperties props, String... args) {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-engine-base-");
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
@@ -44,7 +49,7 @@ class EngineWrapper {
         engine = Engine.of(baseDir, false, JkRepoSet.ofLocal(),
                 JkDependencySet.of(), logSettings, behaviorSettings);
         Engine.KBeanResolution kBeanResolution = kBeanResolution(engine, jekaSrcKBeanClasses);
-        run(engine, kBeanResolution, args);
+        run(engine, kBeanResolution, props, args);
         return this;
     }
 
@@ -61,10 +66,10 @@ class EngineWrapper {
         return engine.getRunbase().load(kbeanClass);
     }
 
-    private void run(Engine engine, Engine.KBeanResolution kBeanResolution, String[] args) {
+    private void run(Engine engine, Engine.KBeanResolution kBeanResolution, JkProperties props, String[] args) {
         engine.resolveClassPaths();
         engine.setKBeanResolution(kBeanResolution);
-        List<KBeanAction> kBeanActions = parse(args, kBeanResolution);
+        List<KBeanAction> kBeanActions = parse(args, props, kBeanResolution);
         engine.resolveEngineCommand(kBeanActions);
         engine.run();
     }
@@ -92,7 +97,7 @@ class EngineWrapper {
                 defaultAndInitKBean.defaultKBeanClassName);
     }
 
-    private List<KBeanAction> parse(String[] args, Engine.KBeanResolution kBeanResolution) {
-        return PicocliParser.parse(new CmdLineArgs(args), kBeanResolution);
+    private List<KBeanAction> parse(String[] args, JkProperties props, Engine.KBeanResolution kBeanResolution) {
+        return PicocliParser.parse(new CmdLineArgs(args), props, kBeanResolution);
     }
 }

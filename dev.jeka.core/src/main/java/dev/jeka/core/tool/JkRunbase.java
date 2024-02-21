@@ -6,11 +6,9 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.*;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -95,6 +93,26 @@ public final class JkRunbase {
             setBaseDirContext(Paths.get(""));
             return BASE_DIR_CONTEXT.get();
         });
+    }
+
+    private static void setValue(Object target, String propName, Object value) {
+        if (propName.contains(".")) {
+            String first = JkUtilsString.substringBeforeFirst(propName, ".");
+            String remaining = JkUtilsString.substringAfterFirst(propName, ".");
+            Object child = JkUtilsReflect.getFieldValue(target, first);
+            if (child == null) {
+                String msg = String.format("Compound property '%s' on class '%s' should not value 'null'" +
+                        " right after been instantiate.%n. Please instantiate this property in %s constructor",
+                        first, target.getClass().getName(), target.getClass().getSimpleName());
+                throw new JkException(msg);
+            }
+            setValue(child, remaining, value);
+            return;
+        }
+        Field field = JkUtilsReflect.getField(target.getClass(), propName);
+        JkUtilsAssert.state(field != null, "Null field found for class %s and field %s",
+                target.getClass().getName(), propName);
+        JkUtilsReflect.setFieldValue(target, field, value);
     }
 
     Path getBaseDir() {
@@ -287,26 +305,14 @@ public final class JkRunbase {
     // inject values in fields from command-line and properties.
     void injectFieldValues(KBean bean) {
         // Inject properties having name matching with a bean field
-        String beanName = KBean.name(bean.getClass());
-        Map<String, String> props = new HashMap<>();
 
-        // accept 'kb#' prefix if the beanClass is declared with '-kb=' options
-        //if (bean.isMatchingName(Environment.behavior.kbeanName.orElse(null))) {
-        //    props.putAll(properties.getAllStartingWith("kb#", false));
-        //}
-
-        props.putAll(properties.getAllStartingWith(beanName + "#", false));
-        FieldInjector.inject(bean, props);
-
-        // Inject properties on fields with @JkInjectProperty
-        FieldInjector.injectAnnotatedProperties(bean, properties);
 
         // Inject field
         fieldInjections.stream()
                 .filter(engineCommand -> engineCommand.getAction() == EngineCommand.Action.SET_FIELD_VALUE)
                 .filter(engineCommand -> engineCommand.getBeanClass().equals(bean.getClass()))
                 .forEach(action -> {
-                    FieldInjector.setValue(bean, action.getMember(), action.getValue());
+                    setValue(bean, action.getMember(), action.getValue());
                 });
     }
 

@@ -69,8 +69,8 @@ public interface JkInternalClasspathScanner {
 
             // Another version of classGraph may be present on the classpath
             // Some libraries as org.webjars:webjars-locator-core use it.
-            // To for this library version mw need to create a dedicated classloader
-            // with child first strategy.
+            // For this library version we need to create a dedicated classloader
+            // with child-first strategy.
             JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties,
                     "io.github.classgraph:classgraph:4.8.162");
             URL[] urls = JkPathSequence.of(classgraphJar.get())
@@ -80,20 +80,6 @@ public interface JkInternalClasspathScanner {
             ChildFirstClassLoader childFirstClassLoader = new ChildFirstClassLoader(urls, parentClassloader);
             Class clazz = JkClassLoader.of(childFirstClassLoader).load(IMPL_CLASS);
             CACHED_INSTANCE = JkUtilsReflect.invokeStaticMethod(clazz, "of");
-
-            /*
-            Class<JkInternalClasspathScanner> clazz = JkClassLoader.ofCurrent().loadIfExist(IMPL_CLASS);
-            if (clazz != null) {
-                return JkUtilsReflect.invokeStaticMethod(clazz, "of");
-            }
-            JkInternalEmbeddedClassloader internalClassloader = JkInternalEmbeddedClassloader
-                    .ofMainEmbeddedLibs(classgraphJar.get());
-            CACHED_INSTANCE = internalClassloader
-                    .createCrossClassloaderProxy(JkInternalClasspathScanner.class, IMPL_CLASS, "of");
-            JkUtilsAssert.argument(internalClassloader.get().isDefined(IMPL_CLASS), "Class %s not found in %s",
-                IMPL_CLASS,  "embedded lib");
-            */
-
 
             return CACHED_INSTANCE;
         }

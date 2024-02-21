@@ -1,6 +1,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.tool.CommandLine.Help.Visibility;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
@@ -43,19 +44,34 @@ class PicocliCommands {
     static CommandSpec fromKBeanDesc(KBeanDescription beanDesc) {
         CommandSpec spec = CommandSpec.create();
         beanDesc.beanFields.forEach(beanField -> {
+
+            Visibility showDefault = beanDesc.includeDefaultValues ?
+                    Visibility.ALWAYS : Visibility.NEVER;
+
+
             String defaultValue = beanField.defaultValue == null  ? CommandLine.Option.NULL_VALUE
                     : Objects.toString(beanField.defaultValue);
+
             String description = beanField.description == null ?
                     "No description." : beanField.description;
             description = description.trim();
             description = description.endsWith(".") ? description : description + ".";
+
+            String customDefaultDesc = "";
+            if (beanField.injectedPropertyName != null ) {
+                showDefault = Visibility.NEVER;
+                String initialDefaultValue = defaultValue;
+                defaultValue ="${" + beanField.injectedPropertyName + ":-" + defaultValue + "}";
+                customDefaultDesc = "\n  Default: {" + beanField.injectedPropertyName + ":-" +initialDefaultValue + "}";
+            }
+
             String acceptedValues = beanField.type.isEnum() ?
                     " [${COMPLETION-CANDIDATES}]" : "";
+            String[] descriptions = (description + acceptedValues + customDefaultDesc).split("\n");
             OptionSpec optionSpec = OptionSpec.builder(beanField.name)
-                    .description(description + acceptedValues)
+                    .description(descriptions)
                     .type(beanField.type)
-                    .showDefaultValue(beanDesc.includeDefaultValues ?
-                            CommandLine.Help.Visibility.ALWAYS : CommandLine.Help.Visibility.NEVER)
+                    .showDefaultValue(showDefault)
                     .hideParamSyntax(false)
                     .defaultValue(defaultValue)
                     .paramLabel("<" + beanField.type.getSimpleName() + ">")

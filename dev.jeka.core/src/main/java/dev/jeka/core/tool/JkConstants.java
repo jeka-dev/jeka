@@ -64,4 +64,5 @@ public final class JkConstants {
      */
     static final JkVersionProvider JEKA_VERSION_PROVIDER = JkVersionProvider.of("dev.jeka:*",
             JkInfo.getJekaVersion());
+    static final String KBEAN_CMD_SUFFIX = ":";
 }
