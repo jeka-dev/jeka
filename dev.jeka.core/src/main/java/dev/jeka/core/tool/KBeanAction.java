@@ -194,7 +194,8 @@ class KBeanAction implements Comparable<KBeanAction> {
                     .sorted().collect(Collectors.toList());
             for (KBeanAction action : sortedCommands) {
                 String value = Objects.toString(action.value);
-                if (JkProperties.SENSITIVE_KEY_PATTERN.test(action.member)) {
+                if (action.type == SET_FIELD_VALUE &&
+                        JkProperties.SENSITIVE_KEY_PATTERN.test(action.member)) {
                     value = "***";
                 }
                 String member = action.type == Action.INVOKE ? action.member + "()" : action.member + "=" + value;
