@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
@@ -9,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.KBeanAction.Action.*;
@@ -191,7 +193,11 @@ class KBeanAction implements Comparable<KBeanAction> {
             List<KBeanAction> sortedCommands = this.kBeanActions.stream()
                     .sorted().collect(Collectors.toList());
             for (KBeanAction action : sortedCommands) {
-                String member = action.type == Action.INVOKE ? action.member + "()" : action.member + "=" + action.value;
+                String value = Objects.toString(action.value);
+                if (JkProperties.SENSITIVE_KEY_PATTERN.test(action.member)) {
+                    value = "***";
+                }
+                String member = action.type == Action.INVOKE ? action.member + "()" : action.member + "=" + value;
                 member = action.type == BEAN_INIT ? "init" : member;
                 columnText.add(
                         action.beanClass.getSimpleName(),

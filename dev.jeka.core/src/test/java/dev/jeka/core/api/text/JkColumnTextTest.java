@@ -22,7 +22,7 @@ public class JkColumnTextTest {
     public void test2_ok()  {
         JkColumnText columnText = JkColumnText
                 .ofSingle(2, 30)
-                .addColumn(1, 90)
+                .addColumn(1, 40)
                 .addColumn(5, 60)
                 .setMarginLeft("    ")
                 .setSeparator(" | ");
@@ -33,5 +33,7 @@ public class JkColumnTextTest {
         System.out.print(columnText);
         System.out.println("---------");
     }
+
+
 
 }

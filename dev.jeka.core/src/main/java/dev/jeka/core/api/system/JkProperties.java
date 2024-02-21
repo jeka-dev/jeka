@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +29,17 @@ import java.util.stream.Collectors;
  *     <code>JkProperties</code> objects can be combined to form a chain of resolution using a fallback mechanism.
  */
 public final class JkProperties {
+
+    /**
+     * A predicate used to determine if a given string is a sensitive key.
+     * A sensitive key is determined by its ending, which could be "password", "secret", "token", or "pwd".
+     * Case-insensitive comparison is used.
+     */
+    public static final Predicate<String> SENSITIVE_KEY_PATTERN = key ->
+        key.toLowerCase().endsWith("password")
+                || key.toLowerCase().endsWith("secret")
+                || key.toLowerCase().endsWith("token")
+                || key.toLowerCase().endsWith("pwd");
 
     /**
      * Environment variables exposed as JkProperties.<p>
@@ -250,10 +262,7 @@ public final class JkProperties {
                 continue;
             }
             String value = get(key);
-            if (key.toLowerCase().endsWith("password")
-                    || key.toLowerCase().endsWith("secret")
-                    || key.toLowerCase().endsWith("token")
-                    || key.toLowerCase().endsWith("pwd")) {
+            if (SENSITIVE_KEY_PATTERN.test(key)) {
                 value = "***";
             }
             String source = getSourceDefining(key).source;
