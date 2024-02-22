@@ -160,6 +160,11 @@ download_and_unpack() {
       silent_flag=""
     fi
     curl -"$silent_flag"Lf --fail --show-error -o "$temp_file" "$url"
+    if [ $? -ne 0 ]; then
+        msg "Curl request failed $url"
+        msg "Returned code: $?"
+        exit 1
+    fi
   elif [ -x "$(command -v wget)" ]; then
     wget -q -O "$temp_file" "$url"
   else
