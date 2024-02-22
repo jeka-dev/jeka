@@ -10,6 +10,7 @@ import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
@@ -156,6 +157,7 @@ public class Main {
         txt.add("Working Directory", System.getProperty("user.dir"));
         txt.add("Base Directory", baseDir);
         txt.add("Command Line",  String.join(" ", Arrays.asList(cmdLine)));
+        txt.add("Console detected", JkUtilsSystem.CONSOLE != null);
         txt.add("Java Home",  System.getProperty("java.home"));
         txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         txt.add("Jeka Version",  JkInfo.getJekaVersion());
