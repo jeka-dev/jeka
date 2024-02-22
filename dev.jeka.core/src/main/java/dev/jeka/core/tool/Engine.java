@@ -216,7 +216,7 @@ class Engine {
         CompileResult compileResult = compileJekaSrc(compileClasspath, parsedSourceInfo.compileOptions);
 
         // Add compile result to he run compile
-        JkPathSequence runClasspath = compileClasspath.and(compileResult.extraClasspath);
+        JkPathSequence runClasspath = compileClasspath.and(compileResult.extraClasspath).withoutDuplicates();
 
         // If private dependencies has been defined, this means that jeka-src is supposed to host
         // an application that wants to control its classpath. Thus, we only put the dependency explicitly
