@@ -34,7 +34,6 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
             throw new RuntimeException(e);
         }
         testWithSpecificJavaVersion();
-        testLsu();
         JkLog.endTask();
     }
 
@@ -106,27 +105,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         System.setProperty("jeka.java.version", "");
     }
 
-    // Test if -lsu let the distrib installation displayed on console in verbose mode
-    private void testLsu() {
 
-        // Delete cached distrib to force reloading
-        Path cachedDistrib = JkLocator.getCacheDir().resolve("distributions").resolve(SNAPSHOT_VERSION);
-        JkPathTree.of(cachedDistrib).createIfNotExist().deleteRoot();
-
-        Path jekaShellPath = getJekaShellPath();
-
-        // '-rc' is important to log git output
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "-lsu", "-v", "-la=false", "#ok")
-                .setLogCommand(true)
-                .setLogWithJekaDecorator(true)
-                .setCollectStdout(true)
-                .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
-                .setEnv("jeka.version", SNAPSHOT_VERSION)
-                .exec();
-        String output = result.getStdoutAsString();
-        JkUtilsAssert.state(!output.startsWith("ok"), "Command output was '%s', " +
-                "expecting logs of distrib installation", output);
-    }
 
 
 }

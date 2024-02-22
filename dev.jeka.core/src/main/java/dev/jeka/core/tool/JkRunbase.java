@@ -133,7 +133,7 @@ public final class JkRunbase {
         T result = (T) beans.get(beanClass);
         if (result == null) {
             String relBaseDir = relBaseDir().toString();
-            String subBaseLabel = relBaseDir.isEmpty() ? "" : "(in " + relBaseDir + ")";
+            String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
             JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
@@ -309,7 +309,7 @@ public final class JkRunbase {
     }
 
     private Path relBaseDir() {
-        if (masterBaseDir != null && baseDir.startsWith(masterBaseDir)) {
+        if (masterBaseDir != null) {
             return masterBaseDir.relativize(baseDir);
         }
         return baseDir;
