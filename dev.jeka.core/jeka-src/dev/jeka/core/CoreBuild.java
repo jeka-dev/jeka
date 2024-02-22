@@ -61,11 +61,7 @@ public class CoreBuild extends KBean {
                 .testSelection
                     .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
                     .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN);
-        project
-            .testing
-                .testProcessor
-                    .engineBehavior
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.BAR);
+
         project
             .packaging
                 .setMainClass("dev.jeka.core.tool.Main")

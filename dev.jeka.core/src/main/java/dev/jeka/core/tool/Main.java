@@ -157,7 +157,7 @@ public class Main {
         txt.add("Working Directory", System.getProperty("user.dir"));
         txt.add("Base Directory", baseDir);
         txt.add("Command Line",  String.join(" ", Arrays.asList(cmdLine)));
-        txt.add("Console detected", JkUtilsSystem.CONSOLE != null);
+        txt.add("Console Detected", JkUtilsSystem.CONSOLE != null);
         txt.add("Java Home",  System.getProperty("java.home"));
         txt.add("Java Version", System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         txt.add("Jeka Version",  JkInfo.getJekaVersion());
