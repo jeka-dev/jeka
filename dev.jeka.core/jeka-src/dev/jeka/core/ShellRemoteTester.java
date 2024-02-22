@@ -60,7 +60,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL,  "ok")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "ok")
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
@@ -81,14 +81,14 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
         String distro = "corretto";
         // Delete cached distrib to force reloading
-        Path cachedJdk= JkLocator.getCacheDir().resolve("jdks").resolve(distro + "-" + javaVersion);
+        Path cachedJdk = JkLocator.getCacheDir().resolve("jdks").resolve(distro + "-" + javaVersion);
         JkPathTree.of(cachedJdk).createIfNotExist().deleteRoot();
 
         Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
         // We pass 'jeka.java.version" in cmdLine args to test this feature
-        JkProcResult procResult =JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "ok",
+        JkProcResult procResult = JkProcess.of(jekaShellPath.toString(), "-r", GIT_URL, "ok",
                         "-Djeka.java.version=" + javaVersion)
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
@@ -98,14 +98,11 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .setEnv("jeka.java.distrib", distro)
                 //.setEnv("jeka.java.version", "20")
                 .exec();
-        JkUtilsAssert.state(Files.exists(cachedJdk),"Jdk not downloaded at %s", cachedJdk);
+        JkUtilsAssert.state(Files.exists(cachedJdk), "Jdk not downloaded at %s", cachedJdk);
         String output = procResult.getStdoutAsString();
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
                 "expecting ending with 'ok 'followed by a breaking line)", output);
         System.setProperty("jeka.java.version", "");
     }
-
-
-
 
 }
