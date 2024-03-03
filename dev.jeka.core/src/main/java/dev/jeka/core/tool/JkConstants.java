@@ -53,7 +53,7 @@ public final class JkConstants {
 
     static final String CMD_APPEND_PROP = CMD_PREFIX_PROP + CMD_APPEND_SUFFIX_PROP;
 
-    static final String CMD_SUBSTITUTE_SYMBOL = ":";
+    static final String CMD_SUBSTITUTE_SYMBOL = "::";
 
     // --------------------  Misc ----------------------------------------------
 

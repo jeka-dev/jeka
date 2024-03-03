@@ -419,6 +419,8 @@ public final class JkKotlinCompiler {
                     .addParams(toWindowsArgs(sourcePaths))
                     .setFailOnError(this.failOnError)
                     .setLogCommand(this.logCommand)
+                    .setCollectStdout(!this.logOutput)
+                    .setCollectStderr(!this.logOutput)
                     .setLogWithJekaDecorator(this.logOutput);
         final JkProcResult result = kotlincProcess.exec();
         return new Result(result.hasSucceed(), kotlincProcess.getParams());

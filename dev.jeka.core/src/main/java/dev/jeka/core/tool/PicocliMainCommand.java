@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
             "         (create a basic code base by invoking 'scaffold' method on 'BaseKBean')",
             "  @|yellow ${COMMAND-NAME} project: scaffold layout.style=SIMPLE |@",
             "         (create a project, specifying 'ProjectKBean.layout.style' prop value)",
-            "  @|yellow ${COMMAND-NAME} -cp dev.jeka:springboot-plugin springboot: project: scaffold |@",
+            "  @|yellow ${COMMAND-NAME} -cp=dev.jeka:springboot-plugin springboot: project: scaffold |@",
             "         (create a Spring-Boot project using Spring-Boot plugin)",
             "  @|yellow ${COMMAND-NAME} myMethod myFieldA=8 myFieldB=false |@",
             "         (set props and invoke method on the default KBean)",

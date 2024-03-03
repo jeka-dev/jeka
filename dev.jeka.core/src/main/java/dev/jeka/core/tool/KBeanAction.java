@@ -187,7 +187,7 @@ class KBeanAction implements Comparable<KBeanAction> {
         }
 
         JkColumnText toColumnText() {
-            JkColumnText columnText = JkColumnText.ofSingle(1, 20)  // actionType
+            JkColumnText columnText = JkColumnText.ofSingle(1, 30)  // actionType
                     .addColumn(1, 50)  // member
                     .addColumn(1, 16); // source
             List<KBeanAction> sortedCommands = this.kBeanActions.stream()

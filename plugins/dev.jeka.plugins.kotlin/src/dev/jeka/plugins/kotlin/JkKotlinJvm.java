@@ -25,7 +25,7 @@ public class JkKotlinJvm {
 
     private boolean addStdlib = true;
 
-    private String jvmVersion = JkJavaVersion.V8.toString();
+    private String jvmVersion = JkJavaVersion.ofCurrent().toString();
 
     private JkKotlinJvm(JkKotlinCompiler kotlinCompiler) {
         this.kotlinCompiler = kotlinCompiler;

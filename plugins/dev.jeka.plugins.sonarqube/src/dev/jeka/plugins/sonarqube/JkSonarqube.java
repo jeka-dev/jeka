@@ -178,7 +178,7 @@ public final class JkSonarqube {
         if (pingServer) {
             if (!JkUtilsNet.isStatusOk(hostUrl, JkLog.isVerbose())) {
                 throw new JkException("The Sonarqube url %s is not available.%nCheck server " +
-                        "or disable this ping check (sonarqube#pingServer=false)", hostUrl);
+                        "or disable this ping check (sonarqube: pingServer=false)", hostUrl);
             }
             JkLog.info("Sonarqube server url : %s", hostUrl);
         }

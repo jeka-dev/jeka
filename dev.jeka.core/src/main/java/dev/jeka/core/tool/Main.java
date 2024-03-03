@@ -236,7 +236,7 @@ public class Main {
     }
 
     private static void logRuntimeInfoEngineCommands(KBeanAction.Container actionContainer) {
-        JkLog.info("Commands           :");
+        JkLog.info("Command Line       :");
         JkLog.info(actionContainer.toColumnText()
                 .setSeparator(" | ")
                 .setMarginLeft("   | ")

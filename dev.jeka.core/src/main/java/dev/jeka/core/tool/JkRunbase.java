@@ -65,7 +65,7 @@ public final class JkRunbase {
     // they are not initialized with any KbeanActions.
     private KBeanAction.Container cmdLineActions = new KBeanAction.Container();
 
-    private KBeanAction.Container effectiveActions = new KBeanAction.Container();
+    private final KBeanAction.Container effectiveActions = new KBeanAction.Container();
 
     private final JkProperties properties;
 
@@ -191,6 +191,10 @@ public final class JkRunbase {
         this.exportedDependencies = exportedDependencies;
     }
 
+    KBeanAction.Container getEffectiveActions() {
+        return effectiveActions;
+    }
+
     void init(KBeanAction.Container cmdLineActionContainer) {
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize JkRunbase with \n" + cmdLineActionContainer.toColumnText());
@@ -295,13 +299,14 @@ public final class JkRunbase {
     }
 
     private <T extends KBean> T instantiateKBean(Class<T> beanClass) {
+
+        this.effectiveActions.add(KBeanAction.ofInit(beanClass));
+
         T bean = JkUtilsReflect.newInstance(beanClass);
 
         // This way KBeans are registered in the order they have been requested for instantiation,
         // and not the order they have finished to be instantiated.
         this.beans.put(beanClass, bean);
-
-        this.effectiveActions.add(KBeanAction.ofInit(beanClass));
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
@@ -320,7 +325,7 @@ public final class JkRunbase {
     }
 
     private Path relBaseDir() {
-        if (masterBaseDir != null) {
+        if (masterBaseDir != null && baseDir.isAbsolute()) {
             return masterBaseDir.relativize(baseDir);
         }
         return baseDir;
@@ -389,7 +394,11 @@ public final class JkRunbase {
         }
 
         // from property names formatted as '@kbeanName.field.name='
-        for (String acceptedName : KBean.acceptedNames(desc.kbeanClass)) {
+        List<String> acceptedNames = new LinkedList<>(KBean.acceptedNames(desc.kbeanClass));
+        if (desc.kbeanClass.getName().equals(kbeanResolution.defaultKbeanClassname)) {
+            acceptedNames.add("");
+        }
+        for (String acceptedName : acceptedNames) {
             String candidateProp = propNameForField(acceptedName, beanField.name);
             String value = this.properties.get(candidateProp);
             if (value != null) {
