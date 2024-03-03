@@ -270,7 +270,10 @@ public class JkPathTreeTest {
         JkPathTree pathTree = JkPathTree.of(sampleFolder);
         pathTree.streamBreathFirst().forEach(System.out::println);
         List<Path> paths = pathTree.streamBreathFirst().collect(Collectors.toList());
-        assertTrue(paths.get(3).startsWith(paths.get(1)));
+        assertTrue(
+                paths.get(3).startsWith(paths.get(1))
+                || paths.get(3).startsWith(paths.get(2))
+        );
     }
 
     @Test

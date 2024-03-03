@@ -69,8 +69,13 @@ class EngineWrapper {
     private void run(Engine engine, Engine.KBeanResolution kBeanResolution, JkProperties props, String[] args) {
         engine.resolveClassPaths();
         engine.setKBeanResolution(kBeanResolution);
-        KBeanAction.Container kBeanActions = parse(args, props, kBeanResolution);
-        engine.initRunbase(kBeanActions);
+        KBeanAction.Container cmdLineActions = parse(args, props, kBeanResolution);
+        props.getAllStartingWith("", true).forEach(System::setProperty);
+        try {
+            engine.initRunbase(cmdLineActions);
+        } finally {
+            props.getAllStartingWith("", true).keySet().forEach(System::clearProperty);
+        }
         engine.run();
     }
 
@@ -98,6 +103,6 @@ class EngineWrapper {
     }
 
     private KBeanAction.Container parse(String[] args, JkProperties props, Engine.KBeanResolution kBeanResolution) {
-        return PicocliParser.parse(new CmdLineArgs(args), props, kBeanResolution);
+        return PicocliParser.parse(new CmdLineArgs(args), kBeanResolution);
     }
 }

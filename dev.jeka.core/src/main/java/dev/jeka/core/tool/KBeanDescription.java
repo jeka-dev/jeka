@@ -19,6 +19,8 @@ final class KBeanDescription {
 
     private static final Map<Class<? extends KBean>, KBeanDescription> CACHE = new HashMap<>();
 
+    final Class<? extends KBean> kbeanClass;
+
     final String synopsisHeader;
 
     final String synopsisDetail;
@@ -30,6 +32,7 @@ final class KBeanDescription {
     final boolean includeDefaultValues;
 
     private KBeanDescription(
+            Class<? extends KBean> kbeanClass,
             String synopsisHeader,
             String synopsisDetail,
             List<BeanMethod> beanMethods,
@@ -37,6 +40,7 @@ final class KBeanDescription {
             boolean includeDefaultValues) {
 
         super();
+        this.kbeanClass = kbeanClass;
         this.synopsisHeader = synopsisHeader;
         this.synopsisDetail = synopsisDetail;
         this.beanMethods = Collections.unmodifiableList(beanMethods);
@@ -44,26 +48,26 @@ final class KBeanDescription {
         this.includeDefaultValues = includeDefaultValues;
     }
 
-    static KBeanDescription of(Class<? extends KBean> beanClass, boolean computeDefaultValue) {
-        if (CACHE.containsKey(beanClass)) {
-            return CACHE.get(beanClass);
+    static KBeanDescription of(Class<? extends KBean> kbeanClass, boolean computeDefaultValue) {
+        if (CACHE.containsKey(kbeanClass)) {
+            return CACHE.get(kbeanClass);
         }
 
         final List<BeanMethod> methods = new LinkedList<>();
-        for (final Method method : executableMethods(beanClass)) {
+        for (final Method method : executableMethods(kbeanClass)) {
             methods.add(BeanMethod.of(method));
         }
         Collections.sort(methods);
         final List<BeanField> beanFields = new LinkedList<>();
-        List<NameAndField> nameAndFields =  fields(beanClass, "", true, null);
+        List<NameAndField> nameAndFields =  fields(kbeanClass, "", true, null);
         for (final NameAndField nameAndField : nameAndFields) {
-            beanFields.add(BeanField.of(beanClass, nameAndField.field,
+            beanFields.add(BeanField.of(kbeanClass, nameAndField.field,
                     nameAndField.name, nameAndField.rootClass, computeDefaultValue));
         }
         Collections.sort(beanFields);
 
         // Grab header + description from content of @JkDoc
-        final JkDoc jkDoc = beanClass.getAnnotation(JkDoc.class);
+        final JkDoc jkDoc = kbeanClass.getAnnotation(JkDoc.class);
         final String header;
         final String detail;
         final String fullDesc = jkDoc == null ? "" : jkDoc.value();
@@ -79,9 +83,10 @@ final class KBeanDescription {
                 detail = "";
             }
         }
-        KBeanDescription result = new KBeanDescription(header, detail, methods, beanFields, computeDefaultValue);
+        KBeanDescription result = new KBeanDescription(kbeanClass, header, detail, methods, beanFields,
+                computeDefaultValue);
         if (computeDefaultValue) {
-            CACHE.put(beanClass, result);
+            CACHE.put(kbeanClass, result);
         }
         return result;
     }

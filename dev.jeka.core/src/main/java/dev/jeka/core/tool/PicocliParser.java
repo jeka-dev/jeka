@@ -2,7 +2,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
@@ -11,17 +10,13 @@ import java.util.stream.Collectors;
 
 class PicocliParser {
 
-    private static final String ENV_SYS_PROP_SOURCE = "env-sysProps";
-
     /**
      * Parse both jeka.properties and command line to get KBean action.
      * The field injections declared after override ones declared before.
      * This means that command line overrides fields declared in jeka.properties
      */
-    public static KBeanAction.Container parse(CmdLineArgs args, JkProperties props, Engine.KBeanResolution resolution) {
+    public static KBeanAction.Container parse(CmdLineArgs args, Engine.KBeanResolution resolution) {
         KBeanAction.Container container = new KBeanAction.Container();
-        container.addAll(parseSysProps(args, resolution));
-        container.addAll(parsePropertyFile(props, resolution));
         container.addAll(parseCmdLineArgs(args, resolution));
         return container;
     }
@@ -30,46 +25,6 @@ class PicocliParser {
         return args.splitByKbeanContext().stream()
                 .flatMap(scopedArgs -> createFromScopedArgs(scopedArgs, resolution, "cmd line").stream())
                 .collect(Collectors.toList());
-    }
-
-    private static List<KBeanAction> parsePropertyFile(JkProperties properties, Engine.KBeanResolution resolution) {
-        return properties.getAllStartingWith("", true).entrySet().stream()
-                .filter(entry -> KbeanAndField.isKBeanAndField(entry.getKey()))
-                .map(entry -> KbeanAndField.of(entry.getKey(), entry.getValue()))
-                .map(KbeanAndField::toCommandLineArgs)
-                .flatMap(args -> createFromScopedArgs(args, resolution, JkConstants.PROPERTIES_FILE).stream())
-                .collect(Collectors.toList());
-    }
-
-    private static List<KBeanAction> parseSysProps(CmdLineArgs args, Engine.KBeanResolution resolution) {
-        List<String> involvedKBeanClasses = args.splitByKbeanContext().stream()
-                .map(CmdLineArgs::findKbeanName)
-                .map(resolution::findKbeanClassName)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .distinct()
-                .collect(Collectors.toList());
-
-        List<KBeanAction> actions = new LinkedList<>();
-        for (String kbeanClassName : involvedKBeanClasses) {
-            Class<? extends  KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
-            KBeanDescription desc = KBeanDescription.of(kbeanClass, true);
-            CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc));
-            commandLine.parseArgs();
-            CommandSpec commandSpec = commandLine.getCommandSpec();
-            for (KBeanDescription.BeanField beanField : desc.beanFields) {
-                if (beanField.injectedPropertyName == null) {
-                    continue;
-                }
-                Object value = commandSpec.findOption(beanField.name).getValue();
-
-                // To avoid 'null' field-set, skip when sys prop = default value
-                if (!Objects.equals(value, beanField.defaultValue)) {
-                    actions.add(KBeanAction.ofSetValue(kbeanClass, beanField.name, value, ENV_SYS_PROP_SOURCE));
-                }
-            }
-        }
-        return actions;
     }
 
     /*
@@ -144,36 +99,6 @@ class PicocliParser {
         return Arrays.stream(args)
                 .filter(arg -> !methodNames.contains(arg))
                 .toArray(String[]::new);
-    }
-
-    private static class KbeanAndField {
-
-        final String kbean;
-
-        final String field;
-
-        final String value;
-
-        KbeanAndField(String kbean, String field, String value) {
-            this.kbean = kbean;
-            this.field = field;
-            this.value = value;
-        }
-
-        static boolean isKBeanAndField(String candidateKey) {
-            return candidateKey.contains("#");
-        }
-
-        static KbeanAndField of(String key, String value) {
-            String kbean = JkUtilsString.substringBeforeFirst(key, "#");
-            String field = JkUtilsString.substringAfterFirst(key, "#");
-            return new KbeanAndField(kbean, field, value);
-        }
-
-        CmdLineArgs toCommandLineArgs() {
-            return new CmdLineArgs(kbean + JkConstants.KBEAN_CMD_SUFFIX, field + "=" + JkUtilsString.nullToEmpty(value));
-        }
-
     }
 
 }

@@ -39,7 +39,7 @@ public class PicocliParserTest {
 
     private KBeanAction.Container parse(String args) {
         CmdLineArgs cmdArgs = new CmdLineArgs(JkUtilsString.parseCommandline(args));
-        return PicocliParser.parse(cmdArgs, JkProperties.EMPTY, kBeanResolution());
+        return PicocliParser.parse(cmdArgs, kBeanResolution());
     }
 
     private static Engine.KBeanResolution kBeanResolution() {

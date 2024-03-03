@@ -3,6 +3,8 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -55,6 +57,9 @@ public class SourceParserTest {
 
     private static ParsedSourceInfo parseResource(String resourceName) {
         String pathString = SourceParserTest.class.getResource(resourceName).getFile();
+        if (JkUtilsSystem.IS_WINDOWS && pathString.startsWith("/")) {
+            pathString = pathString.substring(1);
+        }
         Path file = Paths.get(pathString);
         return SourceParser.parse(file, Paths.get(""));
     }

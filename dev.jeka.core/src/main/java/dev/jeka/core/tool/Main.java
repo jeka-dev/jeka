@@ -116,10 +116,8 @@ public class Main {
             }
 
             // Parse command line to get action beans
-            JkProperties jekaProps = dev.jeka.core.tool.JkRunbase.readBaseProperties(baseDir);
             KBeanAction.Container actionContainer = PicocliParser.parse(
                     interpolatedArgs.withoutOptions(),
-                    jekaProps,
                     kBeanResolution);
 
             // Prepend the init bean in action container

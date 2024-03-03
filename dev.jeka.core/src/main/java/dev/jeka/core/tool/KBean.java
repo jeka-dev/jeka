@@ -9,6 +9,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Base class for KBean. User code is not supposed to instantiate KBeans using 'new' but usinng
@@ -27,10 +29,6 @@ public abstract class KBean {
     private KBean(JkRunbase runbase) {
         this.runbase = runbase;
         this.importedKBeans = new JkImportedKBeans(this);
-
-        // This way KBeans are registered in the order they have been requested for instantiation,
-        // and not the order they have finished to be instantiated.
-        this.runbase.putKBean(this.getClass(), this);
     }
 
     /**
@@ -155,6 +153,18 @@ public abstract class KBean {
         }
         final String prefix = JkUtilsString.substringBeforeLast(className, CLASS_SUFFIX);
         return JkUtilsString.uncapitalize(prefix);
+    }
+
+    static List<String> acceptedNames(Class<? extends KBean> kbeanClass) {
+        List<String> result = new LinkedList<>();
+        result.add(kbeanClass.getName());
+        result.add(kbeanClass.getSimpleName());
+        String uncapitalized = JkUtilsString.uncapitalize(kbeanClass.getSimpleName());
+        result.add(uncapitalized);
+        if (uncapitalized.endsWith(CLASS_SUFFIX)) {
+            result.add(JkUtilsString.substringBeforeFirst(uncapitalized, CLASS_SUFFIX));
+        }
+        return result;
     }
 
     static String name(Class<?> kbeanClass) {

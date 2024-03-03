@@ -187,6 +187,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         /** Turn it on to skip tests. */
         @JkDoc("If true, tests are not run.")
+        @JkInjectProperty("jeka.project.skip.tests")
         public Boolean skip;
 
         /** Turn it on to run tests in a withForking process. */

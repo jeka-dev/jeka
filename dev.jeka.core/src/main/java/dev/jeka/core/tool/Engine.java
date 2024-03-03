@@ -273,6 +273,7 @@ class Engine {
          this.actionContainer = actionContainer;
 
          JkRunbase.setMasterBaseDir(baseDir); // master base dir is used to display relative path on console output
+         JkRunbase.setKBeanResolution(getKbeanResolution());
          runbase = JkRunbase.get(baseDir);
          runbase.setDependencyResolver(dependencyResolver);
          runbase.setClasspath(classpathSetupResult.runClasspath);
@@ -497,7 +498,6 @@ class Engine {
     }
 
     static class KBeanResolution {
-
 
         final List<String>  allKbeans;
 

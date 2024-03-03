@@ -2,6 +2,8 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,7 +21,23 @@ public class EngineTest {
     }
 
     @Test
-    public void publicNestedProp_ok() {
+    public void injectFromJkProps_ok() {
+        JkProperties props = JkProperties.ofMap(JkUtilsIterable.mapOf("@project.layout.style", "SIMPLE"));
+        ProjectKBean projectKBean = new EngineWrapper().run(props,"project:")
+                .load(ProjectKBean.class);
+        assertEquals(JkCompileLayout.Style.SIMPLE, projectKBean.layout.style);
+    }
+
+    @Test
+    public void injectFromCmdLineAndJkProps_cmdLineTakesPrecedence() {
+        JkProperties props = JkProperties.ofMap(JkUtilsIterable.mapOf("@project.layout.style", "SIMPLE"));
+        ProjectKBean projectKBean = new EngineWrapper().run(props,"project:", "layout.style=MAVEN")
+                .load(ProjectKBean.class);
+        assertEquals(JkCompileLayout.Style.MAVEN, projectKBean.layout.style);
+    }
+
+    @Test
+    public void publicNestedFields_ok() {
         NestedProp nestedProp = new EngineWrapper(NestedProp.class).run("options.foo=a")
                 .find(NestedProp.class).get();
         assertEquals("a", nestedProp.options.foo);

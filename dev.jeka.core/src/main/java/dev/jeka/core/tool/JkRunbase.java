@@ -3,6 +3,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
@@ -16,18 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Execution context associated with a base directory.
- * <p><
- * Each <i>runbase</i> has :
+ * <p>
+ * Each <i>runBase</i> has :
  * <ul>
- *     <li>A base dir from where JeKa resolves file paths. The base dir generally contains a <i>jeka</i> dir at its root.</li>
+ *     <li>A base directory from which JeKa resolves file paths. This base directory might contains a <i>jeka-src</i> subdirectory and/or a <i>jeka.properties</i> file at its root.</li>
  *     <li>A KBean registry for holding KBeans involved in the run context.
- *     There can bbe only one KBean instance per class within a runbase.</li>
- *     <li>A property set that is locally defined in the runbase</li>
- *     <li>A set of imported runbase that can be invoked from this runbase</li>
+ *     There can bbe only one KBean instance per class within a runBase.</li>
+ *     <li>A set of properties defined in [baseDir]/jeka.properties file</li>
+ *     <li>A set of imported runBase</li>
  * </ul>
  * Typically, there is one runbase per project to build, sharing the same base dir.
  */
@@ -38,11 +39,15 @@ public final class JkRunbase {
     //        leads in difficult problems as the order the KBeans should be initialized.
     ///private static final boolean LATE_INIT = false;
 
+    private static final String PROP_KBEAN_PREFIX = "@";
+
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
-    private static final Map<Path, JkRunbase> RUNTIMES = new LinkedHashMap<>();
+    private static final Map<Path, JkRunbase> SUB_RUNTIMES = new LinkedHashMap<>();
 
     private static Path masterBaseDir;
+
+    private static Engine.KBeanResolution kbeanResolution;
 
     private final Path baseDir; // Relative Path
 
@@ -54,11 +59,13 @@ public final class JkRunbase {
 
     private JkDependencySet exportedDependencies;
 
-    private final JkPathSequence importedRunbaseDirs = JkPathSequence.of();
+    private final JkPathSequence importedBaseDirs = JkPathSequence.of();
 
-    // An empty container has to be present at instantiation time for sub-runbase, as
-    // they are not initialized with any KbeanActions
-    private KBeanAction.Container actionContainer = new KBeanAction.Container();
+    // Note: An empty container has to be present at instantiation time for sub-runBases, as
+    // they are not initialized with any KbeanActions.
+    private KBeanAction.Container cmdLineActions = new KBeanAction.Container();
+
+    private KBeanAction.Container effectiveActions = new KBeanAction.Container();
 
     private final JkProperties properties;
 
@@ -73,7 +80,7 @@ public final class JkRunbase {
      * Returns the JkRunbase instance associated with the specified project base directory.
      */
     public static JkRunbase get(Path baseDir) {
-        return RUNTIMES.computeIfAbsent(baseDir, path -> new JkRunbase(path));
+        return SUB_RUNTIMES.computeIfAbsent(baseDir, path -> new JkRunbase(path));
     }
 
     /**
@@ -115,20 +122,17 @@ public final class JkRunbase {
     /**
      * Returns root path of imported projects.
      */
-    public JkPathSequence getImportedRunbaseDirs() {
-        return importedRunbaseDirs;
+    public JkPathSequence getImportBaseDirs() {
+        return importedBaseDirs;
     }
 
     /**
      * Instantiates the specified KBean into this runbase, if it is not already present. <p>
      * As KBeans are singleton within a runbase, this method has no effect if the bean is already loaded.
      * @param beanClass The class of the KBean to load.
-     * @param consumer Give a chance to inject default values in the returned instance. It has only effect
-     *                 when creating the singleton. If the singleton in cached, then the consumer
-     *                 won't be applied.
      * @return This object for call chaining.
      */
-    public <T extends KBean> T load(Class<T> beanClass, Consumer<T> consumer) {
+    public <T extends KBean> T load(Class<T> beanClass) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
         T result = (T) beans.get(beanClass);
         if (result == null) {
@@ -137,20 +141,12 @@ public final class JkRunbase {
             JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
             Path previousProject = BASE_DIR_CONTEXT.get();
             BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
-            result = this.instantiateKBean(beanClass, consumer);
+            result = this.instantiateKBean(beanClass);
             BASE_DIR_CONTEXT.set(previousProject);
             JkLog.debugEndTask();
         }
         return result;
     }
-
-    /**
-     * @see JkRunbase#load(Class, Consumer)
-     */
-    public <T extends KBean> T load(Class<T> beanClass) {
-        return load(beanClass, bean -> {});
-    }
-
 
     /**
      * Returns the KBean of the exact specified class, present in this runbase.
@@ -168,7 +164,7 @@ public final class JkRunbase {
     }
 
     /**
-     * Returns the JkProperties object associated with the current instance of JkRunbase.
+     * Returns the JkProperties object associated with the current instance of JkRunBase.
      * JkProperties is a class that holds key-value pairs of properties relevant to the execution of Jeka build tasks.
      */
     public JkProperties getProperties() {
@@ -195,20 +191,28 @@ public final class JkRunbase {
         this.exportedDependencies = exportedDependencies;
     }
 
-    void init(KBeanAction.Container actionContainer) {
+    void init(KBeanAction.Container cmdLineActionContainer) {
         if (JkLog.isDebug()) {
-            JkLog.debug("Initialize JkRunbase with \n" + actionContainer.toColumnText());
+            JkLog.debug("Initialize JkRunbase with \n" + cmdLineActionContainer.toColumnText());
         }
-        this.actionContainer = actionContainer;
+        this.cmdLineActions = cmdLineActionContainer;
 
         JkLog.debugStartTask("Register KBeans");
-        actionContainer.toList().stream()
+
+        // KBeans init from cmdline
+        List<Class<? extends KBean>> kbeansToInit = cmdLineActionContainer.toList().stream()
                 .map(kbeanAction -> kbeanAction.beanClass)
                 .distinct()
-                .forEach(this::load);  // register kbeans
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // KBeans init from props
+        kbeansToInit.addAll(kbeansToInitFromProps());
+
+        kbeansToInit.stream().distinct().forEach(this::load);  // register kbeans
+
         JkLog.debugEndTask();
 
-        // Once KBeans has bean initialised. #postInit is invoked on each,
+        // Once KBeans has been initialised, #postInit is invoked on each,
         // so they can act upon final settings of other KBeans.
         beans.values().forEach(KBean::postInit);
     }
@@ -224,14 +228,11 @@ public final class JkRunbase {
         }
     }
 
-    void putKBean(Class<? extends KBean> kbeanClass, KBean kbean) {
-        beans.put(kbeanClass, kbean);
-    }
-
     // inject values in fields from command-line and properties.
-    void injectFieldValues(KBean bean) {
-        this.actionContainer.findSetValues(bean.getClass()).forEach(
-                action -> setValue(bean, action.member, action.value));
+    List<KBeanAction> injectValuesFromCmdLine(KBean bean) {
+        List<KBeanAction> actions = this.cmdLineActions.findSetValues(bean.getClass());
+        actions.forEach(action -> setValue(bean, action.member, action.value));
+        return actions;
     }
 
     static JkRunbase getCurrentContextBaseDir() {
@@ -245,6 +246,10 @@ public final class JkRunbase {
 
     static void setMasterBaseDir(Path baseDir) {
         masterBaseDir = baseDir;
+    }
+
+    static void setKBeanResolution(Engine.KBeanResolution kbeanResolution) {
+        JkRunbase.kbeanResolution = kbeanResolution;
     }
 
     static JkProperties constructProperties(Path baseDir) {
@@ -289,13 +294,19 @@ public final class JkRunbase {
         return String.format("JkRunbase{ baseDir=%s, beans=%s }", relBaseDir(), beans.keySet());
     }
 
-    private <T extends KBean> T instantiateKBean(Class<T> beanClass, Consumer<T> consumer) {
+    private <T extends KBean> T instantiateKBean(Class<T> beanClass) {
         T bean = JkUtilsReflect.newInstance(beanClass);
-        consumer.accept(bean);
+
+        // This way KBeans are registered in the order they have been requested for instantiation,
+        // and not the order they have finished to be instantiated.
+        this.beans.put(beanClass, bean);
+
+        this.effectiveActions.add(KBeanAction.ofInit(beanClass));
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
-        injectFieldValues(bean);
+        this.effectiveActions.addAll(injectDefaultsFromProps(bean));
+        this.effectiveActions.addAll(injectValuesFromCmdLine(bean));
 
         bean.init();
         return bean;
@@ -334,6 +345,79 @@ public final class JkRunbase {
         JkUtilsAssert.state(field != null, "Null field found for class %s and field %s",
                 target.getClass().getName(), propName);
         JkUtilsReflect.setFieldValue(target, field, value);
+    }
+
+    /*
+     * Note: sys props cannot be resolved at command-line parsing time,
+     * cause beans may be loaded at init or exec time.
+     */
+    private List<KBeanAction> injectDefaultsFromProps(KBean kbean) {
+
+        Class<? extends KBean> kbeanClass = kbean.getClass();
+        List<KBeanAction> result = new LinkedList<>();
+        KBeanDescription desc = KBeanDescription.of(kbeanClass, true);
+
+        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc));
+        commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, desc));
+        commandLine.parseArgs();
+        CommandLine.Model.CommandSpec commandSpec = commandLine.getCommandSpec();
+
+        for (KBeanDescription.BeanField beanField : desc.beanFields) {
+            CommandLine.Model.OptionSpec optionSpec = commandSpec.findOption(beanField.name);
+            Object value = optionSpec.getValue();
+            if (!Objects.equals(beanField.defaultValue, value)) {
+                setValue(kbean, beanField.name, value);
+                result.add(KBeanAction.ofSetValue(kbeanClass, beanField.name, value, "properties"));
+            }
+        }
+        return result;
+    }
+
+    private String getDefaultFromProps(CommandLine.Model.ArgSpec argSpec, KBeanDescription desc) {
+        CommandLine.Model.OptionSpec optionSpec = (CommandLine.Model.OptionSpec) argSpec;
+        KBeanDescription.BeanField beanField = desc.beanFields.stream()
+                .filter(beanField1 -> beanField1.name.equals(optionSpec.longestName()))
+                .findFirst().orElseThrow(
+                        () -> new IllegalStateException("Cannot find field " + optionSpec.longestName()
+                                + " in bean " + desc.kbeanClass.getName()));
+
+        // from explicit ENV VAR or sys props defined with @JkInjectProperty
+        if (beanField.injectedPropertyName != null) {
+            if (properties.get(beanField.injectedPropertyName) != null) {
+                return System.getenv(beanField.injectedPropertyName);
+            }
+        }
+
+        // from property names formatted as '@kbeanName.field.name='
+        for (String acceptedName : KBean.acceptedNames(desc.kbeanClass)) {
+            String candidateProp = propNameForField(acceptedName, beanField.name);
+            String value = this.properties.get(candidateProp);
+            if (value != null) {
+                return value;
+            }
+        }
+
+        // from bean value instantiation*
+        return null;
+    }
+
+    private List<Class<? extends KBean>> kbeansToInitFromProps() {
+        List<String> kbeanClassNames = properties.getAllStartingWith(PROP_KBEAN_PREFIX, false).keySet().stream()
+                .filter(key -> !key.contains("."))
+                .map(key -> kbeanResolution.findKbeanClassName(key))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        List<Class<? extends KBean>> actions = new LinkedList<>();
+        for (String className : kbeanClassNames) {
+            Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(className);
+            actions.add(kbeanClass);
+        }
+        return actions;
+    }
+
+    private static String propNameForField(String kbeanName, String fieldName) {
+        return PROP_KBEAN_PREFIX + kbeanName + "." + fieldName;
     }
 
 }
