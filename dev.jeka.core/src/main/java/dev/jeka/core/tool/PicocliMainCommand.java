@@ -56,8 +56,8 @@ import java.util.stream.Collectors;
         },
         footer = {
             "",
-            "Execute @|yellow jeka -cmd |@ to get a list of available commands.",
-            "Execute @|yellow jeka -i |@ to get base information."
+            "Execute @|yellow jeka : --help |@ to get help on default KBean.",
+            "Execute @|yellow jeka --info |@ to get runtime information."
         },
         optionListHeading = "Options:%n",
         subcommandsRepeatable = true,
@@ -127,7 +127,7 @@ public class PicocliMainCommand {
     private boolean logDebug;
 
     @Option(names = {"-st", "--stacktrace"},
-            description = "Log verbose messages.")
+            description = "Log stack traces.")
     private boolean logStacktrace;
 
     @Option(names = {"-ld", "--duration"},
@@ -138,13 +138,6 @@ public class PicocliMainCommand {
             paramLabel = "STYLE",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
     private final JkLog.Style logStyle = JkLog.Style.INDENT;
-
-    @Option(names = {"-cmd", "--commands"},
-            paramLabel = "<|kbeanName>",
-            description = "Display contextual help on commands",
-            arity = "0..1",
-            fallbackValue = " ")
-    private String commandHelp;
 
     @Option(names = {"-la", "--animations"},
             description = "Display animations on console",
@@ -173,8 +166,7 @@ public class PicocliMainCommand {
                 cleanWork,
                 cleanOutput,
                 ignoreCompileFailure,
-                skipCompile,
-                commandHelp);
+                skipCompile);
     }
 
     JkDependencySet dependencies() {

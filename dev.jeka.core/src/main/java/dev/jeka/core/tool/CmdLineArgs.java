@@ -152,4 +152,20 @@ class CmdLineArgs {
 
         return effectiveCommandLineArgs.toArray(new String[0]);
     }
+
+    String kbeanContextHelp() {
+        List<String> argList  = Arrays.asList(args);
+        int helpIndex = argList.indexOf("--help");
+        if (helpIndex == -1) {
+            helpIndex = argList.indexOf("-h");
+        }
+        if (helpIndex <= 0) {
+            return null;
+        }
+        String kbeanArg = argList.get(helpIndex -1);
+        if (!kbeanArg.endsWith(":")) {
+            return null;
+        }
+        return JkUtilsString.substringBeforeFirst(kbeanArg, ":");
+    }
 }

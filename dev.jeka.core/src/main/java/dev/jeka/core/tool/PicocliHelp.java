@@ -45,11 +45,10 @@ class PicocliHelp {
     }
 
     static void printCmdHelp(JkPathSequence classpath,
-                             List<String> kbeanClassNames,
-                             String defaultKBeanClassName,
+                             Engine.KBeanResolution kbeanResolution,
                              JkProperties props,
                              PrintStream printStream) {
-        cmdHelp(classpath, kbeanClassNames, defaultKBeanClassName, props)
+        cmdHelp(classpath, kbeanResolution, props)
                 .usage(printStream, colorScheme());
     }
 
@@ -68,9 +67,10 @@ class PicocliHelp {
 
     private static CommandLine cmdHelp(
             JkPathSequence classpath,
-            List<String> kbeanClassNames,
-            String defaultKBeanClassName,
+            Engine.KBeanResolution kbeanResolution,
             JkProperties props) {
+
+        String defaultKBeanClassName = kbeanResolution.defaultKbeanClassname;
 
         ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
 
@@ -122,7 +122,7 @@ class PicocliHelp {
         commandLine.setHelpSectionKeys(keys);
 
         // Add section for other KBeans
-        List<String> others = new LinkedList<>(kbeanClassNames);
+        List<String> others = new LinkedList<>(kbeanResolution.allKbeans);
         List<String> stdKbeanClassNames = PicocliCommands.STANDARD_KBEAN_CLASSES.stream()
                         .map(Class::getName).collect(Collectors.toList());
         others.removeAll(stdKbeanClassNames);
@@ -158,7 +158,7 @@ class PicocliHelp {
         }
 
         main.usageMessage()
-                .footer("", "Execute @|yellow jeka -cmd=<kbean>|@ (as @|italic jeka -cmd=docker|@) " +
+                .footer("", "Execute @|yellow jeka <kbean>: --help|@ (as @|italic jeka docker: --help|@) " +
                         "to get details on specific KBean.");
 
         return commandLine;
@@ -197,7 +197,9 @@ class PicocliHelp {
                 synopsis.add("");
             }
         }
-        synopsis.add("Fields");
+        if (!beanDescription.beanFields.isEmpty()) {
+            synopsis.add("Fields");
+        }
         main.usageMessage()
                 .autoWidth(true)
                 .customSynopsis(synopsis.toArray(new String[0]))

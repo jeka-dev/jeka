@@ -98,20 +98,22 @@ public class Main {
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
-            // Handle context help (--commands)
-            if (behavior.commandHelp.isPresent()) {
-                String kbeanName = behavior.commandHelp.get();
-                if (JkUtilsString.isBlank(kbeanName)) {
+            // Handle context help ([kbean]: --help)
+            String kbeanHelp = cmdArgs.kbeanContextHelp();
+            if (kbeanHelp != null) {
+                if (JkUtilsString.isBlank(kbeanHelp)) {
                     PicocliHelp.printCmdHelp(
                                     engine.resolveClassPaths().runClasspath,
-                                    kBeanResolution.allKbeans,
-                                    kBeanResolution.defaultKbeanClassname, props, System.out);
+                                    kBeanResolution,
+                                    props,
+                                    System.out);
                     System.exit(0);
                 }
                 boolean found = PicocliHelp.printKBeanHelp(
                         engine.resolveClassPaths().runClasspath,
                         kBeanResolution.allKbeans,
-                        kbeanName, System.out);
+                        kbeanHelp,
+                        System.out);
                 System.exit(found ? 0 : 1);
             }
 
@@ -141,6 +143,9 @@ public class Main {
             String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
             CommandLine commandLine = e.getCommandLine();
             commandLine.getErr().println(errorTxt + e.getMessage());
+            if (logs.stackTrace) {
+                e.printStackTrace(commandLine.getErr());
+            }
             commandLine.getErr().println("Try 'jeka --commands' or 'jeka -cmd' for more information.");
             System.exit(1);
         } catch (Throwable t) {
