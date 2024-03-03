@@ -146,7 +146,7 @@ public class Main {
             if (logs.stackTrace) {
                 e.printStackTrace(commandLine.getErr());
             }
-            commandLine.getErr().println("Try 'jeka --commands' or 'jeka -cmd' for more information.");
+            commandLine.getErr().println("Try 'jeka : --help' for more information.");
             System.exit(1);
         } catch (Throwable t) {
             handleGenericThrowable(t, startTime, logs);
