@@ -117,7 +117,7 @@ public final class JkTestProcessor {
         return this;
     }
 
-    public JkTestProcessor setJvmHints(JkJdks jdks,  JkJavaVersion javaVersion) {
+    public JkTestProcessor setJvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
         JkUtilsAssert.argument(jdks != null, "jdks argument cannot be null");
         this.jvmHints = new JvmHints(jdks, javaVersion);
         return this;
@@ -314,16 +314,16 @@ public final class JkTestProcessor {
     }
 
     private static class JvmHints {
-        final JkJdks jdks;
+        final JkJavaCompilerToolChain.JkJdks jdks;
         final JkJavaVersion javaVersion;
 
-        JvmHints(JkJdks jdks, JkJavaVersion javaVersion) {
+        JvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
             this.jdks = jdks;
             this.javaVersion = javaVersion;
         }
 
         static JvmHints ofDefault() {
-            return new JvmHints(JkJdks.of(), null);
+            return new JvmHints(JkJavaCompilerToolChain.JkJdks.of(), null);
         }
 
         Path javaHome() {

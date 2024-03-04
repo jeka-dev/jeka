@@ -56,7 +56,7 @@ public final class JkJavaCompileSpec {
 
     /**
      * Returns the specifications as a list of string directly usable in the {@link JkJavaCompilerToolChain} except
-     * sourcepath
+     * source path
      */
     public List<String> getOptions() {
         return this.options;

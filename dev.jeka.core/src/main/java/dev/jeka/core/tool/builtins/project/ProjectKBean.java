@@ -6,7 +6,6 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
-import dev.jeka.core.api.java.JkJdks;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
@@ -305,8 +304,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     // ------- private methods
 
-    private JkJdks jdks() {
-        return JkJdks.ofJdkHomeProps(getRunbase().getProperties().getAllStartingWith("jeka.jdk.", false));
+    private JkJavaCompilerToolChain.JkJdks jdks() {
+        return JkJavaCompilerToolChain.JkJdks.ofJdkHomeProps(getRunbase().getProperties().getAllStartingWith("jeka.jdk.", false));
     }
 
     private void applyRepoConfigOn(JkProject project) {
