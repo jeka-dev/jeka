@@ -113,7 +113,7 @@ class Engine {
 
         // In lenient mode, we ignore dep resolution failure
         this.dependencyResolver.getDefaultParams().setFailOnDependencyResolutionError(
-                !behaviorSettings.ignoreCompileFailure);
+                !behaviorSettings.forceMode);
     }
 
     static Engine of(Path baseDir, boolean skipJekaSrc, JkRepoSet downloadRepos,
@@ -376,7 +376,7 @@ class Engine {
         updateTracker.updateCompileFlag();
         extraClasspath = extraClasspath.and(jekaSrcClassDir);
         boolean globalSuccess = javaCompileSuccess && kotlinCompileResult.success;
-        if (!globalSuccess && !behaviorSettings.ignoreCompileFailure) {
+        if (!globalSuccess && !behaviorSettings.forceMode) {
             throw new JkException("Compilation of %s failed.", jekaSrcDir);
         }
         return new CompileResult(globalSuccess, extraClasspath);
@@ -393,6 +393,7 @@ class Engine {
                 "No jeka.kotlin.version property has been defined on base dir %s", baseDir);
         JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer)
                 .setLogOutput(true)
+                .setFailOnError(!behaviorSettings.forceMode)
                 .addOption("-nowarn");
         compileOptions.forEach(option -> kotlinCompiler.addOption(option));
         JkPathSequence kotlinClasspath = classpath.and(kotlinCompiler.getStdJdk8Lib());

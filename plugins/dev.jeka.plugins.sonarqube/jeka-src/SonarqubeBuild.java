@@ -36,7 +36,8 @@ class SonarqubeBuild extends KBean {
     }
 
     public void cleanPack() {
-        projectKBean.cleanPack();
+        projectKBean.clean();
+        projectKBean.pack();
     }
 
     public static void main(String[] args) {

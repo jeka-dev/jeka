@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 )
 public class PicocliMainCommand {
 
-    @Option(names = { "-c", "--clean-output"},
+    @Option(names = { "-c", "--clean"},
             description = "Delete jeka-output directory prior running.")
     private boolean cleanOutput;
 
@@ -87,6 +87,11 @@ public class PicocliMainCommand {
             description = "Indicate to run directly the built Java program when present, bypassing the JeKa execution engine.")
     private boolean fakeProgram;  // Handled at shell level
 
+    @Option(names = { "-f", "--force"},
+            description = "Try to keep running JeKa even if jeka-src compilation fails.")
+    private boolean forceMode;
+
+
     @Option(names = { "-i", "--info"},
             description = "Display info as versions, location, classpath,...")
     private boolean runtimeInfo;
@@ -96,13 +101,9 @@ public class PicocliMainCommand {
             description = "Specify remote code base location. LOCATION may be a folder path, Git url or an alias.")
     private String fakeRemote;  // Handled at shell level
 
-    @Option(names = { "-f", "--remote-fresh"},
+    @Option(names = { "-u", "--remote-update"},
             description = "Forcing Git update when used with '-r'.")
-    private boolean fakeRemoteFresh;  // Handled at shell level
-
-    @Option(names = { "-icf", "--ignore-fail"},
-            description = "Try to keep running JeKa even if jeka-src compilation fails.")
-    private boolean ignoreCompileFailure;
+    private boolean fakeRemoteUpdate;  // Handled at shell level
 
     @Option(names = { "-kb", "--kbean"},
             paramLabel = "KBEAN",
@@ -112,11 +113,6 @@ public class PicocliMainCommand {
     @Option(names = { "-sk", "--skip-compile"},
             description = "Do not compile jeka-src")
     private boolean skipCompile;
-
-    @Option(names = { "-D<name>"},
-            paramLabel = "<value>",
-            description = "Define system property")
-    private String[] fakeSysProp;  // Handled at shell level
 
     @Option(names = {"-v", "--verbose"},
             description = "Log verbose messages.")
@@ -144,7 +140,7 @@ public class PicocliMainCommand {
             arity = "0..1")
     private Boolean logAnimations;
 
-    @Option(names = "-D", mapFallbackValue = "") // allow -Dkey
+    @Option(names = "-D", mapFallbackValue = "", description = "Define system property") // allow -Dkey
     void setProperty(Map<String, String> props) {
         props.forEach(System::setProperty);
     }
@@ -165,7 +161,7 @@ public class PicocliMainCommand {
                 defaultKBean,
                 cleanWork,
                 cleanOutput,
-                ignoreCompileFailure,
+                forceMode,
                 skipCompile);
     }
 

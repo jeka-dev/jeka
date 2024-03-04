@@ -112,12 +112,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         project.pack();
     }
 
-    @JkDoc("Convenient method to perform a 'clean' followed by a 'pack'.")
-    public void cleanPack() {
-        clean();
-        pack();
-    }
-
     @JkDoc("Displays resolved dependency trees on console.")
     public void depTree() {
         project.displayDependencyTree();

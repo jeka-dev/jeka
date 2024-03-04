@@ -479,8 +479,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
                 JkLog.getErrPrintStream().flush();
             }
 
-            throw new IllegalStateException("Process " + String.join(" ", ellipse(commands))
-                    + "\nhas returned with error code " + exitCode);
+            throw new IllegalStateException("Process has returned with error code " + exitCode);
         }
         return exitCode;
     }
@@ -548,7 +547,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         String workingDirName = this.workingDir == null ? "." : workingDir.toString();
         JkLog.info("working dir   : %s", workingDirName);
         JkLog.info("command path  : %s", command);
-        JkLog.info("full cmd line : %s", fullCmdLine());
+        String cmdLine = JkLog.isVerbose() ? fullCmdLine() : JkUtilsString.ellipse(fullCmdLine(), 120);
+        JkLog.info("cmd line      : %s", cmdLine);
         JkLog.getOutPrintStream().flush();
     }
 

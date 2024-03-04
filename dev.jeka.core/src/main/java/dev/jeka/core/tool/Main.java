@@ -118,7 +118,7 @@ public class Main {
             }
 
             // Parse command line to get action beans
-            KBeanAction.Container actionContainer = PicocliParser.parse(
+            KBeanAction.Container actionContainer = CmdLineParser.parse(
                     interpolatedArgs.withoutOptions(),
                     kBeanResolution);
 
@@ -213,8 +213,8 @@ public class Main {
 
         // By default, log working animation when working dir = base dir (this mean that we are not
         // invoking a tool packaged with JeKa.
-        Path workingDir = Paths.get("");
-        boolean logAnimation = baseDir.equals(workingDir);
+        Path workingDir = Paths.get("").toAbsolutePath();
+        boolean logAnimation = baseDir.toAbsolutePath().normalize().equals(workingDir);
         if (logSettings.animation != null) {
             logAnimation = logSettings.animation;
         }
@@ -277,7 +277,8 @@ public class Main {
         if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails(logs)) {
             printException(logs, t);
         }
-        System.err.println("Failed !");
+        String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");
+        System.err.println(failedText);
     }
 
     private static boolean shouldPrintExceptionDetails(LogSettings logs) {

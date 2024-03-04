@@ -103,6 +103,6 @@ class EngineWrapper {
     }
 
     private KBeanAction.Container parse(String[] args, JkProperties props, Engine.KBeanResolution kBeanResolution) {
-        return PicocliParser.parse(new CmdLineArgs(args), kBeanResolution);
+        return CmdLineParser.parse(new CmdLineArgs(args), kBeanResolution);
     }
 }

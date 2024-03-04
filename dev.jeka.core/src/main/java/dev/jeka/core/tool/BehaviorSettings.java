@@ -10,17 +10,17 @@ class BehaviorSettings {
 
     final boolean cleanOutput;
 
-    final boolean ignoreCompileFailure;
+    final boolean forceMode; // ignore jeka-src compilation and dep resolution failures
 
     final boolean skipCompile;
 
 
-    BehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean ignoreCompileFailure,
+    BehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean forceMode,
                      boolean skipCompile) {
         this.kbeanName = Optional.ofNullable(kbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
-        this.ignoreCompileFailure = ignoreCompileFailure;
+        this.forceMode = forceMode;
         this.skipCompile = skipCompile;
     }
 

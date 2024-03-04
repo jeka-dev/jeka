@@ -35,7 +35,7 @@ public final class JkUtilsIterable {
     /**
      * @see #listOf(Iterable)
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> List<T> listOf(T... items) {
         return Arrays.asList(items);
     }
@@ -43,7 +43,8 @@ public final class JkUtilsIterable {
     /**
      * @see #listOf(Iterable)
      */
-    @SuppressWarnings("unchecked")
+
+    @SafeVarargs
     public static <T> List<T> listOf2orMore(T item1, T item2, T... others) {
         ArrayList<T> result = new ArrayList<>(others.length + 2);
         result.add(item1);
@@ -55,16 +56,13 @@ public final class JkUtilsIterable {
     /**
      * @see #listOf(Iterable)
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> List<T> listOf1orMore(T item1, T... others) {
         ArrayList<T> result = new ArrayList<>(others.length + 1);
         result.add(item1);
         Collections.addAll(result, others);
         return result;
     }
-
-
-
 
     /**
      * Returns a duplicate free list of the given items
@@ -110,7 +108,7 @@ public final class JkUtilsIterable {
     /**
      * Creates a set of specified items.
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> Set<T> setOf(T... items) {
         final HashSet<T> result = new HashSet<>();
         result.addAll(Arrays.asList(items));
@@ -183,7 +181,7 @@ public final class JkUtilsIterable {
      * Returns a list that is a concatenation of the specified lists.
      * The result is not backed by specified {@link Iterable}.
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> List<T> concatLists(Iterable<? extends T>... lists) {
         final List<T> result = new LinkedList<>();
         for (final Iterable<? extends T> list : lists) {

@@ -1,6 +1,5 @@
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Test;
 
@@ -10,7 +9,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-public class PicocliParserTest {
+public class CmdLineParserTest {
 
     @Test
     public void nestedEnum_ok() {
@@ -39,7 +38,7 @@ public class PicocliParserTest {
 
     private KBeanAction.Container parse(String args) {
         CmdLineArgs cmdArgs = new CmdLineArgs(JkUtilsString.parseCommandline(args));
-        return PicocliParser.parse(cmdArgs, kBeanResolution());
+        return CmdLineParser.parse(cmdArgs, kBeanResolution());
     }
 
     private static Engine.KBeanResolution kBeanResolution() {

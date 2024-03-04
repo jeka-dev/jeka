@@ -8,7 +8,7 @@ import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class PicocliParser {
+class CmdLineParser {
 
     /**
      * Parse both jeka.properties and command line to get KBean action.

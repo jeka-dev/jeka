@@ -29,7 +29,7 @@ final class IdeSupport {
                 .map(supplier -> {
                     JkIdeSupport ideSupport = supplier.getJavaIdeSupport();
                     if (ideSupport != null) {
-                        JkLog.info("Use %s class as IDE support supplier.", supplier.getClass().getName());
+                        JkLog.verbose("Use %s class as IDE support supplier.", supplier.getClass().getName());
                     }
                     return ideSupport;
                 })
