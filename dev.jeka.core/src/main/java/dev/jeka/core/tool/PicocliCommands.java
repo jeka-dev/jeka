@@ -89,7 +89,9 @@ class PicocliCommands {
     private static CommandSpec fromKBeanMethod(KBeanDescription.BeanMethod beanMethod) {
         CommandSpec spec = CommandSpec.create();
         spec.subcommandsRepeatable(true);
-        spec.usageMessage().header(beanMethod.description);
+        String description = beanMethod.description;
+        description = (description != null && description.endsWith(".")) ? description : description + ".";
+        spec.usageMessage().header(description);
         return spec;
     }
 

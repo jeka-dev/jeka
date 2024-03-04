@@ -146,7 +146,8 @@ public class Main {
             if (logs.stackTrace) {
                 e.printStackTrace(commandLine.getErr());
             }
-            commandLine.getErr().println("Try 'jeka : --help' for more information.");
+            String suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka : --help|@ for more information.");
+            commandLine.getErr().println(suggestTxt);
             System.exit(1);
         } catch (Throwable t) {
             handleGenericThrowable(t, startTime, logs);

@@ -8,9 +8,24 @@ export DRY_RUN
 source ../../main/shell/jeka
 set -e
 
-
 SAMPLE_DIR=./sample-dir
 SUB_DIR=$SAMPLE_DIR/sub-dir
+
+echo "---------------- Test interpolated args -----------------------"
+
+array_args=("::shorthand" "arg2")
+DEFAULT_BASE_DIR="$SAMPLE_DIR"
+compute_INTERPOLATED_ARGS "${array_args[@]}"
+for elem in "${INTERPOLATED_ARGS[@]}"; do
+  echo "$elem"
+done
+
+echo "---------------- Find remote args -----------------------"
+
+array_args=("toto" "-ru" "arg2")
+index=$(find_remote_arg_index "${array_args[@]}")
+[ ! "$index" == "2" ] && echo "Failure: remote option not detected. Found : '$index'" && exit 1
+
 
 echo "---------------- Test getting properties -----------------------"
 
@@ -45,27 +60,26 @@ echo "get_java_version_from_props = $prop_value"
 
 echo "---------- Test parsing arguments --------------"
 
-CMD_LINE_ARGS=("one-argument" "-lsu")
+CMD_LINE_ARGS=("one-argument" "-v")
 echo "SHOULD_LOG_DOWNLOAD = '$SHOULD_LOG_DOWNLOAD'"
 
 CMD_LINE_ARGS=("one-argument" "other")
 compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "" ] && echo "Failure: -lsu not present but SHOULD_LOG_DOWNLOAD is set to '$SHOULD_LOG_DOWNLOAD'" && exit 1
 
-CMD_LINE_ARGS=( "toto" "-lsu" "uu")
+CMD_LINE_ARGS=( "toto" "-v" "uu")
 compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
 
-CMD_LINE_ARGS=( "toto" "-lsu")
+CMD_LINE_ARGS=( "toto" "--verbose")
 compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
-
 
 
 echo "---------- Test JDK Location --------------------"
 
 # Test JDK Path
-prop_value=$(get_jdk_home_for_version "$SUB_DIR" "17")
+prop_value=$(get_jdk_home_from_props "$SUB_DIR" "17")
 echo "Path of jdk 17=$prop_value"
 
 # Test we can get JDK user home

@@ -41,7 +41,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         Path jekaShellPath = getJekaShellPath();
 
         // Test without alias
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-rc", GIT_URL, "ok")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-ru", GIT_URL, "ok")
                 .setLogCommand(true)
                 .setCollectStdout(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())

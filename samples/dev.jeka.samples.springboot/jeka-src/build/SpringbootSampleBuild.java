@@ -50,7 +50,8 @@ public class SpringbootSampleBuild extends KBean {
 
 
     public void cleanPack() {
-        projectKBean.cleanPack();
+        projectKBean.clean();
+        projectKBean.pack();
     }
 
     public void testRun() {

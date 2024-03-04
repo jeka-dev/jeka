@@ -12,10 +12,10 @@ class SamplesTester extends JekaCommandLineExecutor {
     void run() {
 
         // Run Self-App
-        run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 base: buildJar");
+        run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 base: pack");
 
         // Test also if the KBean hosted in jeka-src, is considered as the default KBean
-        run("dev.jeka.samples.baselib", "base: buildJar : ok");
+        run("dev.jeka.samples.baselib", "base: pack : ok");
 
         // Test caching by running twice
         Path sampleBaseDir = Paths.get("../samples/dev.jeka.samples.baselib").normalize();

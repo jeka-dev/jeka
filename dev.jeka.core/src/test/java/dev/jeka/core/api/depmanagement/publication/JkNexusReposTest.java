@@ -10,7 +10,7 @@ public class JkNexusReposTest {
     @Test
     @Ignore
     public void testCloseAndRelease() {
-        JkLog.setDecorator(JkLog.Style.BRACE);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkRepo repo = JkRepo.ofMavenOssrhDeployRelease("djeang", System.getenv("jiraPwd"), null);
         JkNexusRepos.ofRepo(repo).closeAndRelease();
     }

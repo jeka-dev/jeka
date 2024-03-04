@@ -76,7 +76,8 @@ public class SimpleProjectKBean extends KBean {
     }
 
     public void cleanPackPublish() {
-         projectKBean.cleanPack();
+         projectKBean.clean();
+         projectKBean.pack();
          load(MavenKBean.class).publishLocal();
     }
 

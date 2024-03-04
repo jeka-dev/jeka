@@ -31,6 +31,7 @@ set -e
 #####################
 
 declare CMD_LINE_ARGS=("$@")
+declare -a INTERPOLATED_ARGS
 
 declare JEKA_VERSION_PROP_NAME="jeka.java.version"
 declare JEKA_JAR_NAME="dev.jeka.jeka-core.jar"
@@ -54,6 +55,7 @@ declare SHOULD_LOG_DOWNLOAD # we should not log anything when on the green path,
 
 declare LOG_DEBUG # DEBUG
 declare DRY_RUN  # Debugging purpose
+declare DEFAULT_BASE_DIR="."
 
 
 #######################################
@@ -129,7 +131,7 @@ substring_after_hash() {
 compute_SHOULD_LOG_DOWNLOAD() {
   for arg in "${CMD_LINE_ARGS[@]}"
     do
-      if [ "$arg" == "-lsu" ] ; then
+      if [ "$arg" == "--verbose" ] || [ "$arg" == "-v" ] || [ "$arg" == "-d" ] || [ "$arg" == "--debug" ]; then
           SHOULD_LOG_DOWNLOAD="true"
           return 0
       fi
@@ -249,7 +251,6 @@ get_system_prop_from_args() {
             echo "${arg#$prefix}"
         fi
       done
-
 }
 
 #######################################
@@ -346,28 +347,84 @@ get_java_version_from_props() {
   echo "$trimmed_version"
 }
 
-# call `get_jdk_home_for_version base_dir JAVA_VERSION`
+#######################################
+# Returns the JAVA version to use according properties
+# Globals:
+#   INTERPOLATED_ARGS (write)
+# Arguments:
+#   $@ : an array representing the original args
+# Outputs:
+#   result in INTERPOLATED_ARGS global args
+#######################################
+compute_INTERPOLATED_ARGS() {
+  INTERPOLATED_ARGS=()
+  for arg in "$@"; do
+    if [[ $arg == ::* ]]; then   # if arg starts with '::'
+      local token=${arg:2}
+      local prop_name="jeka.cmd.$token"
+      local value
+      value=$(get_prop_value_from_base_dir "$DEFAULT_BASE_DIR" "$prop_name")
+      if [ "$value" != "" ]; then
+        local -a substitute=("$value")
+        INTERPOLATED_ARGS+=("${substitute[@]}")
+      else
+        INTERPOLATED_ARGS+=("$arg")
+      fi
+    else
+      INTERPOLATED_ARGS+=("$arg")
+    fi
+  done
+}
+
+#######################################
+# Find the index of the remote option in an an array
+# Globals:
+#   INTERPOLATED_ARGS (write)
+# Arguments:
+#   $@ : an array representing the original args
+# Outputs:
+#   result in INTERPOLATED_ARGS global args
+#######################################
+find_remote_arg_index() {
+  index=0
+  for arg in "$@"; do
+    ((index++))
+    is_remote_arg "$arg"
+    if [ "$result" == "true" ]; then
+      echo "$index"
+      return 0;
+    fi
+  done
+  echo "-1";
+}
+
+#######################################
+# Determines if the passed argument is a remote option (as -r)
+# Arguments:
+#   $1 : a string representing one argument
+# Outputs:
+#   result in 'result' global args
+#######################################
+is_remote_arg() {
+  local arg="$1"
+  if [[ "$arg" != -* ]]; then
+    result="false"
+    return 0
+  fi
+  local option=${arg:1}
+  if [[ $option != *r* ]]; then
+    result="false"
+    return 0
+  fi
+  result="true"
+}
+
+# call `get_jdk_home_from_props base_dir JAVA_VERSION`
 get_jdk_home_from_props() {
   local base_dir=$1
   local jdk_version=$2
   local prop_name="jeka.jdk.$jdk_version"
   get_prop_value_from_base_dir "$base_dir" "$prop_name"
-}
-
-
-
-
-
-# Return the argument following '-r' arguments. Returns nothing if '-r' not found.
-# It takes an array as argument. If no arguments is passed, it use script exec args.
-get_remote_argument() {
-  for arg in "$@"; do
-    if [ "$previous" == "-r" ]; then
-      echo "$arg"
-      return
-    fi
-    previous=$arg
-  done
 }
 
 is_git_url() {
@@ -488,13 +545,10 @@ compute_BASE_DIR() {
     local remote_arg=$2
     compute_RESOLVED_ALIAS "$remote_arg"
     compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS"
-  elif [ "$1" = "-rc" ]; then
+  elif [ "$1" = "-ru" ]; then
     local remote_arg=$2
     compute_RESOLVED_ALIAS "$remote_arg"
     compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS" "clean"
-  elif [ "${arg:0:1}" = "@" ]; then   # if first arg is an alias.
-    compute_RESOLVED_ALIAS "$1"
-    compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS"
   else
     BASE_DIR=$(pwd)
   fi
@@ -626,7 +680,6 @@ get_or_download_jdk() {
 compute_SHOULD_LOG_DOWNLOAD
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
-
 
 compute_BASE_DIR "$1" "$2"
 

@@ -43,7 +43,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
         // Project with self springboot
         scaffoldCmd = scaffoldArgs("base: scaffold springboot:");
-        checkCmd = checkArgs("base: test buildJar");
+        checkCmd = checkArgs("base: test pack");
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.checkCmd = checkCmd;

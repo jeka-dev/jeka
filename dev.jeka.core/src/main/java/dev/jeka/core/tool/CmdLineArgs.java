@@ -111,7 +111,7 @@ class CmdLineArgs {
         }
         List<String> result = new LinkedList<>(Arrays.asList(originalArgs));
         String first =result.get(0);
-        if (JkUtilsIterable.listOf("-r", "-rc").contains(first)) {
+        if (JkUtilsIterable.listOf("-r", "-ru").contains(first)) {
             result.remove(0);
             result.remove(0);
         }

@@ -19,7 +19,7 @@ public class AdminKBean extends KBean {
     }
 
     @JkDoc("Edit global.properties file.")
-    public void editGlobalConf() throws IOException {
+    public void editGlobalProps() throws IOException {
         Path globalProps = JkLocator.getGlobalPropertiesFile();
         if (!GraphicsEnvironment.isHeadless()) {
             Desktop.getDesktop().edit(globalProps.toFile());

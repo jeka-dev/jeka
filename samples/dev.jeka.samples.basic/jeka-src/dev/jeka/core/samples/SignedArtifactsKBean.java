@@ -95,7 +95,8 @@ public class SignedArtifactsKBean extends KBean {
 
     public void cleanPackPublish() {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
-        projectKBean.cleanPack();
+        projectKBean.clean();
+        projectKBean.pack();
         mavenPublication.publish();
     }
 

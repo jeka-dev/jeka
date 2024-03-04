@@ -6,7 +6,9 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -51,6 +53,14 @@ public final class BaseKBean extends KBean {
     @JkDoc
     final BaseScaffoldOptions scaffold = new BaseScaffoldOptions();
 
+    /**
+     * Actions to execute when {@link BaseKBean#pack()} is invoked.<p>
+     * By default, the build action creates a fat jar. It can be
+     * replaced by an action creating other jars/artifacts or doing special
+     * action as publishing a Docker image, for example.
+     */
+    public final JkRunnables packActions = JkRunnables.of();
+
     public final JkConsumers<JkManifest> manifestCustomizers = JkConsumers.of();
 
     private String mainClass = AUTO_FIND_MAIN_CLASS;
@@ -68,11 +78,12 @@ public final class BaseKBean extends KBean {
     @Override
     protected void init() {
         selfScaffold = JkBaseScaffold.of(this);
+        packActions.set(this::buildJar);
     }
 
     // We can not just run Application#main cause Spring-Boot seems
     // requiring that the Java process is launched using Spring-Boot application class
-    @JkDoc("Launch application")
+    @JkDoc("Launches application")
     public void runMain() {
         Path tempDirClass = JkUtilsPath.createTempDirectory("jk-");
         getAppClasses().copyTo(tempDirClass);
@@ -87,7 +98,7 @@ public final class BaseKBean extends KBean {
         JkPathTree.of(tempDirClass).createIfNotExist();
     }
 
-    @JkDoc("Launch test suite")
+    @JkDoc("Launches test suite")
     public void test() {
         if (!JkTestProcessor.isEngineTestPresent()) {
             throw new JkException("No engine test class found in current classloader. " +
@@ -100,12 +111,12 @@ public final class BaseKBean extends KBean {
                 .launch(JkClassLoader.ofCurrent().getClasspath(), testSelection);
     }
 
-    @JkDoc("Create runnable fat jar.")
-    public void buildJar() {
-        jarMaker.accept(getJarPath());
+    @JkDoc("Creates runnable fat jar and optional artifacts.")
+    public void pack() {
+        packActions.run();
     }
 
-    @JkDoc("Run fat jar.")
+    @JkDoc("Runs fat jar.")
     public void runJar() {
         this.prepareRunJar().exec();
     }
@@ -129,7 +140,7 @@ public final class BaseKBean extends KBean {
         JkLog.info(sb.toString());
     }
 
-    @JkDoc("Display exported dependency tree on console.")
+    @JkDoc("Displays exported dependency tree on console.")
     public void depTree() {
         String output = getRunbase().getDependencyResolver().resolve(getRunbase().getExportedDependencies())
                 .getDependencyTree().toStringTree();
@@ -139,6 +150,14 @@ public final class BaseKBean extends KBean {
     @JkDoc("Creates a skeleton in the current working directory.")
     public void scaffold() {
         selfScaffold.run();
+    }
+
+    /**
+     * Builds a JAR file using the provided jarMaker
+     */
+    public BaseKBean buildJar() {
+        jarMaker.accept(getJarPath());
+        return this;
     }
 
     /**

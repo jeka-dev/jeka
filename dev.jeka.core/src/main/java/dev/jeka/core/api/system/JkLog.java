@@ -49,7 +49,6 @@ public final class JkLog implements Serializable {
      * Available style of logging displaying.
      */
     public enum Style {
-        BRACE(new JkBraceLogDecorator()),
         INDENT(new JkIndentLogDecorator()),
         DEBUG(new JkDebugLogDecorator()),
         NUMBER(new JkNumberLogDecorator()),

@@ -12,7 +12,7 @@ public class JkSearchTest {
     @Test
     @Ignore
     public void testSearchWithSpecifiedUrl() throws IOException {
-        JkLog.setDecorator(JkLog.Style.BRACE);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         List result = JkCoordinateSearch.of()
                 .setApiUrl("https://oss.sonatype.org/service/local/lucene/search")
                         .setGroupOrNameCriteria("guav")
@@ -23,7 +23,7 @@ public class JkSearchTest {
     @Test
     @Ignore
     public void testSearchWithOssrh() throws IOException {
-        JkLog.setDecorator(JkLog.Style.BRACE);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot("djeang", System.getenv("jiraPwd"));
@@ -40,7 +40,7 @@ public class JkSearchTest {
     @Test
     @Ignore
     public void testSearchWithMavenCentral() throws IOException {
-        JkLog.setDecorator(JkLog.Style.BRACE);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenCentral();
@@ -54,7 +54,7 @@ public class JkSearchTest {
     @Test
     @Ignore
     public void testSearchWithMavenCentralWithVersion() throws IOException {
-        JkLog.setDecorator(JkLog.Style.BRACE);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkRepo repo = JkRepo.ofMavenCentral();
@@ -68,7 +68,7 @@ public class JkSearchTest {
     @Test
     @Ignore
     public void testSearchSpring() throws IOException {
-        JkLog.setDecorator(JkLog.Style.BRACE);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         List result = JkCoordinateSearch.of(JkRepo.ofMavenCentral())
                 .setGroupOrNameCriteria("org.sprin*")
                 .search();
