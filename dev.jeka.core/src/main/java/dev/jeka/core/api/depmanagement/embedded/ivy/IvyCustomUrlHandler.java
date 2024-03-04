@@ -231,7 +231,6 @@ final class IvyCustomUrlHandler extends BasicURLHandler {
                 if (contentLength <= 0) {
                     return UNAVAILABLE;
                 } else {
-                    // TODO: not HTTP... maybe we *don't* want to default to ISO-8559-1 here?
                     String bodyCharset = getCharSetFromContentType(con.getContentType());
                     return new MyUrlInfo(true, contentLength, con.getLastModified(), bodyCharset);
                 }

@@ -100,10 +100,10 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
                 .rejectPackages(REJECTED_PACKAGES)
                 .enableClassInfo()
                 .enableMethodInfo()
+                .disableJarScanning()  // only scan non-jar entries
                 .overrideClassLoaders(extraClassLoader)
                 .ignoreParentClassLoaders();
         final List<String> result;
-        // TODO filter can be in scanning phase
         try (ScanResult scanResult = classGraph.scan()) {
             result = new LinkedList<>();
             for (final ClassInfo classInfo : scanResult.getAllClasses()) {

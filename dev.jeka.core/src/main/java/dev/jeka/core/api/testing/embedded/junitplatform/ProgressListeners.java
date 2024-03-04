@@ -166,16 +166,14 @@ class ProgressListeners {
 
         private int charCount;
 
-        private long testCount;
+        private long testContainerCount;
 
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
 
-            // TODO wrong way for counting, parametrized test won't bbe taken in account
-            // and method containing the parametrized test, will be considered as Container
-            testCount = testPlan.countTestIdentifiers(TestIdentifier::isContainer);
+            testContainerCount = testPlan.countTestIdentifiers(TestIdentifier::isContainer);
 
-            System.out.println("Found " + testCount + " test containers ");
+            System.out.println("Found " + testContainerCount + " test containers ");
             String bootingLine = "Booting tests ...";
             System.out.print(bootingLine);
             charCount = bootingLine.length();
@@ -222,23 +220,23 @@ class ProgressListeners {
         }
 
         private String line(TestIdentifier testIdentifier) {
-            int digitLenght =  Long.toString(testCount).length();
+            int digitLenght =  Long.toString(testContainerCount).length();
             return java.lang.String.format("Executing test %s/%s %s %s",
                     JkUtilsString.padStart(Integer.toString(index), digitLenght, '0'),
-                    JkUtilsString.padStart(Long.toString(testCount), digitLenght, '0'),
+                    JkUtilsString.padStart(Long.toString(testContainerCount), digitLenght, '0'),
                     bar(),
                     friendlyName(testIdentifier));
         }
 
         private String bar() {
-            int count = (int) ((BAR_LENGTH * index) / Math.max(testCount, 1));
+            int count = (int) ((BAR_LENGTH * index) / Math.max(testContainerCount, 1));
             count = Math.min(BAR_LENGTH, count);
             int spaceCount = BAR_LENGTH - count;
             return "[" + JkUtilsString.repeat("=", count) + JkUtilsString.repeat(" ", spaceCount) + "]";
         }
 
         private int testCountCharCount() {
-            return Long.toString(testCount).length();
+            return Long.toString(testContainerCount).length();
         }
 
     }

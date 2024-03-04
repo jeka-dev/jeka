@@ -241,9 +241,9 @@ public final class JkCoordinate {
             this.type = type;
         }
 
-        // TODO blankToNull args
         public static JkArtifactSpecification of(String classifier, String type) {
-            return new JkArtifactSpecification(classifier, type);
+            return new JkArtifactSpecification(JkUtilsString.blankToNull(classifier),
+                    JkUtilsString.blankToNull(type));
         }
 
         public String getClassifier() {
