@@ -1,8 +1,8 @@
 package dev.jeka.core.tool.builtins.tooling.ide;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
@@ -39,11 +39,11 @@ final class IdeSupport {
 
     static JkDependencySet classpathAsDependencySet() {
         JkClassLoader classLoader = JkClassLoader.ofCurrent();
-        final JkClasspath classpath;
+        final JkPathSequence classpath;
         if (classLoader.get() instanceof URLClassLoader) {
             classpath = JkUrlClassLoader.ofCurrent().getDirectClasspath();
         } else {
-            classpath = JkClasspath.ofCurrentRuntime();
+            classpath = JkPathSequence.ofSysPropClassPath();
         }
         JkDependencySet dependencySet = JkDependencySet.of();
         for (Path entry : classpath) {

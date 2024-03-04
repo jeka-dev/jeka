@@ -86,7 +86,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
 
     public void javadoc() {
         JkJavadocProcessor.of()
-            .make(JkClasspath.of(), JkPathTreeSet.ofRoots(src), getOutputDir().resolve("javadoc"));
+            .make(JkPathSequence.of(), JkPathTreeSet.ofRoots(src), getOutputDir().resolve("javadoc"));
     }
 
     public void run() {

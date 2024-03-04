@@ -1,9 +1,7 @@
 package dev.jeka.core.api.file;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -13,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipFile;
 
 /**
  * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>
@@ -23,6 +22,8 @@ import java.util.stream.Collectors;
 public final class JkPathSequence implements Iterable<Path>, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final String WILD_CARD = "*";
 
     private final List<Path> entries;
 
@@ -97,6 +98,20 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      */
     public static JkPathSequence of(Path path1, Path path2, Path... others) {
         return JkPathSequence.of(JkUtilsIterable.listOf2orMore(path1, path2, others));
+    }
+
+    /**
+     * Returns the current classpath as given by
+     * <code>System.getProperty("java.class.path")</code>.
+     */
+    public static JkPathSequence ofSysPropClassPath() {
+        final List<Path> files = new LinkedList<>();
+        final String classpath = System.getProperty("java.class.path");
+        final String[] classpathEntries = classpath.split(File.pathSeparator);
+        for (final String classpathEntry : classpathEntries) {
+            files.addAll(resolveWildCard(classpathEntry));
+        }
+        return JkPathSequence.of(files);
     }
 
     // --------------------------- cleaning ----------------------------------------
@@ -224,6 +239,28 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     }
 
     /**
+     * Returns the first entry of this <code>classpath</code> containing the given class.
+     */
+    public Path findEntryContainingClass(String className) {
+        final String path = toFilePath(className);
+        for (final Path file : entries) {
+            if (Files.isDirectory(file)) {
+                if (Files.exists(file.resolve(path))) {
+                    return file;
+                }
+            } else {
+                final ZipFile zipFile = JkUtilsZip.getZipFile(file.toFile());
+                if (zipFile.getEntry(path) != null) {
+                    JkUtilsIO.closeQuietly(zipFile);
+                    return file;
+                }
+                JkUtilsIO.closeQuietly(zipFile);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Writes the contents of this JkPathSequence to the specified file path.
      */
     public void writeTo(Path path) {
@@ -262,6 +299,26 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         List<Path> paths = JkUtilsPath.toPaths(files);
         Field field = JkUtilsReflect.getField(JkPathSequence.class, "entries");
         JkUtilsReflect.setFieldValue(this, field, paths);
+    }
+
+    private static List<Path> resolveWildCard(String candidatePath) {
+        final List<Path> result = new LinkedList<>();
+        if (candidatePath.endsWith(WILD_CARD)) {
+            final String candidateFolder = JkUtilsString.substringBeforeFirst(candidatePath, WILD_CARD);
+            final Path parent = Paths.get(candidateFolder);
+            if (!Files.exists(parent)) {
+                JkLog.verbose("File %s does not exist : classpath entry %s will be ignored.", parent, candidateFolder);
+            } else {
+                result.addAll(JkPathTree.of(parent).andMatching(true,"**.jar").getFiles());
+            }
+        } else {
+            result.add(Paths.get(candidatePath));
+        }
+        return result;
+    }
+
+    private static String toFilePath(String className) {
+        return className.replace('.', '/').concat(".class");
     }
 
 }

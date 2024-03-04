@@ -150,20 +150,20 @@ public final class JkTestProcessor {
     }
 
     private List<Path> computeClasspath(JkPathSequence testClasspath) {
-        JkClasspath result = JkClasspath.of(testClasspath);
+        JkPathSequence result = testClasspath;
         JkClassLoader classloader = JkClassLoader.ofCurrent();
         result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
         result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
         JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
-        Class<?> testEngineClass = ucl.toJkClassLoader().load(ENGINE_SERVICE);
+        ucl.toJkClassLoader().load(ENGINE_SERVICE);
         return result.getEntries();
     }
 
-    private JkClasspath addIfNeeded(JkClasspath classpath, JkClassLoader classloader,
+    private JkPathSequence addIfNeeded(JkPathSequence classpath, JkClassLoader classloader,
                                            String className, String moduleName) {
-        JkClasspath result = classpath;
+        JkPathSequence result = classpath;
         if (!classloader.isDefined(className)) {
-            if (result.getEntryContainingClass(className) == null) {
+            if (result.findEntryContainingClass(className) == null) {
                 String dep = moduleName + ":" + this.junitPlatformVersion;
                 Path path = JkCoordinateFileProxy.of(this.repoSetSupplier.get(), dep).get();
                 result = result.and(path);

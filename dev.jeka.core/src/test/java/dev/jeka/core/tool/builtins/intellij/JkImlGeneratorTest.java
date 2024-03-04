@@ -3,7 +3,6 @@ package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
@@ -22,7 +21,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withoutJavaProject() {
         JkImlGenerator imlGenerator = JkImlGenerator.of()
-                .setJekaSrcClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()))
+                .setJekaSrcClasspath(JkPathSequence.ofSysPropClassPath())
                 .setBaseDir(Paths.get(""));
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
