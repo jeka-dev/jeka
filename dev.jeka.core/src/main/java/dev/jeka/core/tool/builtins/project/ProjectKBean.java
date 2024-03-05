@@ -168,8 +168,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
      */
     public static class JkPackOptions {
 
-        @JkDoc("Set the type of jar to produce for the main artifact.")
+        @JkDoc("Type of jar to produce for the main artifact.")
         public JkProjectPackaging.JarType jarType = JkProjectPackaging.JarType.REGULAR;
+
+        @JkDoc("Main class name to include in Manifest. Use 'auto' to automatic discovering.")
+        public String mainClass;
 
     }
 
@@ -231,15 +234,15 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         void runJar() {
             project.prepareRunJar(useRuntimeDepsForClasspath)
-                    .addJavaOptions(jvmOptions)
-                    .addParams(programArgs)
+                    .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
+                    .addParams(JkUtilsString.parseCommandline(programArgs))
                     .exec();
         }
 
         void runMain() {
             project.prepareRunMain()
-                    .addJavaOptions(jvmOptions)
-                    .addParams(programArgs)
+                    .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
+                    .addParams(JkUtilsString.parseCommandline(programArgs))
                     .exec();
         }
     }
@@ -339,6 +342,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         if (pack.jarType != null) {
             project.flatFacade().setMainArtifactJarType(pack.jarType);
+        }
+        if (pack.mainClass != null) {
+            project.packaging.setMainClass(pack.mainClass);
         }
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());

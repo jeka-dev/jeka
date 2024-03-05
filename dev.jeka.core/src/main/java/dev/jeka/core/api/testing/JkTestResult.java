@@ -218,7 +218,7 @@ public final class JkTestResult implements Serializable {
                 result.append("\nat ").append(stackTraces[i]);
             }
             result.append("\n...");
-            result.append("\nFind more details in jeka-output/test-report or relaunch using -d option.");
+            result.append("\nFind more details in jeka-output/test-report or relaunch using --debug option.");
             return JkUtilsString.withLeftMargin(result.toString(), "        ");
         }
 

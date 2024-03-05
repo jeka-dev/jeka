@@ -78,6 +78,10 @@ public final class JkTestProcessor {
 
     private static final String JUNIT_PLATFORM_REPORTING_MODULE = "org.junit.platform:junit-platform-reporting";
 
+    private static final String JUNIT_PLATFORM_TEST_ENGINE_MODULE = "org.junit.platform:junit-platform-engine";
+
+    private static final String JUNIT_PLATFORM_COMMON_MODULE = "org.junit.platform:junit-platform-commons";
+
     private JkJavaProcess forkingProcess = JkJavaProcess
             .ofJava(JkTestProcessor.class.getName())
             .setFailOnError(false)
@@ -154,6 +158,9 @@ public final class JkTestProcessor {
         JkClassLoader classloader = JkClassLoader.ofCurrent();
         result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
         result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
+        result = addIfNeeded(result, classloader, ENGINE_SERVICE, JUNIT_PLATFORM_TEST_ENGINE_MODULE);
+        result = addIfNeeded(result, classloader, "org.junit.platform.commons.logging.LoggerFactory, ",
+                JUNIT_PLATFORM_COMMON_MODULE);
         JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
         ucl.toJkClassLoader().load(ENGINE_SERVICE);
         return result.getEntries();

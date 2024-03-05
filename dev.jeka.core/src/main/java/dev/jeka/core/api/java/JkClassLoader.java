@@ -1,6 +1,7 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
@@ -58,7 +59,8 @@ public class JkClassLoader {
         try {
             return (Class<T>) delegate.loadClass(className);
         } catch (final ClassNotFoundException | NoClassDefFoundError e) {
-            throw new IllegalArgumentException("Fail at loading class " + className + " on " + this, e);
+            String detail = JkLog.isVerbose() ? " on " + this : "";
+            throw new IllegalArgumentException("Fail at loading class " + className + detail, e);
         }
     }
 

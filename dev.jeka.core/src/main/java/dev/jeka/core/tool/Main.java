@@ -145,9 +145,9 @@ public class Main {
             commandLine.getErr().println(errorTxt + e.getMessage());
             String suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka : --help|@ for more information.");
             commandLine.getErr().println(suggestTxt);
-            //if (logs.stackTrace) {
+            if (logs.stackTrace) {
                 e.printStackTrace(commandLine.getErr());
-            //}
+            }
             System.exit(1);
         } catch (Throwable t) {
             handleGenericThrowable(t, startTime, logs);
@@ -269,17 +269,22 @@ public class Main {
         JkBusyIndicator.stop();
         JkLog.restoreToInitialState();
         if (t.getMessage() != null) {
-            System.err.println(t.getMessage());
+            String txt = CommandLine.Help.Ansi.AUTO.string("@|red Error: |@" + t.getMessage());
+            System.err.println(txt);
+        } else {
+            String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");
+            System.err.println(failedText);
         }
-        System.err.println("You can investigate using --verbose, --debug, --stacktrace or -ls=DEBUG options.");
+        String suggestTxt = CommandLine.Help.Ansi.AUTO.string("You can investigate using @|yellow --verbose|@, " +
+                "@|yellow --debug|@, @|yellow --stacktrace|@ " +
+                "or @|yellow -ls=DEBUG|@ options.");
+        System.err.println(suggestTxt);
         System.err.println("If this originates from a bug, please report the issue at: " +
                 "https://github.com/jeka-dev/jeka/issues");
 
         if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails(logs)) {
             printException(logs, t);
         }
-        String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");
-        System.err.println(failedText);
     }
 
     private static boolean shouldPrintExceptionDetails(LogSettings logs) {
