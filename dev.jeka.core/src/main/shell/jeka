@@ -49,8 +49,6 @@ declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
 declare JDK_DOWNLOAD_OS
 declare JDK_DOWNLOAD_ARCH
 
-declare RESOLVED_ALIAS # the resolved value of the remote execution argument if started with '@'
-
 declare SHOULD_LOG_DOWNLOAD # we should not log anything when on the green path, except if '-lsu' arg is present
 
 declare LOG_DEBUG # DEBUG
@@ -343,7 +341,7 @@ get_java_version_from_props() {
   local version
   version=$(get_prop_value_from_base_dir "$base_dir" "$JEKA_VERSION_PROP_NAME")
   local trimmed_version
-  trimmed_version=$(echo "$version" | sed 's/ //g')  # remove spaces
+  trimmed_version="${version// /}"  # remove spaces
   echo "$trimmed_version"
 }
 
@@ -444,7 +442,7 @@ is_git_url() {
 # Outputs:
 #   The dir location
 #######################################
-giturl_to_foldername() {
+get_folder_name_from_git_url() {
     local url=$1
     local trimmed_url
     trimmed_url=$(echo "$url" | sed 's/https:\/\///')
@@ -456,6 +454,8 @@ giturl_to_foldername() {
     folder_name=$(echo "$trimmed_url" | sed 's/\//_/g')
     echo "$folder_name"
 }
+
+
 
 assert_dir_exits() {
   if [ ! -d "$1" ]; then
@@ -507,7 +507,7 @@ compute_base_dir_from_resolved_remote_arg() {
     branch_args="--branch $git_tag"
   fi
   local cache_dir_name
-  cache_dir_name=$(giturl_to_foldername "$remote_path")
+  cache_dir_name=$(get_folder_name_from_git_url "$remote_path")
   result=$(get_git_cache_dir)/"$cache_dir_name"
   if [ "$should_clean" == "true" ]; then
     rm -rf "$result"
@@ -671,7 +671,8 @@ get_or_download_jdk() {
 }
 
 #######################################
-# Computes Java variables to determine and download JDL
+# Computes Java command according version, distrib, os and arch, implying optional
+# JDK download
 # Arguments:
 # Global vars:
 #    JDK_DOWNLOAD_OS
@@ -687,7 +688,7 @@ get_or_download_jdk() {
 # Outputs:
 #   result in BASE_DIR global args
 #######################################
-compute_java_vars() {
+compute_JAVA_CMD() {
 
   # OS specific support.  $var _must_ be set to either true or false.
   case "$(uname -s)" in
@@ -779,7 +780,7 @@ GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 compute_INTERPOLATED_ARGS "${CMD_LINE_ARGS[@]}"
 compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
 
-compute_java_vars
+compute_JAVA_CMD
 
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
