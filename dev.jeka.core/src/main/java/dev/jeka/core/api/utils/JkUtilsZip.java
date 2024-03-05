@@ -1,9 +1,13 @@
 package dev.jeka.core.api.utils;
 
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkZipTree;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,5 +54,20 @@ public final class JkUtilsZip {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    /**
+     * Unzips the contents of a URL to a specified target path.
+     *
+     * @param url The URL of the zip file to be unzipped.
+     * @param zipSubPath The subpath within the zip file to be unzipped. Pass null or empty string to unzip the entire zip file.
+     * @param target The destination path where the unzipped files will be copied to.
+     */
+    public static void unzipUrl(String url, String zipSubPath, Path target) {
+        Path temp = JkPathFile.ofTemp("jk-unzip", ".zip").fetchContentFrom(url).get();
+        try (JkZipTree zip = JkZipTree.of(temp)) {
+            zip.goTo(zipSubPath).copyTo(target, StandardCopyOption.REPLACE_EXISTING);
+        }
+        JkUtilsPath.deleteFile(temp);
     }
 }

@@ -123,6 +123,10 @@ public class PicocliMainCommand {
             description = "Log debug level (very verbose)")
     private boolean logDebug;
 
+    @Option(names = {"-q", "--quiet"},
+            description = "Turn off logs")
+    private boolean logQuiet;
+
     @Option(names = {"-st", "--stacktrace"},
             description = "Log stack traces.")
     private boolean logStacktrace;
@@ -150,6 +154,7 @@ public class PicocliMainCommand {
         return new LogSettings(
                 logVerbose,
                 logDebug,
+                logQuiet,
                 logStacktrace,
                 runtimeInfo,
                 logDuration,

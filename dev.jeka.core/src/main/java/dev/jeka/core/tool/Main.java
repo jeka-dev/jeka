@@ -206,7 +206,9 @@ public class Main {
         if (logSettings.runtimeInformation) {
             displayRuntimeInfo(baseDir, cmdLine);
         }
-        if (logSettings.debug) {
+        if (logSettings.quiet) {
+            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
+        } else if (logSettings.debug) {
             JkLog.setVerbosity(JkLog.Verbosity.DEBUG);
         } else if(logSettings.verbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
@@ -224,7 +226,7 @@ public class Main {
     }
 
     private static void displayDuration(long startTs) {
-        System.out.println("\nTotal run duration : " + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
+        System.out.println("\nTotal Duration: " + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs));
     }
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {

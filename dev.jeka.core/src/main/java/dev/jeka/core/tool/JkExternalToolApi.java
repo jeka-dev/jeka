@@ -23,6 +23,16 @@ public final class JkExternalToolApi {
     }
 
     /**
+     * Converts the given templated text to ANSI escape sequences.
+     *
+     * @param templatedText the input text to be converted to ANSI escape sequences
+     * @return the converted text with ANSI escape sequences
+     */
+    public static String ansiText(String templatedText) {
+        return CommandLine.Help.Ansi.AUTO.string(templatedText);
+    }
+
+    /**
      * Retrieves the bean name for the given fully qualified class name.
      */
     public static String getBeanName(String fullyQualifiedClassName) {

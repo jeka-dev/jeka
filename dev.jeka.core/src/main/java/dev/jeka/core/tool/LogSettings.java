@@ -9,6 +9,8 @@ class LogSettings {
 
     final boolean debug;
 
+    final boolean quiet;
+
     final boolean stackTrace;
 
     final boolean runtimeInformation;
@@ -21,6 +23,7 @@ class LogSettings {
 
     LogSettings(boolean verbose,
                 boolean debug,
+                boolean quiet,
                 boolean stackTrace,
                 boolean runtimeInformation,
                 boolean duration,
@@ -29,6 +32,7 @@ class LogSettings {
 
         this.verbose = verbose;
         this.debug = debug;
+        this.quiet = quiet;
         this.stackTrace = stackTrace;
         this.runtimeInformation = runtimeInformation;
         this.duration = duration;
@@ -37,7 +41,7 @@ class LogSettings {
     }
 
     static LogSettings ofDefault() {
-        return new LogSettings(false, false, false, false, false, JkLog.Style.INDENT, false);
+        return new LogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false);
     }
 
 

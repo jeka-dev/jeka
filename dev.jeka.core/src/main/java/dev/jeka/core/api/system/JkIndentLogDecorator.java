@@ -3,6 +3,7 @@ package dev.jeka.core.api.system;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
+import dev.jeka.core.tool.JkExternalToolApi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,6 +17,10 @@ import java.nio.charset.Charset;
 public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    private static final String TASK = JkExternalToolApi.ansiText("@|blue Task: |@");
+
+    private static final String DURATION = "Duration: ";
 
     static final byte LINE_SEPARATOR = 10;
 
@@ -59,13 +64,14 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             if (!JkUtilsString.isBlank(message)) {
                 JkUtilsIO.write(stream, MARGIN_UNIT);
                 stream.println(message);
-            } else if (JkLog.isShowTaskDuration()) {
+            }
+            if (JkLog.isShowTaskDuration()) {
                 JkUtilsIO.write(stream, MARGIN_UNIT);
-                stream.printf("Duration %s%n", JkUtilsTime.formatMillis(event.getDurationMs()));
+                stream.printf(DURATION +  "%s%n", JkUtilsTime.formatMillis(event.getDurationMs()));
             }
         } else if (logType== JkLog.Type.START_TASK) {
             marginErr.flush();
-            out.println("Task: " + message);
+            out.println(TASK + message);
             marginOut.notifyStart();
             marginErr.notifyStart();
             marginErr.mustPrintMargin = true;
