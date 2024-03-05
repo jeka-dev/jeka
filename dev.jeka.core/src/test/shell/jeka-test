@@ -20,13 +20,14 @@ for elem in "${INTERPOLATED_ARGS[@]}"; do
   echo "$elem"
 done
 
+echo
 echo "---------------- Find remote args -----------------------"
 
 array_args=("toto" "-ru" "arg2")
 index=$(find_remote_arg_index "${array_args[@]}")
-[ ! "$index" == "2" ] && echo "Failure: remote option not detected. Found : '$index'" && exit 1
+[ ! "$index" == "1" ] && echo "Failure: remote option not detected. Found : '$index'" && exit 1
 
-
+echo
 echo "---------------- Test getting properties -----------------------"
 
 # Test read value present in sub-dir
@@ -58,6 +59,7 @@ prop_value=$(get_java_version_from_props "$SUB_DIR")
 echo "get_java_version_from_props = $prop_value"
 [ ! "$prop_value" == "17" ] && echo "Failure: function 'get_java_version_from_props' does not returns '17'" && exit 1
 
+echo
 echo "---------- Test parsing arguments --------------"
 
 CMD_LINE_ARGS=("one-argument" "-v")
@@ -75,7 +77,7 @@ CMD_LINE_ARGS=( "toto" "--verbose")
 compute_SHOULD_LOG_DOWNLOAD
 [ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
 
-
+echo
 echo "---------- Test JDK Location --------------------"
 
 # Test JDK Path
@@ -92,6 +94,7 @@ git_cache_dir=$(get_git_cache_dir)
 echo "Git Cache Dir : $git_cache_dir"
 [ -z "$git_cache_dir" ] && echo "Git cache dir is empty" && exit 1
 
+echo
 echo "-------------- Test Remote script call    -----------------"
 
 git_url="https://github.com/jeka-dev/template-examples.git#2.0"
@@ -105,16 +108,14 @@ is_git=$(is_git_url "$git_url")
 is_git=$(is_git_url "/my_path")
 [ $is_git != "false" ] && echo "Failed,/my_path considered as a git url" && exit 1
 
-compute_RESOLVED_ALIAS "$git_url" # result is returned in resolved_alias global var
-[ "$RESOLVED_ALIAS" != "$git_url" ] && echo "Failed at resolving alias '$git_url' : resolved to '$RESOLVED_ALIAS'"
-
-compute_BASE_DIR
+compute_BASE_DIR "-foo" "-r" "https://github.com/djeang/jeka-remote-sample-basic.git#0.0.1"
 echo "Remote base dir : '$BASE_DIR'"
 
 #args=("-r" "./toto")
 #remote_path=$(get_remote_argument "{$args[@]}")
 #echo "$remote_path"
 
+echo
 echo "------------- Test Download jeka distrib ---------"
 
 jeka_version=$(get_prop_value_from_base_dir "$SUB_DIR" "jeka.version")

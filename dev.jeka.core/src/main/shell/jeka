@@ -388,12 +388,12 @@ compute_INTERPOLATED_ARGS() {
 find_remote_arg_index() {
   index=0
   for arg in "$@"; do
-    ((index++))
     is_remote_arg "$arg"
     if [ "$result" == "true" ]; then
       echo "$index"
       return 0;
     fi
+    ((index++))
   done
   echo "-1";
 }
@@ -412,11 +412,13 @@ is_remote_arg() {
     return 0
   fi
   local option=${arg:1}
-  if [[ $option != *r* ]]; then
+
+  # check if option contains letter 'r' and optionally 'u' or 'p'
+  if [[ "$option" == *r* ]] && [[ $option =~ ^(r?u?p?|r?u?p?)$ ]] && [[ ${#option} -le 3 ]]; then
+    result="true"
+  else
     result="false"
-    return 0
   fi
-  result="true"
 }
 
 # call `get_jdk_home_from_props base_dir JAVA_VERSION`
@@ -435,6 +437,13 @@ is_git_url() {
     fi
 }
 
+#######################################
+# Returns the dir caching the specified git repo url
+# Arguments:
+#   $1 : a string representing the git repo url
+# Outputs:
+#   The dir location
+#######################################
 giturl_to_foldername() {
     local url=$1
     local trimmed_url
@@ -455,7 +464,17 @@ assert_dir_exits() {
   fi
 }
 
-
+#######################################
+# Computes the base directory according the value of '-r' option.
+# If the -r refers to a git repo url, then returns the dir where the repo is cloned.
+# Global Vars:
+#   BASE_DIR (write)
+# Arguments:
+#   $1 : a string representing a git repo url or a directory path
+#   $2 : true/false for updating the cloned repo
+# Outputs:
+#   result in BASE_DIR global args
+#######################################
 compute_base_dir_from_resolved_remote_arg() {
 
   local remote_path="$1"  # file-system path or git url
@@ -490,7 +509,7 @@ compute_base_dir_from_resolved_remote_arg() {
   local cache_dir_name
   cache_dir_name=$(giturl_to_foldername "$remote_path")
   result=$(get_git_cache_dir)/"$cache_dir_name"
-  if [ -n "$should_clean" ]; then
+  if [ "$should_clean" == "true" ]; then
     rm -rf "$result"
   fi
   if [ ! -d "$result" ]; then
@@ -506,52 +525,30 @@ compute_base_dir_from_resolved_remote_arg() {
   BASE_DIR=$result
 }
 
-# resolve alias in global.properties
-# Call 'resolve_alias cmdLineArg'.
-# Returns in 'RESOLVED_ALIAS' var
-compute_RESOLVED_ALIAS() {
-  local arg=$1
-  RESOLVED_ALIAS=""
-  if [[ ${arg:0:1} == "@" ]]; then  # argument start with '@'
-    if [ ! -f "$GLOBAL_PROP_FILE" ]; then
-      msg "$GLOBAL_PROP_FILE does not exist. Can't resolve alias $arg"
-      exit 1
-    fi
-    local alias_name=${arg:1}
-    local prop_name="jeka.remote.alias.$alias_name"
-    local resolved
-    resolved=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "$prop_name")
-    if [ -z "$resolved" ]; then
-      msg "Property $prop_name is absent from $GLOBAL_PROP_FILE. Can't resolve alias $arg"
-      msg "Defined Aliases :"
-      msg "=============================="
-      cat "$GLOBAL_PROP_FILE" | grep '^jeka.remote.alias.'
-      msg "=============================="
-      exit 1
-    else
-      RESOLVED_ALIAS="$resolved"
-    fi
-  else
-    RESOLVED_ALIAS="$arg"
-  fi
-}
-
-## return value in global var : BASE_DIR
-## call `compute_BASE_DIR $1 $2`
+#######################################
+# Computes the base directory according presence or not of -r option
+# Arguments:
+#   $@ : array representing the interpolated command line
+# Outputs:
+#   result in BASE_DIR global args
+#######################################
 compute_BASE_DIR() {
+  local -a array=( "$@" )
   local result
-  local arg="$1"
-  if [ "$1" = "-r" ]; then
-    local remote_arg=$2
-    compute_RESOLVED_ALIAS "$remote_arg"
-    compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS"
-  elif [ "$1" = "-ru" ]; then
-    local remote_arg=$2
-    compute_RESOLVED_ALIAS "$remote_arg"
-    compute_base_dir_from_resolved_remote_arg "$RESOLVED_ALIAS" "clean"
-  else
+  local index
+  index=$(find_remote_arg_index "${array[@]}")
+  if [ "$index" == "-1" ]; then
     BASE_DIR=$(pwd)
+    return 0
   fi
+  local option=${array[(($index))]}
+  local next_index=$((index + 1))
+  local remote_arg=${array[$next_index]}
+  local need_update="false"
+  if [[ "$option" == *u* ]]; then
+    need_update="true"
+  fi
+  compute_base_dir_from_resolved_remote_arg "$remote_arg" "$need_update"
 }
 
 # result is written in JEKA_DIST_DIR
@@ -681,7 +678,8 @@ compute_SHOULD_LOG_DOWNLOAD
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 
-compute_BASE_DIR "$1" "$2"
+compute_INTERPOLATED_ARGS "$@"
+compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
 
 # OS specific support.  $var _must_ be set to either true or false.
 case "$(uname -s)" in

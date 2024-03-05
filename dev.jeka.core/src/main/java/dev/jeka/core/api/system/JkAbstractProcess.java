@@ -470,12 +470,16 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
                 ByteArrayOutputStream collectedStdout = (ByteArrayOutputStream) collectStdoutStream;
                 JkLog.error("Std out was ===============================================");
                 JkUtilsIO.write(JkLog.getErrPrintStream(), collectedStdout.toByteArray());
+                if (!collectStderr) {
+                    JkLog.error("===========================================================");
+                }
                 JkLog.getErrPrintStream().flush();
             }
             if (collectStderr) {
                 ByteArrayOutputStream collectedStdErr = (ByteArrayOutputStream) collectStderrStream;
                 JkLog.error("Std err was ===============================================");
                 JkUtilsIO.write(JkLog.getErrPrintStream(), collectedStdErr.toByteArray());
+                JkLog.error("===========================================================");
                 JkLog.getErrPrintStream().flush();
             }
 
