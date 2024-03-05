@@ -365,7 +365,7 @@ compute_INTERPOLATED_ARGS() {
       local value
       value=$(get_prop_value_from_base_dir "$DEFAULT_BASE_DIR" "$prop_name")
       if [ "$value" != "" ]; then
-        local -a substitute=("$value")
+        local substitute=($value)
         INTERPOLATED_ARGS+=("${substitute[@]}")
       else
         INTERPOLATED_ARGS+=("$arg")
@@ -516,11 +516,11 @@ compute_base_dir_from_resolved_remote_arg() {
       local quiet_flag="--quiet"
       if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
         quiet_flag=""
-        msg "Cloning $git_url into $result  ..."
+        debug "Cloning $git_url into $result  ..."
       fi
       git clone $quiet_flag -c advice.detachedHead=false --depth 1 $branch_args "$git_url" "$result"
   else
-      msg "Cache directory $result already exists. Won't clone or update."
+      debug "Cache directory $result already exists. Won't clone or update."
   fi
   BASE_DIR=$result
 }
@@ -678,7 +678,7 @@ compute_SHOULD_LOG_DOWNLOAD
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 
-compute_INTERPOLATED_ARGS "$@"
+compute_INTERPOLATED_ARGS "${CMD_LINE_ARGS[@]}"
 compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
 
 # OS specific support.  $var _must_ be set to either true or false.

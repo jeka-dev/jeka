@@ -108,7 +108,7 @@ is_git=$(is_git_url "$git_url")
 is_git=$(is_git_url "/my_path")
 [ $is_git != "false" ] && echo "Failed,/my_path considered as a git url" && exit 1
 
-compute_BASE_DIR "-foo" "-r" "https://github.com/djeang/jeka-remote-sample-basic.git#0.0.1"
+compute_BASE_DIR "-r" "https://github.com/djeang/jeka-remote-sample-basic.git#0.0.1"
 echo "Remote base dir : '$BASE_DIR'"
 
 #args=("-r" "./toto")

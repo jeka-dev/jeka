@@ -26,7 +26,7 @@ public class Main {
     public static void main(String[] args) {
 
         // Remove -r arguments sent by shell script
-        String[] filteredArgs = new CmdLineArgs(args).withoutShellArgs().get();
+        //String[] filteredArgs = new CmdLineArgs(args).withoutShellArgs().get();
 
         // Get the code base directory sent by script shell
         String basedirProp = System.getProperty("jeka.current.basedir");
@@ -35,7 +35,7 @@ public class Main {
         if (baseDir.startsWith(workingDir)) {
             baseDir = workingDir.relativize(baseDir);
         }
-        exec(baseDir, filteredArgs);
+        exec(baseDir, args);
     }
 
     // TODO Make non-public. Replace by a call creating a new OS process
@@ -60,7 +60,7 @@ public class Main {
 
         // Interpolate command line with values found in properties
         JkProperties props = dev.jeka.core.tool.JkRunbase.constructProperties(baseDir);
-        CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props);
+        CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
 
         LogSettings logs = LogSettings.ofDefault();
 
@@ -143,11 +143,11 @@ public class Main {
             String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
             CommandLine commandLine = e.getCommandLine();
             commandLine.getErr().println(errorTxt + e.getMessage());
-            if (logs.stackTrace) {
-                e.printStackTrace(commandLine.getErr());
-            }
             String suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka : --help|@ for more information.");
             commandLine.getErr().println(suggestTxt);
+            //if (logs.stackTrace) {
+                e.printStackTrace(commandLine.getErr());
+            //}
             System.exit(1);
         } catch (Throwable t) {
             handleGenericThrowable(t, startTime, logs);

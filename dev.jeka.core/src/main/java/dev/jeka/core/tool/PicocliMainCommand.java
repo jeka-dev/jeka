@@ -97,6 +97,7 @@ public class PicocliMainCommand {
     private boolean runtimeInfo;
 
     @Option(names = { "-r", "--remote"},
+            arity = "1",
             paramLabel = "LOCATION",
             description = "Specify remote code base location. LOCATION may be a folder path, Git url or an alias.")
     private String fakeRemote;  // Handled at shell level
