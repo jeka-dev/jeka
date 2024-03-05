@@ -670,6 +670,104 @@ get_or_download_jdk() {
   DOWNLOAD_JDK_DIR=$jdk_cache_dir
 }
 
+#######################################
+# Computes Java variables to determine and download JDL
+# Arguments:
+# Global vars:
+#    JDK_DOWNLOAD_OS
+#    JDK_DOWNLOAD_LIBC_TYPE
+#    JDK_DOWNLOAD_ARCH
+#    JAVA_VERSION
+#    JAVA_HOME
+#    DEFAULT_JAVA_VERSION (read)
+#    JEKA_JDK_HOME
+#    SHOULD_LOG_DOWNLOAD (read)
+#    BASE_DIR (read)
+#    JAVA_CMD
+# Outputs:
+#   result in BASE_DIR global args
+#######################################
+compute_java_vars() {
+
+  # OS specific support.  $var _must_ be set to either true or false.
+  case "$(uname -s)" in
+    Linux*)
+      JDK_DOWNLOAD_OS="linux"
+      if [ -f /etc/alpine-release ]; then
+        JDK_DOWNLOAD_OS=alpine-linux
+      fi
+      ;;
+    Darwin*)
+      JDK_DOWNLOAD_OS="mac"
+      JDK_DOWNLOAD_LIBC_TYPE="libc"; # necessary to download proper JDK
+      ;;
+  esac
+
+  case "$(uname -m)" in
+    i?86)
+      JDK_DOWNLOAD_ARCH="x32";;
+    x86_64|amd64)
+      JDK_DOWNLOAD_ARCH="x64";;
+    aarch64)
+      JDK_DOWNLOAD_ARCH="aarch64";;
+    armv7l)
+      JDK_DOWNLOAD_ARCH="arm";;
+    ppc64le)
+      JDK_DOWNLOAD_ARCH="ppc64le";;
+    s390x)
+      JDK_DOWNLOAD_ARCH="s390x";;
+    arm64)
+      JDK_DOWNLOAD_ARCH="arm64"
+      ;;
+    *)
+      JDK_DOWNLOAD_ARCH=""
+      ;;
+  esac
+
+  # Determines JAVA_HOME
+  JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR")
+
+  if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
+    JAVA_HOME="$JEKA_JDK_HOME"
+
+  elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
+    if [ -z "$JAVA_VERSION" ]; then
+      JAVA_VERSION=$"$DEFAULT_JAVA_VERSION"
+      if [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
+        msg "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION."
+      fi
+    fi
+    jdkPath=$(get_jdk_home_from_props "$BASE_DIR" "$JAVA_VERSION")
+    debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
+    if [ -z "$jdkPath" ]; then
+      get_or_download_jdk "$JAVA_VERSION"
+      JAVA_HOME="$DOWNLOAD_JDK_DIR"
+    fi
+  fi
+
+  # Determines JAVA_CMD to use according JAVA_HOME
+  if [ -z "$JAVA_CMD" ] ; then
+    if [ -n "$JAVA_HOME"  ] ; then
+      if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVA_CMD="$JAVA_HOME/jre/sh/java"
+      else
+        JAVA_CMD="$JAVA_HOME/bin/java"
+      fi
+    else
+      JAVA_CMD="$(which java)"
+    fi
+  fi
+
+  if [ ! -x "$JAVA_CMD" ] ; then
+    msg "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )."
+    msg "  We cannot execute $JAVA_CMD" >&2
+    msg "  You can specify which JDK to use by setting JEKA_JDK environment variable."
+    exit 1
+  fi
+
+}
+
 ##############################################################
 # Script starts here
 ##############################################################
@@ -681,82 +779,7 @@ GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 compute_INTERPOLATED_ARGS "${CMD_LINE_ARGS[@]}"
 compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
 
-# OS specific support.  $var _must_ be set to either true or false.
-case "$(uname -s)" in
-  Linux*)
-    JDK_DOWNLOAD_OS="linux"
-    if [ -f /etc/alpine-release ]; then
-      JDK_DOWNLOAD_OS=alpine-linux
-    fi
-    ;;
-  Darwin*)
-    JDK_DOWNLOAD_OS="mac"
-    JDK_DOWNLOAD_LIBC_TYPE="libc"; # necessary to download proper JDK
-    ;;
-esac
-
-case "$(uname -m)" in
-  i?86)
-    JDK_DOWNLOAD_ARCH="x32";;
-  x86_64|amd64)
-    JDK_DOWNLOAD_ARCH="x64";;
-  aarch64)
-    JDK_DOWNLOAD_ARCH="aarch64";;
-  armv7l)
-    JDK_DOWNLOAD_ARCH="arm";;
-  ppc64le)
-    JDK_DOWNLOAD_ARCH="ppc64le";;
-  s390x)
-    JDK_DOWNLOAD_ARCH="s390x";;
-  arm64)
-    JDK_DOWNLOAD_ARCH="arm64"
-    ;;
-  *)
-    JDK_DOWNLOAD_ARCH=""
-    ;;
-esac
-
-# Determines JAVA_HOME
-JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR")
-
-if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
-  JAVA_HOME="$JEKA_JDK_HOME"
-
-elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
-  if [ -z "$JAVA_VERSION" ]; then
-    JAVA_VERSION=$"$DEFAULT_JAVA_VERSION"
-    if [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
-      msg "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION."
-    fi
-  fi
-  jdkPath=$(get_jdk_home_from_props "$BASE_DIR" "$JAVA_VERSION")
-  debug "JDK HOME $JAVA_VERSION from env or props : $jdkPath "
-  if [ -z "$jdkPath" ]; then
-    get_or_download_jdk "$JAVA_VERSION"
-    JAVA_HOME="$DOWNLOAD_JDK_DIR"
-  fi
-fi
-
-# Determines JAVA_CMD to use according JAVA_HOME
-if [ -z "$JAVA_CMD" ] ; then
-  if [ -n "$JAVA_HOME"  ] ; then
-    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-      # IBM's JDK on AIX uses strange locations for the executables
-      JAVA_CMD="$JAVA_HOME/jre/sh/java"
-    else
-      JAVA_CMD="$JAVA_HOME/bin/java"
-    fi
-  else
-    JAVA_CMD="$(which java)"
-  fi
-fi
-
-if [ ! -x "$JAVA_CMD" ] ; then
-  msg "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )."
-  msg "  We cannot execute $JAVA_CMD" >&2
-  msg "  You can specify which JDK to use by setting JEKA_JDK environment variable."
-  exit 1
-fi
+compute_java_vars
 
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
