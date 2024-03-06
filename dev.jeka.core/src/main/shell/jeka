@@ -42,6 +42,8 @@ declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, .
 declare CURRENT_SCRIPT_DIR
 CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
+# Global variables are preferred over passing all arguments
+# in method call, cause they are too many.
 declare DEFAULT_JAVA_VERSION="21"
 declare JDK_DOWNLOAD_DISTRIB="temurin"
 declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
@@ -363,6 +365,9 @@ compute_INTERPOLATED_ARGS() {
       local value
       value=$(get_prop_value_from_base_dir "$DEFAULT_BASE_DIR" "$prop_name")
       if [ "$value" != "" ]; then
+
+        # Value may content 0 or many elements
+        # shellcheck disable=SC2206
         local substitute=($value)
         INTERPOLATED_ARGS+=("${substitute[@]}")
       else
@@ -444,18 +449,14 @@ is_git_url() {
 #######################################
 get_folder_name_from_git_url() {
     local url=$1
-    local trimmed_url
-    trimmed_url=$(echo "$url" | sed 's/https:\/\///')
-    trimmed_url=$(echo "$trimmed_url" | sed 's/ssh:\/\///')
-    trimmed_url=$(echo "$trimmed_url" | sed 's/git:\/\///')
-    trimmed_url=$(echo "$trimmed_url" | sed  's/git@//')
-    # Extract the repository name from the Git URL using sed and awk
-    local folder_name
-    folder_name=$(echo "$trimmed_url" | sed 's/\//_/g')
+    local trimmed_url=$url
+    local protocols=("https://" "ssh://" "git://" "git@")
+    for protocol in "${protocols[@]}"; do
+      trimmed_url="${trimmed_url#$protocol}"
+    done
+    local folder_name="${trimmed_url//\//_}"  # replace '/' by '_'
     echo "$folder_name"
 }
-
-
 
 assert_dir_exits() {
   if [ ! -d "$1" ]; then
@@ -518,6 +519,8 @@ compute_base_dir_from_resolved_remote_arg() {
         quiet_flag=""
         debug "Cloning $git_url into $result  ..."
       fi
+      # $quiet_flag and $branch_args are not doubled-quoted on purpose (they may contains 0 or 2 args)
+      # shellcheck disable=SC2086
       git clone $quiet_flag -c advice.detachedHead=false --depth 1 $branch_args "$git_url" "$result"
   else
       debug "Cache directory $result already exists. Won't clone or update."
@@ -786,5 +789,8 @@ compute_JAVA_CMD
 if [ -z "$DRY_RUN" ]; then
   compute_JEKA_DIST_DIR "$BASE_DIR"
   compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
+
+  # cause $JEKA_OPTS may content 0 or many arguments
+  # shellcheck disable=SC2086
   exec "$JAVA_CMD" $JEKA_OPTS "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi
