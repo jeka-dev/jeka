@@ -121,7 +121,7 @@ public final class JkJavadocProcessor {
         JkProcResult result = process.exec();
         if (!result.hasSucceed()) {
             JkLog.warn("An error occurred when generating Javadoc (status error = " + result.getExitCode() + "). Maybe there is no public class to document." +
-                    " Relaunch the process with -lv option to see details");
+                    " Relaunch the process with --verbose option to see details");
         }
     }
 
