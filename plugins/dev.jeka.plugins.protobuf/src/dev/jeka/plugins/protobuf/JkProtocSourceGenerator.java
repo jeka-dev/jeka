@@ -4,7 +4,6 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectSourceGenerator;
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
@@ -58,7 +57,6 @@ public class JkProtocSourceGenerator extends JkProjectSourceGenerator {
 
     @Override
     public void generate(JkProject project, Path generatedSourceDir) {
-        JkLog.startTask("Compiling protocol buffer files from " + protoFilePath);
         JkPathTree protoFiles = JkPathTree.of(project.getBaseDir()).goTo(protoFilePath);
         String[] extraOptions = JkUtilsString.parseCommandline(extraProtocOptions);
         JkProtoc protoc = JkProtoc.ofJava(generatedSourceDir)
@@ -68,6 +66,10 @@ public class JkProtocSourceGenerator extends JkProjectSourceGenerator {
             protoc.setProtocJarVersion(protocJarVersion);
         }
         protoc.compile(protoFiles.toSet());
-        JkLog.endTask();
+    }
+
+    @Override
+    public String toString() {
+        return "Protobuf Generator " + protocJarVersion;
     }
 }
