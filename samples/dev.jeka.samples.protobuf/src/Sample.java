@@ -1,7 +1,7 @@
 public class Sample {
 
     public static void main(String[] args) {
-        SearchRequestOuterClass.SearchRequest searchRequest = SearchRequestOuterClass.SearchRequest.newBuilder()
+        SearchRequestOuterClassg ar.SearchRequest searchRequest = SearchRequestOuterClass.SearchRequest.newBuilder()
                 .setQuery("foo")
                 .setPageNumber(12)
                 .build();

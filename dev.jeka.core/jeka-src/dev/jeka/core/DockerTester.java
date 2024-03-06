@@ -51,7 +51,7 @@ class DockerTester  {
     }
 
     public static void main(String[] args) {
-        JkLog.setDecorator(JkLog.Style.FLAT);
+        JkLog.setDecorator(JkLog.Style.INDENT);
         run();
     }
 

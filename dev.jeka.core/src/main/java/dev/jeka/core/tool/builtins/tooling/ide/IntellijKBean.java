@@ -115,8 +115,8 @@ public final class IntellijKBean extends KBean {
                 .forEach(this::generateImlExec);
     }
 
-    @JkDoc("Try to fix project by deleting workspace.xml and touching iml file")
-    public void fixProject() {
+    @JkDoc("Re-init the project by deleting workspace.xml and touching iml file")
+    public void initProject() {
         iml();
         IntelliJProject.find(getBaseDir()).deleteWorkspaceXml();
         modulesXml();

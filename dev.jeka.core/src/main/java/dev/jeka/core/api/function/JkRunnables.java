@@ -53,6 +53,16 @@ public class JkRunnables implements Runnable {
     }
 
     /**
+     * Same as {@link #append(String, Runnable)} but effective only the specified condition
+     */
+    public JkRunnables appendIf(boolean condition, String name, Runnable runnable) {
+        if (condition) {
+            return append(name, runnable, null);
+        }
+        return this;
+    }
+
+    /**
      * Sets the specified {@link Runnable}s as the execution chain. <p>
      * This removes all pre-existing runnables from the chain.
      */

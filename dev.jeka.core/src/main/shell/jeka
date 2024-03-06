@@ -58,18 +58,7 @@ declare DRY_RUN  # Debugging purpose
 declare DEFAULT_BASE_DIR="."
 
 
-#######################################
-# Prints passed arguments on the standard stream, only if LOG_DEBUG is non-empty
-# Globals:
-#   LOG_DEBUG (read)
-# Arguments:
-#   $*
-#######################################
-debug() {
-  if [ -n "$LOG_DEBUG" ] || [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
-    echo "$1" 1>&2
-  fi
-}
+
 
 #######################################
 # Prints passed arguments on the stderr
@@ -120,22 +109,27 @@ substring_after_hash() {
     fi
 }
 
+
+
+
 #######################################
-# Computes if we should print something on console when downloading files
+# Gets the value of a property, declared as '-Dprop.name=prop.value' in an array.
 # Globals:
 #   CMD_LINE_ARGS (read)
-#   SHOULD_LOG_DOWNLOAD (write)
 # Arguments:
-#   None
+#   $1 : the property name
+# Outputs:
+#   Write property value to stdout
 #######################################
-compute_SHOULD_LOG_DOWNLOAD() {
+get_system_prop_from_args() {
+  local prop_name=$1
+  local prefix="-D$prop_name="
   for arg in "${CMD_LINE_ARGS[@]}"
-    do
-      if [ "$arg" == "--verbose" ] || [ "$arg" == "-v" ] || [ "$arg" == "-d" ] || [ "$arg" == "--debug" ]; then
-          SHOULD_LOG_DOWNLOAD="true"
-          return 0
-      fi
-    done
+      do
+        if [[ "$arg" == "$prefix"* ]] ; then
+            echo "${arg#$prefix}"
+        fi
+      done
 }
 
 #######################################
@@ -182,6 +176,37 @@ download_and_unpack() {
     unzip -qq -o "$temp_file" -d "$dir"
   fi
   rm "$temp_file"
+}
+
+#######################################
+# Computes if we should print something on console when downloading files
+# Globals:
+#   CMD_LINE_ARGS (read)
+#   SHOULD_LOG_DOWNLOAD (write)
+# Arguments:
+#   None
+#######################################
+compute_SHOULD_LOG_DOWNLOAD() {
+  for arg in "${CMD_LINE_ARGS[@]}"
+    do
+      if [ "$arg" == "--verbose" ] || [ "$arg" == "-v" ] || [ "$arg" == "-d" ] || [ "$arg" == "--debug" ]; then
+          SHOULD_LOG_DOWNLOAD="true"
+          return 0
+      fi
+    done
+}
+
+#######################################
+# Prints passed arguments on the standard stream, only if LOG_DEBUG is non-empty
+# Globals:
+#   LOG_DEBUG (read)
+# Arguments:
+#   $*
+#######################################
+debug() {
+  if [ -n "$LOG_DEBUG" ] || [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
+    echo "$1" 1>&2
+  fi
 }
 
 #######################################
@@ -233,25 +258,7 @@ get_git_cache_dir() {
   echo "$(get_cache_dir)/git"
 }
 
-#######################################
-# Gets the value of a property, declared as '-Dprop.name=prop.value' in an array.
-# Globals:
-#   CMD_LINE_ARGS (read)
-# Arguments:
-#   $1 : the property name
-# Outputs:
-#   Write property value to stdout
-#######################################
-get_system_prop_from_args() {
-  local prop_name=$1
-  local prefix="-D$prop_name="
-  for arg in "${CMD_LINE_ARGS[@]}"
-      do
-        if [[ "$arg" == "$prefix"* ]] ; then
-            echo "${arg#$prefix}"
-        fi
-      done
-}
+
 
 #######################################
 # Gets the value of a property declared within a property file
@@ -280,7 +287,11 @@ get_prop_value_from_file() {
 #   Write env var name to stdout
 #######################################
 get_env_var_name() {
-  echo "$1" | tr 'a-z.' 'A-Z_'
+  local prop_name="$1"
+  local result=${prop_name^}
+  result=${result//./_}
+  result=${result//-/_}
+  echo "$result"
 }
 
 #######################################
@@ -554,8 +565,21 @@ compute_BASE_DIR() {
   compute_base_dir_from_resolved_remote_arg "$remote_arg" "$need_update"
 }
 
-# result is written in JEKA_DIST_DIR
+#######################################
+# Computes the location of JeKa distribution directory according the JeKa version
+# used for the current BASE DIR. This may implies to dowload the distribution.
+# Global Vars:
+#   JEKA_DIST_DIR (write)
+# Arguments:
+#   $1 : the base directory
+# Outputs:
+#   result in JEKA_DIST_DIR global args
+#######################################
 compute_JEKA_DIST_DIR() {
+  if [ "$JEKA_DIST_DIR" != "" ]; then
+    return 0
+  fi
+
   local base_dir=$1
   local explicit_distrib_dir
   explicit_distrib_dir=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.location")
@@ -593,6 +617,9 @@ compute_JEKA_DIST_DIR() {
 ## Execute Jeka. Call `exec_jeka $base_dir`.
 ## Returns value in JEKA_CLASSPATH
 compute_JEKA_CLASSPATH() {
+  if [ "$JEKA_CLASSPATH" != "" ]; then
+    return 0
+  fi
   local dist_dir=$1
 
   # If no distrib dir is specified (no jeka.version specified), we look first
@@ -692,6 +719,9 @@ get_or_download_jdk() {
 #   result in BASE_DIR global args
 #######################################
 compute_JAVA_CMD() {
+  if [ "$JAVA_CMD" != "" ]; then
+    return 0;
+  fi
 
   # OS specific support.  $var _must_ be set to either true or false.
   case "$(uname -s)" in
@@ -772,6 +802,129 @@ compute_JAVA_CMD() {
 
 }
 
+#######################################
+# Execute java program if requested.
+# Program execution is requested when '-p' is present in cmd line args.
+# The args following '-p' are to be passed to program args.
+# First, Jeka try to find an executable bin or jar, in 'jeka-output'
+# If there is none, jeka launches build and retry.
+#
+# Global Vars:
+#   BASE_DIR      (read)
+#   JEKA_DIST_DIR (write)
+#   RETRY_AFTER_BUILD (read/write)
+#   INTERPOLATED_ARGS (read)
+# Outputs:
+#   None. Exit anyway if program launch has been requested
+#######################################
+execute_program_if_requested() {
+  local -i prog_option_index
+  prog_option_index=$(find_index_of_program_option "${INTERPOLATED_ARGS[@]}")
+  if [[ $prog_option_index == -1 ]]; then
+    return 0
+  fi
+  local -i from_arg_index
+  from_arg_index=$((prog_option_index+1))
+  local program_args=("${INTERPOLATED_ARGS[@]:$from_arg_index}")
+  execute_and_exit_native_if_present "${program_args[@]}"
+  execute_and_exit_java_if_present "${program_args[@]}"
+
+  if [[ "$RETRY_AFTER_BUILD" == "true" ]]; then
+    msg "Cannot find a native or jar executable in $BASE_DIR/jeka-output"
+    exit 1
+  fi
+
+  ## If we are here, this means that no native or jar has been found -> build
+  debug "Launch a build to generate executable"
+  compute_JAVA_CMD
+  compute_JEKA_DIST_DIR "$BASE_DIR"
+  compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
+
+  local -a heading_args=("${INTERPOLATED_ARGS[@]::$prog_option_index}")
+
+  "$JAVA_CMD" "${JEKA_OPTS[@]}" "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "${heading_args[@]}" "project:" "pack" "-Djeka.skip.tests=true"
+  RETRY_AFTER_BUILD="true"
+  execute_program_if_requested
+
+}
+
+#######################################
+# Gets the index of '-p' or '--program' in the given array
+# Returns -1, if no such element found
+# Globals:
+#   none
+# Arguments:
+#   $1 : the arrays where we are searching element in
+#   $2 : the array providing elements to search
+# Outputs:
+#   Write to stdout
+#######################################
+find_index_of_program_option() {
+  local -i index=0
+  local -a items=("$@")
+  for item in "${items[@]}"; do
+    if [[ "$item" == "-p" ]] || [[ "$item" == "--program" ]]; then
+      echo "$index"
+      return 0
+    fi
+    ((index++))
+  done
+  echo -1
+}
+
+######################################
+# Execute and exit native program if present
+#
+# Global Vars:
+#   BASE_DIR      (read)
+# Arguments:
+#   $1 : args array to pass to native program
+# Outputs:
+#   None. Exit anyway if program found
+#######################################
+execute_and_exit_native_if_present() {
+  local exe_file;
+  for file in "$BASE_DIR"/jeka-output/*; do
+      if [ -f "$file" ] && [ -x "$file" ] && [[ "$file" != *".jar" ]]; then
+        exe_file="$file"
+        break
+      fi
+  done
+  if [ "$exe_file" == "" ]; then
+    debug "No native exe file found in $BASE_DIR/jeka-output/*"
+    return 0
+  fi
+  exec "$exe_file" "$@"
+  exit $?
+}
+
+######################################
+# Execute and exit java program if present
+#
+# Global Vars:
+#   BASE_DIR      (read)
+# Arguments:
+#   $1 : args array to pass to native program
+# Outputs:
+#   None. Exit anyway if program found
+#######################################
+execute_and_exit_java_if_present() {
+  local jar_file;
+  for file in "$BASE_DIR"/jeka-output/*; do
+      if [ -f "$file" ] && [[ "$file" == *".jar" ]]; then
+        jar_file="$file"
+        break
+      fi
+  done
+  if [ "$jar_file" == "" ]; then
+    debug "No Jar file found in $BASE_DIR/jeka-output/*"
+    return 0
+  fi
+  compute_JAVA_CMD
+  exec "$JAVA_CMD" -jar "$jar_file" "$@"
+  exit $?
+}
+
 ##############################################################
 # Script starts here
 ##############################################################
@@ -783,6 +936,8 @@ GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 compute_INTERPOLATED_ARGS "${CMD_LINE_ARGS[@]}"
 compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
 
+execute_program_if_requested
+
 compute_JAVA_CMD
 
 ## When debugging we don't want to execute Jeka
@@ -790,7 +945,5 @@ if [ -z "$DRY_RUN" ]; then
   compute_JEKA_DIST_DIR "$BASE_DIR"
   compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"
 
-  # cause $JEKA_OPTS may content 0 or many arguments
-  # shellcheck disable=SC2086
-  exec "$JAVA_CMD" $JEKA_OPTS "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
+  exec "$JAVA_CMD" "${JEKA_OPTS[@]}" "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "$@"
 fi
