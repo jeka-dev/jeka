@@ -101,6 +101,7 @@ public class Main {
             // Handle context help ([kbean]: --help)
             String kbeanHelp = cmdArgs.kbeanContextHelp();
             if (kbeanHelp != null) {
+                JkRunbase.setKBeanResolution(kBeanResolution);
                 if (JkUtilsString.isBlank(kbeanHelp)) {
                     PicocliHelp.printCmdHelp(
                                     engine.resolveClassPaths().runClasspath,

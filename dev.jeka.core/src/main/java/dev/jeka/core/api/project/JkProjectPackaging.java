@@ -130,7 +130,7 @@ public class JkProjectPackaging {
         JkJarPacker.of(classDir)
                 .withManifest(getManifest())
                 .makeJar(target);
-        JkLog.endTask("Jar created at " + target);
+        JkLog.endTask("Jar created at " + friendlyPath(target));
     }
 
     /**
@@ -138,7 +138,7 @@ public class JkProjectPackaging {
      */
     public Path createBinJar() {
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.ofMainArtifact("jar"));
-        createBinJar(path);
+        createBinJar(friendlyPath(path));
         return path;
     }
 
@@ -153,7 +153,7 @@ public class JkProjectPackaging {
                 .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
-        JkLog.endTask("Jar created at " + target);
+        JkLog.endTask("Fat Jar created at " + friendlyPath(target));
     }
 
     /**
@@ -163,7 +163,14 @@ public class JkProjectPackaging {
         JkLog.startTask("pack-fat-jar");
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.of("fat", "jar"));
         createFatJar(path);
-        JkLog.endTask("Fat jar created at " + path);
+        JkLog.endTask("Fat jar created at " + friendlyPath(path));
+        return path;
+    }
+
+    private static Path friendlyPath(Path path) {
+        if (path.toString().startsWith("..")) {
+            return path.toAbsolutePath().normalize();
+        }
         return path;
     }
 

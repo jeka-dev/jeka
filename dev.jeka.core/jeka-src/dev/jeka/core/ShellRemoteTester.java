@@ -34,6 +34,8 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
             throw new RuntimeException(e);
         }
         testWithSpecificJavaVersion();
+        testWithShortHand();
+        testImplicitBuildWithCowSay();
         JkLog.endTask();
     }
 
@@ -103,6 +105,41 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
                 "expecting ending with 'ok 'followed by a breaking line)", output);
         System.setProperty("jeka.java.version", "");
+    }
+
+    private void testWithShortHand() {
+
+        Path jekaShellPath = getJekaShellPath();
+
+        // Test without alias
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "::myShortHand")
+                .setLogCommand(true)
+                .setLogWithJekaDecorator(false)
+                .setCollectStdout(true)
+                .redirectErrorStream(false)
+                .setEnv("jeka.cmd.myShortHand", "-r https://github.com/jeka-dev/sample-for-integration-test.git ok")
+                .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
+                .setEnv("jeka.version", SNAPSHOT_VERSION)
+                .exec();
+
+        // Tests if messages written in stderr by jeka shell are not
+        // collected in the output
+        String output = result.getStdoutAsString();
+        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+                "expecting 'ok' followed by a breaking line)", output);
+    }
+
+    private void testImplicitBuildWithCowSay() {
+
+        Path jekaShellPath = getJekaShellPath();
+
+        JkProcess.of(jekaShellPath.toString(),
+                        "-ru", "https://github.com/jeka-dev/demo-cowsay", "-p",  "Hello",  "JeKa")
+                .setLogCommand(true)
+                .setLogWithJekaDecorator(true)
+                .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
+                .setEnv("jeka.version", SNAPSHOT_VERSION)
+                .exec();
     }
 
 }

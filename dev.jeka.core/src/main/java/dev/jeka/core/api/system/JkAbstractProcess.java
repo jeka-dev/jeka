@@ -488,15 +488,6 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         return exitCode;
     }
 
-    private static List<String> ellipse(List<String> options) {
-        if (JkLog.isVerbose()) {
-            return options;
-        }
-        return options.stream()
-                .map(option -> JkUtilsString.ellipse(option, 120))
-                .collect(Collectors.toList());
-    }
-
     private ProcessBuilder processBuilder(List<String> command) {
         if (inheritIO && logWithJekaDecorator) {
             throw new IllegalStateException("inheritIO and logWithJekaDecorator can not be used in conjunction. " +
@@ -533,18 +524,6 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     private String shortenCommand() {
         Path path = Paths.get(command);
         return path.getFileName().toString();
-    }
-
-    private String shortenWorkingDir() {
-        int maxSize = 30;
-        String path = workingDir.toString();
-        if (JkLog.isDebug() ||  path.length() <= maxSize) {
-            return path;
-        }
-        if (workingDir.isAbsolute() && workingDir.getNameCount() > 2) {
-            return workingDir.getRoot().toString() + workingDir.getName(0) + "/.../" + workingDir.getFileName();
-        }
-        return path;
     }
 
     private void printContextualInfo() {
