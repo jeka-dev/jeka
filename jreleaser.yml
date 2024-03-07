@@ -1,0 +1,30 @@
+# Generated with JReleaser 1.11.0 at 2024-03-06T22:31:01.064858+01:00
+project:
+  name: jeka
+  version: 0.11.0-SNAPSHOT
+  description: Build and Run Java projects from anywhere
+  longDescription: Build and Run Java application from anywhere
+  authors:
+    - Jerome Angibaud
+  license: Apache-2.0
+  links:
+    homepage: https://jeka.dev
+  java:
+    groupId: dev.jeka
+    version: 8
+  inceptionYear: 2014
+
+release:
+  github:
+    owner: Jerome Angibaud
+
+distributions:
+  app:
+    artifacts:
+      - path: https://repo.maven.apache.org/maven2/dev/jeka/jeka-core/{{projectVersion}}/jeka-core-{{projectVersion}}-distrib.zip
+
+packagers:
+  brew:
+    active: ALWAYS
+  scoop:
+    active: ALWAYS
