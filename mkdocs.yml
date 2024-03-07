@@ -4,11 +4,24 @@ theme:
     logo: images/knight-color-logo.svg
     favicon: images/knight-color-logo.svg
     palette :
+      # Palette toggle for light mode
+      - scheme: default
+        toggle:
+          icon: material/brightness-7
+          name: Switch to dark mode
+        primary: blue grey
+
+      # Palette toggle for dark mode
+      - scheme: slate
+        toggle:
+          icon: material/brightness-4
+          name: Switch to light mode
         primary: blue grey
         favicon: images/knight-color-logo.svg
     features:
         - navigation.instant
         - navigation.tracking
+        - content.code.copy
 extra:
     analytics:
         provider: google
@@ -16,27 +29,30 @@ extra:
 nav:
     - Installation: installation.md
     - Cheat Sheet: cheat-sheet.md
-    - Reference Guide:
-        - Execution Engine:
-          - File Structure: reference-guide/execution-engine-files.md
-          - Setup: reference-guide/execution-engine-setup.md
-          - Def-Classpath: reference-guide/execution-engine-defclasspath.md
-          - KBeans: reference-guide/execution-engine-kbeans.md
-          - Properties: reference-guide/execution-engine-properties.md
-          - Process: reference-guide/execution-engine-process.md
-          - Reuse Elements: reference-guide/execution-engine-reuse.md
-        - Build Library:
-          - Intro: reference-guide/build-library-intro.md
-          - System: reference-guide/build-library-system.md
-          - File Management: reference-guide/build-library-files.md
-          - Delependency Management: reference-guide/build-library-dependency-management.md
-          - Project Build: reference-guide/build-library-project-build.md
-          - 3rd Party Tool Integration: reference-guide/build-library-3rd-party-tool-integration.md
-    - Tutorials IntelliJ Plugin:
-        - Getting Started: tutorials/gui-getting-started.md
-        - Reuse Elements: tutorials/gui-reuse-elements.md
     - FAQ: faq.md
     - Examples: examples.md
+    - Legacy (version  0.10.x) :
+      - Reference Guide:
+          - Execution Engine:
+            - File Structure: legacy/reference-guide/execution-engine-files.md
+            - Setup: legacy/reference-guide/execution-engine-setup.md
+            - Def-Classpath: legacy/reference-guide/execution-engine-defclasspath.md
+            - KBeans: legacy/reference-guide/execution-engine-kbeans.md
+            - Properties: legacy/reference-guide/execution-engine-properties.md
+            - Process: legacy/reference-guide/execution-engine-process.md
+            - Reuse Elements: legacy/reference-guide/execution-engine-reuse.md
+          - Build Library:
+            - Intro: legacy/reference-guide/build-library-intro.md
+            - System: legacy/reference-guide/build-library-system.md
+            - File Management: legacy/reference-guide/build-library-files.md
+            - Dependency Management: legacy/reference-guide/build-library-dependency-management.md
+            - Project Build: legacy/reference-guide/build-library-project-build.md
+            - 3rd Party Tool Integration: legacy/reference-guide/build-library-3rd-party-tool-integration.md
+      - Tutorials IntelliJ Plugin:
+          - Getting Started: legacy/tutorials/gui-getting-started.md
+          - Reuse Elements: legacy/tutorials/gui-reuse-elements.md
+      - Faq: legacy/faq.md
+
 repo_url: https://github.com/jerkar/jeka
 markdown_extensions:
     - admonition

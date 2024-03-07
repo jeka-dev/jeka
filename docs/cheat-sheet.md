@@ -1,14 +1,14 @@
 ## Useful commands
 
-| Command              | Description                                                                                                                         |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| `[kbean-name]#help`  | Displays methods and options invokable for the specified plugin (e.g. `jeka scaffold#help`).                                        |
-| `intellij#iml`       | Generates iml file for Intellij. This is generated according to the dependen Standrdcies declared for _Jeka_ project.               |
-| `intellij#iml -dci`  | If the `jeka intellij#iml` fails due to compilation error on def classes, `-dci` forces ignore compileation error on *def classes*. |
-| `eclipse#files`      | Same purpose as above to generate metadata files for Eclipse.                                                                       |
-| `scaffold#run`       | Generates files to create a basic _Jeka_ project from scratch.                                                                      |
-| `scaffold#wrapper`   | Generates wrapper files (jekaw/jekaw.bat and bootstrap jar).                                                                        |
-| `scaffold#run java#` | Generates files to create a _Jeka_ project to build a JVM language project.                                                         |
+| Command                 | Description                                                    |
+|-------------------------|----------------------------------------------------------------|
+| `: --help`              | Displays availbable methods, options and KBeans                |
+| `intellij: iml -f`      | Generates iml file for Intellij.                               |
+| `intellij: initProject` | Initializes Intellij Project                                   |
+| `eclipse: files`        | Same purpose as above to generate metadata files for Eclipse.  |
+| `project: scaffold`     | Generates files to create a basic _Jeka_ project from scratch. |
+| `project: pack`         | Build jars and others optional artifacts from a project        |
+| `base: scaffold`        | Creates files a base workspace without project.                |
 
 ## Standard Properties
 
@@ -32,12 +32,11 @@
     - if *JAVA_HOME* env var is specified, select it
     - else, look in cache and download default version (21)
 
-## Rules for reading Properties
+## How JeKa Reads Properties
+JeKa reads properties in this order:
 
-This is the place, in order of precedence where JeKa reads properties
-
-- The command-line arguments formatted as "-Dmy.prop=xxx"
-- Environment variables formatted as 'my.prop' 
-- [BASE_DIR]/jeka.properties file. Where [BASE_DIR] is the root of the project to build/run.
-- look recursively in parent [BASE_DIR]/../jeka.properties. Stop at first folder ancestor not having a *jeka.properties* file
-- [JEKA_USER_HOME]/global.properties
+- Command-line arguments (as `-Dmy.prop=xxx`).
+- Environment variables (`my.prop`or `MY_PROP`).
+- The *jeka.properties* file in the base dir.
+- The *jeka.properties* file in parent directories, until it's not found.
+- The *global.properties* file in [JEKA_USER_HOME].

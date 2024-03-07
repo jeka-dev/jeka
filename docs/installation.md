@@ -4,11 +4,12 @@ You don't need to install JeKa to use it as a build tool, as is is generally pre
 the project base directory.
 
 Nevertheless, you might need to install it for the following use-cases :
+
 - Scaffold (create skeleton) of new projects from your local machine.
 - Execute remote scripts/applications located of filesystem or *git* repo.
 - Use shorter command `jeka` instead of `./jeka`or `.\jeka.ps`.
 
-Once installed, you will rarely need to upgrade as JeKa will execute the JeKa version specified in
+Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
 the application to run.
 However, you'll be able to upgrade your base install by executing `jekau` command.
 
@@ -37,7 +38,7 @@ The manual installation is straightforward and may help when script installation
 
 ## Sanity check
 
-Once installed, you can open a new terminal session and execute `jeka -lri` to see runtime details.
+Once installed, you can open a new terminal session and execute `jeka --help` to see runtime details.
 
 
 
