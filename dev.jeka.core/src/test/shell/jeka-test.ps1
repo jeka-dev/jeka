@@ -1,5 +1,19 @@
 . ".\..\..\main\shell\jeka.ps1"
 
+function TestInterpolate {
+    param(
+        [string]$baseDir,
+        [Array]$cmdLineArgs)
+    $interpolated = Get-InterpolatedCmd "sample-dir\sub-dir" $cmdLineArgs
+    foreach ($item in $cmdLineArgs) {
+        Write-Output $item
+    }
+    Write-Output "->"
+    foreach ($item in $interpolated) {
+        Write-Output $item
+    }
+}
+
 Write-Output "-------- Some computed constants -----------"
 $jekaUserHome = Get-JekaUserHome
 Write-Output ("jeka user hme :" +  $jekaUserHome)
@@ -24,14 +38,15 @@ $nonExistingValue= Get-PropValueFromBaseDir "sample-dir\sub-dir" $cmdArgValue  "
 Write-Output ("non.existing=" +  $nonExistingValue)
 Write-Output ""
 Write-Output "-------- Interpolate -----------"
+$parsed = Get-ParsedCommandLine "toto tutu"
+foreach ($item in $parsed) {
+    Write-Output $item
+}
+Write-Output "------"
 $cmdLineArgs = @( "toto", "uu", "-Dfoo=bar2" )
-$interpolated = Get-InterpolatedCmd "sample-dir\sub-dir" $cmdLineArgs
-#Write-Output $mdLineArgs
-#Write-Output $interpolated
-foreach ($item in $cmdLineArgs) {
-    Write-Output $item
-}
-Write-Output "->"
-foreach ($item in $interpolated) {
-    Write-Output $item
-}
+TestInterpolate  "sample-dir\sub-dir" $cmdLineArgs
+Write-Output "------"
+$cmdLineArgs = @( "toto", "::uu", "-Dfoo=bar2", ":bb", "-Djeka.cmd.uu=coco popo" )
+TestInterpolate  "sample-dir\sub-dir" $cmdLineArgs
+
+

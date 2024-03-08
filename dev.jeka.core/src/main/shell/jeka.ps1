@@ -201,7 +201,7 @@ function Get-PropValueFromBaseDir {
 function Get-ParsedCommandLine($cmdLine) {
   $pattern = '(""[^""]*""|[^ ]*)'
   $regex = New-Object Text.RegularExpressions.Regex $pattern
-  $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') }
+  $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') } | Where-Object { $_ -ne "" }
 }
 
 function Get-InterpolatedCmd {
