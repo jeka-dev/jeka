@@ -20,7 +20,6 @@
 # - look in JEKA_USER_HOME/global.properties
 #
 
-
 #######################################
 # Download specified zip/tgz file and unpack it to the specified dir
 # Globals:
@@ -33,7 +32,6 @@ function DownloadAndUnpack {
   param([string]$url, [string]$dir)
 
   $temp_file = [System.IO.Path]::GetTempFileName();
-  rm  $temp_file
   $webclient = New-Object System.Net.WebClient
   $webclient.DownloadFile($url, $temp_file)
 
@@ -51,11 +49,11 @@ function DownloadAndUnpack {
 #   Write location to stdout
 #######################################
 function Get-JekaUserHome {
-  if ([string]::IsNullOrEmpty($env: JEKA_USER_HOME)) {
+  if ([string]::IsNullOrEmpty($env:JEKA_USER_HOME)) {
     return "$env:USERPROFILE\.jeka"
   }
   else {
-    return $env: JEKA_USER_HOME
+    return $env:JEKA_USER_HOME
   }
 }
 
@@ -70,8 +68,9 @@ function Get-JekaUserHome {
 #   Write location to stdout
 #######################################
 function Get-CacheDir {
-  if ([string]::IsNullOrEmpty($env: JEKA_CACHE_DIR)) {
-    return "$env:JEKA_USER_HOME\cache"
+  if ([string]::IsNullOrEmpty($env:JEKA_CACHE_DIR)) {
+    $jekaUserHome = Get-JekaUserHome
+    return $jekaUserHome + "\cache"
   }
   else {
     return $env:JEKA_CACHE_DIR
@@ -101,7 +100,7 @@ function Get-GitCacheDir {
 # Outputs:
 #   Write extracted sub-string to stdout
 #######################################
-function Substring-BeforeHash {
+function Get-SubstringBeforeHash {
   param([string]$str)
   return $str.Split('#')[0]
 }
@@ -115,7 +114,7 @@ function Substring-BeforeHash {
 # Outputs:
 #   Write extracted sub-string to stdout
 #######################################
-function Substring-AfterHash {
+function Get-SubstringAfterHash {
   param([string]$str)
   return $str.Split('#')[1]
 }
@@ -131,9 +130,9 @@ function Substring-AfterHash {
 #   Write property value to stdout
 #######################################
 function Get-SystemPropFromArgs {
-  param([string]$PropName, [Array]$CmdLineArgs)
-  $prefix = "-D$PropName="
-  foreach ($arg in $CmdLineArgs) {
+  param([Array]$cmdLineArgs, [string]$propName)
+  $prefix = "-D$propName="
+  foreach ($arg in $cmdLineArgs) {
     if ($arg.StartsWith($prefix)) {
       return ($arg -replace $prefix, "")
     }
@@ -149,16 +148,18 @@ function Get-SystemPropFromArgs {
 #   $2 : the property name
 #######################################
 function Get-PropValueFromFile {
-  param([string]$FilePath, [string]$PropName)
-  if (-Not (Test-Path $FilePath)) {
-    return
-  }
-  $content = Get-Content $FilePath
-  foreach ($line in $content) {
-    if ($line -match "^\\s*$PropName=") {
-      return ($line -split "=", 2)[1]
+  param (
+    [string]$filePath,
+    [string]$propertyName
+  )
+  $data = Get-Content $filePath
+  foreach ($line in $data) {
+    if ($line -match "^$propertyName=") {
+      $value = $line.Split('=')[1]
+      return $value.Trim()
     }
   }
+  return $null
 }
 
 #######################################
@@ -172,26 +173,58 @@ function Get-PropValueFromFile {
 #   Write env var name to stdout
 #######################################
 function Get-PropValueFromBaseDir {
-  param([string]$BaseDir, [string]$PropName, [Array]$CmdLineArgs)
+  param([string]$baseDir, [Array]$cmdLineArgs, [string]$propName)
 
-  $cmdArgsValue = Get-SystemPropFromCmdArgs -PropName $PropName -CmdLineArgs $CmdLineArgs
+  $cmdArgsValue = Get-SystemPropFromArgs $cmdLineArgs $propName
   if ($null -ne $cmdArgsValue) {
     return $cmdArgsValue
   }
-  $envValue = [Environment]::GetEnvironmentVariable($PropName)
+  $envValue = [Environment]::GetEnvironmentVariable($propName)
   if ($null -ne $envValue) {
     return $envValue
   }
-  $jekaPropertyFilePath = Join-Path $BaseDir 'jeka.properties'
-  $value = Get-PropValueFromFile -FilePath $jekaPropertyFilePath -PropName $PropName
+  $jekaPropertyFilePath = Join-Path $baseDir 'jeka.properties'
+
+  $value = Get-PropValueFromFile $jekaPropertyFilePath $propName
   if ($null -eq $value) {
-    $parentDir = Join-Path $BaseDir '..'
+    $parentDir = Join-Path $baseDir '..'
     $parentJekaPropsFile = Join-Path $parentDir 'jeka.properties'
     if (Test-Path $parentJekaPropsFile) {
-      $value = Get-PropValueFromFile -FilePath $parentJekaPropsFile -PropName $PropName
+      $value = Get-PropValueFromFile $parentJekaPropsFile $propName
     } else {
-      $value = Get-PropValueFromFile -FilePath $GLOBAL:GLOBAL_PROP_FILE -PropName $PropName
+      $value = Get-PropValueFromFile $GLOBAL:GLOBAL_PROP_FILE $propName
     }
   }
   return $value
 }
+
+function Get-ParsedCommandLine($cmdLine) {
+  $pattern = '(""[^""]*""|[^ ]*)'
+  $regex = New-Object Text.RegularExpressions.Regex $pattern
+  $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') }
+}
+
+function Get-InterpolatedCmd {
+  param(
+    [string]$baseDir,
+    [Array]$cmdLineArgs)
+
+  $result = @()
+  foreach ($arg in $cmdLineArgs) {
+    if ($arg -like "::*") {
+      $propKey= ( "jeka.cmd." + $arg.Substring(2) )
+      $propValue= Get-PropValueFromBaseDir $baseDir $cmdLineArgs $propKey
+      if ($null -ne $propValue) {
+        $valueArray= Get-ParsedCommandLine $propValue
+        $result += $valueArray
+      } else {
+        $result += $arg
+      }
+    } else {
+      $result += $arg
+    }
+  }
+  return $result
+}
+
+$ErrorActionPreference = "Stop"
