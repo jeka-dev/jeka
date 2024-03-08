@@ -205,6 +205,7 @@ function Get-ParsedCommandLine($cmdLine) {
 }
 
 function Get-InterpolatedCmd {
+
   param(
     [string]$baseDir,
     [Array]$cmdLineArgs)
