@@ -1,17 +1,8 @@
 . ".\..\..\main\shell\jeka.ps1"
 
-function TestInterpolate {
-    param(
-        [string]$baseDir,
-        [Array]$cmdLineArgs)
+function TestInterpolate([string]$baseDir, [Array]$cmdLineArgs) {
     $interpolated = Get-InterpolatedCmd "sample-dir\sub-dir" $cmdLineArgs
-    foreach ($item in $cmdLineArgs) {
-        Write-Output $item
-    }
-    Write-Output "->"
-    foreach ($item in $interpolated) {
-        Write-Output $item
-    }
+    Write-Output ([System.String]::Join(' ', $cmdLineArgs) + " -> " + [System.String]::Join(' ', $interpolated))
 }
 
 Write-Output "-------- Some computed constants -----------"
@@ -24,29 +15,36 @@ Write-Output "-------- String manipulation -----------"
 Write-Output (Get-SubstringBeforeHash "rrr#ooo")
 Write-Output (Get-SubstringAfterHash "rrr#ooo")
 Write-Output ""
-Write-Output "-------- Find properties -----------"
-$cmdArgValuepropValue = Get-PropValueFromFile "sample-dir/jeka.properties" "foo"
-Write-Output ("foo=" +  $propValue)
-$cmdLineArgs = @("toto", "uu", "-Dfoo=bar2")
-$cmdArgValue = Get-SystemPropFromArgs $cmdLineArgs "foo"
-Write-Output ("foo=" +  $cmdArgValue)
-$overridenValue= Get-PropValueFromBaseDir "sample-dir\sub-dir" $cmdArgValue  "overriden.prop"
-Write-Output ("overriden.prop=" +  $overridenValue)
-$javaVersionValue= Get-PropValueFromBaseDir "sample-dir\sub-dir" $cmdArgValue  "jeka.java.version"
-Write-Output ("jeka.java.version=" +  $javaVersionValue)
-$nonExistingValue= Get-PropValueFromBaseDir "sample-dir\sub-dir" $cmdArgValue  "non.existing"
-Write-Output ("non.existing=" +  $nonExistingValue)
-Write-Output ""
-Write-Output "-------- Interpolate -----------"
-$parsed = Get-ParsedCommandLine "toto tutu"
-foreach ($item in $parsed) {
-    Write-Output $item
-}
-Write-Output "------"
+Write-Output "-------- CmdLineArgs -----------"
+$rawArgs = @( "toto", "-u", "-Dfoo=bar2" )
+$cmdLineArgs = [CmdLineArgs]::new($rawArgs)
+Write-Output $cmdLineArgs.GetSystemProperty("foo")
+$args = @("-u", "--update")
+Write-Output $cmdLineArgs.GetIndexOfFirstOf($args)
 $cmdLineArgs = @( "toto", "uu", "-Dfoo=bar2" )
 TestInterpolate  "sample-dir\sub-dir" $cmdLineArgs
-Write-Output "------"
+Write-Output "--"
 $cmdLineArgs = @( "toto", "::uu", "-Dfoo=bar2", ":bb", "-Djeka.cmd.uu=coco popo" )
-TestInterpolate  "sample-dir\sub-dir" $cmdLineArgs
+$baseDir = $PWD.Path + "\sample-dir\sub-dir"
+TestInterpolate $baseDir $cmdLineArgs
+Write-Output ""
+Write-Output "--------Props -----------"
+$file = $PWD.Path + "\sample-dir\jeka.properties"
+Write-Output ("foo=" +  [Props]::GetValueFromFile($file, "foo"))
+$cmdLineArgs = [CmdLineArgs]::new(@("toto", "uu", "-Dfoo=bar2"))
+$baseDir =  $PWD.Path + ("\sample-dir\sub-dir")
 
+$props = [Props]::new($cmdLineArgs, $baseDir)
 
+Write-Output ("overriden.prop=" + $props.GetValue("overriden.prop"))
+Write-Output ("jeka.java.version=" +  $props.GetValue("jeka.java.version"))
+Write-Output ("non.existing=" +  $props.GetValue("non.existing"))
+
+Write-Output ""
+Write-Output "-------- IsGitRemote -----------"
+Write-Output (IsGitRemote "../ooop/uu")
+Write-Output (IsGitRemote "https://ooop/uu.git")
+Write-Output (IsGitRemote "https://ooop/uu.git#foo")
+Write-Output ""
+Write-Output "-------- Folder from git repo -----------"
+Write-Output (Get-FolderNameFromGitUrl "https://ooop/uu.git#foo")

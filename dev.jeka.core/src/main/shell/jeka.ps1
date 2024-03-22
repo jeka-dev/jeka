@@ -119,26 +119,6 @@ function Get-SubstringAfterHash {
   return $str.Split('#')[1]
 }
 
-
-#######################################
-# Gets the value of a property, declared as '-Dprop.name=prop.value' in an array.
-# Globals:
-#   CMD_LINE_ARGS (read)
-# Arguments:
-#   $1 : the property name
-# Outputs:
-#   Write property value to stdout
-#######################################
-function Get-SystemPropFromArgs {
-  param([Array]$cmdLineArgs, [string]$propName)
-  $prefix = "-D$propName="
-  foreach ($arg in $cmdLineArgs) {
-    if ($arg.StartsWith($prefix)) {
-      return ($arg -replace $prefix, "")
-    }
-  }
-}
-
 #######################################
 # Gets the value of a property declared within a property file
 # Globals:
@@ -198,7 +178,8 @@ function Get-PropValueFromBaseDir {
   return $value
 }
 
-function Get-ParsedCommandLine($cmdLine) {
+# return array
+function ParseCommandLine([string]$cmdLine) {
   $pattern = '(""[^""]*""|[^ ]*)'
   $regex = New-Object Text.RegularExpressions.Regex $pattern
   $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') } | Where-Object { $_ -ne "" }
@@ -227,5 +208,181 @@ function Get-InterpolatedCmd {
   }
   return $result
 }
+
+function Get-BaseDir {
+  param([Array]$interpolatedArgs)
+
+  $remoteArgs= @("-r", "--remote", "-ru", "-ur")
+  $remoteIndex= Get-indexOfFirst $interpolatedArgs $remoteArgs
+  if ($remoteIndex -eq -1) {
+    return Get-Location
+  }
+  $remoteValue= $interpolatedArgs[($remoteIndex + 1)]
+  if (IsGitRemote $remoteValue) {
+    repoUrl= SubstringBeforeHash $remoteValue
+
+  }
+}
+
+function IsGitRemote {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$remoteValue
+  )
+  $gitUrlRegex = '(https?://.+.git*)|^(ssh://.+.git*)|^(git://.+.git*)|^(git@[^:]+:.+.git*)$'
+  if ($remoteValue -match $gitUrlRegex) {
+    return $true;
+  } else {
+    return $false;
+  }
+}
+
+function Get-FolderNameFromGitUrl {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$url
+  )
+  $protocols = @('https://', 'ssh://', 'git://', 'git@')
+  $trimmedUrl = $url
+  foreach ($protocol in $protocols) {
+    $trimmedUrl = $trimmedUrl -replace [regex]::Escape($protocol), ''
+  }
+  # replace '/' by '_'
+  $folderName = $trimmedUrl -replace '/', '_'
+  return $folderName
+}
+
+function Get-JavaCmd {
+
+}
+
+class CmdLineArgs {
+  [Array]$args
+
+  CmdLineArgs([Array]$interpolatedArgs) {
+    $this.args = $interpolatedArgs
+  }
+
+  [string] GetSystemProperty([string]$propName) {
+    $prefix = "-D$propName="
+    foreach ($arg in $this.args) {
+      if ( $arg.StartsWith($prefix) ) {
+        return $arg.Replace($prefix, "")
+      }
+    }
+    return $null
+  }
+
+ [int] GetIndexOfFirstOf([Array]$candidates) {
+    foreach ($arg in $candidates) {
+      $index = $this.args.IndexOf($arg)
+      if ($index -ne -1) {
+        return $index
+      }
+    }
+    return -1
+  }
+
+  [CmdLineArgs] Interpolated([String]$globalPropFile) {
+    $result = @()
+    foreach ($arg in $cmdLineArgs) {
+      if ($arg -like "::*") {
+        $propKey= ( "jeka.cmd." + $arg.Substring(2) )
+        $propValue= [Props]::GetValueFromFile($globalPropFile, $propKey)
+        if ($null -ne $propValue) {
+          $valueArray= ParseCommandLine $propValue
+          $result += $valueArray
+        } else {
+          $result += $arg
+        }
+      } else {
+        $result += $arg
+      }
+    }
+    return [CmdLineArgs]::new($result)
+  }
+
+
+}
+
+class Props {
+  [CmdLineArgs]$cmdLineArgs
+  [string]$baseDir
+
+  Props([CmdLineArgs]$cmdLineArgs, [string]$baseDir) {
+    $this.cmdLineArgs = $cmdLineArgs
+    $this.baseDir = $baseDir
+  }
+
+  [string] GetValue([string]$propName) {
+    $cmdArgsValue = $this.cmdLineArgs.GetSystemProperty($propName)
+    if ($null -ne $cmdArgsValue) {
+      return $cmdArgsValue
+    }
+    $envValue = [Environment]::GetEnvironmentVariable($propName)
+    if ($null -ne $envValue) {
+      return $envValue
+    }
+    $jekaPropertyFilePath = $this.baseDir + '\jeka.properties'
+
+    $value = $this.GetValueFromFile($jekaPropertyFilePath, $propName)
+    if ($null -eq $value) {
+      $parentDir = $this.baseDir + '\..'
+      $parentJekaPropsFile = $parentDir + '\jeka.properties'
+      if (Test-Path $parentJekaPropsFile) {
+        $value = $this.GetValueFromFile($parentJekaPropsFile, $propName)
+      } else {
+        $value = $this.GetValueFromFile($GLOBAL:GLOBAL_PROP_FILE, $propName)
+      }
+    }
+    return $value
+  }
+
+  static [string] GetValueFromFile([string]$filePath, [string]$propertyName) {
+    $data = [System.IO.File]::ReadAllLines($filePath)
+    foreach ($line in $data) {
+      if ($line -match "^$propertyName=") {
+        $value = $line.Split('=')[1]
+        return $value.Trim()
+      }
+    }
+    return $null
+  }
+
+}
+
+class JdkDownload {
+  [string]$Version
+  [string]$Distrib
+
+  JdkDownload([string]$baseDir, [Array]$cmdLineArgs) {
+    $this.Version = "21"
+    $this.Distrib = "temurin"
+
+  }
+
+  Install() {
+    $jdkurl="https://api.foojay.io/disco/v3.0/directuris?distro=$this.Distrib&javafx_bundled=false&libc_type=c_std_lib&archive_type=zip&operating_system=windows&package_type=jdk&version=$this.Version&architecture=x64&latest=available"
+  }
+
+}
+
+function main([Array]$args) {
+
+  $jekaUserHome = Get-JekaUserHome
+  $globalPropFile = $jekaUserHome + "\global.properties"
+  $rawCmdLineArgs = [CmdLineArgs]::new($args)
+  $cmdLineArgs = $rawCmdLineArgs.Interpolated($globalPropFile)
+  $baseDir = Get-BaseDir($interpolatedArgs)
+  $props = [Props]::new($cmdLineArgs, $baseDir)
+
+
+
+
+
+
+}
+
+
 
 $ErrorActionPreference = "Stop"
