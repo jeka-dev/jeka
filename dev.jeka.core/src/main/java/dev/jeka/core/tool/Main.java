@@ -93,6 +93,7 @@ public class Main {
             // Resolve KBeans
             Engine.KBeanResolution kBeanResolution = engine.getKbeanResolution();
             Engine.ClasspathSetupResult classpathSetupResult = engine.getClasspathSetupResult();
+            JkLog.debug("Found KBeans : %s" , kBeanResolution.allKbeans);
 
             // Augment current classloader with resolved deps and compiled classes
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();

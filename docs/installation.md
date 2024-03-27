@@ -31,7 +31,7 @@ For installing and running, JeKa needs only *curl* be installed on the system.
 
 The manual installation is straightforward and may help when script installation fails.
 
-- Download latest JeKa distrib from https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions
+- Download latest JeKa distrib from [maven central](https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions)
   and download file named *jeka-core-xxx-distrib.zip*.
 - Unzip the content of the zip file to an arbitrary directory
 - Add this directory to your path.
