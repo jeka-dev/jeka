@@ -89,7 +89,7 @@ public abstract class JekaCommandLineExecutor {
     }
 
     private static String scriptName() {
-        return JkUtilsSystem.IS_WINDOWS ? "jekaw.bat" : "jeka";
+        return JkUtilsSystem.IS_WINDOWS ? "jeka.bat" : "jeka";
     }
 
 }

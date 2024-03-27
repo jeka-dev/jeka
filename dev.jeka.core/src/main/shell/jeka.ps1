@@ -1,197 +1,385 @@
-#
-# Script for launching JeKa tool in PowerShell.
-#
-# Authors: Jerome Angibaud
-#
-# Rules for selecting a JDK :
-# - if JEKA_JDK_HOME env var is specified, select it
-# - if a jeka.java.version property is specified
-#     - if a jeka.jdk.[version] property is specified, select it.
-#     - else, look in cache or download the proper JDK
-# - else
-#   - if JAVA_HOME env var is specified, select it
-#   - else, look in cache and download default version (21)
-#
-# Rules for reading a property (said "my.prop") :
-# - if a command line args contains "-Dmy.prop=xxx", returns 'xxx'
-# - if an env var 'my.prop' exists, returns this value
-# - if property is defined in $BASE_DIR/jeka.properties, returns this value
-# - look recursively in $BASE_DIR/../jeka.properties. Stop at first folder ancestor not having a jeka.properties file
-# - look in JEKA_USER_HOME/global.properties
-#
 
 
-#######################################
-# Download specified zip/tgz file and unpack it to the specified dir
-# Globals:
-#   none
-# Arguments:
-#   $1 : url to download file
-#   $2 : the target directory path to unzip/unpack content
-#######################################
-function DownloadAndUnpack {
-  param([string]$url, [string]$dir)
-
-  $temp_file = [System.IO.Path]::GetTempFileName();
-  rm  $temp_file
-  $webclient = New-Object System.Net.WebClient
-  $webclient.DownloadFile($url, $temp_file)
-
-  Expand-Archive -Force $temp_file $dir
-  Remove-Item -Path $temp_file
-}
-
-#######################################
-# Gets the Jeka directory for the user. This is where are located global.properties and cache dirs.
-# Globals:
-#   JEKA_USER_HOME (read)
-# Arguments:
-#   none
-# Outputs:
-#   Write location to stdout
-#######################################
 function Get-JekaUserHome {
-  if ([string]::IsNullOrEmpty($env: JEKA_USER_HOME)) {
+  if ([string]::IsNullOrEmpty($env:JEKA_USER_HOME)) {
     return "$env:USERPROFILE\.jeka"
   }
   else {
-    return $env: JEKA_USER_HOME
+    return $env:JEKA_USER_HOME
   }
 }
 
-#######################################
-# Gets the effective cache dir for Jeka user
-# Globals:
-#   JEKA_CACHE_DIR (read)
-#   JEKA_USER_HOME (read)
-# Arguments:
-#   none
-# Outputs:
-#   Write location to stdout
-#######################################
-function Get-CacheDir {
-  if ([string]::IsNullOrEmpty($env: JEKA_CACHE_DIR)) {
-    return "$env:JEKA_USER_HOME\cache"
+function Get-CacheDir([string]$jekaUserHome) {
+  if ([string]::IsNullOrEmpty($env:JEKA_CACHE_DIR)) {
+    return $jekaUserHome + "\cache"
   }
   else {
     return $env:JEKA_CACHE_DIR
   }
 }
 
-#######################################
-# Gets the dir for caching projects cloned from git
-# Globals:
-#   JEKA_CACHE_DIR (read)
-#   JEKA_USER_HOME (read)
-# Arguments:
-#   none
-# Outputs:
-#   Write location to stdout
-#######################################
-function Get-GitCacheDir {
-  return "$(Get-CacheDir)\git"
-}
+class BaseDirResolver {
+  [string]$url
+  [string]$cacheDir
+  [string]$updateFlag
 
-#######################################
-# Gets the sub-string part starting after '#' of a specified string. ('Hello#World' should returns 'World')
-# Globals:
-#   none
-# Arguments:
-#   $1 : the string to extract substring from
-# Outputs:
-#   Write extracted sub-string to stdout
-#######################################
-function Substring-BeforeHash {
-  param([string]$str)
-  return $str.Split('#')[0]
-}
+  BaseDirResolver([string]$url, [string]$cacheDir, [bool]$updateFlag) {
+    $this.url = $url
+    $this.cacheDir = $cacheDir
+    $this.updateFlag = $updateFlag
+  }
 
-#######################################
-# Gets the sub-string part ending before '#' of a specified string. ('Hello#World' should returns 'Hello')
-# Globals:
-#   none
-# Arguments:
-#   $1 : the string to extract substring from
-# Outputs:
-#   Write extracted sub-string to stdout
-#######################################
-function Substring-AfterHash {
-  param([string]$str)
-  return $str.Split('#')[1]
-}
-
-
-#######################################
-# Gets the value of a property, declared as '-Dprop.name=prop.value' in an array.
-# Globals:
-#   CMD_LINE_ARGS (read)
-# Arguments:
-#   $1 : the property name
-# Outputs:
-#   Write property value to stdout
-#######################################
-function Get-SystemPropFromArgs {
-  param([string]$PropName, [Array]$CmdLineArgs)
-  $prefix = "-D$PropName="
-  foreach ($arg in $CmdLineArgs) {
-    if ($arg.StartsWith($prefix)) {
-      return ($arg -replace $prefix, "")
+  [string] GetPath() {
+    if ($this.url -eq '') {
+      return $PWD.Path
     }
-  }
-}
-
-#######################################
-# Gets the value of a property declared within a property file
-# Globals:
-#   none
-# Arguments:
-#   $1 : the path of the property file
-#   $2 : the property name
-#######################################
-function Get-PropValueFromFile {
-  param([string]$FilePath, [string]$PropName)
-  if (-Not (Test-Path $FilePath)) {
-    return
-  }
-  $content = Get-Content $FilePath
-  foreach ($line in $content) {
-    if ($line -match "^\\s*$PropName=") {
-      return ($line -split "=", 2)[1]
+    if (! $this.IsGitRemote()) {
+      return $this.url
     }
-  }
-}
-
-#######################################
-# Resolves and returns the value of a property by looking in command line args, env var and jeka.properties files
-# Globals:
-#   CMD_LINE_ARGS (read)
-# Arguments:
-#   $1 : the base directory from where looking for jeka.properties file
-#   $2 : the property name
-# Outputs:
-#   Write env var name to stdout
-#######################################
-function Get-PropValueFromBaseDir {
-  param([string]$BaseDir, [string]$PropName, [Array]$CmdLineArgs)
-
-  $cmdArgsValue = Get-SystemPropFromCmdArgs -PropName $PropName -CmdLineArgs $CmdLineArgs
-  if ($null -ne $cmdArgsValue) {
-    return $cmdArgsValue
-  }
-  $envValue = [Environment]::GetEnvironmentVariable($PropName)
-  if ($null -ne $envValue) {
-    return $envValue
-  }
-  $jekaPropertyFilePath = Join-Path $BaseDir 'jeka.properties'
-  $value = Get-PropValueFromFile -FilePath $jekaPropertyFilePath -PropName $PropName
-  if ($null -eq $value) {
-    $parentDir = Join-Path $BaseDir '..'
-    $parentJekaPropsFile = Join-Path $parentDir 'jeka.properties'
-    if (Test-Path $parentJekaPropsFile) {
-      $value = Get-PropValueFromFile -FilePath $parentJekaPropsFile -PropName $PropName
+    $path = $this.cacheDir + "\git\" + $this.FolderName()
+    if ([System.IO.Directory]::Exists($path)) {
+      if ($this.updateFlag) {
+        [System.IO.Directory]::Delete($path, $true)
+        $this.Clone($path)
+      }
     } else {
-      $value = Get-PropValueFromFile -FilePath $GLOBAL:GLOBAL_PROP_FILE -PropName $PropName
+      $this.Clone($path)
+    }
+    return $path
+  }
+
+  hidden [void] Clone([string]$path) {
+    $branch_args = $this.SubstringAfterHash()
+    $gitCmd = "git clone --quiet -c advice.detachedHead=false --depth 1 $branch_args $this.url $path"
+    Invoke-Expression -Command $gitCmd
+  }
+
+  hidden [bool] IsGitRemote() {
+    $gitUrlRegex = '(https?://.+.git*)|^(ssh://.+.git*)|^(git://.+.git*)|^(git@[^:]+:.+.git*)$'
+    if ($this.url -match $gitUrlRegex) {
+      return $true;
+    } else {
+      return $false;
     }
   }
-  return $value
+
+  hidden [string] SubstringBeforeHash() {
+    return $this.url.Split('#')[0]
+  }
+
+  hidden [string] SubstringAfterHash() {
+    return $this.url.Split('#')[1]
+  }
+
+  hidden [string] FolderName() {
+    $protocols = @('https://', 'ssh://', 'git://', 'git@')
+    $trimmedUrl = $this.url
+    foreach ($protocol in $protocols) {
+      $trimmedUrl = $trimmedUrl -replace [regex]::Escape($protocol), ''
+    }
+    # replace '/' by '_'
+    $folderName = $trimmedUrl -replace '/', '_'
+    return $folderName
+  }
+
 }
+
+class CmdLineArgs {
+  [Array]$args
+
+  CmdLineArgs([Array]$arguments) {
+    $this.args = $arguments
+  }
+
+  [string] GetSystemProperty([string]$propName) {
+    $prefix = "-D$propName="
+    foreach ($arg in $this.args) {
+      if ( $arg.StartsWith($prefix) ) {
+        return $arg.Replace($prefix, "")
+      }
+    }
+    return $null
+  }
+
+ [int] GetIndexOfFirstOf([Array]$candidates) {
+    foreach ($arg in $candidates) {
+      $index = $this.args.IndexOf($arg)
+      if ($index -ne -1) {
+        return $index
+      }
+    }
+    return -1
+  }
+
+  [string] GetRemoteBaseDirArg() {
+    $remoteArgs= @("-r", "--remote", "-ru", "-ur")
+    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
+    if ($remoteIndex -eq -1) {
+      return $null
+    }
+    return $args[$remoteIndex + 1]
+  }
+
+  [bool] IsUpdateFlagPresent() {
+    $remoteArgs= @("-ru", "-ur", "-u", "--remote-update")
+    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
+    return ($remoteIndex -ne -1)
+  }
+
+  [bool] IsProgramFlagPresent() {
+    $remoteArgs= @("-p", "--program")
+    $remoteIndex= Get-indexOfFirst($this.args,$remoteArgs)
+    return ($remoteIndex -ne -1)
+  }
+
+}
+
+class Props {
+  [CmdLineArgs]$cmdLineArgs
+  [string]$baseDir
+  [string]$globalPropFile
+
+  Props([CmdLineArgs]$cmdLineArgs, [string]$baseDir, [string]$globalPropFile ) {
+    $this.cmdLineArgs = $cmdLineArgs
+    $this.baseDir = $baseDir
+    $this.globalPropFile = $globalPropFile
+  }
+
+  [string] GetValue([string]$propName) {
+    $cmdArgsValue = $this.cmdLineArgs.GetSystemProperty($propName)
+    if ($cmdArgsValue -ne '') {
+      return $cmdArgsValue
+    }
+    $envValue = [Environment]::GetEnvironmentVariable($propName)
+    if ($null -ne $envValue) {
+      return $envValue
+    }
+    $jekaPropertyFilePath = $this.baseDir + '\jeka.properties'
+
+    $value = [Props]::GetValueFromFile($jekaPropertyFilePath, $propName)
+    if ($null -eq $value) {
+      $parentDir = $this.baseDir + '\..'
+      $parentJekaPropsFile = $parentDir + '\jeka.properties'
+      if (Test-Path $parentJekaPropsFile) {
+        $value = $this.GetValueFromFile($parentJekaPropsFile, $propName)
+      } else {
+        $value = $this.GetValueFromFile($this.globalPropFile, $propName)
+      }
+    }
+    return $value
+  }
+
+  [string] GetValueOrDefault([string]$propName, [string]$defaultValue) {
+    $value = $this.GetValue($propName)
+    $isNull = ($value -eq '')
+    if ($value -eq '') {
+      return $defaultValue
+    } else {
+      return $value
+    }
+  }
+
+  [CmdLineArgs] InterpolatedCmdLine() {
+    $result = @()
+    foreach ($arg in $this.cmdLineArgs.args) {
+      if ($arg -like "::*") {
+        $propKey= ( "jeka.cmd." + $arg.Substring(2) )
+        $propValue= $this.GetValue($propKey)
+        if ($null -ne $propValue) {
+          $valueArray= [Props]::ParseCommandLine($propValue)
+          $result += $valueArray
+        } else {
+          $result += $arg
+        }
+      } else {
+        $result += $arg
+      }
+    }
+    return [CmdLineArgs]::new($result)
+  }
+
+  static [string] ParseCommandLine([string]$cmdLine) {
+    $pattern = '(""[^""]*""|[^ ]*)'
+    $regex = New-Object Text.RegularExpressions.Regex $pattern
+    return $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') } | Where-Object { $_ -ne "" }
+  }
+
+  static [string] GetValueFromFile([string]$filePath, [string]$propertyName) {
+    if (! [System.IO.File]::Exists($filePath)) {
+      return $null
+    }
+    $data = [System.IO.File]::ReadAllLines($filePath)
+    foreach ($line in $data) {
+      if ($line -match "^$propertyName=") {
+        $value = $line.Split('=')[1]
+        return $value.Trim()
+      }
+    }
+    return $null
+  }
+
+}
+
+class Jdks {
+  [Props]$Props
+  [string]$CacheDir
+
+  Jdks([Props]$props, [string]$cacheDir) {
+    $this.Props = $props
+    $this.CacheDir = $cacheDir
+  }
+
+  [string] GetJavaCmd() {
+    $javaHome = $this.JavaHome()
+    $javaExe = $this.JavaExe($javaHome)
+    return $javaExe
+  }
+
+  hidden Install([string]$distrib, [string]$version, [string]$targetDir) {
+    Write-Host "Downloading JDK $distrib $version. It may take a while..."
+    $jdkurl="https://api.foojay.io/disco/v3.0/directuris?distro=$distrib&javafx_bundled=false&libc_type=c_std_lib&archive_type=zip&operating_system=windows&package_type=jdk&version=$version&architecture=x64&latest=available"
+    $zipExtractor = [ZipExtractor]::new($jdkurl, $targetDir)
+    $zipExtractor.ExtractRootContent()
+  }
+
+  hidden [string] CachedJdkDir([string]$version, [string]$distrib) {
+    return $this.CacheDir + "\jdks\" + $distrib + "-" + $version
+  }
+
+  hidden [string] JavaExe([string]$javaHome) {
+    return $javaHome + "\bin\java.exe"
+  }
+
+  hidden [string] JavaHome() {
+    if ($Env:JEKA_JAVA_HOME -ne $null) {
+      return $Env:JEKA_JAVA_HOME
+    }
+    $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
+    $distib = ($this.Props.GetValueOrDefault("jeka.java.distrib", "temurin"))
+    $cachedJdkDir =  $this.CachedJdkDir($version, $distib)
+    $javaExeFile = $this.JavaExe($cachedJdkDir)
+    if (! [System.IO.File]::Exists($javaExeFile)) {
+      $this.Install($distib, $version, $cachedJdkDir)
+    }
+    return $cachedJdkDir
+  }
+
+}
+
+class JekaDistrib {
+  [Props]$props
+  [String]$cacheDir
+
+  JekaDistrib([Props]$props, [string]$cacheDir) {
+    $this.props = $props
+    $this.cacheDir = $cacheDir
+  }
+
+  [string] GetDir() {
+    $specificLocation = $this.props.GetValue("jeka.distrib.location")
+    if ($specificLocation -ne '') {
+      return $specificLocation
+    }
+    $jekaVersion = $this.props.GetValue("jeka.version")
+
+    # If version not specified, use jeka jar present in running distrib
+    if ($jekaVersion -eq '') {
+      return $PSScriptRoot
+    }
+
+    $distDir = $this.cacheDir + "\distributions\" + $jekaVersion
+    if ( [System.IO.Directory]::Exists($distDir)) {
+      return $distDir
+    }
+
+    $distRepo = $this.props.GetValueOrDefault("jeka.distrib.repo", "https://repo.maven.apache.org/maven2")
+    $url = "$distRepo/dev/jeka/jeka-core/$jekaVersion/jeka-core-$jekaVersion-distrib.zip"
+    $zipExtractor = [ZipExtractor]::new($url, $distDir)
+    $zipExtractor.Extract()
+    return $distDir
+  }
+
+  [string] GetJar() {
+    return $this.GetDir() + "\dev.jeka.jeka-core.jar"
+  }
+
+}
+
+class ZipExtractor {
+  [string]$url
+  [string]$dir
+
+  ZipExtractor([string]$url, [string]$dir) {
+    $this.url = $url
+    $this.dir = $dir
+  }
+
+  ExtractRootContent() {
+    $zipFile = $this.Download()
+    $tempDir = [System.IO.Path]::GetTempFileName()
+    Remove-Item -Path $tempDir
+    Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
+    $subDirs = Get-ChildItem -Path $tempDir -Directory
+    Write-Host "tempDir=$tempDir"
+    $root = $tempDir + "\" + $subDirs[0]
+    Write-Host "root=$root"
+    Move-Item -Path $root -Destination $this.dir -Force
+    Remove-Item -Path $zipFile
+    Remove-Item -Path $tempDir -Recurse
+  }
+
+  Extract() {
+    $zipFile = $this.Download()
+    Expand-Archive -Path $zipFile -DestinationPath $this.dir -Force
+    Remove-Item -Path $zipFile
+  }
+
+  hidden [string] Download() {
+    $downloadFile = [System.IO.Path]::GetTempFileName() + ".zip"
+    $webClient = New-Object System.Net.WebClient
+    $webClient.DownloadFile($this.url, $downloadFile)
+    $webClient.Dispose()
+    return $downloadFile
+  }
+}
+
+function Main {
+  param(
+    [array]$arguments
+  )
+
+  $jekaUserHome = Get-JekaUserHome
+  $cacheDir = Get-CacheDir($jekaUserHome)
+  $globalPropFile = $jekaUserHome + "\global.properties"
+
+  # Get interpolated cmdLine, while ignoring Base dir
+  $rawCmdLineArgs = [CmdLineArgs]::new($arguments)
+  $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
+  $cmdLineArgs = $rawProps.InterpolatedCmdLine()
+
+  # Resolve basedir and interpolate cmdLine according props declared in base dir
+  $remoteArg = $cmdLineArgs.GetRemoteBaseDirArg()
+  $updateArg = $cmdLineArgs.IsUpdateFlagPresent()
+  $baseDirResolver = [BaseDirResolver]::new($remoteArg, $cacheDir, $updateArg)
+  $baseDir = $baseDirResolver.GetPath()
+  $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
+  $cmdLineArgs = $props.InterpolatedCmdLine()
+
+  # Compute Java command
+  $jdks = [Jdks]::new($props, $cacheDir)
+  $javaCmd = $jdks.GetJavaCmd()
+
+  if ($cmdLineArgs.IsUpdateFlagPresent()) {
+    # Try to Execute program without passing by Jeka
+  } else {
+    $jekaDistrib = [JekaDistrib]::new($props, $cacheDir)
+    $jekaJar = $jekaDistrib.GetJar()
+    $classpath = "$baseDir\jeka-boot\*;$jekaJar"
+    $jekaOpts = $Env:JEKA_OPTS
+    & "$javaCmd" $jekaOpts "-Djeka.current.basedir=$baseDir" -cp $classpath "dev.jeka.core.tool.Main" $arguments
+  }
+
+}
+
+$ErrorActionPreference = "Stop"
+Main -arguments $args
