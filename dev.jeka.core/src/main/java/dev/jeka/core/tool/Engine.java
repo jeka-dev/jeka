@@ -432,7 +432,6 @@ class Engine {
         final List<String> jekaSrcKBeans;
         if (JkPathTree.of(jekaSrcClassDir).withMatcher(JAVA_CLASS_MATCHER).containFiles() && !skipJekaSrc) {
             ClassLoader srcClassloader = JkUrlClassLoader.of(jekaSrcClassDir).get();
-            //AppendableUrlClassloader srcClassloader = createScanClassloader(jekaSrcClassDir);
             jekaSrcKBeans = scanner.findClassesExtending(srcClassloader, KBean.class, jekaSrcClassDir);
         } else {
             jekaSrcKBeans = Collections.emptyList();

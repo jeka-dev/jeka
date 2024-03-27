@@ -221,7 +221,7 @@ public abstract class JkScaffold {
     }
 
     private void createShellScripts() {
-        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.bat");
+        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.ps1");
         if (Files.exists(jekaBat)) {
             JkLog.verbose("Create jeka.ps1 file");
             JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.ps1"), StandardCopyOption.REPLACE_EXISTING);

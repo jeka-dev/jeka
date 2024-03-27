@@ -186,7 +186,8 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     @Override
     public List<String> findClassesExtending(ClassLoader classLoader, Class<?> baseClass, Path classDir) {
-        String pathElementPah = classDir.toAbsolutePath().normalize().toString();
+        String pathElementPah = classDir.toAbsolutePath().normalize().toString()
+                .replace('\\', '/'); // failed on Windows if no relacement
         ClassGraph classGraph = new ClassGraph()
                 .disableNestedJarScanning()
                 .disableRuntimeInvisibleAnnotations()

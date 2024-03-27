@@ -1,4 +1,10 @@
+function Write-Message {
+  param([string]$msg)
 
+  if ($global:Verbose) {
+    Write-Host $msg
+  }
+}
 
 function Get-JekaUserHome {
   if ([string]::IsNullOrEmpty($env:JEKA_USER_HOME)) {
@@ -39,18 +45,22 @@ class BaseDirResolver {
     $path = $this.cacheDir + "\git\" + $this.FolderName()
     if ([System.IO.Directory]::Exists($path)) {
       if ($this.updateFlag) {
-        [System.IO.Directory]::Delete($path, $true)
-        $this.Clone($path)
+        Remove-Item -Path $path -Recurse -Force
+        $this.GitClone($path)
       }
     } else {
-      $this.Clone($path)
+      $this.GitClone($path)
     }
     return $path
   }
 
-  hidden [void] Clone([string]$path) {
-    $branch_args = $this.SubstringAfterHash()
-    $gitCmd = "git clone --quiet -c advice.detachedHead=false --depth 1 $branch_args $this.url $path"
+  hidden [void] GitClone([string]$path) {
+    $branchArgs = $this.SubstringAfterHash()
+    if ($branchArgs -ne '') {
+      $branchArgs = "--branch " + $branchArgs
+    }
+    $repoUrl = $this.SubstringBeforeHash()
+    $gitCmd = "git clone --quiet -c advice.detachedHead=false --depth 1 $branchArgs $repoUrl $path"
     Invoke-Expression -Command $gitCmd
   }
 
@@ -117,11 +127,17 @@ class CmdLineArgs {
     if ($remoteIndex -eq -1) {
       return $null
     }
-    return $args[$remoteIndex + 1]
+    return $this.args[$remoteIndex + 1]
   }
 
   [bool] IsUpdateFlagPresent() {
     $remoteArgs= @("-ru", "-ur", "-u", "--remote-update")
+    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
+    return ($remoteIndex -ne -1)
+  }
+
+  [bool] IsVerboseFlagPresent() {
+    $remoteArgs= @("-v", "--verbose", "--debug")
     $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
     return ($remoteIndex -ne -1)
   }
@@ -236,7 +252,7 @@ class Jdks {
   }
 
   hidden Install([string]$distrib, [string]$version, [string]$targetDir) {
-    Write-Host "Downloading JDK $distrib $version. It may take a while..."
+    Write-Message "Downloading JDK $distrib $version. It may take a while..."
     $jdkurl="https://api.foojay.io/disco/v3.0/directuris?distro=$distrib&javafx_bundled=false&libc_type=c_std_lib&archive_type=zip&operating_system=windows&package_type=jdk&version=$version&architecture=x64&latest=available"
     $zipExtractor = [ZipExtractor]::new($jdkurl, $targetDir)
     $zipExtractor.ExtractRootContent()
@@ -284,7 +300,16 @@ class JekaDistrib {
 
     # If version not specified, use jeka jar present in running distrib
     if ($jekaVersion -eq '') {
-      return $PSScriptRoot
+      $dir = $PSScriptRoot
+      $jarFile = $dir + "\dev.jeka.jeka-core.jar"
+      if (! [System.IO.File]::Exists($jarFile)) {
+        Write-Host "No Jeka jar file found at $jarFile"
+        Write-Host "This is due that neither jeka.distrib.location nor jeka.version are specified in properties, "
+        Write-Host "and you are probably invoking local 'jeka.ps1'"
+        Write-Host "Specify one the mentionned above properties or invoke 'jeka' if JeKa is installed on host machine."
+        exit 1
+      }
+      return $dir
     }
 
     $distDir = $this.cacheDir + "\distributions\" + $jekaVersion
@@ -320,9 +345,7 @@ class ZipExtractor {
     Remove-Item -Path $tempDir
     Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
     $subDirs = Get-ChildItem -Path $tempDir -Directory
-    Write-Host "tempDir=$tempDir"
     $root = $tempDir + "\" + $subDirs[0]
-    Write-Host "root=$root"
     Move-Item -Path $root -Destination $this.dir -Force
     Remove-Item -Path $zipFile
     Remove-Item -Path $tempDir -Recurse
@@ -364,6 +387,7 @@ function Main {
   $baseDir = $baseDirResolver.GetPath()
   $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
   $cmdLineArgs = $props.InterpolatedCmdLine()
+  $global:Verbose = $cmdLineArgs.IsVerboseFlagPresent()
 
   # Compute Java command
   $jdks = [Jdks]::new($props, $cacheDir)
@@ -376,7 +400,8 @@ function Main {
     $jekaJar = $jekaDistrib.GetJar()
     $classpath = "$baseDir\jeka-boot\*;$jekaJar"
     $jekaOpts = $Env:JEKA_OPTS
-    & "$javaCmd" $jekaOpts "-Djeka.current.basedir=$baseDir" -cp $classpath "dev.jeka.core.tool.Main" $arguments
+    $baseDirProp = "-Djeka.current.basedir=$baseDir"
+    & "$javaCmd" "$jekaOpts" $baseDirProp -cp $classpath "dev.jeka.core.tool.Main" $arguments
   }
 
 }

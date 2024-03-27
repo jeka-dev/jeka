@@ -56,6 +56,10 @@ public abstract class JekaCommandLineExecutor {
 
     protected JkProcess prepareJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
         Path cmd = useBaseDirJeka ? baseDir.resolve(scriptName()) : jekaShellCmd;
+        boolean usePowerShell = JkUtilsSystem.IS_WINDOWS && useBaseDirJeka;
+        if (usePowerShell) {
+            cmd = Paths.get("powershell.exe");
+        }
         boolean showOutput = JkLog.isVerbose();
         //boolean showOutput = true;
         JkProcess process = JkProcess.of(cmd.toString())
@@ -75,6 +79,10 @@ public abstract class JekaCommandLineExecutor {
                 // set explicitly jeka-core.jar to use, otherwise it may fetch a Jeka version from maven
                 // if jeka.properties contains a jeka.version prop, has it happens when scaffolding.
                 .setEnv("jeka.distrib.location", jekaShellCmd.toAbsolutePath().getParent().normalize().toString());
+
+        if (usePowerShell) {
+            process.addParamsFirst(baseDir.resolve("jeka.ps1").toString());
+        }
 
         // Add jacoco agent for gathering test coverage info
         if (jacocoAgentPath != null) {
