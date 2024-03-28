@@ -177,6 +177,27 @@ public abstract class JkScaffold {
         return JkUtilsIO.read(clazz.getResource(resourceName));
     }
 
+    /**
+     * Creates or replaces shell scripts in the specified base directory, meaning jeka.ps1 and jeka bash scripts.
+     * @param baseDir the base directory where the shell scripts will be created or replaced.
+     */
+    public static void createShellScripts(Path baseDir) {
+        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.ps1");
+        if (Files.exists(jekaBat)) {
+            JkLog.verbose("Create jeka.ps1 file");
+            JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.ps1"), StandardCopyOption.REPLACE_EXISTING);
+        }
+        Path jekaShell = JkLocator.getJekaHomeDir().resolve("jeka");
+        if (Files.isDirectory(jekaShell)) {
+            JkLog.warn("%s directory is still present. Cannot create jeka shell file in base directory.", jekaShell);
+        } else if (Files.exists(jekaShell)) {
+            JkLog.verbose("Create jeka shell file");
+            JkUtilsPath.copy(jekaShell, baseDir.resolve("jeka"),
+                    StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+            JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
+        }
+    }
+
     private void createOrUpdateJekaProps() {
         StringBuilder sb = new StringBuilder();
         if (!JkUtilsString.isBlank(jekaDistribLocation)) {
@@ -221,21 +242,10 @@ public abstract class JkScaffold {
     }
 
     private void createShellScripts() {
-        final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.ps1");
-        if (Files.exists(jekaBat)) {
-            JkLog.verbose("Create jeka.ps1 file");
-            JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.ps1"), StandardCopyOption.REPLACE_EXISTING);
-        }
-        Path jekaShell = JkLocator.getJekaHomeDir().resolve("jeka");
-        if (Files.isDirectory(jekaShell)) {
-            JkLog.warn("%s directory is still present. Cannot create jeka shell file in base directory.", jekaShell);
-        } else if (Files.exists(jekaShell)) {
-            JkLog.verbose("Create jeka shell file");
-            JkUtilsPath.copy(jekaShell, baseDir.resolve("jeka"),
-                    StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-            JkPathFile.of(jekaShell).setPosixExecPermissions(true, true, true);
-        }
+        createShellScripts(baseDir);
     }
+
+
 
     public static class JkFileEntry {
 

@@ -1,5 +1,6 @@
 package dev.jeka.core.tool.builtins.admin;
 
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -28,7 +29,12 @@ public class AdminKBean extends KBean {
                     .setInheritIO(true)
                     .exec();
         }
+    }
 
+    @JkDoc("Creates or replaces jeka.ps1 and jeka bash script in the current directory .%n" +
+            "The running JeKa version is used for defining jeka scripts version to be created.")
+    public void updateLocalScripts() {
+        JkScaffold.createShellScripts(getBaseDir());
     }
 
 
