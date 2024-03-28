@@ -133,13 +133,16 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
         Path jekaShellPath = getJekaShellPath();
 
-        JkProcess.of(jekaShellPath.toString(),
-                        "-ru", "https://github.com/jeka-dev/demo-cowsay", "-p",  "Hello",  "JeKa")
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(),
+                        "-ru", "https://github.com/jeka-dev/demo-cowsay", "-p",  "Hello JeKa")
                 .setLogCommand(true)
-                .setLogWithJekaDecorator(true)
+                .setCollectStdout(true)
+                .setLogWithJekaDecorator(false)
                 .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
                 .setEnv("jeka.version", SNAPSHOT_VERSION)
                 .exec();
+        String stdout = result.getStdoutAsString();
+        JkUtilsAssert.state(stdout.contains("Hello JeKa"), "Expecting output containing 'Hello JeKa', was %n%s", stdout);
     }
 
 }
