@@ -936,8 +936,54 @@ execute_and_exit_java_if_present() {
     return 0
   fi
   compute_JAVA_CMD
-  exec "$JAVA_CMD" -jar "$jar_file" "$@"
+  local -a sysProp_params
+  filter_in_sysProp "$@"
+  sysProp_params=("${returned[@]}")
+  local -a regular_params
+  filter_out_sysProp "$@"
+  regular_params=("${returned[@]}")
+  exec "$JAVA_CMD" "${sysProp_params[@]}" -jar "$jar_file" "${regular_params[@]}"
   exit $?
+}
+
+######################################
+# Filter array keeping only items that match '-Dxxx=yyy' (sys prop)
+#
+# Global Vars:
+#   returned     (write)
+# Arguments:
+#   $@ : arrays to filter
+# Outputs:
+#   The filtered array is written to in the 'returned' global var
+#######################################
+filter_in_sysProp() {
+  local arr=("$@")
+    returned=()
+    for i in "${arr[@]}"; do
+      if [[ $i == -D* ]] && [[ $i == *"="* ]]; then
+        returned+=("$i")
+      fi
+    done
+}
+
+######################################
+# Filter array removing items that match '-Dxxx=yyy' (sys prop)
+#
+# Global Vars:
+#   returned     (write)
+# Arguments:
+#   $@ : arrays to filter
+# Outputs:
+#   The filtered array is written to in the 'returned' global var
+#######################################
+filter_out_sysProp() {
+  local arr=("$@")
+    returned=()
+    for i in "${arr[@]}"; do
+      if [[ $i != -D* ]] || [[ $i != *"="* ]]; then
+        returned+=("$i")
+      fi
+    done
 }
 
 ##############################################################
