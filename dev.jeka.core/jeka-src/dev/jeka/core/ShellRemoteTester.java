@@ -49,7 +49,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
         String output = result.getStdoutAsString();
-        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+        JkUtilsAssert.state(output.equals("ok" + System.lineSeparator()), "Command output was '%s', " +
                 "expecting 'ok' followed by a breaking line)", output);
     }
 
@@ -74,7 +74,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         // Tests if messages written in stderr by jeka shell are not
         // collected in the output
         String output = result.getStdoutAsString();
-        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+        JkUtilsAssert.state(output.equals("ok" + System.lineSeparator()), "Command output was '%s', " +
                 "expecting 'ok' followed by a breaking line)", output);
     }
 
@@ -102,7 +102,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .exec();
         JkUtilsAssert.state(Files.exists(cachedJdk), "Jdk not downloaded at %s", cachedJdk);
         String output = procResult.getStdoutAsString();
-        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+        JkUtilsAssert.state(output.equals("ok" + System.lineSeparator()), "Command output was '%s', " +
                 "expecting ending with 'ok 'followed by a breaking line)", output);
         System.setProperty("jeka.java.version", "");
     }
@@ -125,7 +125,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         // Tests if messages written in stderr by jeka shell are not
         // collected in the output
         String output = result.getStdoutAsString();
-        JkUtilsAssert.state(output.equals("ok\n"), "Command output was '%s', " +
+        JkUtilsAssert.state(output.equals("ok" + System.lineSeparator()), "Command output was '%s', " +
                 "expecting 'ok' followed by a breaking line)", output);
     }
 

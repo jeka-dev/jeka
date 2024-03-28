@@ -103,7 +103,12 @@ class CmdLineArgs {
 
   [string] GetSystemProperty([string]$propName) {
     $prefix = "-D$propName="
+    #Write-Host "sysprop prefix=$prefix"
     foreach ($arg in $this.args) {
+      if ($arg -eq $null) {
+        continue
+      }
+      #Write-Host "sysproparg=$arg"
       if ( $arg.StartsWith($prefix) ) {
         return $arg.Replace($prefix, "")
       }
@@ -144,7 +149,7 @@ class CmdLineArgs {
 
   [bool] IsProgramFlagPresent() {
     $remoteArgs= @("-p", "--program")
-    $remoteIndex= Get-indexOfFirst($this.args,$remoteArgs)
+    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
     return ($remoteIndex -ne -1)
   }
 
@@ -167,13 +172,13 @@ class Props {
       return $cmdArgsValue
     }
     $envValue = [Environment]::GetEnvironmentVariable($propName)
-    if ($null -ne $envValue) {
+    if ('' -ne $envValue) {
       return $envValue
     }
     $jekaPropertyFilePath = $this.baseDir + '\jeka.properties'
 
     $value = [Props]::GetValueFromFile($jekaPropertyFilePath, $propName)
-    if ($null -eq $value) {
+    if ('' -eq $value) {
       $parentDir = $this.baseDir + '\..'
       $parentJekaPropsFile = $parentDir + '\jeka.properties'
       if (Test-Path $parentJekaPropsFile) {
@@ -201,7 +206,7 @@ class Props {
       if ($arg -like "::*") {
         $propKey= ( "jeka.cmd." + $arg.Substring(2) )
         $propValue= $this.GetValue($propKey)
-        if ($null -ne $propValue) {
+        if ('' -ne $propValue) {
           $valueArray= [Props]::ParseCommandLine($propValue)
           $result += $valueArray
         } else {
@@ -214,7 +219,7 @@ class Props {
     return [CmdLineArgs]::new($result)
   }
 
-  static [string] ParseCommandLine([string]$cmdLine) {
+  static [array] ParseCommandLine([string]$cmdLine) {
     $pattern = '(""[^""]*""|[^ ]*)'
     $regex = New-Object Text.RegularExpressions.Regex $pattern
     return $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') } | Where-Object { $_ -ne "" }
@@ -387,13 +392,15 @@ function Main {
   $baseDir = $baseDirResolver.GetPath()
   $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
   $cmdLineArgs = $props.InterpolatedCmdLine()
+  $joinedArgs = $cmdLineArgs.args -join ","
+  Write-Message "Interoplated cmd line : $joinedArgs"
   $global:Verbose = $cmdLineArgs.IsVerboseFlagPresent()
 
   # Compute Java command
   $jdks = [Jdks]::new($props, $cacheDir)
   $javaCmd = $jdks.GetJavaCmd()
 
-  if ($cmdLineArgs.IsUpdateFlagPresent()) {
+  if ($cmdLineArgs.IsProgramFlagPresent()) {
     # Try to Execute program without passing by Jeka
   } else {
     $jekaDistrib = [JekaDistrib]::new($props, $cacheDir)
@@ -401,7 +408,7 @@ function Main {
     $classpath = "$baseDir\jeka-boot\*;$jekaJar"
     $jekaOpts = $Env:JEKA_OPTS
     $baseDirProp = "-Djeka.current.basedir=$baseDir"
-    & "$javaCmd" "$jekaOpts" $baseDirProp -cp $classpath "dev.jeka.core.tool.Main" $arguments
+    & "$javaCmd" "$jekaOpts" $baseDirProp -cp $classpath "dev.jeka.core.tool.Main" $cmdLineArgs.args
   }
 
 }
