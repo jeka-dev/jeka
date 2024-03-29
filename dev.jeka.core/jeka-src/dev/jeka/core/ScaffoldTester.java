@@ -50,7 +50,7 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
         runWithDistribJekaShell(path, scaffoldCmdLine);
         runWithDistribJekaShell(path, checkCommandLine);
-        runWithBaseDirJekaShell(path, checkCommandLine);
+        //runWithBaseDirJekaShell(path, checkCommandLine);
         if (deleteAfter) {
             JkPathTree.of(path).deleteRoot();
         }

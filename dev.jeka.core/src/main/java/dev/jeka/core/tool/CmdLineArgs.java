@@ -114,9 +114,9 @@ class CmdLineArgs {
         for (String candidate : candidates) {
             int index = result.indexOf(candidate);
             if (index != -1) {
-                int indexToRemove = index + 1;
-                if (indexToRemove < result.size()) {
-                    result.remove(indexToRemove);
+                result.remove(index);
+                if (index < result.size()) {
+                    result.remove(index);
                 }
                 return result.toArray(new String[0]);
             }

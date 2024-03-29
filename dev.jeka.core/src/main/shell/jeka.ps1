@@ -1,10 +1,15 @@
-function Write-Verbose-Force {
+function MessageInfo {
+  param([string]$msg)
+  [Console]::Error.WriteLine($msg)
+}
+
+function MessageVerbose {
   param([string]$msg)
 
-  $previous = $VerbosePreference
-  $VerbosePreference = "Continue"
-  Write-Verbose "$msg"
-  $VerbosePreference = $previous
+  if ($VerbosePreference -eq "Continue") {
+    [Console]::Error.WriteLine($msg)
+  }
+
 }
 
 function Exit-Error {
@@ -68,7 +73,7 @@ class BaseDirResolver {
       $branchArgs = "--branch " + $branchArgs
     }
     $repoUrl = $this.SubstringBeforeHash()
-    Write-Verbose-Force "Git clone $repoUrl"
+    MessageInfo "Git clone $repoUrl"
     $gitCmd = "git clone --quiet -c advice.detachedHead=false --depth 1 $branchArgs $repoUrl $path"
     Invoke-Expression -Command $gitCmd
   }
@@ -299,7 +304,7 @@ class Jdks {
   }
 
   hidden Install([string]$distrib, [string]$version, [string]$targetDir) {
-    Write-Verbose-Force "Downloading JDK $distrib $version. It may take a while..."
+    MessageInfo "Downloading JDK $distrib $version. It may take a while..."
     $jdkurl="https://api.foojay.io/disco/v3.0/directuris?distro=$distrib&javafx_bundled=false&libc_type=c_std_lib&archive_type=zip&operating_system=windows&package_type=jdk&version=$version&architecture=x64&latest=available"
     $zipExtractor = [ZipExtractor]::new($jdkurl, $targetDir)
     $zipExtractor.ExtractRootContent()
@@ -497,6 +502,7 @@ function Main {
     [bool]$allowReenter
   )
 
+  $argLine = $arguments -join ' '
   $jekaUserHome = Get-JekaUserHome
   $cacheDir = Get-CacheDir($jekaUserHome)
   $globalPropFile = $jekaUserHome + "\global.properties"
@@ -517,7 +523,7 @@ function Main {
   if ($cmdLineArgs.IsVerboseFlagPresent()) {
     $VerbosePreference = 'Continue'
   }
-  Write-Verbose "Interpolated cmd line : $joinedArgs"
+  MessageVerbose "Interpolated cmd line : $joinedArgs"
 
   # Compute Java command
   $jdks = [Jdks]::new($props, $cacheDir)
@@ -547,7 +553,7 @@ function Main {
     $buildArgs = [Props]::ParseCommandLine($buildCmd)
     $leadingArgs = $cmdLineArgs.GetPriorProgramArgs()
     $effectiveArgs = $leadingArgs + $buildArgs
-    Write-Verbose "Building with command : $effectiveArgs"
+    MessageInfo "Building with command : $effectiveArgs"
     ExecJekaEngine -baseDir $baseDir -cacheDir $cacheDir -props $props -javaCmd $javaCmd -cmdLineArgs $effectiveArgs
     if ($LASTEXITCODE -ne 0) {
       Exit-Error "Build exited with error code $LASTEXITCODE. Cannot execute program"
