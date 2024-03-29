@@ -95,7 +95,9 @@ public final class JkJarPacker {
             }
         }
         jarWriter.close();
-        JkUtilsPath.deleteIfExists(originalJar);
+
+        // On Windows, this may happen that the deletion fails cause another process is using it
+        JkUtilsPath.deleteIfExistsSafely(originalJar);
     }
 
 }

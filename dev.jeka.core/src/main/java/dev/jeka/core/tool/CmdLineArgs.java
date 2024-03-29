@@ -110,13 +110,20 @@ class CmdLineArgs {
             return originalArgs;
         }
         List<String> result = new LinkedList<>(Arrays.asList(originalArgs));
-        String first =result.get(0);
-        if (JkUtilsIterable.listOf("-r", "-ru").contains(first)) {
-            result.remove(0);
-            result.remove(0);
+        String[] candidates = new String[] {"-r", "-ru", "-ur", "--remote"};
+        for (String candidate : candidates) {
+            int index = result.indexOf(candidate);
+            if (index != -1) {
+                int indexToRemove = index + 1;
+                if (indexToRemove < result.size()) {
+                    result.remove(indexToRemove);
+                }
+                return result.toArray(new String[0]);
+            }
         }
-        return result.toArray(new String[0]);
+        return originalArgs;
     }
+
 
     String[] get() {
         return args;

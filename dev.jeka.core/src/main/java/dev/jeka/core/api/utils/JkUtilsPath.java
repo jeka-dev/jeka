@@ -250,6 +250,18 @@ public final class JkUtilsPath {
     }
 
     /**
+     * Delegates to Files{@link #deleteIfExists(Path)}
+     */
+    public static void deleteIfExistsSafely(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (final IOException e) {
+            path.toFile().deleteOnExit();
+            JkLog.verbose("Cannot delete %s. Cause : %s", path, e.getMessage());
+        }
+    }
+
+    /**
      * Delegates to {@link Files#createFile(Path, FileAttribute[])}s
      */
     public static void createFile(Path path, FileAttribute<?>... attrs) {
