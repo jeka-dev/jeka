@@ -4,6 +4,7 @@ import dev.jeka.core.api.system.JkProcHandler;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -86,7 +87,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 JkUtilsAssert.state(ended, "Can't kill process");
 
             } else {
-                runWithBaseDirJekaShell(path, checkCmd);
+                runJeka(!JkUtilsSystem.IS_WINDOWS, path, checkCmd);
             }
 
             if (checkHttp) {
