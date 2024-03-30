@@ -28,9 +28,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         testWithRemoteGitHttp();
         try {
             testWithSnapshotDistribVersion();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
         testWithSpecificJavaVersion();
@@ -133,8 +131,10 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
         Path jekaShellPath = getJekaShellPath();
 
+        // We want also testing that sys properties declared as program arguments are
+        // handled as regular sys properties
         JkProcResult result = JkProcess.of(jekaShellPath.toString(),
-                        "--quiet", "-ru", "https://github.com/jeka-dev/demo-cowsay", "-p",  "Hello JeKa", "-Dcowsay.prefix=Mooo")
+                        "-ru", "https://github.com/jeka-dev/demo-cowsay", "-p",  "Hello JeKa", "-Dcowsay.prefix=Mooo")
                 .setLogCommand(true)
                 .setCollectStdout(true)
                 .setCollectStderr(true)
