@@ -1,12 +1,22 @@
+#Requires -Version 5
+
+#
+# Execute JeKa by Downloading requiered potentialy missing dependencies (JDK, JeKa version)
+# The passed arguments are interpolated then passed to JeKA engine.
+#
+
 function MessageInfo {
   param([string]$msg)
-  [Console]::Error.WriteLine($msg)
+  if ($global:QuietFlag -ne $true) {
+    [Console]::Error.WriteLine($msg)
+  }
+
 }
 
 function MessageVerbose {
   param([string]$msg)
 
-  if ($VerbosePreference -eq "Continue") {
+  if (($VerbosePreference -eq "Continue") -and ($global:QuietFlag -ne $true)) {
     [Console]::Error.WriteLine($msg)
   }
 
@@ -160,6 +170,12 @@ class CmdLineArgs {
 
   [bool] IsUpdateFlagPresent() {
     $remoteArgs= @("-ru", "-ur", "-u", "--remote-update")
+    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
+    return ($remoteIndex -ne -1)
+  }
+
+  [bool] IsQuietFlagPresent() {
+    $remoteArgs= @("-q", "--quiet")
     $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
     return ($remoteIndex -ne -1)
   }
@@ -465,7 +481,8 @@ function ExecJekaEngine {
     [string]$cacheDir,
     [Props]$props,
     [string]$javaCmd,
-    [array]$cmdLineArgs
+    [array]$cmdLineArgs,
+    [Parameter(Mandatory=$false)][bool]$stderr = $false
   )
 
   $jekaDistrib = [JekaDistrib]::new($props, $cacheDir)
@@ -498,17 +515,20 @@ function ExecProg {
 
 function Main {
   param(
-    [array]$arguments,
-    [bool]$allowReenter
+    [array]$arguments
   )
 
-  $argLine = $arguments -join ' '
+  #$argLine = $arguments -join '|'
+  #MessageInfo "Raw arguments |$argLine|"
   $jekaUserHome = Get-JekaUserHome
   $cacheDir = Get-CacheDir($jekaUserHome)
   $globalPropFile = $jekaUserHome + "\global.properties"
 
   # Get interpolated cmdLine, while ignoring Base dir
   $rawCmdLineArgs = [CmdLineArgs]::new($arguments)
+  if ($rawCmdLineArgs.IsQuietFlagPresent()) {
+    $global:QuietFlag = $true
+  }
   $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
   $cmdLineArgs = $rawProps.InterpolatedCmdLine()
 
@@ -574,4 +594,4 @@ function Main {
 }
 
 $ErrorActionPreference = "Stop"
-Main -arguments $args -allowReenter $true
+Main -arguments $args
