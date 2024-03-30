@@ -129,7 +129,7 @@ class Engine {
     }
 
     private static String classNameFromClassFilePath(Path relativePath) {
-        final String dotName = relativePath.toString().replace('/', '.');
+        final String dotName = relativePath.toString().replace('\\', '/').replace('/', '.');
         return JkUtilsString.substringBeforeLast(dotName, ".");
     }
 
