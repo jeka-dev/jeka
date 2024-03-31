@@ -143,9 +143,11 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .setEnv("jeka.version", SNAPSHOT_VERSION)
                 .exec();
         String stdout = result.getStdoutAsString();
+        String stderr = result.getStderrAsString();
         JkUtilsAssert.state(stdout.contains("MoooHello JeKa"), "Expecting output containing 'MoooHello JeKa', " +
-                "was %n%s %n stderr was %n%s", stdout, result.getStderrAsString());
-        JkUtilsAssert.state(stdout.trim().startsWith("_____"), "Expecting output starting with '_____', was %s", stdout);
+                "was %n%s %n stderr was %n%s", stdout, stderr);
+        JkUtilsAssert.state(stdout.trim().startsWith("_____"), "Expecting output starting " +
+                "with '_____', was %n%s %n stderr was %n%s", stdout, stderr);
     }
 
 }

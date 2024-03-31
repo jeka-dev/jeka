@@ -295,8 +295,9 @@ class Props {
     $data = [System.IO.File]::ReadAllLines($filePath)
     foreach ($line in $data) {
       if ($line -match "^$propertyName=") {
-        $value = $line.Split('=')[1]
-        return $value.Trim()
+        $keyLength = $propertyName.Length + 1
+        $value = $line.Substring($keyLength)
+        return $value
       }
     }
     return $null
@@ -562,7 +563,8 @@ function Main {
 
     # No executable or Jar found : launch a build
     $buildCmd = $props.GetValue("jeka.program.build")
-    if ($buildCmd -eq '') {
+    MessageInfo "jeka.program.build=$buildCmd"
+    if (!$buildCmd) {
       $srcDir = $baseDir + "\src"
       if ([System.IO.Directory]::Exists($srcDir)) {
         $buildCmd = "project: pack -Djeka.skip.tests=true"
