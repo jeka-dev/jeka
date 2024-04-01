@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
@@ -106,7 +122,7 @@ public class JkProjectFlatFacade {
     /**
      * Sets the main class name to use in #runXxx and for building docker images.
      * The value <code>"auto"</code> means that it will e auto-discovered.
-     * 
+     *
      * @see JkProjectPackaging#setMainClass(String)
      */
     public JkProjectFlatFacade setMainClass(String mainClass) {
@@ -185,7 +201,6 @@ public class JkProjectFlatFacade {
     }
 
 
-
     /**
      * Sets whether to skip running tests for the project.
      */
@@ -216,6 +231,7 @@ public class JkProjectFlatFacade {
 
     /**
      * The published version will be computed according the current git tag.
+     *
      * @see JkGit#getVersionFromTag()
      */
     public JkProjectFlatFacade setVersionFromGitTag() {
@@ -224,6 +240,7 @@ public class JkProjectFlatFacade {
 
     /**
      * The published version will be computed according the git last commit message.
+     *
      * @see JkGit#getVersionFromCommitMessage(String)
      */
     public JkProjectFlatFacade setVersionFromGitTagCommitMessage(String suffixKeyword) {
@@ -243,6 +260,7 @@ public class JkProjectFlatFacade {
     /**
      * By default, every class in test folder are run. If you add an exclude filter,
      * tests accepting this filter won't be run.
+     *
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectFlatFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
@@ -255,6 +273,7 @@ public class JkProjectFlatFacade {
     /**
      * By default, every class in test folder are run. If you add an including filter, only
      * tests accepting one of the declared filters will run.
+     *
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectFlatFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
@@ -266,12 +285,12 @@ public class JkProjectFlatFacade {
      * Adds a test include filters for test classes named as <code>^(Test.*|.+[.$]Test.*|.*Tests?)$</code>.
      * This is a standard filter in many tools.
      *
-     *  @see #addTestIncludeFilterSuffixedBy(String, boolean)
+     * @see #addTestIncludeFilterSuffixedBy(String, boolean)
      */
     public JkProjectFlatFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
         project.testing.testSelection.addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
-       return this;
+        return this;
     }
 
     /**
@@ -301,7 +320,7 @@ public class JkProjectFlatFacade {
         return customizeTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
     }
 
-    private JkDependencySet add(JkDependencySet deps, String ... descriptors) {
+    private JkDependencySet add(JkDependencySet deps, String... descriptors) {
         JkDependencySet result = deps;
         for (String descriptor : descriptors) {
             result = result.and(descriptor);
@@ -309,7 +328,7 @@ public class JkProjectFlatFacade {
         return result;
     }
 
-    private JkDependencySet addFirst(JkDependencySet deps, String ... descriptors) {
+    private JkDependencySet addFirst(JkDependencySet deps, String... descriptors) {
         JkDependencySet result = deps;
         List<String> items = new LinkedList<>(Arrays.asList(descriptors));
         Collections.reverse(items);
@@ -320,7 +339,7 @@ public class JkProjectFlatFacade {
     }
 
 
-    private JkDependencySet minus(JkDependencySet deps, String ... descriptors) {
+    private JkDependencySet minus(JkDependencySet deps, String... descriptors) {
         JkDependencySet result = deps;
         for (String descriptor : descriptors) {
             result = result.minus(descriptor);

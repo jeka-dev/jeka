@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -84,7 +100,6 @@ class LocalAndTxtDependencies {
      * org.fluentlenium:fluentlenium-assertj:3.2.0
      * org.fluentlenium:fluentlenium-junit:3.2.0
      * </pre>
-     *
      */
     public static LocalAndTxtDependencies ofTextDescription(String description) {
         return Parser.parseTxt(description);
@@ -210,14 +225,13 @@ class LocalAndTxtDependencies {
             if (line.startsWith(GLOBAL_EXCLUDE_SYMBOL)) {
                 String coordinate = line.substring(GLOBAL_EXCLUDE_SYMBOL.length()).trim();
                 return current.withGlobalExclusions(coordinate);
-            }
-            else {
+            } else {
                 return current.and(line);
             }
         }
 
         private static String readQualifier(String line) {
-            String payload = JkUtilsString.substringAfterFirst(line,"== ").trim();
+            String payload = JkUtilsString.substringAfterFirst(line, "== ").trim();
             if (payload.contains("=")) {
                 payload = JkUtilsString.substringBeforeFirst(payload, "=").toLowerCase().trim();
             }

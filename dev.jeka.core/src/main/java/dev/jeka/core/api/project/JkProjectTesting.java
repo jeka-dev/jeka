@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -14,7 +30,6 @@ import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -128,11 +143,11 @@ public class JkProjectTesting {
 
     /**
      * Performs entire test phase, including : <ul>
-     *     <li>compile regular code if needed</li>
-     *     <li>perform pre test tasks if present</li>
-     *     <li>compile test code and process test resources</li>
-     *     <li>execute compiled tests</li>
-     *     <li>execute post tesks if present</li>
+     * <li>compile regular code if needed</li>
+     * <li>perform pre test tasks if present</li>
+     * <li>compile test code and process test resources</li>
+     * <li>execute compiled tests</li>
+     * <li>execute post tesks if present</li>
      * </ul>
      */
     public void run() {
@@ -181,8 +196,8 @@ public class JkProjectTesting {
         JkTestProcessor result = JkTestProcessor.of();
         final Path reportDir = compilation.layout.getOutputDir().resolve(this.reportDir);
         result
-            .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
-            .engineBehavior
+                .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
+                .engineBehavior
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(defaultProgressStyle());
         return result;
