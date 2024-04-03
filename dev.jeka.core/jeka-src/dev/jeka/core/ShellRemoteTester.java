@@ -64,6 +64,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
+                .setCollectStderr(true)
                 .redirectErrorStream(false)
                 .setEnv("jeka.distrib.repo", SNAPSHOT_REPO)
                 .setEnv("jeka.version", SNAPSHOT_VERSION)
