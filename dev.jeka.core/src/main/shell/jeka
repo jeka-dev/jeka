@@ -642,12 +642,13 @@ compute_JEKA_CLASSPATH() {
     return 0
   fi
   local dist_dir=$1
+  local bin_dir="$dist_dir"
 
   # If no distrib dir is specified (no jeka.version specified), we look first
   # for jeka-core.jar presence in the same dir of the current script
   if [ -z "$dist_dir" ]; then  ## No jeka.version is specified, should find the local one
     if [ -f "$CURRENT_SCRIPT_DIR/$JEKA_JAR_NAME" ]; then
-      dist_dir="$CURRENT_SCRIPT_DIR"
+      bin_dir="$CURRENT_SCRIPT_DIR"
     fi
     if [ -z "$dist_dir" ]; then
       msg "No JeKa distribution found from script location $CURRENT_SCRIPT_DIR."
@@ -670,7 +671,10 @@ compute_JEKA_CLASSPATH() {
        boot_dir_args="./jeka-boot/*:"
     fi
   fi
-  local jar_file="$dist_dir/$JEKA_JAR_NAME"
+  local jar_file="$dist_dir/bin/$JEKA_JAR_NAME"
+  if [ ! -f "$jar_file" ]; then
+    jar_file="$dist_dir/$JEKA_JAR_NAME"
+  fi
   if [ ! -f "$jar_file" ]; then
     msg "Cannot find JeKa jar file $jar_file."
     msg "Are you sure the JeKa distribution you use is properly packaged ?"

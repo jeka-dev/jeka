@@ -107,13 +107,15 @@ public class CoreBuild extends KBean {
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
         distrib
-            .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"))
+            .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"));
+        Path binDir = distribFolder().resolve("bin");
+        JkPathTree.of(binDir)
             .importDir(getBaseDir().resolve("src/main/shell"))
             .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.MAIN_JAR_ARTIFACT_ID))
             .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID));
 
-        JkPathFile.of(distrib.get("jeka")).setPosixExecPermissions();
-        JkPathFile.of(distrib.get("jekau")).setPosixExecPermissions();
+        JkPathFile.of(binDir.resolve("jeka")).setPosixExecPermissions();
+        JkPathFile.of(binDir.resolve("jeka-install")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
             testScaffolding();
             new ShellRemoteTester().run();
