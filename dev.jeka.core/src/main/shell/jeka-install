@@ -129,7 +129,7 @@ setup() {
     echo "Your system seems to already have JeKa installed at : $current_jeka_path"
     echo "If it is a an old version of jeka (<0.11), you can rename it (i.e. jekal) and re-run this script."
     echo
-    echo "If it is an recent version, you can update it by executing 'jekau' or 'jekau <version>'."
+    echo "If it is an recent version, you can update it by executing 'jeka-install' or 'jeka-install <version>'."
     echo "You can see latest versions here : https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions"
     echo ""
     echo "For manual install/fixing, check your $SHELL_CONFIG_FILE file"
