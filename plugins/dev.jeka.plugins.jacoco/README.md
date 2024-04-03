@@ -11,11 +11,10 @@ It also contains utilities class to configure projects programmatically.
 ```properties
 jeka.classpath.inject=dev.jeka:jacoco-plugin
 
-# Instantiate jacoco KBean
-jeka.cmd._append=jacoco#
 
 # Optional settings. Execute `jeka jacoco#help` to see available options.
-jacoco#jacocoVersion=0.8.7
+@jacoco=
+@jacoco.jacocoVersion=0.8.7
 ```
 
 ## Configure Programmatically

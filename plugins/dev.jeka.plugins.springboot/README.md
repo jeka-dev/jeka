@@ -41,9 +41,9 @@ As all KBean, this can be instantiated both using *property file* or *programmat
 
 ```properties
 jeka.classpath.inject=dev.jeka:springboot-plugin
-jeka.default.kbean=dev.jeka.plugins.springboot.SpringbootKBean
 
-springboot#springbootVersion=3.2.1
+@springboot
+@springboot.springbootVersion=3.2.1
 ```
 Visit [source code](src/dev/jeka/plugins/springboot/SpringbootKBean.java) to see available options.
 

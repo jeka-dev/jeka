@@ -16,7 +16,7 @@ jeka.classpath.inject=dev.jeka:sonarqube-plugin
 jeka.cmd.buildQuality=project: pack sonarqube: run
 
 # Optional tool settings
-sonarqube#scannerVersion=5.0.1.3006
+@sonarqube.scannerVersion=5.0.1.3006
 
 # all properties starting with 'sonar.' will be injected as is in the <i>Sonarqube</i> command line.
 sonar.host.url=http://localhost:9000

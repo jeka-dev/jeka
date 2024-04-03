@@ -7,14 +7,16 @@ This plugin provides utility classes and KBean to compile Google ProtoBuffer .pr
 ```properties
 jeka.classpath.inject=dev.jeka:protobuf-plugin
 
+@protobuf
+
 # Change the location of proto files (default is src/main/proto)
-protobuf#protoPath=src/main/protofiles
+@protobuf.protoPath=src/main/protofiles
 
 # Specify the version of the protoc compiler to use
-protobuf#protocVersion=3.1.10
+@protobuf.protocVersion=3.1.10
 
 # Specify the version of protobuf library to include in compile-time dependencies
-protobuf#protobufVersion=3.21.12
+@protobuf.protobufVersion=3.21.12
 ```
 This will add automatically protobuf code source generation to your project.
 
