@@ -21,7 +21,7 @@ set -e
 # Script for installing and upgrading JeKa
 # Authors: Jerome Angibaud
 
-# curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jekau | $(echo $0) -s - setup
+# curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jeka-install | $(echo $0) -s - setup
 
 
 declare MAVEN_REPO="https://repo1.maven.org/maven2"
@@ -156,7 +156,7 @@ setup() {
   echo "Installing Jeka Version $LAST_VERSION in $install_dir ..."
   download_and_unpack "$url" "$install_dir" "zip"
   chmod +x "$install_dir/jeka"
-  chmod +x "$install_dir/jekau"
+  chmod +x "$install_dir/jeka-install"
 
   # Adapt shell script
   compute_SHELL_CONFIG_FILE
@@ -170,7 +170,7 @@ setup() {
   export PATH=$PATH:$install_dir
   jeka --version
   echo "Jeka is properly installed."
-  echo "Later on, you can upgrade to a different JeKa version by running either 'jekau' or 'jekau <version>'."
+  echo "Later on, you can upgrade to a different JeKa version by running either 'jeka-install' or 'jeka-install <version>'."
 }
 
 update() {
