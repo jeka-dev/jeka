@@ -18,7 +18,6 @@ import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.file.JkPathTree;
@@ -223,8 +222,8 @@ class MasterBuild extends KBean {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);
         JkGpgSigner gpg = JkGpgSigner.ofStandardProject(this.getBaseDir());
         JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg);
-        releaseRepo.publishConfig.setVersionFilter(this::isOfficialVersion);
-        snapshotRepo.publishConfig.setVersionFilter(version -> !isOfficialVersion(version));
+        releaseRepo.publishConfig
+                    .setVersionFilter(jkVersion -> !jkVersion.isSnapshot());
         JkRepo githubRepo = JkRepo.ofGitHub("jeka-dev", "jeka");
         githubRepo.publishConfig.setVersionFilter(jkVersion -> !jkVersion.isSnapshot());
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
@@ -234,10 +233,6 @@ class MasterBuild extends KBean {
         JkProject project = projectKBean.project;
         project.setVersion(effectiveVersion);
         project.compilation.addJavaCompilerOptions("-g");
-    }
-
-    private boolean isOfficialVersion(JkVersion version) {
-        return !version.getValue().contains("-"); // '-' means it"s a -SNAPSHOT or -alpha... version
     }
 
     private void applyToSlave(MavenKBean mavenKBean) {

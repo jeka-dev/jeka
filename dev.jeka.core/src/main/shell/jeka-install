@@ -51,7 +51,7 @@ download_and_unpack() {
       mkdir -p "$dir"
       gzip -cd "$temp_file" | tar xf - -C "$dir"
   else
-    unzip -q -o -j "$temp_file" "*/bin/*" -d "$dir"
+    unzip -q -o -j "$temp_file" -d "$dir" -x '__MACOSX/*'
   fi
   rm "$temp_file"
 }
