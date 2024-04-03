@@ -378,7 +378,7 @@ class JekaDistrib {
     $this.cacheDir = $cacheDir
   }
 
-  [string] GetDir() {
+  [string] GetBinDir() {
     $specificLocation = $this.props.GetValue("jeka.distrib.location")
     if ($specificLocation -ne '') {
       return $specificLocation
@@ -401,18 +401,18 @@ class JekaDistrib {
 
     $distDir = $this.cacheDir + "\distributions\" + $jekaVersion
     if ( [System.IO.Directory]::Exists($distDir)) {
-      return $distDir
+      return "$distDir\bin"
     }
 
     $distRepo = $this.props.GetValueOrDefault("jeka.distrib.repo", "https://repo.maven.apache.org/maven2")
     $url = "$distRepo/dev/jeka/jeka-core/$jekaVersion/jeka-core-$jekaVersion-distrib.zip"
     $zipExtractor = [ZipExtractor]::new($url, $distDir)
     $zipExtractor.Extract()
-    return $distDir
+    return "$distDir\bin"
   }
 
   [string] GetJar() {
-    return $this.GetDir() + "\dev.jeka.jeka-core.jar"
+    return $this.GetBinDir() + "\dev.jeka.jeka-core.jar"
   }
 
 }
