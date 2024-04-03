@@ -28,9 +28,6 @@ declare MAVEN_REPO="https://repo1.maven.org/maven2"
 declare MANUAL_NOTICE="https://jeka-dev.github.io/jeka/reference-guide/installation"
 
 
-## While there is no official release for Jeka 0.11.x, we force to fetch distrib from OSSRH snapshot
-SPECIFIC_JEKA_DIST_URL="https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/0.11.x-SNAPSHOT/jeka-core-0.11.x-SNAPSHOT-distrib.zip"
-
 download_and_unpack() {
   local url=$1
   local dir=$2
@@ -54,7 +51,7 @@ download_and_unpack() {
       mkdir -p "$dir"
       gzip -cd "$temp_file" | tar xf - -C "$dir"
   else
-    unzip -qq -o "$temp_file" -d "$dir"
+    unzip -qq -o -j "$temp_file" "/bin/* "-d "$dir"
   fi
   rm "$temp_file"
 }
@@ -80,6 +77,14 @@ compute_LAST_VERSION() {
   local url
   url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
   LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
+}
+
+compute_LAST_RELEASE() {
+    response=$(curl -s "https://api.github.com/repos/jeka-dev/jeka/tags")
+
+    # Extract and print the name of the last release without '-' character
+    latest_release=$(echo "$response" | jq -r '.[].name' | grep -v -- '-' | head -n 1)
+    LAST_RELEASE=$latest_release
 }
 
 get_download_url() {
@@ -140,17 +145,16 @@ setup() {
   fi
 
   # Proceed install
+  compute_LAST_VERSION
   if [ "$SPECIFIC_JEKA_DIST_URL" != "" ]; then  ## $SPECIFIC_JEKA_DIST_URL may be overridden
     url="$SPECIFIC_JEKA_DIST_URL"
-    LAST_VERSION="0.11.x-SNAPSHOT"
   else
-    compute_LAST_VERSION
     local url
     url="$(get_download_url "$LAST_VERSION")"
   fi
 
   # Downloading and unpack
-  local install_dir="$HOME/.jeka/bin"
+  local install_dir="$HOME/.jeka"
   mkdir -p $install_dir
   touch "$HOME/.jeka/global.properties"
   echo "Installing Jeka Version $LAST_VERSION in $install_dir ..."
@@ -178,6 +182,8 @@ update() {
   if [ "$version" == "" ]; then
     compute_LAST_VERSION
     version="$LAST_VERSION"
+    #compute_LAST_RELEASE
+    #version="$LAST_RELEASE"
   fi
   echo "Updating Jeka to version $version ? [y/n]"
   read -r user_input
