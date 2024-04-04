@@ -80,5 +80,10 @@ public final class JkConstants {
      */
     static final JkVersionProvider JEKA_VERSION_PROVIDER = JkVersionProvider.of("dev.jeka:*",
             JkInfo.getJekaVersion());
+
     static final String KBEAN_CMD_SUFFIX = ":";
+
+    static final String KBEAN_CLASS_NAMES_CACHE_FILE = "jeka-kbean-classes.txt";
+
+    static final String KBEAN_CLASSPATH_CACHE_FILE =  "jeka-kbean-classpath.txt";
 }

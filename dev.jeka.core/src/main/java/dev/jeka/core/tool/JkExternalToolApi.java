@@ -35,6 +35,12 @@ import java.util.*;
  */
 public final class JkExternalToolApi {
 
+    public static final String CMD_PREFIX_PROP = JkConstants.CMD_PREFIX_PROP;
+
+    public static final String CMD_APPEND_SUFFIX_PROP =  JkConstants.CMD_APPEND_SUFFIX_PROP;
+
+    public static final String CMD_SUBSTITUTE_SYMBOL = JkConstants.CMD_SUBSTITUTE_SYMBOL;
+
     private JkExternalToolApi(){
     }
 
@@ -152,6 +158,14 @@ public final class JkExternalToolApi {
         return KBean.nameMatches(className, candidate);
     }
 
+    public static Path getKBeanClassnameCacheFile(Path baseDir) {
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASS_NAMES_CACHE_FILE);
+    }
+
+    public static Path getKBeanClasspathCacheFile(Path baseDir) {
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASSPATH_CACHE_FILE);
+    }
+
 
     private static class EngineClasspathCache {
 
@@ -187,6 +201,8 @@ public final class JkExternalToolApi {
         private Path resolvedClasspathCache(Scope scope) {
             return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(scope.prefix() + RESOLVED_CLASSPATH_FILE);
         }
+
+
 
     }
 }

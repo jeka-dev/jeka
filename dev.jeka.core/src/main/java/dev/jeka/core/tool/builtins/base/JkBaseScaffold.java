@@ -56,6 +56,7 @@ public final class JkBaseScaffold extends JkScaffold {
     private JkBaseScaffold(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
         super(baseDir);
         this.selfScaffoldOption = scaffoldOptions;
+        scaffoldOptions.applyTo(this);
     }
 
     /**

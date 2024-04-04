@@ -219,9 +219,8 @@ public abstract class JkScaffold {
         if (!JkUtilsString.isBlank(jekaDistribLocation)) {
             sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
 
-            // -- we need to specify a version if distribution location is empty
         } else  {
-            String effectiveJekaVersion = !JkUtilsString.isBlank(jekaVersion) ? jekaVersion : lastJekaVersion();
+            String effectiveJekaVersion = jekaVersion != null ? jekaVersion : lastJekaVersion();
 
             // TODO remove this check when 0.11.x will be released.
             if (!effectiveJekaVersion.startsWith("0.10.")) {

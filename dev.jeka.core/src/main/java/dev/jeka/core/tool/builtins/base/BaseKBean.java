@@ -24,7 +24,6 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -89,11 +88,11 @@ public final class BaseKBean extends KBean {
 
     private Consumer<Path> jarMaker = this::fatJar;
 
-    private JkBaseScaffold selfScaffold;
+    private JkBaseScaffold baseScaffold;
 
     @Override
     protected void init() {
-        selfScaffold = JkBaseScaffold.of(this);
+        baseScaffold = JkBaseScaffold.of(this);
         packActions.set(this::buildJar);
     }
 
@@ -165,7 +164,7 @@ public final class BaseKBean extends KBean {
 
     @JkDoc("Creates a skeleton in the current working directory.")
     public void scaffold() {
-        selfScaffold.run();
+        baseScaffold.run();
     }
 
     /**
@@ -260,8 +259,8 @@ public final class BaseKBean extends KBean {
      * The JkBaseScaffold provides methods for configuring the project scaffold,
      * such as adding file entries and setting options.
      */
-    public JkBaseScaffold getSelfScaffold() {
-        return selfScaffold;
+    public JkBaseScaffold getBaseScaffold() {
+        return baseScaffold;
     }
 
     /**

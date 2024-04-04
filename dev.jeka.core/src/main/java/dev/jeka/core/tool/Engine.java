@@ -457,9 +457,9 @@ class Engine {
         JkPathSequence kbeanClasspath = classpathSetupResult.kbeanClasspath;
 
         // -- Look cached result in files
-        Path classpathCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classpath.txt");
+        Path classpathCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASSPATH_CACHE_FILE);
         JkPathSequence cachedClasspath = JkPathSequence.readFromQuietly(classpathCache);
-        Path kbeanCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve("jeka-kbean-classes.txt");
+        Path kbeanCache = baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASS_NAMES_CACHE_FILE);
 
         // -- If cache matches, returns cached resul
         // -- kbeanCache file may not exist is compilation is skipped
