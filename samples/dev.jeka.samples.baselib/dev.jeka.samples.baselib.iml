@@ -61,12 +61,8 @@
                 <CLASSES>
                     <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">
@@ -97,14 +93,5 @@
             </library>
         </orderEntry>
         <orderEntry exported="" module-name="dev.jeka.core" scope="TEST" type="module"/>
-        <orderEntry exported="" scope="TEST" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="file://$MODULE_DIR$/.jeka-work/jeka-src-classes"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
     </component>
 </module>

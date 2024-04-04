@@ -180,7 +180,7 @@ public final class JkImlGenerator {
                 iml.component.getContent().addSourceFolder(path, false, null);
             }
         }
-        iml.component.getOrderEntries().addAll(defOrderEntries());
+        iml.component.getOrderEntries().addAll(jekaSrcOrderEntries());
         imlConfigurer.accept(iml);
         JkLog.verbose("Iml object generated");
         return iml;
@@ -191,7 +191,7 @@ public final class JkImlGenerator {
     }
 
     // For def, we have computed classpath from runtime
-    private List<JkIml.OrderEntry> defOrderEntries() {
+    private List<JkIml.OrderEntry> jekaSrcOrderEntries() {
         OrderEntries orderEntries = new OrderEntries();
         JkPathSequence importedClasspath = jekaSrcImportedProjects.getEntries().stream()
                         .map(JkRunbase::get)
@@ -199,10 +199,11 @@ public final class JkImlGenerator {
                         .reduce(JkPathSequence.of(), (ps1, ps2) -> ps1.and(ps2))
                         .withoutDuplicates();
 
+
         jekaSrcClasspath.and(jekaSrcImportedProjects).getEntries().stream()
                 .filter(path -> !importedClasspath.getEntries().contains(path))
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
-                .filter(path -> !path.equals(Paths.get(JkConstants.JEKA_SRC_CLASSES_DIR)))
+                .filter(path -> !path.endsWith(JkConstants.JEKA_SRC_CLASSES_DIR))
                 .forEach(path -> orderEntries.add(path, JkIml.Scope.TEST));
         return new LinkedList<>(orderEntries.orderEntries);
     }
