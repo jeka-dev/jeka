@@ -281,10 +281,10 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         private boolean generateLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
-        private JkProjectScaffold.Template template = JkProjectScaffold.Template.BUILD_CLASS;
+        private JkProjectScaffold.Kind kind = JkProjectScaffold.Kind.BUILD_CLASS;
 
-        public JkProjectScaffold.Template getTemplate() {
-            return template;
+        public JkProjectScaffold.Kind getKind() {
+            return kind;
         }
 
         @Override
@@ -292,7 +292,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             super.applyTo(scaffold);
             // Scaffold project structure including build class
             JkProjectScaffold projectScaffold = (JkProjectScaffold) scaffold;
-            projectScaffold.setTemplate(template);
+            projectScaffold.setTemplate(kind);
             projectScaffold.setUseSimpleStyle(ProjectKBean.this.layout.style == JkCompileLayout.Style.SIMPLE);
 
             // Create 'project-dependencies.txt' file if needed

@@ -45,7 +45,7 @@ public final class JkProjectScaffold extends JkScaffold {
 
     public static final String SIMPLE_STYLE_PROP = "project#layout.style=SIMPLE";
 
-    public enum Template {
+    public enum Kind {
         BUILD_CLASS, PROPS, PLUGIN
     }
 
@@ -61,7 +61,7 @@ public final class JkProjectScaffold extends JkScaffold {
 
     private boolean generateLibsFolders;
 
-    private Template template = Template.BUILD_CLASS;
+    private Kind kind = Kind.BUILD_CLASS;
 
     private final JkConsumers<JkProjectScaffold> customizers = JkConsumers.of();
 
@@ -85,15 +85,15 @@ public final class JkProjectScaffold extends JkScaffold {
     /**
      * Returns the template currently set for this scaffold
      */
-    public Template getTemplate() {
-        return template;
+    public Kind getTemplate() {
+        return kind;
     }
 
     /**
      * Sets the template for this scaffold.
      */
-    public JkProjectScaffold setTemplate(Template template) {
-        this.template = template;
+    public JkProjectScaffold setTemplate(Kind kind) {
+        this.kind = kind;
         return this;
     }
 
@@ -163,16 +163,16 @@ public final class JkProjectScaffold extends JkScaffold {
             addJekaPropValue(SIMPLE_STYLE_PROP);
         }
 
-        if (template == Template.BUILD_CLASS) {
+        if (kind == Kind.BUILD_CLASS) {
             String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
             addFileEntry(BUILD_CLASS_PATH, code);
 
-        } else if (template == Template.PLUGIN) {
+        } else if (kind == Kind.PLUGIN) {
             String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");
             code = code.replace("${jekaVersion}", JkInfo.getJekaVersion());
             addFileEntry(BUILD_CLASS_PATH, code);
 
-        } else if (template == Template.PROPS) {
+        } else if (kind == Kind.PROPS) {
             addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
         }
 
@@ -191,7 +191,7 @@ public final class JkProjectScaffold extends JkScaffold {
         testLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
 
         // This is special scaffolding for plugin projects
-        if (template == Template.PLUGIN) {
+        if (kind == Kind.PLUGIN) {
             Path breakingChangeFile = project.getBaseDir().resolve("breaking_versions.txt");
             String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";

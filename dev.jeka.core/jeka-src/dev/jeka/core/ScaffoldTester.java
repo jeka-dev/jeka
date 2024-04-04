@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core;
 
 import dev.jeka.core.api.file.JkPathTree;
@@ -20,11 +36,11 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         // Basic scaffold and checks
         scaffoldAndCheckInTemp("base: scaffold -v", "hello base: info -v -Djeka.java.version=17", true);
         scaffoldAndCheckInTemp("base: scaffold scaffold.kind=APP -vi", "base: test runMain", true);
-        scaffoldAndCheckInTemp("project: scaffold scaffold.template=BUILD_CLASS", ": --help", true);
+        scaffoldAndCheckInTemp("project: scaffold scaffold.kind=BUILD_CLASS", ": --help", true);
 
         // Scaffold template=PROPS + layout=SIMPLE
         Path tempDir = scaffoldAndCheckInTemp(
-                "project: scaffold.template=PROPS layout.style=SIMPLE scaffold",
+                "project: scaffold.kind=PROPS layout.style=SIMPLE scaffold",
                 "project: pack -v", false);
         JkUtilsAssert.state(Files.exists(tempDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
                 "dependencies.txt has not been generated");
@@ -32,7 +48,7 @@ class ScaffoldTester extends JekaCommandLineExecutor {
 
         // Scaffold for Jeka  plugin
         scaffoldAndCheckInTemp(
-                "project: scaffold scaffold.template=PLUGIN",
+                "project: scaffold scaffold.kind=PLUGIN",
                 "project: pack", true);
 
         // Check IntelliJ + Eclipse metadata
