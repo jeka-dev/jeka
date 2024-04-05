@@ -72,7 +72,7 @@ public class EngineTest {
     @Test
     public void picocliEnum_ok() {
         ProjectKBean projectKBean = new EngineWrapper()
-                .run("project:", "scaffold.kind=PROPS", "layout.style=SIMPLE")
+                .run("project:", "scaffold.kind=REGULAR", "layout.style=SIMPLE")
                 .load(ProjectKBean.class);
         assertEquals(JkCompileLayout.Style.SIMPLE, projectKBean.layout.style);
     }

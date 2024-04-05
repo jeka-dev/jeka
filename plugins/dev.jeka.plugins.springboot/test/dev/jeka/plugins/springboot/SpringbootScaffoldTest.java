@@ -37,15 +37,14 @@ import static org.junit.Assert.assertTrue;
 public class SpringbootScaffoldTest {
 
     @Test
-    public void scaffoldProject_withBuildClass_ok() throws Exception {
+    public void scaffoldProject_regular_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         JkProjectScaffold projectScaffold = JkProjectScaffold.of(project);
         projectScaffold.compileDeps.add("toto:titi:0.0.1");
         projectScaffold.runtimeDeps.add("foo:bar");
         projectScaffold
-                .setTemplate(JkProjectScaffold.Kind.BUILD_CLASS)
-                .setTemplate(JkProjectScaffold.Kind.BUILD_CLASS)
+                .setTemplate(JkProjectScaffold.Kind.REGULAR)
                 .addCustomizer(SpringbootScaffold::adapt)
                 .run();
 
@@ -69,12 +68,12 @@ public class SpringbootScaffoldTest {
     }
 
     @Test
-    public void scaffoldProject_PropsWithSimpleLayout_ok() throws IOException {
+    public void scaffoldProject_regularWithSimpleLayout_ok() throws IOException {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         JkProjectScaffold.of(project)
-                .setTemplate(JkProjectScaffold.Kind.PROPS)
+                .setTemplate(JkProjectScaffold.Kind.REGULAR)
                 .setUseSimpleStyle(true)
                 .addCustomizer(SpringbootScaffold::adapt)
                 .run();
@@ -93,27 +92,7 @@ public class SpringbootScaffoldTest {
         JkPathTree.of(baseDir).deleteRoot();
     }
 
-    @Test
-    public void scaffoldProject_buildClassWithSimpleLayout_ok() throws IOException {
-        Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
-        JkProject project = JkProject.of().setBaseDir(baseDir);
-        project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
 
-        JkProjectScaffold.of(project)
-                .setTemplate(JkProjectScaffold.Kind.BUILD_CLASS)
-                .setUseSimpleStyle(true)
-                .addCustomizer(SpringbootScaffold::adapt)
-                .run();
-
-        // Check project layout
-        assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));
-        assertTrue(Files.exists(baseDir.resolve("src/app//Application.java")));
-        assertFalse(Files.isDirectory(baseDir.resolve("res")));
-
-        // cleanup
-        //Desktop.getDesktop().open(baseDir.toFile());
-        JkPathTree.of(baseDir).deleteRoot();
-    }
 
     @Test
     public void scaffoldSelf_withBuildClass_ok() throws Exception {

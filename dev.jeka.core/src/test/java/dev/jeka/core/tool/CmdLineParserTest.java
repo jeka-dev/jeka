@@ -30,7 +30,7 @@ public class CmdLineParserTest {
     @Test
     public void nestedEnum_ok() {
         List<KBeanAction> kBeanActions = parse(
-                "project: scaffold scaffold.kind=PROPS layout.style=SIMPLE").toList();
+                "project: scaffold scaffold.kind=REGULAR layout.style=SIMPLE").toList();
         kBeanActions.forEach(System.out::println);
         Object styleValue = kBeanActions.stream()
                 .filter(action -> "layout.style".equals(action.member))

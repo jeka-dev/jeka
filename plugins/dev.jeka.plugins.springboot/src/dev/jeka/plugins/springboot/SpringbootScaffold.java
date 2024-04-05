@@ -37,7 +37,7 @@ class SpringbootScaffold {
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
                 JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
 
-        if (projectScaffold.getTemplate() == JkProjectScaffold.Kind.BUILD_CLASS) {
+        if (projectScaffold.getTemplate() == JkProjectScaffold.Kind.REGULAR) {
             String code = readSnippet("Build.java");
 
             // For testability purpose
@@ -50,8 +50,6 @@ class SpringbootScaffold {
             code = code.replace("${dependencyDescription}", injectClasspath);
             code = code.replace("${springbootVersion}", lastSpringbootVersion);
             projectScaffold.addFileEntry(JkProjectScaffold.BUILD_CLASS_PATH, code);
-
-        } else if (projectScaffold.getTemplate() == JkProjectScaffold.Kind.PROPS) {
 
             // Augment jeka.properties
             projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_INJECT_PROP + "=dev.jeka:springboot-plugin");

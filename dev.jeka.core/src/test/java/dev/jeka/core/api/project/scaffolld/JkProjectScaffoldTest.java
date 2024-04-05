@@ -35,14 +35,14 @@ public class JkProjectScaffoldTest {
 
 
     @Test
-    public void scaffold_withBuildClass_ok() throws Exception {
+    public void scaffold_regular_ok()  {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         JkProjectScaffold projectScaffold = JkProjectScaffold.of(project);
         projectScaffold.compileDeps.add("toto:titi:0.0.1");
         projectScaffold.runtimeDeps.add("foo:bar");
         projectScaffold
-                .setTemplate(JkProjectScaffold.Kind.BUILD_CLASS)
+                .setTemplate(JkProjectScaffold.Kind.REGULAR)
                 .run();
 
         // check .gitIgnore
@@ -67,26 +67,6 @@ public class JkProjectScaffoldTest {
     }
 
     @Test
-    public void scaffold_withProps_ok() throws Exception {
-        Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
-        JkProject project = JkProject.of().setBaseDir(baseDir);
-        JkProjectScaffold.of(project)
-            .setTemplate(JkProjectScaffold.Kind.PROPS)
-            .run();
-
-        // Check build class is absent
-        assertFalse(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Build.java")));
-
-        // Check default KBean is present
-        String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();
-        assertTrue(jekaContent.contains(JkConstants.DEFAULT_KBEAN_PROP + "=project"));
-
-        // cleanup
-        // Desktop.getDesktop().open(baseDir.toFile());
-        JkPathTree.of(baseDir).deleteRoot();
-    }
-
-    @Test
     public void scaffold_withSimpleLayout_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
@@ -102,7 +82,7 @@ public class JkProjectScaffoldTest {
 
         // Check property is here
         String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();
-        assertTrue(jekaContent.contains("project#layout.style=SIMPLE"));
+        assertTrue(jekaContent.contains("@project.layout.style=SIMPLE"));
 
         // cleanup
         //Desktop.getDesktop().open(baseDir.toFile());

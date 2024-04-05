@@ -43,10 +43,10 @@ public final class JkProjectScaffold extends JkScaffold {
 
     public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Build.java";
 
-    public static final String SIMPLE_STYLE_PROP = "project#layout.style=SIMPLE";
+    public static final String SIMPLE_STYLE_PROP = "@project.layout.style=SIMPLE";
 
     public enum Kind {
-        BUILD_CLASS, PROPS, PLUGIN
+        REGULAR, PLUGIN
     }
 
     protected final JkProject project;
@@ -61,7 +61,7 @@ public final class JkProjectScaffold extends JkScaffold {
 
     private boolean generateLibsFolders;
 
-    private Kind kind = Kind.BUILD_CLASS;
+    private Kind kind = Kind.REGULAR;
 
     private final JkConsumers<JkProjectScaffold> customizers = JkConsumers.of();
 
@@ -163,17 +163,15 @@ public final class JkProjectScaffold extends JkScaffold {
             addJekaPropValue(SIMPLE_STYLE_PROP);
         }
 
-        if (kind == Kind.BUILD_CLASS) {
+        if (kind == Kind.REGULAR) {
             String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
             addFileEntry(BUILD_CLASS_PATH, code);
+            //addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
 
         } else if (kind == Kind.PLUGIN) {
             String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");
             code = code.replace("${jekaVersion}", JkInfo.getJekaVersion());
             addFileEntry(BUILD_CLASS_PATH, code);
-
-        } else if (kind == Kind.PROPS) {
-            addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
         }
 
     }

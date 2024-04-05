@@ -281,7 +281,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         private boolean generateLibsFolders = false;
 
         @JkDoc("The template used for scaffolding the build class")
-        private JkProjectScaffold.Kind kind = JkProjectScaffold.Kind.BUILD_CLASS;
+        private JkProjectScaffold.Kind kind = JkProjectScaffold.Kind.REGULAR;
 
         public JkProjectScaffold.Kind getKind() {
             return kind;
