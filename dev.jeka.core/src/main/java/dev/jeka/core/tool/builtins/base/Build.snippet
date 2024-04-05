@@ -2,12 +2,17 @@ package _dev;
 
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 
+// Declare non-prod dependencies here (build, tests, compile-only deps)
 ${inject}
 class Build extends KBean {
 
+    final BaseKBean baseKBean = load(BaseKBean.class);
+
     @Override
     protected void init() {
+        // configure baseKBean here
     }
 
 }
