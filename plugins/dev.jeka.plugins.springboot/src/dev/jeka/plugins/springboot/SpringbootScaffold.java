@@ -28,7 +28,7 @@ import java.util.List;
 class SpringbootScaffold {
 
 
-    public static void adapt(JkProjectScaffold projectScaffold) {
+    public static void customize(JkProjectScaffold projectScaffold) {
 
         // Remove the default build class defined for project
         projectScaffold.removeFileEntry(JkProjectScaffold.BUILD_CLASS_PATH);
@@ -63,7 +63,7 @@ class SpringbootScaffold {
         projectScaffold.addFileEntry(pack + "/ControllerIT.java", readSnippet("ControllerIT.java"));
     }
 
-    static void adapt(JkBaseScaffold baseScaffold) {
+    static void customize(JkBaseScaffold baseScaffold) {
 
         // Remove build class defined by default
         baseScaffold.removeFileEntriesStaringBy(Paths.get(JkConstants.JEKA_SRC_DIR));

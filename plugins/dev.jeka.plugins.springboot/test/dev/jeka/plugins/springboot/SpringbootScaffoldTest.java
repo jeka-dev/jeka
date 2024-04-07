@@ -45,7 +45,7 @@ public class SpringbootScaffoldTest {
         projectScaffold.runtimeDeps.add("foo:bar");
         projectScaffold
                 .setTemplate(JkProjectScaffold.Kind.REGULAR)
-                .addCustomizer(SpringbootScaffold::adapt)
+                .addCustomizer(SpringbootScaffold::customize)
                 .run();
 
         // check .gitIgnore
@@ -75,7 +75,7 @@ public class SpringbootScaffoldTest {
         JkProjectScaffold.of(project)
                 .setTemplate(JkProjectScaffold.Kind.REGULAR)
                 .setUseSimpleStyle(true)
-                .addCustomizer(SpringbootScaffold::adapt)
+                .addCustomizer(SpringbootScaffold::customize)
                 .run();
 
         // Check project layout
@@ -99,7 +99,7 @@ public class SpringbootScaffoldTest {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
         JkBaseScaffold.of(baseDir, options)
-                .addCustomizer(SpringbootScaffold::adapt)
+                .addCustomizer(SpringbootScaffold::customize)
                 .run();
 
         // Should not include script class defined by default

@@ -99,7 +99,7 @@ public final class IntellijKBean extends KBean {
         if ("true".equals(getRunbase().getProperties().get(IML_SKIP_MODULE_XML_PROP))) {
             return;
         }
-        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir());
+        IntelliJProject intelliJProject = IntelliJProject.of(getBaseDir());
         if (!Files.exists(intelliJProject.getModulesXmlPath())) {
             intelliJProject.generateModulesXml(imlPath);
             JkLog.info("%s generated.", intelliJProject.getModulesXmlPath());
@@ -112,7 +112,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Generates ./idea/modules.xml file by grabbing all .iml files presents " +
             "in root or sub-directory of the project.")
     public void modulesXml() {
-        IntelliJProject intelliJProject = IntelliJProject.find(getBaseDir());
+        IntelliJProject intelliJProject = IntelliJProject.of(getBaseDir());
         intelliJProject.regenerateModulesXml();
         JkLog.info("File generated at : " + intelliJProject.getModulesXmlPath());
     }
@@ -134,7 +134,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Re-init the project by deleting workspace.xml and touching iml file")
     public void initProject() {
         iml();
-        IntelliJProject.find(getBaseDir()).deleteWorkspaceXml();
+        IntelliJProject.of(getBaseDir()).deleteWorkspaceXml();
         modulesXml();
         iml();
     }

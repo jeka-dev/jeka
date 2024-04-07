@@ -88,7 +88,7 @@ public final class SpringbootKBean extends KBean {
     private void customizeProjectKBean(ProjectKBean projectKBean) {
 
         // Customize scaffold
-        projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::adapt);
+        projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::customize);
 
         JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project)
                 .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
@@ -103,7 +103,7 @@ public final class SpringbootKBean extends KBean {
     private void customizeSelfKBean(BaseKBean baseKBean) {
 
         // customize scaffold
-        baseKBean.getBaseScaffold().addCustomizer(SpringbootScaffold::adapt);
+        baseKBean.getBaseScaffold().addCustomizer(SpringbootScaffold::customize);
 
         baseKBean.setMainClass(BaseKBean.AUTO_FIND_MAIN_CLASS);
         baseKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
