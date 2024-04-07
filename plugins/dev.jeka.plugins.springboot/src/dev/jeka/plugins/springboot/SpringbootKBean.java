@@ -36,9 +36,9 @@ import java.util.Optional;
 )
 public final class SpringbootKBean extends KBean {
 
-    @JkDoc("Version of Spring Boot version used to resolve dependency versions.")
-    @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    private String springbootVersion;
+    //@JkDoc("Version of Spring Boot version used to resolve dependency versions.")
+    //@JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
+    //private String springbootVersion;
 
     @JkDoc("If true, create a bootable jar artifact.")
     private final boolean createBootJar = true;
@@ -55,10 +55,12 @@ public final class SpringbootKBean extends KBean {
     @Override
     protected void init() {
 
-        // Customize ProjectKBean if present
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
-        if (optionalProjectKBean.isPresent()) {
-            customizeProjectKBean(optionalProjectKBean.get());
+        Optional<BaseKBean> optionalBaseKBean = getRunbase().find(BaseKBean.class);
+
+        // Use Project KBean if Project KBean is present or if BaseKBean is absent
+        if (optionalProjectKBean.isPresent() || !optionalBaseKBean.isPresent()) {
+            customizeProjectKBean(load(ProjectKBean.class));
 
             // Otherwise, force use BaseKBean
         } else {
@@ -79,7 +81,7 @@ public final class SpringbootKBean extends KBean {
 
     @JkDoc("Provides info about this plugin configuration")
     public void info() {
-        JkLog.info("Spring-Boot version : " + springbootVersion);
+ //       JkLog.info("Spring-Boot version : " + springbootVersion);
         JkLog.info("Create Bootable Jar : " + this.createBootJar);
         JkLog.info("Create original Jar : " + this.createOriginalJar);
         JkLog.info("Create .war file : " + this.createWarFile);
@@ -92,9 +94,12 @@ public final class SpringbootKBean extends KBean {
 
         JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project)
                 .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
+        /*
         if (springbootVersion != null) {
             springbootProject.includeParentBom(springbootVersion);
         }
+
+         */
         if (springRepo != null) {
             springbootProject.addSpringRepo(springRepo);
         }

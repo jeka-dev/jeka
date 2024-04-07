@@ -47,6 +47,7 @@ class SpringbootScaffold {
         projectScaffold.addJekaPropValue("@springboot=");
 
         // Add dependencies
+        projectScaffold.compileDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion);
         projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
         projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
 
@@ -73,7 +74,7 @@ class SpringbootScaffold {
                 JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
 
         List<String> deps = JkUtilsIterable.listOf(
-                "org.springframework.boot:spring-boot-dependencies::pom:" + lastSpringbootVersion,
+                JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion,
                 "org.springframework.boot:spring-boot-starter-web");
 
         List<String> devDeps = JkUtilsIterable.listOf("org.springframework.boot:spring-boot-starter-test");
