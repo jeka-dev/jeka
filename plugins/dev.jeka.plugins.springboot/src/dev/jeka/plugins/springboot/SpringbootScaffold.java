@@ -37,32 +37,20 @@ class SpringbootScaffold {
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
                 JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
 
-        if (projectScaffold.getTemplate() == JkProjectScaffold.Kind.REGULAR) {
-            String code = readSnippet("Build.java");
+        // For testability purpose
+        String overriddenPluginDep = System.getProperty(JkSpringbootProject
+                .OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
 
-            // For testability purpose
-            String overriddenPluginDep = System.getProperty(JkSpringbootProject
-                    .OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
-            String injectClasspath = overriddenPluginDep != null ?
-                    overriddenPluginDep.replace("\\", "/") : "dev.jeka:springboot-plugin";
+        // Augment jeka.properties
+        projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_INJECT_PROP + "=dev.jeka:springboot-plugin");
+        projectScaffold.addJekaPropValue("");
+        projectScaffold.addJekaPropValue("@springboot=");
 
-            // Add customized build class
-            code = code.replace("${dependencyDescription}", injectClasspath);
-            code = code.replace("${springbootVersion}", lastSpringbootVersion);
-            projectScaffold.addFileEntry(JkProjectScaffold.BUILD_CLASS_PATH, code);
-
-            // Augment jeka.properties
-            projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_INJECT_PROP + "=dev.jeka:springboot-plugin");
-            projectScaffold.addJekaPropValue("");
-            projectScaffold.addJekaPropValue("springboot#springbootVersion=" + lastSpringbootVersion);
-
-            // Add dependencies
-            projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
-            projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
-        }
+        // Add dependencies
+        projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
+        projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
 
         // Add sample code
-
         String basePackage = "app";
 
         // -- src

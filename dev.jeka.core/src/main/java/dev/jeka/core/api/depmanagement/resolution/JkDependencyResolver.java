@@ -23,6 +23,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Files;
@@ -349,7 +350,8 @@ public final class JkDependencyResolver  {
         }
         JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
         JkLog.debug("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
-        JkPathFile.of(cacheFile).createIfNotExist().write(result.toPath());
+        JkUtilsPath.createFileSafely(cacheFile);  // On Jeka-ide JkPathFile.createifNotExist throw a "file already exist exception"
+        JkPathFile.of(cacheFile).write(result.toPath());
         return result.getEntries();
     }
 

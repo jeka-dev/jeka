@@ -37,11 +37,11 @@ import java.util.function.Consumer;
 public final class DockerKBean extends KBean {
 
     @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")
-    public String dockerRunParams = "";
+    public String runParams = "";
 
     @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
             "If not set, the image name will be inferred form project info.")
-    public String dockerImageName;
+    public String imageName;
 
     /**
      * Handler on the Docker build configuration for customizing built images.
@@ -72,27 +72,27 @@ public final class DockerKBean extends KBean {
 
     @JkDoc("Builds Docker image in local registry.")
     public void build() {
-        dockerBuild().buildImage(dockerImageName);
+        dockerBuild().buildImage(imageName);
     }
 
     @JkDoc("Runs Docker image and wait until termination.")
     public void run() {
         JkDocker.assertPresent();
-        String containerName = "jeka-" + dockerImageName.replace(':', '-');
+        String containerName = "jeka-" + imageName.replace(':', '-');
         String args = String.format("-it --rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
-                        + dockerRunParams + " --name %s %s",
+                        + runParams + " --name %s %s",
                 dockerBuild().portMappingArgs(),
                 jvmOptions,
                 programArgs,
                 containerName,
-                dockerImageName);
+                imageName);
         JkDocker.execCmdLine("run", args);
     }
 
     @JkDoc("Displays info about the Docker image.")
     public void info() {
         String buildInfo = dockerBuild().info(); // May trigger a compilation to find the main class
-        JkLog.info("Image Name        : " + this.dockerImageName);
+        JkLog.info("Image Name        : " + this.imageName);
         JkLog.info(buildInfo);
     }
 
@@ -108,8 +108,8 @@ public final class DockerKBean extends KBean {
 
     private void configureForSelfApp(BaseKBean baseKBean) {
         JkLog.verbose("Configure DockerKBean for SelAppKBean %s", baseKBean);
-        this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
-                ? dockerImageName
+        this.imageName = !JkUtilsString.isBlank(imageName)
+                ? imageName
                 : computeImageName(baseKBean.getModuleId(), baseKBean.getVersion(), baseKBean.getBaseDir());
         this.jvmOptions = JkUtilsString.nullToEmpty(baseKBean.jvmOptions);
         this.programArgs = JkUtilsString.nullToEmpty(baseKBean.programArgs);
@@ -124,8 +124,8 @@ public final class DockerKBean extends KBean {
     private void configureForProject(ProjectKBean projectKBean) {
         JkLog.verbose("Configure DockerKBean for ProjectKBean %s", projectKBean.project);
         JkProject project = projectKBean.project;
-        this.dockerImageName = !JkUtilsString.isBlank(dockerImageName)
-                ? dockerImageName
+        this.imageName = !JkUtilsString.isBlank(imageName)
+                ? imageName
                 : computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
         this.jvmOptions = JkUtilsString.nullToEmpty(projectKBean.run.jvmOptions);
         this.programArgs = JkUtilsString.nullToEmpty(projectKBean.run.programArgs);

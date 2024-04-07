@@ -260,6 +260,9 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
     public Path findEntryContainingClass(String className) {
         final String path = toFilePath(className);
         for (final Path file : entries) {
+            if (!Files.exists(file)) {
+                continue;
+            }
             if (Files.isDirectory(file)) {
                 if (Files.exists(file.resolve(path))) {
                     return file;
