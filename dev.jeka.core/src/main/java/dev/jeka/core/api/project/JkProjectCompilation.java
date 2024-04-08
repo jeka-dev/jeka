@@ -73,7 +73,6 @@ public class JkProjectCompilation {
 
     private boolean done;
 
-    private JkResolveResult cachedResolveResult = null;
 
     JkProjectCompilation(JkProject project) {
         this.project = project;
@@ -118,6 +117,7 @@ public class JkProjectCompilation {
         preCompileActions.run();
         compileActions.run();
         postCompileActions.run();
+        done = true;
     }
 
     /**
@@ -128,7 +128,6 @@ public class JkProjectCompilation {
             JkLog.debug(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
         } else {
             run();
-            done = true;
         }
     }
 
