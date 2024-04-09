@@ -277,6 +277,7 @@ public class JkDockerBuild {
 
         String portMapping = portMappingArgs();
         JkLog.info("Run docker image : docker run -it --rm %s%s", portMapping, imageName);
+        JkLog.info("Use '-e JVM_OPTIONS=...' and '-e PROGRAM_ARGS=...' options to pass JVM options or program arguments.");
     }
 
     /**

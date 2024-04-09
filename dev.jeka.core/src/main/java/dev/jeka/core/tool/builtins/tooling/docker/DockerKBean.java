@@ -36,8 +36,11 @@ import java.util.function.Consumer;
 @JkDoc("Builds and runs image based on project or 'jeka-src' (Requires a Docker client)")
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Extra parameters to pass to 'docker run' command while invoking 'run' (such as '-p 8080:8080')")
+    @JkDoc("Program arguments to pass to 'docker run' command while invoking 'run' (such as '-p 8080:8080')")
     public String programArgs = "";
+
+    @JkDoc("JVM options to pass to 'build' or 'run' command")
+    public String jvmOptions = "";
 
     @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
             "If not set, the image name will be inferred form project info.")
@@ -48,23 +51,17 @@ public final class DockerKBean extends KBean {
      */
     private final JkConsumers<JkDockerBuild> customizer = JkConsumers.of();
 
-    // Used only for running image. Not for building.
-    private String jvmOptions = "";
-
-
     @Override
     protected void init() {
-        Optional<BaseKBean> optionalSelfAppKBean = getRunbase().find(BaseKBean.class);
-        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
-       /*
-        if (optionalProjectKBean.isPresent() && optionalProjectKBean.isPresent()) {
-            throw new IllegalStateException("Both a BaseKBean and ProjectKBean are present in the JkRunbase. " +
-                    "Cannot configure for Both. You need to remove one of these KBeans in order to use DockerKBean.");
+        Optional<BaseKBean> optionalBaseKBean = getRunbase().find(BaseKBean.class);;
+        if (!optionalBaseKBean.isPresent()) {
+            JkLog.verbose("Configure docker for project");
+            this.configureForProject(this.load(ProjectKBean.class));
+        } else {
+            JkLog.verbose("Configure docker for base");
+            this.configureForBase(optionalBaseKBean.get());
         }
 
-        */
-        optionalSelfAppKBean.ifPresent(this::configureForBase);
-        optionalProjectKBean.ifPresent(this::configureForProject);
     }
 
     @JkDoc("Builds Docker image in local registry.")
@@ -108,8 +105,6 @@ public final class DockerKBean extends KBean {
         this.imageName = !JkUtilsString.isBlank(imageName)
                 ? imageName
                 : computeImageName(baseKBean.getModuleId(), baseKBean.getVersion(), baseKBean.getBaseDir());
-        this.jvmOptions = JkUtilsString.nullToEmpty(baseKBean.jvmOptions);
-        this.programArgs = JkUtilsString.nullToEmpty(baseKBean.programArgs);
 
         this.customize(dockerBuild ->  dockerBuild
                 .setMainClass(baseKBean.getMainClass())
@@ -124,8 +119,6 @@ public final class DockerKBean extends KBean {
         this.imageName = !JkUtilsString.isBlank(imageName)
                 ? imageName
                 : computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
-        this.jvmOptions = JkUtilsString.nullToEmpty(projectKBean.run.jvmOptions);
-        this.programArgs = JkUtilsString.nullToEmpty(projectKBean.run.programArgs);
         this.customize(dockerBuild -> dockerBuild.adaptTo(project));
     }
 
