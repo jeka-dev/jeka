@@ -36,8 +36,8 @@ import java.util.function.Consumer;
 @JkDoc("Builds and runs image based on project or 'jeka-src' (Requires a Docker client)")
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Extra parameters to pass to 'docker run' command while invoking '#runImage' (such as '-p 8080:8080')")
-    public String runParams = "";
+    @JkDoc("Extra parameters to pass to 'docker run' command while invoking 'run' (such as '-p 8080:8080')")
+    public String programArgs = "";
 
     @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
             "If not set, the image name will be inferred form project info.")
@@ -51,9 +51,6 @@ public final class DockerKBean extends KBean {
     // Used only for running image. Not for building.
     private String jvmOptions = "";
 
-    // Used only for running image. Not for building.
-    private String programArgs = "";
-
 
     @Override
     protected void init() {
@@ -66,7 +63,7 @@ public final class DockerKBean extends KBean {
         }
 
         */
-        optionalSelfAppKBean.ifPresent(this::configureForSelfApp);
+        optionalSelfAppKBean.ifPresent(this::configureForBase);
         optionalProjectKBean.ifPresent(this::configureForProject);
     }
 
@@ -80,7 +77,7 @@ public final class DockerKBean extends KBean {
         JkDocker.assertPresent();
         String containerName = "jeka-" + imageName.replace(':', '-');
         String args = String.format("-it --rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
-                        + runParams + " --name %s %s",
+                        +  " --name %s %s",
                 dockerBuild().portMappingArgs(),
                 jvmOptions,
                 programArgs,
@@ -106,8 +103,8 @@ public final class DockerKBean extends KBean {
         return dockerBuild;
     }
 
-    private void configureForSelfApp(BaseKBean baseKBean) {
-        JkLog.verbose("Configure DockerKBean for SelAppKBean %s", baseKBean);
+    private void configureForBase(BaseKBean baseKBean) {
+        JkLog.verbose("Configure DockerKBean for Base %s", baseKBean);
         this.imageName = !JkUtilsString.isBlank(imageName)
                 ? imageName
                 : computeImageName(baseKBean.getModuleId(), baseKBean.getVersion(), baseKBean.getBaseDir());
