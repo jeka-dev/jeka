@@ -868,7 +868,11 @@ execute_program_if_requested() {
   local build_cmd
   build_cmd=$(get_prop_value_from_base_dir "$BASE_DIR" "jeka.program.build")
   if [[ -z "$build_cmd" ]]; then
-    build_cmd="project: pack -Djeka.skip.tests=true"
+    if [ -d "$BASE_DIR/src" ]; then
+      build_cmd="project: pack -Djeka.skip.tests=true"
+    else
+      build_cmd="pack: pack -Djeka.skip.tests=true"
+    fi
   fi
   debug "Launch build with command : $build_cmd"
 
