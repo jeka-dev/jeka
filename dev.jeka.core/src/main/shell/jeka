@@ -871,7 +871,7 @@ execute_program_if_requested() {
     if [ -d "$BASE_DIR/src" ]; then
       build_cmd="project: pack -Djeka.skip.tests=true"
     else
-      build_cmd="pack: pack -Djeka.skip.tests=true"
+      build_cmd="base: pack -Djeka.skip.tests=true"
     fi
   fi
   debug "Launch build with command : $build_cmd"
