@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-import dev.jeka.core.api.depmanagement.JkRepo;
+package dev.jeka.plugins.nexus;import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.plugins.nexus.JkNexusRepos;
 
 
 class JkNexusReposRunner {
