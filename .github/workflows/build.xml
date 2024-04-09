@@ -29,6 +29,7 @@
 			<!-- needed to include sample builds into quality analysis -->
 			<src path="plugins/dev.jeka.plugins.jacoco" />
 			<src path="plugins/dev.jeka.plugins.sonarqube" />
+			<src path="plugins/dev.jeka.plugins.nexus" />
 
 			<classpath>
 				<fileset refid="libs" />
