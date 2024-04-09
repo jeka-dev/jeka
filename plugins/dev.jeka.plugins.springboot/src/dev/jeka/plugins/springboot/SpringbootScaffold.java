@@ -40,6 +40,10 @@ class SpringbootScaffold {
         // For testability purpose
         String overriddenPluginDep = System.getProperty(JkSpringbootProject
                 .OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME);
+        if (overriddenPluginDep != null) {
+            String pluginDep = overriddenPluginDep.replace("\\", "/");
+            projectScaffold.setJekaPropsCustomizer(content -> content.replace("dev.jeka:springboot-plugin", pluginDep));
+        }
 
         // Augment jeka.properties
         projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_INJECT_PROP + "=dev.jeka:springboot-plugin");

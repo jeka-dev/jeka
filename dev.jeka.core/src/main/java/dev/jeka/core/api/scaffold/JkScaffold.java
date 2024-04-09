@@ -33,6 +33,7 @@ import dev.jeka.core.tool.JkConstants;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +58,8 @@ public abstract class JkScaffold {
     private String jekaDistribLocation;
 
     private String jekaPropsExtraContent = "";
+
+    private UnaryOperator<String> jekaPropCustomizer = s -> s;
 
     protected JkScaffold(Path baseDir, JkRepoSet downloadRepos) {
         super();
@@ -165,6 +168,15 @@ public abstract class JkScaffold {
     }
 
     /**
+     * Gives a chance to override the final jeka.properties file
+     */
+    public JkScaffold setJekaPropsCustomizer(UnaryOperator<String> customizer) {
+        this.jekaPropCustomizer = customizer;
+        return this;
+    }
+
+
+    /**
      * Adds a file entry to the list of file entries in the scaffold.
      * The file entry consists of a relative path and its content.
      * The file entry will be created or updated when the scaffold is run.
@@ -235,13 +247,15 @@ public abstract class JkScaffold {
             String content = jekaPropsExtraContent.replace("\\n", "\n");
             sb.append(content + "\n");
         }
-        //String sorted = sortJekaPropContent(sb.toString());
 
         JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
         if (!jekaPropsFile.exists()) {
             jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
         }
-        jekaPropsFile.write(sb.toString(), StandardOpenOption.APPEND);
+        String result = sb.toString();
+        result = jekaPropCustomizer.apply(result);
+
+        jekaPropsFile.write(result, StandardOpenOption.APPEND);
     }
 
     private void createOrUpdateGitIgnore() {
