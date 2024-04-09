@@ -90,6 +90,10 @@ public abstract class JkScaffold {
         return this;
     }
 
+    public boolean hasJekaPropExtraContent() {
+        return !JkUtilsString.isBlank(jekaPropsExtraContent);
+    }
+
     public JkScaffold setJekaVersion(String jekaVersion) {
         this.jekaVersion = jekaVersion;
         return this;
