@@ -19,7 +19,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
+
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
@@ -31,8 +31,10 @@ import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.builtins.tooling.nexus.NexusKBean;
+
 import dev.jeka.plugins.jacoco.JkJacoco;
+import dev.jeka.plugins.nexus.JkNexusRepos;
+import dev.jeka.plugins.nexus.NexusKBean;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
 
@@ -40,6 +42,7 @@ import java.io.IOException;
 
 @JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
 @JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
+@JkInjectClasspath("../plugins/dev.jeka.plugins.nexus/jeka-output/classes")
 class MasterBuild extends KBean {
 
     @JkInjectProperty("OSSRH_USER")
@@ -77,6 +80,9 @@ class MasterBuild extends KBean {
 
     @JkInjectRunbase("../plugins/dev.jeka.plugins.protobuf")
     ProtobufBuild protobufBuild;
+
+    @JkInjectRunbase("../plugins/dev.jeka.plugins.nexus")
+    NexusBuild nexusBuild;
 
     private JkJacoco jacocoForCore;
 

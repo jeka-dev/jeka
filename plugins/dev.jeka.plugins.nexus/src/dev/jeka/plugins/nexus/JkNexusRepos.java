@@ -14,9 +14,10 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.api.depmanagement.publication;
+package dev.jeka.plugins.nexus;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;

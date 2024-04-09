@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/dev.jeka.master/dev.jeka.master.iml" filepath="$PROJECT_DIR$/dev.jeka.master/dev.jeka.master.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.kotlin/.idea/dev.jeka.plugins.kotlin.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.kotlin/.idea/dev.jeka.plugins.kotlin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.nexus/dev.jeka.plugins.nexus.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.nexus/dev.jeka.plugins.nexus.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.nodejs/.idea/dev.jeka.plugins.nodejs.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.nodejs/.idea/dev.jeka.plugins.nodejs.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.protobuf/.idea/dev.jeka.plugins.protobuf.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.protobuf/.idea/dev.jeka.plugins.protobuf.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/dev.jeka.plugins.sonarqube/.idea/dev.jeka.plugins.sonarqube.iml" filepath="$PROJECT_DIR$/plugins/dev.jeka.plugins.sonarqube/.idea/dev.jeka.plugins.sonarqube.iml" />

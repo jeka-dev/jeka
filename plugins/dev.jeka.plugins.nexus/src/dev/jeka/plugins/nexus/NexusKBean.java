@@ -14,10 +14,9 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.tooling.nexus;
+package dev.jeka.plugins.nexus;
 
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.depmanagement.publication.JkNexusRepos;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;

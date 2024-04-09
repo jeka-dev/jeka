@@ -64,6 +64,7 @@ which means that we don't need to specify their version when importing.
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
 * [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
 * [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
+* [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
 
 The following plugins are maintained in their own repos.
 

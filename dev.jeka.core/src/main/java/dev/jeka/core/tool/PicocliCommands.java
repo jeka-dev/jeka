@@ -28,7 +28,6 @@ import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.EclipseKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.builtins.tooling.nexus.NexusKBean;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +42,7 @@ class PicocliCommands {
             GitKBean.class,
             DockerKBean.class,
             IntellijKBean.class,
-            EclipseKBean.class,
-            NexusKBean.class
+            EclipseKBean.class
     );
 
     static CommandLine mainCommandLine() {

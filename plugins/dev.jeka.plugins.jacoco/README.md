@@ -9,7 +9,7 @@ It also contains utilities class to configure projects programmatically.
 ## Configure using Kean
 
 ```properties
-jeka.classpath.inject=dev.jeka:jacoco-plugin
+jeka.inject.classpath=dev.jeka:jacoco-plugin
 
 
 # Optional settings. Execute `jeka jacoco#help` to see available options.
