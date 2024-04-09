@@ -618,7 +618,12 @@ compute_JEKA_DIST_DIR() {
 
       else
         # select download repo
-        local jeka_repo="https://repo.maven.apache.org/maven2"
+        local jeka_repo
+        if [[ "$jeka_version" == *"-SNAPSHOT" ]]; then
+          jeka_repo="https://oss.sonatype.org/content/repositories/snapshots"
+        else
+          jeka_repo="https://repo.maven.apache.org/maven2"
+        fi
         local distrib_repo
         distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
