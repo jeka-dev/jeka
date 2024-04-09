@@ -35,6 +35,9 @@ import java.util.*;
  */
 public final class JkExternalToolApi {
 
+    // The following fields and methods are part of the API used by external tools
+    // Please don't remove.
+
     public static final String CMD_PREFIX_PROP = JkConstants.CMD_PREFIX_PROP;
 
     public static final String CMD_APPEND_SUFFIX_PROP =  JkConstants.CMD_APPEND_SUFFIX_PROP;
@@ -171,7 +174,7 @@ public final class JkExternalToolApi {
 
         private static final String RESOLVED_CLASSPATH_FILE = "resolved-classpath.txt";
 
-        private static final String KBEAN_CLASSES_CACHE_FILE_NAME = "kbean-classes.txt";
+        private static final String KBEAN_CLASSES_CACHE_FILE_NAME = "jeka-kbean-classes.txt";
 
         private final Path baseDir;
 

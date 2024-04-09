@@ -19,9 +19,11 @@ package dev.jeka.core.api.tooling.git;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,7 +73,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .addParams("branch", "--show-current")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
-                .exec()
+                .execAndCheck()
                 .getStdoutAsString()
                 .replace("\n", "");
         if (JkUtilsString.isBlank(branch)) {
@@ -84,8 +86,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Checks if the local branch is in sync with the remote branch.
      */
     public boolean isSyncWithRemote() {
-        String local = copy().setParams("rev-parse", "@").setCollectStdout(true).exec().getStdoutAsString();
-        String remote = copy().setParams("rev-parse", "@{u}").setCollectStdout(true).exec().getStdoutAsString();
+        String local = copy().setParams("rev-parse", "@").setCollectStdout(true).execAndCheck().getStdoutAsString();
+        String remote = copy().setParams("rev-parse", "@{u}").setCollectStdout(true).execAndCheck().getStdoutAsString();
         return local.equals(remote);
     }
 
@@ -100,7 +102,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setParams("diff", "HEAD", "--stat")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
-                .exec()
+                .execAndCheck()
                 .getStdoutAsString()
                 .replace("\n", "")
                 .isEmpty();
@@ -114,7 +116,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setParams("rev-parse", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
-                .exec()
+                .execAndCheck()
                 .getStdoutAsString()
                 .replace("\n", "");
         return commit.isEmpty() ? null : commit;
@@ -128,7 +130,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setParams("tag", "-l", "--points-at", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
-                .exec().getStdoutAsMultiline()
+                .execAndCheck()
+                .getStdoutAsMultiline()
                 .stream()
                     .filter(tag -> !tag.isEmpty())
                     .collect(Collectors.toList());
@@ -143,7 +146,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
-                .exec()
+                .execAndCheck()
                 .getStdoutAsMultiline();
     }
 
@@ -184,7 +187,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public JkGit tagAndPush(String name) {
         tag(name);
-        copy().setParams("push", "origin", name).exec();
+        copy().setParams("push", "origin", name).execAndCheck();
         return this;
     }
 
@@ -192,7 +195,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Adds a tag at the HEAD of the current branch.
      */
     public JkGit tag(String tagName) {
-        copy().setParams("tag", tagName).exec();
+        copy().setParams("tag", tagName).execAndCheck();
         return this;
     }
 
@@ -248,7 +251,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
             return this.copy()
                     .setParams("describe", "--tags", "--exact-match")
                     .setCollectStdout(true)
-                    .exec()
+                    .execAndCheck()
                     .getStdoutAsString()
                     .replace("\n", "");
         }
@@ -286,7 +289,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         List<String> rawResults = copy()
                 .setParams("log", "--oneline", getLatestTag() + "..HEAD")
                 .setCollectStdout(true)
-                .exec()
+                .execAndCheck()
                 .getStdoutAsMultiline();
         List<String> result = new LinkedList<>();
         for (String line : rawResults) {
@@ -305,7 +308,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     public String getLatestTag() {
         List<String> tags = copy().setParams("describe", "--tags", "--abbrev=0")
                 .setCollectStdout(true)
-                .exec()
+                .execAndCheck()
                 .getStdoutAsMultiline();
         return tags.isEmpty() ? null : tags.get(0);
     }
@@ -327,7 +330,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public void tagRemote() {
         JkLog.info("Existing tags on origin :");
-        this.copy().setLogWithJekaDecorator(true).setParams("ls remote", "--tag", "--sort=creatordate", "origin").exec();
+        this.copy().setLogWithJekaDecorator(true).setParams("ls remote", "--tag", "--sort=creatordate", "origin").execAndCheck();
         if (this.isWorkspaceDirty()) {
             JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
             return;
@@ -344,6 +347,14 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     @Override
     public JkGit copy() {
         return new JkGit(this);
+    }
+
+    private JkProcResult execAndCheck() {
+        JkProcResult procResult = exec();
+        if (procResult.getExitCode() == 128) {
+            throw new JkException("Cannot find a Git repository at " + this.getWorkingDir());
+        }
+        return procResult;
     }
 
 }
