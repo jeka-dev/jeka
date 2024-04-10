@@ -18,14 +18,17 @@ package dev.jeka.core;
 
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.docker.JkDocker;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 
-class DockerTester  {
+class DockerTester extends JekaCommandLineExecutor  {
 
     private static final String IMAGE_NAME = "jeka-install-ubuntu";
 
@@ -33,12 +36,14 @@ class DockerTester  {
 
     private static final boolean NO_CACHE = false;
 
-    static void run() {
+    void run() {
         if (!JkDocker.isPresent()) {
             JkLog.warn("Docker not present. Can't run Docker tests");
             return;
         }
-        buildInstallImage();
+        JkLog.info("Docker detected : run docker tests");
+        cowsayBuildAndRunImage();
+        //buildInstallImage();
         //runImage();
     }
 
@@ -66,13 +71,30 @@ class DockerTester  {
         return Paths.get("../" + candidate);
     }
 
-    private static void testBuildAndRunImage() {
+    private void cowsayBuildAndRunImage() {
+        Path jekaShellPath = getJekaShellPath();
 
+        // Build image
+        JkProcess.of(jekaShellPath.toString(), "-ru", ShellRemoteTester.COW_SAY_URL, "docker:", "build")
+                .setLogCommand(true)
+                .setCollectStdout(false)
+                .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
+                .exec();
+
+        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", ShellRemoteTester.COW_SAY_URL, "docker:",
+                        "run", "programArgs=toto", "it=false", "--quiet")
+                .setLogCommand(true)
+                .setCollectStdout(true)
+                .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
+                .exec();
+        String output = result.getStdoutAsString();
+        JkUtilsAssert.state(output.contains("toto"), "Command output was '%s', " +
+                "expecting containing 'toto'", output);
     }
 
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.INDENT);
-        run();
+        new DockerTester().run();
     }
 
 }

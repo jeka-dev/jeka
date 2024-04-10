@@ -49,6 +49,9 @@ public final class DockerKBean extends KBean {
     @JkDoc("Base image to construct the Docker image.")
     public String baseImage = JkDockerBuild.BASE_IMAGE;
 
+    @JkDoc("Run docker with '-it' option")
+    public boolean it = true;
+
     /**
      * Handler on the Docker build configuration for customizing built images.
      */
@@ -76,8 +79,10 @@ public final class DockerKBean extends KBean {
     public void run() {
         JkDocker.assertPresent();
         String containerName = "jeka-" + imageName.replace(':', '-');
-        String args = String.format("-it --rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
+        String itOption = it ? "-it" : "";
+        String args = String.format("%s--rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
                         +  " --name %s %s",
+                itOption,
                 dockerBuild().portMappingArgs(),
                 jvmOptions,
                 programArgs,
@@ -128,12 +133,19 @@ public final class DockerKBean extends KBean {
 
     private String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
         String name;
+        String versionTag = computeVersion(version);
         if (moduleId != null) {
             name = moduleId.toString().replace(":", "-");
         } else {
             name =  baseDir.toAbsolutePath().getFileName().toString();
+            if (name.contains("#")) {   // Remote dir may contains # for indicating version
+                if (version.isSnapshot()) {
+                    return name.replace("#", ":");
+                }
+                name = JkUtilsString.substringBeforeFirst(name, "#");
+            }
         }
-        return name + ":" + computeVersion(version);
+        return name + ":" + versionTag;
     }
 
     private String computeVersion(JkVersion version) {

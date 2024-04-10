@@ -118,6 +118,7 @@ public class CoreBuild extends KBean {
         JkPathFile.of(binDir.resolve("jeka-install")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
             testScaffolding();
+            new DockerTester().run();
             new ShellRemoteTester().run();
         }
         JkLog.info("Distribution created in " + distrib.getRoot());
