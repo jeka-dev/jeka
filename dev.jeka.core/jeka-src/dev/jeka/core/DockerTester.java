@@ -20,7 +20,6 @@ package dev.jeka.core;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
 
-import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,11 +38,11 @@ class DockerTester  {
             JkLog.warn("Docker not present. Can't run Docker tests");
             return;
         }
-        buildImage();
+        buildInstallImage();
         //runImage();
     }
 
-    static void buildImage() {
+    static void buildInstallImage() {
 
         JkDocker.prepareExec("build")
                 .addParamsIf(NO_CACHE, "--no-cache")
@@ -65,6 +64,10 @@ class DockerTester  {
             return Paths.get(candidate);
         }
         return Paths.get("../" + candidate);
+    }
+
+    private static void testBuildAndRunImage() {
+
     }
 
     public static void main(String[] args) {

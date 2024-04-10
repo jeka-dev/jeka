@@ -46,6 +46,9 @@ public final class DockerKBean extends KBean {
             "If not set, the image name will be inferred form project info.")
     public String imageName;
 
+    @JkDoc("Base image to construct the Docker image.")
+    public String baseImage = JkDockerBuild.BASE_IMAGE;
+
     /**
      * Handler on the Docker build configuration for customizing built images.
      */
@@ -96,6 +99,7 @@ public final class DockerKBean extends KBean {
 
     private JkDockerBuild dockerBuild() {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
+        dockerBuild.setBaseImage(this.baseImage);
         customizer.accept(dockerBuild);
         return dockerBuild;
     }

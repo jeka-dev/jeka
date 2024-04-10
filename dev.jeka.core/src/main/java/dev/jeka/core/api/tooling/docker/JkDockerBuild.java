@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 public class JkDockerBuild {
 
-    private static final String BASE_IMAGE = "eclipse-temurin:21.0.1_12-jdk-jammy";
+    public static final String BASE_IMAGE = "eclipse-temurin:21.0.2_13-jdk-jammy";
 
     private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
 
@@ -91,10 +91,15 @@ public class JkDockerBuild {
      * Adapts this JkDockerBuild instance to build the specified JkProject.
      */
     public JkDockerBuild adaptTo(JkProject project) {
+        JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
+        if (!classTree.withMatcher(JkPathMatcher.of("**/*class")).containFiles()) {
+            JkLog.verbose("No compiled classes found. Force compile.");
+            project.compilation.runIfNeeded();
+        }
         String mainClass = project.packaging.getMainClass();
         JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project.");
         return this
-                .setClasses(JkPathTree.of(project.compilation.layout.resolveClassDir()))
+                .setClasses(classTree)
                 .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
                 .setMainClass(mainClass);
     }
