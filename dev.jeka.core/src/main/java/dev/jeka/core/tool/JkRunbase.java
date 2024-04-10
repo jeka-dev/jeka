@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * <ul>
  *     <li>A base directory from which JeKa resolves file paths. This base directory might contains a <i>jeka-src</i> subdirectory and/or a <i>jeka.properties</i> file at its root.</li>
  *     <li>A KBean registry for holding KBeans involved in the run context.
- *     There can bbe only one KBean instance per class within a runBase.</li>
+ *     There can be only one KBean instance per class within a runBase.</li>
  *     <li>A set of properties defined in [baseDir]/jeka.properties file</li>
  *     <li>A set of imported runBase</li>
  * </ul>
@@ -168,6 +168,9 @@ public final class JkRunbase {
      * Returns the KBean of the exact specified class, present in this runbase.
      */
     public <T extends KBean> Optional<T> find(Class<T> beanClass) {
+        if (cmdLineActions.findInvolvedKBeanClasses().contains(beanClass)) {
+            return Optional.of(load(beanClass));
+        }
         return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
     }
 

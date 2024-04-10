@@ -16,7 +16,6 @@
 
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
@@ -64,18 +63,16 @@ public final class SpringbootKBean extends KBean {
 
             // Otherwise, force use BaseKBean
         } else {
-            customizeSelfKBean(load(BaseKBean.class));
+            customizeBaseKBean(load(BaseKBean.class));
         }
 
         // Configure Docker KBean to add port mapping on run
         Optional<DockerKBean> optionalDockerKBean = getRunbase().find(DockerKBean.class);
-        if (optionalDockerKBean.isPresent()) {
-            optionalDockerKBean.get().customize(dockerBuild -> {
-                if (dockerBuild.getExposedPorts().isEmpty()) {
-                    dockerBuild.setExposedPorts(8080);
-                }
-            });
-        }
+        optionalDockerKBean.ifPresent(dockerKBean -> dockerKBean.customize(dockerBuild -> {
+            if (dockerBuild.getExposedPorts().isEmpty()) {
+                dockerBuild.setExposedPorts(8080);
+            }
+        }));
 
     }
 
@@ -105,7 +102,7 @@ public final class SpringbootKBean extends KBean {
         }
     }
 
-    private void customizeSelfKBean(BaseKBean baseKBean) {
+    private void customizeBaseKBean(BaseKBean baseKBean) {
 
         // customize scaffold
         baseKBean.getBaseScaffold().addCustomizer(SpringbootScaffold::customize);

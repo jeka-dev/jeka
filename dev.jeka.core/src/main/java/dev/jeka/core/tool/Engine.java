@@ -297,7 +297,7 @@ class Engine {
         runbase.assertValid(); // fail-fast. bugfix purpose
 
         // initialise runbase with resolved commands
-        runbase.init(actionContainer);
+        runbase.init(this.actionContainer);
         if (logSettings.runtimeInformation) {
             JkLog.info("KBeans Init        :");
             JkLog.info(runbase.getEffectiveActions().toColumnText()
@@ -309,9 +309,6 @@ class Engine {
     }
 
     void run() {
-        if (runbase == null) {
-            initRunbase(actionContainer);
-        }
         runbase.run(actionContainer);
     }
 

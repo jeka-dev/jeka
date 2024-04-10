@@ -155,6 +155,12 @@ class KBeanAction implements Comparable<KBeanAction> {
                     .collect(Collectors.toList());
         }
 
+        List<Class<? extends KBean>> findInvolvedKBeanClasses() {
+            return kBeanActions.stream()
+                    .map(action -> action.beanClass)
+                    .collect(Collectors.toList());
+        }
+
         void addAll(List<KBeanAction> kBeanActions) {
             kBeanActions.forEach(this::add);
         }
