@@ -193,7 +193,10 @@ public class JkDockerBuild {
 
         // Build image using Docker daemon
         JkProcess.of("docker", "build", "-t", imageName, "./" + tempBuildDir).setInheritIO(true)
-                .setLogCommand(true).exec();
+                .setLogCommand(true)
+                .setLogWithJekaDecorator(true)
+                .setInheritIO(false)
+                .exec();
 
         String portMapping = portMappingArgs();
         JkLog.info("Run docker image : docker run -it --rm %s%s", portMapping, imageName);

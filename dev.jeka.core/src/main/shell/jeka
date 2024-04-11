@@ -72,8 +72,6 @@ declare DRY_RUN  # Debugging purpose
 declare DEFAULT_BASE_DIR="."
 
 
-
-
 #######################################
 # Prints passed arguments on the stderr
 # Globals:
@@ -129,10 +127,11 @@ array_contains() {
 
     for element in "${array[@]}"; do
         if [[ $element == $search ]]; then
+            echo "true"
             return 0 # Element found, return success
         fi
     done
-    return 1 # Element not found, return failure
+    echo "false"
 }
 
 
@@ -590,7 +589,20 @@ compute_BASE_DIR() {
   local next_index=$((index + 1))
   local remote_arg=${array[$next_index]}
   local need_update="false"
-  if [[ "$option" == *u* ]]; then
+
+  # check if cmdline contains -u or --update options, prior the -parameters
+  local -a prior_program_option_array
+  if [[ $PROGRAM_OPTION_INDEX == -1 ]]; then
+    prior_program_option_array=("${INTERPOLATED_ARGS[@]}")
+  else
+    prior_program_option_array=("${INTERPOLATED_ARGS[@]:0:PROGRAM_OPTION_INDEX}")
+  fi
+  local contains_u
+  contains_u=$(array_contains "-u" "${prior_program_option_array[@]}")
+  local contains_update
+  contains_update=$(array_contains "--update" "${prior_program_option_array[@]}")
+
+  if [[ "$option" == *u* ]] || [[ $contains_u == "true" ]] || [[ $contains_update == "true" ]]; then
     need_update="true"
   fi
   compute_base_dir_from_resolved_remote_arg "$remote_arg" "$need_update"

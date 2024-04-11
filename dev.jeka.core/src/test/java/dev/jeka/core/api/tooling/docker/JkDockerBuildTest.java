@@ -37,8 +37,10 @@ public class JkDockerBuildTest {
         System.out.println(dockerBuild.dockerBuildContent(imageName));
         System.out.println(dockerBuild.info(imageName));
         dockerBuild.buildImage(imageName);
-        JkDocker.exec("run", imageName);
-        JkDocker.prepareExec("rmi", "IMAGE", imageName);
+        JkDocker.prepareExec("run", imageName)
+                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
+        JkDocker.prepareExec("rmi", "IMAGE", imageName)
+                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
     }
 
     @Test
@@ -61,8 +63,10 @@ public class JkDockerBuildTest {
         System.out.println(dockerBuild.dockerBuildContent(baseImage));
         System.out.println(dockerBuild.info(imageName));
         dockerBuild.buildImage(imageName + "-" + baseImage);
-        JkDocker.exec("run", imageName);
-        JkDocker.prepareExec("rmi", "IMAGE", imageName);
+        JkDocker.prepareExec("run", imageName)
+                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
+        JkDocker.prepareExec("rmi", "IMAGE", imageName)
+                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
     }
 
 }
