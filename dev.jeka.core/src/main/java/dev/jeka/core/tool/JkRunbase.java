@@ -81,6 +81,8 @@ public final class JkRunbase {
     // they are not initialized with any KbeanActions.
     private KBeanAction.Container cmdLineActions = new KBeanAction.Container();
 
+    private List<Class<? extends KBean>> kbeanInitDeclaredInProps = new LinkedList<>();
+
     private final KBeanAction.Container effectiveActions = new KBeanAction.Container();
 
     private final JkProperties properties;
@@ -168,7 +170,8 @@ public final class JkRunbase {
      * Returns the KBean of the exact specified class, present in this runbase.
      */
     public <T extends KBean> Optional<T> find(Class<T> beanClass) {
-        if (cmdLineActions.findInvolvedKBeanClasses().contains(beanClass)) {
+        if (cmdLineActions.findInvolvedKBeanClasses().contains(beanClass) ||
+                this.kbeanInitDeclaredInProps.contains(beanClass)) {
             return Optional.of(load(beanClass));
         }
         return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
@@ -228,8 +231,10 @@ public final class JkRunbase {
                 .distinct()
                 .collect(Collectors.toCollection(LinkedList::new));
 
+        this.kbeanInitDeclaredInProps = kbeansToInitFromProps();
+
         // KBeans init from props
-        kbeansToInit.addAll(kbeansToInitFromProps());
+        kbeansToInit.addAll(this.kbeanInitDeclaredInProps);
 
         kbeansToInit.stream().distinct().forEach(this::load);  // register kbeans
 

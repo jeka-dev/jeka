@@ -18,12 +18,9 @@ package dev.jeka.core.api.tooling.docker;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -31,46 +28,54 @@ import dev.jeka.core.tool.JkConstants;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Experimental
- * Docker Builder assistant for creating Docker images running Java programs.
+ * Docker Builder assistant for creating Docker images with nonroot user.
  */
 public class JkDockerBuild {
 
-    public static final String BASE_IMAGE = "eclipse-temurin:21.0.2_13-jdk-jammy";
+    public static final String TEMURIN_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
+            "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot";
 
-    private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
+    public static final String UBUNTU_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
+            "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot";
+
+    public static final String ALPINE_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
+            "    adduser --uid ${UID} -g ${GID} --disabled-password --gecos \"\" nonroot\n";
+
 
     private static final String EXTRA_FILE_DIR = "extra-files";
 
-    private static final JkPathMatcher CLASS_MATCHER = JkPathMatcher.of("**/*.class", "*.class");
+    protected JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
 
-    private JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
+    private String baseImage = "ubuntu";
 
-    private String baseImage = BASE_IMAGE;
+    private Integer userId = 1001;
 
-    private JkPathTree classes;
+    private Integer groupId;
 
-    private List<Path> classpath = Collections.emptyList();
+    private String addUserTemplate;
 
-    private String mainClass;
+    private Path baseBuildDir;
 
     // key is destination within image filesystem, value is path in host filesystem
-    private final Map<String, Path> extraFiles = new HashMap<>();
+    protected final Map<String, Path> nonRootExtraFiles = new HashMap<>();
 
-    private final Map<Object, String> agents = new HashMap<>();
+    private final List<String> preUserCreationStatements = new LinkedList<>();
 
-    private final Path tempBuildDir = Paths.get(JkConstants.OUTPUT_PATH).resolve("docker-build");
+    private final List<String> nonRootStatements = new LinkedList<>();
 
-    private final List<String> extraBuildSteps = new LinkedList<>();
+    private final List<String> rootStatements = new LinkedList<>();
 
     private final List<Integer> exposedPorts = new LinkedList<>();
 
-    private JkDockerBuild() {
+    private final List<String> footerStatements = new LinkedList<>();
+
+
+    protected JkDockerBuild() {
     }
 
     /**
@@ -81,58 +86,19 @@ public class JkDockerBuild {
     }
 
     /**
-     * Creates a JkDockerBuild instance for the specified JkProject.
-     */
-    public static JkDockerBuild of(JkProject project) {
-        return of().adaptTo(project);
-    }
-
-    /**
-     * Adapts this JkDockerBuild instance to build the specified JkProject.
-     */
-    public JkDockerBuild adaptTo(JkProject project) {
-        JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
-        if (!classTree.withMatcher(JkPathMatcher.of("**/*class")).containFiles()) {
-            JkLog.verbose("No compiled classes found. Force compile.");
-            project.compilation.runIfNeeded();
-        }
-        String mainClass = project.packaging.getMainClass();
-        JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project.");
-        return this
-                .setClasses(classTree)
-                .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
-                .setMainClass(mainClass);
-    }
-
-    /**
      * Sets the base image name to use a s the base image in the docker file.
      */
-    public JkDockerBuild setBaseImage(String baseImage) {
+    public final JkDockerBuild setBaseImage(String baseImage) {
         this.baseImage = baseImage;
         return this;
     }
 
     /**
-     * Sets the compiled Java classes that constitute the Java program to be executed.
+     * Sets the base build directory for the Docker build process.
+     * This directory will be used as the context directory for the Dockerfile.
      */
-    public JkDockerBuild setClasses(JkPathTree classes) {
-        this.classes = classes;
-        return this;
-    }
-
-    /**
-     * Sets the jar files that constitute the classpath of the program to be executed.
-     */
-    public JkDockerBuild setClasspath(List<Path> classpath) {
-        this.classpath = classpath;
-        return this;
-    }
-
-    /**
-     * Specifies the main class to run to execute the Program.
-     */
-    public JkDockerBuild setMainClass(String mainClass) {
-        this.mainClass = mainClass;
+    public final JkDockerBuild setBaseBuildDir(Path baseBuildDir) {
+        this.baseBuildDir = baseBuildDir;
         return this;
     }
 
@@ -141,28 +107,8 @@ public class JkDockerBuild {
      * @param file The path of the file in the host file system
      * @param destination The path of the file in the image.
      */
-    public JkDockerBuild addExtraFile(Path file, String destination) {
-        this.extraFiles.put(destination, file);
-        return this;
-    }
-
-    /**
-     * Adds the specified agent to the running JVM
-     * @param file The agent jar file in the host system
-     * @param agentOptions The agent options that will be prepended to '-javaagent:' option
-     */
-    public JkDockerBuild addAgent(Path file, String agentOptions) {
-        this.agents.put(file, agentOptions);
-        return this;
-    }
-
-    /**
-     * Adds the specified agent to the running JVM
-     * @param agentCoordinate The agent maven coordinate to download agent.
-     * @param agentOptions The agent options that will be prepended to '-javaagent:' option
-     */
-    public JkDockerBuild addAgent(@JkDepSuggest String agentCoordinate, String agentOptions) {
-        this.agents.put(agentCoordinate, agentOptions);
+    public final JkDockerBuild addExtraFile(Path file, String destination) {
+        this.nonRootExtraFiles.put(destination, file);
         return this;
     }
 
@@ -170,7 +116,7 @@ public class JkDockerBuild {
      * Sets the Maven repository used for downloading agent jars. Initial value is
      * Maven central.
      */
-    public JkDockerBuild setDownloadMavenRepos(JkRepoSet repos) {
+    public final JkDockerBuild setDownloadMavenRepos(JkRepoSet repos) {
         this.repos = repos;
         return this;
     }
@@ -178,15 +124,47 @@ public class JkDockerBuild {
     /**
      * Adds a docker build statement to be executed at the start of Docker build.
      */
-    public JkDockerBuild addExtraBuildStep(String statement) {
-        this.extraBuildSteps.add(statement);
+    public final JkDockerBuild addNonRootStatement(String statement) {
+        this.nonRootStatements.add(statement);
+        return this;
+    }
+
+    /**
+     * Set userId to be used as nonroot user.
+     * @param userId The userId, or <code>null</code> to use the root user and skip nonroot user creation
+     */
+    public final JkDockerBuild setUserId(Integer userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    public final JkDockerBuild setGroupId(int groupId) {
+        this.groupId = groupId;
+        return this;
+    }
+
+    /**
+     * Adds a docker build statement at the end of the DockerBuild file
+     */
+    public final JkDockerBuild addFooterStatement(String statement) {
+        this.footerStatements.add(statement);
+        return this;
+    }
+
+
+    /**
+     * Sets the docker statement for adding a user.  "${UID}" and "$[GID}" will be
+     * replaced by respectively the userId and the groupId set on this instance.
+     */
+    public final JkDockerBuild setAddUserTemplate(String addUserTemplate) {
+        this.addUserTemplate = addUserTemplate;
         return this;
     }
 
     /**
      * Adds a port to be exposed by the container.
      */
-    public JkDockerBuild setExposedPorts(Integer ...ports) {
+    public final JkDockerBuild setExposedPorts(Integer ...ports) {
         this.exposedPorts.clear();
         this.exposedPorts.addAll(Arrays.asList(ports));
         return this;
@@ -195,7 +173,7 @@ public class JkDockerBuild {
     /**
      * Returns an unmodifiable list of exposed ports in the Docker image.
      */
-    public List<Integer> getExposedPorts() {
+    public final List<Integer> getExposedPorts() {
         return Collections.unmodifiableList(exposedPorts);
     }
 
@@ -203,78 +181,15 @@ public class JkDockerBuild {
      * Builds the docker image with the specified image name.
      * @param imageName The name of the image to be build. It may contains or not a tag name.
      */
-    public void buildImage(String imageName) {
+    public final void buildImage(String imageName) {
         JkDocker.assertPresent();
-
-        JkUtilsAssert.state(!JkUtilsString.isBlank(mainClass), "Class containing 'main' method is not set.");
-
+        Path tempBuildDir = getTempBuildDir(imageName);
         JkPathTree.of(tempBuildDir).deleteContent();
 
-        List<Path> sanitizedLibs = sanitizedLibs();
+        String dockerBuild = dockerBuildContent(imageName);
 
-        // Handle extra build steps
-        String extraStatements = extraBuildSteps.stream()
-                .reduce("", (init, step) -> init + step + "\n" );
-
-        // Handle extra files
-        Map<Path, Path> originalToBuildDirFileMap = copyExtraFilesToBuildDir();
-        String extraFileCopy = createCopyInstructions(originalToBuildDirFileMap);
-
-        // Handle agents
-        Map<Object, Path> agentBuildDirMap = copyAgents();
-        String agentCopy = createAgentCopyInstruction(agentBuildDirMap);
-        String agentInstructions = createAgentOptions(agentBuildDirMap);
-
-        // Handle exposed ports
-        String exposedPortStatements = exposedPorts.isEmpty() ? "" :
-                "EXPOSE " + exposedPorts.stream().map(i -> Integer.toString(i))
-                        .collect(Collectors.joining(" ")) + "\n";
-
-        String dockerBuildTemplate =
-                "FROM ${baseImage}\n" +
-                exposedPortStatements +
-                extraStatements +
-                "WORKDIR /app\n" +
-                extraFileCopy +
-                agentCopy +
-                "COPY libs /app/libs\n" +
-                "COPY snapshot-libs /app/libs\n" +
-                "COPY classpath.txt /app/classpath.txt\n" +
-                "COPY resources /app/classes\n" +
-                "COPY classes /app/classes\n" +
-                "ENTRYPOINT java ${agents}$JVM_OPTIONS -cp @/app/classpath.txt ${mainClass} $PROGRAM_ARGS";
-        String dockerBuild = dockerBuildTemplate
-                .replace("${baseImage}", baseImage)
-                .replace("${mainClass}", mainClass)
-                .replace("${agents}", agentInstructions);
         JkPathFile.of(tempBuildDir.resolve("Dockerfile")).write(dockerBuild);
 
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("libs"));
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("snapshot-libs"));
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("resources"));
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("classes"));
-
-        // Copy classes to docker-build/classes
-        classFiles().copyTo(tempBuildDir.resolve("classes"));
-
-        // Copy resources to docker-build/resources
-        resourceFiles().copyTo(tempBuildDir.resolve("resources"));
-
-        // Copy classpath.txt
-        String classpathTxt = createClasspathArs(sanitizedLibs);
-        JkPathFile.of(tempBuildDir.resolve("classpath.txt")).write(classpathTxt);
-
-        // Copy Snapshot libs
-        sanitizedLibs.stream()
-                .filter(CHANGING_LIB)
-                .map(JkPathFile::of)
-                .forEach(file -> file.copyToDir(tempBuildDir.resolve("libs")));
-
-        // Copy libs
-        sanitizedLibs.stream()
-                .filter(path -> !CHANGING_LIB.test(path))
-                .map(JkPathFile::of)
-                .forEach(file -> file.copyToDir(tempBuildDir.resolve("libs")));
 
         // Build image using Docker daemon
         JkProcess.of("docker", "build", "-t", imageName, "./" + tempBuildDir).setInheritIO(true)
@@ -286,49 +201,73 @@ public class JkDockerBuild {
     }
 
     /**
+     * Computes a list of statements to be added before the footer statements in the Docker build file..
+     */
+    protected List<String> computePreFooterStatements(String imageName) {
+        return Collections.emptyList();
+    }
+
+    // non-private for testing purpose
+    final String dockerBuildContent(String imageName) {
+        // Handle extra files
+        Map<Path, Path> extraNonRootFileMap = copyExtraFilesToBuildDir(imageName, nonRootExtraFiles);
+        String nonRootExtraFileCopy = createCopyStatements(extraNonRootFileMap);
+
+
+        // Handle exposed ports
+        String exposedPortStatements = exposedPorts.isEmpty() ? "" :
+                "EXPOSE " + exposedPorts.stream().map(i -> Integer.toString(i))
+                        .collect(Collectors.joining(" ")) + "\n";
+
+        String dockerBuildTemplate =
+                "FROM ${baseImage}\n" +
+                        exposedPortStatements +
+                        toString(preUserCreationStatements) +
+                        userCreationStatement() +
+                        appDirCreation() +
+                        toString(rootStatements) +
+                        switchUser() +
+                        "WORKDIR /app\n" +
+                        nonRootExtraFileCopy + "\n" +
+                        toString(computePreFooterStatements(imageName)) +
+                        toString(footerStatements);
+        return dockerBuildTemplate.replace("${baseImage}", baseImage);
+    }
+
+    /**
      * Returns a formatted string that contains information about this Docker build.
      */
-    public String info() {
+    public String info(String imageName) {
 
         StringBuilder sb = new StringBuilder();
+        sb.append("Dockerbuild File  : ").append("\n");
+        sb.append("----------------------------------------------").append("\n");
+        sb.append(this.dockerBuildContent(imageName)).append("\n");
+        sb.append("----------------------------------------------").append("\n");
         sb.append("Base Image Name   : " + this.baseImage).append("\n");
 
         sb.append("Exposed Ports     : " + this.exposedPorts).append("\n");
 
+        if (this.userId == null) {
+            sb.append("Use               : root\n");
+        } else {
+            sb.append("User              : " + userId).append("\n");
+            sb.append("Group             : " + groupId(userId)).append("\n");
+        }
+
         sb.append("Extra Build Steps : ").append("\n");
-        this.extraBuildSteps.forEach(item -> sb.append("  " + item).append("\n"));
+        this.nonRootStatements.forEach(item -> sb.append("  " + item).append("\n"));
 
         sb.append("Extra Files       :").append("\n");
-        this.extraFiles.entrySet().forEach(entry
+        this.nonRootExtraFiles.entrySet().forEach(entry
                 -> sb.append("  " + entry.getValue()  + " -> " + entry.getKey()+ "\n"));
-
-        sb.append("Agents            : ").append("\n");
-        this.agents.entrySet().forEach(entry
-                -> sb.append("  " + entry.getKey()  + "=" + entry.getValue() + "\n"));
-
-        List<Path> libs = sanitizedLibs();
-        sb.append("Released libs     :").append("\n");
-        libs.stream().filter(CHANGING_LIB.negate()).forEach(item -> sb.append("  " + item + "\n"));
-        sb.append("Snapshot libs     :").append("\n");
-        libs.stream().filter(CHANGING_LIB).forEach(item -> sb.append("  " + item + "\n"));
-
-        sb.append("Resources Files   : " ).append("\n");
-        resourceFiles().getRelativeFiles().forEach(path -> sb.append("  " + path + "\n"));
-
-        sb.append("Class Files       : " ).append("\n");
-        classFiles().getRelativeFiles().forEach(path -> sb.append("  " + path + "\n"));
-
-        sb.append("Main class        : " + this.mainClass).append("\n");
-        sb.append("Classpath         : " ).append("\n");
-        this.classpath.forEach(item -> sb.append("  " + item + "\n"));
-
         return sb.toString();
     }
 
     /**
      * Returns a string representation of the command line arguments for port mapping in the Docker image.
      */
-    public String portMappingArgs() {
+    public final String portMappingArgs() {
         String portMapping = "";
         if (!this.exposedPorts.isEmpty()) {
             portMapping = this.exposedPorts.stream()
@@ -338,50 +277,39 @@ public class JkDockerBuild {
         return portMapping;
     }
 
-    private JkPathTree classFiles() {
-        return classes.andMatcher(CLASS_MATCHER);
-    }
-
-    private JkPathTree resourceFiles() {
-        return classes.andMatcher(CLASS_MATCHER.negate());
-    }
-
-    private List<Path> sanitizedLibs() {
-        return classpath.stream()
-                .filter(path -> !Files.isDirectory(path))
-                .collect(Collectors.toList());
-    }
-
-    private String createClasspathArs(List<Path> sanitizedLibs) {
-        StringBuilder classpathValue = new StringBuilder();
-        if (classes != null && classes.containFiles()) {
-            classpathValue.append("/app/classes");
-        }
-        sanitizedLibs.forEach(path -> classpathValue.append(":/app/libs/" + path.getFileName()));
-        return classpathValue.toString();
+    protected final Path getTempBuildDir(String imageName) {
+        String dirName = "docker-build-" + imageName.replace(':', '#');
+        Path parent = baseBuildDir == null ? Paths.get(JkConstants.OUTPUT_PATH)
+                : baseBuildDir;
+        return parent.resolve(dirName);
 
     }
 
-    private Map<Path, Path> copyExtraFilesToBuildDir() {
+    private Map<Path, Path> copyExtraFilesToBuildDir(String imageName, Map<String, Path> extraFiles) {
         Map<Path, Path> result = new HashMap<>();
-        Path extraFileDir = tempBuildDir.resolve(EXTRA_FILE_DIR);
+        Path extraFileDir = getTempBuildDir(imageName).resolve(EXTRA_FILE_DIR);
         if (!extraFiles.isEmpty()) {
             JkUtilsPath.createDirectories(extraFileDir);
         }
-        for (Path file : extraFiles.values()) {
+        for (Map.Entry<String, Path> entry : extraFiles.entrySet()) {
+            Path file = entry.getValue();
             Path dest = extraFileDir.resolve(file.getFileName());
             if (Files.exists(dest)) {
                 dest = extraFileDir.resolve(file.getFileName() + "-" + UUID.randomUUID());
             }
             result.put(file, dest);
-            JkUtilsPath.copy(file, dest);
+            if (!Files.exists(file)) {
+                throw new IllegalStateException(String.format("Docker import file %s -> %s, does not exist.",
+                        file, entry.getKey()));
+            }
+            JkUtilsPath.copy(file, dest, StandardCopyOption.REPLACE_EXISTING);
         }
         return result;
     }
 
-    private String createCopyInstructions(Map<Path, Path> buildDirMap) {
+    private String createCopyStatements(Map<Path, Path> buildDirMap) {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Path> entry : extraFiles.entrySet()) {
+        for (Map.Entry<String, Path> entry : nonRootExtraFiles.entrySet()) {
             Path buildDirFile = buildDirMap.get(entry.getValue());
             String from =  EXTRA_FILE_DIR + "/" + buildDirFile.getFileName();
             String to = entry.getKey();
@@ -390,52 +318,59 @@ public class JkDockerBuild {
         return sb.toString();
     }
 
-    private Map<Object, Path> copyAgents() {
-        Map<Object, Path> result = new HashMap<>();
-        Path agentDir = tempBuildDir.resolve("agents");
-        if (!agents.isEmpty()) {
-            JkUtilsPath.createDirectories(agentDir);
+    private String userCreationStatement() {
+        if (userId == null) {
+            return "";
         }
-        for (Object file : agents.keySet()) {
-            final Path agentJar;
-            if (file instanceof Path) {
-                agentJar = (Path) file;
-            } else {
-                JkCoordinate coordinate = JkCoordinate.of(file.toString());
-                JkCoordinateFileProxy fileProxy = JkCoordinateFileProxy.of(repos, coordinate);
-                agentJar = fileProxy.get();
-            }
-            Path dest = agentDir.resolve(agentJar.getFileName());
-            result.put(file, dest);
-            JkUtilsPath.copy(agentJar, dest);
-        }
-        return result;
+        int gid = groupId(userId);
+        String template = getAddUserTemplate() + "\n";
+        return template.replace("${UID}", userId.toString()).replace("${GID}", Integer.toString(gid));
     }
 
-    private String createAgentOptions(Map<Object, Path> buildDirMap) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Object, String> entry : agents.entrySet()) {
-            Path buildDirFile = buildDirMap.get(entry.getKey());
-            String agentPath =  "/app/agents/" + buildDirFile.getFileName();
-            sb.append("-javaagent:" + agentPath);
-            if (!JkUtilsString.isBlank(entry.getValue())) {
-                sb.append("=" + entry.getValue());
-            }
-            sb.append(" ");
+    private String appDirCreation() {
+        if (userId == null) {
+            return "RUN mkdir -p /app\n";
         }
-        return sb.toString();
+        int gid = groupId(userId);
+        String template =  "RUN mkdir -p /app && \\\n" +
+                "    chown -R ${UID}:${GID} /app \n";
+        return template.replace("${UID}", userId.toString()).replace("${GID}", Integer.toString(gid));
     }
 
-    private String createAgentCopyInstruction(Map<Object, Path> buildDirMap) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Object, String> entry : this.agents.entrySet()) {
-            Path buildDirFile = buildDirMap.get(entry.getKey());
-            String from =  "agents/" + buildDirFile.getFileName();
-            String to = "/app/agents/" + buildDirFile.getFileName();
-            sb.append("COPY " + from + " " + to + "\n");
+    private String switchUser() {
+        if (userId == null) {
+            return "";
         }
-        return sb.toString();
+        return "USER nonroot\n";
     }
+
+    private static String toString(List<String> statements) {
+        return statements.stream().reduce("", (init, step) -> init + step + "\n" );
+    }
+
+    private int groupId(int uid) {
+        if (this.groupId != null) {
+            return this.groupId;
+        }
+        return uid + 1;  // Some distrib as Alpine does not allow group creation having the same id than a user
+    }
+
+    private String getAddUserTemplate() {
+        if (!JkUtilsString.isBlank(addUserTemplate)) {
+            return addUserTemplate;
+        }
+        if (baseImage.contains("ubuntu")) {
+            return UBUNTU_ADD_USER_TEMPLATE;
+        } else if (baseImage.contains("temurin")) {
+            return TEMURIN_ADD_USER_TEMPLATE;
+        } else if (baseImage.contains("alpine")) {
+            return ALPINE_ADD_USER_TEMPLATE;
+        }
+        return UBUNTU_ADD_USER_TEMPLATE;
+    }
+
+
+
 }
 
 

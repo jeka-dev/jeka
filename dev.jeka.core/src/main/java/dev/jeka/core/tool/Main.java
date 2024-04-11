@@ -296,7 +296,7 @@ public class Main {
             System.err.println(failedText);
         }
         String suggestTxt = CommandLine.Help.Ansi.AUTO.string("You can investigate using @|yellow --verbose|@, " +
-                "@|yellow --debug|@, @|yellow --stacktrace|@ " +
+                "@|yellow --debug|@, @|yellow --stacktrace|@, @|yellow --info|@ " +
                 "or @|yellow -ls=DEBUG|@ options.");
         System.err.println(suggestTxt);
         System.err.println("If this originates from a bug, please report the issue at: " +

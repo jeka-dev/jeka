@@ -1,4 +1,5 @@
 import dev.jeka.core.JekaCommandLineExecutor;
+import dev.jeka.core.api.tooling.docker.JkDocker;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +14,9 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Run Self-App
         run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 base: pack");
+        if (JkDocker.isPresent()) {
+            run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 docker: build");
+        }
 
         // Test also if the KBean hosted in jeka-src, is considered as the default KBean
         run("dev.jeka.samples.baselib", "base: pack : ok --debug --info");

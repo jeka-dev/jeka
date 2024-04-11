@@ -36,6 +36,10 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     private static final String TASK = JkExternalToolApi.ansiText("@|blue Task: |@");
 
+    private static final String WARN = JkExternalToolApi.ansiText("@|yellow WARN: |@");
+
+    private static final String ERROR = JkExternalToolApi.ansiText("@|red ERROR: |@");
+
     private static final String DURATION = "Duration: ";
 
     static final byte LINE_SEPARATOR = 10;
@@ -74,7 +78,13 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
         }
         String message = event.getMessage();
         if (event.getType().isMessageType()) {
-            message = "[" + event.getType() + "] " + message;
+            if (event.getType() == JkLog.Type.WARN) {
+                message = WARN + message;
+            } else if (event.getType() == JkLog.Type.ERROR) {
+                message = ERROR + message;
+            } else {
+                message = "[" + event.getType() + "] " + message;
+            }
         }
         if (logType == JkLog.Type.END_TASK) {
             if (!JkUtilsString.isBlank(message)) {

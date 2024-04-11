@@ -22,7 +22,7 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
-import dev.jeka.core.api.tooling.docker.JkDockerBuild;
+import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
@@ -47,7 +47,7 @@ public final class DockerKBean extends KBean {
     public String imageName;
 
     @JkDoc("Base image to construct the Docker image.")
-    public String baseImage = JkDockerBuild.BASE_IMAGE;
+    public String baseImage = JkDockerJvmBuild.BASE_IMAGE;
 
     @JkDoc("Run docker with '-it' option")
     public boolean it = true;
@@ -55,7 +55,7 @@ public final class DockerKBean extends KBean {
     /**
      * Handler on the Docker build configuration for customizing built images.
      */
-    private final JkConsumers<JkDockerBuild> customizer = JkConsumers.of();
+    private final JkConsumers<JkDockerJvmBuild> customizer = JkConsumers.of();
 
     @Override
     protected void init() {
@@ -79,7 +79,7 @@ public final class DockerKBean extends KBean {
     public void run() {
         JkDocker.assertPresent();
         String containerName = "jeka-" + imageName.replace(':', '-');
-        String itOption = it ? "-it" : "";
+        String itOption = it ? "-it " : "";
         String args = String.format("%s--rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
                         +  " --name %s %s",
                 itOption,
@@ -93,17 +93,17 @@ public final class DockerKBean extends KBean {
 
     @JkDoc("Displays info about the Docker image.")
     public void info() {
-        String buildInfo = dockerBuild().info(); // May trigger a compilation to find the main class
+        String buildInfo = dockerBuild().info(this.imageName); // May trigger a compilation to find the main class
         JkLog.info("Image Name        : " + this.imageName);
         JkLog.info(buildInfo);
     }
 
-    public void customize(Consumer<JkDockerBuild> dockerBuildCustomizer) {
+    public void customize(Consumer<JkDockerJvmBuild> dockerBuildCustomizer) {
         customizer.add(dockerBuildCustomizer);
     }
 
-    private JkDockerBuild dockerBuild() {
-        JkDockerBuild dockerBuild = JkDockerBuild.of();
+    private JkDockerJvmBuild dockerBuild() {
+        JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of();
         dockerBuild.setBaseImage(this.baseImage);
         customizer.accept(dockerBuild);
         return dockerBuild;
