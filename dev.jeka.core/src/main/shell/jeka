@@ -53,6 +53,7 @@ declare JEKA_USER_HOME
 declare GLOBAL_PROP_FILE
 declare BASE_DIR  # To find BASE_DIR/jeka/local.properties, BASE_DIR/jeka/def, ...
 declare CURRENT_SCRIPT_DIR
+declare -i PROGRAM_OPTION_INDEX
 CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 # Global variables are preferred over passing all arguments
@@ -122,7 +123,17 @@ substring_after_hash() {
     fi
 }
 
+array_contains() {
+    local search=$1; shift
+    local array=("$@")
 
+    for element in "${array[@]}"; do
+        if [[ $element == $search ]]; then
+            return 0 # Element found, return success
+        fi
+    done
+    return 1 # Element not found, return failure
+}
 
 
 #######################################
@@ -843,17 +854,16 @@ compute_JAVA_CMD() {
 #   JEKA_DIST_DIR (write)
 #   RETRY_AFTER_BUILD (read/write)
 #   INTERPOLATED_ARGS (read)
+#   PROGRAM_OPTION_INDEX (read)
 # Outputs:
 #   None. Exit anyway if program launch has been requested
 #######################################
 execute_program_if_requested() {
-  local -i prog_option_index
-  prog_option_index=$(find_index_of_program_option "${INTERPOLATED_ARGS[@]}")
-  if [[ $prog_option_index == -1 ]]; then
+  if [[ $PROGRAM_OPTION_INDEX == -1 ]]; then
     return 0
   fi
   local -i from_arg_index
-  from_arg_index=$((prog_option_index+1))
+  from_arg_index=$((PROGRAM_OPTION_INDEX+1))
   local program_args=("${INTERPOLATED_ARGS[@]:$from_arg_index}")
   execute_and_exit_native_if_present "${program_args[@]}"
   execute_and_exit_java_if_present "${program_args[@]}"
@@ -900,17 +910,17 @@ execute_program_if_requested() {
 # Outputs:
 #   Write to stdout
 #######################################
-find_index_of_program_option() {
+compute_PROGRAM_OPTION_INDEX() {
   local -i index=0
   local -a items=("$@")
   for item in "${items[@]}"; do
     if [[ "$item" == "-p" ]] || [[ "$item" == "--program" ]]; then
-      echo "$index"
+      PROGRAM_OPTION_INDEX="$index"
       return 0
     fi
     ((index++))
   done
-  echo -1
+  PROGRAM_OPTION_INDEX=-1
 }
 
 ######################################
@@ -1021,6 +1031,7 @@ JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 
 compute_INTERPOLATED_ARGS "${CMD_LINE_ARGS[@]}"
+compute_PROGRAM_OPTION_INDEX "${INTERPOLATED_ARGS[@]}"
 compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
 
 execute_program_if_requested
