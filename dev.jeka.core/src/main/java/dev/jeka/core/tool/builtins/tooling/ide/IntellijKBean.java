@@ -22,6 +22,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.Main;
@@ -38,10 +39,6 @@ public final class IntellijKBean extends KBean {
 
     // Flag for skipping modules.xml creation when testing.
     public static final String IML_SKIP_MODULE_XML_PROP = "jeka.intellij.iml.skip.moduleXml";
-
-    @JkDoc("Add a iml dependency on the specified module (hosting Jeka) instead of adding a direct dependency on Jeka jar." +
-            "This is desirable on multi-module projects to share a single Jeka version.")
-    private String jekaModuleName;
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
     private final boolean useVarPath = true;
@@ -77,9 +74,6 @@ public final class IntellijKBean extends KBean {
                 .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
                 .setUseVarPath(useVarPath);
-        if (!JkUtilsString.isBlank(jekaModuleName)) {
-            useJekaDefinedInModule(jekaModuleName.trim());
-        }
         if (!JkUtilsString.isBlank(jdkName)) {
             imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
         } else if (!JkUtilsString.isBlank(suggestedJdkName)) {
@@ -89,13 +83,18 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
-        JkIml iml = imlGenerator.computeIml();
         Path imlPath = getImlFile();
+
+        // Determine if we are trying to generate an iml for the 'jeka-src' submodule
+        String extensionLessFileName = JkUtilsString.substringBeforeLast(imlPath.getFileName().toString(), ".");
+        boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName);
+        JkIml iml = imlGenerator.computeIml(isForJekaSrcModule);
+
         JkPathFile.of(imlPath)
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        JkLog.info("Iml file generated at " + getBaseDir().relativize(imlPath));
+        JkLog.info("Iml file generated at " + imlPath);
         if ("true".equals(getRunbase().getProperties().get(IML_SKIP_MODULE_XML_PROP))) {
             return;
         }
@@ -147,16 +146,7 @@ public final class IntellijKBean extends KBean {
         return this;
     }
 
-    /**
-     * In multi-module project, it's desirable that a unique module holds the dependency on Jeka, so it can be
-     * updated in a central location.
-     * Calling this method will force the generated iml to have a dependency on the specified module instead
-     * of on the jeka-core jar.
-     */
-    public IntellijKBean useJekaDefinedInModule(String intellijModule) {
-        imlGenerator.setExcludeJekaLib(true);
-        return configureIml(iml -> iml.component.addModuleOrderEntry(intellijModule, JkIml.Scope.TEST));
-    }
+
 
     /**
      * In multi-module project, Jeka dependency may be already hold by a module this one depends on.

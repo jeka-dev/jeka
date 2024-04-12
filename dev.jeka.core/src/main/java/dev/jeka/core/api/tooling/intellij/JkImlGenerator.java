@@ -62,6 +62,8 @@ public final class JkImlGenerator {
 
     private boolean failOnDepsResolutionError = true;
 
+    private boolean isForJekaSrc;
+
     private JkImlGenerator() {
     }
 
@@ -145,9 +147,15 @@ public final class JkImlGenerator {
     }
 
     public JkIml computeIml() {
+        return computeIml(false);
+    }
+
+    public JkIml computeIml(boolean isForJekaSrc) {
         JkIdeSupport ideSupport = ideSupportSupplier == null ? null : ideSupportSupplier.get();
         Path dir = ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
         JkIml iml = JkIml.of().setModuleDir(dir);
+        iml.setIsForJekaSrc(isForJekaSrc);
+
         JkLog.verbose("Compute iml jeka-src classpath : %s", jekaSrcClasspath);
         JkLog.verbose("Compute iml jeka-src imported projects : %s", jekaSrcImportedProjects);
         if (this.useVarPath) {

@@ -20,6 +20,7 @@ import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +33,10 @@ import java.util.stream.Collectors;
 public final class JkIml {
 
     private Path moduleDir = Paths.get("");
+
+    // when generating iml for a sub 'jeka-src' module, we need to relativize paths to $MODULE_DIR$/.. instead
+    // of $MODULE_DIR$
+    private boolean isForJekaSrc;
 
     public final Component component = new Component();
 
@@ -49,9 +54,15 @@ public final class JkIml {
         return this;
     }
 
+    public JkIml setIsForJekaSrc(boolean isForJekaSrc) {
+        this.isForJekaSrc = isForJekaSrc;
+        return this;
+    }
+
     public enum Scope {
         COMPILE, RUNTIME, TEST, PROVIDED
     }
+
 
     public class Component {
 
@@ -525,14 +536,22 @@ public final class JkIml {
             if (!original.isAbsolute()) {
                 Path moduleDirRelativePath = moduleDir.toAbsolutePath().normalize()
                         .relativize(original.toAbsolutePath().normalize());
-                return Paths.get("$MODULE_DIR$").resolve(moduleDirRelativePath);
+                String rootDirString = isForJekaSrc ? "$MODULE_DIR$/.." : "$MODULE_DIR$";
+                return Paths.get(rootDirString).resolve(moduleDirRelativePath);
             }
             Path normalized  = original.normalize();
             return substitutes.entrySet().stream()
                     .filter(pathStringEntry -> pathStringEntry.getValue() != null)
                     .filter(pathStringEntry -> normalized.startsWith(pathStringEntry.getValue()))
                     .findFirst()
-                    .map(entry -> Paths.get("$" + entry.getKey() + "$").resolve(entry.getValue().relativize(normalized)))
+                    .map(entry -> {
+                        String entryKey = "$" + entry.getKey() + "$";
+                        if (isForJekaSrc && "MODULE_DIR".equals(entry.getKey())) {
+                            entryKey = entryKey + "/..";
+                        }
+                        return Paths.get(entryKey)
+                                .resolve(entry.getValue().relativize(normalized));
+                    })
                     .orElse(normalized);
         }
     }
