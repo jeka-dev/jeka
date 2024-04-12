@@ -17,6 +17,6 @@ RUN apt install -y curl  \
 USER nonroot
 
 ARG CACHEBUST=1
+WORKDIR /home/nonroot
 RUN curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jeka-install | bash -s - setup
 
-WORKDIR /home/nonroot

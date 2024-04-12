@@ -1,23 +1,28 @@
-site_name: Jeka Build Tool
+site_name: JeKa Build Tool
 theme:
     name: material
-    logo: images/knight-color-logo.svg
+    logo: images/logo.svg
     favicon: images/knight-color-logo.svg
+    font:
+      text: Roboto
     palette :
       # Palette toggle for light mode
-      - scheme: default
-        toggle:
-          icon: material/brightness-7
-          name: Switch to dark mode
-        primary: blue grey
-
       # Palette toggle for dark mode
       - scheme: slate
         toggle:
           icon: material/brightness-4
           name: Switch to light mode
-        primary: blue grey
+        primary: purple
         favicon: images/knight-color-logo.svg
+
+      - scheme: default
+        toggle:
+          icon: material/brightness-7
+          name: Switch to dark mode
+        primary: purple
+        accent: indigo
+
+
     features:
         - navigation.instant
         - navigation.tracking
@@ -28,9 +33,14 @@ extra:
         property: UA-103449580-2
 nav:
     - Installation: installation.md
+    - Getting Started: getting-started.md
+    - Reference:
+        - KBeans: reference/kbeans.md
+        - Properties: reference/properties.md
     - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md
+    - Migration Guide (0.10 -> 0.11): migration-guide.md
     - Legacy (version  0.10.x) :
       - Reference Guide:
           - Execution Engine:

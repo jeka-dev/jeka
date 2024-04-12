@@ -94,7 +94,8 @@ class DockerTester extends JekaCommandLineExecutor  {
 
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.INDENT);
-        new DockerTester().run();
+        buildInstallImage();
+        //new DockerTester().run();
     }
 
 }
