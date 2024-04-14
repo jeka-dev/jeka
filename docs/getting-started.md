@@ -31,9 +31,9 @@ We can override the value of *public* field by specifying the value in *jeka.pro
 file as `@script.name=Everybody`('script' being the simple class name with camel-case).
 
 !!! Note
-    Execute `jeka : --help` to display specific help on the current script.
+    Execute `jeka script: --help` to display specific help on the current script.
 
-## Add dependencies
+### Add dependencies
 
 Your script can depends on libs located in a Maven repository, or on folder/jar located on file system.
 
@@ -65,7 +65,7 @@ and execute `jeka --info`. This displays runtime information about JeKa run, inc
 
 You can add as many `@JkInjectClasspath` annotation on the class.
 
-### Use BOM dependencies
+#### Use BOM dependencies
 
 In some cases, we may need to use a BOM dependency which provides versioning information on other dependencies we might use.
 
@@ -75,7 +75,7 @@ In some cases, we may need to use a BOM dependency which provides versioning inf
 @JkInjectClasspath("com.google.cloud:oogle-cloud-bigquery")
 ```
 
-### Dependencies on file system
+#### Dependencies on file system
 
 There is 2 way of adding local file system dependencies :
 
@@ -87,7 +87,7 @@ There is 2 way of adding local file system dependencies :
 @JkInjectClasspath("../other-project/my-classes")
 ```
 
-## Add compilation directives
+### Add compilation directives
 
 Classes from *jeka-src* are compiled behind-the-scene prior of being executed.
 
@@ -111,5 +111,72 @@ will still work exactly as it used to.
 
 ### Multiple Scripts
 
-Creating many scripts class in one project isn't a common use case but it will help to understand 
+Creating many script classes in a single project isn't a common use case but it will help to understand 
 some concepts related to [KBeans](reference/kbeans.md)
+
+1. In the existing project, create a new class *Build.java* at the root of *jeka-src*. This class should extend `KBean`.
+2. Add a *public void no-args* method *foo* in this class
+```java
+import dev.jeka.core.tool.KBean;
+
+public class Build extends KBean {
+
+    public void foo() {
+        System.out.println("Method 'foo()' is running.");
+    }
+}
+```
+and execute `jeka foo` to notice that this method is actually run.
+
+3. Execute `jeka hello`. You should get an error message as : *ERROR: Unmatched argument at index 0: 'hello'*.
+
+This is due that we did not mention the KBean class to use as default when invoking method.
+By default, JeKa width-first explores *jeka-src* to find the first class implementing `KBean`, and so *Build.java* win.
+
+Execute `jeka script: hello` to invoke `hello` method from `Script`class.
+
+You can check the actual default KBean, by executing `jeka --info` and check for the *Default KBean* entry.
+
+!!! note
+    A given `KBean` class can accept many names to be referenced :
+
+    - Its fully qualified class name (as org.eaxample.kbeans.MyCoolKBean)
+    - Its short class name (as MyCoolKBean))
+    - Its short class name withj uncapitalized first-letter (as myCoolKBean)
+    - If the class name is ending with 'KBean', the KBean suffix can omitted (as myCool)
+
+!!! Tip
+    You can change the default KBean by mentioning `jeka.default.kbean=script` in *jeka.properties* file.
+
+
+### Make KBeans interact with each other
+
+KBean mechanism plays a central role in JeKa ecosystem. In the following section, we will play around  
+it to make you more familiar with.
+
+1. Set `jeka.default.kbean=script` property in the *jeka.properties* file and make sure that *Script.java* and *Build.java*  are still present in *jeka-src* dir
+2. Add the following method in *Script.java*
+```java
+@Override
+protected void init() {
+    Script script = load(Script.class);  //  Get the singleton Script instance
+    script.name = "EveryBody";           
+}
+```
+
+3. Now, execute `jeka script: hello build:`. This will initialize *script* and *build* KBean singletons then
+   invoke `Script.hello()` method.
+   This result in displaying `Hello Everybody` in the console. This means that *build* KBean has configured *script* successfully.
+
+    !!! note
+        When Jeka *initialize* a KBean, this means that it instantiates it prior invoking its `ìnit` method.
+
+4. Now, execute `jeka script: hello`, you'll notice that this display back `Hello world`. This is due that 
+   `build` is not initialized anymore.
+
+   You can force it to be always initialized, by adding `@build=` property to *jeka-properties* file.
+   
+   Add it and retry `jeka script: hello`. Now it should display `Hello Everybody`
+
+
+   

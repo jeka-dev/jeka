@@ -1,8 +1,14 @@
+# Frequented Asked Questions
+
 ## General
 
-### I'm behind a firewall that prevent me to access to Maven central, what should I do ?
+### I'm behind a firewall that prevent to access to Maven Central, what can I do ?
 
-Define the `jeka.repos.download` property in your USER_HOME/.jeka/global.properties file
+If you cannot access to Maven Central repository for whatever reason, you should use 
+a Maven repository that is accessible from your organisation. 
+
+This [section](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) explains how you can setup the upload repository globally or for a given project.
+
 Alternatively, you can define the JEKA_REPOS_DOWNLOAD environment variable.
 
 See [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) for more details.
@@ -16,8 +22,28 @@ JeKa just leverages the standard Java mechanism to handle proxy. For example, Yo
 
 See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be-used-by-the-jvm) for more details on arguments.
 
+### How can I use Maven/Gradle in conjunction with JeKa ?
 
-### How can I migrate from Maven ?
+Nothing prevents to use JeKa in conjunction of Maven or Gradle in the same project,
+except that in IDE, synchronisation may interfere between the 2 systems.
+
+To avoid that, JeKa proposes a simple solution :
+
+1. Creates the project in IDE as you normally do for Maven or Gradle
+2. Execute : `jeka base: scaffold`. This generates the folder/file structure for JeKa
+3. Add `@intellij.imlFile=jeka-src/jeka-src.iml` in *jeka.properties* file.
+4. Execute : `jeka intellij: iml`. The iml file should be created under *jeka-src* folder.
+5. Execute : `jeka intellij: initProject`. To create a module according the generated iml file.
+
+Now *jeka-src* live in its own IntelliJ module.
+Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.
+
+!!! warning
+    Do not remove the `@intellij.imlFile=jeka-src/jeka-src.iml` property from *jeka.property* file, otherwise you will
+    still face sync issues.
+
+
+### How can I migrate my project from Maven ?
 
 _Jeka_ helps translate all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
 
@@ -43,9 +69,14 @@ public class Build extends JkBean {
 }
 ```
 
-### How can I generate Eclipse/Intellij without using ProjectKBean ?
+### How can I sync  Eclipse/Intellij without using ProjectKBean ?
 
-Just make your _KBean_ class implement `JkJavaIdeSupport`.
+`ProjectKBean` KBean provides IDE sync out-of-the-box but you may prefer to not use it.
+
+Just let your KBean implements `JkJavaIdeSupport` and implement the unique method that is 
+proving info necessary to generate IDE metadata file.
+
+Then, for sync, just execute `jeka intellij: iml` as usual.
 
 
 
