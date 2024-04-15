@@ -112,7 +112,7 @@ will still work exactly as it used to.
 ### Multiple Scripts
 
 Creating many script classes in a single project isn't a common use case but it will help to understand 
-some concepts related to [KBeans](reference/kbeans.md)
+some concepts related to [KBeans](../reference/kbeans.md)
 
 1. In the existing project, create a new class *Build.java* at the root of *jeka-src*. This class should extend `KBean`.
 2. Add a *public void no-args* method *foo* in this class
@@ -178,5 +178,3 @@ protected void init() {
    
    Add it and retry `jeka script: hello`. Now it should display `Hello Everybody`
 
-
-   

@@ -117,13 +117,13 @@ in public field `yyyyy` of KBean `xxx`.
 
 examples:
 ```
-springboot#springbootVersion=2.4.7
-project#test.skip=true
+@springboot.springbootVersion=2.4.7
+@project.test.skip=true
 ```
 
 !!! Note
-    There is a slight difference between using `-Dproject#test.skip=true` and 
-    `project#test.skip=true` in the command line.<br/>
+    There is a slight difference between using `-D@project.test.skip=true` and 
+    `@project.test.skip=true` in the command line.<br/>
     For the former, the field is injected via system properties, this means that for multi-modules projects,
     the value will be injected on every Jeka module.
     For the latter, the value will be injected only on the root module.

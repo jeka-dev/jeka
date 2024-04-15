@@ -18,4 +18,4 @@ Jeka adopts the colon notation for KBean.
 
 ## Consequences
 
-To mention default KBean, we'll simply use `:` as in `jeka project:pack : e2e`
+To mention default KBean, we'll simply use `:` as in `jeka project: pack : e2e`

@@ -33,7 +33,9 @@ extra:
         property: UA-103449580-2
 nav:
     - Installation: installation.md
-    - Getting Started: getting-started.md
+    - Tutorials:
+        - Getting Started: tutorials/getting-started.md
+        - Build Projects: tutorials/build-projects.md
     - Reference:
         - KBeans: reference/kbeans.md
         - Properties: reference/properties.md

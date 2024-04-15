@@ -163,6 +163,8 @@ public final class JkProjectScaffold extends JkScaffold {
             addJekaPropValue(SIMPLE_STYLE_PROP);
         }
 
+        addJekaPropValue("@project=");
+
         if (kind == Kind.REGULAR) {
             String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
             addFileEntry(BUILD_CLASS_PATH, code);

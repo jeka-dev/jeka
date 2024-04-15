@@ -1,7 +1,7 @@
 ## KBeans
 
 _KBean_ is the central concept of the execution engine. _KBeans_ are classes with declared executable methods. 
-There is only one _KBean_ instance by _KBean_ class in any given Jeka project (JkRuntime).
+There is only one _KBean_ instance by _KBean_ class in any given Jeka base dir..
 
 _KBean_ classes share the following characteristics :
 
@@ -48,14 +48,14 @@ public class SimpleJkBean extends KBean {
 
 ```
 
-### KBean Commands
+### KBean Methods
 
-A _KBean command_ is an instance method of a KBean class that can be invoked from the command line. In order to be considered as a _command_, a method must :
+A _KBean_ method is a specific method defined in a KBean class, designed to be executable from the command line interface. For successful recognition as a _command_, the method should adhere to the following criteria:
 
-* be `public`
-* be an instance method
-* take no argument
-* return `void`
+* It should be designated as `public`.
+* It should be an instance method, not static or abstract.
+* It should not require any arguments upon invocation.
+* It should not return any value, indicated by a `void` return type.
 
 ### KBean Attributes
 
@@ -100,9 +100,9 @@ Many methods/properties can be invoked in a single command line.
     _[kbeanName]_ prefix can be omitted. By default, it will be resolved on the bean mentioned by the *-kb=* option, 
     or the first KBean found in _def_ dir, if the option is not present. 
     Search is executed by alphabetical order of fully qualified class names. 
-    Example : `jeka #toSomething #aProperty=xxxx`
-    It is also possible to refer to the default KBean by using *kb#* prefix in place of *#*.
-    Example : `jeka kb#toSomething kb#aProperty=xxxx`
+    Example : `jeka toSomething aProperty=xxxx`
+    It is also possible to refer to the default KBean by using *:#* prefix.
+    Example : `jeka : toSomething aProperty=xxxx`
 
 
 #### From IntelliJ Jeka Plugin
@@ -160,7 +160,7 @@ You can achieve this in a statically typed way.
 
 * In _master_ _KBean_, declare a field of type `KBean` (e.g. ´JkBean importedBuild;`). It doesn't have to be public.
 * Annotate it with `@JkInjectProject` mentioning the relative path of the imported project (e.g. `@JkInjectProject("../anotherModule")).
-* Execute `jeka intellij#iml` or `jeka eclipse#files`.
+* Execute `jeka intellij: iml` or `jeka eclipse: files`.
 * Redefine the declared type from `KBean` to the concrete type of imported _KBean_
 * Now, master _KBean_ can access the imported _KBean_ in a static typed way.
 * See example [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
@@ -186,14 +186,6 @@ according the `JkProject` object found in _project KBean_.
 This _KBean_ proposes an extension point through its `configure` methods in order to modify the resulting iml
 (e.g. using a module dependency instead of a library dependency).
 
-#### scaffold
-
-`ScaffoldjKBean` provides methods for project directories and files to create a new _Jeka_ project. Basically, 
-it creates a project ready to create vanilla automation tasks.
-
-This _KBean_ offers an extension point in order for another KBean to augment the scaffolded structure. For example, 
-executing `jeka scaffold#run` will create a basic Jeka project while `jeka scaffold#run project#` will create 
-a project ready to build a JVM-based project. 
 
 #### git
 

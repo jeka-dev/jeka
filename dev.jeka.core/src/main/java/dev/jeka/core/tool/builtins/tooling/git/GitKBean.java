@@ -66,13 +66,6 @@ public final class GitKBean extends KBean {
         JkLog.info(gerVersionFromGit().getVersion());
     }
 
-    @JkDoc("Handles versioning of the project managed in the projectKBean. " +
-            "It is meant to be called from the property file cmd, prior other project#xxxxx commands. ")
-    public void handleProjectVersioning() {
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
-                gerVersionFromGit().handleVersioning(projectKBean.project));
-    }
-
     @JkDoc("Displays last git tag in current branch")
     public void lastTag() {
         System.out.println(JkGit.of(getBaseDir()).setLogWithJekaDecorator(false).getLatestTag());
