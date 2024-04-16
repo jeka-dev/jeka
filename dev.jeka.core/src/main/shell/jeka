@@ -38,7 +38,6 @@
 #
 
 set -e
-set -x
 #####################
 # Global vars
 #####################
@@ -928,7 +927,6 @@ compute_PROGRAM_OPTION_INDEX() {
   local -i index=0
   local -a items=("$@")
   for item in "${items[@]}"; do
-    echo "-----------------------index=$index"
     if [ "$item" == "-p" ] || [ "$item" == "--program" ]; then
       PROGRAM_OPTION_INDEX="$index"
       return 0
