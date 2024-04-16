@@ -20,6 +20,9 @@ import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+
 /**
  * Class providing utility methods for executing Docker commands.
  */
@@ -65,11 +68,15 @@ public class JkDocker {
      * Checks if Docker is present on the system.
      */
     public static boolean isPresent() {
-        return prepareExec("version")
-                .setLogCommand(true)
-                .setInheritIO(false)
-                .setLogWithJekaDecorator(false)
-                .exec().hasSucceed();
+        try {
+            return prepareExec("version")
+                    .setLogCommand(true)
+                    .setInheritIO(false)
+                    .setLogWithJekaDecorator(false)
+                    .exec().hasSucceed();
+        } catch (UncheckedIOException e) {
+            return false;
+        }
     }
 
     public static void assertPresent() {
