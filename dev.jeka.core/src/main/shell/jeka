@@ -933,7 +933,7 @@ compute_PROGRAM_OPTION_INDEX() {
       PROGRAM_OPTION_INDEX="$index"
       return 0
     fi
-    ((index++))
+    ((index += 1))
 
   done
   PROGRAM_OPTION_INDEX=-1
