@@ -25,13 +25,11 @@ without any extra action from your part.
 You can add as many *public void no-args* methods or *public fields* in your scripts.
 The accepted *public field* types are mentioned [here](https://picocli.info/#_built_in_types).
 
-### Configure script
+!!! tip
+    You can document your script by annotation Class, public fields or public method with `@JkDoc` annotation.
+    This will be visible when executing: `jeka script: --help`.
+    Note that only part before first breaking line of the doc content will be displayed as summary.
 
-We can override the value of *public* field by specifying the value in *jeka.properties* 
-file as `@script.name=Everybody`('script' being the simple class name with camel-case).
-
-!!! Note
-    Execute `jeka script: --help` to display specific help on the current script.
 
 ### Add dependencies
 
@@ -148,25 +146,42 @@ You can check the actual default KBean, by executing `jeka --info` and check for
 !!! Tip
     You can change the default KBean by mentioning `jeka.default.kbean=script` in *jeka.properties* file.
 
+### Configure script execution
+
+We can override the value of *public* field by specifying the value in *jeka.properties* as :
+```properties
+@script.name=Everybody
+```
+
+Execute 'jeka hello', you should get
+```
+Hello Everybody
+```
 
 ### Make KBeans interact with each other
 
 KBean mechanism plays a central role in JeKa ecosystem. In the following section, we will play around  
 it to make you more familiar with.
 
-1. Set `jeka.default.kbean=script` property in the *jeka.properties* file and make sure that *Script.java* and *Build.java*  are still present in *jeka-src* dir
+1. Set `jeka.default.kbean=script` property in the *jeka.properties* file and remove `@script.name=Everybody` 
+   added in previous step.
+   ```properties
+   jeka.default.kbean=script
+   ```
+   Also, make sure that *Script.java* and *Build.java*  are still present in *jeka-src* dir.
+
 2. Add the following method in *Script.java*
 ```java
 @Override
 protected void init() {
     Script script = load(Script.class);  //  Get the singleton Script instance
-    script.name = "EveryBody";           
+    script.name = "Mates";           
 }
 ```
 
 3. Now, execute `jeka script: hello build:`. This will initialize *script* and *build* KBean singletons then
    invoke `Script.hello()` method.
-   This result in displaying `Hello Everybody` in the console. This means that *build* KBean has configured *script* successfully.
+   This result in displaying `Hello Mates` in the console. This means that *build* KBean has configured *script* successfully.
 
     !!! note
         When Jeka *initialize* a KBean, this means that it instantiates it prior invoking its `ìnit` method.
@@ -176,5 +191,8 @@ protected void init() {
 
    You can force it to be always initialized, by adding `@build=` property to *jeka-properties* file.
    
-   Add it and retry `jeka script: hello`. Now it should display `Hello Everybody`
+   Add it and retry `jeka script: hello`. Now it should display `Hello Mates`
 
+## Classpath KBeans
+
+As we just see, many KBeans can live together in 

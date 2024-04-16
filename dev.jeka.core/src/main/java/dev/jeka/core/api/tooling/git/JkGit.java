@@ -48,7 +48,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Creates a new JkGit instance pointing on the specified working directory.
      */
     public static JkGit of(Path dir) {
-        return new JkGit().setWorkingDir(dir);
+        return new JkGit().setWorkingDir(dir).setFailOnError(false);
     }
 
     /**
@@ -80,6 +80,15 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
             return null;
         }
         return branch;
+    }
+
+    public boolean isOnGitRepo() {
+        String result = this.copy()
+                .addParams("rev-parse ", "--is-inside-work-tree")
+                .setCollectStdout(true)
+                .exec()
+                .getStdoutAsString();
+        return "true".equals(result);
     }
 
     /**
@@ -351,8 +360,10 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
 
     private JkProcResult execAndCheck() {
         JkProcResult procResult = exec();
-        if (procResult.getExitCode() == 128) {
-            throw new JkException("Cannot find a Git repository at " + this.getWorkingDir());
+        if (procResult.getExitCode() != 0) {
+            if (!copy().isOnGitRepo()) {
+                throw new JkException("Cannot find a Git repository from " + this.getWorkingDir());
+            }
         }
         return procResult;
     }
