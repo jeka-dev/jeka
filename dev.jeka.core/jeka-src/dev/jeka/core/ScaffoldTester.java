@@ -24,6 +24,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * End-to-end tests about scaffolding.
@@ -34,6 +35,8 @@ class ScaffoldTester extends JekaCommandLineExecutor {
     void run() {
 
         // Basic scaffold and checks
+        runWithDistribJekaShell(Paths.get(""), "--version");
+        runWithDistribJekaShell(Paths.get(""), "--help");
         scaffoldAndCheckInTemp("base: scaffold", "hello base: info -v -Djeka.java.version=17", true);
         scaffoldAndCheckInTemp("base: scaffold scaffold.kind=APP -vi", "base: test runMain", true);
         scaffoldAndCheckInTemp("project: scaffold scaffold.kind=REGULAR", ": --help", true);
