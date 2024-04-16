@@ -18,11 +18,14 @@ package dev.jeka.plugins.nodejs;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @JkDoc("Auto-configure projects with nodeJs client.")
@@ -37,7 +40,7 @@ public class NodeJsKBean extends KBean {
     public String cmdLine;
 
     @JkDoc("The relative path of the nodeJs project.")
-    public String clientDir = "client";
+    public String clientDir = "client-js";
 
     @JkDoc("The directory path, relative to 'clientDir', containing the client build result.")
     public String clientBuildDir = "build";
@@ -63,11 +66,17 @@ public class NodeJsKBean extends KBean {
     }
 
     private JkNodeJs getJkNodeJs() {
+
         return JkNodeJs.ofVersion(version).setWorkingDir(getWorkingDir());
     }
 
    private Path getWorkingDir() {
-        return getBaseDir().resolve(clientDir);
+        Path result = getBaseDir().resolve(clientDir);
+        if (!Files.exists(result)) {
+            JkLog.info("Directory not found %s, use current dir as working dir.", result);
+            return Paths.get("");
+        }
+        return result;
    }
 
    private String[] commandLines() {

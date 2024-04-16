@@ -157,24 +157,25 @@ public class JkNodeJs {
      * Configures the specified project to include a Node.js build right after main compilation.
      *
      * @param project The project to configure
-     * @param clientBaseDir The path of the Node.js subproject (relative to the base dir).
+     * @param clientJsBaseDir The path of the Node.js subproject (relative to the base dir).
      * @param clientBuildDir The path, relative to @clientBaseDir of the directory containing the build result.
      * @param copyToDir If not empty, the result of the client  build will be copied to this directory in class dir (e.g. 'static').
      * @param buildCommands The commands (npm o npx) to execute to build the Node.js project.
      */
-    public JkNodeJs configure(JkProject project, String clientBaseDir, String clientBuildDir, String copyToDir,
+    public JkNodeJs configure(JkProject project, String clientJsBaseDir, String clientBuildDir, String copyToDir,
                               String ...buildCommands) {
-        Path baseDir = project.getBaseDir().resolve(clientBaseDir);
-        Path buildDir = baseDir.resolve(clientBuildDir);
+        Path jsBaseDir = project.getBaseDir().resolve(clientJsBaseDir);
+        Path buildJsDir = jsBaseDir.resolve(clientBuildDir);
+
         project.compilation.postCompileActions.append("build-js-project", () -> {
-            this.setWorkingDir(baseDir);
+            this.setWorkingDir(jsBaseDir);
             JkConsoleSpinner.of("Building Node.js project")
                     .setAlternativeMassage("Building Node.js project. It may take a while...")
                     .run(() -> Arrays.stream(buildCommands).forEach(this::exec));
-            JkLog.info("JS project built in %s", baseDir.resolve(clientBuildDir));
+            JkLog.info("JS project built in %s", buildJsDir);
             if (!JkUtilsString.isBlank(copyToDir)) {
                 Path target = project.compilation.layout.resolveClassDir().resolve(copyToDir);
-                JkPathTree.of(buildDir).copyTo(target);
+                JkPathTree.of(buildJsDir).copyTo(target);
                 JkLog.info("Build copied to %s", target);
             }
 

@@ -68,7 +68,7 @@ You can add as many `@JkInjectClasspath` annotation on the class.
 In some cases, we may need to use a BOM dependency which provides versioning information on other dependencies we might use.
 
 ```java
-@JkInjectClasspath("com.google.cloud:libraries-bom<:pom:5.0.0")
+@JkInjectClasspath("com.google.cloud:libraries-bom::pom:5.0.0")
 @JkInjectClasspath("com.google.cloud:google-cloud-storage")
 @JkInjectClasspath("com.google.cloud:oogle-cloud-bigquery")
 ```
@@ -83,6 +83,17 @@ There is 2 way of adding local file system dependencies :
 ```java
 @JkInjectClasspath("../other-project/mylib.jar")
 @JkInjectClasspath("../other-project/my-classes")
+```
+
+#### Define dependencies with properties
+
+Dependencies can also be mentioned using the `jeka.inject.classpath=` property in *jeka.properties* file.
+
+```
+jeka.inject.classpath=\
+  com.google.cloud:libraries-bom::pom:5.0.0 \
+  com.google.cloud:google-cloud-storage \
+  com.google.cloud:oogle-cloud-bigquery
 ```
 
 ### Add compilation directives
@@ -195,4 +206,15 @@ protected void init() {
 
 ## Classpath KBeans
 
-As we just see, many KBeans can live together in 
+We distinct *local* KBeans (which are Java sources file defined in *jeka-src*) from *classpath* KBeans (which 
+are compiled classes lying in the Jeka classpath).
+
+Execute: `jeka : --help` to list all available KBeans. You'll notice the *standard KBeans* section that mentions 
+all KBeans bundled with JeKa out-of-the-box (and always available). These are typically *classpath* KBeans.
+ 
+For example, you can execute `jeka admin: openHomeDir` to open your*Jeka Home directory*.
+
+## Add KBeans to classpath
+
+This just consists in adding a dependency that contains a KBean class. 
+
