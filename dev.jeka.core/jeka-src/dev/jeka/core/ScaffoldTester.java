@@ -34,7 +34,7 @@ class ScaffoldTester extends JekaCommandLineExecutor {
     void run() {
 
         // Basic scaffold and checks
-        scaffoldAndCheckInTemp("base: scaffold -v", "hello base: info -v -Djeka.java.version=17", true);
+        scaffoldAndCheckInTemp("base: scaffold", "hello base: info -v -Djeka.java.version=17", true);
         scaffoldAndCheckInTemp("base: scaffold scaffold.kind=APP -vi", "base: test runMain", true);
         scaffoldAndCheckInTemp("project: scaffold scaffold.kind=REGULAR", ": --help", true);
 
