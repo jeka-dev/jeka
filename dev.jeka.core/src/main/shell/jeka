@@ -928,11 +928,12 @@ compute_PROGRAM_OPTION_INDEX() {
   local -i index=0
   local -a items=("$@")
   for item in "${items[@]}"; do
-    if [[ "$item" == "-p" ]] || [[ "$item" == "--program" ]]; then
+    if [ "$item" == "-p" ] || [ "$item" == "--program" ]; then
       PROGRAM_OPTION_INDEX="$index"
       return 0
     fi
     ((index++))
+    echo "-----------------------index=$index"
   done
   PROGRAM_OPTION_INDEX=-1
 }
