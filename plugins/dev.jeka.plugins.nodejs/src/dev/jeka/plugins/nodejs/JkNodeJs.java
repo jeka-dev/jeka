@@ -203,7 +203,7 @@ public class JkNodeJs {
                 .setFailOnError(true)
                 .setEnv("PATH", pathVar)
                 .setLogCommand(true)
-                .setLogWithJekaDecorator(JkLog.isVerbose());
+                .setLogWithJekaDecorator(true);
     }
 
     private static boolean isBinaryPresent(Path installDir) {
