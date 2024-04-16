@@ -65,11 +65,13 @@ declare JDK_DOWNLOAD_FILE_TYPE="tar.gz" # overridden for *WIN os
 declare JDK_DOWNLOAD_OS
 declare JDK_DOWNLOAD_ARCH
 
-declare SHOULD_LOG_DOWNLOAD # we should not log anything when on the green path, except if '-lsu' arg is present
+declare IS_VERBOSE # we should not log anything when on the green path, except if '-lsu' arg is present
 
 declare LOG_DEBUG # DEBUG
 declare DRY_RUN  # Debugging purpose
 declare DEFAULT_BASE_DIR="."
+
+echo "--------------------------------------------------------------"
 
 
 #######################################
@@ -175,7 +177,7 @@ download_and_unpack() {
   ## download
   if [ -x "$(command -v curl)" ]; then
     local silent_flag="s"
-    if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+    if [ "$IS_VERBOSE" != "" ]; then
       silent_flag=""
     fi
     curl -"$silent_flag"Lf --fail --show-error -o "$temp_file" "$url"
@@ -205,15 +207,15 @@ download_and_unpack() {
 # Computes if we should print something on console when downloading files
 # Globals:
 #   CMD_LINE_ARGS (read)
-#   SHOULD_LOG_DOWNLOAD (write)
+#   IS_VERBOSE (write)
 # Arguments:
 #   None
 #######################################
-compute_SHOULD_LOG_DOWNLOAD() {
+compute_IS_VERBOSE() {
   for arg in "${CMD_LINE_ARGS[@]}"
     do
       if [ "$arg" == "--verbose" ] || [ "$arg" == "-v" ] || [ "$arg" == "-d" ] || [ "$arg" == "--debug" ]; then
-          SHOULD_LOG_DOWNLOAD="true"
+          IS_VERBOSE="true"
           return 0
       fi
     done
@@ -227,7 +229,7 @@ compute_SHOULD_LOG_DOWNLOAD() {
 #   $*
 #######################################
 debug() {
-  if [ -n "$LOG_DEBUG" ] || [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
+  if [ -n "$LOG_DEBUG" ] || [ -n "$IS_VERBOSE" ]; then
     echo "$1" 1>&2
   fi
 }
@@ -556,7 +558,7 @@ compute_base_dir_from_resolved_remote_arg() {
   fi
   if [ ! -d "$result" ]; then
       local quiet_flag="--quiet"
-      if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+      if [ "$IS_VERBOSE" != "" ]; then
         quiet_flag=""
         debug "Cloning $git_url into $result  ..."
       fi
@@ -652,7 +654,7 @@ compute_JEKA_DIST_DIR() {
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
 
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
-        if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+        if [ "$IS_VERBOSE" != "" ]; then
           msg "Download Jeka distrib from $url in $distrib_cache_dir"
         fi
         download_and_unpack "$url" "$distrib_cache_dir"
@@ -732,7 +734,7 @@ get_or_download_jdk() {
       exit 1
     fi
     local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
-    if [ "$SHOULD_LOG_DOWNLOAD" != "" ]; then
+    if [ "$IS_VERBOSE" != "" ]; then
       msg "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
     fi
     download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
@@ -764,7 +766,7 @@ get_or_download_jdk() {
 #    JAVA_HOME
 #    DEFAULT_JAVA_VERSION (read)
 #    JEKA_JDK_HOME
-#    SHOULD_LOG_DOWNLOAD (read)
+#    IS_VERBOSE (read)
 #    BASE_DIR (read)
 #    JAVA_CMD
 # Outputs:
@@ -819,7 +821,7 @@ compute_JAVA_CMD() {
   elif [ -n "$JAVA_VERSION" ] || [ -z "$JAVA_HOME" ]; then # if a Java version is specified in then use one of the JeKa managed JDK
     if [ -z "$JAVA_VERSION" ]; then
       JAVA_VERSION=$"$DEFAULT_JAVA_VERSION"
-      if [ -n "$SHOULD_LOG_DOWNLOAD" ]; then
+      if [ -n "$IS_VERBOSE" ]; then
         msg "No JAVA_HOME defined and no jeka.java.version defined. Use Java $DEFAULT_JAVA_VERSION."
       fi
     fi
@@ -1038,7 +1040,7 @@ filter_out_sysProp() {
 # Script starts here
 ##############################################################
 
-compute_SHOULD_LOG_DOWNLOAD
+compute_IS_VERBOSE
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 
