@@ -58,6 +58,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
     private JkProject project() {
         JkProject project = JkProject.of().setBaseDir(getBaseDir());
 
+        // we want to create regular and fat jar, when 'pack' is invoked.
         project.packActions.set(project.packaging::createBinJar, project.packaging::createFatJar);
 
         // Control on how dependency resolver behavior

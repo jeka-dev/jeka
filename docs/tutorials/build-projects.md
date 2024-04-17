@@ -94,14 +94,17 @@ sonar.host.url=http://localhost:9000
 
 ## Execute build actions
 
-Compile sources
+This is a list of common commands used when building projects. This commands may be combined 
+and use in conjunction on `--clean (-c)` option for cleaning the output dir prior running.
+
+Generates source code
 ```shell
-jeka project: compile
+jeka project: generateSources
 ```
 
-Clean result and compile
+Compile sources
 ```shell
-jeka project: clean compile
+jeka project: compile --clean
 ```
 
 Compile (if needed) and execute tests
@@ -124,6 +127,11 @@ Display project info on console
 jeka project: info
 ```
 
+Display the tree of transitive dependencies
+```shell
+jeka project: depTree
+```
+
 Execute the main method from compiled classes
 ```shell
 jeka project: runMain programArgs="myArg1 myArg2"
@@ -139,7 +147,131 @@ Create an executable Docker file
 jeka docker: build
 ```
 
-Create an executable Docker file
+Run the executable Docker file
 ```shell
 jeka docker: run programArgs
 ```
+
+Publish on [Maven repository](reference/properties/#repositories)
+```shell
+jeka maven: publish 
+```
+
+Publish on local Maven repository
+```shell
+jeka maven: publishLocal
+```
+
+## Configure programmatically
+
+Project can also be configured programmatically. This is often needed when we want to 
+include extra build actions or adopt distinct behaviors on specific conditions.
+
+When we have scaffolded the project, a *Build.java* class was created on purpose for customizing 
+the project.
+
+```java
+class Build extends KBean {
+
+    final JkProject project = load(ProjectKBean.class).project;
+
+    /*
+     * Configures KBean project
+     * When this method is called, option fields have already been injected from command line.
+     */
+    @Override
+    protected void init() {
+        // configure project instance here
+    }
+
+}
+```
+
+The `init()`is the designed place for configuring the `JkProject` instance. 
+
+The `JkProject` class models all what is needed to build a JVM project. This is a huge object model that 
+contains both configuration and methods that actually *'build'*.
+
+The API is too large and deep to be detailed here, we can just mention some useful links :
+
+`JkProject.flatFacade()` propose a simplified access to the API for most frequent cases.
+
+  - [Reference](reference/api-project)
+  - [JkProject source code](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project/JkProject.java)
+
+
+### Example with Flat Facade
+
+```java
+class Build extends KBean {
+
+    boolean runIntegrationTests;
+
+    final JkProject project = load(ProjectKBean.class).project;
+
+    
+    @Override
+    protected void init() {
+        project.flatFacade()
+                   // change dependency ordering : guava must be before commons-lang
+                .customizeRuntimeDeps(deps -> deps    
+                        .withMoving("com.google.guava:guava", before("commons-lang:commons-lang")))
+                   // Set how tests execution are displayed on console
+                .setTestProgressStyle(JkTestProcessor.JkProgressOutputStyle.BAR)
+                   // Run test ending with 'IT' only on a specific condition
+                .addTestIncludeFilterSuffixedBy("IT", runIntegrationTests);
+    }
+
+}
+```
+
+### Example with JkProject
+
+```java
+import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+
+class Build extends KBean {
+
+    final JkProject project = load(ProjectKBean.class).project;
+
+    final JkMavenPublication mavenPublication = load(MavenKBean.class).getMavenPublication();
+
+
+    @Override
+    protected void init() {
+
+        // Add extra actions
+        project.compilation.preCompileActions.append("Resources generation", this::generateSomeResources);
+        project.packActions.append("Create bin distrib", this::createBinDistrib);
+
+        // Customize Maven publication
+          // -- customize published transitive dependencies
+        mavenPublication.customizeDependencies(dep -> dep
+                .withTransitivity("com.google.guava:guava", JkTransitivity.COMPILE)
+        );
+          // -- add a new artifact file to publish, along the method to create it
+        mavenPublication.putArtifact(JkArtifactId.of("fat", "jar"), project.packaging::createFatJar);
+          // -- describe the POM metadata
+        mavenPublication.pomMetadata
+                .addMitLicense()
+                .addGithubDeveloper("John Doe", "Doe@djoe.com")
+                .setProjectDescription("......");
+    }
+
+    private void generateSomeResources() {
+        // .. do something
+    }
+
+    private void createBinDistrib() {
+        // .. do something
+    }
+
+}
+```
+

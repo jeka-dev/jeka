@@ -89,6 +89,14 @@ jeka.repos.download.headers.my-header-name=myHeaderValue
 jeka.repos.download.headers.another-header-name=anotherHeaderValue
 ```
 
+Same for publish repo
+```properties
+jeka.repos.publish=https://my.company/myrepo
+eka.repos.publish.username=myUsername
+jeka.repos.publish.password=myPassword
+jeka.repos.download.headers.Authorization=Bearer:: XHrU8hHKJHJ454==67g
+```
+
 For convenience, we can define multiple repositories and reference them using aliases
 ```
 jeka.repos.myRepo1=https://my.company/repo

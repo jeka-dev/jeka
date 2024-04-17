@@ -88,7 +88,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         }
         String mainClass = project.packaging.getMainClass();
         this.setBaseBuildDir(project.compilation.layout.getOutputDir());
-        JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project. Set the @project.pack.mainClass property");
+        JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project. Please, set the @project.pack.mainClass property.");
         return this
                 .setClasses(classTree)
                 .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
