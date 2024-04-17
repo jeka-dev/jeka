@@ -1,25 +1,48 @@
 # Getting Started
 
-Let's create some basic script to understand basic concepts.
-
-!!! Note
-    Use the `jeka --help` command to start navigate in command line help.
+Let's create some simple scripts to understand the basic concepts.
 
 ## Create a basic script
 
 Execute `jeka base: scaffold` to create a basic Jeka structure.
 
-The *jeka-src/Script.java* contains a Java code that can be invoked as a script from command line.
+This generates a *jeka-src/Script.java* file, which is an example of Java code invokable from command line.
 
-If you use *IntelliJ*, execute `jeka intellij: iml` to synchronize the IDE metadata. 
-If IntelliJ does not reflect changes, execute `jeka intellij: initProject`
+```java
+class Script extends KBean {
+
+    @JkDoc("Person to whom the greeting is intended")
+    public String name = "World";
+
+    @JkDoc("Print greeting on console")
+    public void hello() {
+        String greetings = "Hello " + name + " !";
+        System.out.println(greetings);
+    }
+
+}
+```
+
+!!! tip
+    If you use *IntelliJ*, execute `jeka intellij: iml` to synchronize the IDE metadata. 
+    If IntelliJ does not reflect changes, execute `jeka intellij: initProject`
 
 Execute `jeka hello`. A *Hello World* message is printed on console.
-
+```{ .txt .no-copy }
+Hello World !
+```
 Execute `jeka hello name=JeKa`. A *Hello JeKa* message is printed on console.
+``` { .txt .no-copy }
+Hello JeKa !
+```
 
-Rename `hello`  method (to `hi` for say) and the greeting message in the script.
-Now execute `jeka hi` : you notice that your change has been automatically taken in account 
+Add a similar `hi` method in *Script.java* 
+```java
+public void hi() {
+    System.out.println("Hi " + name + " !");
+}
+```
+and execute `jeka hi`. you notice that your change has been automatically taken in account 
 without any extra action from your part.
 
 You can add as many *public void no-args* methods or *public fields* in your scripts.
@@ -30,8 +53,42 @@ The accepted *public field* types are mentioned [here](https://picocli.info/#_bu
     This will be visible when executing: `jeka script: --help`.
     Note that only part before first breaking line of the doc content will be displayed as summary.
 
+## Define JDK version
 
-### Add dependencies
+We can select which JDK will run the script bu using [properties](reference/properties)
+
+Edit *jeka.properties*:
+```properties
+jeka.java.version=22
+```
+Executing `jeka hello` will trigger a download of JDK 22 (if not already present), prior executing 
+the script. JeKa caches the downloaded JDKs in *[USER HOME]/.jeka/cache/jdks*.
+
+This is possible to choose another distribution by using the following properties :
+```properties
+jeka.java.version=21
+jeka.java.distrib=graalvm
+```
+If you don't want JeKa manage distribution for you, you can choose explicitly the SDK location:
+```properties
+jeka.java.version=17
+jeka.sdk.17=/my/jdks/17-corretto
+```
+!!! note
+    The properties can also be set by using *system properties* or *OS Environment variables*.
+    Continuous Integration machine can define env variables as `jeka.sdk.17` to override the SDK location.
+
+
+## Define JeKa version
+
+Your script may depends of some unstable JeKa APIs. To make sure your script will always work, 
+whatever JeKa version is installed at client/user side, mention the following properties in 
+*jeka.properties*, as :
+```properties
+jeka.version=0.11.0
+```
+
+## Add dependencies
 
 Your script can depends on libs located in a Maven repository, or on folder/jar located on file system.
 
@@ -50,20 +107,21 @@ public void ascii() throws Exception {
     System.out.println(FigletFont.convertOneLine("Hello"));
 }
 ```
-... and execute `jeka ascii` to display :
-```
+... and execute `jeka ascii`. This will display on console :
+``` { .txt .no-copy }
   _   _      _ _       
  | | | | ___| | | ___  
  | |_| |/ _ \ | |/ _ \ 
  |  _  |  __/ | | (_) |
  |_| |_|\___|_|_|\___/ 
 ```
-This library has no transitive dependency, but it could have. Try to import any transitive you like 
-and execute `jeka --info`. This displays runtime information about JeKa run, including classpath.
+This library has no transitive dependency, but it could have. Try to import any library with transitive 
+dependencies and execute `jeka --info`. 
+This displays runtime information about JeKa run, including the resulting classpath.
 
-You can add as many `@JkInjectClasspath` annotation on the class.
+You can add, as many `@JkInjectClasspath` annotations you need, on the class.
 
-#### Use BOM dependencies
+### Use BOM dependencies
 
 In some cases, we may need to use a BOM dependency which provides versioning information on other dependencies we might use.
 
@@ -73,7 +131,7 @@ In some cases, we may need to use a BOM dependency which provides versioning inf
 @JkInjectClasspath("com.google.cloud:oogle-cloud-bigquery")
 ```
 
-#### Dependencies on file system
+### Dependencies on file system
 
 There is 2 way of adding local file system dependencies :
 
@@ -85,7 +143,7 @@ There is 2 way of adding local file system dependencies :
 @JkInjectClasspath("../other-project/my-classes")
 ```
 
-#### Define dependencies with properties
+### Define dependencies with properties
 
 Dependencies can also be mentioned using the `jeka.inject.classpath=` property in *jeka.properties* file.
 
@@ -96,7 +154,7 @@ jeka.inject.classpath=\
   com.google.cloud:oogle-cloud-bigquery
 ```
 
-### Add compilation directives
+## Add compilation directives
 
 Classes from *jeka-src* are compiled behind-the-scene prior of being executed.
 
@@ -110,15 +168,8 @@ For example we can turn off some warning messages using
 
 ## Multi-file scripts
 
-On the previous example, *jeka-src* dir is containing a single *Script.java* file.
-
-There can be as many Script ot utility class you need and located in any package structure, as 
-for any Java program.
-
-For example, you can move *Script.java* file in *org.example* package and the script 
-will still work exactly as it used to.
-
-### Multiple Scripts
+*jeka-src* can host as many scripts and utility classes as you need. For now, we have a single 
+class located in default package, but we could have located *Script.java* in *org.example* the same way.
 
 Creating many script classes in a single project isn't a common use case but it will help to understand 
 some concepts related to [KBeans](../reference/kbeans.md)
@@ -137,42 +188,56 @@ public class Build extends KBean {
 ```
 and execute `jeka foo` to notice that this method is actually run.
 
-3. Execute `jeka hello`. You should get an error message as : *ERROR: Unmatched argument at index 0: 'hello'*.
+3. Execute `jeka hello`. You should get the following error message
+   ``` { .txt .no-copy }
+   ERROR: Unmatched argument at index 0: 'hello'
+   ```
+    This is because,  we did not mention the *KBean* to use as default when invoking method.
+    JeKa explores *jeka-src*, with width-first strategy, to find the first class implementing `KBean`. 
+    In this case, *Build.java* won.
+   
+    Execute `jeka foo`. It should display:
+    ``` { .txt .no-copy }
+    Method 'foo()' is running.
+    ```
+    
+4.  To execute a method of a specific *KBean*, we should mention it explicitly as: `jeka [kbean]: [method]`.
 
-This is due that we did not mention the KBean class to use as default when invoking method.
-By default, JeKa width-first explores *jeka-src* to find the first class implementing `KBean`, and so *Build.java* win.
+    Execute: `jeka script: hello`. This should display on console:
+    ``` { .txt .no-copy }
+    Hello World !
+    ```
+    
+5.  We can specify the *KBean* to use as default using `jeka.default.kbean=`property in *jeka.properties*.
+    ```properties
+    jeka.default.kbean=script
+    ```
 
-Execute `jeka script: hello` to invoke `hello` method from `Script`class.
+    You can check the actual default KBean, by executing `jeka --info` and check for the *Default KBean* entry.
+    
+    !!! note
+        A given `KBean` class can accept many names to be referenced :
+    
+        - Its fully qualified class name (as org.eaxample.kbeans.MyCoolKBean)
+        - Its short class name (as MyCoolKBean))
+        - Its short class name withj uncapitalized first-letter (as myCoolKBean)
+        - If the class name is ending with 'KBean', the KBean suffix can omitted (as myCool)
 
-You can check the actual default KBean, by executing `jeka --info` and check for the *Default KBean* entry.
+## Configure default values
 
-!!! note
-    A given `KBean` class can accept many names to be referenced :
-
-    - Its fully qualified class name (as org.eaxample.kbeans.MyCoolKBean)
-    - Its short class name (as MyCoolKBean))
-    - Its short class name withj uncapitalized first-letter (as myCoolKBean)
-    - If the class name is ending with 'KBean', the KBean suffix can omitted (as myCool)
-
-!!! Tip
-    You can change the default KBean by mentioning `jeka.default.kbean=script` in *jeka.properties* file.
-
-### Configure script execution
-
-We can override the value of *public* field by specifying the value in *jeka.properties* as :
+We can override the value of *public* fields of *KBeans* by using properties as :
 ```properties
 @script.name=Everybody
 ```
 
-Execute 'jeka hello', you should get
-```
+Add the last properties tou your *jeka.properties* file and xecute 'jeka hello'. You should get ::
+``` { .txt .no-copy }
 Hello Everybody
 ```
 
 ### Make KBeans interact with each other
 
-KBean mechanism plays a central role in JeKa ecosystem. In the following section, we will play around  
-it to make you more familiar with.
+KBean mechanism plays a central role in JeKa ecosystem. In the following section, we will play around it to make you more familiar with.
 
 1. Set `jeka.default.kbean=script` property in the *jeka.properties* file and remove `@script.name=Everybody` 
    added in previous step.
@@ -181,28 +246,34 @@ it to make you more familiar with.
    ```
    Also, make sure that *Script.java* and *Build.java*  are still present in *jeka-src* dir.
 
-2. Add the following method in *Script.java*
-```java
-@Override
-protected void init() {
-    Script script = load(Script.class);  //  Get the singleton Script instance
-    script.name = "Mates";           
-}
-```
+2. Add the following method in *Build.java*
+    ```java
+    public class Build extends KBean {
+        
+        @Override
+        protected void init() {
+            Script script = load(Script.class);  //  Get the singleton Script instance
+            script.name = "Mates";           
+        }
+    ```
+   The init() method is called when a Kbean singleton is initialized by JeKa engine.
 
-3. Now, execute `jeka script: hello build:`. This will initialize *script* and *build* KBean singletons then
-   invoke `Script.hello()` method.
-   This result in displaying `Hello Mates` in the console. This means that *build* KBean has configured *script* successfully.
+3. Now, execute `jeka script: hello build:`. This initializes *script* and *build* KBean singletons then
+   invokes `Script.hello()` method.
+   ``` { .txt .no-copy }
+   Hello Mates !
+   ```
+   What has happened ?
+   JeKa has initialized *script* and *build* KBeans, then has invoked `Script.hello()` method.
+   All *KBeans* to be initialized, are initialized prior any KBean method is invoked.
 
-    !!! note
-        When Jeka *initialize* a KBean, this means that it instantiates it prior invoking its `ìnit` method.
 
-4. Now, execute `jeka script: hello`, you'll notice that this display back `Hello world`. This is due that 
+4. If you simply execute `jeka script: hello`, you'll notice that this display `Hello world`. This is because 
    `build` is not initialized anymore.
 
-   You can force it to be always initialized, by adding `@build=` property to *jeka-properties* file.
-   
-   Add it and retry `jeka script: hello`. Now it should display `Hello Mates`
+    You can force it to be always initialized, by adding `@build=` property to *jeka-properties* file.
+
+    Add it and retry `jeka script: hello`. It should display `Hello Mates`
 
 ## Classpath KBeans
 
@@ -214,7 +285,50 @@ all KBeans bundled with JeKa out-of-the-box (and always available). These are ty
  
 For example, you can execute `jeka admin: openHomeDir` to open your*Jeka Home directory*.
 
-## Add KBeans to classpath
+### Add KBeans to classpath
 
-This just consists in adding a dependency that contains a KBean class. 
+Adding KBeans to classpath just consists in adding a dependency that contains a KBean class. 
 
+You can use `jeka.inject.classpath` properties as :
+```properties
+jeka.inject.classpath=\
+  dev.jeka:springboot-plugin  \
+  dev.jeka:sonarqube-plugin \
+  dev.jeka:openapi-plugin:0.11.0.1
+```
+
+or declare it using `@JkInjectClasspath` annotation in any class from *jeka-src*.
+
+!!! Note
+    When omitting the version for a dependency of group 'dev.jeka', as in 'dev.jeka:springboot-plugin', 
+    JeKa uses its own running version for resolving the coordinate.
+    This is due that most of extension with 'dev.jeka' group share released in the same time than JeKa.
+
+### Example with NodeJs
+
+This is also possible to augment classpath dynamically from the command line, using the `-cp`option.
+
+In this example, we'll add the nodeJs plugin. The plugin doanload Nodejs version 2à.12.2 (if needed) 
+and then execute the specified command line.
+
+```shell
+jeka -cp=dev.jeka:nodejs-plugin nodeJs: version="20.12.2" exec cmdLine="npx cowsay Hello"
+```
+This should display:
+```
+Directory not found /Users/jerome/temp-jeka-tests/client-js, use current dir as working dir.
+Task: start-program >npx cowsay Hello
+       _______
+      < Hello >
+       -------
+              \   ^__^
+               \  (oo)\_______
+                  (__)\       )\/\
+                      ||----w |
+                      ||     ||
+```
+
+You can have more info about *NodeJs* plugin by executing 
+```shell
+jeka -cp=dev.jeka:nodejs-plugin nodeJs: -h
+```

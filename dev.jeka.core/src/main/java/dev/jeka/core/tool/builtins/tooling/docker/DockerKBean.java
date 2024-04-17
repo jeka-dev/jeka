@@ -36,10 +36,10 @@ import java.util.function.Consumer;
 @JkDoc("Builds and runs image based on project or 'jeka-src' (Requires a Docker client)")
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Program arguments to pass to 'docker run' command while invoking 'run' (such as '-p 8080:8080')")
+    @JkDoc("Java program arguments to pass to the Java application when run with 'docker: run'")
     public String programArgs = "";
 
-    @JkDoc("JVM options to pass to 'build' or 'run' command")
+    @JkDoc("JVM options to pass to the Java application when run with 'docker: run'")
     public String jvmOptions = "";
 
     @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
@@ -49,8 +49,8 @@ public final class DockerKBean extends KBean {
     @JkDoc("Base image to construct the Docker image.")
     public String baseImage = JkDockerJvmBuild.BASE_IMAGE;
 
-    @JkDoc("Run docker with '-it' option")
-    public boolean it = true;
+    @JkDoc("Space separated options to pass 'docker run' command, as '--interactive --tty'")
+    public String runOptions = "";
 
     /**
      * Handler on the Docker build configuration for customizing built images.
@@ -79,10 +79,10 @@ public final class DockerKBean extends KBean {
     public void run() {
         JkDocker.assertPresent();
         String containerName = "jeka-" + imageName.replace(':', '-');
-        String itOption = it ? "-it " : "";
+        String runOptions = JkUtilsString.isBlank(this.runOptions) ? "" : this.runOptions.trim() + " ";
         String args = String.format("%s--rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
                         +  " --name %s %s",
-                itOption,
+                runOptions,
                 dockerBuild().portMappingArgs(),
                 jvmOptions,
                 programArgs,
