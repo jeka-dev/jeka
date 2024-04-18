@@ -138,8 +138,6 @@ public final class JkBaseScaffold extends JkScaffold {
         } else {
             addFileEntry(SCRIPT_CLASS_PATH, code("Script.snippet", deps, devDeps));
         }
-
-
     }
 
     private void generateReadme() {
@@ -148,6 +146,5 @@ public final class JkBaseScaffold extends JkScaffold {
             JkPathFile.of(baseDir.resolve("README.MD")).createIfNotExist().write(content);
         }
     }
-
 
 }
