@@ -142,6 +142,8 @@ Execute the main method from the packed jar.
 jeka project: runJar programArgs="myArg1 myArg2"
 ```
 
+### Docker commands
+
 Create an executable Docker file
 ```shell
 jeka docker: build
@@ -151,6 +153,8 @@ Run the executable Docker file
 ```shell
 jeka docker: run programArgs
 ```
+
+### Maven publish commands
 
 Publish on [Maven repository](reference/properties/#repositories)
 ```shell

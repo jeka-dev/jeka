@@ -51,8 +51,7 @@ public class JkScaffoldOptions {
         // add extra content to jeka.properties
 
         if (rawJekaPropsContentPath != null) {
-            String content = JkPathFile.of(rawJekaPropsContentPath).readAsString();
-            scaffold.addJekaPropsContent(content);
+            scaffold.setRawJekaPropsPath(rawJekaPropsContentPath);
         } else if (extraJekaProps != null) {
             Arrays.stream(extraJekaProps.split(",")).forEach(scaffold::addJekaPropValue);
             scaffold
