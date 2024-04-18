@@ -18,7 +18,6 @@ package dev.jeka.core.tool.builtins.base;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
-import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -52,13 +51,13 @@ public final class JkBaseScaffold extends JkScaffold {
 
     private boolean includeJunit = true;
 
-    private final BaseKBean.BaseScaffoldOptions selfScaffoldOption;
+    private final BaseKBean.BaseScaffoldOptions baseScaffoldOption;
 
     private final JkConsumers<JkBaseScaffold> customizers = JkConsumers.of();
 
     private JkBaseScaffold(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
         super(baseDir);
-        this.selfScaffoldOption = scaffoldOptions;
+        this.baseScaffoldOption = scaffoldOptions;
         scaffoldOptions.applyTo(this);
     }
 
@@ -131,7 +130,7 @@ public final class JkBaseScaffold extends JkScaffold {
     }
 
     private void configureScaffold() {
-        if (selfScaffoldOption.kind == Kind.APP) {
+        if (baseScaffoldOption.kind == Kind.APP) {
             addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", junitDeps(), devDeps));
             addFileEntry(TEST_CLASS_PATH, code("MyTest.snippet"));
             addFileEntry(APP_CLASS_PATH, code("App.snippet", deps));
@@ -144,8 +143,10 @@ public final class JkBaseScaffold extends JkScaffold {
     }
 
     private void generateReadme() {
-        String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
-        JkPathFile.of(baseDir.resolve("README.MD")).createIfNotExist().write(content);
+        if (this.baseScaffoldOption.kind == Kind.APP) {
+            String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md"));
+            JkPathFile.of(baseDir.resolve("README.MD")).createIfNotExist().write(content);
+        }
     }
 
 

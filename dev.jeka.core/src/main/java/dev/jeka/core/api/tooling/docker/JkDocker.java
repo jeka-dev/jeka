@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.tooling.docker;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -70,7 +71,7 @@ public class JkDocker {
     public static boolean isPresent() {
         try {
             return prepareExec("version")
-                    .setLogCommand(true)
+                    .setLogCommand(JkLog.isVerbose())
                     .setInheritIO(false)
                     .setLogWithJekaDecorator(false)
                     .exec().hasSucceed();
