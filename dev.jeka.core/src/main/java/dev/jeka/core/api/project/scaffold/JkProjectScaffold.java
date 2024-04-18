@@ -134,6 +134,7 @@ public final class JkProjectScaffold extends JkScaffold {
         if (generateLibsFolders) {
             generateLibsFolders();
         }
+        generateReadme();
     }
 
     /**
@@ -239,6 +240,11 @@ public final class JkProjectScaffold extends JkScaffold {
         JkPathFile.of(project.getBaseDir().resolve(JkProject.DEPENDENCIES_TXT_FILE))
                 .createIfNotExist()
                 .write(content);
+    }
+
+    private void generateReadme() {
+        String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
+        JkPathFile.of(project.getBaseDir().resolve("README.MD")).createIfNotExist().write(content);
     }
 
 

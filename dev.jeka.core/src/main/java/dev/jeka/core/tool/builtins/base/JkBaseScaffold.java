@@ -16,8 +16,11 @@
 
 package dev.jeka.core.tool.builtins.base;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.scaffold.JkScaffold;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -95,6 +98,7 @@ public final class JkBaseScaffold extends JkScaffold {
         configureScaffold();
         customizers.accept(this);
         super.run();
+        generateReadme();
     }
 
     /**
@@ -135,6 +139,13 @@ public final class JkBaseScaffold extends JkScaffold {
         } else {
             addFileEntry(SCRIPT_CLASS_PATH, code("Script.snippet", deps, devDeps));
         }
+
+
+    }
+
+    private void generateReadme() {
+        String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
+        JkPathFile.of(baseDir.resolve("README.MD")).createIfNotExist().write(content);
     }
 
 

@@ -45,7 +45,7 @@ public abstract class JkScaffold {
 
     private static final String JEKA_OUTPUT_IGNORE = "/jeka-output";
 
-    private final Path baseDir;
+    protected final Path baseDir;
 
     private final JkRepoSet downloadRepos;
 
