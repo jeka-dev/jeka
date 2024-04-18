@@ -41,24 +41,26 @@ public class JkScaffoldOptions {
     @JkDoc("Coma separated string representing properties to add to jeka.properties.")
     private String extraJekaProps = "";
 
-    @JkDoc("Add extra content at the end of the template jeka.properties file.")
-    private Path extraJekaPropsContentPath;
+    @JkDoc(
+            "Set the path of a file containing the exact content of the jeka.properties file to generate.%n"
+        +   "If this field is set, all others related to jeka.properties generation are ignored.")
+    private Path rawJekaPropsContentPath;
 
     public void applyTo(JkScaffold scaffold) {
 
         // add extra content to jeka.properties
-        if (extraJekaProps != null) {
+
+        if (rawJekaPropsContentPath != null) {
+            String content = JkPathFile.of(rawJekaPropsContentPath).readAsString();
+            scaffold.addJekaPropsContent(content);
+        } else if (extraJekaProps != null) {
             Arrays.stream(extraJekaProps.split(",")).forEach(scaffold::addJekaPropValue);
-        }
-        if (extraJekaPropsContentPath != null) {
-            String content = JkPathFile.of(extraJekaPropsContentPath).readAsString();
-            scaffold.addJekaPropsFileContent(content);
+            scaffold
+                    .setJekaVersion(jekaVersion)
+                    .setJekaDistribLocation(jekaLocation)
+                    .setJekaDistribRepo(jekaDistribRepo);
         }
 
-        scaffold
-                .setJekaVersion(jekaVersion)
-                .setJekaDistribLocation(jekaLocation)
-                .setJekaDistribRepo(jekaDistribRepo);
     }
 
 

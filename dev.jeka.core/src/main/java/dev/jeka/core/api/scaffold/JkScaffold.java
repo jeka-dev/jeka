@@ -57,7 +57,10 @@ public abstract class JkScaffold {
 
     private String jekaDistribLocation;
 
-    private String jekaPropsExtraContent = "";
+    private String jekaPropsContent = "";
+
+    // If not null, we take this file content as is and ignore other settings
+    private Path rawJekaPropsPath;
 
     private UnaryOperator<String> jekaPropCustomizer = s -> s;
 
@@ -71,11 +74,11 @@ public abstract class JkScaffold {
         this(baseDir, JkRepoProperties.ofGlobalProperties().getDownloadRepos());
     }
 
-    public JkScaffold addJekaPropsFileContent(String extraContent) {
-        if (extraContent == null) {
+    public JkScaffold addJekaPropsContent(String extraContent) {
+        if (JkUtilsString.isBlank(extraContent)) {
             return this;
         }
-        this.jekaPropsExtraContent += extraContent;
+        this.jekaPropsContent += extraContent;
         return this;
     }
 
@@ -83,19 +86,24 @@ public abstract class JkScaffold {
      * Adds a property to scaffolded jeka.properties by specifying a string with format "prop.name=prop.value".
      */
     public JkScaffold addJekaPropValue(String propValue) {
-        if (JkUtilsString.isBlank(propValue)) {
-            return this;
-        }
-        jekaPropsExtraContent += "\n" + propValue.trim();
-        return this;
-    }
-
-    public boolean hasJekaPropExtraContent() {
-        return !JkUtilsString.isBlank(jekaPropsExtraContent);
+        return  addJekaPropsContent("\n" + propValue.trim());
     }
 
     public JkScaffold setJekaVersion(String jekaVersion) {
         this.jekaVersion = jekaVersion;
+        return this;
+    }
+
+    /**
+     * Sets the path of a file that will be copied to jeka.properties.
+     * <p>
+     * If such a path is set, all other settings related to jeka.properties generation
+     * are ignored and the content of jeka.properties will be exactly the same as
+     * the specified file.
+     *
+     */
+    public JkScaffold setRawJekaPropsPath(Path rawJekaPropsPath) {
+        this.rawJekaPropsPath = rawJekaPropsPath;
         return this;
     }
 
@@ -232,24 +240,30 @@ public abstract class JkScaffold {
 
     private void createOrUpdateJekaProps() {
         StringBuilder sb = new StringBuilder();
-        if (!JkUtilsString.isBlank(jekaDistribLocation)) {
-            sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
 
-        } else  {
-            String effectiveJekaVersion = jekaVersion != null ? jekaVersion : lastJekaVersion();
+        if (rawJekaPropsPath != null) {
+            sb.append(JkPathFile.of(rawJekaPropsPath).readAsString());
 
-            // TODO remove this check when 0.11.x will be released.
-            if (!effectiveJekaVersion.startsWith("0.10.")) {
-                sb.append("jeka.version=" + effectiveJekaVersion + "\n");
+        } else {
+            if (!JkUtilsString.isBlank(jekaDistribLocation)) {
+                sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
+
+            } else {
+                String effectiveJekaVersion = jekaVersion != null ? jekaVersion : lastJekaVersion();
+
+                // TODO remove this check when 0.11.x will be released.
+                if (!effectiveJekaVersion.startsWith("0.10.")) {
+                    sb.append("jeka.version=" + effectiveJekaVersion + "\n");
+                }
             }
-        }
 
-        if (!JkUtilsString.isBlank(this.jekaDistribRepo)) {
-            sb.append("jeka.distrib.repo=" + jekaDistribRepo + "\n");
-        }
-        if (!JkUtilsString.isBlank(this.jekaPropsExtraContent)) {
-            String content = jekaPropsExtraContent.replace("\\n", "\n");
-            sb.append(content + "\n");
+            if (!JkUtilsString.isBlank(this.jekaDistribRepo)) {
+                sb.append("jeka.distrib.repo=" + jekaDistribRepo + "\n");
+            }
+            if (!JkUtilsString.isBlank(this.jekaPropsContent)) {
+                String content = jekaPropsContent.replace("\\n", "\n");
+                sb.append(content + "\n");
+            }
         }
 
         JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
@@ -277,8 +291,6 @@ public abstract class JkScaffold {
     private void createShellScripts() {
         createShellScripts(baseDir);
     }
-
-
 
     public static class JkFileEntry {
 
