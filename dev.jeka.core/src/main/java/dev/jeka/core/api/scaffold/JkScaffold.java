@@ -239,12 +239,12 @@ public abstract class JkScaffold {
     }
 
     private void createOrUpdateJekaProps() {
-        StringBuilder sb = new StringBuilder();
+        final String fileContent;
 
         if (rawJekaPropsPath != null) {
-            sb.append(JkPathFile.of(rawJekaPropsPath).readAsString());
-
+            fileContent = JkPathFile.of(rawJekaPropsPath).readAsString();
         } else {
+            StringBuilder sb = new StringBuilder();
             if (!JkUtilsString.isBlank(jekaDistribLocation)) {
                 sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
 
@@ -264,16 +264,16 @@ public abstract class JkScaffold {
                 String content = jekaPropsContent.replace("\\n", "\n");
                 sb.append(content + "\n");
             }
+            String partialContent = sb.toString();
+            fileContent = jekaPropCustomizer.apply(partialContent);
         }
 
         JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
         if (!jekaPropsFile.exists()) {
             jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
         }
-        String result = sb.toString();
-        result = jekaPropCustomizer.apply(result);
 
-        jekaPropsFile.write(result, StandardOpenOption.APPEND);
+        jekaPropsFile.write(fileContent, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     private void createOrUpdateGitIgnore() {
