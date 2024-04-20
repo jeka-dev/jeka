@@ -33,6 +33,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -81,32 +82,32 @@ public final class JkSpringbootProject {
         // run tests in forked mode
         project.testing.testProcessor.setForkingProcess(true);
 
-        project.packActions.set();
+        project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION, () -> {});
 
         // define bootable jar as main artifact
         if (createBootJar) {
             JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             project.setJarMaker(this::createBootJar);
-            project.packActions.append("Make bootable jar", () -> createBootJar(artifactFile));
+            project.packActions.replaceOrAppend("make-bootable-jar", () -> createBootJar(artifactFile));
         }
         if (createWarFile) {
             JkArtifactId artifactId = JkArtifactId.ofMainArtifact("war");
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(project, path);
-            project.packActions.append("Make war file", () -> warMaker.accept(artifactFile) );
+            project.packActions.replaceOrAppend("make-war-file", () -> warMaker.accept(artifactFile) );
         }
         if (createOriginalJar) {
             Path artifactFile = project.artifactLocator.getArtifactPath(ORIGINAL_ARTIFACT);
             Consumer<Path> makeBinJar = project.packaging::createBinJar;
-            project.packActions.append("Make original jar", () -> makeBinJar.accept(artifactFile));
+            project.packActions.replaceOrAppend("make-original-jar", () -> makeBinJar.accept(artifactFile));
         }
 
         // To deploy spring-Boot app in a container, we don't need to create a jar
         // This is more efficient to keep the structure exploded to have efficient image layering.
         // In this case, just copy manifest in class dir is enough.
         if (!createBootJar && !createOriginalJar && !createWarFile) {
-            project.packActions.append("Include manifest", project.packaging::copyManifestInClassDir);
+            project.packActions.replaceOrAppend("include-manifest", project.packaging::copyManifestInClassDir);
         }
 
         project.packaging.setMainClass(JkProject.AUTO_FIND_MAIN_CLASS);

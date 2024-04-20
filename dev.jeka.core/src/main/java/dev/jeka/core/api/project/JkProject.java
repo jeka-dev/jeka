@@ -70,12 +70,16 @@ import java.util.stream.Collectors;
  */
 public final class JkProject implements JkIdeSupportSupplier {
 
+    public static final String CREATE_JAR_ACTION = "create-jar";
+
     /**
      * This constant represents the value "auto" and is used in {@link JkProjectPackaging#setMainClass(String)} (String)}
      * to indicate that the main class should be discovered automatically..
      */
     public static final String AUTO_FIND_MAIN_CLASS = "auto";
+
     public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
+
     public static final String PROJECT_LIBS_DIR = "libs";
 
     private static final String DEFAULT_ENCODING = "UTF-8";
@@ -163,7 +167,8 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .setDisplaySpinner(true)
                 .setUseInMemoryCache(true);
         jarMaker = packaging::createBinJar;
-        packActions.set(() -> jarMaker.accept(artifactLocator.getMainArtifactPath()));
+        packActions.append(CREATE_JAR_ACTION,
+                () -> jarMaker.accept(artifactLocator.getMainArtifactPath()));
     }
 
     /**
@@ -393,7 +398,8 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .add("Main Class Name", declaredMainClassName)
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
-                .add("Manifest", packaging.getManifest().asTrimedString()); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
+                .add("Pack actions", this.packActions.getRunnableNames())
+                .add("Manifest Base", packaging.getManifest().asTrimedString()); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
         builder.append(columnsText.toString());
 
         if (JkLog.isVerbose()) { // add declared dependencies

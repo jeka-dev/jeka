@@ -79,15 +79,6 @@ public class JkRunnables implements Runnable {
     }
 
     /**
-     * Sets the specified {@link Runnable}s as the execution chain. <p>
-     * This removes all pre-existing runnables from the chain.
-     */
-    public JkRunnables set(Runnable ... runnables) {
-        this.entries.clear();
-        return this.append(runnables);
-    }
-
-    /**
      * Inserts the specified runnable in the execution chain, just before another one.
      * @param name The name of the runnable to insert.
      * @param beforeRunnableName The name of the runnable that we must insert before.

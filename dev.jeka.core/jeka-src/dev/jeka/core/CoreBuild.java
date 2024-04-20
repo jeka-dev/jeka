@@ -58,7 +58,9 @@ public class CoreBuild extends KBean {
         project
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setModuleId("dev.jeka:jeka-core")
-            .packActions.set(this::doPackWithEmbeddedJar, this::doDistrib);
+            //.packActions.set(this::doPackWithEmbeddedJar, this::doDistrib);
+            .packActions.append("include-embedded-jar", this::doPackWithEmbeddedJar)
+                        .append("create-distrib", this::doDistrib);
         project
             .compilerToolChain
                 .setForkedWithDefaultProcess();
@@ -172,7 +174,7 @@ public class CoreBuild extends KBean {
         Path targetJar = project.artifactLocator.getMainArtifactPath();
 
         // Main jar
-        project.packaging.createBinJar(targetJar);
+        //project.packaging.createBinJar(targetJar);
         JkZipTree jarTree = JkZipTree.of(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project

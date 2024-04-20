@@ -53,6 +53,8 @@ import java.util.stream.Collectors;
 )
 public final class BaseKBean extends KBean {
 
+    public static final String CREATE_JAR_ACTION = "create-jar";
+
     /**
      * Represents the value "auto" usable in {@link #setMainClass(String)}
      * to indicate that the main class should be discovered automatically.
@@ -93,7 +95,7 @@ public final class BaseKBean extends KBean {
     @Override
     protected void init() {
         baseScaffold = JkBaseScaffold.of(this);
-        packActions.set(this::buildJar);
+        packActions.append(CREATE_JAR_ACTION, this::buildJar);
     }
 
     // We can not just run Application#main cause Spring-Boot seems

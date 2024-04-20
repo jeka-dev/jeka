@@ -61,7 +61,8 @@ public class JkJ2eWarProjectAdapter {
         JkArtifactId warArtifact = JkArtifactId.ofMainArtifact("war");
         Path warFile = project.artifactLocator.getArtifactPath(warArtifact);
         Consumer<Path> warMaker = path -> generateWar(project, path);
-        project.packActions.set(() -> warMaker.accept(warFile));
+        project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION,
+                () -> warMaker.accept(warFile));
     }
 
     public void generateWar(JkProject project, Path targetPath) {

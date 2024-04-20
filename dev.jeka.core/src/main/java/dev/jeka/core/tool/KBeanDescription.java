@@ -107,6 +107,10 @@ final class KBeanDescription {
         return result;
     }
 
+     boolean isContainingField(String fieldName) {
+        return this.beanFields.stream().anyMatch(beanField -> fieldName.equals(beanField.name));
+    }
+
     private static List<Method> executableMethods(Class<?> clazz) {
         final List<Method> result = new LinkedList<>();
         for (final Method method : clazz.getMethods()) {

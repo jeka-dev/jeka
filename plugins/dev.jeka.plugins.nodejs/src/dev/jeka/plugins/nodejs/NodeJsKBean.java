@@ -26,6 +26,9 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @JkDoc("Auto-configure projects with nodeJs client.")
@@ -35,15 +38,19 @@ public class NodeJsKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "20.10.0,18.19.0,16.20.2")
     public String version = JkNodeJs.DEFAULT_NODE_VERSION;
 
-    @JkDoc("Comma separated, command lines to execute for client build or in conjunction with #exec method. " +
+    @JkDoc("Comma separated, command lines to execute for building js application or in conjunction with #exec method. " +
             "This can be similar to something like 'npx ..., npm ...'")
     public String cmdLine;
 
-    @JkDoc("The relative path of the nodeJs project.")
-    public String clientDir = "client-js";
+    @JkDoc("Comma separated, command lines to execute for testing when 'autoConfigureProject'=true")
+    public String testCmdLine;
 
-    @JkDoc("The directory path, relative to 'clientDir', containing the client build result.")
-    public String clientBuildDir = "build";
+    @JkDoc("Path of js project root. It is expected to be relative to the base directory.")
+    public String appDir = "app-js";
+
+    @JkDoc("Path of the built application (Generally containing an index.html file). " +
+            "It is expected to be relative to the js app dir.")
+    public String distDir = "build";
 
     @JkDoc("If not empty, the result of client build will be copied to this dir relative to class dir (e.g. 'static')")
     public String copyToDir;
@@ -53,7 +60,7 @@ public class NodeJsKBean extends KBean {
 
     @JkDoc("Execute npm using the command line specified in 'cmdLine' property.")
     public void exec() {
-        Stream.of(commandLines()).forEach(getJkNodeJs()::exec);
+        commandLines(cmdLine).forEach(getJkNodeJs()::exec);
     }
 
     @Override
@@ -61,7 +68,8 @@ public class NodeJsKBean extends KBean {
         if (autoConfigureProject) {
             JkProject project = load(ProjectKBean.class).project;
             JkNodeJs.ofVersion(this.version)
-                    .configure(project, clientDir, clientBuildDir, copyToDir, commandLines());
+                    .configure(project, appDir, distDir, copyToDir, commandLines(cmdLine),
+                            commandLines(testCmdLine));
         }
     }
 
@@ -71,7 +79,7 @@ public class NodeJsKBean extends KBean {
     }
 
    private Path getWorkingDir() {
-        Path result = getBaseDir().resolve(clientDir);
+        Path result = getBaseDir().resolve(appDir);
         if (!Files.exists(result)) {
             JkLog.info("Directory not found %s, use current dir as working dir.", result);
             return Paths.get("");
@@ -79,10 +87,14 @@ public class NodeJsKBean extends KBean {
         return result;
    }
 
-   private String[] commandLines() {
-        return Stream.of(cmdLine.split(","))
+   private static List<String> commandLines(String cmd) {
+        if (cmd == null) {
+            return Collections.emptyList();
+        }
+        return Stream.of(cmd.split(","))
                 .map(String::trim)
-                .toArray(String[]::new);
+                .collect(Collectors.toList());
    }
+
 
 }

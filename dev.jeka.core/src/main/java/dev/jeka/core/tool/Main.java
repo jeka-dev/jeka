@@ -21,6 +21,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
@@ -35,6 +36,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -134,6 +137,9 @@ public class Main {
                         System.out);
                 System.exit(found ? 0 : 1);
             }
+
+            // Validate KBean properties
+            validateKBeanProps(props, kBeanResolution.allKbeans);
 
             // Parse command line to get action beans
             KBeanAction.Container actionContainer = CmdLineParser.parse(
@@ -319,6 +325,35 @@ public class Main {
             System.err.flush();
             System.err.println("=========================================================================================");
         }
+    }
+
+    private static void validateKBeanProps(JkProperties props, List<String> allKbeanClassNames) {
+        Set<String> propNames = props.getAllStartingWith("@", false).keySet();
+        for (String propName : propNames) {
+            String beanName = propName.contains(".") ?
+                    JkUtilsString.substringBeforeFirst(propName, ".") : propName;
+            String kbeanClassName = null;
+            for (String kbeanClazz : allKbeanClassNames) {
+                if (KBean.nameMatches(kbeanClazz, beanName)) {
+                    kbeanClassName = kbeanClazz;
+                    break;
+                }
+            }
+            if (kbeanClassName == null) {
+                throw new IllegalStateException("Property '@" + propName + "' does not match to any KBean. " +
+                        "Execute `jeka : --help' to see available KBeans.");
+            }
+            if (propName.contains(".")) {
+                String fieldName = JkUtilsString.substringAfterFirst(propName, ".");
+                Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
+                if (!KBeanDescription.of(kbeanClass, false).isContainingField(fieldName)) {
+                    throw new IllegalStateException("Property '@" + propName + "' does not match any field in "
+                            + beanName + " KBean. Execute 'jeka " + beanName + ": --help' to see available fields.");
+                }
+
+            }
+        }
+
     }
 
 }
