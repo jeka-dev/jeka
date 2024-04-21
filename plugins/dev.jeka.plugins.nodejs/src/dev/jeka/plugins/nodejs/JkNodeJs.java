@@ -170,7 +170,9 @@ public class JkNodeJs {
 
         project.compilation.postCompileActions.append("build-js", () -> {
             this.setWorkingDir(jsBaseDir);
-            buildCommands.forEach(this::exec);
+            JkConsoleSpinner.of("Building Node.js project")
+                    .setAlternativeMassage("Building Node.js project. It may take a while...")
+                    .run(() -> buildCommands.forEach(this::exec));
             JkLog.info("JS project built in %s", buildJsDir);
             if (!JkUtilsString.isBlank(copyToDir)) {
                 Path target = project.compilation.layout.resolveClassDir().resolve(copyToDir);
@@ -182,7 +184,9 @@ public class JkNodeJs {
         if (!testCommands.isEmpty()) {
             project.testing.testProcessor.postActions.append("test-js", () -> {
                 this.setWorkingDir(jsBaseDir);
-                testCommands.forEach(this::exec);
+                JkConsoleSpinner.of("Testing Node.js project")
+                        .setAlternativeMassage("Testing Node.js project. It may take a while...")
+                        .run(() -> testCommands.forEach(this::exec));
             });
         }
         return this;

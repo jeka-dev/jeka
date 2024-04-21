@@ -221,9 +221,7 @@ public final class JkSonarqube {
             JkLog.info("Sonarqube server url : %s", hostUrl);
         }
 
-        JkConsoleSpinner.of("Running Sonarqube")
-                .setAlternativeMassage("Running Sonarqube. It may take a while ...")
-                .run(this::runAndCheck);
+        JkConsoleSpinner.of("Running Sonarqube").run(this::runAndCheck);
         JkLog.endTask("Sonar analysis performed in %d millis.");
     }
 
@@ -379,7 +377,7 @@ public final class JkSonarqube {
                 .setFailOnError(JkLog.isVerbose())
                 .addParams(toProperties())
                 .setLogCommand(JkLog.isVerbose())
-                .setLogWithJekaDecorator(JkLog.isVerbose());
+                .setLogWithJekaDecorator(JkLog.isVerbose() || !JkLog.isAnimationAccepted());
     }
 
     private List<String> toProperties() {
