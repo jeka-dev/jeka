@@ -26,7 +26,6 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,8 +52,8 @@ public class NodeJsKBean extends KBean {
             "It is expected to be relative to the js app dir.")
     public String distDir = "build";
 
-    @JkDoc("If not empty, the result of client build will be copied to this dir relative to class dir (e.g. 'static')")
-    public String copyToDir;
+    @JkDoc("If not empty, the result of client build will be copied to this dir relative to the generated class dir (e.g. 'static')")
+    public String targetResourceDir;
 
     @JkDoc("If true, the project wrapped by ProjectKBean will be configured automatically to build the nodeJs project.")
     public boolean autoConfigureProject = false;
@@ -74,7 +73,7 @@ public class NodeJsKBean extends KBean {
         if (autoConfigureProject) {
             JkProject project = load(ProjectKBean.class).project;
             JkNodeJs.ofVersion(this.version)
-                    .configure(project, appDir, distDir, copyToDir, commandLines(cmdLine),
+                    .configure(project, appDir, distDir, targetResourceDir, commandLines(cmdLine),
                             commandLines(testCmdLine));
         }
     }
