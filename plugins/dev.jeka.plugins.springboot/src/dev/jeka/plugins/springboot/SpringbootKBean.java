@@ -27,11 +27,11 @@ import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import java.util.Optional;
 
 @JkDoc(
-        "Adapt projectKBean or SelfAppKean for Spring-Boot.\n" +
+        "Adapt projectKBean or baseKBean for Spring-Boot.\n" +
         "- Produce bootable jars\n" +
         "- Customize .war file for projectKBean\n" +
         "- Adapt scaffold\n" +
-        "The project or the SelfApp is automatically configured during this KBean initialization. "
+        "The project or the baseApp is automatically configured during this KBean initialization. "
 )
 public final class SpringbootKBean extends KBean {
 
