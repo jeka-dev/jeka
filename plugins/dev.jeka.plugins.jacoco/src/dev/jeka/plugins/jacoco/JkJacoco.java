@@ -23,14 +23,15 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -40,14 +41,13 @@ import java.util.stream.Collectors;
 
 /**
  * Provides convenient methods to deal with Jacoco agent and report tool.
- *
+ * <p><
  * Note : May sometime fall in this issue when running from IDE :
- * https://stackoverflow.com/questions/31720139/jacoco-code-coverage-report-generator-showing-error-classes-in-bundle-code-c
- *
+ * <a href="https://stackoverflow.com/questions/31720139/jacoco-code-coverage-report-generator-showing-error-classes-in-bundle-code-c">...</a>
+ * <p>
  * See command-line documentation :
- * https://www.jacoco.org/jacoco/trunk/doc/cli.html
- * https://www.jacoco.org/jacoco/trunk/doc/agent.html
- *
+ * <a href="https://www.jacoco.org/jacoco/trunk/doc/cli.html">...</a>
+ * <a href="https://www.jacoco.org/jacoco/trunk/doc/agent.html">...</a>
  */
 public final class JkJacoco {
 
@@ -60,7 +60,7 @@ public final class JkJacoco {
 
     public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
-    public static final String DEFAULT_VERSION = "0.8.11";
+    public static final String DEFAULT_VERSION = "0.8.12";
 
     private final ToolProvider toolProvider;
 
@@ -106,13 +106,6 @@ public final class JkJacoco {
      */
     public static JkJacoco ofVersion(@JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent") String version) {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), version);
-    }
-
-    /**
-     * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli embedded in this plugin.
-     */
-    public static JkJacoco ofEmbedded() {
-        return new JkJacoco(new EmbeddedToolProvider());
     }
 
     /**
@@ -214,7 +207,7 @@ public final class JkJacoco {
     }
 
     /**
-     * See https://www.jacoco.org/jacoco/trunk/doc/cli.html for report option
+     * See <a href="https://www.jacoco.org/jacoco/trunk/doc/cli.html">...</a> for report option
      */
     public JkJacoco addReportOptions(String ...args) {
         reportOptions.addAll(Arrays.asList(args));
@@ -311,8 +304,7 @@ public final class JkJacoco {
     private String agentOptions() {
         String result = String.join(",", agentOptions);
         boolean hasDestFile = agentOptions.stream()
-                .filter(option -> option.startsWith("destfile="))
-                .findFirst().isPresent();
+                .anyMatch(option -> option.startsWith("destfile="));
         if (!hasDestFile) {
             if (!JkUtilsString.isBlank(result)) {
                 result = result + ",";
@@ -351,34 +343,5 @@ public final class JkJacoco {
                     "org.jacoco:org.jacoco.cli:nodeps:" + version).get();
         }
     }
-
-    private static class EmbeddedToolProvider implements ToolProvider {
-
-        private final Path agentJarFile;
-
-        private final Path cliJarFile;
-
-        EmbeddedToolProvider() {
-            final URL agentJarUrl = JkJacoco.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
-            agentJarFile = JkUtilsIO.copyUrlContentToCacheFile(agentJarUrl, System.out,
-                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-            final URL cliJarUrl = JkJacoco.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
-            cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
-                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-        }
-
-        @Override
-        public Path getAgentJar() {
-            return agentJarFile;
-        }
-
-        @Override
-        public Path getCmdLineJar() {
-            return cliJarFile;
-        }
-    }
-
-
-
 
 }

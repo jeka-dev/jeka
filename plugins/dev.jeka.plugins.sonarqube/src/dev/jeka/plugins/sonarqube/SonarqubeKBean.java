@@ -43,7 +43,8 @@ public class SonarqubeKBean extends KBean {
     @JkDoc("Ping the sonarqube server prior running analysis")
     public boolean pingServer = true;
 
-    public final JkSonarqube sonarqube = JkSonarqube.ofEmbedded();
+    public final JkSonarqube sonarqube = JkSonarqube.ofVersion(getRunbase().getDependencyResolver().getRepos(),
+            JkSonarqube.DEFAULT_SCANNER__VERSION);
 
     @JkDoc("Runs sonarQube analysis based on properties defined in this plugin. " +
             "Properties prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
@@ -57,14 +58,14 @@ public class SonarqubeKBean extends KBean {
 
     @Override
     protected void init() {
-        if (JkUtilsString.isBlank(scannerVersion)) {
-            sonarqube.setVersion(null, null);
-        } else {
-            sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), scannerVersion);
-        }
+        sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), effectiveScannerVersion());
         sonarqube.setPingServer(pingServer);
         sonarqube.setLogOutput(logOutput);
         sonarqube.setProperties(getRunbase().getProperties());
+    }
+
+    private String effectiveScannerVersion() {
+        return JkUtilsString.isBlank(scannerVersion) ? JkSonarqube.DEFAULT_SCANNER__VERSION : scannerVersion;
     }
 
 }

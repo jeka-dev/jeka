@@ -47,7 +47,7 @@ import java.util.*;
  */
 public final class JkSonarqube {
 
-    public static final String DEFAULT_SCANNER__VERSION = "4.6.2.2472";
+    public static final String DEFAULT_SCANNER__VERSION = "5.0.1.3006";
 
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
@@ -71,7 +71,9 @@ public final class JkSonarqube {
     public static final String BINARIES = "binaries";
     public static final String JAVA_BINARIES = "java.binaries";
     public static final String TEST = "tests";
+    public static final String TEST_INCLUSIONS = "test.inclusions";
     public static final String LIBRARIES = "libraries";
+    public static final String EXCLUSIONS = "exclusions";
     public static final String JAVA_LIBRARIES = "java.libraries";
     public static final String JAVA_TEST_LIBRARIES = "java.test.libraries";
     public static final String JAVA_TEST_BINARIES = "java.test.binaries";
@@ -80,7 +82,6 @@ public final class JkSonarqube {
     public static final String JDBC_URL = "jdbc.url";
     public static final String JDBC_USERNAME = "jdbc.username";
     public static final String JDBC_PASSWORD = "jdbc.password";
-    private static final String SCANNER_JAR_NAME_46 = "sonar-scanner-cli-4.6.2.2472.jar";
     private static final String SONAR_PREFIX = "sonar.";
 
     private final Map<String, String> params = new HashMap<>();
@@ -98,13 +99,6 @@ public final class JkSonarqube {
         this.repos = repos;
         this.scannerVersion = scannerVersion;
         params.put(WORKING_DIRECTORY, workDir(Paths.get("")));
-    }
-
-    /**
-     * Creates a {@link JkSonarqube} object using the embedded scanner.
-     */
-    public static JkSonarqube ofEmbedded() {
-        return new JkSonarqube(null, null);
     }
 
     /**
@@ -132,6 +126,34 @@ public final class JkSonarqube {
      */
     public static JkSonarqube ofVersion(@JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), scannerVersion);
+    }
+
+    /**
+     * Returns a copy of the current {@link JkSonarqube} object with the same field values.
+     */
+    public JkSonarqube copyWithProperties() {
+        JkSonarqube copy = copyWithoutProperties();
+        copy.params.putAll(this.params);
+        return copy;
+    }
+
+    /**
+     * Returns the value of the property with the specified key.
+     */
+    public String getProperty(String key) {
+        return params.get(key);
+    }
+
+    /**
+     * Returns a copy of the current {@link JkSonarqube} object with the same field values, except for the properties
+     * "logOutput" and "pingServer" which are set to the same as the original object.
+     * This method is useful for creating immutable copies of the object.
+     */
+    public JkSonarqube copyWithoutProperties() {
+        JkSonarqube copy = new JkSonarqube(this.repos, this.scannerVersion);
+        copy.logOutput = this.logOutput;
+        copy.pingServer = this.pingServer;
+        return copy;
     }
 
     /**
@@ -234,7 +256,7 @@ public final class JkSonarqube {
      * @return An instance of JkSonarqube with the updated property.
      * @see <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">SonarQube Analysis Parameters</a>
      */
-    public JkSonarqube setProperty(String key, Iterable<Path> value) {
+    public JkSonarqube setPathProperty(String key, Iterable<Path> value) {
         return setProperty(key, toPaths(value));
     }
 
@@ -254,7 +276,6 @@ public final class JkSonarqube {
         this.setProperties(properties.getAllStartingWith("sonar.", false));
         return this;
     }
-
 
     public JkSonarqube setProjectBaseDir(Path baseDir) {
         return setProperty(PROJECT_BASE_DIR, baseDir.toAbsolutePath().toString());
@@ -321,8 +342,8 @@ public final class JkSonarqube {
                 .setProjectBaseDir(baseDir)
                 .setBinaries(project.compilation.layout.resolveClassDir())
                 .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
-                .setProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
+                .setPathProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
+                .setPathProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
                 .setProperty(WORKING_DIRECTORY, workDir(baseDir))
                 .setProperty(JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
@@ -331,12 +352,12 @@ public final class JkSonarqube {
                 .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
                 .setProperty(JACOCO_XML_REPORTS_PATHS,
                         baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
-                .setProperty(JAVA_LIBRARIES, libs)
-                .setProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+                .setPathProperty(JAVA_LIBRARIES, libs)
+                .setPathProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
         if (provideTestLibs) {
             JkDependencySet deps = project.testing.compilation.getDependencies();
             JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
-            this.setProperty(JAVA_TEST_LIBRARIES, testLibs);
+            this.setPathProperty(JAVA_TEST_LIBRARIES, testLibs);
         }
         return this;
     }
@@ -401,11 +422,6 @@ public final class JkSonarqube {
         JkJavaVersion javaVersion = JkJavaVersion.of(System.getProperty("java.version"));
         JkUtilsAssert.state(javaVersion.compareTo(JkJavaVersion.V11) >= 0,
                 "Sonarqube has to run on JRE >= 11. You are running on version " + javaVersion);
-        if (this.scannerVersion == null) {
-            URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
-            JkLog.verbose("Use embedded sonar scanner : %s", SCANNER_JAR_NAME_46);
-            return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-        }
         JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",
                 this.scannerVersion);
         JkCoordinateDependency coordinateDependency = JkCoordinateDependency

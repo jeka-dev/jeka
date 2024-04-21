@@ -19,6 +19,7 @@ package dev.jeka.plugins.nodejs;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -63,6 +64,11 @@ public class NodeJsKBean extends KBean {
         commandLines(cmdLine).forEach(getJkNodeJs()::exec);
     }
 
+    @JkDoc("Execute the command line specified by 'testCmdLine'")
+    public void execTest() {
+        commandLines(testCmdLine).forEach(getJkNodeJs()::exec);
+    }
+
     @Override
     protected void init() {
         if (autoConfigureProject) {
@@ -73,19 +79,30 @@ public class NodeJsKBean extends KBean {
         }
     }
 
+    /**
+     * Returns the working directory for the NodeJsKBean. If the specified appDir does not exist,
+     * the base directory is returned.
+     *
+     * @return The working directory as a Path object.
+     */
+    public Path getWorkingDir() {
+        if (JkUtilsString.isBlank(appDir)) {
+            return getBaseDir();
+        }
+        Path result = getBaseDir().resolve(appDir);
+        if (!Files.exists(result)) {
+            JkLog.info("Directory not found %s, use base dir as working dir.", result);
+            return getBaseDir();
+        }
+        return result;
+    }
+
     private JkNodeJs getJkNodeJs() {
 
         return JkNodeJs.ofVersion(version).setWorkingDir(getWorkingDir());
     }
 
-   private Path getWorkingDir() {
-        Path result = getBaseDir().resolve(appDir);
-        if (!Files.exists(result)) {
-            JkLog.info("Directory not found %s, use current dir as working dir.", result);
-            return Paths.get("");
-        }
-        return result;
-   }
+
 
    private static List<String> commandLines(String cmd) {
         if (cmd == null) {
