@@ -17,6 +17,7 @@
 package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkException;
 
 import java.io.*;
 import java.util.Arrays;
@@ -156,28 +157,12 @@ public final class JkTestResult implements Serializable {
         }
     }
 
-    public void printFailures(PrintStream printStream) {
-        for (JkFailure failure : failures) {
-            failure.print(printStream);
-            printStream.println();
-        }
-    }
 
-    public void assertNoFailure() {
+    public void assertSuccess() {
         if (failures.isEmpty()) {
             return;
         }
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            PrintStream printStream = new PrintStream(os);
-            printStream.println( failures.size() + " test failures : ");
-            printStream.println();
-            printFailures(printStream);
-            String message = os.toString("UTF8");
-            throw new IllegalStateException(message);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
+        throw new JkException("Failures detected in test execution");
     }
 
     public static final class JkFailure implements Serializable {
