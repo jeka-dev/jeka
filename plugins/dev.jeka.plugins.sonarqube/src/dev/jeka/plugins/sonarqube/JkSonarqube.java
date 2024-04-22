@@ -222,7 +222,7 @@ public final class JkSonarqube {
         }
 
         JkConsoleSpinner.of("Running Sonarqube").run(this::runAndCheck);
-        JkLog.endTask("Sonar analysis performed in %d millis.");
+        JkLog.endTask();
     }
 
     private void runAndCheck() {

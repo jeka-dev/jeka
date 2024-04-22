@@ -399,8 +399,11 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     public JkProcHandler execAsync() {
         final List<String> commands = computeEffectiveCommands();
         if (logCommand) {
-            String workingDirName = this.workingDir == null ? "" : this.workingDir + ">";
-            JkLog.info("Start program asynchronously : " + workingDirName + commands);
+            String cmd = shortenCommand() +  " " + shortenArgs(100);
+            JkLog.info("start-async-program >" + cmd);
+            if (JkLog.isVerbose()) {
+                printContextualInfo();
+            }
         }
         if (inheritIO) {
             JkLog.getOutPrintStream().flush();

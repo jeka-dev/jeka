@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.utils;
 
+import dev.jeka.core.api.system.JkLog;
+
 import java.io.*;
 import java.net.*;
 
@@ -47,6 +49,7 @@ public class JkUtilsNet {
      */
     public static void checkUntilOk(String url, int timeoutMillis, int sleepMillis) {
         long start = System.currentTimeMillis();
+        int statusCode = -1;
 
         while ( sinceStart(start) < timeoutMillis ) {
             try {
@@ -55,18 +58,24 @@ public class JkUtilsNet {
                 connection.setRequestMethod("GET");
                 connection.connect();
 
-                int statusCode = connection.getResponseCode();
-                System.out.printf("Pinging %s returned %s%n", url, statusCode);
+                statusCode = connection.getResponseCode();
+                JkLog.debug("Pinging %s returned %s%n", url, statusCode);
                 if (isOK(statusCode)) {
-                    break;
+                    JkLog.verbose("Check ping on %s returned success code : %s", url, statusCode);
+                    return;
                 }
+                JkLog.debug("Check ping on %s returned fail code : %s. Waiting %s ms before next attemp", url,
+                        statusCode, sleepMillis);
                 connection.disconnect();
                 JkUtilsSystem.sleep(sleepMillis);
             } catch (Exception e) {
-                System.out.println("Error pinging " + url + " :" + e.getMessage());
+                JkLog.debug("Error pinging %s : %s. Sleep %s millis before next attempt", url ,e.getMessage(),
+                        sleepMillis);
                 JkUtilsSystem.sleep(sleepMillis);
             }
         }
+        throw new IllegalStateException("Request " + url + " failed with status code " + statusCode +
+                " for more than " + timeoutMillis +  " millis.");
 
     }
 
@@ -114,6 +123,83 @@ public class JkUtilsNet {
             return true; // If connect() succeeds, the port is open
         } catch (IOException e) {
             return false; // If connect() fails, the port is closed
+        }
+    }
+
+    /**
+     * Finds a free port within the specified range.
+     */
+    public static int findFreePort(int from, int to) {
+        for (int port = from; port <= to; port++) {
+            try (ServerSocket serverSocket = new ServerSocket(port)) {
+                return port;
+            } catch (IOException e) {
+                JkLog.verbose("Tested ort %s is already in use", port);
+            }
+        }
+        throw new IllegalStateException("No free port found between " + from + " and " + to);
+    }
+
+    /**
+     * Sends an HTTP request to the specified URL using the specified method and parameters.
+     *
+     * @param url    The URL to send the request to
+     * @param method The HTTP method to use (e.g., "GET", "POST", etc.)
+     * @param params The parameters to include in the request body
+     * @return The response from the server as a BasicHttpResponse object
+     * @throws UncheckedIOException If an I/O error occurs while sending the request or receiving the response
+     */
+    public static BasicHttpResponse sendHttpRequest(String url, String method, String params) {
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+            httpURLConnection.setRequestMethod(method);
+            httpURLConnection.setDoOutput(params != null);
+
+            // Send POST request
+            if (params != null) {
+                OutputStream os = httpURLConnection.getOutputStream();
+                os.write(params.getBytes());
+                os.flush();
+                os.close();
+            }
+
+            // Get Response
+            int responseCode = httpURLConnection.getResponseCode();
+/*
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    httpURLConnection.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+*/
+            return new BasicHttpResponse(responseCode, null);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+    }
+
+    public static class BasicHttpResponse {
+
+        public final int code;
+
+        public final String body;
+
+        public BasicHttpResponse(int code, String body) {
+            this.code = code;
+            this.body = body;
+        }
+
+        public boolean isOk() {
+            return code < 400;
+        }
+
+        public void asserOk() {
+            JkUtilsAssert.state(isOk(), "Returned HTTP status code was not OK : %s", code);
         }
     }
 

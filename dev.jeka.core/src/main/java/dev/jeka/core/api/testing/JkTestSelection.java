@@ -165,7 +165,7 @@ public final class JkTestSelection implements Serializable {
         return discoveryConfigurer;
     }
 
-    public JkTestSelection setTestClassRoots(UnaryOperator<JkPathSequence> pathSequencer) {
+    public JkTestSelection customizeTestClassRoots(UnaryOperator<JkPathSequence> pathSequencer) {
         testClassRoots = pathSequencer.apply(testClassRoots);
         return this;
     }

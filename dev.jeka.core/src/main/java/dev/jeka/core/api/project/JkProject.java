@@ -70,6 +70,18 @@ import java.util.stream.Collectors;
  */
 public final class JkProject implements JkIdeSupportSupplier {
 
+    /**
+     * Flag to indicate if we need to include, or not, runtime dependencies in some scenario.
+     */
+    public  enum RuntimeDeps {
+
+        INCLUDE, EXCLUDE;
+
+        public static RuntimeDeps of(boolean include) {
+            return include ? INCLUDE : EXCLUDE;
+        }
+    }
+
     public static final String CREATE_JAR_ACTION = "create-jar";
 
     /**
@@ -281,7 +293,7 @@ public final class JkProject implements JkIdeSupportSupplier {
 
 
     /**
-     * Sets a {@link Runnable} to create the JAR used by {@link #prepareRunJar(boolean)}
+     * Sets a {@link Runnable} to create the JAR used by {@link #prepareRunJar(RuntimeDeps)}
      */
     public JkProject setJarMaker(Consumer<Path> jarMaker) {
         this.jarMaker = jarMaker;
@@ -313,10 +325,10 @@ public final class JkProject implements JkIdeSupportSupplier {
      *
      * @param artifactClassifier  The classifier of the artifact to run. In a project producing a side 'fat' jar, you can use
      *                           'fat'. If you want to run the main artifact, just use ''.
-     * @param includeRuntimeDeps If <code>true</code>, the runtime dependencies will be added to the classpath. This should
-     *                           values <code>false</code> in case of <i>fat</i> jar.
+     * @param runtimeDepInclusion If <code>INCLUDE</code>, the runtime dependencies will be added to the classpath. This should
+     *                           values <code>EXCLUDE</code> in case of <i>fat</i> jar.
      */
-    public JkJavaProcess prepareRunJar(String artifactClassifier, boolean includeRuntimeDeps) {
+    public JkJavaProcess prepareRunJar(String artifactClassifier, RuntimeDeps runtimeDepInclusion) {
         JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
         Path artifactPath = artifactLocator.getArtifactPath(artifactId);
         if (!Files.exists(artifactPath)) {
@@ -326,19 +338,19 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setInheritIO(true);
-        if (includeRuntimeDeps) {
+        if (runtimeDepInclusion == RuntimeDeps.INCLUDE) {
             javaProcess.setClasspath(packaging.resolveRuntimeDependenciesAsFiles());
         }
         return javaProcess;
     }
 
     /**
-     * Same as {@link #prepareRunJar(String, boolean)} but specific for the main artefact.
+     * Same as {@link #prepareRunJar(String, RuntimeDeps)} but specific for the main artefact.
      *
-     * @see #prepareRunJar(String, boolean)
+     * @see #prepareRunJar(String, RuntimeDeps)
      */
-    public JkJavaProcess prepareRunJar(boolean includeRuntimeDeps) {
-        return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, includeRuntimeDeps);
+    public JkJavaProcess prepareRunJar(RuntimeDeps runtimeDepInclusion) {
+        return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, runtimeDepInclusion);
     }
 
     // -------------------------- Other -------------------------

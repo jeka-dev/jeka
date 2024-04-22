@@ -19,6 +19,7 @@ package dev.jeka.core.api.project;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.system.JkLog;
@@ -31,7 +32,6 @@ import dev.jeka.core.tool.JkException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 /**
  * Handles project testing step. This involves both test compilation and run.
@@ -55,6 +55,8 @@ public class JkProjectTesting {
      */
     public final JkTestSelection testSelection;
 
+    public final JkRunnables postActions = JkRunnables.of().setLogTasks(true);
+
     // relative path from output dir
     private String reportDir = "test-report";
 
@@ -67,8 +69,8 @@ public class JkProjectTesting {
     JkProjectTesting(JkProject project) {
         this.project = project;
         compilation = new JkProjectTestCompilation();
-        testProcessor = defaultTestProcessor();
-        testSelection = defaultTestSelection();
+        testProcessor = createDefaultTestProcessor();
+        testSelection = createDefaultTestSelection();
     }
 
     /**
@@ -168,6 +170,7 @@ public class JkProjectTesting {
             return;
         }
         executeWithTestProcessor();
+        postActions.run();
         JkLog.endTask();
     }
 
@@ -183,24 +186,39 @@ public class JkProjectTesting {
         }
     }
 
-    private void executeWithTestProcessor() {
-        UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
-        testSelection.setTestClassRoots(op);
-        JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
-        if (!result.getFailures().isEmpty() && breakOnFailures) {
-            throw new JkException("Failures detected in test execution");
-        }
+    /**
+     * Creates a default test selection for the current project.
+     * The default test selection includes the compiled test classes
+     */
+    public JkTestSelection createDefaultTestSelection() {
+        return JkTestSelection.of()
+                .addTestClassRoots(Paths.get(compilation.layout.getClassDir()))
+                .customizeTestClassRoots(paths -> paths.resolvedTo(project.getOutputDir()));
     }
 
-    private JkTestProcessor defaultTestProcessor() {
+    /**
+     * Creates a default test processor for running tests.
+     *
+     * @return a default {@link JkTestProcessor} object.
+     */
+    public JkTestProcessor createDefaultTestProcessor() {
         JkTestProcessor result = JkTestProcessor.of();
         final Path reportDir = compilation.layout.getOutputDir().resolve(this.reportDir);
         result
-                .setRepoSetSupplier(() -> project.dependencyResolver.getRepos())
+                .setRepoSetSupplier(() -> project.dependencyResolver.getRepos()) // cannot use lambda
                 .engineBehavior
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(defaultProgressStyle());
         return result;
+    }
+
+    private void executeWithTestProcessor() {
+      //  UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
+      //  testSelection.setTestClassRoots(op);
+        JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
+        if (!result.getFailures().isEmpty() && breakOnFailures) {
+            throw new JkException("Failures detected in test execution");
+        }
     }
 
     private static JkTestProcessor.JkProgressOutputStyle defaultProgressStyle() {
@@ -212,11 +230,6 @@ public class JkProjectTesting {
         }
         return JkUtilsSystem.CONSOLE == null ? JkTestProcessor.JkProgressOutputStyle.STEP :
                 JkTestProcessor.JkProgressOutputStyle.BAR;
-    }
-
-    private JkTestSelection defaultTestSelection() {
-        return JkTestSelection.of().addTestClassRoots(
-                Paths.get(compilation.layout.getClassDir()));
     }
 
     private class JkProjectTestCompilation extends JkProjectCompilation {

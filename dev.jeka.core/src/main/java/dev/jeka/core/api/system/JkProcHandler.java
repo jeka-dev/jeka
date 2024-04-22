@@ -73,21 +73,6 @@ public class JkProcHandler {
         return  Arrays.asList(getOutput().split("\\r?\n"));
     }
 
-    /**
-     * Returns the process ID (PID) of the given process.
-     *
-     * <p>
-     * This method is used to obtain the PID of a process on a non-Windows system.
-     * It uses reflection to access the "pid" field of the provided Process object.
-     *
-     * @return the PID of the provided process
-     * @throws IllegalStateException if the system is Windows and PID retrieval is not supported
-     */
-    public int getPid() {
-        JkUtilsAssert.state(!JkUtilsSystem.IS_WINDOWS, "Can't get pid for Windows system");
-        return (Integer) JkUtilsReflect.getFieldValue(process, "pid");
-    }
-
     public int waitFor() {
         try {
             return process.waitFor();

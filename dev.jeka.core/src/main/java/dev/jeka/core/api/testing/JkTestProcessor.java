@@ -107,6 +107,14 @@ public final class JkTestProcessor {
 
     public final JkRunnables preActions = JkRunnables.of();
 
+    /**
+     * Collection of <i>Eunnables</i> to be executed after the test processor has run.
+     * <p>
+     * It is typically used for generating reports after a test definition has run.
+     * <p>
+     * If you want to run another test 'suite', you'll need to use {@link dev.jeka.core.api.project.JkProjectTesting#postActions}
+     * instead.
+     */
     public final JkRunnables postActions = JkRunnables.of();
 
     private String junitPlatformVersion = "1.9.3";
@@ -201,7 +209,7 @@ public final class JkTestProcessor {
      */
     public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
         if (!testSelection.hasTestClasses()) {
-            JkLog.verbose("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
+            JkLog.info("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
             return JkTestResult.of();
         }
         final JkTestResult result;
