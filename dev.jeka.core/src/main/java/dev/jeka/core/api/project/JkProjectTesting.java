@@ -213,11 +213,9 @@ public class JkProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-      //  UnaryOperator<JkPathSequence> op = paths -> paths.resolvedTo(project.getOutputDir());
-      //  testSelection.setTestClassRoots(op);
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
-        if (!result.getFailures().isEmpty() && breakOnFailures) {
-            throw new JkException("Failures detected in test execution");
+        if (breakOnFailures) {
+            result.assertSuccess();
         }
     }
 
