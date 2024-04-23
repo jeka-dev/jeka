@@ -549,7 +549,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         String workingDirName = this.workingDir == null ? "." : workingDir.toString();
         JkLog.info("working dir   : %s", workingDirName);
         JkLog.info("command path  : %s", command);
-        String cmdLine = JkLog.isVerbose() ? fullCmdLine() : JkUtilsString.ellipse(fullCmdLine(), 120);
+        final String cmdLine;
+        if (JkLog.isDebug() ) {
+            cmdLine = fullCmdLine();
+        } else if (JkLog.isVerbose()) {
+            cmdLine = JkUtilsString.ellipse(fullCmdLine(), 480);
+        } else {
+            cmdLine = JkUtilsString.ellipse(fullCmdLine(), 120);
+        }
         JkLog.info("cmd line      : %s", cmdLine);
         JkLog.getOutPrintStream().flush();
     }

@@ -23,6 +23,10 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class providing utility methods for executing Docker commands.
@@ -54,7 +58,7 @@ public class JkDocker {
     }
 
     /**
-     * Prepares a JkProcess object to execute a Docker command with the given parameters..
+     * Prepares a JkProcess object to execute a Docker command with the given parameters.
      */
     public static JkProcess prepareExec(String dockerCommand, String ...params) {
         return JkProcess.of("docker")
@@ -62,7 +66,7 @@ public class JkDocker {
                 .addParams(params)
                 .setLogCommand(true)
                 .setInheritIO(true)
-                .setFailOnError(false);
+                .setFailOnError(true);  // By default, it is wise to fail when an error occurs
     }
 
     /**
@@ -74,7 +78,9 @@ public class JkDocker {
                     .setLogCommand(JkLog.isVerbose())
                     .setInheritIO(false)
                     .setLogWithJekaDecorator(false)
-                    .exec().hasSucceed();
+                    .setFailOnError(false)
+                    .exec()
+                        .hasSucceed();
         } catch (UncheckedIOException e) {
             return false;
         }
@@ -84,5 +90,20 @@ public class JkDocker {
         JkUtilsAssert.state(isPresent(), "Operation halted. Docker client unresponsive. Is Docker daemon running?");
     }
 
+    /**
+     * Retrieves the names of all images present in the Docker registry.
+     * The image are formatted as `repository:tag'. The tag is always present, it values 'latest' by default.
+     *
+     * @return A set of strings representing the names of the images in the repository.
+     */
+    public static Set<String> getImageNames() {
+        List<String> rawResult = prepareExec("images", "--format", "{{.Repository}}:{{.Tag}}")
+                .setCollectStdout(true)
+                .setInheritIO(false)
+                .exec().getStdoutAsMultiline();
+        return rawResult.stream()
+                .map(String::trim)
+                .collect(Collectors.toSet());
+    }
 
 }

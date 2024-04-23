@@ -102,6 +102,15 @@ public class JkUtilsNet {
         }
     }
 
+    public static boolean isAvailableAndOk(String url, boolean log) {
+        try {
+            return isStatusOk(url, log);
+        } catch (RuntimeException e) {
+            JkLog.debug("Error while pinging %s : %s", url, e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * Checks if a port is open on a specified host.
      *

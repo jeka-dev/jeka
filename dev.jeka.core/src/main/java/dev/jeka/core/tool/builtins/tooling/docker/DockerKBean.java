@@ -52,6 +52,8 @@ public final class DockerKBean extends KBean {
     @JkDoc("Space separated options to pass 'docker run' command, as '--interactive --tty'")
     public String runOptions = "";
 
+    private String lastRunningContainerName;
+
     /**
      * Handler on the Docker build configuration for customizing built images.
      */
@@ -78,7 +80,7 @@ public final class DockerKBean extends KBean {
     @JkDoc("Runs Docker image and wait until termination.")
     public void run() {
         JkDocker.assertPresent();
-        String containerName = "jeka-" + imageName.replace(':', '-');
+        this.lastRunningContainerName = "jeka-" + imageName.replace(':', '-');
         String runOptions = JkUtilsString.isBlank(this.runOptions) ? "" : this.runOptions.trim() + " ";
         String args = String.format("%s--rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
                         +  " --name %s %s",
@@ -86,7 +88,7 @@ public final class DockerKBean extends KBean {
                 dockerBuild().portMappingArgs(),
                 jvmOptions,
                 programArgs,
-                containerName,
+                this.lastRunningContainerName,
                 imageName);
         JkDocker.execCmdLine("run", args);
     }
@@ -100,6 +102,13 @@ public final class DockerKBean extends KBean {
 
     public void customize(Consumer<JkDockerJvmBuild> dockerBuildCustomizer) {
         customizer.add(dockerBuildCustomizer);
+    }
+
+    /**
+     * Retrieves the name of the last or current running container, launched using {@link #run()} method.
+     */
+    public String getLastRunningContainerName() {
+        return lastRunningContainerName;
     }
 
     private JkDockerJvmBuild dockerBuild() {
