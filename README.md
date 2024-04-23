@@ -20,7 +20,6 @@ Its key features include:
 
 -  **Customizable:** JeKa can be configured with concise **property files** for generic cases, or by **Java code** for specific needs.
 
--  **Friendliness:** JeKa offers concise configuration and easy troubleshooting for Java developers.
 
 ## Use-cases
 
