@@ -6,21 +6,27 @@
 
 ##  What is JeKa ?
 
-<strong>JeKa</strong> is a build tool that allows users to build or run directly run Java/Kotlin applications. 
+<strong>Jeka</strong> is a Java build tool that allows users to build, script or run directly Java/Kotlin applications.
 
 Its key features include:
 
 -  **JDKs Management:** Automatically downloads and selects the appropriate JDKs. No need to have Java already installed on the host machine.
+
 -  **Direct App Execution:** Runs applications directly from their Git repository, providing a means to distribute Java applications as source.
+
 -  **Portable Builds:** JeKa downloads everything needed for a build (JDKs, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
+
 -  **Easily Extendable:** JeKa comes with a simple plugin mechanism for easy extension.
+
 -  **Customizable:** JeKa can be configured with concise **property files** for generic cases, or by **Java code** for specific needs.
+
+-  **Friendliness:** JeKa offers concise configuration and easy troubleshooting for Java developers.
 
 ## Use-cases
 
 - **Use Java for scripting:** JeKa makes it ridiculously easy to write and execute scripts using the Java language.
   
-  Write your automated task directly in Java and execute it from anywhere without any setup.
+  Write your automated tasks directly in Java and execute them from anywhere, without any setup.
 
 - **Create portable builds - pipelines:** Combine the build and scripting capabilities of Jeka to create complete
   CI/CD pipelines that run everywhere (from Windows desktop to cloud CI/CD).
