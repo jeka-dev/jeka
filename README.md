@@ -6,7 +6,7 @@
 
 ##  What is JeKa ?
 
-<strong>JeKa</strong> is a build tool that allows users to build or directly run Java / Kotlin applications. 
+<strong>JeKa</strong> is a build tool that allows users to build or run directly run Java/Kotlin applications. 
 
 Its key features include:
 
@@ -16,22 +16,31 @@ Its key features include:
 -  **Easily Extendable:** JeKa comes with a simple plugin mechanism for easy extension.
 -  **Customizable:** JeKa can be configured with concise **property files** for generic cases, or by **Java code** for specific needs.
 
-## Why JeKa ?
+## Use-cases
 
-JeKa's scripting capabilities allow it to address the building and CI/CD concerns of a Java project using a single tool and language.
+- **Use Java for scripting:** JeKa makes it ridiculously easy to write and execute scripts using the Java language.
+  
+  Write your automated task directly in Java and execute it from anywhere without any setup.
 
-JeKa also lowers the entry barrier to Java with minimalist configurations and by enabling the execution of entire applications 
-(web apps, command-line, GUI, scripts) directly from their Git repository in an efficient way.
+- **Create portable builds - pipelines:** Combine the build and scripting capabilities of Jeka to create complete
+  CI/CD pipelines that run everywhere (from Windows desktop to cloud CI/CD).
 
+- **Deliver applications as sources:** JeKa can execute entire Java applications 
+  of any kind and any size directly from their Git repo. Just commit or tag your repo to release your app.
+
+- **Make Java simpler for newcomers**: Get rid of learning tools and knitting with JVMs when starting with 
+  Java. 
+  
+  Write directly Java code that can be build and executed from anywhere with minimal or no setup.
 
 ## Examples
 
 - [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
 - [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
 
+- [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 
 - [Build a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
-- [Build a Spring-Boot application](https://github.com/jeka-dev/working-examples/blob/master/springboot-api/jeka/def/Build.java)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
 ## Getting Started
@@ -119,7 +128,7 @@ JeKa builds itself. To build JeKa full distribution from sources, the simpler is
 ### Build JeKa from Command Line
 
 JeKa builds itself, but we need to compile the JeKa sources prior to execute it. 
-Fot this, a small _Ant_ script bootstraps the build process by compiling JeKa first then launch 
+For this, a small _Ant_ script bootstraps the build process by compiling JeKa first then launch 
 the JeKa build.
 
 At the repository root dir, execute : `ant -f .github\workflows\build.xml`.
