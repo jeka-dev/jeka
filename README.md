@@ -57,7 +57,7 @@ Visit following pages according your expectation :
 
 ## Plugins
 
-### Bundled Plugin
+### Bundled Plugins
 
 JeKa comes with plugins out-of-the-box. These plugins cover most of the common needs for building a project. 
 This includes IDE integration (IntelliJ Eclipse), 
@@ -66,7 +66,7 @@ dependency management, compilation, testing, Git, GPG signing, Scaffolding, Mave
 You can have a description of these plugins by executing command `jeka --help`.
 
 
-### External Plugin
+### External Plugins
 
 External plugins require to be explicitly imported.
 
