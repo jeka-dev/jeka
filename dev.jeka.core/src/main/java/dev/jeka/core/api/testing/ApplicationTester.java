@@ -34,7 +34,7 @@ public abstract class ApplicationTester {
         } finally {
             JkLog.endTask();
         }
-        JkLog.startTask("Executing tests");
+        JkLog.startTask("Run tests against deployed application");
         try {
             executeTests();
         } finally {
@@ -82,7 +82,6 @@ public abstract class ApplicationTester {
      */
     protected final int findFreePort() {
         return JkUtilsNet.findFreePort(49152, 65535);
-
     }
 
     private void checkUntilReady() {
