@@ -33,10 +33,10 @@ Its key features include:
 - **Deliver applications as sources:** JeKa can execute entire Java applications 
   of any kind and any size directly from their Git repo. Just commit or tag your repo to release your app.
 
-- **Make Java simpler for newcomers**: Get rid of learning tools and knitting with JVMs when starting with 
+- **Make Java fun for newcomers**: Get rid of learning legacy build tools and tangling with JVMs when starting with 
   Java. 
   
-  Write directly Java code that can be build and executed from anywhere with minimal or no setup.
+  Write directly Java code that can be build and executed from anywhere with minimal or zero setup.
 
 ## Examples
 
