@@ -49,19 +49,27 @@ Its key features include:
   
   Build projects and seamlessly combine scripts to create comprehensive CI/CD pipelines that can run anywhere, 
   from Windows desktop to cloud CI/CD environments.
+  
   JeKa can also complement other build tools such as Maven or Gradle to fulfill their missing features.
 
 
-- **Deliver applications as sources:** JeKa can execute entire Java applications of any kind and size directly 
-  from their Git repository. Simply commit or tag your repository to release your application.
+- **Deliver applications as sources** 
+
+  JeKa can execute entire Java applications of any kind and size directly from their Git repository. 
+  
+  Simply commit or tag your repository to release your application.
 
 
-- **Make Java fun for newcomers**: Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
+- **Make Java fun for newcomers**
+
+  Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
 
   Write directly Java code that can be build and executed from anywhere with minimal or zero setup.
 
 
-- **Centralize build logic**: Define in one place the build and delivery logic that projects with similar technologies can share and extend
+- **Centralize build logic**: 
+
+  Define in one place the build and delivery logic that projects with similar technologies can share and extend.
   
 
 ## Examples
