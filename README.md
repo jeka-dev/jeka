@@ -40,13 +40,15 @@ Its key features include:
 ## Use-cases
 
 - **Use Java for scripting** 
+
   JeKa makes it ridiculously easy to write and execute scripts using the Java language.
   Write your automated tasks directly in Java and execute them from anywhere, without any setup.
 
 
-- **Build projects - Create pipelines:** Build projects and seamlessly combine scripts to create comprehensive CI/CD 
-  pipelines that can run anywhere, from Windows desktop to cloud CI/CD environments. 
-
+- **Build projects - Create pipelines** 
+  
+  Build projects and seamlessly combine scripts to create comprehensive CI/CD pipelines that can run anywhere, 
+  from Windows desktop to cloud CI/CD environments.
   JeKa can also complement other build tools such as Maven or Gradle to fulfill their missing features.
 
 
