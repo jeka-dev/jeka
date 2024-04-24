@@ -39,7 +39,7 @@ Now *jeka-src* live in its own IntelliJ module.
 Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.
 
 !!! warning
-    Do not remove the `@intellij.imlFile=jeka-src/jeka-src.iml` property from *jeka.property* file, otherwise you will
+    Do not remove the `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from *jeka.property* file, otherwise you will
     still face sync issues.
 
 
