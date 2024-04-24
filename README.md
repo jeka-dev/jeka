@@ -67,7 +67,7 @@ Its key features include:
   Write directly Java code that can be build and executed from anywhere with minimal or zero setup.
 
 
-- **Centralize build logic**: 
+- **Centralize build logic**
 
   Define in one place the build and delivery logic that projects with similar technologies can share and extend.
   
