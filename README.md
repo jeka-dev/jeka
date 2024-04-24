@@ -25,7 +25,7 @@ Its key features include:
 -  **JDKs Management:** Automatically downloads and selects the appropriate JDKs. No need to have Java already installed on the host machine.
 
 
--  **Direct App Execution:** Runs applications directly from their Git repository, providing a means to distribute Java applications as source.
+-  **Direct App Execution:** Run applications directly from their Git repository, providing a means to distribute Java applications as source.
 
 
 -  **Portable Builds:** JeKa downloads everything needed for a build (JDKs, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
