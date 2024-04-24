@@ -50,7 +50,7 @@ Its key features include:
   Build projects and seamlessly combine scripts to create comprehensive CI/CD pipelines that can run anywhere, 
   from Windows desktop to cloud CI/CD environments.
   
-  JeKa can also complement other build tools such as Maven or Gradle to fulfill their missing features.
+  JeKa can also complement other build tools such as *Maven* or *Gradle* to fulfill their missing features.
 
 
 - **Deliver applications as sources** 
