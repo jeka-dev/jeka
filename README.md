@@ -45,7 +45,8 @@ Its key features include:
 
 
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
-- [JeKa used along Maven to Build and Run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+- [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+
 
 - [Build a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
