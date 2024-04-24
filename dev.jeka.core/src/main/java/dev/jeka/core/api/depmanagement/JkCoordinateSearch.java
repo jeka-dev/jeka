@@ -150,7 +150,6 @@ public class JkCoordinateSearch {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document domDoc = JkUtilsXml.documentFrom(in);
             JkDomDocument doc = JkDomDocument.of(domDoc);
-            doc.print(System.out);
             return toResult(doc);
         }
     }
