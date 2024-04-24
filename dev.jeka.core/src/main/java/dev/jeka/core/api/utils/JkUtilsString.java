@@ -299,6 +299,7 @@ public final class JkUtilsString {
         for (String token : variableTokens) {
             String value = replacer.apply(token);
             if (token != null) {
+                JkUtilsAssert.argument(value != null, "No replacement defined for token %s", token);
                 result = result.replace("${" + token + "}", value);
             }
         }
