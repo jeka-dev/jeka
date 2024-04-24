@@ -43,7 +43,9 @@ Its key features include:
 - [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
 - [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
 
+
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
+- [JeKa used along Maven to Build and Run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
 - [Build a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).

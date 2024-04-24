@@ -71,8 +71,6 @@ declare DRY_RUN  # Debugging purpose
 declare DEFAULT_BASE_DIR="."
 
 
-
-
 #######################################
 # Prints passed arguments on the stderr
 # Globals:
@@ -188,7 +186,7 @@ download_and_unpack() {
   elif [ -x "$(command -v wget)" ]; then
     wget -q -O "$temp_file" "$url"
   else
-    msg "Error: curl or wget not found, please make sure one of them is installed" 1>&2
+    msg "Error: curl or wget not found, please make sure one of them is installed"
     exit 1
   fi
 
@@ -229,7 +227,7 @@ compute_IS_VERBOSE() {
 #######################################
 debug() {
   if [ -n "$LOG_DEBUG" ] || [ -n "$IS_VERBOSE" ]; then
-    echo "$1" 1>&2
+    echo "$*" 1>&2
   fi
 }
 
@@ -653,9 +651,7 @@ compute_JEKA_DIST_DIR() {
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
 
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
-        if [ "$IS_VERBOSE" != "" ]; then
-          msg "Download Jeka distrib from $url in $distrib_cache_dir"
-        fi
+        msg "Download Jeka distrib from $url in $distrib_cache_dir"
         download_and_unpack "$url" "$distrib_cache_dir"
         JEKA_DIST_DIR=$distrib_cache_dir
       fi
@@ -723,19 +719,17 @@ get_or_download_jdk() {
   jdk_cache_dir="$(get_cache_dir)/jdks/$JDK_DOWNLOAD_DISTRIB-$JAVA_VERSION"
   if [ ! -d "$jdk_cache_dir" ]; then
     if [ -z "$JDK_DOWNLOAD_OS" ]; then
-      msg "Unable to download JDK, unsupported Operating System: $(uname -s)" 1>&2
-      msg "You may workaround this problem by specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
+      msg "Unable to download JDK, unsupported Operating System: $(uname -s)"
+      msg "You may workaround this problem by specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file."
       exit 1
     fi
     if [ -z "$JDK_DOWNLOAD_ARCH" ]; then
-      msg "Unable to download JDK, unsupported Architecture: $(uname -m)" 1>&2
-      msg "You may workaround this problem by specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file." 1>&2
+      msg "Unable to download JDK, unsupported Architecture: $(uname -m)"
+      msg "You may workaround this problem by specifying a 'jeka.jdk.$JAVA_VERSION' env var or property in ~/jeka/global.properties file."
       exit 1
     fi
     local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
-    if [ "$IS_VERBOSE" != "" ]; then
-      msg "Downloading JKD $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
-    fi
+    msg "Downloading JDK $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
     download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
     if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
       pushd "$jdk_cache_dir" > /dev/null 2>&1
@@ -902,10 +896,11 @@ execute_program_if_requested() {
       build_cmd="base: pack -Djeka.skip.tests=true"
     fi
   fi
-  debug "Launch build with command : $build_cmd"
 
   # shellcheck disable=SC2206
   local -a build_args=($build_cmd)
+  # shellcheck disable=SC2145
+  debug "Launch build with command : ${heading_args[@]} ${build_args[@]}"
   "$JAVA_CMD" "${JEKA_OPTS[@]}" "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "${heading_args[@]}" "${build_args[@]}"
   RETRY_AFTER_BUILD="true"
   execute_program_if_requested

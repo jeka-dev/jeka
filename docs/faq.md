@@ -31,7 +31,7 @@ To avoid that, JeKa proposes a simple solution :
 
 1. Creates the project in IDE as you normally do for Maven or Gradle
 2. Execute : `jeka base: scaffold`. This generates the folder/file structure for JeKa
-3. Add `@intellij.imlFile=jeka-src/jeka-src.iml` in *jeka.properties* file.
+3. Add `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` in *jeka.properties* file.
 4. Execute : `jeka intellij: iml`. The iml file should be created under *jeka-src* folder.
 5. Execute : `jeka intellij: initProject`. To create a module according the generated iml file.
 
