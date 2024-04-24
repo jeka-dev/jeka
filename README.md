@@ -39,8 +39,8 @@ Its key features include:
 
 ## Use-cases
 
-- **Use Java for scripting:** JeKa makes it ridiculously easy to write and execute scripts using the Java language.
-  
+- **Use Java for scripting** 
+  JeKa makes it ridiculously easy to write and execute scripts using the Java language.
   Write your automated tasks directly in Java and execute them from anywhere, without any setup.
 
 
