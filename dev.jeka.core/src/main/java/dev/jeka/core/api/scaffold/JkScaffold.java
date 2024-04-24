@@ -45,6 +45,8 @@ public abstract class JkScaffold {
 
     private static final String JEKA_OUTPUT_IGNORE = "/jeka-output";
 
+    private static final String LAST_VERSION_OF_TOKEN = "${lastVersionOf:";
+
     protected final Path baseDir;
 
     private final JkRepoSet downloadRepos;
@@ -267,13 +269,14 @@ public abstract class JkScaffold {
             String partialContent = sb.toString();
             fileContent = jekaPropCustomizer.apply(partialContent);
         }
+        String interpolated = interpolateLastVersionOf(fileContent, 0, this.downloadRepos);
 
         JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
         if (!jekaPropsFile.exists()) {
             jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
         }
 
-        jekaPropsFile.write(fileContent, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+        jekaPropsFile.write(interpolated, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     private void createOrUpdateGitIgnore() {
@@ -315,5 +318,33 @@ public abstract class JkScaffold {
                     StandardOpenOption.WRITE);
         }
     }
+
+    static String interpolateLastVersionOf(String originalContent, int from, JkRepoSet repos) {
+        int index = originalContent.indexOf(LAST_VERSION_OF_TOKEN);
+        if (index == -1) {
+            return originalContent;
+        }
+        if (from >= originalContent.length()) {
+            return originalContent;
+        }
+        int indexTo = originalContent.indexOf("}", index);
+        if (indexTo == -1) {
+            return originalContent;
+        }
+        String coordinate = originalContent.substring(index + LAST_VERSION_OF_TOKEN.length(), indexTo);
+        System.out.println(coordinate);
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
+        Optional<JkVersion> latest = dependencyResolver.searchVersions(coordinate).stream()
+                .map(JkVersion::of)
+                .max(Comparator.naturalOrder());
+        if (!latest.isPresent()) {
+            throw new IllegalArgumentException("Cannot find versions for " + coordinate);
+        }
+        String wholeToken = LAST_VERSION_OF_TOKEN + coordinate + "}";
+        String newContent = originalContent.replace(wholeToken, latest.get().toString());
+
+        return interpolateLastVersionOf(newContent, 0, repos);
+    }
+
 
 }
