@@ -32,10 +32,7 @@ import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JkCoordinateSearch {
@@ -88,8 +85,6 @@ public class JkCoordinateSearch {
         return this;
     }
 
-
-
     public JkCoordinateSearch setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
@@ -128,6 +123,11 @@ public class JkCoordinateSearch {
             if (repoBaseUrl != null && !REPO_API_URL.containsKey(repoBaseUrl)) {
                 REPO_API_URL.put(repoBaseUrl, url);
             }
+        }
+        if (showVersion()) {
+            result = result.stream()
+                    .sorted(new VersionedComparator().reversed())
+                    .collect(Collectors.toList());
         }
         return result;
     }
@@ -258,6 +258,16 @@ public class JkCoordinateSearch {
             orgMmavenSearchIdsXpath = JkDomXPath.compile("/response/result[@name='response']/doc/str[@name='id']");
         }
         return orgMmavenSearchIdsXpath;
+    }
+
+    private static class VersionedComparator implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            String v1 = JkUtilsString.substringAfterLast(o1, ":");
+            String v2 = JkUtilsString.substringAfterLast(o2, ":");
+            return JkVersion.of(v1).compareTo(JkVersion.of(v2));
+        }
     }
 
 

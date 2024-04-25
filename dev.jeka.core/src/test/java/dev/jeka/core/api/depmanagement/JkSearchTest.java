@@ -75,5 +75,15 @@ public class JkSearchTest {
         result.forEach(System.out::println);
     }
 
+    @Test
+    @Ignore
+    public void testSearchSpringpom()  {
+        JkLog.setDecorator(JkLog.Style.INDENT);
+        List result = JkCoordinateSearch.of(JkRepo.ofMavenCentral())
+                .setGroupOrNameCriteria("org.springframework.boot:spring-boot-dependencies::")
+                .search();
+        result.forEach(System.out::println);
+    }
+
 
 }
