@@ -4,7 +4,6 @@ import dev.jeka.core.api.system.JkProcHandler;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,27 +27,29 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
         // Regular project
         String scaffoldCmd = scaffoldArgs("project: scaffold");
-        String checkCmd = checkArgs("project: info pack version=0.0.1");
+        String buildCmd = withJavaVersionArgs("project: info pack version=0.0.1");
         RunChecker runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
-        runChecker.checkCmd = checkCmd;
+        runChecker.buildCmd = buildCmd;
+        runChecker.runCmd = withJavaVersionArgs("project: runJar");
         runChecker.run();
 
         // Project with simple layout
         scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold");
-        checkCmd = checkArgs("project: pack");
+        buildCmd = withJavaVersionArgs("project: pack");
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
-        runChecker.checkCmd = checkCmd;
+        runChecker.buildCmd = buildCmd;
         runChecker.run();
 
         // Project with self springboot
         scaffoldCmd = scaffoldArgs("base: scaffold springboot:");
-        checkCmd = checkArgs("base: test pack");
+        buildCmd = withJavaVersionArgs("base: test pack");
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
-        runChecker.checkCmd = checkCmd;
+        runChecker.buildCmd = buildCmd;
         runChecker.cleanup = false;
+        runChecker.runCmd = withJavaVersionArgs("project: runJar");
         Path baseDir = runChecker.run();
         JkUtilsAssert.state(!Files.exists(baseDir.resolve("src")),
                 "Self Springboot was scaffolded with project structure !");
@@ -57,9 +58,9 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
     private class RunChecker {
         String scaffoldCmd;
-        String checkCmd;
+        String buildCmd;
+        String runCmd;
         boolean cleanup = true;
-        boolean checkHttp = true;
         int checkHttpTimeout = 8000;
         int checkHttpSleep = 2000;
         String url = "http://localhost:8080";
@@ -68,31 +69,40 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
 
             Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
             runWithDistribJekaShell(path, scaffoldCmd);
+            runWithDistribJekaShell(path, buildCmd);
 
-            if (checkHttp) {
+            if (runCmd != null) {
                 JkUtilsAssert.state(!JkUtilsNet.isStatusOk(url, true), "A server is already listening to %s", url);
 
                 System.out.println("======= Checking health with HTTP ================== ");
-                System.out.println("Scaffold command " + scaffoldCmd);
+                System.out.println("Run command " + runCmd);
 
                 // launch checker in separate process
-                JkProcHandler handler = prepareWithBaseDirJekaShell(path, checkCmd).execAsync();
+                JkProcHandler handler = prepareWithBaseDirJekaShell(path, runCmd)
+                        .setCollectStdout(true)
+                        .setCollectStderr(true)
+                        .execAsync();
 
                 // try to get a Ok response
-                JkUtilsNet.checkUntilOk(url, checkHttpTimeout, checkHttpSleep);
+                try {
+                    JkUtilsNet.checkUntilOk(url, checkHttpTimeout, checkHttpSleep);
+                } catch (RuntimeException e) {
+                    System.out.println("=======Std out ================= ");
+                    System.out.println(handler.getOutput());
+                    System.out.println("=======Std err ================= ");
+                    System.out.println(handler.getOutput());
+                    throw e;
+                }
 
                 // destroy the sub-process
                 handler.getProcess().destroyForcibly();
                 boolean ended = handler.waitFor(2000, TimeUnit.MILLISECONDS);
                 JkUtilsAssert.state(ended, "Can't kill process");
 
-            } else {
-                runJeka(!JkUtilsSystem.IS_WINDOWS, path, checkCmd);
+            } /*else {
+                runJeka(!JkUtilsSystem.IS_WINDOWS, path, buildCmd);
             }
-
-            if (checkHttp) {
-                JkPathTree.of(path).deleteRoot();
-            }
+            */
             return path;
         }
 
@@ -107,7 +117,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 sprinbootPluginJar);
     }
 
-    private String checkArgs(String original)  {
+    private String withJavaVersionArgs(String original)  {
 
         // Needed to force starting springboot process with java 17
         return original + " -Djeka.java.version=17";
