@@ -9,7 +9,7 @@ jeka project: pack
 
 Create jar skipping tests
 ```shell
-jeka project: pack -Djeka.skip.tests=true
+jeka project: pack "-Djeka.skip.tests=true"
 ```
 
 Run jar

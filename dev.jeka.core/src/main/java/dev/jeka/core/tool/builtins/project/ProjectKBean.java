@@ -147,7 +147,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Displays information about the Java project to build.")
     public void info() {
         JkLog.info(this.project.getInfo());
-        JkLog.info("\nExecute 'project: showDepTree' to display details on dependencies.");
+        JkLog.info("\nExecute 'project: depTree' to display details on dependencies.");
     }
 
     @JkDoc("Run the generated jar.")

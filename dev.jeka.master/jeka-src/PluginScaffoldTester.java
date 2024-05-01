@@ -59,7 +59,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         String scaffoldCmd;
         String checkCmd;
         boolean cleanup = true;
-        boolean checkHttp = false;
+        boolean checkHttp = true;
         int checkHttpTimeout = 8000;
         int checkHttpSleep = 2000;
         String url = "http://localhost:8080";
