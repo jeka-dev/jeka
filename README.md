@@ -2,6 +2,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/dev.jeka/jeka-core)](https://search.maven.org/search?q=g:%22dev.jeka%22%20AND%20a:%22jeka-core%22)
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
+
+<img src="./docs/images/knight-color-logo.svg" width="100" align="right" hspace="15"  />
+
 > [!IMPORTANT]
 > JeKa 0.11.0 has been released!!!
 > 
@@ -14,11 +17,10 @@
 > 
 > The official documentation provides information for both versions and a migration guide.
 
-<img src="./docs/images/knight-color-logo.svg" width="100" align="right" hspace="15"  />
-
 ##  What is JeKa ?
 
-<strong>Jeka</strong> is a Java build tool that allows users to build, script or run directly Java/Kotlin applications.
+**JeKa** is a Java build tool for building or executing Java applications and scripts 
+directly from source code.
 
 Its key features include:
 
@@ -28,13 +30,13 @@ Its key features include:
 -  **Direct App Execution:** Run applications directly from their Git repository, providing a means to distribute Java applications as source.
 
 
--  **Portable Builds:** JeKa downloads everything needed for a build (JDKs, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
+-  **Portable Builds:** JeKa downloads everything needed for building  (JDKs, Maven deps, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
 
 
 -  **Easily Extendable:** JeKa comes with a simple plugin mechanism for easy extension.
 
 
--  **Customizable:** JeKa can be configured with concise **property files** for generic cases, or by **Java code** for specific needs.
+-  **Customizable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
 
 
 ## Use-cases
@@ -45,10 +47,10 @@ Its key features include:
   Write your automated tasks directly in Java and execute them from anywhere, without any setup.
 
 
-- **Build projects - Create pipelines** 
+- **Build projects - Create delivery pipelines** 
   
   Build projects and seamlessly combine scripts to create comprehensive CI/CD pipelines that can run anywhere, 
-  from Windows desktop to cloud CI/CD environments.
+  from IDE debugger to cloud CI/CD environments. 
   
   JeKa can also complement other build tools such as *Maven* or *Gradle* to fulfill their missing features.
 
@@ -69,7 +71,7 @@ Its key features include:
 
 - **Centralize build logic**
 
-  Define in one place the build and delivery logic that projects with similar technologies can share and extend.
+  Define the CI/CD logic in one place, which projects can share and extend.
   
 
 ## Examples
