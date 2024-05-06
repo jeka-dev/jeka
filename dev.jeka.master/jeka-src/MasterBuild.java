@@ -118,18 +118,21 @@ class MasterBuild extends KBean {
     public void make() throws IOException {
 
         JkLog.startTask("build-core-and-plugins");
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
-            JkLog.startTask("package %s", bean);
-            JkLog.info(bean.project.getInfo());
-            bean.clean();
-            bean.pack();
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(projectKBean -> {
+            JkLog.startTask("package %s", projectKBean);
+            JkLog.info(projectKBean.project.getInfo());
+            projectKBean.clean();
+            projectKBean.pack();
             JkLog.endTask();
         });
         JkLog.endTask();
+
         if (runSamples) {
             JkLog.startTask("run-samples");
             SamplesTester samplesTester = new SamplesTester();
             PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
+
+            // Instrument core with Jacoco when running sample tests
             if (jacocoForCore != null) {
                 samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
                 pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
@@ -146,8 +149,11 @@ class MasterBuild extends KBean {
             }
             JkLog.endTask();
         }
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(projectJkBean ->
-                JkVersionFromGit.of().handleVersioning(projectJkBean.project));
+
+        // Share same versioning for all sub-projects
+        getImportedKBeans().get(ProjectKBean.class, false).forEach(
+                projectJkBean -> JkVersionFromGit.of().handleVersioning(projectJkBean.project)
+        );
         String branch = JkGit.of().getCurrentBranch();
         JkLog.verbose("Current build branch: %s", branch);
         JkLog.verbose("current ossrhUser:  %s", ossrhUser);
