@@ -30,13 +30,13 @@ Its key features include:
 -  **Direct App Execution:** Run applications directly from their Git repository, providing a means to distribute Java applications as source.
 
 
--  **Portable Builds:** JeKa downloads everything needed for building  (JDKs, Maven deps, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
-
-
--  **Easily Extendable:** JeKa comes with a simple plugin mechanism for easy extension.
+-  **Portable Builds:** JeKa downloads everything needed for building your projects (JDKs, Maven deps, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
 
 
 -  **Customizable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
+
+
+-  **Easily Extendable:** JeKa provides a simple plugin mechanism that allows for easy extension.
 
 
 ## Use-cases
@@ -44,7 +44,7 @@ Its key features include:
 - **Use Java for scripting** 
 
   JeKa makes it ridiculously easy to write and execute scripts using the Java language.
-  Write your automated tasks directly in Java and execute them from anywhere, without any setup.
+  Write your automated tasks directly in Java, using third-party dependencies or not, and execute them from anywhere, without any setup.
 
 
 - **Build projects - Create delivery pipelines** 
