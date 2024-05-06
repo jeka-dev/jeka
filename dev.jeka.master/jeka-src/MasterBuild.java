@@ -117,6 +117,7 @@ class MasterBuild extends KBean {
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void make() throws IOException {
 
+        // Build core project then plugins
         JkLog.startTask("build-core-and-plugins");
         getImportedKBeans().get(ProjectKBean.class, false).forEach(projectKBean -> {
             JkLog.startTask("package %s", projectKBean);
@@ -127,6 +128,7 @@ class MasterBuild extends KBean {
         });
         JkLog.endTask();
 
+        // Run tests on sample projects if required
         if (runSamples) {
             JkLog.startTask("run-samples");
             SamplesTester samplesTester = new SamplesTester();
