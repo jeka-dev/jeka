@@ -35,12 +35,18 @@ To avoid that, JeKa proposes a simple solution :
 4. Execute : `jeka intellij: iml`. The iml file should be created under *jeka-src* folder.
 5. Execute : `jeka intellij: initProject`. To create a module according the generated iml file.
 
+!!! note
+    'jeka-src' should now live in its own Intellij module. If your IDE does not reflect 
+    this state after executing step 5, just close and re-open the project.
+
 Now *jeka-src* live in its own IntelliJ module.
 Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.
+
 
 !!! warning
     Do not remove the `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from *jeka.property* file, otherwise you will
     still face sync issues.
+
 
 
 ### How can I migrate my project from Maven ?
