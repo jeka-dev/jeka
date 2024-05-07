@@ -457,10 +457,9 @@ class ProgramExecutor {
   [string]$folder
   [array]$cmdLineArgs
 
-  ProgramExecutor([string]$folder, [string]$cmdLineArgs) {
+  ProgramExecutor([string]$folder, [array]$cmdLineArgs) {
     $this.folder = $folder
     $this.cmdLineArgs = $cmdLineArgs
-    $h = $this.folder
   }
 
   Exec([string]$javaCmd, [string]$progFile) {
@@ -522,13 +521,13 @@ function ExecProg {
   $argLine = $cmdLineArgs -join ' '
   if ($progFile.EndsWith('.exe')) {
     Write-Verbose "Run native program $progFile with args $argLine"
-    & "$progFile" "$cmdLineArgs"
+    & "$progFile" $cmdLineArgs
   } else {
     $cmdLineArgs = [CmdLineArgs]::new($cmdLineArgs)
     $sypPropArgs = $cmdLineArgs.FilterInSysProp()
     $sanitizedProgArgs = $cmdLineArgs.FilterOutSysProp()
     Write-Verbose "Run Java program $progFile with args $argLine"
-    & "$javaCmd" -jar "$sypPropArgs" "$progFile" "$sanitizedProgArgs"
+    & "$javaCmd" -jar "$sypPropArgs" "$progFile" $sanitizedProgArgs
   }
 }
 
