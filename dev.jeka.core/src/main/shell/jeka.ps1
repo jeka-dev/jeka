@@ -183,6 +183,9 @@ class CmdLineArgs {
 
   [array] GetPriorProgramArgs() {
     $index = $this.GetProgramArgIndex() - 1
+    if ($index -lt 0) {
+      return @()
+    }
     return $this.args[0..$index]
   }
 
@@ -264,7 +267,7 @@ class Props {
       $parentDir = $this.baseDir + '\..'
       $parentJekaPropsFile = $parentDir + '\jeka.properties'
       if (Test-Path $parentJekaPropsFile) {
-        $value = $this.GetValueFromFile($parentJekaPropsFile, $propName)
+        $value = [Props]::GetValueFromFile($parentJekaPropsFile, $propName)
       } else {
         $value = [Props]::GetValueFromFile($this.globalPropFile, $propName)
       }

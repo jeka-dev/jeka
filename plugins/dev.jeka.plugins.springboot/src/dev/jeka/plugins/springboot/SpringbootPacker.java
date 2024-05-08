@@ -104,7 +104,7 @@ class SpringbootPacker {
 
         // write service
         Path fsProviderFile = JkPathFile.ofTemp("jk-", "")
-                .write("org.springframework.boot.loader.nio.file.NestedFileSystemProvider")
+                .write("org.springframework.boot.loader.nio.file.NestedFileSystemProvider\n")
                 .get();
         try (InputStream inputStream = JkUtilsIO.inputStream(fsProviderFile.toFile())){
             jarWriter.writeEntry("META-INF/services/java.nio.file.spi.FileSystemProvider", inputStream);

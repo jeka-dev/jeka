@@ -47,8 +47,6 @@ Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.
     Do not remove the `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from *jeka.property* file, otherwise you will
     still face sync issues.
 
-
-
 ### How can I migrate my project from Maven ?
 
 _Jeka_ helps translate all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
