@@ -2,7 +2,7 @@
 
 | Command                 | Description                                                    |
 |-------------------------|----------------------------------------------------------------|
-| `: --help`              | Displays availbable methods, options and KBeans                |
+| `--doc`                 | Displays available methods, options and KBeans                 |
 | `intellij: iml -f`      | Generates iml file for Intellij.                               |
 | `intellij: initProject` | Initializes Intellij Project                                   |
 | `eclipse: files`        | Same purpose as above to generate metadata files for Eclipse.  |

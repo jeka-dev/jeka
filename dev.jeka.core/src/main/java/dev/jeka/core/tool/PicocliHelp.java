@@ -174,7 +174,7 @@ class PicocliHelp {
         }
 
         main.usageMessage()
-                .footer("", "Execute @|yellow jeka <kbean>: --help|@ (as @|italic jeka docker: --help|@) " +
+                .footer("", "Execute @|yellow jeka <kbean>: --doc|@ (as @|italic jeka docker: --doc|@) " +
                         "to get details on specific KBean.");
 
         return commandLine;

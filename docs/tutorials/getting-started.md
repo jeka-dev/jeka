@@ -50,7 +50,7 @@ The accepted *public field* types are mentioned [here](https://picocli.info/#_bu
 
 !!! tip
     You can document your script by annotation Class, public fields or public method with `@JkDoc` annotation.
-    This will be visible when executing: `jeka script: --help`.
+    This will be visible when executing: `jeka script: --doc`.
     Note that only part before first breaking line of the doc content will be displayed as summary.
 
 ## Define JDK version
@@ -280,7 +280,7 @@ KBean mechanism plays a central role in JeKa ecosystem. In the following section
 We distinct *local* KBeans (which are Java sources file defined in *jeka-src*) from *classpath* KBeans (which 
 are compiled classes lying in the Jeka classpath).
 
-Execute: `jeka : --help` to list all available KBeans. You'll notice the *standard KBeans* section that mentions 
+Execute: `jeka --doc` to list all available KBeans. You'll notice the *standard KBeans* section that mentions 
 all KBeans bundled with JeKa out-of-the-box (and always available). These are typically *classpath* KBeans.
  
 For example, you can execute `jeka admin: openHomeDir` to open your*Jeka Home directory*.
@@ -330,5 +330,5 @@ Task: start-program >npx cowsay Hello
 
 You can have more info about *NodeJs* plugin by executing 
 ```shell
-jeka -cp=dev.jeka:nodejs-plugin nodeJs: -h
+jeka -cp=dev.jeka:nodejs-plugin nodeJs: --doc
 ```

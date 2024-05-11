@@ -18,7 +18,6 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.Arrays;
@@ -176,16 +175,15 @@ class CmdLineArgs {
         return effectiveCommandLineArgs.toArray(new String[0]);
     }
 
-    String kbeanContextHelp() {
+    String kbeanDoc() {
         List<String> argList  = Arrays.asList(args);
-        int helpIndex = argList.indexOf("--help");
-        if (helpIndex == -1) {
-            helpIndex = argList.indexOf("-h");
-        }
-        if (helpIndex <= 0) {
+        int docIndex = argList.indexOf("--doc");
+        if (docIndex < 0) {
             return null;
+        } else if (docIndex == 0) {
+            return "";
         }
-        String kbeanArg = argList.get(helpIndex -1);
+        String kbeanArg = argList.get(docIndex -1);
         if (!kbeanArg.endsWith(":")) {
             return null;
         }

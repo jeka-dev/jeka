@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
         },
         footer = {
             "",
-            "Execute @|yellow jeka : --help |@ to get help on default KBean.",
+            "Execute @|yellow jeka : --doc |@ to get help on default KBean.",
             "Execute @|yellow jeka --info |@ to get runtime information."
         },
         optionListHeading = "Options:%n",
@@ -97,6 +97,10 @@ public class PicocliMainCommand {
     )
     private List<String> classpaths;
 
+    @Option(names = {"--doc"},
+            description = "Display documentation on default KBean, or a specific KBean if mentioned a 'aKBean: --doc'.")
+    private boolean fakeDoc;  // Handled at upper level
+
     @Option(names = {"-p", "--program"},
             description = "Indicate to run directly the built Java program when present, bypassing the JeKa execution engine.")
     private boolean fakeProgram;  // Handled at shell level
@@ -104,7 +108,6 @@ public class PicocliMainCommand {
     @Option(names = { "-f", "--force"},
             description = "Try to keep running JeKa even if jeka-src compilation fails.")
     private boolean forceMode;
-
 
     @Option(names = { "-i", "--info"},
             description = "Display info as versions, location, classpath,...")

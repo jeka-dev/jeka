@@ -36,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -119,7 +118,7 @@ public class Main {
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
             // Handle context help ([kbean]: --help)
-            String kbeanHelp = cmdArgs.kbeanContextHelp();
+            String kbeanHelp = cmdArgs.kbeanDoc();
             if (kbeanHelp != null) {
                 JkRunbase.setKBeanResolution(kBeanResolution);
                 if (JkUtilsString.isBlank(kbeanHelp)) {
@@ -303,7 +302,7 @@ public class Main {
             System.err.println(failedText);
         }
         String suggestTxt = CommandLine.Help.Ansi.AUTO.string("You can investigate using @|yellow --verbose|@, " +
-                "@|yellow --debug|@, @|yellow --stacktrace|@, @|yellow --info|@ " +
+                "@|yellow --debug|@, @|yellow --stacktrace|@, @|yellow --doc|@ , @|yellow --info|@ " +
                 "or @|yellow -ls=DEBUG|@ options.");
         System.err.println(suggestTxt);
         System.err.println("If this originates from a bug, please report the issue at: " +
