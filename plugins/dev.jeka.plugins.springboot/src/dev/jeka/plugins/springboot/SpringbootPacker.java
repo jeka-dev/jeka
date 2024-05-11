@@ -16,6 +16,8 @@
 
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
@@ -25,9 +27,8 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -42,6 +43,8 @@ class SpringbootPacker {
 
     private static final String SPRINGBOOT_LIB_PREFIX = "spring-boot-";
 
+    private static final String LOADER_COORDINATE = "org.springframework.boot:spring-boot-loader:";
+
     private final List<Path> nestedLibs;
 
     private final Path bootLoaderJar;
@@ -50,7 +53,10 @@ class SpringbootPacker {
 
     private final String mainClassName;
 
-    private SpringbootPacker(List<Path> nestedLibs, Path loader, String mainClassNeme, JkManifest originalManifest) {
+    private final String springbootVersion;
+
+    private SpringbootPacker(List<Path> nestedLibs, String mainClassNeme, JkManifest originalManifest,
+                             JkRepoSet downloadRepos) {
         super();
         this.nestedLibs = nestedLibs.stream()  // sanitize
                 .filter(path -> {
@@ -65,20 +71,21 @@ class SpringbootPacker {
                 })
                 .distinct()
                 .collect(Collectors.toList());
-        this.bootLoaderJar = loader;
         this.originalManifest = originalManifest;
         this.mainClassName = mainClassNeme;
+        this.springbootVersion = findSpringbootVersion(this.nestedLibs);
+        JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(downloadRepos,
+                LOADER_COORDINATE + this.springbootVersion);
+        JkLog.verbose("Embed Spring-Boot loader %s in bootable jar", this.springbootVersion);
+        this.bootLoaderJar = loaderProxy.get();
     }
 
-    public static final SpringbootPacker of(List<Path> nestedLibs, Path loader, String mainClassName,
+    public static final SpringbootPacker of(List<Path> nestedLibs, JkRepoSet downloadRepos,
+                                            String mainClassName,
                                             JkManifest originalManifest) {
-        return new SpringbootPacker(nestedLibs, loader, mainClassName, originalManifest);
+        return new SpringbootPacker(nestedLibs, mainClassName, originalManifest, downloadRepos);
     }
 
-    public static String getJarLauncherClass(String springbootVersion) {
-        return JkVersion.VERSION_COMPARATOR.compare(springbootVersion, "3.2.0") < 0 ?
-                LAUNCHER_CLASS_LEGACY : LAUNCHER_CLASS_320;
-    }
 
     public void makeExecJar(JkPathTree classTree, Path target) {
         try {
@@ -91,6 +98,9 @@ class SpringbootPacker {
     private void makeBootJarChecked(JkPathTree classTree, Path target) throws IOException {
 
         JkJarWriter jarWriter = JkJarWriter.of(target);
+
+        // Add project classes and resources
+        writeClasses(classTree, jarWriter);
 
         // Manifest
         augmentManifest(mainClassName);;
@@ -113,8 +123,12 @@ class SpringbootPacker {
         // Add loader
         jarWriter.writeLoaderClasses(bootLoaderJar.toUri().toURL());
 
-        // Add project classes and resources
-        writeClasses(classTree, jarWriter);
+        // Add classpath.idx entry
+        String classpathIdxContent = createClasspathIdxContent();
+        jarWriter.writeEntry("BOOT-INF/classpath.idx", new ByteArrayInputStream(
+                classpathIdxContent.getBytes(StandardCharsets.UTF_8)));
+
+
 
         jarWriter.close();
         jarWriter.setExecutableFilePermission(target);
@@ -137,8 +151,7 @@ class SpringbootPacker {
     }
 
     private void augmentManifest(String startClassName) {
-        String springbootVersion = findSpringbootVersion(this.nestedLibs);
-        String launcherJarClass = getJarLauncherClass(springbootVersion);
+        String launcherJarClass = getJarLauncherClass();
         originalManifest
                 .addMainClass(launcherJarClass)
                 .addMainAttribute("Start-Class", startClassName)
@@ -146,6 +159,12 @@ class SpringbootPacker {
                 .addMainAttribute("Spring-Boot-Classes", "BOOT-INF/classes/")
                 .addMainAttribute("Spring-Boot-Lib", "BOOT-INF/lib/");
     }
+
+    private String getJarLauncherClass() {
+        return JkVersion.VERSION_COMPARATOR.compare(springbootVersion, "3.2.0") < 0 ?
+                LAUNCHER_CLASS_LEGACY : LAUNCHER_CLASS_320;
+    }
+
 
     private static String findSpringbootVersion(List<Path> libs) {
         return libs.stream()
@@ -162,5 +181,14 @@ class SpringbootPacker {
                 .orElseThrow(() -> new IllegalStateException("No " + SPRINGBOOT_LIB_PREFIX + "-*.jar " +
                         "found in dependencies. Cannot create Sprong-Boot jar."));
     }
+
+    private String createClasspathIdxContent() {
+        StringBuilder sb = new StringBuilder();
+        for(Path path : this.nestedLibs) {
+            sb.append(String.format("- \"BOOT-INF/lib/%s\"%n", path.getFileName()));
+        }
+        return sb.toString();
+    }
+
 
 }

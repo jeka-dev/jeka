@@ -36,9 +36,6 @@ public class JkSpringbootJars {
      static final String SPRINGBOOT_APPLICATION_ANNOTATION_NAME =
             "org.springframework.boot.autoconfigure.SpringBootApplication";
 
-    static final String LOADER_COORDINATE = "org.springframework.boot:spring-boot-loader:";
-
-    static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.1";
 
     /**
      * Creates a bootable jar from class files and libraries to include in the bootable jar.
@@ -47,10 +44,8 @@ public class JkSpringbootJars {
                                      Path targetJar, JkManifest originalManifest) {
         JkUtilsAssert.argument(classTree.exists(), "class dir not found " + classTree.getRoot());
         String mainClassName = findMainClassName(classTree.getRoot());
-        JkCoordinateFileProxy loaderProxy = JkCoordinateFileProxy.of(downloadRepo,
-                LOADER_COORDINATE + DEFAULT_SPRINGBOOT_VERSION);
 
-        SpringbootPacker.of(libsToInclude, loaderProxy.get(), mainClassName, originalManifest)
+        SpringbootPacker.of(libsToInclude, downloadRepo, mainClassName, originalManifest)
                 .makeExecJar(classTree, targetJar);
     }
 

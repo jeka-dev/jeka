@@ -27,6 +27,7 @@ import java.util.List;
 
 class SpringbootScaffold {
 
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.5";
 
     public static void customize(JkProjectScaffold projectScaffold) {
 
@@ -35,7 +36,7 @@ class SpringbootScaffold {
 
         String lastSpringbootVersion = projectScaffold.findLatestVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
-                JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
+                DEFAULT_SPRINGBOOT_VERSION);
 
         // For testability purpose
         String overriddenPluginDep = System.getProperty(JkSpringbootProject
@@ -75,7 +76,7 @@ class SpringbootScaffold {
 
         String lastSpringbootVersion = baseScaffold.findLatestVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
-                JkSpringbootJars.DEFAULT_SPRINGBOOT_VERSION);
+                DEFAULT_SPRINGBOOT_VERSION);
 
         List<String> deps = JkUtilsIterable.listOf(
                 JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion,
