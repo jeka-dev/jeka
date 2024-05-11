@@ -117,7 +117,7 @@ public class Main {
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
-            // Handle context help ([kbean]: --help)
+            // Handle doc ([kbean]: --doc)
             String kbeanHelp = cmdArgs.kbeanDoc();
             if (kbeanHelp != null) {
                 JkRunbase.setKBeanResolution(kBeanResolution);

@@ -185,7 +185,7 @@ class CmdLineArgs {
         }
         String kbeanArg = argList.get(docIndex -1);
         if (!kbeanArg.endsWith(":")) {
-            return null;
+            return "";
         }
         return JkUtilsString.substringBeforeFirst(kbeanArg, ":");
     }
