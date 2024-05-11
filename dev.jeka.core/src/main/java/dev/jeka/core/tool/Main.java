@@ -225,6 +225,7 @@ public class Main {
     }
 
     private static void setupLogging(LogSettings logSettings, Path baseDir, String[] cmdLine) {
+        JkLog.setLogOnlyOnStdErr(logSettings.logOnStderr);
         JkLog.setDecorator(logSettings.style);
 
         if (logSettings.runtimeInformation) {

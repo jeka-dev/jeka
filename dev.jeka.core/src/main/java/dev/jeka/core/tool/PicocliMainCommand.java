@@ -159,6 +159,10 @@ public class PicocliMainCommand {
             arity = "0..1")
     private Boolean logAnimations;
 
+    @Option(names = {"--stderr"},
+            description = "Log on stderr instead of stdout")
+    private boolean logOnStderr;
+
     @Option(names = "-D", mapFallbackValue = "", description = "Define system property") // allow -Dkey
     void setProperty(Map<String, String> props) {
         props.forEach(System::setProperty);
@@ -173,7 +177,8 @@ public class PicocliMainCommand {
                 runtimeInfo,
                 logDuration,
                 logStyle,
-                logAnimations);
+                logAnimations,
+                logOnStderr);
     }
 
     BehaviorSettings behaviorSettings() {

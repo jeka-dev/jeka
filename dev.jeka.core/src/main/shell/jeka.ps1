@@ -587,9 +587,9 @@ function Main {
     if (!$buildCmd) {
       $srcDir = $baseDir + "\src"
       if ([System.IO.Directory]::Exists($srcDir)) {
-        $buildCmd = "project: pack -Djeka.skip.tests=true"
+        $buildCmd = "project: pack -Djeka.skip.tests=true --stderr"
       } else {
-        $buildCmd = "base: pack -Djeka.skip.tests=true"
+        $buildCmd = "base: pack -Djeka.skip.tests=true --stderr"
       }
     }
     $buildArgs = [Props]::ParseCommandLine($buildCmd)

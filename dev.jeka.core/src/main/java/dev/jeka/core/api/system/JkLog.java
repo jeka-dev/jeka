@@ -100,6 +100,8 @@ public final class JkLog implements Serializable {
 
     private static boolean showTaskDuration;
 
+    private static boolean logOnlyOnStdErr;
+
     private static LinkedList<Long> getStartTimes() {
         LinkedList<Long> result = START_TIMES.get();
         if (result == null) {
@@ -116,7 +118,8 @@ public final class JkLog implements Serializable {
      * Therefore, users have to set explicitly a consumer using this method or {@link #setDecorator(Style)} ().
      */
     public static void setDecorator(JkLogDecorator newDecorator) {
-        newDecorator.doInit(INITIAL_OUT, INITIAL_ERR);
+        PrintStream out = logOnlyOnStdErr ? INITIAL_ERR : INITIAL_OUT;
+        newDecorator.doInit(out, INITIAL_ERR);
         decorator = newDecorator;
         System.setOut(decorator.getOut());
         System.setErr(decorator.getErr());
@@ -128,6 +131,16 @@ public final class JkLog implements Serializable {
     public static void setDecorator(Style style) {
         setDecorator(style.decorator);
         decoratorStyle = style;
+    }
+
+    /**
+     * if true, all log will be printed to stderr instead og stdout.
+     * @param flag
+     */
+    public static void setLogOnlyOnStdErr(boolean flag) {
+        boolean change = logOnlyOnStdErr != flag;
+        logOnlyOnStdErr = flag;
+        setDecorator(decorator);
     }
 
     /**

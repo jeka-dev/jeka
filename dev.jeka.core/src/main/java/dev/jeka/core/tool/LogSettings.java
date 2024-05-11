@@ -37,6 +37,8 @@ class LogSettings {
 
     final Boolean animation;
 
+    final boolean logOnStderr;
+
     LogSettings(boolean verbose,
                 boolean debug,
                 boolean quiet,
@@ -44,7 +46,8 @@ class LogSettings {
                 boolean runtimeInformation,
                 boolean duration,
                 JkLog.Style style,
-                Boolean animation) {
+                Boolean animation,
+                boolean logOnStderr) {
 
         this.verbose = verbose;
         this.debug = debug;
@@ -54,10 +57,11 @@ class LogSettings {
         this.duration = duration;
         this.style = style;
         this.animation = animation;
+        this.logOnStderr = logOnStderr;
     }
 
     static LogSettings ofDefault() {
-        return new LogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false);
+        return new LogSettings(false, false, false, false, false, false, JkLog.Style.INDENT, false, false);
     }
 
 
