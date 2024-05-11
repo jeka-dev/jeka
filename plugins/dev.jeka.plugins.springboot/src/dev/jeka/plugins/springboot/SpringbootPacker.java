@@ -21,18 +21,17 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJarWriter;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.plugins.springboot.SpringbootJarWriter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 class SpringbootPacker {
@@ -97,7 +96,7 @@ class SpringbootPacker {
 
     private void makeBootJarChecked(JkPathTree classTree, Path target) throws IOException {
 
-        JkJarWriter jarWriter = JkJarWriter.of(target);
+        SpringbootJarWriter jarWriter = SpringbootJarWriter.of(target);
 
         // Add project classes and resources
         writeClasses(classTree, jarWriter);
@@ -127,15 +126,12 @@ class SpringbootPacker {
         String classpathIdxContent = createClasspathIdxContent();
         jarWriter.writeEntry("BOOT-INF/classpath.idx", new ByteArrayInputStream(
                 classpathIdxContent.getBytes(StandardCharsets.UTF_8)));
-
-
-
         jarWriter.close();
         jarWriter.setExecutableFilePermission(target);
         JkLog.info("Bootable jar created at " + target);
     }
 
-    private void writeClasses(JkPathTree classTree, JkJarWriter jarWriter) {
+    private void writeClasses(JkPathTree classTree, SpringbootJarWriter jarWriter) {
         classTree.stream()
                 .filter(path -> !path.toString().endsWith("/"))
                 .filter(path -> !Files.isDirectory(path))

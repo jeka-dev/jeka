@@ -32,12 +32,13 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         RunChecker runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.buildCmd = buildCmd;
-        runChecker.runCmd = withJavaVersionArgs("project: runJar");
+        //runChecker.runCmd = withJavaVersionArgs("project: runJar");
         runChecker.run();
 
         // Project with simple layout
         scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold");
         buildCmd = withJavaVersionArgs("project: pack");
+
         runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.buildCmd = buildCmd;
@@ -50,7 +51,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
         runChecker.scaffoldCmd = scaffoldCmd;
         runChecker.buildCmd = buildCmd;
         runChecker.cleanup = false;
-        runChecker.runCmd = withJavaVersionArgs("project: runJar");
+        //runChecker.runCmd = withJavaVersionArgs("project: runJar");
         Path baseDir = runChecker.run();
         JkUtilsAssert.state(!Files.exists(baseDir.resolve("src")),
                 "Self Springboot was scaffolded with project structure !");
@@ -73,7 +74,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
             runWithDistribJekaShell(path, buildCmd);
 
             // TODO Fix the problem of springboot jar on Windows
-            if (runCmd != null && JkUtilsSystem.IS_WINDOWS) {
+            if (runCmd != null) {
                 JkUtilsAssert.state(!JkUtilsNet.isStatusOk(url, true), "A server is already listening to %s", url);
 
                 System.out.println("======= Checking health with HTTP ================== ");
@@ -101,10 +102,10 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
                 boolean ended = handler.waitFor(2000, TimeUnit.MILLISECONDS);
                 JkUtilsAssert.state(ended, "Can't kill process");
 
-            } /*else {
+            } else {
                 runJeka(!JkUtilsSystem.IS_WINDOWS, path, buildCmd);
             }
-            */
+
             return path;
         }
 

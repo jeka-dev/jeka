@@ -63,13 +63,6 @@ public interface JkInternalGpgDoer {
             ClassLoader classLoader = JkInternalChildFirstClassLoader.of(paths, JkInternalGpgDoer.class.getClassLoader());
             clazz = JkClassLoader.of(classLoader).load(IMPL_CLASS);
             CACHED_INSTANCE = JkUtilsReflect.invokeStaticMethod(clazz, "of");
-            /*
-            CACHED_INSTANCE =  JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(
-                            bcOpenPgpApiJar.get(),
-                            bcProviderJar.get()
-                    ).createCrossClassloaderProxy(JkInternalGpgDoer.class, IMPL_CLASS, "of");
-
-             */
             return CACHED_INSTANCE;
         }
 

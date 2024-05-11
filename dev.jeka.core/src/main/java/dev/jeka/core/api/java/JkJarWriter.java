@@ -20,15 +20,16 @@ import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.jar.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
@@ -38,10 +39,9 @@ import java.util.zip.ZipEntry;
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @author Jerome Angibaud
  */
  public class JkJarWriter {
-
-    private static final String NESTED_LOADER_JAR = "META-INF/loader/spring-boot-loader.jar";
 
     private static final int BUFFER_SIZE = 32 * 1024;
 
@@ -136,66 +136,6 @@ import java.util.zip.ZipEntry;
         JarEntry entry = new JarEntry(entryName);
         try {
             writeEntry(entry, new InputStreamEntryWriter(inputStream, true));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * Write a nested library.
-     * 
-     * @param destination
-     *            the destination of the library
-     * @param library
-     *            the library
-     * @throws UncheckedIOException
-     *             if the write fails
-     */
-    public void writeNestedLibrary(String destination, Path library) {
-        JarEntry entry = new JarEntry(destination + library.getFileName().toString());
-        entry.setTime(getNestedLibraryTime(library));
-        try {
-            new CrcAndSize(library).setupStoredEntry(entry);
-            writeEntry(entry, new InputStreamEntryWriter(Files.newInputStream(library), true));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-    }
-
-    private long getNestedLibraryTime(Path path) {
-        try {
-            try (JarFile jarFile = new JarFile(path.toFile())) {
-                Enumeration<JarEntry> entries = jarFile.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
-                    if (!entry.isDirectory()) {
-                        return entry.getTime();
-                    }
-                }
-            }
-            return Files.getLastModifiedTime(path).toMillis();
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
-    }
-
-    /**
-     * Write the required spring-boot-loader classes to the JAR.
-     * 
-     * @throws UncheckedIOException
-     *             if the classes cannot be written
-     */
-    public void writeLoaderClasses(URL loaderJar)  {
-        try {
-            JarInputStream inputStream = new JarInputStream(new BufferedInputStream(loaderJar.openStream()));
-            JarEntry entry;
-            while ((entry = inputStream.getNextJarEntry()) != null) {
-                if (entry.getName().endsWith(".class")) {
-                    writeEntry(entry, new InputStreamEntryWriter(inputStream, false));
-                }
-            }
-            inputStream.close();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -350,12 +290,6 @@ import java.util.zip.ZipEntry;
 
         private long size;
 
-        CrcAndSize(Path file) throws IOException {
-            try (InputStream inputStream = Files.newInputStream(file)) {
-                load(inputStream);
-            }
-        }
-
         CrcAndSize(InputStream inputStream) throws IOException {
             load(inputStream);
         }
@@ -369,23 +303,11 @@ import java.util.zip.ZipEntry;
             }
         }
 
-        public void setupStoredEntry(JarEntry entry) {
+        void setupStoredEntry(JarEntry entry) {
             entry.setSize(this.size);
             entry.setCompressedSize(this.size);
             entry.setCrc(this.crc.getValue());
             entry.setMethod(ZipEntry.STORED);
-        }
-    }
-    
-    public void setExecutableFilePermission(Path path) {
-        try {
-            Set<PosixFilePermission> permissions = new HashSet<>(
-                    Files.getPosixFilePermissions(path));
-            permissions.add(PosixFilePermission.OWNER_EXECUTE);
-            Files.setPosixFilePermissions(path, permissions);
-        }
-        catch (Throwable ex) {
-            // Ignore and continue creating the jar
         }
     }
 

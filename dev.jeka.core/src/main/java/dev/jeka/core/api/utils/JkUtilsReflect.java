@@ -577,4 +577,40 @@ public final class JkUtilsReflect {
         PRIMITIVE_TO_WRAPPER.put(short.class, Short.TYPE);
     }
 
+    /**
+     * Create a Dynamic proxy with the specified interface, delagating call to the
+     * target object.
+     */
+    public static <T> T createReflectionProxy(Class<T> interfaze, Object target) {
+        return (T) Proxy.newProxyInstance(
+                interfaze.getClassLoader(),
+                new Class[] {interfaze},
+                new JkUtilsReflect.ReflectionInvocationHandler(target)
+        );
+    }
+
+    /**
+     * Proxy Invocation handler, that delegate to target instance via reflection
+     */
+    public static class ReflectionInvocationHandler implements InvocationHandler {
+
+        private final Object targetInstance;
+
+        public ReflectionInvocationHandler(Object targetInstance) {
+            this.targetInstance = targetInstance;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) {
+            try {
+                Method targetMethod = targetInstance.getClass().getMethod(method.getName(), method.getParameterTypes());
+                return targetMethod.invoke(targetInstance, args);
+            } catch (final IllegalArgumentException | NoSuchMethodException | IllegalAccessException |
+                           InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+
 }

@@ -39,6 +39,10 @@ public class JkInternalChildFirstClassLoader extends URLClassLoader {
         sysClzLoader = getSystemClassLoader();
     }
 
+    public static JkInternalChildFirstClassLoader of(URL[] urls, ClassLoader parent) {
+        return new JkInternalChildFirstClassLoader(urls, parent);
+    }
+
     public static JkInternalChildFirstClassLoader of(Iterable<Path> paths, ClassLoader parent) {
         URL[] urls = JkPathSequence.of(paths)
                 .and(JkInternalEmbeddedClassloader.embeddedLibs())

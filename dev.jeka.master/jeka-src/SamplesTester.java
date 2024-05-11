@@ -29,7 +29,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Test with injecting dep via @JkInjectClasspath(...)
         run("dev.jeka.samples.springboot", "-la=false -c -cw " +
-                "project: pack maven: publishLocal -Djeka.java.version=17");
+                "project: pack runJar run.programArgs=auto-close maven: publishLocal -Djeka.java.version=17");
 
         // Test with injecting plugin dep via "+"
         run("dev.jeka.samples.sonarqube", "-vic " +
