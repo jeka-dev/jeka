@@ -21,6 +21,11 @@ jobs:
       with:
         java-version: 1.8
 
+    - name: Restore JeKa cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ~/.jeka/cache
+
     - name: Build JeKa bootstrapped with ANT
       env:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
@@ -29,6 +34,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+      
+    - name: Save JeKa cache
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.jeka/cache
 
     - name: Deploy MkDocs
       if: github.ref == 'refs/heads/master'
