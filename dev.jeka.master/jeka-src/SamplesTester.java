@@ -19,7 +19,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         }
 
         // Test also if the KBean hosted in jeka-src, is considered as the default KBean
-        run("dev.jeka.samples.baselib", "base: pack : ok --debug --info");
+        run("dev.jeka.samples.baselib", "base: pack : ok --debug --inspect");
 
         // Test caching by running twice
         Path sampleBaseDir = Paths.get("../samples/dev.jeka.samples.baselib").normalize();

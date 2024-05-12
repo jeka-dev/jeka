@@ -116,7 +116,7 @@ public void ascii() throws Exception {
  |_| |_|\___|_|_|\___/ 
 ```
 This library has no transitive dependency, but it could have. Try to import any library with transitive 
-dependencies and execute `jeka --info`. 
+dependencies and execute `jeka --inspect`. 
 This displays runtime information about JeKa run, including the resulting classpath.
 
 You can add, as many `@JkInjectClasspath` annotations you need, on the class.
@@ -213,7 +213,7 @@ and execute `jeka foo` to notice that this method is actually run.
     jeka.default.kbean=script
     ```
 
-    You can check the actual default KBean, by executing `jeka --info` and check for the *Default KBean* entry.
+    You can check the actual default KBean, by executing `jeka --inspect` and check for the *Default KBean* entry.
     
     !!! note
         A given `KBean` class can accept many names to be referenced :

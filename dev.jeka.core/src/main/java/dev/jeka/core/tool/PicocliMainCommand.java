@@ -70,8 +70,8 @@ import java.util.stream.Collectors;
         },
         footer = {
             "",
-            "Execute @|yellow jeka : --doc |@ to get help on default KBean.",
-            "Execute @|yellow jeka --info |@ to get runtime information."
+            "Execute @|yellow jeka --doc |@ to get help on default KBean.",
+            "Execute @|yellow jeka --inspect |@ to display runtime setup information."
         },
         optionListHeading = "Options:%n",
         subcommandsRepeatable = true,
@@ -109,8 +109,8 @@ public class PicocliMainCommand {
             description = "Try to keep running JeKa even if jeka-src compilation fails.")
     private boolean forceMode;
 
-    @Option(names = { "-i", "--info"},
-            description = "Display info as versions, location, classpath,...")
+    @Option(names = { "-i", "--inspect"},
+            description = "Display information about runtime setup (versions, properties, locations, classpaths, kbeans...")
     private boolean runtimeInfo;
 
     @Option(names = { "-r", "--remote"},
