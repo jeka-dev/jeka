@@ -63,7 +63,7 @@ directory at *[USER HOME]/.jeka/cache*.
 When running as *Github Action* this directory is empty at the start of the build. We need to save/restore it in 
 order to make it persist from one build to another.
 
-Fot this, we can use *cache action* as follow:
+For this, we can use [cache action](https://github.com/actions/cache) as follow:
 ```yaml
     - name: Restore JeKa cache
       uses: actions/cache/restore@v4
@@ -80,7 +80,6 @@ Fot this, we can use *cache action* as follow:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 ```
-
 
 ## Compilation
 
