@@ -25,6 +25,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: ~/.jeka/cache
+        key: ${{ runner.os }}
 
     - name: Build JeKa bootstrapped with ANT
       env:
@@ -39,6 +40,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: ~/.jeka/cache
+        key: ${{ runner.os }}
 
     - name: Deploy MkDocs
       if: github.ref == 'refs/heads/master'
