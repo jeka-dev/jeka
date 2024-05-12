@@ -49,11 +49,37 @@ Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.
 
 ### How can I migrate my project from Maven ?
 
-_Jeka_ helps translate all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
+_JeKa_ helps translating all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
 
 Assuming _Maven_ is already installed and there is a _pom.xml_ file at the root of the project, 
 execute `jeka maven: showPomDeps` to display _Java_ code/configuration to 
 copy-paste in a build class or *dependencies.txt* file.
+
+### How to cache downloaded dependencies in Github-actions ?
+
+_JeKa_ caches downloaded dependencies (JDKs, JeKa distros, Maven artifacts, NodeJs exe,...) in a single 
+directory at *[USER HOME]/.jeka/cache*.
+
+When running as *Github Action* this directory is empty at the start of the build. We need to save/restore it in 
+order to make it persist from one build to another.
+
+Fot this, we can use *cache action* as follow:
+```yaml
+    - name: Restore JeKa cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ~/.jeka/cache
+        key: ${{ runner.os }}
+
+    - name: Run some JeKa commands
+      run: "./jeka project: pack ..."
+      
+    - name: Save JeKa cache
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.jeka/cache
+        key: ${{ runner.os }}
+```
 
 
 ## Compilation
@@ -73,7 +99,7 @@ public class Build extends JkBean {
 }
 ```
 
-### How can I sync  Eclipse/Intellij without using ProjectKBean ?
+### How can I sync Eclipse/Intellij without using ProjectKBean ?
 
 `ProjectKBean` KBean provides IDE sync out-of-the-box but you may prefer to not use it.
 
