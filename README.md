@@ -33,10 +33,11 @@ Its key features include:
 -  **Portable Builds:** JeKa downloads everything needed for building your projects (JDKs, Maven deps, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
 
 
--  **Customizable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
+-  **Customizable and Extendable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
+   Also, JeKa provides a simple plugin mechanism that allows for easy extension.
 
 
--  **Easily Extendable:** JeKa provides a simple plugin mechanism that allows for easy extension.
+-  **Kotlin Support:** Scripts or applications can also be implemented using the *Kotlin* language.
 
 
 ## Use-cases

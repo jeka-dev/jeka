@@ -187,10 +187,6 @@ public abstract class KBean {
         return name(kbeanClass.getName());
     }
 
-    final boolean isMatchingName(String candidateName) {
-        return nameMatches(this.getClass().getName(), candidateName);
-    }
-
     static boolean isPropertyField(Field field) {
         if (Modifier.isStatic(field.getModifiers())) {
             return false;
