@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
         },
         footer = {
             "",
-            "Execute @|yellow jeka --doc |@     to display help on KBean commands.",
+            "Execute @|yellow jeka --doc |@     to display available KBean commands.",
             "Execute @|yellow jeka --inspect |@ to display runtime setup information."
         },
         optionListHeading = "Options:%n",
