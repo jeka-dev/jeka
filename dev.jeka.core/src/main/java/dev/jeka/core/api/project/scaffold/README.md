@@ -2,9 +2,14 @@
 
 ## JeKa commands
 
-Clean and Create jar
+Create jar
 ```shell
 jeka project: pack
+```
+
+Clean and Create jar
+```shell
+jeka project: pack --clean
 ```
 
 Create jar skipping tests

@@ -42,17 +42,7 @@ class PicocliHelp {
 
     static void printUsageHelp(PrintStream printStream) {
         CommandLine commandLine = PicocliCommands.mainCommandLine();
-        try {
-            PicocliCommands.STANDARD_KBEAN_CLASSES.forEach(kbeanClass -> {
-                CommandLine.Model.CommandSpec kbeanSpec = simpleFromKbeanClass(kbeanClass);
-                commandLine.addSubcommand(kbeanSpec);
-            });
-        } catch (Exception e) {  // Help should be robust
-            printStream.println("Error while processing help.");
-            e.printStackTrace(printStream);
-        } finally {
-            commandLine.usage(printStream, colorScheme());
-        }
+        commandLine.usage(printStream, colorScheme());
     }
 
     static void printVersionHelp(PrintStream printStream) {

@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
         },
         footer = {
             "",
-            "Execute @|yellow jeka --doc |@ to get help on default KBean.",
+            "Execute @|yellow jeka --doc |@     to display help on KBean commands.",
             "Execute @|yellow jeka --inspect |@ to display runtime setup information."
         },
         optionListHeading = "Options:%n",
@@ -96,10 +96,6 @@ public class PicocliMainCommand {
             }
     )
     private List<String> classpaths;
-
-    @Option(names = {"--doc"},
-            description = "Display documentation on default KBean, or a specific KBean if mentioned a 'aKBean: --doc'.")
-    private boolean fakeDoc;  // Handled at upper level
 
     @Option(names = {"-p", "--program"},
             description = "Indicate to run directly the built Java program when present, bypassing the JeKa execution engine.")
@@ -129,7 +125,7 @@ public class PicocliMainCommand {
     private String defaultKBean;
 
     @Option(names = { "-sk", "--skip-compile"},
-            description = "Do not compile jeka-src")
+            description = "Do not compile jeka-src.")
     private boolean skipCompile;
 
     @Option(names = {"-v", "--verbose"},
@@ -137,11 +133,11 @@ public class PicocliMainCommand {
     private boolean logVerbose;
 
     @Option(names = {"--debug"},
-            description = "Log debug level (very verbose)")
+            description = "Log debug level (very verbose).")
     private boolean logDebug;
 
     @Option(names = {"-q", "--quiet"},
-            description = "Turn off logs")
+            description = "Turn off logs.")
     private boolean logQuiet;
 
     @Option(names = {"-st", "--stacktrace"},
@@ -149,7 +145,7 @@ public class PicocliMainCommand {
     private boolean logStacktrace;
 
     @Option(names = {"-ld", "--duration"},
-            description = "Log task durations")
+            description = "Log task durations.")
     private boolean logDuration;
 
     @Option(names = { "-ls"},
@@ -158,18 +154,22 @@ public class PicocliMainCommand {
     private final JkLog.Style logStyle = JkLog.Style.INDENT;
 
     @Option(names = {"-la", "--animations"},
-            description = "Display animations on console",
+            description = "Display animations on console.",
             arity = "0..1")
     private Boolean logAnimations;
 
     @Option(names = {"--stderr"},
-            description = "Log on stderr instead of stdout")
+            description = "Log on stderr instead of stdout.")
     private boolean logOnStderr;
 
-    @Option(names = "-D", mapFallbackValue = "", description = "Define system property") // allow -Dkey
+    @Option(names = "-D", mapFallbackValue = "", description = "Define system property.") // allow -Dkey
     void setProperty(Map<String, String> props) {
         props.forEach(System::setProperty);
     }
+
+    @Option(names = {"--doc"},
+            description = "Display documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc'.")
+    private boolean fakeDoc;  // Handled at upper level
 
     LogSettings logSettings() {
         return new LogSettings(
