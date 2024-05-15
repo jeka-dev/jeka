@@ -212,7 +212,6 @@ class PicocliHelp {
                 .commandListHeading("Methods\n");
 
         return new CommandLine(main).setUsageHelpAutoWidth(true);
-
     }
 
 
@@ -236,14 +235,6 @@ class PicocliHelp {
                 .stackTraces (dev.jeka.core.tool.CommandLine.Help.Ansi.Style.italic)
                 .applySystemProperties() // optional: allow end users to customize
                 .build();
-    }
-
-    private static CommandLine.Model.CommandSpec simpleFromKbeanClass(Class<? extends KBean> kbeanClass) {
-        KBeanDescription kBeanDescription = KBeanDescription.of(kbeanClass, false);
-        CommandLine.Model.CommandSpec commandSpec = dev.jeka.core.tool.CommandLine.Model.CommandSpec.create();
-        commandSpec.name(KBean.name(kbeanClass) + ":");
-        commandSpec.usageMessage().header(kBeanDescription.synopsisHeader);
-        return commandSpec;
     }
 
     private static Map<String, String> cmdShortHand(JkProperties props) {

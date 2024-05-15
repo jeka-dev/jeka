@@ -28,6 +28,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Exported methods to integrate with external tools.
@@ -167,6 +168,21 @@ public final class JkExternalToolApi {
 
     public static Path getKBeanClasspathCacheFile(Path baseDir) {
         return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASSPATH_CACHE_FILE);
+    }
+
+    public static List<String[]> availableOptions() {
+        List<CommandLine.Model.OptionSpec> options =CommandLine.Model.CommandSpec
+                .forAnnotatedObject(new PicocliMainCommand())
+                .options();
+        return options.stream()
+                .map(optionSpec -> {
+                    String name = optionSpec.longestName();
+                    String desc = String.join(" ", optionSpec.description());
+                    String typeName = optionSpec.type().getTypeName();
+                    String paramLabel = optionSpec.paramLabel();
+                    return new String[] {name, desc, typeName, paramLabel};
+                })
+                .collect(Collectors.toList());
     }
 
 

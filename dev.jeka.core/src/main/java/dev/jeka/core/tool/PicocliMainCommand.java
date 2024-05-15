@@ -148,7 +148,7 @@ public class PicocliMainCommand {
             description = "Log task durations.")
     private boolean logDuration;
 
-    @Option(names = { "-ls"},
+    @Option(names = { "-ls", "--log-style"},
             paramLabel = "STYLE",
             description = "Set the JeKa log style : ${COMPLETION-CANDIDATES}.")
     private final JkLog.Style logStyle = JkLog.Style.INDENT;
@@ -166,7 +166,7 @@ public class PicocliMainCommand {
             description = "Display documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc'.")
     private boolean fakeDoc;  // Handled at upper level
 
-    @Option(names = "-D", mapFallbackValue = "", description = "Define system property.") // allow -Dkey
+    @Option(names = "-D", mapFallbackValue = "", description = "Define system property as '-Dmy.key=my.value'.") // allow -Dkey
     void setProperty(Map<String, String> props) {
         props.forEach(System::setProperty);
     }
