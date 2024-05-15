@@ -22,7 +22,17 @@ Run jar
 jeka project: runJar run.programArgs="" run.jvmOptions=""
 ```
 
+Synchronize IntelliJ
+```shell
+jeka intellij: iml
+```
+
 Create docker image
 ```shell
 jeka docker: build
+
+```
+Run docker image
+```shell
+jeka docker: run
 ```

@@ -162,14 +162,15 @@ public class PicocliMainCommand {
             description = "Log on stderr instead of stdout.")
     private boolean logOnStderr;
 
+    @Option(names = {"--doc"},
+            description = "Display documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc'.")
+    private boolean fakeDoc;  // Handled at upper level
+
     @Option(names = "-D", mapFallbackValue = "", description = "Define system property.") // allow -Dkey
     void setProperty(Map<String, String> props) {
         props.forEach(System::setProperty);
     }
 
-    @Option(names = {"--doc"},
-            description = "Display documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc'.")
-    private boolean fakeDoc;  // Handled at upper level
 
     LogSettings logSettings() {
         return new LogSettings(

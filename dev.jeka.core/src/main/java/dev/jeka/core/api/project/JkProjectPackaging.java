@@ -28,6 +28,7 @@ import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.tool.JkDoc;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +43,12 @@ import java.util.function.Supplier;
 public class JkProjectPackaging {
 
     public enum JarType {
-        REGULAR, FAT
+
+        @JkDoc("Jar containing only classes and resources of the project.")
+        REGULAR,
+
+        @JkDoc("Jar including classes and resources of dependencies. This Jar is not shaded.")
+        FAT
     }
 
     /**
