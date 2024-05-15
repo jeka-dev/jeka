@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 /**
  * Exported methods to integrate with external tools.
- *
  */
 public final class JkExternalToolApi {
 
