@@ -153,6 +153,9 @@ final class KBeanDescription {
 
     // For nested props, JkDoc must be present on the class or one of its fields.
     private static boolean isTerminal(Class<?> fieldType) {
+        if (fieldType.isEnum()) {
+            return true;
+        }
         return !fieldType.isAnnotationPresent(JkDoc.class) &&
                 JkUtilsReflect.getDeclaredFieldsWithAnnotation(fieldType, JkDoc.class).isEmpty();
     }
