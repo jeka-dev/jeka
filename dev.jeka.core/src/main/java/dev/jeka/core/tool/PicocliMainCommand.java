@@ -116,7 +116,7 @@ public class PicocliMainCommand {
     private String fakeRemote;  // Handled at shell level
 
     @Option(names = { "-u", "--remote-update"},
-            description = "Forcing Git update when used with '-r'.")
+            description = "Forcing Git update when used with '--remote' or '-r'.")
     private boolean fakeRemoteUpdate;  // Handled at shell level
 
     @Option(names = { "-kb", "--kbean"},

@@ -71,8 +71,10 @@ class SpringbootScaffold {
 
     static void customize(JkBaseScaffold baseScaffold) {
 
+        baseScaffold.baseScaffoldOption.kind = null; // to generate README.MD
+
         // Remove build class defined by default
-        baseScaffold.removeFileEntriesStaringBy(Paths.get(JkConstants.JEKA_SRC_DIR));
+        baseScaffold.removeFileEntriesStartingWith(Paths.get(JkConstants.JEKA_SRC_DIR));
 
         String lastSpringbootVersion = baseScaffold.findLatestVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),

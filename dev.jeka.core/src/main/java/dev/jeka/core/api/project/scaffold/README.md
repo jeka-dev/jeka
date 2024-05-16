@@ -27,12 +27,18 @@ Synchronize IntelliJ
 jeka intellij: iml
 ```
 
-Create docker image
+### Docker
+
+Create image
 ```shell
 jeka docker: build
 
 ```
-Run docker image
+Show info about image
+```shell
+jeka docker: info
+```
+Run image
 ```shell
 jeka docker: run
 ```

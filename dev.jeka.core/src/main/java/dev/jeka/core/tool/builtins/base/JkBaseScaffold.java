@@ -51,7 +51,7 @@ public final class JkBaseScaffold extends JkScaffold {
 
     private boolean includeJunit = true;
 
-    private final BaseKBean.BaseScaffoldOptions baseScaffoldOption;
+    public final BaseKBean.BaseScaffoldOptions baseScaffoldOption;
 
     private final JkConsumers<JkBaseScaffold> customizers = JkConsumers.of();
 
@@ -141,7 +141,7 @@ public final class JkBaseScaffold extends JkScaffold {
     }
 
     private void generateReadme() {
-        if (this.baseScaffoldOption.kind == Kind.APP) {
+        if (this.baseScaffoldOption.kind != Kind.JEKA_SCRIPT) {
             String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md"));
             JkPathFile.of(baseDir.resolve("README.MD")).createIfNotExist().write(content);
         }

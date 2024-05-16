@@ -203,7 +203,7 @@ public abstract class JkScaffold {
     /**
      * Removes the file entries that start with the specified path prefix.
      */
-    public final void removeFileEntriesStaringBy(Path pathPrefix) {
+    public final void removeFileEntriesStartingWith(Path pathPrefix) {
         for (ListIterator<JkFileEntry> it = fileEntries.listIterator(); it.hasNext();) {
             JkFileEntry entry = it.next();
             if (entry.relativePath.startsWith(pathPrefix)) {
