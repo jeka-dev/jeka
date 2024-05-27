@@ -1,9 +1,9 @@
 <svg viewBox="0 0 301 410" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1">
 <style type="text/css">
-	.st0{fill:#d64072;}
-	.st1{fill:#ed317f;}
-	.st2{fill:#d62a9d;}
-	.st3{fill:#bf209f;}
+	.st0{stroke:#d64072;stroke-width:5;fill:none;}
+	.st1{stroke:#ed317f;stroke-width:5;fill:none;}
+	.st2{stroke:#d62a9d;stroke-width:5;fill:none;}
+	.st3{stroke:#bf209f;stroke-width:5;fill:none;}
 </style>
  <g>
   <title>Layer 1</title>
