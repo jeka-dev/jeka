@@ -339,7 +339,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public void tagRemote() {
         JkLog.info("Existing tags on origin :");
-        this.copy().setLogWithJekaDecorator(true).setParams("ls remote", "--tag", "--sort=creatordate", "origin").execAndCheck();
+        this.copy().setLogWithJekaDecorator(true).setParams("ls-remote", "--tag", "--sort=creatordate", "origin").execAndCheck();
         if (this.isWorkspaceDirty()) {
             JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
             return;

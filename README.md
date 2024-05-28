@@ -72,7 +72,7 @@ Its key features include:
 
 - **Centralize build logic**
 
-  Define the CI/CD logic in one place, which projects can share and extend.
+  Centralize build and CI/CD logic for shared use and extension across projects within the organization.
   
 
 ## Examples
