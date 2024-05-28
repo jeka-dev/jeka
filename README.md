@@ -3,7 +3,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
 
-<img src="./docs/images/knight-red.svg" width="100" align="right" hspace="15"  />
+<img src="./docs/images/knight-stroke-red-to-pink-bg-black.svg" width="100" align="right" hspace="15"  />
 
 > [!IMPORTANT]
 > JeKa 0.11.0 has been released!!!
