@@ -179,7 +179,7 @@ install() {
   else
     echo "Jeka is installed. You can check by executing 'jeka --version'."
   fi
-
+  echo "Please, start a new Shell to ensure the changes are applied."
 }
 
 update() {
