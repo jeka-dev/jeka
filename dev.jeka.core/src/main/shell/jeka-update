@@ -22,6 +22,7 @@ set -e
 # Authors: Jerome Angibaud
 
 # curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jeka-install | $(echo $0) -s - install
+# curl -s https://jeka.dev/install.sh | $(echo $0) -s - install check
 
 # TODO get back to regular repo when released
 declare MAVEN_REPO="https://oss.sonatype.org/content/repositories/snapshots"
