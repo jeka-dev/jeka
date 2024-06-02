@@ -58,10 +58,6 @@ download_and_unpack() {
 }
 
 check_prerequisites() {
-  if ! command -v git > /dev/null 2>&1; then
-      echo "Git is not installed. Please install it prior installing Jeka"
-      exit 1
-  fi
   if ! command -v curl > /dev/null 2>&1; then
       echo "Curl is not installed. Please install it prior installing Jeka"
       exit 1
@@ -78,6 +74,9 @@ compute_LAST_VERSION() {
   local url
   url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
   LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
+
+  # TODO remove
+  LAST_VERSION=0.11.x-SNAPSHOT
 }
 
 compute_LAST_RELEASE() {
@@ -128,7 +127,7 @@ install() {
   current_jeka_path=$(which jeka || echo "not found")
   if [ "$current_jeka_path" != "not found" ]; then
     echo "Your system seems to already have JeKa installed at : $current_jeka_path"
-    echo "If it is a an old version of jeka (<0.11), you can rename it (i.e. jekal) and re-run this script."
+    echo "If it is a an old version of jeka (<0.11), you can rename it (i.e. jeka-legacy) and re-run this script."
     echo
     echo "If it is an recent version, you can update it by executing 'jeka-install' or 'jeka-install <version>'."
     echo "You can see latest versions here : https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions"
@@ -155,7 +154,7 @@ install() {
   fi
 
   # Downloading and unpack
-  local install_dir="$HOME/.jeka"
+  local install_dir="$HOME/.jeka/bin"
   mkdir -p $install_dir
   touch "$HOME/.jeka/global.properties"
   echo "Installing Jeka Version $LAST_VERSION in $install_dir ..."
@@ -170,12 +169,17 @@ install() {
   echo "" >> "$SHELL_CONFIG_FILE"
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
   echo "export PATH=\$PATH:$install_dir" >> "$SHELL_CONFIG_FILE"
-
-  echo "Checking install with 'jeka --version'. This requires JDK download. It may take a while ..."
   export PATH=$PATH:$install_dir
-  jeka --version
-  echo "Jeka is properly installed."
-  echo "Later on, you can upgrade to a different JeKa version by running either 'jeka-install' or 'jeka-install <version>'."
+
+  if [ "$CHECK" == "true" ]; then
+    echo "Checking install with 'jeka --version'. This requires JDK download."
+    jeka --version
+    echo "Jeka is properly installed."
+    echo "Later on, you can upgrade to a different JeKa version by running either 'jeka-install' or 'jeka-install <version>'."
+  else
+    echo "Jeka is installed. You can check by executing 'jeka --version'."
+  fi
+
 }
 
 update() {
@@ -208,6 +212,8 @@ update() {
 # ------------------------------- Script start here ----------------------
 
 if [ "$1" == "install" ]; then  ## hidden functionality used only for installing from scratch
+  if [ "$2" == "check" ] || [ "$3" == "check" ]
+  CHECK="true"
   install
 else
   echo "Update installed Jeka Version. Usage 'jeka-install <version>'."
