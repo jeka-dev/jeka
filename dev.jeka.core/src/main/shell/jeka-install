@@ -212,8 +212,9 @@ update() {
 # ------------------------------- Script start here ----------------------
 
 if [ "$1" == "install" ]; then  ## hidden functionality used only for installing from scratch
-  if [ "$2" == "check" ] || [ "$3" == "check" ]
-  CHECK="true"
+  if [ "$2" == "check" ] || [ "$3" == "check" ]; then
+    CHECK="true"
+  fi
   install
 else
   echo "Update installed Jeka Version. Usage 'jeka-install <version>'."
