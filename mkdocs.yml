@@ -1,8 +1,8 @@
 site_name: JeKa Build Tool
 theme:
     name: material
-    logo: images/logo.svg
-    favicon: images/knight-color-logo.svg
+    logo: images/logo-plain-white.svg
+    favicon: images/logo-plain-gradient.svg
     font:
       text: Roboto
     palette :
