@@ -71,11 +71,15 @@ final class SourceParser {
     }
 
     private static void augment(ParsedSourceInfo info, String rawLine, Path baseDir, boolean privateFolder) {
-        if (!rawLine.contains("@")) {
-            return; // fast return
-        }
         String line = rawLine.trim();
-        if (!line.startsWith("@")) {
+        if (!line.startsWith("@") && !rawLine.startsWith("//DEPS ")) {
+            return;
+        }
+
+        // Handle JBang notation
+        if (line.startsWith("//DEPS ")) {
+            String value = JkUtilsString.substringAfterFirst(line, "//DEPS").trim();
+            info.addDep(!privateFolder, JkDependency.of(baseDir, value));
             return;
         }
 

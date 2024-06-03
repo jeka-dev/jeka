@@ -8,11 +8,11 @@
 
 ## MacOS and Linux
 
-For installing and running, JeKa needs only *curl* and *unzip* be installed on the system.
+For installing and running, JeKa requires *curl* and *unzip* be installed on the system.
 
 Execute :
 ```shell
-curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jekau | $(echo $0) -s - setup
+curl -s -L https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
 This installs JeKa, and launches a sanity checks that triggers a JDK download.
 
