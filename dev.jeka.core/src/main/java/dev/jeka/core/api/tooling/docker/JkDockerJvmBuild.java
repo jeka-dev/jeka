@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 /**
  * Docker Builder assistant for creating Docker images running Java programs.
+ *
  */
 public class JkDockerJvmBuild extends JkDockerBuild {
 
@@ -44,23 +45,20 @@ public class JkDockerJvmBuild extends JkDockerBuild {
 
     private static final JkPathMatcher CLASS_MATCHER = JkPathMatcher.of("**/*.class", "*.class");
 
-    private String baseImage = BASE_IMAGE;
-
     private JkPathTree classes;
 
     private List<Path> classpath = Collections.emptyList();
 
     private String mainClass;
 
+    protected JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
+
     private final Map<Object, String> agents = new HashMap<>();
-
-    private final List<String> extraBuildSteps = new LinkedList<>();
-
-    private final List<Integer> exposedPorts = new LinkedList<>();
 
     private JkDockerJvmBuild() {
         this.setBaseImage(BASE_IMAGE);
-
+        this.nonRootSteps.add(this::enhance);
+        this.rootSteps.addNonRootMkdir("/app");
     }
 
     /**
@@ -77,6 +75,13 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         return of().adaptTo(project);
     }
 
+    @Override
+    public void buildImage(Path contextDir, String imageName) {
+        super.buildImage(contextDir, imageName);
+        JkLog.info("Pass extra JVM options : Use '-e JAVA_TOOL_OPTIONS=...'");
+        JkLog.info("Pass program arguments : Add arguments to the end of the command line");
+    }
+
     /**
      * Adapts this JkDockerBuild instance to build the specified JkProject.
      */
@@ -87,7 +92,6 @@ public class JkDockerJvmBuild extends JkDockerBuild {
             project.compilation.runIfNeeded();
         }
         String mainClass = project.packaging.getMainClass();
-        this.setBaseBuildDir(project.compilation.layout.getOutputDir());
         JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project. Please, set the @project.pack.mainClass property.");
         return this
                 .setClasses(classTree)
@@ -140,69 +144,75 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     }
 
     /**
-     * Adds a docker build statement to be executed at the start of Docker build.
+     * Sets the Maven repository used for downloading agent jars. Initial value is
+     * Maven central.
      */
-    public JkDockerJvmBuild addExtraBuildStep(String statement) {
-        this.extraBuildSteps.add(statement);
+    public final JkDockerBuild setDownloadMavenRepos(JkRepoSet repos) {
+        this.repos = repos;
         return this;
     }
 
-    @Override
-    protected List<String> computePreFooterStatements(String imageName) {
-        List<String> result = new LinkedList<>();
-
-        // Handle agents
-        Map<Object, Path> agentBuildDirMap = copyAgents(imageName);
-        String agentCopy = createAgentCopyInstruction(agentBuildDirMap);
-        String agentInstructions = createAgentOptions(agentBuildDirMap);
-        result.add(agentCopy);
+    private void enhance(Context context) {
 
         // Handle Java layers
-        String copyJavaFiles =
-            "COPY libs /app/libs\n" +
-            "COPY snapshot-libs /app/libs\n" +
-            "COPY classpath.txt /app/classpath.txt\n" +
-            "COPY resources /app/classes\n" +
-            "COPY classes /app/classes\n";
-        result.add(copyJavaFiles);
-
-        Path tempBuildDir = getTempBuildDir(imageName);
         List<Path> sanitizedLibs = sanitizedLibs();
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("libs"));
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("snapshot-libs"));
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("resources"));
-        JkUtilsPath.createDirectories(tempBuildDir.resolve("classes"));
 
-        // -- Copy classes to docker-build/classes
-        classFiles().copyTo(tempBuildDir.resolve("classes"), StandardCopyOption.REPLACE_EXISTING);
-
-        //  -- Copy resources to docker-build/resources
-        resourceFiles().copyTo(tempBuildDir.resolve("resources"), StandardCopyOption.REPLACE_EXISTING);
-
-        // -- Copy classpath.txt
-        String classpathTxt = createClasspathArs(sanitizedLibs);
-        JkPathFile.of(tempBuildDir.resolve("classpath.txt")).deleteIfExist().write(classpathTxt);
-
-        // -- Copy Snapshot libs
-        sanitizedLibs.stream()
-                .filter(CHANGING_LIB)
-                .map(JkPathFile::of)
-                .forEach(file -> file.copyToDir(tempBuildDir.resolve("libs")));
-
-        // -- Copy libs
+        // -- Create non-snapshot layer
+        Path libs = context.dir.resolve("libs");
+        JkUtilsPath.createDirectories(libs);
         sanitizedLibs.stream()
                 .filter(path -> !CHANGING_LIB.test(path))
                 .map(JkPathFile::of)
-                .forEach(file -> file.copyToDir(tempBuildDir.resolve("libs"), StandardCopyOption.REPLACE_EXISTING));
+                .forEach(file -> file.copyToDir(libs, StandardCopyOption.REPLACE_EXISTING));
+        context.add("COPY libs /app/libs");
+
+        // -- Create snapshot layer
+        Path snapshotLibs = context.dir.resolve("snapshot-libs");
+        JkUtilsPath.createDirectories(snapshotLibs);
+        sanitizedLibs.stream()
+                .filter(CHANGING_LIB)
+                .map(JkPathFile::of)
+                .forEach(file -> file.copyToDir(snapshotLibs, StandardCopyOption.REPLACE_EXISTING));
+        context.add("COPY snapshot-libs /app/snapshot-libs");
+
+        // -- Add classpath.txt layer
+        Path classpathTxt = context.dir.resolve("classpath.txt");
+        String classpathTxtContent = createClasspathArgs(sanitizedLibs);
+        JkPathFile.of(classpathTxt).deleteIfExist().write(classpathTxtContent);
+        context.add("COPY classpath.txt /app/classpath.txt");
+
+        // -- add resource layer
+        Path resources = context.dir.resolve("resources");
+        JkUtilsPath.createDirectories(resources);
+        resourceFiles().copyTo(resources, StandardCopyOption.REPLACE_EXISTING);
+        context.add("COPY resources /app/resources");
+
+        // -- add class layer
+        Path classes = context.dir.resolve("classes");
+        JkUtilsPath.createDirectories(classes);
+        classFiles().copyTo(classes, StandardCopyOption.REPLACE_EXISTING);
+        context.add("COPY classes /app/classes");
+
+        // Handle agents
+        Map<Object, Path> agentBuildDirMap = copyAgents(context.dir);
+        String agentCopy = createAgentCopyInstruction(agentBuildDirMap);
+        String agentInstructions = createAgentOptions(agentBuildDirMap);
+        if (!agentInstructions.trim().isEmpty() && !agentInstructions.endsWith(" ")) {
+            agentInstructions = agentInstructions + " ";
+        }
+        context.add(agentCopy);
 
         // Handle entryPoint
-        String entryPoint =
-            "ENTRYPOINT java ${agents}$JVM_OPTIONS -cp @/app/classpath.txt ${mainClass} $PROGRAM_ARGS"
-                    .replace("${mainClass}", mainClass)
-                    .replace("${agents}", agentInstructions);
-        result.add(entryPoint);
+        List<String> args = new LinkedList<>();
+        args.add("java");
+        args.addAll(Arrays.asList(JkUtilsString.parseCommandline(agentInstructions)));
+        args.add("-cp");
+        args.add("@/app/classpath.txt");
+        args.add(mainClass);
+        String argLine = toArrayQuotedString(args);
+        context.add("ENTRYPOINT " + argLine);
+        context.add("CMD []");
 
-        return result;
     }
 
     /**
@@ -210,7 +220,12 @@ public class JkDockerJvmBuild extends JkDockerBuild {
      */
     public String info(String imageName) {
 
-        StringBuilder sb = new StringBuilder(super.info(imageName));
+        StringBuilder sb = new StringBuilder();
+        sb.append("Image Name : " + imageName + "\n");
+        sb.append("Dockerfile :\n");
+        sb.append("-------------------------------------------------\n");
+        sb.append(render()).append("\n");
+        sb.append("-------------------------------------------------\n");
 
         sb.append("Agents            : ").append("\n");
         this.agents.entrySet().forEach(entry
@@ -249,10 +264,10 @@ public class JkDockerJvmBuild extends JkDockerBuild {
                 .collect(Collectors.toList());
     }
 
-    private String createClasspathArs(List<Path> sanitizedLibs) {
+    private String createClasspathArgs(List<Path> sanitizedLibs) {
         StringBuilder classpathValue = new StringBuilder();
         if (classes != null && classes.containFiles()) {
-            classpathValue.append("/app/classes");
+            classpathValue.append("/app/classes:/app/resources");
         }
         sanitizedLibs.forEach(path -> classpathValue.append(":/app/libs/" + path.getFileName()));
         return classpathValue.toString();
@@ -260,10 +275,9 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     }
 
 
-    private Map<Object, Path> copyAgents(String imageName) {
+    private Map<Object, Path> copyAgents(Path contextDir) {
         Map<Object, Path> result = new HashMap<>();
-        Path tempBuildDir = getTempBuildDir(imageName);
-        Path agentDir = tempBuildDir.resolve("agents");
+        Path agentDir = contextDir.resolve("agents");
         if (!agents.isEmpty()) {
             JkUtilsPath.createDirectories(agentDir);
         }

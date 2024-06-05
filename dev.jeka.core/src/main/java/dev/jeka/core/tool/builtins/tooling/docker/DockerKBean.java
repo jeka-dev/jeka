@@ -74,7 +74,8 @@ public final class DockerKBean extends KBean {
 
     @JkDoc("Builds Docker image in local registry.")
     public void build() {
-        dockerBuild().buildImage(imageName);
+        String dirName = "docker-build-" + imageName.replace(':', '#');
+        dockerBuild().buildImage(getOutputDir().resolve(dirName), imageName);
     }
 
     @JkDoc("Runs Docker image and wait until termination.")
@@ -82,14 +83,13 @@ public final class DockerKBean extends KBean {
         JkDocker.assertPresent();
         this.lastRunningContainerName = "jeka-" + imageName.replace(':', '-');
         String runOptions = JkUtilsString.isBlank(this.runOptions) ? "" : this.runOptions.trim() + " ";
-        String args = String.format("%s--rm %s-e \"JVM_OPTIONS=%s\" -e \"PROGRAM_ARGS=%s\" "
-                        +  " --name %s %s",
+        String args = String.format("%s--rm %s-e \"JAVA_TOOL_OPTIONS=%s\" --name %s %s %s",
                 runOptions,
                 dockerBuild().portMappingArgs(),
                 jvmOptions,
-                programArgs,
                 this.lastRunningContainerName,
-                imageName);
+                imageName,
+                programArgs);
         JkDocker.execCmdLine("run", args);
     }
 

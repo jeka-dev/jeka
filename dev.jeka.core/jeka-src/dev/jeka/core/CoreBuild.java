@@ -117,7 +117,7 @@ public class CoreBuild extends KBean {
             .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.SOURCES_ARTIFACT_ID));
 
         JkPathFile.of(binDir.resolve("jeka")).setPosixExecPermissions();
-        JkPathFile.of(binDir.resolve("jeka-install")).setPosixExecPermissions();
+        JkPathFile.of(binDir.resolve("jeka-update")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
             testScaffolding();
             new DockerTester().run();

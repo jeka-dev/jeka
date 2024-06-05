@@ -33,7 +33,7 @@ class BaseAppBuild extends KBean {
             load(DockerKBean.class).customize(dockerBuild -> dockerBuild
                     .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
                     .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
-                    .addExtraFile(getBaseDir().resolve("jeka.properties"), "/toto.txt")
+                    .nonRootSteps.addCopy(getBaseDir().resolve("jeka.properties"), "/toto.txt", false)
             );
         }
     }

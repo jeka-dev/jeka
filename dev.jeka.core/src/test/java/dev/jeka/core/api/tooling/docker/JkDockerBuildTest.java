@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.tooling.docker;
 
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -28,19 +30,27 @@ public class JkDockerBuildTest {
         if (!JkDocker.isPresent()) {
             return;
         }
+        JkLog.setDecorator(JkLog.Style.INDENT);
+        //JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         final Path extraFile = Paths.get(JkDockerBuildTest.class.getResource("toto.txt").toURI());
         JkDockerBuild dockerBuild = JkDockerBuild.of();
-        dockerBuild.addExtraFile(extraFile, "/my_toto.txt");
-        dockerBuild.addFooterStatement("ENTRYPOINT [\"echo\", \"toto\"]");
+        dockerBuild.nonRootSteps.addCopy(extraFile, "/my_toto.txt", false);
+        dockerBuild.nonRootSteps.add("ENTRYPOINT [\"echo\"]");
+        dockerBuild.nonRootSteps.add("CMD [\"titi\"]");
         dockerBuild.setUserId(null);
         String imageName = "jk-test-simpleroot";
-        System.out.println(dockerBuild.dockerBuildContent(imageName));
-        System.out.println(dockerBuild.info(imageName));
-        dockerBuild.buildImage(imageName);
+        System.out.println(dockerBuild.render());
+        Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
+        System.out.println("Cereating buidcontext in " + contextDir);
+        dockerBuild.buildImage(contextDir, imageName);
         JkDocker.prepareExec("run", imageName)
+                .setInheritIO(false)
+                .addParams("lulu")
+                .setLogWithJekaDecorator(true).
+                exec();
+        JkDocker.prepareExec("image", "rm", "--force", imageName)
                 .setInheritIO(false).setLogWithJekaDecorator(true).exec();
-        JkDocker.prepareExec("rmi", "IMAGE", imageName)
-                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
+        System.out.println("Generated in " + contextDir);
     }
 
     @Test
@@ -55,17 +65,17 @@ public class JkDockerBuildTest {
 
     private void simpleNonRootWithBaseImage(String baseImage) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
-        dockerBuild.addFooterStatement("ENTRYPOINT [\"echo\", \"toto\"]");
+        dockerBuild.nonRootSteps.add("ENTRYPOINT [\"echo\", \"toto\"]");
         dockerBuild.setBaseImage(baseImage);
         //dockerBuild.setUserId(1001);
         //dockerBuild.setGroupId("1002");
-        String imageName = "jk-test-simplenonroot";
-        System.out.println(dockerBuild.dockerBuildContent(baseImage));
-        System.out.println(dockerBuild.info(imageName));
-        dockerBuild.buildImage(imageName + "-" + baseImage);
+        String imageName = "jk-test-simplenonroot-" + baseImage;
+        System.out.println(dockerBuild.render());
+        Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
+        dockerBuild.buildImage(contextDir, imageName);
         JkDocker.prepareExec("run", imageName)
                 .setInheritIO(false).setLogWithJekaDecorator(true).exec();
-        JkDocker.prepareExec("rmi", "IMAGE", imageName)
+        JkDocker.prepareExec("image", "rm", "--force", imageName)
                 .setInheritIO(false).setLogWithJekaDecorator(true).exec();
     }
 

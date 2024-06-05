@@ -19,6 +19,7 @@ package dev.jeka.core.api.tooling.docker;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,6 +34,7 @@ public class JkDockerJvmBuildTest {
         if (!JkDocker.isPresent()) {
             return;
         }
+        JkLog.setDecorator(JkLog.Style.INDENT);
         JkProject project = JkProject.of().flatFacade()
                 .customizeCompileDeps(deps -> deps
                         .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
@@ -45,15 +47,26 @@ public class JkDockerJvmBuildTest {
                         .and(JkDependencySet.Hint.first(), "org.mockito:mockito-core:2.10.0")
                 )
                 .setModuleId("my:project").setVersion("MyVersion")
-                .setMainClass("org.examples.Main")
+                .setMainClass("dev.jeka.core.tool.Main")
                 .getProject();
         JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project);
-        String imageName = "toto";
-        Path buildDir =JkUtilsPath.createTempDirectory("jk-test");
-        dockerJvmBuild.setBaseBuildDir(buildDir);
-        System.out.println(dockerJvmBuild.dockerBuildContent(imageName));
+        dockerJvmBuild.nonRootSteps.insertBefore("COPY classpath.txt", "# rem for testing 'insertBefore'");
+        String imageName = "jk-testunit-jvm";
+
         System.out.println(dockerJvmBuild.info(imageName));
-        System.out.println(buildDir);
+
+        // now run the image
+        Path contextDir =JkUtilsPath.createTempDirectory("jk-test");
+        System.out.println(contextDir);
+        dockerJvmBuild.buildImage(contextDir, imageName);
+        JkDocker.prepareExec("run", imageName)
+                .setLogCommand(true)
+                .addParams("--version")
+                .setInheritIO(false)
+                .setLogWithJekaDecorator(true)
+                .exec();
+        JkDocker.prepareExec("image", "rm", "--force", imageName);
+
     }
 
 }

@@ -54,6 +54,7 @@ class DockerTester extends JekaCommandLineExecutor  {
                 .addParamsAsCmdLine("--build-arg CACHEBUST=%s", Instant.now())
                 .addParamsAsCmdLine("--progress=plain -t %s .", IMAGE_NAME)
                 .setWorkingDir(DOCKER_DIR)
+                .setInheritIO(true)
                 .exec();
     }
 
