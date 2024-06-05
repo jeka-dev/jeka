@@ -36,21 +36,13 @@ import java.util.function.Consumer;
 @JkDoc("Builds and runs image based on project or 'jeka-src' (Requires a Docker client)")
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Java program arguments to pass to the Java application when run with 'docker: run'")
-    public String programArgs = "";
-
-    @JkDoc("JVM options to pass to the Java application when run with 'docker: run'")
-    public String jvmOptions = "";
-
     @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
             "If not set, the image name will be inferred form project info.")
     public String imageName;
 
-    @JkDoc("Base image to construct the Docker image.")
-    public String baseImage = JkDockerJvmBuild.BASE_IMAGE;
+    public final RunOptions run = new RunOptions();
 
-    @JkDoc("Space separated options to pass 'docker run' command, as '--interactive --tty'")
-    public String runOptions = "";
+    public final BuildOptions build = new BuildOptions();
 
     private String lastRunningContainerName;
 
@@ -82,14 +74,14 @@ public final class DockerKBean extends KBean {
     public void run() {
         JkDocker.assertPresent();
         this.lastRunningContainerName = "jeka-" + imageName.replace(':', '-');
-        String runOptions = JkUtilsString.isBlank(this.runOptions) ? "" : this.runOptions.trim() + " ";
+        String runOptions = JkUtilsString.isBlank(run.options) ? "" : run.options.trim() + " ";
         String args = String.format("%s--rm %s-e \"JAVA_TOOL_OPTIONS=%s\" --name %s %s %s",
                 runOptions,
                 dockerBuild().portMappingArgs(),
-                jvmOptions,
+                run.jvmOptions,
                 this.lastRunningContainerName,
                 imageName,
-                programArgs);
+                run.programArgs);
         JkDocker.execCmdLine("run", args);
     }
 
@@ -113,7 +105,7 @@ public final class DockerKBean extends KBean {
 
     private JkDockerJvmBuild dockerBuild() {
         JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of();
-        dockerBuild.setBaseImage(this.baseImage);
+        dockerBuild.setBaseImage(build.baseImage);
         customizer.accept(dockerBuild);
         return dockerBuild;
     }
@@ -162,6 +154,25 @@ public final class DockerKBean extends KBean {
             return "latest";
         }
         return version.toString();
+    }
+
+    public static class RunOptions {
+
+        @JkDoc("Java program arguments to pass to the Java application when run with 'docker: run'")
+        public String programArgs = "";
+
+        @JkDoc("JVM options to pass to the Java application when run with 'docker: run'")
+        public String jvmOptions = "";
+
+        @JkDoc("Space separated options to pass 'docker run' command, as '--interactive --tty'")
+        public String options = "";
+    }
+
+    public static class BuildOptions {
+
+        @JkDoc("Base image to construct the Docker image.")
+        public String baseImage = JkDockerJvmBuild.BASE_IMAGE;
+
     }
 
 }

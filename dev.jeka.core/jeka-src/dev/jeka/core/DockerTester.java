@@ -83,7 +83,7 @@ class DockerTester extends JekaCommandLineExecutor  {
                 .exec();
 
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", ShellRemoteTester.COW_SAY_URL, "docker:",
-                        "run", "programArgs=toto", "--quiet")
+                        "run", "run.programArgs=toto", "--quiet")
                 .setLogCommand(true)
                 .setCollectStdout(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
