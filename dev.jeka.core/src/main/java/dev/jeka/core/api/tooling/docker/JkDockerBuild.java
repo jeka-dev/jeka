@@ -174,6 +174,18 @@ public class JkDockerBuild {
     }
 
     /**
+     * Same as {@link #buildImage(Path, String)} but without needing passing a context directory.<p>
+     * The context directory will be created on a random temp dir.
+     * @return The path of the context dir.
+     */
+    public Path buildImage(String imageName) {
+        Path contextDir = JkUtilsPath.createTempDirectory("jeka-docker-build-context");
+        JkLog.verbose("Using context dir %s for building Docker image %s" , contextDir, imageName);
+        buildImage(contextDir, imageName);
+        return contextDir;
+    }
+
+    /**
      * Renders the effective Dockerfile
      */
     public final String render() {
@@ -335,6 +347,13 @@ public class JkDockerBuild {
          */
         public StepContainer addCopy(Path fileOrDir, String containerPath, boolean optional) {
             return add(context -> copyFileInContext(fileOrDir, containerPath, context, optional));
+        }
+
+        /**
+         * Same as {@link #addCopy(Path, String, boolean)} with optional=false
+         */
+        public StepContainer addCopy(Path fileOrDir, String containerPath) {
+            return addCopy(fileOrDir, containerPath, false);
         }
 
         /**

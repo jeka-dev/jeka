@@ -97,7 +97,7 @@ public class PicocliMainCommand {
     )
     private List<String> classpaths;
 
-    @Option(names = {"-p", "--program"},
+    @Option(names = {"-p", "--program-args"},
             description = "Indicate to run directly the built Java program when present, bypassing the JeKa execution engine.")
     private boolean fakeProgram;  // Handled at shell level
 
