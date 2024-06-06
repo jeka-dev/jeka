@@ -27,6 +27,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,7 +40,7 @@ public class NativeKBean extends KBean {
     @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
             "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
     public void build() {
-        Path javaHome = JkJavaProcess.CURRENT_JAVA_HOME;
+        assertToolPresent();
         JkProject project = load(ProjectKBean.class).project;
         Path jar = project.artifactLocator.getMainArtifactPath();
         if (!Files.exists(jar)) {
@@ -55,9 +56,7 @@ public class NativeKBean extends KBean {
         }
         String relTarget = JkUtilsString.substringBeforeLast(jar.toString(), ".jar");
         Path target = Paths.get(relTarget).toAbsolutePath();
-        Path nativeImageExe = JkUtilsSystem.IS_WINDOWS ?
-                javaHome.resolve("bin/native-image.cmd") :
-                javaHome.resolve("bin/native-image");
+        Path nativeImageExe = toolPath();
         JkProcess.of(nativeImageExe.toString(), "--no-fallback")
                 .addParams("-H:+UnlockExperimentalVMOptions")
                 .addParams("-H:IncludeResources=.*(?<!\\.class)")
@@ -69,6 +68,30 @@ public class NativeKBean extends KBean {
                 .exec();
         JkLog.info("Generated in %s", target);
         JkLog.info("Run: %s", relTarget);
+    }
+
+    private static Path toolPath() {
+        Path javaHome = JkJavaProcess.CURRENT_JAVA_HOME;
+        return JkUtilsSystem.IS_WINDOWS ?
+                javaHome.resolve("bin/native-image.cmd") :
+                javaHome.resolve("bin/native-image");
+    }
+
+    private static boolean isPresent() {
+        try {
+            return JkProcess.of(toolPath().toString(), "--version")
+                    .exec()
+                    .hasSucceed();
+        } catch (UncheckedIOException e) {
+            return false;
+        }
+    }
+
+    private static void assertToolPresent() {
+        if (!isPresent()) {
+            throw new IllegalStateException("The project seems not to be configured for using graalvm JDK.\n" +
+                    "Please set 'jeka.java.distrib=graalvm' in jeka.properties in order to build native images.");
+        }
     }
 
 }
