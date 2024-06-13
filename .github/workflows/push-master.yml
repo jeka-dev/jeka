@@ -18,7 +18,7 @@ jobs:
       run: git fetch --prune --unshallow --tag
 
     - name: Display Branch Name
-      run: echo "Current Branch: ${{ github.ref }}"
+      run: echo "Current branch = ${{ github.ref }}"
 
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
