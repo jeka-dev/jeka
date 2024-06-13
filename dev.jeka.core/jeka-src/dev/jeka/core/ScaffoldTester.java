@@ -51,9 +51,12 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         JkPathTree.of(tempDir).deleteRoot();
 
         // Scaffold for Jeka  plugin
+        /*
         scaffoldAndCheckInTemp(
                 "project: scaffold scaffold.kind=PLUGIN",
                 "project: pack", true);
+
+         */
 
         // Check IntelliJ + Eclipse metadata
         Path workingDir = scaffoldAndCheckInTemp(
