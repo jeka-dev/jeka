@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.utils;
 
 import java.lang.annotation.Annotation;
@@ -98,7 +114,8 @@ public final class JkUtilsReflect {
             setAccessibleIfNeeded(field);
             field.set(object, value);
         } catch (final Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(String.format("Error while setting value '%s'(class %s) on field %s",
+                    value, value.getClass().getName(), field), e);
         }
     }
 
@@ -392,32 +409,31 @@ public final class JkUtilsReflect {
      * Returns all fields declared in the class passed as argument or its
      * super classes annotated with the supplied annotation.
      */
-    public static List<Field> getAllDeclaredFields(Class<?> clazz,
-                                                   Class<? extends Annotation> annotationClass) {
+    public static List<Field> getDeclaredFieldsWithAnnotation(Class<?> clazz,
+                                                              Class<? extends Annotation> annotationClass) {
         final List<Field> result = new LinkedList<>();
         for (final Field field : clazz.getDeclaredFields()) {
-            final Object option = field.getAnnotation(annotationClass);
-            if (option != null) {
+            final Object annotation = field.getAnnotation(annotationClass);
+            if (annotation != null) {
                 result.add(field);
             }
         }
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null) {
-            result.addAll(getAllDeclaredFields(superClass, annotationClass));
+            result.addAll(getDeclaredFieldsWithAnnotation(superClass, annotationClass));
         }
         return result;
     }
 
     /**
-     * Returns all fields declared in the class passed as argument or andAccept its
-     * super classes.
+     * Returns all fields declared in the class passed as argument or and its super classes.
      */
-    public static List<Field> getAllDeclaredFields(Class<?> clazz, boolean includeSuperClass) {
+    public static List<Field> getDeclaredFieldsWithAnnotation(Class<?> clazz, boolean includeSuperClass) {
         final List<Field> result = new LinkedList<>();
         Collections.addAll(result, clazz.getDeclaredFields());
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null && includeSuperClass) {
-            result.addAll(getAllDeclaredFields(superClass, true));
+            result.addAll(getDeclaredFieldsWithAnnotation(superClass, true));
         }
         return result;
     }
@@ -450,6 +466,21 @@ public final class JkUtilsReflect {
     @SuppressWarnings("unchecked")
     public static <T> T invokeInstanceMethod(Object instance, String methodName, Object... args) {
         return (T) invokeMethod(instance, null, methodName, args);
+    }
+
+    /**
+     * Returns a string representation of the given object.
+     */
+    public static String toString(Object object) {
+        if (object == null) {
+            return "[null]";
+        }
+        StringBuilder b = new StringBuilder("[" + object.getClass().getName() + "    ");
+        for (Field f : object.getClass().getDeclaredFields()) {
+            b.append(f.getName() + "=" + getFieldValue(object, f.getName()) + " ");
+        }
+        b.append(']');
+        return b.toString();
     }
 
     private static Object invokeMethod(Object target, Class<?> clazz, String methodName,
@@ -544,6 +575,42 @@ public final class JkUtilsReflect {
         PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
         PRIMITIVE_TO_WRAPPER.put(void.class, Void.TYPE);
         PRIMITIVE_TO_WRAPPER.put(short.class, Short.TYPE);
+    }
+
+    /**
+     * Create a Dynamic proxy with the specified interface, delagating call to the
+     * target object.
+     */
+    public static <T> T createReflectionProxy(Class<T> interfaze, Object target) {
+        return (T) Proxy.newProxyInstance(
+                interfaze.getClassLoader(),
+                new Class[] {interfaze},
+                new JkUtilsReflect.ReflectionInvocationHandler(target)
+        );
+    }
+
+    /**
+     * Proxy Invocation handler, that delegate to target instance via reflection
+     */
+    public static class ReflectionInvocationHandler implements InvocationHandler {
+
+        private final Object targetInstance;
+
+        public ReflectionInvocationHandler(Object targetInstance) {
+            this.targetInstance = targetInstance;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) {
+            try {
+                Method targetMethod = targetInstance.getClass().getMethod(method.getName(), method.getParameterTypes());
+                return targetMethod.invoke(targetInstance, args);
+            } catch (final IllegalArgumentException | NoSuchMethodException | IllegalAccessException |
+                           InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
 }

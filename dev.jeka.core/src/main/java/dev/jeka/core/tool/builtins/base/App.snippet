@@ -1,0 +1,15 @@
+package app;
+
+import com.github.lalyos.jfiglet.FigletFont;
+import dev.jeka.core.tool.JkInjectClasspath;
+
+// Declare here, production dependencies
+${inject}
+@JkInjectClasspath("com.github.lalyos:jfiglet:0.0.9")
+public class App {
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(FigletFont.convertOneLine("Hello JeKa"));
+    }
+
+}

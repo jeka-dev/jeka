@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.plugins.sonarqube;
 
 import dev.jeka.core.api.depmanagement.*;
@@ -9,13 +25,13 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkException;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -31,7 +47,7 @@ import java.util.*;
  */
 public final class JkSonarqube {
 
-    public static final String DEFAULT_SCANNER__VERSION = "4.6.2.2472";
+    public static final String DEFAULT_SCANNER__VERSION = "5.0.1.3006";
 
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
@@ -55,7 +71,9 @@ public final class JkSonarqube {
     public static final String BINARIES = "binaries";
     public static final String JAVA_BINARIES = "java.binaries";
     public static final String TEST = "tests";
+    public static final String TEST_INCLUSIONS = "test.inclusions";
     public static final String LIBRARIES = "libraries";
+    public static final String EXCLUSIONS = "exclusions";
     public static final String JAVA_LIBRARIES = "java.libraries";
     public static final String JAVA_TEST_LIBRARIES = "java.test.libraries";
     public static final String JAVA_TEST_BINARIES = "java.test.binaries";
@@ -64,29 +82,23 @@ public final class JkSonarqube {
     public static final String JDBC_URL = "jdbc.url";
     public static final String JDBC_USERNAME = "jdbc.username";
     public static final String JDBC_PASSWORD = "jdbc.password";
-    private static final String SCANNER_JAR_NAME_46 = "sonar-scanner-cli-4.6.2.2472.jar";
     private static final String SONAR_PREFIX = "sonar.";
 
     private final Map<String, String> params = new HashMap<>();
 
-    private final JkRepoSet repos;
+    private JkRepoSet repos;
 
-    private final String scannerVersion;
+    private String scannerVersion;
 
-    private boolean logOutput;
+    private boolean logOutput = true;
+
+    private boolean pingServer = true;
 
     private JkSonarqube(JkRepoSet repos,
                         @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         this.repos = repos;
         this.scannerVersion = scannerVersion;
         params.put(WORKING_DIRECTORY, workDir(Paths.get("")));
-    }
-
-    /**
-     * Creates a {@link JkSonarqube} object using the embedded scanner.
-     */
-    public static JkSonarqube ofEmbedded() {
-        return new JkSonarqube(null, null);
     }
 
     /**
@@ -116,18 +128,49 @@ public final class JkSonarqube {
         return ofVersion(JkRepo.ofMavenCentral().toSet(), scannerVersion);
     }
 
-    private static String workDir(Path baseDir) {
-        return baseDir.resolve(JkConstants.JEKA_DIR + "/.sonarscannerworks").toString();
+    /**
+     * Returns a copy of the current {@link JkSonarqube} object with the same field values.
+     */
+    public JkSonarqube copyWithProperties() {
+        JkSonarqube copy = copyWithoutProperties();
+        copy.params.putAll(this.params);
+        return copy;
     }
 
     /**
-     * @see #configureFor(JkProject, boolean, boolean)
+     * Returns the value of the property with the specified key.
      */
-    public JkSonarqube configureFor(JkProject project) {
-        return configureFor(project, true, false);
+    public String getProperty(String key) {
+        return params.get(key);
     }
 
+    /**
+     * Returns a copy of the current {@link JkSonarqube} object with the same field values, except for the properties
+     * "logOutput" and "pingServer" which are set to the same as the original object.
+     * This method is useful for creating immutable copies of the object.
+     */
+    public JkSonarqube copyWithoutProperties() {
+        JkSonarqube copy = new JkSonarqube(this.repos, this.scannerVersion);
+        copy.logOutput = this.logOutput;
+        copy.pingServer = this.pingServer;
+        return copy;
+    }
 
+    /**
+     * Sets the version of the SonarQube scanner and the repositories from which to download it.
+     *
+     * @param downloadRepos The repositories from which to download the SonarQube scanner.
+     * @param scannerVersion The version of the SonarQube scanner. It should be in the format "org.sonarsource.scanner.cli:sonar-scanner-cli:VERSION".
+     */
+    public JkSonarqube setVersion(JkRepoSet downloadRepos, @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
+        this.repos = downloadRepos;
+        this.scannerVersion = scannerVersion;
+        return this;
+    }
+
+    /**
+     * Sets the project ID for SonarQube analysis.
+     */
     public JkSonarqube setProjectId(String projectKey, String projectName, String version) {
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
@@ -144,22 +187,56 @@ public final class JkSonarqube {
         return this;
     }
 
+    /**
+     * Determines whether SonarQube scanner logs should be displayed.
+     *
+     * @param logOutput 'true' if the logs should be displayed, 'false' otherwise.
+     * @return an instance of JkSonarqube with the updated logOutput setting.
+     */
     public JkSonarqube setLogOutput(boolean logOutput) {
         this.logOutput = logOutput;
         return this;
     }
 
-    public void run() {
-        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("localhost");
-        JkLog.startTask("Launch Sonar analysis on server " + hostUrl);
-        Path jar = getToolJar();
-        String[] args = JkLog.isVerbose() ? new String[] {"-e", "-X"} : new String[] {"-e"};
-        javaProcess(jar, "org.sonarsource.scanner.cli.Main").exec(args);
-        JkLog.endTask();
+    /**
+     * Sets the flag whether to ping the server during SonarQube analysis.
+     */
+    public JkSonarqube setPingServer(boolean pingServer) {
+        this.pingServer = pingServer;
+        return this;
     }
 
     /**
-     * Set a sonarqube property (aka analysis parameter) as listed <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">here</a>. <p/>
+     * Executes SonarQube analysis.
+     */
+    public void run() {
+        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("http://localhost:9000");
+
+        JkLog.startTask("run-sonar-analysis");
+        if (pingServer) {
+            if (!JkUtilsNet.isStatusOk(hostUrl, JkLog.isVerbose())) {
+                throw new JkException("The Sonarqube url %s is not available.%nCheck server " +
+                        "or disable this ping check (sonarqube: pingServer=false)", hostUrl);
+            }
+            JkLog.info("Sonarqube server url : %s", hostUrl);
+        }
+
+        JkConsoleSpinner.of("Running Sonarqube").run(this::runAndCheck);
+        JkLog.endTask();
+    }
+
+    private void runAndCheck() {
+        Path jar = getToolJar();
+        JkProcResult procResult = javaProcess(jar)
+                .addParamsIf(JkLog.verbosity() == JkLog.Verbosity.DEBUG, "-X")
+                .exec();
+        if (!procResult.hasSucceed()) {
+            throw new JkException("SonarScanner command failed. Use--verbose to get more details.");
+        }
+    }
+
+    /**
+     * Sets a sonarqube property (aka analysis parameter) as listed <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">here</a>. <p/>
      *
      * Sonarqube properties all start with prefix 'sonar.' but you can omit it, as it will be
      * prepended at launch time, if missing.
@@ -170,16 +247,19 @@ public final class JkSonarqube {
     }
 
     /**
-     * Convenient method to pass a list of path, as property value.
-     * @see #setProperty(String, String)
+     * Sets a sonarqube property (aka analysis parameter) with a list of paths.
+     *
+     * @param key   The key of the property.
+     * @param value The iterable collection of paths.
+     * @return An instance of JkSonarqube with the updated property.
+     * @see <a href="https://docs.sonarsource.com/sonarqube/9.9/analyzing-source-code/analysis-parameters/">SonarQube Analysis Parameters</a>
      */
-    public JkSonarqube setProperty(String key, Iterable<Path> value) {
+    public JkSonarqube setPathProperty(String key, Iterable<Path> value) {
         return setProperty(key, toPaths(value));
     }
 
     /**
-     * Convenient method to pass a bulk of sonar properties..
-     * @see #setProperty(String, String)
+     * Adds SonarQube analysis properties.
      */
     public JkSonarqube setProperties(Map<String, String> props) {
         this.params.putAll(props);
@@ -228,13 +308,76 @@ public final class JkSonarqube {
         return setProperty(JDBC_PASSWORD, pwd);
     }
 
-    private JkJavaProcess javaProcess(Path jar, String mainClassName) {
-        return JkJavaProcess.ofJava(mainClassName)
+    /**
+     * Configures Sonarqube for the supplied {@link JkProject}.
+     * @param provideProdLibs If true, the list of production dependency files will be provided to sonarqube.
+     * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
+     */
+    public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
+        final JkCompileLayout prodLayout = project.compilation.layout;
+        final JkCompileLayout testLayout = project.testing.compilation.layout;
+        final Path baseDir = project.getBaseDir();
+        JkPathSequence libs = JkPathSequence.of();
+        if (provideProdLibs) {
+            JkDependencySet deps = project.compilation.getDependencies()
+                    .merge(project.packaging.getRuntimeDependencies()).getResult();
+            libs = project.dependencyResolver.resolve(deps).getFiles();
+        }
+        final Path testReportDir = project.testing.getReportDir();
+        JkModuleId jkModuleId = project.getModuleId();
+        if (jkModuleId == null) {
+            String baseDirName = baseDir.getFileName().toString();
+            if (JkUtilsString.isBlank(baseDirName)) {
+                baseDirName = baseDir.toAbsolutePath().getFileName().toString();
+            }
+            jkModuleId = JkModuleId.of(baseDirName, baseDirName);
+        }
+        final String version = project.getVersion().getValue();
+        final String fullName = jkModuleId.getDotNotation();
+        final String name = jkModuleId.getName();
+        this
+                .setProjectId(fullName, name, version)
+                .setProjectBaseDir(baseDir)
+                .setBinaries(project.compilation.layout.resolveClassDir())
+                .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
+                .setPathProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
+                .setPathProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
+                .setProperty(WORKING_DIRECTORY, workDir(baseDir))
+                .setProperty(JUNIT_REPORTS_PATH,
+                        baseDir.relativize( testReportDir.resolve("junit")).toString())
+                .setProperty(SUREFIRE_REPORTS_PATH,
+                        baseDir.relativize(testReportDir.resolve("junit")).toString())
+                .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
+                .setProperty(JACOCO_XML_REPORTS_PATHS,
+                        baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
+                .setPathProperty(JAVA_LIBRARIES, libs)
+                .setPathProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+        if (provideTestLibs) {
+            JkDependencySet deps = project.testing.compilation.getDependencies();
+            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
+            this.setPathProperty(JAVA_TEST_LIBRARIES, testLibs);
+        }
+        return this;
+    }
+
+    /**
+     * @see #configureFor(JkProject, boolean, boolean)
+     */
+    public JkSonarqube configureFor(JkProject project) {
+        return configureFor(project, true, false);
+    }
+
+    private static String workDir(Path baseDir) {
+        return baseDir.resolve(JkConstants.JEKA_WORK_PATH + "/.sonarscannerworks").toString();
+    }
+
+    private JkJavaProcess javaProcess(Path jar) {
+        return JkJavaProcess.ofJava("org.sonarsource.scanner.cli.Main")
                 .setClasspath(jar)
-                .setFailOnError(true)
+                .setFailOnError(JkLog.isVerbose())
                 .addParams(toProperties())
-                .setLogCommand(JkLog.isVerbose() || logOutput)
-                .setLogOutput(JkLog.isVerbose() || logOutput);
+                .setLogCommand(JkLog.isVerbose())
+                .setLogWithJekaDecorator(JkLog.isVerbose() || !JkLog.isAnimationAccepted());
     }
 
     private List<String> toProperties() {
@@ -277,11 +420,6 @@ public final class JkSonarqube {
         JkJavaVersion javaVersion = JkJavaVersion.of(System.getProperty("java.version"));
         JkUtilsAssert.state(javaVersion.compareTo(JkJavaVersion.V11) >= 0,
                 "Sonarqube has to run on JRE >= 11. You are running on version " + javaVersion);
-        if (this.scannerVersion == null) {
-            URL embeddedUrl = JkSonarqube.class.getResource(SCANNER_JAR_NAME_46);
-            JkLog.info("Use embedded sonar scanner : " + SCANNER_JAR_NAME_46);
-            return JkUtilsIO.copyUrlContentToCacheFile(embeddedUrl, null, JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-        }
         JkCoordinate coordinate = JkCoordinate.of("org.sonarsource.scanner.cli", "sonar-scanner-cli",
                 this.scannerVersion);
         JkCoordinateDependency coordinateDependency = JkCoordinateDependency
@@ -301,61 +439,10 @@ public final class JkSonarqube {
             throw new IllegalStateException(sb.toString());
         }
         JkVersion effectiveVersion = resolveResult.getVersionOf(coordinate.getModuleId());  // Get effective version if specified one is '+'
-        JkLog.info("Run sonar scanner " + effectiveVersion);
+        JkLog.verbose("Use sonar scanner %s", effectiveVersion);
         return resolveResult.getFiles().getEntries().get(0);
     }
 
-    /**
-     * Configures Sonarqube for the supplied {@link JkProject}.
-     * @param provideProdLibs If true, the list of production dependency files will be provided to sonarqube.
-     * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
-     */
-    public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
-        final JkCompileLayout prodLayout = project.compilation.layout;
-        final JkCompileLayout testLayout = project.testing.compilation.layout;
-        final Path baseDir = project.getBaseDir();
-        JkPathSequence libs = JkPathSequence.of();
-        if (provideProdLibs) {
-            JkDependencySet deps = project.compilation.getDependencies()
-                    .merge(project.packaging.getRuntimeDependencies()).getResult();
-            libs = project.dependencyResolver.resolve(deps).getFiles();
-        }
-        final Path testReportDir = project.testing.getReportDir();
-        JkModuleId jkModuleId = project.publication.getModuleId();
-        if (jkModuleId == null) {
-            String baseDirName = baseDir.getFileName().toString();
-            if (JkUtilsString.isBlank(baseDirName)) {
-                baseDirName = baseDir.toAbsolutePath().getFileName().toString();
-            }
-            jkModuleId = JkModuleId.of(baseDirName, baseDirName);
-        }
-        final String version = project.publication.getVersion().getValue();
-        final String fullName = jkModuleId.getDotNotation();
-        final String name = jkModuleId.getName();
-        this
-            .setLogOutput(JkLog.isVerbose())
-            .setProjectId(fullName, name, version)
-            .setProjectBaseDir(baseDir)
-            .setBinaries(project.compilation.layout.resolveClassDir())
-                .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
-                .setProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(WORKING_DIRECTORY, workDir(baseDir))
-                .setProperty(JUNIT_REPORTS_PATH,
-                    baseDir.relativize( testReportDir.resolve("junit")).toString())
-                .setProperty(SUREFIRE_REPORTS_PATH,
-                    baseDir.relativize(testReportDir.resolve("junit")).toString())
-                .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
-                .setProperty(JACOCO_XML_REPORTS_PATHS,
-                    baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
-                .setProperty(JAVA_LIBRARIES, libs)
-                .setProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
-        if (provideTestLibs) {
-            JkDependencySet deps = project.testing.compilation.getDependencies();
-            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
-            this.setProperty(JAVA_TEST_LIBRARIES, testLibs);
-        }
-        return this;
-    }
+
 
 }

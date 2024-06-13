@@ -15,11 +15,19 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow --tags
+
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build Jeka bootstrapped with ANT
+
+    - name: Restore JeKa cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ~/.jeka/cache
+        key: ${{ runner.os }}
+
+    - name: Build JeKa bootstrapped with ANT
       env:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
@@ -27,8 +35,25 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+      
+    - name: Save JeKa cache
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.jeka/cache
+        key: ${{ runner.os }}
+
     - name: Deploy MkDocs
       if: github.ref == 'refs/heads/master'
       uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Deploy distrib to Release
+      if: github.event_name == 'create' && github.ref_type == 'tag'
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dev.jeka.core/jeka-output/dev.jeka.jeka-core-distrib.zip
+        asset_name: distrib.zip
+        tag: ${{ github.ref }}
+        overwrite: true

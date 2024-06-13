@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLocator;
@@ -5,6 +21,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
 import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
@@ -25,7 +42,6 @@ public final class JkCoordinate {
     private final JkVersion version;
 
     private final JkArtifactSpecification artifactSpecification;
-
 
     private JkCoordinate(JkModuleId moduleId, JkVersion version,
                          JkArtifactSpecification artifactSpecification) {
@@ -83,17 +99,19 @@ public final class JkCoordinate {
      *
      * Version can be a '?' if it is unspecified or a '+' to take the highest existing version.
      */
-    public static JkCoordinate of(@JkDepSuggest String description) {
-        final String[] strings = description.split( ":");
-        final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of \n" +
+    public static JkCoordinate of(@JkDepSuggest String coordinate, Object...tokens) {
+        String formattedCoordinate = String.format(coordinate, tokens);
+        final String[] strings = formattedCoordinate.split( ":");
+        final String errorMessage = "Coordinate specification '" + formattedCoordinate + "' is not correct. Should be one of \n" +
                 "  group:name \n" +
                 "  group:name:version \n" +
                 "  group:name:classifiers:version \n" +
                 "  group:name:classifiers:extension:version \n" +
                 "  group:name:classifiers:extension: \n" +
                 "where classifiers can be a coma separated list of classifier.";
-        JkUtilsAssert.argument(isCoordinateDescription(description), errorMessage);
-        int separatorCount = JkUtilsString.countOccurrence(description, ':');
+
+        JkUtilsAssert.argument(isCoordinateDescription(formattedCoordinate), errorMessage);
+        int separatorCount = JkUtilsString.countOccurrence(formattedCoordinate, ':');
         final JkModuleId jkModuleId = JkModuleId.of(strings[0], strings[1]);
         if (separatorCount == 1 && strings.length == 2) {
             return of(jkModuleId, JkVersion.UNSPECIFIED);
@@ -124,11 +142,10 @@ public final class JkCoordinate {
 
     /**
      * Returns <code>true</code> if the specified candidate matches to a module description.
-     * @see #of(String)
      */
     public static boolean isCoordinateDescription(String candidate) {
         final String[] strings = candidate.split( ":");
-        return strings.length >= 2 && strings.length <= 5;
+        return strings.length >= 2 && strings.length <= 5 && !candidate.contains(" ");
     }
 
     /**
@@ -185,12 +202,12 @@ public final class JkCoordinate {
      *                    linux and mac classifier. ',mac' stands for the default classifier +
      *                    mac classifier
      */
-    public JkCoordinate withClassifierAndType(String classifier, String type) {
-        return new JkCoordinate(moduleId, version, JkArtifactSpecification.of(classifier, type));
+    public JkCoordinate withClassifierAndType(String classifiers, String type) {
+        return new JkCoordinate(moduleId, version, JkArtifactSpecification.of(classifiers, type));
     }
 
     /**
-     * @see #andClassifierAndType(String, String)
+     * @see #withClassifierAndType(String, String)
      */
     public JkCoordinate withClassifier(String classifier) {
         return withClassifierAndType(classifier, null);
@@ -239,9 +256,9 @@ public final class JkCoordinate {
             this.type = type;
         }
 
-        // TODO blankToNull args
         public static JkArtifactSpecification of(String classifier, String type) {
-            return new JkArtifactSpecification(classifier, type);
+            return new JkArtifactSpecification(JkUtilsString.blankToNull(classifier),
+                    JkUtilsString.blankToNull(type));
         }
 
         public String getClassifier() {
@@ -259,10 +276,8 @@ public final class JkCoordinate {
 
             JkArtifactSpecification that = (JkArtifactSpecification) o;
 
-            if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
-            if (type != null ? !type.equals(that.type) : that.type != null) return false;
-
-            return true;
+            if (!Objects.equals(classifier, that.classifier)) return false;
+            return Objects.equals(type, that.type);
         }
 
         @Override

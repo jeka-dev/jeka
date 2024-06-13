@@ -1,4 +1,22 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
+
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,10 +63,32 @@ public interface JkDependency {
      * depending on the specified parameter stands for a path or a coordinate.
      */
     static JkDependency of(String pathOrCoordinate) {
-        if (pathOrCoordinate.contains(":")) {
+        if (isCoordinate(pathOrCoordinate)) {
             return JkCoordinateDependency.of(pathOrCoordinate.trim());
         }
         return JkFileSystemDependency.of(Paths.get(pathOrCoordinate));
+    }
+
+    /**
+     * Same as {@link #of(String)} but resolve relative paths against the specified base directory.
+     */
+    static JkDependency of(Path baseDir, String pathOrCoordinate) {
+        if (isCoordinate(pathOrCoordinate)) {
+            return JkCoordinateDependency.of(pathOrCoordinate.trim());
+        }
+        Path path = Paths.get(pathOrCoordinate);
+        path =  path.isAbsolute() ? path : baseDir.resolve(path);
+        return JkFileSystemDependency.of(path);
+    }
+
+    /**
+     * Determines whether the given String represents a coordinate or a file path.
+     */
+    static boolean isCoordinate(String pathOrCoordinate) {
+        boolean hasColon = pathOrCoordinate.contains(":");
+        boolean windowsFile = JkUtilsSystem.IS_WINDOWS &&
+                ( pathOrCoordinate.startsWith(":\\", 1) || pathOrCoordinate.startsWith(":/", 1) );
+        return hasColon && !windowsFile;
     }
 
 

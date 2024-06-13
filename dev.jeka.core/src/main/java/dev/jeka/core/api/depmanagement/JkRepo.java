@@ -1,5 +1,22 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -13,7 +30,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository
@@ -116,11 +132,11 @@ public final class JkRepo {
         String pwd = null;
         String githubToken = System.getenv("GITHUB_TOKEN");
         if (!JkUtilsString.isBlank(githubToken)) {
-            JkLog.trace("Github token found, configure repo %s with associate credential", baseUrl);
+            JkLog.verbose("Github token found, configure repo %s with associate credential", baseUrl);
             username = "GITHUB_TOKEN";
             pwd = githubToken;
         } else {
-            JkLog.trace("No Github token found to make credential on repo %s.", baseUrl);
+            JkLog.verbose("No Github token found to make credential on repo %s.", baseUrl);
         }
         JkRepo repo = of(baseUrl)
                 .setCredentials(JkRepoCredentials.of(username, pwd, "GitHub Package Registry"));
@@ -144,7 +160,7 @@ public final class JkRepo {
      * Creates an OSSRH repository for deploying released artifacts.
      */
     public static JkRepo ofMavenOssrhDeployRelease(String jiraId, String jiraPassword,
-                                                   UnaryOperator<Path> signer) {
+                                                   JkFileSigner signer) {
         JkRepo repo =  of(MAVEN_OSSRH_DEPLOY_RELEASE)
                 .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager");
         repo.publishConfig
@@ -242,7 +258,7 @@ public final class JkRepo {
     }
 
     public JkRepo setHttpHeaders(String ...keysAndValues) {
-        return setHttpHeaders(JkUtilsIterable.mapOfAny(keysAndValues));
+        return setHttpHeaders(JkUtilsIterable.mapOfAny((Object[]) keysAndValues));
     }
 
     public JkRepo setHttpHeaders(Map<String, String> headers) {
@@ -279,7 +295,7 @@ public final class JkRepo {
 
     @Override
     public String toString() {
-        return url.toString();
+        return url.toString() + "     " + publishConfig;
     }
 
     private static URL toUrl(String urlOrDir) {
@@ -403,7 +419,9 @@ public final class JkRepo {
      */
     public static class JkPublishConfig {
 
-        private Predicate<JkVersion> versionFilter = jkVersion -> true;
+        private static Predicate<JkVersion> NO_FILTER = jkVersion -> true;
+
+        private Predicate<JkVersion> versionFilter = NO_FILTER;
 
         private boolean signatureRequired;
 
@@ -411,7 +429,7 @@ public final class JkRepo {
 
         private Set<String> checksumAlgos = new HashSet<>();
 
-        private UnaryOperator<Path> signer;
+        private JkFileSigner signer;
 
         /**
          * Returns the filter used for this {@link JkPublishConfig}.
@@ -433,7 +451,7 @@ public final class JkRepo {
             return checksumAlgos;
         }
 
-        public UnaryOperator<Path> getSigner() {
+        public JkFileSigner getSigner() {
             return signer;
         }
 
@@ -458,7 +476,7 @@ public final class JkRepo {
             return this;
         }
 
-        public JkPublishConfig setSigner(UnaryOperator<Path> signer) {
+        public JkPublishConfig setSigner(JkFileSigner signer) {
             this.signer = signer;
             return this;
         }
@@ -473,6 +491,18 @@ public final class JkRepo {
             return result;
         }
 
+        @Override
+        public String toString() {
+            boolean hasVersionFilter = versionFilter != NO_FILTER;
+            boolean hasSigner = signer != null;
+            return "publishConfig:{" +
+                    "versionFilter:" + hasVersionFilter +
+                    ", signatureRequired:" + signatureRequired +
+                    ", uniqueSnapshot:" + uniqueSnapshot +
+                    ", checksumAlgos:" + checksumAlgos +
+                    ", signer:" + hasSigner +
+                    '}';
+        }
     }
 
 

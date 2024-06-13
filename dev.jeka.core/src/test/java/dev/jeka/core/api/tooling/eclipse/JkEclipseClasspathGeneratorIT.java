@@ -26,7 +26,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("base"))
             .flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("org.apache.httpcomponents.client5:httpclient5:5.1.3"))
                 .getProject();
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
@@ -42,7 +42,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
             .compilation
-                .configureDependencies(deps -> deps.and(baseProject.toDependency()));
+                .customizeDependencies(deps -> deps.and(baseProject.toDependency()));
         coreProject
             .testing
                 .compilation
@@ -65,8 +65,8 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
             .compilation
-                    .configureDependencies(deps -> deps.and(coreProject.toDependency()));
-        desktopProject.artifactProducer.makeAllArtifacts();
+                    .customizeDependencies(deps -> deps.and(coreProject.toDependency()));
+        desktopProject.pack();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.generate();

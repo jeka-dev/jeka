@@ -1,10 +1,22 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.crypto.gpg.embedded.bc;
 
 import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
-import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.openpgp.PGPUtil;
@@ -25,18 +37,17 @@ import java.util.List;
 
 final class BcGpgDoer implements JkInternalGpgDoer {
 
-    private static final int HASH_ALGO = HashAlgorithmTags.SHA1;  //NOSONAR
+    private static final int HASH_ALGO = HashAlgorithmTags.SHA1;
 
     // Accessed through reflection
     static BcGpgDoer of() {
         return new BcGpgDoer();
     }
 
-    public boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
-
+    public boolean verify(Path fileToVerify, Path signatureFile, Path publicRingPath) {
         try (final InputStream streamToVerify = Files.newInputStream(fileToVerify);
              final InputStream signatureStream = Files.newInputStream(signatureFile);
-             final InputStream pubringStream = Files.newInputStream(pubringFile)) {
+             final InputStream pubringStream = Files.newInputStream(publicRingPath)) {
             return verify(streamToVerify, signatureStream, pubringStream);
         } catch (final IOException | PGPException e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -84,19 +95,10 @@ final class BcGpgDoer implements JkInternalGpgDoer {
         return signature.verify();
     }
 
-    public void sign(Path fileToSign, Path secringFile, String keyName, Path signatureFile, char[] pass,
-                            boolean armor) {
-        JkLog.info("Sign file %s using secretkey file %s and key name '%s'.",
-                JkUtilsPath.relativizeFromWorkingDir(fileToSign),
-                JkUtilsPath.relativizeFromWorkingDir(secringFile),
-                keyName);
-        JkUtilsAssert.argument(Files.exists(fileToSign), fileToSign + " not found.");
-        JkUtilsAssert.argument(Files.exists(secringFile), secringFile + " not found.");
-        JkPathFile.of(signatureFile).createIfNotExist();
-        try (final InputStream toSign = Files.newInputStream(fileToSign);
-             final InputStream keyRing = Files.newInputStream(secringFile);
-             final OutputStream out = Files.newOutputStream(signatureFile)) {
-            sign(toSign, keyRing, keyName, out, pass, armor);
+    @Override
+    public void sign(InputStream streamToSign, OutputStream signatureStream, Path secretRingPath, String keyName, char[] pass, boolean armor) {
+        try (final InputStream keyRing = Files.newInputStream(secretRingPath)) {
+            sign(streamToSign, keyRing, keyName, signatureStream, pass, armor);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -204,7 +206,6 @@ final class BcGpgDoer implements JkInternalGpgDoer {
                                 + " Was expecting a file containing secret key only. ");
             }
         }
-
     }
 
     private BcGpgDoer() {

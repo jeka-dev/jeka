@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.kotlin;
 
 import dev.jeka.core.api.depmanagement.*;
@@ -5,13 +21,13 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -23,14 +39,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Stand for a compilation setting and process. Use this class to perform java
- * compilation.
+ * Represents a Kotlin compiler.
  */
 public final class JkKotlinCompiler {
 
-    enum Target {
+    /**
+     * Represents the possible target platforms for the Kotlin compiler.
+     */
+    public enum Target {
         JAVA, JS
     }
+
+    public static final String KOTLIN_COMPILER_COORDINATES = "org.jetbrains.kotlin:kotlin-compiler:";
 
     public static final String KOTLIN_VERSION_OPTION = "jeka.kotlin.version";
 
@@ -46,13 +66,13 @@ public final class JkKotlinCompiler {
 
     private final List<String> jvmOptions = new LinkedList<>();
 
-    private List<String> options = new LinkedList<>();
+    private final List<String> options = new LinkedList<>();
 
     private JkRepoSet repos = JkRepoSet.of(JkRepo.ofMavenCentral());
 
-    private List<Plugin> plugins = new LinkedList<>();
+    private final List<Plugin> plugins = new LinkedList<>();
 
-    private JkPathSequence extraClasspath = JkPathSequence.of();
+    private final JkPathSequence extraClasspath = JkPathSequence.of();
 
     private final String command;
 
@@ -95,7 +115,11 @@ public final class JkKotlinCompiler {
      *  Creates a {@link JkKotlinCompiler} of the specified Kotlin version for the specified target platform. The
      *  compiler matching the specified Kotlin version is downloaded from the specified repo.
      */
-    public static JkKotlinCompiler ofTarget(JkRepoSet repos, Target target, String kotlinVersion) {
+    public static JkKotlinCompiler ofTarget(
+            JkRepoSet repos,
+            Target target,
+            @JkDepSuggest(versionOnly = true, hint = KOTLIN_COMPILER_COORDINATES) String kotlinVersion) {
+
         JkPathTree kotlincDir = JkPathTree.of(getLibsDir(kotlinVersion));
         JkPathSequence kotlincFiles;
         if (kotlincDir.exists() && kotlincDir.containFiles()) {
@@ -115,15 +139,28 @@ public final class JkKotlinCompiler {
                 new JarsVersionAndTarget(kotlincFiles, kotlinVersion, target));
     }
 
-    private static Path getLibsDir(String version) {
-        return JkLocator.getCacheDir().resolve("kotlinc").resolve(version);
-    }
+    /**
+     * Creates a {@link JkKotlinCompiler} for JVM with the specified version and fetched from the specified repository .
+     *
+     * @param repos The repository set to download the Kotlin compiler from.
+     * @param version The version of Kotlin to use.
+     *
+     * @throws IllegalArgumentException if `version` is null.
+     */
+    public static JkKotlinCompiler ofJvm(
+            JkRepoSet repos,
+            @JkDepSuggest(versionOnly = true, hint = KOTLIN_COMPILER_COORDINATES) String version) {
 
-    public static JkKotlinCompiler ofJvm(JkRepoSet repos, String version) {
         JkUtilsAssert.argument(version != null, "Kotlin version cannot be null. You mist provide one.");
         return ofTarget(repos, Target.JAVA, version);
     }
 
+    /**
+     * Creates a {@link JkKotlinCompiler} for JVM with the specified by 'jeka.kotlin.version' property
+     * and fetched from the specified repository.
+     *
+     * @param repos The repository set to download the Kotlin compiler from.
+     */
     public static JkKotlinCompiler ofJvm(JkRepoSet repos) {
         JkProperties props = JkProperties.ofSysPropsThenEnvThenGlobalProperties();
         String version = props.get(KOTLIN_VERSION_OPTION);
@@ -153,7 +190,7 @@ public final class JkKotlinCompiler {
         if (cachedVersion != null) {
             return cachedVersion;
         }
-        List<String> lines = JkProcess.of(command, "-version").execAndReturnOutput();
+        List<String> lines = JkProcess.of(command, "-version").setCollectStdout(true).exec().getStdoutAsMultiline();
         String line = lines.get(0);
         cachedVersion=  line.split(" ")[2].trim();
         return cachedVersion;
@@ -161,7 +198,7 @@ public final class JkKotlinCompiler {
 
     /**
      * Returns path of stdlib located in JEKA_HOME (if the compiler is provided by the platform) of from
-     * a repo (if the comiler is managed by Jeka, meaning the version is specified)
+     * a repo (if the compiler is managed by JeKa, meaning the version is specified)
      */
     public Path getStdLib() {
         if (isProvidedCompiler()) {
@@ -173,6 +210,9 @@ public final class JkKotlinCompiler {
         return JkCoordinateFileProxy.of(repos, coordinate).get();
     }
 
+    /**
+     * Returns the path of the standard JDK 8 libraries for the Kotlin compiler.
+     */
     public JkPathSequence getStdJdk8Lib() {
         final Path jarDir;
         if (isProvidedCompiler()) {
@@ -193,27 +233,39 @@ public final class JkKotlinCompiler {
 
     }
 
+    /**
+     * Sets the flag to indicate whether compilation should fail on error or not.
+     */
     public JkKotlinCompiler setFailOnError(boolean fail) {
         this.failOnError = fail;
         return this;
     }
 
+    /**
+     * Sets the flag to indicate whether the compiler command should be logged or not.
+     */
     public JkKotlinCompiler setLogCommand(boolean log) {
         this.logCommand = log;
         return this;
     }
 
+    /**
+     * Sets the flag to indicate whether the compiler output should be logged or not.
+     */
     public JkKotlinCompiler setLogOutput(boolean log) {
         this.logOutput = log;
         return this;
     }
 
+    /**
+     * Retrieves the set of repositories to fetch stdlib and plugins.
+     */
     public JkRepoSet getRepos() {
         return repos;
     }
 
     /**
-     * Set the repo to fetch stdlib and plugins
+     * Set the repo to fetch stdlib and plugins.
      */
     public JkKotlinCompiler setRepos(JkRepoSet repos) {
         this.repos = repos;
@@ -228,12 +280,18 @@ public final class JkKotlinCompiler {
         return this;
     }
 
+    /**
+     * Adds a plugin option to the Kotlin compiler.
+     */
     public JkKotlinCompiler addPluginOption(String pluginId, String name, String value) {
         addOption("-P");
         addOption("plugin:" + pluginId + ":" + name + "=" + value);
         return this;
     }
 
+    /**
+     * Adds a plugin JAR file to the Kotlin compiler.
+     */
     public JkKotlinCompiler addPlugin(Path pluginJar) {
         Plugin plugin = new Plugin();
         plugin.jar = pluginJar;
@@ -246,7 +304,7 @@ public final class JkKotlinCompiler {
      * If the coordinate does not mention the version, the Kotlin version of this compiler is chosen.<p>
      * {@link Plugin} class provides constants about most common plugin coordinates.
      */
-    public JkKotlinCompiler addPlugin(String coordinate) {
+    public JkKotlinCompiler addPlugin(@JkDepSuggest(hint = "org.jetbrains.kotlin:") String coordinate) {
         Plugin plugin = new Plugin();
         if (JkUtilsString.isBlank(coordinate)) {
             plugin.pluginCoordinate = null;
@@ -261,13 +319,16 @@ public final class JkKotlinCompiler {
         return this;
     }
 
+    /**
+     * Adds an option to the Kotlin compiler.
+     */
     public JkKotlinCompiler addOption(String option) {
         this.options.add(toWindowsArg(option));
         return this;
     }
 
     /**
-     * Actually compile the source files to the output directory.
+     * Compiles the source files to the output directory.
      *
      * @return <code>false</code> if a compilation error occurred.
      *
@@ -290,11 +351,9 @@ public final class JkKotlinCompiler {
         if (JkLog.verbosity().isVerbose()) {
             message = message + " to " + outputDir + " using options : " + String.join(" ", effectiveOptions);
         }
-        long start = System.nanoTime();
-        JkLog.startTask(message);
-
+        JkLog.verboseStartTask(message);
         final Result result = run(compileSpec);
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        JkLog.verboseEndTask();
         if (!result.success) {
             if (failOnError) {
                 throw new IllegalStateException("Kotlin compiler failed " + result.params);
@@ -304,12 +363,18 @@ public final class JkKotlinCompiler {
         return true;
     }
 
+    /**
+     * Returns the list of plugins used by this compiler.
+     */
     public List<String> getPlugins() {
         return this.plugins.stream()
                 .map(Plugin::toOption)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the list of plugin options used by this compiler.
+     */
     public List<String> getPluginOptions() {
         List<String> options = new LinkedList<>();
         for (Iterator<String> it = options.iterator(); it.hasNext();) {
@@ -324,8 +389,14 @@ public final class JkKotlinCompiler {
         return Collections.unmodifiableList(options);
     }
 
+    private static Path getLibsDir(
+            @JkDepSuggest(versionOnly = true, hint = KOTLIN_COMPILER_COORDINATES) String version) {
+
+        return JkLocator.getCacheDir().resolve("kotlinc").resolve(version);
+    }
+
     private Result run(JkKotlinJvmCompileSpec compileSpec) {
-        JkPathMatcher filter = KOTLIN_SOURCE_MATCHER.or(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+        JkPathMatcher filter = KOTLIN_SOURCE_MATCHER.or(JkJavaCompilerToolChain.JAVA_SOURCE_MATCHER);
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSources().andMatcher(filter).getFiles()) {
             sourcePaths.add(file.toString());
@@ -335,9 +406,9 @@ public final class JkKotlinCompiler {
             JkLog.warn("No Kotlin source found in " + compileSpec.getSources());
             return new Result(true, Collections.emptyList());
         }
-        JkLog.info("" + sourcePaths.size() + " files to compile.");
-        JkLog.info("Kotlin version : " + getVersion() + ", Target JVM : " + compileSpec.getTargetVersion() );
-        JkProcess kotlincProcess;
+        JkLog.verbose("%s files to compile.", sourcePaths.size());
+        JkLog.verbose("Kotlin version : %s, Target JVM : %s", getVersion() ,compileSpec.getTargetVersion() );
+        JkAbstractProcess<?> kotlincProcess;
         List<String> loggedOptions = new LinkedList<>(this.options);
         JkKotlinJvmCompileSpec effectiveSpec = compileSpec.copy();
         for (Plugin plugin : this.plugins) {
@@ -345,14 +416,14 @@ public final class JkKotlinCompiler {
             loggedOptions.add(plugin.toOption());
         }
         if (command != null) {
-            JkLog.info("Use kotlin compiler : " + command + " with options " + loggedOptions);
+            JkLog.verbose("Use kotlin compiler : %s with options %s", command, loggedOptions);
             kotlincProcess = JkProcess.of(command)
                     .addParams(this.jvmOptions.stream()
                             .map(JkKotlinCompiler::toJavaOption)
                             .collect(Collectors.toList()));
         } else {
-            JkLog.trace("Use Kotlin compiler using jars %s", jarsVersionAndTarget);
-            JkLog.info("Use Kotlin compiler with options %s", loggedOptions);
+            JkLog.verbose("Use Kotlin compiler using jars %s", jarsVersionAndTarget);
+            JkLog.verbose("Use Kotlin compiler with options %s", loggedOptions);
             kotlincProcess = JkJavaProcess.ofJava( "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
                     .setClasspath(jarsVersionAndTarget.jars)
                     .addJavaOptions(this.jvmOptions)
@@ -364,9 +435,11 @@ public final class JkKotlinCompiler {
                     .addParams(toWindowsArgs(sourcePaths))
                     .setFailOnError(this.failOnError)
                     .setLogCommand(this.logCommand)
-                    .setLogOutput(this.logOutput);
-        final int result = kotlincProcess.exec();
-        return new Result(result == 0, kotlincProcess.getParams());
+                    .setCollectStdout(!this.logOutput)
+                    .setCollectStderr(!this.logOutput)
+                    .setLogWithJekaDecorator(this.logOutput);
+        final JkProcResult result = kotlincProcess.exec();
+        return new Result(result.hasSucceed(), kotlincProcess.getParams());
     }
 
     private static class Result {

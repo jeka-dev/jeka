@@ -4,9 +4,6 @@ import dev.jeka.core.api.depmanagement.JkCoordinate.JkArtifactSpecification;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.LinkedList;
-import java.util.List;
-
 @SuppressWarnings("javadoc")
 public class JkModuleDependencyTest {
 

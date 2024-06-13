@@ -1,0 +1,21 @@
+package dev.jeka.core;
+import org.apache.ivy.util.StringUtils;
+import dev.jeka.core.api.depmanagement.jekaDependencies;
+import dev.jeka.core.api.depmanagement.jekaScope;
+import dev.jeka.core.api.depmanagement.jekaVersion;
+import dev.jeka.core.api.publishing.jekaIvyPublication;
+import dev.jeka.core.api.publishing.jekaMavenPublication;
+import dev.jeka.core.api.utils.jekaUtilsIterable;
+
+/**
+ * Blalalala
+ */
+public class DepManagedBuild extends Build {
+
+	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
+	
+	@JkInjectRunbase("../dev.jeka.core")
+	public CoreBuild foo;
+	
+	@JkInjectRunbase("../dev.jeka.core/src")
+	public CoreBuild bar;

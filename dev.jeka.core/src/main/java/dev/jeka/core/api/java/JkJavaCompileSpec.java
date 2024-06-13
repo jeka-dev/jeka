@@ -1,13 +1,34 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkAbstractPathTree;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,8 +71,8 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompiler} except
-     * sourcepath
+     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompilerToolChain} except
+     * source path
      */
     public List<String> getOptions() {
         return this.options;
@@ -80,6 +101,27 @@ public final class JkJavaCompileSpec {
 
     public String getTargetVersion() {
         return getNextValue(TARGET_OPTS);
+    }
+
+    /**
+     * Returns the minimum version of Java suitable for compiling, according
+     * <i>source</i>, <i>target</i> and <i>release</i> options. <p>
+     * Returns <code>null</code> if none of these options is present.
+     */
+    public JkJavaVersion minJavaVersion() {
+        String releaseArg = getReleaseVersion();
+        if (!JkUtilsString.isBlank(releaseArg)) {
+            return JkJavaVersion.of(releaseArg);
+        }
+        String targetArg = getTargetVersion();
+        if (!JkUtilsString.isBlank(targetArg)) {
+            return JkJavaVersion.of(targetArg);
+        }
+        String sourceArg = getSourceVersion();
+        if (!JkUtilsString.isBlank(sourceArg)) {
+            return JkJavaVersion.of(sourceArg);
+        }
+        return null;
     }
 
     /**
@@ -139,7 +181,7 @@ public final class JkJavaCompileSpec {
 
     public List<Path> getSourceDirs() {
         return sources.toList().stream()
-                .map(tree -> tree.getRoot())
+                .map(JkAbstractPathTree::getRoot)
                 .map(JkUtilsPath::relativizeFromWorkingDir)
                 .collect(Collectors.toList());
     }
@@ -246,7 +288,7 @@ public final class JkJavaCompileSpec {
         while (it.hasNext()) {
             final String optionItem = it.next();
             if (optionItem.equals(optionName) && it.hasNext()) {
-                return it.next();
+                return it.next().trim();
             }
         }
         return null;

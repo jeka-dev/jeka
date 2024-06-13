@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -40,8 +56,9 @@ public final class JkModuleId implements Comparator<JkModuleId> {
      */
     public static JkModuleId of(@JkDepSuggest String moduleId) {
         if (moduleId.contains(":")) {
-            final String group = JkUtilsString.substringBeforeLast(moduleId, ":").trim();
-            final String name = JkUtilsString.substringAfterLast(moduleId, ":").trim();
+            String[] items = moduleId.split(":");
+            final String group = items[0].trim();
+            final String name = items[1].trim();
             return JkModuleId.of(group, name);
         }
         if (moduleId.contains(".")) {
@@ -85,7 +102,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
     /**
      * A concatenation of the group and name of this module as '[group]:[value]'.
      */
-    public String getColonNotation() {
+    public String toColonNotation() {
         return group + ":" + name;
     }
 
@@ -112,7 +129,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
 
     @Override
     public String toString() {
-        return getColonNotation();
+        return toColonNotation();
     }
 
     @Override
@@ -123,9 +140,7 @@ public final class JkModuleId implements Comparator<JkModuleId> {
         JkModuleId that = (JkModuleId) o;
 
         if (!group.equals(that.group)) return false;
-        if (!name.equals(that.name)) return false;
-
-        return true;
+        return name.equals(that.name);
     }
 
     @Override

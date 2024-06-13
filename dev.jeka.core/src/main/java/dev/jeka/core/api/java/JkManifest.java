@@ -1,19 +1,35 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
 
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -21,11 +37,11 @@ import java.util.jar.Manifest;
 
 
 /**
- * Helper class to read and write Manifest from and to file.
+ * Wrapper class on {@link Manifest} providing utility methods.
  *
  * @author Jerome Angibaud
  */
-public final class JkManifest<T> {
+public final class JkManifest{
 
     /**
      * The path where generally belongs all manifest past (relative to archive root)
@@ -36,6 +52,8 @@ public final class JkManifest<T> {
      * The JDK version who was running while building this manifest.
      */
     public static final String BUILD_JDK = "Build-Jdk";
+
+    public static final String BUILD_TIME = "Build-Time";
 
     /**
      * The software that has created this manifest. Normally "Jeka" along its
@@ -146,20 +164,6 @@ public final class JkManifest<T> {
     }
 
     /**
-     * Adds the main class entry by auto-detecting the class holding the main method.
-     */
-    public JkManifest addAutodetectMain(Path classDir) {
-        ClassLoader classLoader = JkUrlClassLoader.of(classDir).get();
-        List<String> classes = JkInternalClasspathScanner.of().findClassesHavingMainMethod(classLoader);
-        if (!classes.isEmpty()) {
-            this.addMainClass(classes.get(0));
-        } else {
-            throw new IllegalStateException("No class with main method found.");
-        }
-        return this;
-    }
-
-    /**
      * @see #addMainAttribute(Name, String)
      */
     public JkManifest addMainAttribute(String key, String value) {
@@ -172,17 +176,37 @@ public final class JkManifest<T> {
      * This method returns this object.
      */
     public JkManifest addMainClass(String value) {
-        return addMainAttribute(Name.MAIN_CLASS, value);
+        if (value != null) {
+            addMainAttribute(Name.MAIN_CLASS, value);
+        }
+        return this;
+    }
+
+    /**
+     * Adds <i>implementation-*</i> information to the JkManifest.
+     *t.
+     */
+    public JkManifest addImplementationInfo(JkModuleId moduleId, JkVersion version) {
+        if (moduleId != null) {
+            this.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId.getName());
+            this.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR, moduleId.getGroup());
+        }
+        if (!version.isUnspecified()) {
+            this.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version.getValue());
+        }
+        return this;
     }
 
     /**
      * Fills this manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
-    public JkManifest addContextualInfo() {
-        return addMainAttribute(CREATED_BY, "Jeka").addMainAttribute(BUILT_BY,
-                System.getProperty("user.name")).addMainAttribute(BUILD_JDK,
-                        System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+    public JkManifest addBuildInfo() {
+        return this
+                .addMainAttribute(CREATED_BY, "JeKa " + JkInfo.getJekaVersion())
+                .addMainAttribute(BUILT_BY, System.getProperty("user.name"))
+                .addMainAttribute(BUILD_JDK, System.getProperty("java.vendor") + " " + System.getProperty("java.version"))
+                .addMainAttribute(BUILD_TIME, ZonedDateTime.now().toString());
     }
 
     /**
@@ -257,6 +281,29 @@ public final class JkManifest<T> {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String asString() {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            manifest.write(baos);
+            return baos.toString("UTF-8");
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns a trimmed string representation of the manifest, removing tailing empty line
+     *
+     * @return a trimmed string representation of the manifest
+     */
+    public String asTrimedString() {
+        String manifest = asString();
+        int lastBr = manifest.lastIndexOf("\n");
+        if (lastBr != -1) {
+            manifest = manifest.substring(0, lastBr-1);
+        }
+        return manifest;
     }
 
     /**

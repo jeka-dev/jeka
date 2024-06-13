@@ -1,12 +1,33 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.publication.JkArtifactPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkMavenMetadata;
 import dev.jeka.core.api.depmanagement.publication.JkPomMetadata;
 import dev.jeka.core.api.depmanagement.publication.JkPomTemplateGenerator;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
+import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -29,11 +50,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.function.UnaryOperator;
+import java.util.*;
 
 /**
  * {@link IvyInternalPublisher} delegates to this class for publishing to Maven
@@ -43,7 +60,7 @@ final class IvyPublisherForMaven {
 
     private final RepositoryResolver resolver;
 
-    private final UnaryOperator<Path> signer;
+    private final JkFileSigner signer;
 
     private final Path descriptorOutputDir;
 
@@ -51,7 +68,7 @@ final class IvyPublisherForMaven {
 
     private final Set<String> checksumAlgos;
 
-    IvyPublisherForMaven(UnaryOperator<Path> signer, RepositoryResolver dependencyResolver,
+    IvyPublisherForMaven(JkFileSigner signer, RepositoryResolver dependencyResolver,
                          Path descriptorOutputDir, boolean uniqueSnapshot, Set<String> checksumAlgos) {
         super();
         this.resolver = dependencyResolver;
@@ -61,7 +78,9 @@ final class IvyPublisherForMaven {
         this.checksumAlgos = checksumAlgos;
     }
 
-    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactLocator artifactLocator, JkPomMetadata metadata) {
+    void publish(DefaultModuleDescriptor moduleDescriptor, JkArtifactPublisher artifactPublisher,
+                 JkPomMetadata metadata, Map<JkModuleId, JkVersion> managedDependencies) {
+
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         try {
             resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -71,10 +90,14 @@ final class IvyPublisherForMaven {
 
         // publish artifacts
         final JkCoordinate coordinate = IvyTranslatorToDependency.toJkCoordinate(ivyModuleRevisionId);
-        final JkMavenMetadata returnedMetaData = publish(coordinate, artifactLocator);
+        final JkMavenMetadata returnedMetaData = publish(coordinate, artifactPublisher);
 
         // publish pom
-        final Path pomXml = makePom(moduleDescriptor, artifactLocator, metadata);
+        final Path pomXml = makePom(moduleDescriptor, artifactPublisher.artifactLocator, metadata);
+        if (!managedDependencies.isEmpty()) {
+            includeManagedDependencies(pomXml, managedDependencies);
+        }
+
         final String version;
         if (coordinate.getVersion().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(coordinate);
@@ -83,14 +106,14 @@ final class IvyPublisherForMaven {
             final JkMavenMetadata.Versioning.JkSnapshot snap = mavenMetadata.currentSnapshot();
             version = versionForUniqueSnapshot(coordinate.getVersion().getValue(), snap.timestamp,
                     snap.buildNumber);
-            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME,
+            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_CLASSIFIER,
                     version);
             putInRepo(pomXml, pomDest, true);
-            mavenMetadata.addSnapshotVersion("pom", JkArtifactId.MAIN_ARTIFACT_NAME);
+            mavenMetadata.addSnapshotVersion("pom", JkArtifactId.MAIN_ARTIFACT_CLASSIFIER);
             push(mavenMetadata, path);
         } else {
             version = coordinate.getVersion().getValue();
-            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME, version);
+            final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, version);
             putInRepo(pomXml, pomDest, true);
         }
         if (this.descriptorOutputDir == null) {
@@ -106,9 +129,9 @@ final class IvyPublisherForMaven {
         commitPublication(resolver);
     }
 
-    private JkMavenMetadata publish(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
+    private JkMavenMetadata publish(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher) {
         if (!coordinate.getVersion().isSnapshot()) {
-            final String existing = checkNotExist(coordinate, artifactLocator);
+            final String existing = checkNotExist(coordinate, artifactPublisher);
             if (existing != null) {
                 throw new IllegalArgumentException("Artifact " + existing
                         + " already exists on repo.");
@@ -126,14 +149,15 @@ final class IvyPublisherForMaven {
             final int buildNumber = mavenMetadata.currentBuildNumber();
             final String versionUniqueSnapshot = versionForUniqueSnapshot(coordinate.getVersion()
                     .getValue(), timestamp, buildNumber);
-            for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-                publishUniqueSnapshot(coordinate, artifactId.getName(),
-                    artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
+            for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
+                publishUniqueSnapshot(coordinate, artifactId.getClassifier(),
+                    artifactPublisher.artifactLocator.getArtifactPath(artifactId), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
-            for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-                publishNormal(coordinate, artifactId.getName(), artifactLocator.getArtifactPath(artifactId));
+            for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
+                publishNormal(coordinate, artifactId.getClassifier(),
+                        artifactPublisher.artifactLocator.getArtifactPath(artifactId));
             }
             return null;
         }
@@ -149,8 +173,11 @@ final class IvyPublisherForMaven {
         } else {
             pomXml = JkUtilsPath.createTempFile("published-pom-", ".xml");
         }
-        final String packaging = JkUtilsString.substringAfterLast(artifactLocator
-                .getMainArtifactPath().getFileName().toString(), ".");
+
+        // Packaging is for <packaging>jar</packaging> tag
+        final String packaging = artifactLocator == JkArtifactLocator.VOID ? "pom" :
+                JkUtilsString.substringAfterLast(artifactLocator.getMainArtifactPath().getFileName().toString(), ".");
+
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setMapping(new ScopeMapping());
         pomWriterOptions.setArtifactPackaging(packaging);
@@ -171,13 +198,13 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
-        final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_NAME);
+    private String checkNotExist(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher) {
+        final String pomDest = destination(coordinate, "pom", JkArtifactId.MAIN_ARTIFACT_CLASSIFIER);
         if (existOnRepo(pomDest)) {
             throw new IllegalArgumentException("The main artifact already exist for " + coordinate);
         }
-        for (final JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-            Path artifactFile = artifactLocator.getArtifactPath(artifactId);
+        for (final JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
+            Path artifactFile = artifactPublisher.artifactLocator.getArtifactPath(artifactId);
             final String ext = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
             final String dest = destination(coordinate, ext, null);
             if (existOnRepo(dest)) {
@@ -230,7 +257,7 @@ final class IvyPublisherForMaven {
         final StringBuilder result = new StringBuilder(moduleBasePath(jkModuleId)).append("/")
                 .append(version).append("/").append(jkModuleId.getName()).append("-")
                 .append(uniqueVersion);
-        if (!JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
+        if (!JkArtifactId.MAIN_ARTIFACT_CLASSIFIER.equals(classifier)) {
             result.append("-").append(classifier);
         }
         result.append(".").append(ext);
@@ -302,11 +329,11 @@ final class IvyPublisherForMaven {
         return path;
     }
 
-
     private void putInRepo(Path source, String destination, boolean overwrite) {
         final Repository repository = this.resolver.getRepository();
         final String dest = completePath(destination);
-        JkLog.info("Publish file " + dest);
+        // Keep leading spaces for nice formatting with FLAT log decorator
+        JkLog.info("- " + dest);
         try {
             repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksumAlgos) {
@@ -314,14 +341,14 @@ final class IvyPublisherForMaven {
                 final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
                 Files.write(temp, checkSum.getBytes());
                 final String csDest = dest + "." + algo;
-                JkLog.info("Publish file " + csDest);
+                JkLog.info("- " + csDest);
                 repository.put(null, temp.toFile(), csDest, overwrite);
                 Files.deleteIfExists(temp);
             }
             if (this.signer != null) {
-                final Path signed = signer.apply(source);
+                final Path signed = signer.sign(source);
                 final String signedDest = dest + ".asc";
-                JkLog.info("Publish file " + signedDest);
+                JkLog.info("- " + signedDest);
                 repository.put(null, signed.toFile(), signedDest, overwrite);
             }
         } catch (final IOException e) {
@@ -368,8 +395,17 @@ final class IvyPublisherForMaven {
             }
             return null;
         }
+    }
 
-
+    private static void includeManagedDependencies(Path pomFile, Map<JkModuleId, JkVersion> managedDependencies) {
+        JkDomDocument dom = JkDomDocument.parse(pomFile);
+        JkDomElement dependenciesEl = dom.root().get("managedDependency").get("dependencies").make();
+        managedDependencies.forEach((key, value) -> dependenciesEl
+                .add("dependency")
+                    .add("groupId").text(key.getGroup()).make().__
+                    .add("artifactId").text(key.getName()).make().__
+                    .add("version").text(value.getValue()).make());
+        dom.save(pomFile);
     }
 
 }

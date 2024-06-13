@@ -1,8 +1,26 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.utils;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Utility class for dealing with strings.
@@ -11,6 +29,12 @@ import java.util.function.Function;
  */
 public final class JkUtilsString {
 
+    /**
+     * Joins the elements of the given iterable into a single string using the specified separator.
+     *
+     * @param items     the iterable containing the elements to be joined
+     * @param separator the string to be used as separator between the elements
+     */
     static String join(Iterable<?> items, String separator) {
         final StringBuilder builder = new StringBuilder();
         final Iterator<?> it = items.iterator();
@@ -147,9 +171,9 @@ public final class JkUtilsString {
      */
     public static String pluralize(int count, String singular, String plural) {
         if (count > 1) {
-            return "" + count + " " + plural;
+            return count + " " + plural;
         }
-        return "" + count + " " + singular;
+        return count + " " + singular;
     }
 
     /**
@@ -217,6 +241,9 @@ public final class JkUtilsString {
         return string.isEmpty() || " ".equals(string);
     }
 
+    /**
+     * Checks if the provided string consists only of digits.
+     */
     public static boolean isDigits(String string) {
         try {
             Double.parseDouble(string);
@@ -226,6 +253,13 @@ public final class JkUtilsString {
         }
     }
 
+    /**
+     * Extracts variable tokens from the given string.
+     * <p>
+     * Variable tokens are string embedded within <code>${}</code>.
+     *
+     * @param string The input string.
+     */
     public static List<String> extractVariableToken(String string) {
         boolean onDollar = false;
         boolean inToken = false;
@@ -251,12 +285,21 @@ public final class JkUtilsString {
         return result;
     }
 
+    /**
+     * Interpolates a string by replacing variable tokens with their corresponding values.
+     *
+     * @param string   The string to interpolate.
+     * @param replacer The function used to retrieve the value for each variable token.
+     *
+     * @return The interpolated string.
+     */
     public static String interpolate(String string, Function<String, String> replacer) {
         List<String> variableTokens = JkUtilsString.extractVariableToken(string);
         String result = string;
         for (String token : variableTokens) {
             String value = replacer.apply(token);
             if (token != null) {
+                JkUtilsAssert.argument(value != null, "No replacement defined for token %s", token);
                 result = result.replace("${" + token + "}", value);
             }
         }
@@ -268,17 +311,27 @@ public final class JkUtilsString {
      * string is longer than the specified max length. Otherwise, the specified string is returned as is.
      */
     public static String ellipse(String string, int max) {
+        if (string.length() <= 3) {
+            return string;
+        }
         if (string.length() <= max || max < 0) {
             return string;
         }
-        return string.substring(0, max) + "...";
+        return string.substring(0, max-3) + "...";
     }
 
     /**
-     * Kindly borrowed from ANT
+     * Parses a command line string and splits it into an array of individual command line arguments.
+     * <p>
+     * Borrowed from ANT.
+     *
+     * @param commandline the command line string to parse
+     * @return an array of individual command line arguments
+     *
+     * @throws IllegalArgumentException if there are unbalanced quotes in the command line string
      */
-    public static String[] translateCommandline(String toProcess) {
-        if (toProcess == null || toProcess.length() == 0) {
+    public static String[] parseCommandline(String commandline) {
+        if (commandline == null || commandline.isEmpty()) {
             // no command? no string
             return new String[0];
         }
@@ -288,7 +341,7 @@ public final class JkUtilsString {
         final int inQuote = 1;
         final int inDoubleQuote = 2;
         int state = normal;
-        final StringTokenizer tok = new StringTokenizer(toProcess, "\"\' ", true);
+        final StringTokenizer tok = new StringTokenizer(commandline, "\"' ", true);
         final ArrayList<String> result = new ArrayList<>();
         final StringBuilder current = new StringBuilder();
         boolean lastTokenHasBeenQuoted = false;
@@ -297,7 +350,7 @@ public final class JkUtilsString {
             final String nextTok = tok.nextToken();
             switch (state) {
             case inQuote:
-                if ("\'".equals(nextTok)) {
+                if ("'".equals(nextTok)) {
                     lastTokenHasBeenQuoted = true;
                     state = normal;
                 } else {
@@ -313,7 +366,7 @@ public final class JkUtilsString {
                 }
                 break;
             default:
-                if ("\'".equals(nextTok)) {
+                if ("'".equals(nextTok)) {
                     state = inQuote;
                 } else if ("\"".equals(nextTok)) {
                     state = inDoubleQuote;
@@ -333,11 +386,20 @@ public final class JkUtilsString {
             result.add(current.toString());
         }
         if (state == inQuote || state == inDoubleQuote) {
-            throw new IllegalArgumentException("unbalanced quotes in " + toProcess);
+            throw new IllegalArgumentException("unbalanced quotes in " + commandline);
         }
-        return result.toArray(new String[result.size()]);
+        return result.toArray(new String[0]);
     }
 
+    /**
+     * Pads the given string with the specified pad character to ensure it reaches the minimum length.
+     *
+     * @param string The string to pad.
+     * @param minLength The minimum length the resulting string should have.
+     * @param padChar The character to use for padding.
+     *
+     * @return The padded string.
+     */
     public static String padEnd(String string, int minLength, char padChar) {
         if (string.length() >= minLength) {
             return string;
@@ -350,6 +412,15 @@ public final class JkUtilsString {
         return sb.toString();
     }
 
+    /**
+     * Pads the given string with the specified pad character to ensure it reaches the minimum length.
+     *
+     * @param string     The string to pad.
+     * @param minLength  The minimum length the resulting string should have.
+     * @param padChar    The character to use for padding.
+     *
+     * @return The padded string.
+     */
     public static String padStart(String string, int minLength, char padChar) {
         if (string.length() >= minLength) {
             return string;
@@ -362,11 +433,83 @@ public final class JkUtilsString {
         return sb.toString();
     }
 
+    /**
+     * Converts a blank string to null. If the input string is null, empty, or consists only of whitespaces,
+     * this method returns null. Otherwise, it returns the input string.
+     *
+     * @param in the input string
+     */
     public static String blankToNull(String in) {
         return isBlank(in) ? null : in;
     }
 
+    /**
+     * Converts a null string to an empty string. If the input string is null, it returns an empty string.
+     * If the input string is not null, it returns the input string as is.
+     *
+     * @param in the input string
+     */
     public static String nullToEmpty(String in) {
         return in == null ? "" : in;
     }
+
+    /**
+     * Wraps the given string character-wise to fit within the specified width.
+     */
+    public static String wrapStringCharacterWise(String input, int maxLineLength) {
+        StringBuilder stringBuilder = new StringBuilder(input);
+        int index = 0;
+        while(stringBuilder.length() > index + maxLineLength) {
+            int lastLineReturn = stringBuilder.lastIndexOf("\n", index + maxLineLength);
+            if (lastLineReturn > index) {
+                index = lastLineReturn;
+            } else {
+                index = stringBuilder.lastIndexOf(" ", index + maxLineLength);
+                if (index == -1) {
+
+                    // One word is too long to fit, try best effort
+                    int newMaxLength = Arrays.stream(input.split(" |\n"))
+                            .map(String::length)
+                            .max(Comparator.naturalOrder())
+                            .orElse(input.length() +1);
+                    if (newMaxLength >= maxLineLength) {
+                        return input;
+                    }
+                    return wrapStringCharacterWise(input, newMaxLength);
+                }
+                stringBuilder.replace(index, index + 1, "\n");
+                index++;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Returns a string with a left margin added to each line.
+     * Each line in the provided paragraph will be prepended with the specified margin.
+     */
+    public static String withLeftMargin(String paragraph, String margin) {
+        String all = Arrays.stream(paragraph.split("\n"))
+                .map(line -> margin + line)
+                .reduce("",  (one, two) -> one + "\n" + two);
+        return all.substring(1); // remove first 'br'
+    }
+
+    /**
+     * Returns a readable representation of command line arguments.
+     * Each option in the provided list is split by the platform's file separator and concatenated
+     * with a new line character (\n).
+     */
+    public static String readableCommandAgs(String margin, List<String> options) {
+        StringBuilder sb = new StringBuilder();
+        options.stream()
+                .flatMap(item -> Stream.of(item.split(File.pathSeparator)))
+                .filter(item -> !JkUtilsString.isBlank(item))
+                .forEach(item -> sb.append(margin + item + "\n"));
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() -1);
+        }
+        return sb.toString();
+    }
+
 }

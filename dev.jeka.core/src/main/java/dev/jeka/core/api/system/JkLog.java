@@ -1,7 +1,24 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.PrintStream;
@@ -22,26 +39,36 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class JkLog implements Serializable {
 
+    /**
+     * Type of events emitted by logs.
+     */
     public enum Type {
-        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK;
+        ERROR, WARN, INFO, VERBOSE, DEBUG, PROGRESS, START_TASK, END_TASK;
 
-        public boolean isTraceWarnOrError() {
-            return this == TRACE || this == WARN || this == ERROR;
+        public boolean isMessageType() {
+            return this == VERBOSE || this == WARN || this == ERROR || this == DEBUG;
         }
     }
 
+    /**
+     * Levels of logging
+     */
     public enum Verbosity {
-        MUTE, WARN_AND_ERRORS, NORMAL, VERBOSE, QUITE_VERBOSE;
+        MUTE, WARN_AND_ERRORS, INFO, VERBOSE, DEBUG;
 
         public boolean isVerbose() {
-            return this == VERBOSE || this == QUITE_VERBOSE;
+            return this == VERBOSE || this == DEBUG;
         }
     }
-    
+
+    /**
+     * Available style of logging displaying.
+     */
     public enum Style {
-        BRACE(new JkBraceLogDecorator()),
         INDENT(new JkIndentLogDecorator()),
-        DEBUG(new JkDebugLogDecorator());
+        DEBUG(new JkDebugLogDecorator()),
+        NUMBER(new JkNumberLogDecorator()),
+        FLAT(new JkFlatLogDecorator());
 
         private final JkLogDecorator decorator;
 
@@ -60,7 +87,7 @@ public final class JkLog implements Serializable {
 
     private static JkLogDecorator decorator = NO_OP_DECORATOR;
 
-    private static Verbosity verbosity = Verbosity.NORMAL;
+    private static Verbosity verbosity = Verbosity.INFO;
 
     private static AtomicInteger currentNestedTaskLevel = new AtomicInteger(0);
 
@@ -70,6 +97,10 @@ public final class JkLog implements Serializable {
 
     // if false, no animation should be displayed.
     private static boolean acceptAnimation = true;
+
+    private static boolean showTaskDuration;
+
+    private static boolean logOnlyOnStdErr;
 
     private static LinkedList<Long> getStartTimes() {
         LinkedList<Long> result = START_TIMES.get();
@@ -82,11 +113,13 @@ public final class JkLog implements Serializable {
 
     /**
      * By default, events are not consumed, meaning nothing appends when {@link #info(String, Object...)} (String),
-     * {@link #error(String)}, {@link #warn(String)} or {@link #trace(String)} are invoked.
+     * {@link #error(String, Object...)} (String)}, {@link #warn(String, Object...)} (String)}
+     * or {@link #verbose(String, Object...)} (String)} are invoked.
      * Therefore, users have to set explicitly a consumer using this method or {@link #setDecorator(Style)} ().
      */
     public static void setDecorator(JkLogDecorator newDecorator) {
-        newDecorator.doInit(INITIAL_OUT, INITIAL_ERR);
+        PrintStream out = logOnlyOnStdErr ? INITIAL_ERR : INITIAL_OUT;
+        newDecorator.doInit(out, INITIAL_ERR);
         decorator = newDecorator;
         System.setOut(decorator.getOut());
         System.setErr(decorator.getErr());
@@ -98,6 +131,16 @@ public final class JkLog implements Serializable {
     public static void setDecorator(Style style) {
         setDecorator(style.decorator);
         decoratorStyle = style;
+    }
+
+    /**
+     * if true, all log will be printed to stderr instead og stdout.
+     * @param flag
+     */
+    public static void setLogOnlyOnStdErr(boolean flag) {
+        boolean change = logOnlyOnStdErr != flag;
+        logOnlyOnStdErr = flag;
+        setDecorator(decorator);
     }
 
     /**
@@ -117,16 +160,24 @@ public final class JkLog implements Serializable {
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
-        JkUtilsAssert.argument(verbosityArg != null, "Verbosity can noot be set to null.");
+        JkUtilsAssert.argument(verbosityArg != null, "Verbosity can not be set to null.");
         verbosity = verbosityArg;
     }
 
-    public static boolean isAcceptAnimation() {
+    public static boolean isAnimationAccepted() {
         return acceptAnimation;
     }
 
     public static void setAcceptAnimation(boolean acceptAnimation) {
         JkLog.acceptAnimation = acceptAnimation;
+    }
+
+    public static boolean isShowTaskDuration() {
+        return showTaskDuration;
+    }
+
+    public static void setShowTaskDuration(boolean showTaskDuration) {
+        JkLog.showTaskDuration = showTaskDuration;
     }
 
     static Style getDecoratorStyle() {
@@ -148,7 +199,26 @@ public final class JkLog implements Serializable {
         if (Verbosity.MUTE == verbosity()) {
             return NO_OP_STREAM;
         }
-        return decorator.getOut();
+        return decorator.getErr();
+    }
+
+    public static void debug(String message, Object ...params) {
+        if (verbosity() == Verbosity.DEBUG) {
+            consume(JkLogEvent.ofRegular(Type.DEBUG, String.format(message, params)));
+        }
+    }
+
+    public static void debug(int maxLength, String message, Object ...params) {
+        if (verbosity() == Verbosity.DEBUG) {
+            consume(JkLogEvent.ofRegular(Type.DEBUG, JkUtilsString.wrapStringCharacterWise(
+                    String.format(message, params), maxLength)));
+        }
+    }
+
+    public static void verbose(String message, Object ...params) {
+        if (verbosity().isVerbose()) {
+            consume(JkLogEvent.ofRegular(Type.VERBOSE, String.format(message, params)));
+        }
     }
 
     public static void info(String message, Object... params) {
@@ -159,15 +229,7 @@ public final class JkLog implements Serializable {
         consume(JkLogEvent.ofRegular(Type.WARN, String.format(message, params)));
     }
 
-    public static void trace(String message, Object ...params) {
-        if (verbosity().isVerbose()) {
-            consume(JkLogEvent.ofRegular(Type.TRACE, String.format(message, params)));
-        }
-    }
-
-
-
-    public static void error(String message, String ...params) {
+    public static void error(String message, Object ...params) {
         consume(JkLogEvent.ofRegular(Type.ERROR, String.format(message, params)));
     }
 
@@ -175,10 +237,7 @@ public final class JkLog implements Serializable {
         if (Verbosity.MUTE == verbosity()) {
             return false;
         }
-        if (Verbosity.WARN_AND_ERRORS == verbosity() && (type != Type.ERROR && type != Type.WARN)) {
-            return false;
-        }
-        return true;
+        return Verbosity.WARN_AND_ERRORS != verbosity() || (type == Type.ERROR || type == Type.WARN);
     }
 
     /**
@@ -192,8 +251,20 @@ public final class JkLog implements Serializable {
         }
     }
 
-    public static void traceStartTask(String message, Object ... params) {
+    /**
+     * Logs the start of the current task. !!!  Should be closed by {@link #verboseEndTask()}.
+     */
+    public static void verboseStartTask(String message, Object ... params) {
         if (verbosity.isVerbose()) {
+            startTask(message, params);
+        }
+    }
+
+    /**
+     * Logs the start of the current task. !!!  Should be closed by {@link #verboseEndTask()}.
+     */
+    public static void debugStartTask(String message, Object ... params) {
+        if (verbosity == Verbosity.DEBUG) {
             startTask(message, params);
         }
     }
@@ -212,11 +283,12 @@ public final class JkLog implements Serializable {
                     System.err.println(ste);
                 }
                 throw new IllegalStateException("No start task found matching with this endTask. Check that you don't have " +
-                        "used an 'endTask' one too many in your code.");
+                        "used an 'endTask' without matching #startTaskMethod.");
 
             }
-            Long durationMillis = JkUtilsTime.durationInMillis(startTime);
-            consume(JkLogEvent.ofEndTask(Type.END_TASK, message, durationMillis));
+            long durationMillis = JkUtilsTime.durationInMillis(startTime);
+            String actualMessage = message.contains("%d") ? String.format(message, durationMillis) : message;
+            consume(JkLogEvent.ofEndTask(Type.END_TASK, actualMessage, durationMillis));
         }
     }
 
@@ -227,14 +299,30 @@ public final class JkLog implements Serializable {
         endTask("");
     }
 
-    public static void traceEndTask() {
+    public static void verboseEndTask() {
         if (verbosity.isVerbose()) {
             endTask();
         }
     }
 
+    public static void debugEndTask() {
+        if (verbosity == Verbosity.DEBUG) {
+            endTask();
+        }
+    }
+
+    public static void debugEndTask(String message) {
+        if (verbosity == Verbosity.DEBUG) {
+            endTask(message);
+        }
+    }
+
     public static boolean isVerbose() {
-        return verbosity == Verbosity.VERBOSE;
+        return isDebug() || verbosity == Verbosity.VERBOSE;
+    }
+
+    public static boolean isDebug() {
+        return  verbosity == Verbosity.DEBUG;
     }
 
     private static void consume(JkLogEvent event) {
@@ -256,7 +344,7 @@ public final class JkLog implements Serializable {
                 throw new RuntimeException(e);
             }
         } else {
-            decorator.handle((JkLogEvent) event);
+            decorator.handle(event);
         }
     }
 
@@ -305,7 +393,7 @@ public final class JkLog implements Serializable {
 
     public static abstract class JkLogDecorator implements Serializable {
 
-        private boolean acceptAnimation = true;
+        private final boolean acceptAnimation = true;
 
         private PrintStream targetOut;
 

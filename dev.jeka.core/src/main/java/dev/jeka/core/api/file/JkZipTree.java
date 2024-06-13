@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -8,11 +24,11 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 /**
- * A {@link JkPathTree} for zip path tress located in a zip file.
+ * A {@link JkPathTree} for zip path tree located in a zip file.
  *  Instances are supposed to be closed by the user code, in a <i>try-with-resource</i> statement or
  *  in a <i>finally</i> clause.
  */
-public class JkZipTree extends JkPathTree<JkZipTree> implements Closeable {
+public class JkZipTree extends JkAbstractPathTree<JkZipTree> implements Closeable {
 
     private JkZipTree(JkUtilsPath.JkZipRoot zipRoot, JkPathMatcher pathMatcher) {
         super(zipRoot, pathMatcher);
@@ -20,7 +36,6 @@ public class JkZipTree extends JkPathTree<JkZipTree> implements Closeable {
 
     /**
      * Creates a path tree from a zip file. The zip file content will be seen as a regular folder.
-     *
      * Warn : Don't forget to close this resource when you are finished with.
      */
     public static JkZipTree of(Path zipFile) {

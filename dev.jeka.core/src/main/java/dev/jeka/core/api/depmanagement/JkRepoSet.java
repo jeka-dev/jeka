@@ -1,5 +1,22 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.resolution.JkInternalDependencyResolver;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
@@ -9,7 +26,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +85,8 @@ public final class JkRepoSet {
     public JkRepoSet and(JkRepoSet other) {
         final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(other.repos);
-        return new JkRepoSet(list);
+        List<JkRepo> distinctRepos = list.stream().distinct().collect(Collectors.toList());
+        return new JkRepoSet(distinctRepos);
     }
 
     public static JkRepoSet ofLocal() {
@@ -79,7 +96,7 @@ public final class JkRepoSet {
     /**
      * Creates a JkRepoSet for publishing on <a href="http://central.sonatype.org/">OSSRH</a>
      */
-    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password, UnaryOperator<Path> signer) {
+    public static JkRepoSet ofOssrhSnapshotAndRelease(String userName, String password, JkFileSigner signer) {
         return of(JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(userName, password),
                 JkRepo.ofMavenOssrhDeployRelease(userName, password, signer));
     }
@@ -126,7 +143,7 @@ public final class JkRepoSet {
         return get(JkCoordinate.of(coordinate));
     }
 
-    public JkRepoSet withDefaultSigner(UnaryOperator<Path> signer) {
+    public JkRepoSet withDefaultSigner(JkFileSigner signer) {
         List<JkRepo> reposCopy = repos.stream()
                 .map(repo -> {
                     if (repo.publishConfig.getSigner() == null

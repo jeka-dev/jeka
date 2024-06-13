@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -6,7 +22,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompiler;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
@@ -20,13 +36,13 @@ import java.util.stream.Collectors;
 
 /**
  * Handles project compilation step. Users can configure inner phases by chaining runnables.
- * They also can modify {@link JkJavaCompiler} and {@link JkJavaCompileSpec} to use.
+ * They also can modify {@link JkJavaCompilerToolChain} and {@link JkJavaCompileSpec} to use.
  */
 public class JkProjectCompilation {
 
-    public static final String RESOURCES_PROCESS_ACTION = "resources-process";
+    public static final String RESOURCES_PROCESS_ACTION = "process-resources";
 
-    public static final String JAVA_SOURCES_COMPILE_ACTION = "java-sources-compile";
+    public static final String JAVA_SOURCES_COMPILE_ACTION = "compile-java-sources";
 
     private final JkProject project;
 
@@ -53,23 +69,25 @@ public class JkProjectCompilation {
 
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
-    private List<JkSourceGenerator> sourceGenerators = new LinkedList<>();
+    private final List<JkProjectSourceGenerator> sourceGenerators = new LinkedList<>();
 
     private boolean done;
 
-    private JkResolveResult cachedResolveResult = null;
 
     JkProjectCompilation(JkProject project) {
         this.project = project;
         resourceProcessor = JkResourceProcessor.of();
         preCompileActions = JkRunnables.of()
-                .setLogRunnableName(true)
+                .setLogTasks(true)
+                .setTaskSuffix(taskSuffix())
                 .append(RESOURCES_PROCESS_ACTION, this::processResources);
         compileActions = JkRunnables.of()
-                .setLogRunnableName(true)
+                .setLogTasks(true)
+                .setTaskSuffix(taskSuffix())
                 .append(JAVA_SOURCES_COMPILE_ACTION, this::compileJava);
         postCompileActions = JkRunnables.of()
-                .setLogRunnableName(true);
+                .setTaskSuffix(taskSuffix())
+                .setLogTasks(true);
         layout = initialLayout();
     }
 
@@ -82,9 +100,8 @@ public class JkProjectCompilation {
         return this;
     }
 
-
     public void generateSources() {
-        for (JkSourceGenerator sourceGenerator : sourceGenerators) {
+        for (JkProjectSourceGenerator sourceGenerator : sourceGenerators) {
             JkLog.startTask("Generate sources with " + sourceGenerator);
             Path path = layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName());
             sourceGenerator.generate(this.project, path);
@@ -96,12 +113,11 @@ public class JkProjectCompilation {
      * Performs entire compilation phase.
      */
     public void run() {
-        JkLog.startTask("Run compilation phase for " + purpose());
         generateSources();
         preCompileActions.run();
         compileActions.run();
         postCompileActions.run();
-        JkLog.endTask();
+        done = true;
     }
 
     /**
@@ -109,10 +125,9 @@ public class JkProjectCompilation {
      */
     public void runIfNeeded() {
         if (done) {
-            JkLog.trace(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
+            JkLog.debug(JAVA_SOURCES_COMPILE_ACTION + " already done. Won't perform again.");
         } else {
             run();
-            done = true;
         }
     }
 
@@ -136,26 +151,26 @@ public class JkProjectCompilation {
         return this;
     }
 
-    public JkProjectCompilation configureDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
+    public JkProjectCompilation customizeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
         this.dependenciesModifier = dependenciesModifier.andThen(modifier);
         return this;
     }
 
-    public JkResolveResult resolveDependencies() {
-        if (cachedResolveResult != null) {
-            return cachedResolveResult;
-        }
-        cachedResolveResult = project.dependencyResolver.resolve(getDependencies());
-        return cachedResolveResult;
+    public List<Path> resolveDependenciesAsFiles() {
+        return project.dependencyResolver.resolveFiles(getDependencies());
     }
 
     public JkDependencySet getDependencies() {
         return dependenciesModifier.apply(baseDependencies());
     }
 
-    public JkProjectCompilation addSourceGenerator(JkSourceGenerator sourceGenerator) {
+    public JkProjectCompilation addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {
         this.sourceGenerators.add(sourceGenerator);
         return this;
+    }
+
+    public boolean isDone() {
+        return done;
     }
 
     public List<Path> getGeneratedSourceDirs() {
@@ -170,7 +185,7 @@ public class JkProjectCompilation {
     }
 
     private void compileJava() {
-        boolean success = project.compiler.compile(compileSpec());
+        boolean success = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec());
         if (!success) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }
@@ -194,7 +209,7 @@ public class JkProjectCompilation {
     }
 
     protected JkPathSequence classpath() {
-        return resolveDependencies().getFiles();
+        return JkPathSequence.of(resolveDependenciesAsFiles());
     }
 
     protected JkDependencySet baseDependencies() {
@@ -206,6 +221,11 @@ public class JkProjectCompilation {
 
     protected String purpose() {
         return "production";
+    }
+
+    private String taskSuffix() {
+        return "production".equals(this.purpose()) ? "" : " (" + this.purpose() + ")"
+                + project.relativeLocationLabel();
     }
 
 }

@@ -1,8 +1,24 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.publication.JkArtifactPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -21,13 +37,13 @@ class IvyTranslatorToArtifact {
 
     private static final String EXTRA_PREFIX = "e";
 
-    static Map<String, Artifact> toMavenArtifacts(JkCoordinate coordinate, JkArtifactLocator artifactLocator) {
+    static Map<String, Artifact> toMavenArtifacts(JkCoordinate coordinate, JkArtifactPublisher artifactPublisher) {
         Map<String, Artifact> result = new HashMap<>();
         Instant now = Instant.now();
-        for (JkArtifactId artifactId : artifactLocator.getArtifactIds()) {
-            Path file = artifactLocator.getArtifactPath(artifactId);
+        for (JkArtifactId artifactId : artifactPublisher.getArtifactIds()) {
+            Path file = artifactPublisher.artifactLocator.getArtifactPath(artifactId);
             ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(coordinate);
-            String classifier = artifactId.getName();
+            String classifier = artifactId.getClassifier();
             final Artifact artifact = toMavenArtifact(file, classifier, moduleRevisionId, now);
             result.put(classifier, artifact);
         }
@@ -35,10 +51,10 @@ class IvyTranslatorToArtifact {
     }
 
     static List<ArtifactAndConfigurations> toIvyArtifacts(JkCoordinate coordinate,
-                                                          List<JkIvyPublication.JkPublishedArtifact> jkArtifacts) {
+                                                          List<JkIvyPublication.JkIvyPublishedArtifact> jkArtifacts) {
         List<ArtifactAndConfigurations> result = new LinkedList<>();
         Instant now = Instant.now();
-        for (JkIvyPublication.JkPublishedArtifact jkArtifact : jkArtifacts) {
+        for (JkIvyPublication.JkIvyPublishedArtifact jkArtifact : jkArtifacts) {
             ModuleRevisionId moduleRevisionId = IvyTranslatorToDependency.toModuleRevisionId(coordinate);
             final Artifact artifact = toIvyArtifact(jkArtifact, moduleRevisionId, now);
             result.add(new ArtifactAndConfigurations(artifact, jkArtifact.configurationNames));
@@ -48,7 +64,7 @@ class IvyTranslatorToArtifact {
 
     static void bind(DefaultModuleDescriptor descriptor, Map<String, Artifact> artifactMap) {
         artifactMap.forEach((classifier, artifact) -> {
-            String conf = JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier) ? "default" : classifier;
+            String conf = JkArtifactId.MAIN_ARTIFACT_CLASSIFIER.equals(classifier) ? "default" : classifier;
             if (descriptor.getConfiguration(conf) == null) {
                 descriptor.addConfiguration(new Configuration(conf));
             }
@@ -84,7 +100,7 @@ class IvyTranslatorToArtifact {
     private static Artifact toMavenArtifact(Path artifactFile, String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifactFile.getFileName().toString(), ".");
         final Map<String, String> extraAttribute;
-        if (JkArtifactId.MAIN_ARTIFACT_NAME.equals(classifier)) {
+        if (JkArtifactId.MAIN_ARTIFACT_CLASSIFIER.equals(classifier)) {
             extraAttribute = new HashMap<>();
         } else {
             extraAttribute = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
@@ -93,7 +109,7 @@ class IvyTranslatorToArtifact {
                 extraAttribute);
     }
 
-    static Artifact toIvyArtifact(JkIvyPublication.JkPublishedArtifact artifact,
+    static Artifact toIvyArtifact(JkIvyPublication.JkIvyPublishedArtifact artifact,
                                   ModuleRevisionId moduleId, Instant date) {
         final String name = JkUtilsString.isBlank(artifact.name) ? moduleId.getOrganisation() + "."
                 + moduleId.getName() : artifact.name;

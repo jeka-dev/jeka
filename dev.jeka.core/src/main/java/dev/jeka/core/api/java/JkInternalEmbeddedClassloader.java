@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.system.JkLocator;
@@ -41,6 +57,17 @@ public class JkInternalEmbeddedClassloader {
     }
 
     public static JkInternalEmbeddedClassloader ofMainEmbeddedLibs(List<Path> extraEntries) {
+        List<Path> pathList = embeddedLibs();
+        pathList.addAll(extraEntries);
+        List<URL> urlList = pathList.stream()
+                .map(JkUtilsPath::toUrl)
+                .collect(Collectors.toList());
+        URL[] urls = urlList.toArray(new URL[0]);
+        ClassLoader classLoader = new URLClassLoader(urls,  targetClassloader());
+        return of(classLoader);
+    }
+
+    static List<Path> embeddedLibs() {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         List<Path> pathList = new LinkedList<>();
         URL embeddedNameUrl =  JkInternalEmbeddedClassloader.class.getClassLoader()
@@ -50,13 +77,7 @@ public class JkInternalEmbeddedClassloader {
             Path file = getEmbeddedLibAsPath("META-INF/" + jarName);
             pathList.add(file);
         }
-        pathList.addAll(extraEntries);
-        List<URL> urlList = pathList.stream()
-                .map(JkUtilsPath::toUrl)
-                .collect(Collectors.toList());
-        URL[] urls = urlList.toArray(new URL[0]);
-        ClassLoader classLoader = new URLClassLoader(urls,  targetClassloader());
-        return of(classLoader);
+        return pathList;
     }
 
     public static Path getEmbeddedLibAsPath(String resourcePath) {

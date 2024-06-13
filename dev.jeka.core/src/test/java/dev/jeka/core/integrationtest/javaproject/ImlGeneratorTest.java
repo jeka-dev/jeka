@@ -12,10 +12,10 @@ public class ImlGeneratorTest {
     public void generateIml_springbootProject_ok() {
 
         JkProject project = JkProject.of().flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-web:" + VERSION)
                 )
-                .configureTestDependencies(deps -> deps
+                .customizeTestDeps(deps -> deps
                         .and("org.springframework.boot:spring-boot-starter-test:" + VERSION)
                             .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
                 ).getProject();

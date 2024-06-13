@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.system.JkLog;
@@ -84,7 +100,7 @@ public final class JkResourceProcessor {
      * @see #addInterpolators(Iterable)
      */
     public JkResourceProcessor addInterpolator(String acceptPattern, String... keyValues) {
-        return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny(keyValues));
+        return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny((Object[]) keyValues));
     }
 
     /**
@@ -110,14 +126,18 @@ public final class JkResourceProcessor {
     public void generate(JkPathTreeSet resourceTrees, Path outputDir) {
         Path relativeOutputDir = outputDir.isAbsolute() ? Paths.get("").toAbsolutePath().relativize(outputDir)
                 : outputDir;
-        JkLog.startTask("Copy resource files to %s", relativeOutputDir);
+        boolean hasResourceFiles  = resourceTrees.count(1, false) > 0;
+        if (!hasResourceFiles) {
+            JkLog.verbose("No resources to process");
+            return;
+        }
+        JkLog.verbose("Copy resource files to %s", relativeOutputDir);
         for (final JkPathTree resourceTree : resourceTrees.toList()) {
             final AtomicInteger count = new AtomicInteger(0);
             if (!resourceTree.exists()) {
                 continue;
             }
-            resourceTree.stream().forEach(object -> {
-                Path path = (Path) object;
+            resourceTree.stream().forEach(path -> {
                 final Path relativePath = resourceTree.getRoot().relativize(path);
                 final Path out = outputDir.resolve(relativePath);
                 final Map<String, String> data = JkInterpolator.of(relativePath.toString(),
@@ -129,10 +149,8 @@ public final class JkResourceProcessor {
                     count.incrementAndGet();
                 }
             });
-            JkLog.info("%s processed from %s.", JkUtilsString.pluralize(count.get(), "file"),
-                    JkUtilsPath.relativizeFromWorkingDir(resourceTree.getRoot()));
+            JkLog.verbose("%s processed", JkUtilsString.pluralize(count.get(), "file"));
         }
-        JkLog.endTask();
     }
 
     /**

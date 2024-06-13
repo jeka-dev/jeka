@@ -1,8 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="FULL BUILD skip test" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="MasterBuild" />
     <module name="dev.jeka.master" />
-    <option name="PROGRAM_PARAMETERS" value="-ls=BRACE -lsu -lri -cw -Dproject#test.skip=true runSamples=false" />
+    <option name="PROGRAM_PARAMETERS" value="-Djeka.skip.tests=true runSamples=false --inspect --stacktrace" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

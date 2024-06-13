@@ -8,11 +8,11 @@
 
 	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="dev.jeka.core/jeka/project-libs/compile-only">
+	<fileset id="libs" dir="dev.jeka.core/libs/compile-only">
 		<include name='**/*.jar' />
 	</fileset>
 
-	<fileset id="junit5-libs" dir="dev.jeka.core/jeka/project-libs/test">
+	<fileset id="junit5-libs" dir="dev.jeka.core/libs/test">
 		<include name='**/*.jar' />
 	</fileset>
 
@@ -26,9 +26,11 @@
 		<javac destdir="${bin}" encoding="UTF-8" includeantruntime="false">
 			<src path="dev.jeka.core/src/main/java" />
 
-			<!-- needed to include sample bbuilds into quality analysis -->
+			<!-- needed to include sample builds into quality analysis -->
 			<src path="plugins/dev.jeka.plugins.jacoco" />
 			<src path="plugins/dev.jeka.plugins.sonarqube" />
+			<src path="plugins/dev.jeka.plugins.nexus" />
+
 			<classpath>
 				<fileset refid="libs" />
 			</classpath>
@@ -44,7 +46,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="project#clean make -lri -lsu -ls=BRACE -lst -lna -lv=false" />
+			<arg line="masterBuild: make -i --stacktrace" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

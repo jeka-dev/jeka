@@ -1,9 +1,25 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomXPath;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsHttp;
+import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -16,10 +32,7 @@ import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JkCoordinateSearch {
@@ -72,8 +85,6 @@ public class JkCoordinateSearch {
         return this;
     }
 
-
-
     public JkCoordinateSearch setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
@@ -99,7 +110,7 @@ public class JkCoordinateSearch {
                 throw new UncheckedIOException(e);
             }
             if (result == null) {
-                JkLog.trace("No API found at " + url + " (404).");
+                JkLog.verbose("No API found at %s (404).", url);
                 baseCandidtate = getParentUrl(baseCandidtate);
                 if (baseCandidtate == null) {
                     break;
@@ -112,6 +123,11 @@ public class JkCoordinateSearch {
             if (repoBaseUrl != null && !REPO_API_URL.containsKey(repoBaseUrl)) {
                 REPO_API_URL.put(repoBaseUrl, url);
             }
+        }
+        if (showVersion()) {
+            result = result.stream()
+                    .sorted(new VersionedComparator().reversed())
+                    .collect(Collectors.toList());
         }
         return result;
     }
@@ -130,11 +146,10 @@ public class JkCoordinateSearch {
         if (code == 404) {
             return null;
         }
-        JkUtilsHttp.assertResponseOk(con, null);
+        JkUtilsNet.assertResponseOk(con, null);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document domDoc = JkUtilsXml.documentFrom(in);
             JkDomDocument doc = JkDomDocument.of(domDoc);
-            doc.print(System.out);
             return toResult(doc);
         }
     }
@@ -243,6 +258,16 @@ public class JkCoordinateSearch {
             orgMmavenSearchIdsXpath = JkDomXPath.compile("/response/result[@name='response']/doc/str[@name='id']");
         }
         return orgMmavenSearchIdsXpath;
+    }
+
+    private static class VersionedComparator implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            String v1 = JkUtilsString.substringAfterLast(o1, ":");
+            String v2 = JkUtilsString.substringAfterLast(o2, ":");
+            return JkVersion.of(v1).compareTo(JkVersion.of(v2));
+        }
     }
 
 

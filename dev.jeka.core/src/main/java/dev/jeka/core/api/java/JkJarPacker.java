@@ -1,11 +1,33 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsZip;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.jar.JarFile;
 
 /**
  * Utilities class to produce Jar files.
@@ -33,6 +55,10 @@ public final class JkJarPacker {
     public static JkJarPacker of(JkPathTreeSet classTrees) {
         JkUtilsAssert.argument(!classTrees.toList().isEmpty(), "Nothing to create jar from : " + classTrees);
         return new JkJarPacker(classTrees, null, null);
+    }
+
+    public static JkJarPacker of(JkPathTree classTree) {
+        return of(classTree.toSet());
     }
 
     public static JkJarPacker of(Path classDir) {
@@ -69,14 +95,25 @@ public final class JkJarPacker {
      *               dependencies or not.
      */
     public void makeFatJar(Path resultFile, Iterable<Path> otherJars, PathMatcher filter) {
+        Path originalJar = JkUtilsPath.createTempFile("jk-jar-original", ".jar");
+        JkUtilsPath.deleteFile(originalJar);
+        classtrees.andMatcher(filter).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(originalJar);
+        JkJarWriter jarWriter = JkJarWriter.of(resultFile);
         if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classtrees.toList().get(0).getRoot());
+            jarWriter.writeManifest(manifest.getManifest());
         }
-        JkPathTreeSet.ofEmpty().andZips(otherJars).and(classtrees).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
-                .andMatcher(filter)
-                .zipTo(resultFile)  // main jar files must take precedence over files coming form dependencies
-                .close();
-    }
+        jarWriter.writeEntries(JkUtilsZip.jarFile(originalJar));
+        for (Path extraZip : otherJars) {
+            try (JarFile jarFile = JkUtilsZip.jarFile(extraZip)) {
+                jarWriter.writeEntries(jarFile);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        jarWriter.close();
 
+        // On Windows, this may happen that the deletion fails cause another process is using it
+        JkUtilsPath.deleteIfExistsSafely(originalJar);
+    }
 
 }

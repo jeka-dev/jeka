@@ -1,11 +1,25 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
@@ -17,11 +31,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * A set of {@link JkPathTree}.
- *
- * @author Jerome Angibaud
+ * See {@link JkPathTree#getRoot()}
  */
-public final class JkPathTreeSet implements Closeable {
+public final class JkPathTreeSet {
 
     private final List<JkPathTree> pathTrees;
 
@@ -64,11 +76,15 @@ public final class JkPathTreeSet implements Closeable {
         return new JkPathTreeSet(dirs);
     }
 
+    /**
+     * Creates a {@link JkPathTreeSet} from an array of folder paths.
+     *
+     * @param folders the array of folder paths
+     * @return the {@link JkPathTreeSet} created from the folder paths
+     */
     public static JkPathTreeSet ofRoots(String folder, String... folders) {
-        List<Path> allFolders = JkUtilsIterable.listOf1orMore(folder, folders).stream()
-                .map(Paths::get)
-                .collect(Collectors.toList());
-        return ofRoots(allFolders.toArray(new Path[0]));
+        return ofRoots(JkUtilsIterable.listOf1orMore(folder, folders).stream()
+                .map(Paths::get).toArray(Path[]::new));
     }
 
     /**
@@ -89,24 +105,6 @@ public final class JkPathTreeSet implements Closeable {
         final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         list.addAll(Arrays.asList(trees));
         return new JkPathTreeSet(list);
-    }
-
-    /**
-     * Creates a {@link JkPathTreeSet} which is a concatenation of this
-     * {@link JkPathTreeSet} and zip files passed as parameter.
-     */
-    public JkPathTreeSet andZips(Iterable<Path> zipFiles) {
-        Iterable<Path> paths = JkUtilsPath.disambiguate(zipFiles);
-        final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
-        paths.forEach(zipFile -> list.add(JkZipTree.of(zipFile)));
-        return new JkPathTreeSet(list);
-    }
-
-    /**
-     * @see #andZips(Iterable)
-     */
-    public JkPathTreeSet andZip(Path... zips) {
-        return andZips(Arrays.asList(zips));
     }
 
     /**
@@ -165,7 +163,7 @@ public final class JkPathTreeSet implements Closeable {
     // ---------------------------- iterate over files -----------------------------------
 
     /**
-     * Returns a concatenation of {@link #getFiles()} for all trees involved in this set.
+     * Returns a concatenation of files for all trees involved in this set.
      */
     public List<Path> getFiles() {
         final LinkedList<Path> result = new LinkedList<>();
@@ -178,7 +176,7 @@ public final class JkPathTreeSet implements Closeable {
     }
 
     /**
-     * Returns a concatenation of {@link #getRelativeFiles()} () for all trees involved in this set.
+     * Returns a concatenation of relative paths for all trees involved in this set.
      */
     public List<Path> getRelativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
@@ -338,30 +336,22 @@ public final class JkPathTreeSet implements Closeable {
         } else return pathTrees.equals(other.pathTrees);
     }
 
-    @Override
-    public void close()  {
-        this.pathTrees.stream()
-                .filter(JkZipTree.class::isInstance)
-                .map(JkZipTree.class::cast)
-                .forEach(JkZipTree::close);
-    }
-
     /**
      * Same as {@link JkPathTree#watch(long, AtomicBoolean, Consumer)} but acting on this full path tree set.
      */
     public void watch(long millis, AtomicBoolean run, Consumer<List<JkPathTree.FileChange>> fileChangeConsumer)  {
         try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
-            List<WatchKey> watchKeys = (List<WatchKey>) this.pathTrees.stream()
+            List<WatchKey> watchKeys = this.pathTrees.stream()
                     .filter(tree -> Files.isDirectory(tree.getRoot()))
                     .flatMap(tree -> tree.getWatchKeys(watchService).stream())
-                    .collect(Collectors.toCollection(() -> new LinkedList<>()));
+                    .collect(Collectors.toCollection(LinkedList::new));
             while (run.get()) {
                 JkUtilsSystem.sleep(millis);
-                List<JkPathTree.FileChange> fileChanges = (List<JkPathTree.FileChange>) this.pathTrees.stream()
+                List<JkPathTree.FileChange> fileChanges = this.pathTrees.stream()
                         .flatMap(tree -> tree.getFileChanges(watchService, watchKeys).stream())
                         .collect(Collectors.toList());
                 if (!fileChanges.isEmpty()) {
-                    JkLog.trace("File change detected : " + fileChanges);
+                    JkLog.verbose("File change detected : %s", fileChanges);
                     fileChangeConsumer.accept(fileChanges);
                 }
             }

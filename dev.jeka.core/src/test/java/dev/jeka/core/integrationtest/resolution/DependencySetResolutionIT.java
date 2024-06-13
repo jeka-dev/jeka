@@ -1,7 +1,6 @@
 package dev.jeka.core.integrationtest.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
@@ -275,15 +274,13 @@ public class DependencySetResolutionIT {
         JkProject project = JkProject.of()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .flatFacade()
-                    .configureCompileDependencies(deps -> deps
+                    .customizeCompileDeps(deps -> deps
                         .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE)
                         .and("org.openjfx:javafx-controls:linux:11.0.2", JkTransitivity.NONE)
                         .and("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);
-        JkResolveResult resolveResult = project.compilation.resolveDependencies();
-        resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
-        JkPathSequence paths = resolveResult.getFiles();
+        JkPathSequence paths = JkPathSequence.of(project.compilation.resolveDependenciesAsFiles());
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
         assertEquals(3, paths.getEntries().size());
     }
@@ -293,13 +290,11 @@ public class DependencySetResolutionIT {
         JkProject project = JkProject.of()
                 .setJvmTargetVersion(JkJavaVersion.V11)
                 .flatFacade()
-                .configureCompileDependencies(deps -> deps
+                .customizeCompileDeps(deps -> deps
                         .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE))
                 .getProject();
         project.setIncludeTextAndLocalDependencies(false);
-        JkResolveResult resolveResult = project.compilation.resolveDependencies();
-        resolveResult.getDependencyTree().toStrings().forEach(System.out::println);
-        JkPathSequence paths = resolveResult.getFiles();
+        JkPathSequence paths = JkPathSequence.of(project.compilation.resolveDependenciesAsFiles());
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
         assertEquals(1, paths.getEntries().size());
         // the order Ivy resolve classifiers cannot be controlled

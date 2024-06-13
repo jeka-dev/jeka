@@ -1,12 +1,30 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A bunch of {@link JkQualifiedDependency}
+ * Represents a set of qualified dependencies.
  */
 public class JkQualifiedDependencySet {
 
@@ -39,45 +57,68 @@ public class JkQualifiedDependencySet {
     private final List<JkQualifiedDependency> entries;
 
     // Transitive dependencies globally excluded
-    private final Set<JkDependencyExclusion> globalExclusions;
+    private final LinkedHashSet<JkDependencyExclusion> globalExclusions;
 
     private final JkVersionProvider versionProvider;
 
-    private JkQualifiedDependencySet(List<JkQualifiedDependency> qualifiedDependencies, Set<JkDependencyExclusion>
+    private JkQualifiedDependencySet(List<JkQualifiedDependency> qualifiedDependencies,
+                                     LinkedHashSet<JkDependencyExclusion>
             globalExclusions, JkVersionProvider versionProvider) {
         this.entries = Collections.unmodifiableList(qualifiedDependencies);
-        this.globalExclusions = Collections.unmodifiableSet(globalExclusions);
+        this.globalExclusions = globalExclusions;
         this.versionProvider = versionProvider;
     }
 
+    /**
+     * Creates a new empty instance of JkQualifiedDependencySet.
+     */
     public static JkQualifiedDependencySet of() {
-        return new JkQualifiedDependencySet(Collections.emptyList(), Collections.emptySet(), JkVersionProvider.of());
+        return new JkQualifiedDependencySet(Collections.emptyList(), new LinkedHashSet<>(), JkVersionProvider.of());
     }
 
+    /**
+     * Returns a new JkQualifiedDependencySet based on the provided list of JkDependency objects.
+     */
     public static JkQualifiedDependencySet ofDependencies(List<JkDependency> dependencies) {
         return of(dependencies.stream().map(dep -> JkQualifiedDependency.of(null, dep)).collect(Collectors.toList()));
     }
 
+    /**
+     * Creates a new JkQualifiedDependencySet based on the provided list of JkQualifiedDependencies.
+     */
     public static JkQualifiedDependencySet of(List<JkQualifiedDependency> qualifiedDependencies) {
-        return new JkQualifiedDependencySet(qualifiedDependencies, Collections.emptySet(), JkVersionProvider.of());
+        return new JkQualifiedDependencySet(qualifiedDependencies,new LinkedHashSet<>(), JkVersionProvider.of());
     }
 
+    /**
+     * Creates a new JkQualifiedDependencySet based on the provided JkDependencySet.
+     */
     public static JkQualifiedDependencySet of(JkDependencySet dependencySet) {
         return ofDependencies(dependencySet.getEntries())
                 .withGlobalExclusions(dependencySet.getGlobalExclusions())
                 .withVersionProvider(dependencySet.getVersionProvider());
     }
 
+    /**
+     * Retrieves the list of qualified dependencies.
+     */
     public List<JkQualifiedDependency> getEntries() {
         return entries;
     }
 
+    /**
+     * Retrieves the list of dependencies.
+     */
     public List<JkDependency> getDependencies() {
         return entries.stream()
                 .map(JkQualifiedDependency::getDependency)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves the list of coordinate dependencies from the JkQualifiedDependencySet.
+     * Coordinate dependencies are dependencies that have module coordinates and can be used for dependency resolution.
+     */
     public List<JkCoordinateDependency> getCoordinateDependencies() {
         return entries.stream()
                 .map(JkQualifiedDependency::getDependency)
@@ -86,29 +127,45 @@ public class JkQualifiedDependencySet {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the set of global exclusions for this JkQualifiedDependencySet.
+     * These exclusions only apply to transitive dependencies and do not affect directly declared dependencies.
+     */
     public Set<JkDependencyExclusion> getGlobalExclusions() {
         return globalExclusions;
     }
 
+    /**
+     * Returns the version provider associated with this {@link JkQualifiedDependencySet}.
+     */
     public JkVersionProvider getVersionProvider() {
         return versionProvider;
     }
 
-    public List<JkQualifiedDependency> findByModule(String moduleId) {
+    /**
+     * Finds and returns a list of qualified dependencies based on the specified module ID.
+     */
+    public List<JkQualifiedDependency> findByCoordinateGroupId(String moduleId) {
         return this.entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
-                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getModuleId().getColonNotation()
+                .filter(qDep -> qDep.getCoordinateDependency().getCoordinate().getModuleId().toColonNotation()
                         .equals(moduleId))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Removes the specified {@link JkDependency} from the {@link JkQualifiedDependencySet}.
+     */
     public JkQualifiedDependencySet remove(JkDependency dependency) {
         List<JkQualifiedDependency> dependencies = entries.stream()
-                .filter(qDep -> !qDep.equals(dependency))  // TODO dDep is always != depedency as they are not from same class
+                .filter(qDep -> !dependency.equals(qDep.getDependency()))
                 .collect(Collectors.toList());
         return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
+    /**
+     * Removes the specified {@link JkQualifiedDependency} from the {@link JkQualifiedDependencySet}.
+     */
     public JkQualifiedDependencySet remove(JkQualifiedDependency dependency) {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> !qDep.equals(dependency))
@@ -116,24 +173,42 @@ public class JkQualifiedDependencySet {
         return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
+    /**
+     * Adds a new qualified dependency to the existing dependencies.
+     * The qualifier is used to differentiate between multiple dependencies with the same module coordinates.
+     */
     public JkQualifiedDependencySet and(JkQualifiedDependency qualifiedDependency) {
         List<JkQualifiedDependency> result = new LinkedList<>(this.entries);
         result.add(qualifiedDependency);
         return new JkQualifiedDependencySet(result, globalExclusions, versionProvider);
     }
 
+    /**
+     * Adds a new qualified dependency to the existing dependencies.
+     * The qualifier is used to differentiate between multiple dependencies with the same module coordinates.
+     */
     public JkQualifiedDependencySet and(String qualifier, JkDependency dependency) {
         return and(JkQualifiedDependency.of(qualifier, dependency));
     }
 
+    /**
+     * Adds a new qualified dependency to the existing dependencies. The qualifier is used to
+     * differentiate between multiple dependencies with the same module coordinates.
+     */
     public JkQualifiedDependencySet and(String qualifier, String moduleDependencyDescriptor) {
         return and(qualifier, JkCoordinateDependency.of(moduleDependencyDescriptor));
     }
 
+    /**
+     * Removes the specified dependency from the JkQualifiedDependencySet.
+     */
     public JkQualifiedDependencySet remove(String dep) {
         return remove(JkCoordinateDependency.of(dep));
     }
 
+    /**
+     * Replaces the qualifier of the specified dependency in the {@link JkQualifiedDependencySet}.
+     */
     public JkQualifiedDependencySet replaceQualifier(JkDependency dependency, String qualifier) {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .map(qDep -> qDep.getDependency().equals(dependency) ? qDep.withQualifier(qualifier) : qDep)
@@ -141,10 +216,17 @@ public class JkQualifiedDependencySet {
         return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
+    /**
+     * Replaces the qualifier of the specified dependency in the {@link JkQualifiedDependencySet}.
+     */
     public JkQualifiedDependencySet replaceQualifier(String dependency, String qualifier) {
         return replaceQualifier(JkCoordinateDependency.of(dependency), qualifier);
     }
 
+    /**
+     * Filters and returns a new JkQualifiedDependencySet containing only the JkQualifiedDependencies
+     * that have the specified qualifiers.
+     */
     public JkQualifiedDependencySet withQualifiersOnly(String ... qualifiers) {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(dep -> Arrays.asList(qualifiers).contains(dep.getQualifier()))
@@ -152,7 +234,11 @@ public class JkQualifiedDependencySet {
         return new JkQualifiedDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
-    public JkQualifiedDependencySet withModuleDependenciesOnly() {
+    /**
+     * Filters and Returns a new JkQualifiedDependencySet containing only the JkQualifiedDependencies
+     * whose underlying JkDependency is an instance of JkCoordinateDependency.
+     */
+    public JkQualifiedDependencySet withCoordinateDependenciesOnly() {
         List<JkQualifiedDependency> dependencies = entries.stream()
                 .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
                 .collect(Collectors.toList());
@@ -166,8 +252,7 @@ public class JkQualifiedDependencySet {
     public JkQualifiedDependencySet withGlobalExclusions(Set<JkDependencyExclusion> exclusions) {
         Set<JkDependencyExclusion> newExclusions = new HashSet<>(this.globalExclusions);
         newExclusions.addAll(exclusions);
-        return new JkQualifiedDependencySet(entries, Collections.unmodifiableSet(newExclusions),
-                versionProvider);
+        return new JkQualifiedDependencySet(entries, new LinkedHashSet<>(newExclusions), versionProvider);
     }
 
     /**
@@ -187,6 +272,9 @@ public class JkQualifiedDependencySet {
         return new JkQualifiedDependencySet(this.entries, globalExclusions, resolvedVersionProvider);
     }
 
+    /**
+     * Computes the set of IDE dependencies based on the given compile, runtime, and test dependencies.
+     */
     public static JkQualifiedDependencySet computeIdeDependencies(
             JkDependencySet allCompileDeps,
             JkDependencySet allRuntimeDeps,
@@ -220,6 +308,9 @@ public class JkQualifiedDependencySet {
                 testMerge.getResult().getVersionProvider());
     }
 
+    /**
+     * Computes the set of IDE dependencies based on the given compile, runtime, and test dependencies.
+     */
     public static JkQualifiedDependencySet computeIdeDependencies(
             JkDependencySet allCompileDeps,
             JkDependencySet allRuntimeDeps,
@@ -227,6 +318,9 @@ public class JkQualifiedDependencySet {
         return computeIdeDependencies(allCompileDeps, allRuntimeDeps, allTestDeps, JkCoordinate.ConflictStrategy.FAIL);
     }
 
+    /**
+     * Computes the set of qualified dependencies for publishing using Ivy.
+     */
     public static JkQualifiedDependencySet computeIvyPublishDependencies(
             JkDependencySet allCompileDeps,
             JkDependencySet allRuntimeDeps,
@@ -265,11 +359,16 @@ public class JkQualifiedDependencySet {
                 mergeWithTest.getResult().getVersionProvider());
     }
 
-
+    /**
+     * Returns the Ivy target configurations for the given transitivity.
+     */
     public static String getIvyTargetConfigurations(JkTransitivity transitivity) {
         return TRANSITIVITY_TARGET_CONF_MAP.get(transitivity);
     }
 
+    /**
+     * Returns a List of JkDependency objects that have the specified qualifiers.
+     */
     public List<JkDependency> getDependenciesHavingQualifier(String ... qualifiers) {
         List<String> list = Arrays.asList(qualifiers);
         return entries.stream()
@@ -278,6 +377,9 @@ public class JkQualifiedDependencySet {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Checks if any module in the dependency set has an unspecified version.
+     */
     public JkQualifiedDependencySet assertNoUnspecifiedVersion() {
         final List<JkCoordinateDependency> unspecifiedVersionModules = getCoordinateDependencies().stream()
                 .filter(dep -> this.versionProvider.getVersionOfOrUnspecified(
@@ -329,5 +431,52 @@ public class JkQualifiedDependencySet {
         result = 31 * result + globalExclusions.hashCode();
         result = 31 * result + versionProvider.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "JkQualifiedDependencySet{" +
+                "entries=" + entries +
+                ", globalExclusions=" + globalExclusions +
+                ", versionProvider=" + versionProvider +
+                '}';
+    }
+
+    public String toStringMultiline(String margin) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(margin).append("Dependencies    :\n");
+        entries.forEach(dep -> sb.append(margin + "  " + dep + "\n"));
+        sb.append(margin).append("Exclusions      :\n");
+        globalExclusions.forEach(exclusion -> sb.append(margin + "  " + exclusion + "\n"));
+        sb.append(margin).append("Version Provider:\n");
+        versionProvider.toMap().entrySet()
+                .forEach(entry -> sb.append(margin + "  " + entry.getKey() + " : " + entry.getValue() + "\n"));
+        if (sb.charAt(sb.length() -1)  == '\n') {
+            sb.deleteCharAt(sb.length() -1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Computes the MD5 hash of the current instance and returns it as a string.
+     * The string is suitable to be used as a file name.
+     */
+    public String md5() {
+        try {
+            final MessageDigest digest = MessageDigest.getInstance("MD5");
+            this.entries.forEach(dep -> digest.update(toHashByteArray(dep)));
+            this.globalExclusions.forEach(exclusion -> digest.update(toHashByteArray(exclusion)));
+            digest.update(toHashByteArray(this.versionProvider));
+            return Base64.getEncoder().encodeToString(digest.digest()).replace('/', '-');
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static byte[] toHashByteArray(Object object) {
+        if (object == null) {
+            return new byte[0];
+        }
+        return Integer.toString(object.hashCode()).getBytes();
     }
 }

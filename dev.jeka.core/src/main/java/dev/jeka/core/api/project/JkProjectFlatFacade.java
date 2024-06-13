@@ -1,11 +1,26 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.depmanagement.JkDepSuggest;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
-import dev.jeka.core.api.tooling.JkGit;
+import dev.jeka.core.api.tooling.git.JkGit;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,17 +28,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.PROD;
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.TEST;
 
 /**
- * Simple facade over {@link JkProject} to access common setting conveniently.
+ * Flat facade over {@link JkProject} to access {@link JkProject} configuration
+ * from a single entry point.
  */
 public class JkProjectFlatFacade {
 
@@ -33,47 +47,56 @@ public class JkProjectFlatFacade {
         this.project = project;
     }
 
-    public JkProjectFlatFacade applyOnProject(Consumer<JkProject> projectConsumer) {
-        project.apply(projectConsumer);
-        return this;
-    }
-
-    public JkProjectFlatFacade apply(Consumer<JkProjectFlatFacade> facadeConsumer) {
-        facadeConsumer.accept(this);
-        return this;
-    }
-
+    /**
+     * Sets the Java JVM version that will be used to compile sources and generate bytecode.
+     */
     public JkProjectFlatFacade setJvmTargetVersion(JkJavaVersion version) {
         project.setJvmTargetVersion(version);
         return this;
     }
 
+    /**
+     * Sets if the project should produce regular or fat jar by default.
+     */
     public JkProjectFlatFacade setMainArtifactJarType(JkProjectPackaging.JarType jarType) {
         if (jarType == JkProjectPackaging.JarType.REGULAR) {
-            project.artifactProducer.putMainArtifact(project.packaging::createBinJar);
+            project.setJarMaker(project.packaging::createBinJar);
         } else if (jarType == JkProjectPackaging.JarType.FAT) {
-            project.artifactProducer.putMainArtifact(project.packaging::createFatJar);
+            project.setJarMaker(project.packaging::createFatJar);
         } else {
             throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
         }
         return this;
     }
 
+    /**
+     * Sets the source encoding for the project.
+     */
     public JkProjectFlatFacade setSourceEncoding(String encoding) {
         project.setSourceEncoding(encoding);
         return this;
     }
 
+    /**
+     * Sets the base directory for this Project.
+     */
     public JkProjectFlatFacade setBaseDir(Path baseDir) {
         project.setBaseDir(baseDir);
         return this;
     }
 
+    /**
+     * Sets the base directory for this Project by specifying a String representing the
+     * base directory path.
+     */
     public JkProjectFlatFacade setBaseDir(String baseDir) {
         return setBaseDir(Paths.get(baseDir));
     }
 
-
+    /**
+     * Sets the layout style for the project's compilation layout.
+     * <p>
+     */
     public JkProjectFlatFacade setLayoutStyle(JkCompileLayout.Style style) {
         if (style == JkCompileLayout.Style.SIMPLE) {
             project.compilation.layout.setSourceSimpleStyle(PROD);
@@ -87,10 +110,8 @@ public class JkProjectFlatFacade {
         return this;
     }
 
-
-
     /**
-     * The resources will be located in same dirs than sources.
+     * The resources will be located in same the dir than the sources.
      */
     public JkProjectFlatFacade mixResourcesAndSources() {
         project.compilation.layout.mixResourcesAndSources();
@@ -98,88 +119,132 @@ public class JkProjectFlatFacade {
         return this;
     }
 
-    public JkProjectFlatFacade includeJavadocAndSources(boolean includeJavaDoc, boolean includeSources) {
-        project.includeJavadocAndSources(includeJavaDoc, includeSources);
+    /**
+     * Sets the main class name to use in #runXxx and for building docker images.
+     * The value <code>"auto"</code> means that it will e auto-discovered.
+     *
+     * @see JkProjectPackaging#setMainClass(String)
+     */
+    public JkProjectFlatFacade setMainClass(String mainClass) {
+        project.packaging.setMainClass(mainClass);
         return this;
     }
 
-    public JkProjectFlatFacade configureCompileDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.compilation.configureDependencies(modifier);
+    /**
+     * Customizes the compilation dependencies of the project using the provided modifier function.
+     */
+    public JkProjectFlatFacade customizeCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.compilation.customizeDependencies(modifier);
         return this;
     }
 
-    public JkProjectFlatFacade configureRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.packaging.configureRuntimeDependencies(modifier);
+    /**
+     * Customizes the runtime dependencies of the project using the provided modifier function.
+     */
+    public JkProjectFlatFacade customizeRuntimeDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.packaging.customizeRuntimeDependencies(modifier);
         return this;
     }
 
-    public JkProjectFlatFacade configureTestDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.testing.compilation.configureDependencies(modifier);
+    /**
+     * Customizes the test dependencies of the project using the provided modifier function.
+     */
+    public JkProjectFlatFacade customizeTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        project.testing.compilation.customizeDependencies(modifier);
         return this;
     }
 
-    public JkProjectFlatFacade addCompileDeps(@JkDepSuggest String... moduleDescriptors) {
-        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
-        return configureCompileDependencies(addFun);
+    /**
+     * Adds compile dependencies to the project.
+     *
+     * @param coordinates the dependencies to be added in the format of group:artifactId:version
+     */
+    public JkProjectFlatFacade addCompileDeps(@JkDepSuggest String... coordinates) {
+        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, coordinates);
+        return customizeCompileDeps(addFun);
     }
 
-    public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String... moduleDescriptors) {
-        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
-        configureCompileDependencies(addFun);
-        String[] groupAndNames = Arrays.stream(moduleDescriptors)
+    /**
+     * Adds compile-only dependencies to the project.
+     *
+     * @param coordinates the dependencies to be added in the format of group:artifactId:version
+     */
+    public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String... coordinates) {
+        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, coordinates);
+        customizeCompileDeps(addFun);
+        String[] groupAndNames = Arrays.stream(coordinates)
                 .map(JkCoordinate::of)
-                .map(coodinate -> coodinate.getModuleId().getColonNotation())
-                .collect(Collectors.toList())
-                .toArray(new String[0]);
+                .map(coordinate -> coordinate.getModuleId().toColonNotation())
+                .toArray(String[]::new);
         UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, groupAndNames);
-        return configureRuntimeDependencies(minusFun);
+        return customizeRuntimeDeps(minusFun);
     }
 
-    public JkProjectFlatFacade addRuntimeDeps(@JkDepSuggest String... moduleDescriptors) {
-        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, moduleDescriptors);
-        return configureRuntimeDependencies(addFun);
+    /**
+     * Adds runtime dependencies to the project.
+     *
+     * @param coordinates the dependencies to be added in the format of group:artifactId:version
+     */
+    public JkProjectFlatFacade addRuntimeDeps(@JkDepSuggest String... coordinates) {
+        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, coordinates);
+        return customizeRuntimeDeps(addFun);
     }
 
-    public JkProjectFlatFacade addTestDeps(@JkDepSuggest String... moduleDescriptors) {
-        UnaryOperator<JkDependencySet> addFun = deps -> addFirst(deps, moduleDescriptors);
-        return addTestDeps(addFun);
+    /**
+     * Adds test dependencies to the project.
+     *
+     * @param coordinates the dependencies to be added in the format of group:artifactId:version
+     */
+    public JkProjectFlatFacade addTestDeps(@JkDepSuggest String... coordinates) {
+        UnaryOperator<JkDependencySet> addFun = deps -> addFirst(deps, coordinates);
+        return prependTestDeps(addFun);
     }
 
+
+    /**
+     * Sets whether to skip running tests for the project.
+     */
     public JkProjectFlatFacade skipTests(boolean skipped) {
         project.testing.setSkipped(skipped);
         return this;
     }
 
-    /**
-     * Add specified dependencies at head of preset dependencies.
-     */
-    public JkProjectFlatFacade addTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        return configureTestDependencies(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
-    }
 
-    public JkProjectFlatFacade setPublishedVersion(Supplier<String> versionSupplier) {
-        project.publication.setVersion(versionSupplier);
+    /**
+     * Sets the supplier for computing the project version.
+     *
+     * @param versionSupplier the supplier for computing the project version.
+     */
+    public JkProjectFlatFacade setVersionSupplier(Supplier<String> versionSupplier) {
+        project.setVersionSupplier(() -> JkVersion.of(versionSupplier.get()));
         return this;
     }
 
-    public JkProjectFlatFacade setPublishedVersion(String version) {
-        return setPublishedVersion(() -> version);
+    /**
+     * Sets the version of the project.
+     *
+     * @param version the version to set for the project.
+     */
+    public JkProjectFlatFacade setVersion(String version) {
+        return setVersionSupplier(() -> version);
     }
 
     /**
      * The published version will be computed according the current git tag.
+     *
      * @see JkGit#getVersionFromTag()
      */
-    public JkProjectFlatFacade setPublishedVersionFromGitTag() {
-        return setPublishedVersion(() -> JkGit.of(getProject().getBaseDir()).getVersionFromTag());
+    public JkProjectFlatFacade setVersionFromGitTag() {
+        return setVersionSupplier(() -> JkGit.of(getProject().getBaseDir()).getVersionFromTag());
     }
 
     /**
      * The published version will be computed according the git last commit message.
+     *
      * @see JkGit#getVersionFromCommitMessage(String)
      */
-    public JkProjectFlatFacade setPublishedVersionFromGitTagCommitMessage(String suffixKeyword) {
-        return setPublishedVersion(() -> JkGit.of(getProject().getBaseDir())
+    public JkProjectFlatFacade setVersionFromGitTagCommitMessage(String suffixKeyword) {
+        return setVersionSupplier(() -> JkGit.of(getProject().getBaseDir())
                 .getVersionFromCommitMessage(suffixKeyword));
     }
 
@@ -187,22 +252,15 @@ public class JkProjectFlatFacade {
      * @param moduleId group + artifactId to use when publishing on a binary repository.
      *                 Must be formatted as 'group:artifactId'
      */
-    public JkProjectFlatFacade setPublishedModuleId(String moduleId) {
-        project.publication.setModuleId(moduleId);
-        return this;
-    }
-
-    /**
-     * Configures the dependencies to be published in a Maven repository.
-     */
-    public JkProjectFlatFacade configurePublishedDeps(Function<JkDependencySet, JkDependencySet> dependencyModifier) {
-        project.publication.maven.configureDependencies(dependencyModifier);
+    public JkProjectFlatFacade setModuleId(String moduleId) {
+        project.setModuleId(JkModuleId.of(moduleId));
         return this;
     }
 
     /**
      * By default, every class in test folder are run. If you add an exclude filter,
      * tests accepting this filter won't be run.
+     *
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectFlatFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
@@ -215,6 +273,7 @@ public class JkProjectFlatFacade {
     /**
      * By default, every class in test folder are run. If you add an including filter, only
      * tests accepting one of the declared filters will run.
+     *
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectFlatFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
@@ -223,26 +282,45 @@ public class JkProjectFlatFacade {
     }
 
     /**
-     * @see #addTestIncludeFilterSuffixedBy(String, boolean)
      * Adds a test include filters for test classes named as <code>^(Test.*|.+[.$]Test.*|.*Tests?)$</code>.
      * This is a standard filter in many tools.
+     *
+     * @see #addTestIncludeFilterSuffixedBy(String, boolean)
      */
     public JkProjectFlatFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
         project.testing.testSelection.addIncludePatternsIf(condition,
                 JkTestSelection.STANDARD_INCLUDE_PATTERN);
-       return this;
+        return this;
     }
 
-    public JkProjectFlatFacade addSourceGenerator(JkSourceGenerator sourceGenerator) {
+    /**
+     * Sets the style for displaying test progress during test execution.
+     */
+    public JkProjectFlatFacade setTestProgressStyle(JkTestProcessor.JkProgressOutputStyle style) {
+        project.testing.testProcessor.engineBehavior.setProgressDisplayer(style);
+        return this;
+    }
+
+    /**
+     * Adds a source generator to the project.
+     */
+    public JkProjectFlatFacade addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {
         project.compilation.addSourceGenerator(sourceGenerator);
         return this;
     }
 
+    /**
+     * Retrieves the project associated with this facade.
+     */
     public JkProject getProject() {
         return project;
     }
 
-    private JkDependencySet add(JkDependencySet deps, String ... descriptors) {
+    private JkProjectFlatFacade prependTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        return customizeTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
+    }
+
+    private JkDependencySet add(JkDependencySet deps, String... descriptors) {
         JkDependencySet result = deps;
         for (String descriptor : descriptors) {
             result = result.and(descriptor);
@@ -250,7 +328,7 @@ public class JkProjectFlatFacade {
         return result;
     }
 
-    private JkDependencySet addFirst(JkDependencySet deps, String ... descriptors) {
+    private JkDependencySet addFirst(JkDependencySet deps, String... descriptors) {
         JkDependencySet result = deps;
         List<String> items = new LinkedList<>(Arrays.asList(descriptors));
         Collections.reverse(items);
@@ -261,7 +339,7 @@ public class JkProjectFlatFacade {
     }
 
 
-    private JkDependencySet minus(JkDependencySet deps, String ... descriptors) {
+    private JkDependencySet minus(JkDependencySet deps, String... descriptors) {
         JkDependencySet result = deps;
         for (String descriptor : descriptors) {
             result = result.minus(descriptor);

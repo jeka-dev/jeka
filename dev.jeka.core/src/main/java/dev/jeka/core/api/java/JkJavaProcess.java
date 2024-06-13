@@ -1,7 +1,23 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
@@ -20,7 +36,7 @@ import static dev.jeka.core.api.utils.JkUtilsIterable.listOf;
  *
  * @author Jerome Angibaud
  */
-public class JkJavaProcess extends JkProcess<JkJavaProcess> {
+public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
 
     public static final Path CURRENT_JAVA_HOME = Paths.get(System.getProperty("java.home"));
 
@@ -32,7 +48,8 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
     private boolean inheritSystemProperties = false;
 
     protected JkJavaProcess() {
-        super(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
+        super();
+        this.setCommand(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
     }
 
     protected JkJavaProcess(JkJavaProcess other) {
@@ -82,12 +99,16 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
 
     /**
      * Adds the specified java options to the command line.
-     * Options are command line parameters prepending the Java class to launch (e.g. 'cp', '/mylibs/foo.jar')
+     * Options are command line parameters prepending the Java class parameter.
      */
     public JkJavaProcess addJavaOptions(Collection<String> options) {
         return addParamsFirst(options);
     }
 
+    /**
+     * Adds the specified Java options to the command line if the given condition is true.
+     * @see #addJavaOptions(Collection)
+     */
     public JkJavaProcess addJavaOptionsIf(boolean condition, String... options) {
         if (condition) {
             return addJavaOptions(options);
@@ -95,6 +116,10 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
         return this;
     }
 
+    /**
+     * Adds the specified java options to the command line.
+     * @see #addJavaOptions(Collection)
+     */
     public JkJavaProcess addJavaOptions(String... options) {
         return this.addJavaOptions(Arrays.asList(options));
     }
@@ -110,34 +135,43 @@ public class JkJavaProcess extends JkProcess<JkJavaProcess> {
         return this.addJavaOptions("-cp", classpath.toPath());
     }
 
+    /**
+     * Adds a system property to the command line parameters.
+     */
     public JkJavaProcess addSystemProperty(String key, String value) {
-        addParams("-D" + key + "=" + value);
+        addParamsFirst("-D" + key + "=" + value);
         return this;
     }
 
+    /**
+     * Sets whether the process should inherit system properties from the parent process.
+     */
     public JkJavaProcess setInheritSystemProperties(boolean inheritSystemProperties) {
         this.inheritSystemProperties = inheritSystemProperties;
         return this;
     }
 
+    /**
+     * Creates a copy of the current JkJavaProcess instance with the same properties.
+     */
     public JkJavaProcess copy() {
         return new JkJavaProcess(this)
                 .setInheritSystemProperties(this.inheritSystemProperties);
     }
 
     @Override
-    protected void customizeCommand(List<String> commands) {
+    protected void customizeCommand() {
         Properties props = System.getProperties();
         for (Object key : props.keySet()) {
             String name = (String) key;
             String prefix = "-D" + name + "=";
-            if (commands.stream().anyMatch(command -> command.startsWith(prefix))) {
+            if (getParams().stream().anyMatch(parameter -> parameter.startsWith(prefix))) {
                 continue;
             }
             if (inheritSystemProperties || PROXY_PROPS.contains(name)) {
                 this.addSystemProperty(name, props.getProperty(name));
             }
         }
-
     }
+
 }

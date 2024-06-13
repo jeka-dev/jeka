@@ -1,23 +1,31 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
-import java.io.File;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
@@ -26,16 +34,6 @@ import java.util.zip.ZipFile;
  * @author Jerome Angibaud
  */
 public final class JkUrlClassLoader {
-
-    private static final String CLASS_SUFFIX = ".class";
-
-    private static final int CLASS_SUFFIX_LENGTH = CLASS_SUFFIX.length();
-
-    /**
-     * A {@link PathMatcher} accepting only .class files.
-     */
-    public static final PathMatcher CLASS_FILE_FILTER = file -> (Files.isRegularFile(file)
-            && file.getFileName().toString().endsWith(CLASS_SUFFIX));
 
     private final URLClassLoader delegate;
 
@@ -65,29 +63,12 @@ public final class JkUrlClassLoader {
         return wrapUrlClassLoader(Thread.currentThread().getContextClassLoader());
     }
 
-    /**
-     * Returns a {@link JkUrlClassLoader} wrapping the ofSystem class loader.
-     *
-     * @see ClassLoader#getSystemClassLoader()
-     */
-    public static JkUrlClassLoader ofSystem() {
-        return wrapUrlClassLoader(ClassLoader.getSystemClassLoader());
-    }
-
     private static JkUrlClassLoader wrapUrlClassLoader(ClassLoader classLoader) {
         if (! (classLoader instanceof URLClassLoader)) {
             throw new IllegalStateException("The current or system classloader is not instance of URLClassLoader but "
                     + classLoader.getClass() + ". It is probably due that you are currently running on JDK9.");
         }
         return of((URLClassLoader) classLoader);
-    }
-
-    /**
-     * Returns a {@link JkUrlClassLoader} wrapping the class loader having loaded
-     * the specified class.
-     */
-    public static JkUrlClassLoader ofLoaderOf(Class<?> clazz) {
-        return new JkUrlClassLoader((URLClassLoader) clazz.getClassLoader());
     }
 
     /**
@@ -105,132 +86,20 @@ public final class JkUrlClassLoader {
     }
 
     /**
-     * Creates a <code>JkClassLoader</code>, child of this one and having the specified entries.
-     */
-    public JkUrlClassLoader createChild(Iterable<Path> extraEntries) {
-        final Iterable<Path> paths = JkUtilsPath.disambiguate(extraEntries);
-        return new JkUrlClassLoader(new URLClassLoader(toUrl(paths), this.delegate));
-    }
-
-    /**
      * Returns the classpath of this classloader without mentioning classpath of
      * the parent classloaders.
      */
-    public JkClasspath getDirectClasspath() {
-        return JkClasspath.of(JkUtilsSystem.classloaderEntries(this.delegate));
-    }
-
-    /**
-     * Returns the complete classpath of this classloader.
-     */
-    public JkClasspath getFullClasspath() {
-        final JkClasspath classpath;
-        if (this.delegate.getParent() != null && this.getParent().get() instanceof  URLClassLoader) {
-            classpath = JkUrlClassLoader.of((URLClassLoader) this.getParent().get()).getFullClasspath();
-
-        } else {
-            classpath = JkClasspath.of();
-        }
-        return classpath.and(getDirectClasspath());
+    public JkPathSequence getDirectClasspath() {
+        return JkPathSequence.of(JkUtilsSystem.classloaderEntries(this.delegate));
     }
 
     public JkClassLoader toJkClassLoader() {
         return JkClassLoader.of(delegate);
     }
 
-    /**
-     * Loads all class having a relative path matching the supplied
-     * glob patterns. For example, if you want to load all class
-     * belonging to <code>my.packAllArtifacts</code> or its sub package, then you have to
-     * supply a filter with an including pattern as
-     * <code>my/packAllArtifacts/&#42;&#42;/&#42;.class</code>. Note that ending with
-     * <code>.class</code> is important.
-     */
-    private Set<Class<?>> loadClasses(Iterable<String> patterns) {
-        final Set<Class<?>> result = new HashSet<>();
-        final JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
-        final Set<Path> classFiles = this.getFullClasspath().getAllPathMatching(patterns);
-        for (final Path classFile : classFiles) {
-            final String className = getAsClassName(classFile.toString());
-            result.add(jkClassLoader.load(className));
-        }
-        return result;
-    }
-
-    /**
-     * Loads all class having a relative path matching the supplied ANT pattern.
-     * For example, if you want to load all class belonging to
-     * <code>my.packAllArtifacts</code> or its sub package, then you have to supply the
-     * following pattern <code>my/packAllArtifacts/&#42;&#42;/&#42;</code>.
-     */
-    public Set<Class<?>> loadClasses(String... globPatterns) {
-        final List<String> patterns = new LinkedList<>();
-        for (final String pattern : globPatterns) {
-            patterns.add(pattern + ".class");
-        }
-        return loadClasses(patterns);
-    }
-
-    /**
-     * Returns all classes of this <code>classloader</code> that are defined
-     * inside the provided <code>JkPathTreeSet</code>.
-     *
-     */
-    public Set<Class<?>> loadClassesIn(JkPathTreeSet jkPathTreeSet) {
-        final Set<Class<?>> result = new HashSet<>();
-        final JkClassLoader jkClassLoader = this.toJkClassLoader();
-        for (final Path path : jkPathTreeSet.getRelativeFiles()) {
-            if (path.toString().endsWith(".class")) {
-                final String className = getAsClassName(path.toString());
-                result.add(jkClassLoader.load(className));
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * Returns all classes of this <code>classloader</code> that are defined
-     * inside the specified directory.
-     */
-    private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
-        final List<Path> paths;
-        if (Files.isDirectory(dirOrJar)) {
-            paths = JkPathTree.of(dirOrJar).andMatching(true, "**.class").getRelativeFiles();
-        } else {
-            final List<ZipEntry> entries = JkUtilsZip.getZipEntries(JkUtilsZip.getZipFile(dirOrJar.toFile()));
-            paths = new LinkedList<>();
-            for (final ZipEntry entry : entries) {
-                if (entry.getName().endsWith(".class")) {
-                    paths.add(Paths.get(entry.getName()));
-                }
-            }
-        }
-        return classIterator(paths.stream().map(path -> path.toString()).collect(Collectors.toList()));
-    }
-
-    private Iterator<Class<?>> classIterator(final Iterable<String> fileNameIt) {
-        final Iterator<String> it = fileNameIt.iterator();
-        final JkClassLoader jkClassLoader = JkClassLoader.of(delegate);
-        return new Iterator<Class<?>>() {
-
-            @Override
-            public boolean hasNext() {
-                return it.hasNext();
-            }
-
-            @Override
-            public Class<?> next() {
-                final String className = getAsClassName(it.next());
-                return jkClassLoader.load(className);
-            }
-
-            @Override
-            public void remove() {
-                throw new IllegalStateException("Not supported");
-
-            }
-        };
+    @Override
+    public String toString() {
+        return toJkClassLoader().toString();
     }
 
     private static URL[] toUrl(Iterable<Path> paths) {
@@ -244,79 +113,6 @@ public final class JkUrlClassLoader {
             }
         }
         return urls.toArray(new URL[0]);
-    }
-
-    /**
-     * Transforms a class file name as <code>com/foo/Bar.class</code> to the
-     * corresponding class name <code>com.foo.Bar</code>.
-     */
-    private static String getAsClassName(String resourceName) {
-        return resourceName.replace(File.separatorChar, '.').replace("/", ".")
-                .substring(0, resourceName.length() - CLASS_SUFFIX_LENGTH);
-    }
-
-
-    @Override
-    public String toString() {
-        return toJkClassLoader().toString();
-    }
-
-    public void addEntries(Iterable<Path> paths) {
-        try {
-            final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
-            for (final Path path : JkUtilsPath.disambiguate(paths)) {
-                JkUtilsReflect.invoke(this.delegate, method, JkUtilsPath.toUrl(path));
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error while adding urls on classloader " + this, e);
-        }
-    }
-
-    /**
-     * Reloads all J2SE service providers. It can be necessary if adding
-     * dynamically some service providers to the classpath.
-     */
-    public void loadAllServices() {
-        final Set<Class<?>> serviceClasses = new HashSet<>();
-        for (final Path file : this.getFullClasspath()) {
-            if (Files.isRegularFile(file)) {
-                JkLog.trace("Scanning " + file + " for META-INF/services.");
-                final ZipFile zipFile = JkUtilsZip.getZipFile(file.toFile());
-                final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
-                if (serviceEntry == null) {
-                    JkUtilsIO.closeOrFail(zipFile);
-                    continue;
-                }
-                for (final ZipEntry entry : JkUtilsZip.getZipEntries(zipFile)) {
-                    if (entry.getName().startsWith("META-INF/services/")) {
-                        final String serviceName = JkUtilsString.substringAfterLast(
-                                entry.getName(), "/");
-                        final Class<?> serviceClass = this.toJkClassLoader().loadIfExist(serviceName);
-                        if (serviceClass != null) {
-                            JkLog.trace("Found service providers for : " + serviceName);
-                            serviceClasses.add(serviceClass);
-                        }
-                    }
-                }
-                JkUtilsIO.closeOrFail(zipFile);
-            } else {
-                final Path serviceDir = file.resolve("META-INF/services");
-                if (!Files.exists(serviceDir) || !Files.isDirectory(serviceDir)) {
-                    continue;
-                }
-                JkUtilsPath.walk(serviceDir, 1).forEach(candidate -> {
-                    final Class<?> serviceClass = this.toJkClassLoader().loadIfExist(candidate.getFileName().toString());
-                    if (serviceClass != null) {
-                        serviceClasses.add(serviceClass);
-                    }
-                });
-
-            }
-        }
-        for (final Class<?> serviceClass : serviceClasses) {
-            JkLog.trace("Reload service providers for : " + serviceClass.getName());
-            ServiceLoader.loadInstalled(serviceClass).reload();
-        }
     }
 
 }

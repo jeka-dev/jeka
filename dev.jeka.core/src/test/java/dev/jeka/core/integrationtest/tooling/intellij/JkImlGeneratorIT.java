@@ -30,7 +30,7 @@ public class JkImlGeneratorIT {
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(base)
             .compilation
-                    .configureDependencies(deps -> deps
+                    .customizeDependencies(deps -> deps
                         .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")));
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
@@ -44,7 +44,7 @@ public class JkImlGeneratorIT {
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
                 .compilation
-                    .configureDependencies(deps -> deps.and(baseProject.toDependency()));
+                    .customizeDependencies(deps -> deps.and(baseProject.toDependency()));
         coreProject
                 .testing
                     .compilation
@@ -68,7 +68,7 @@ public class JkImlGeneratorIT {
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop)
                 .compilation
-                    .configureDependencies(deps -> deps
+                    .customizeDependencies(deps -> deps
                         .and(coreProject.toDependency()));
         final JkImlGenerator desktopGenerator = JkImlGenerator.of()
                 .setIdeSupport(desktopProject.getJavaIdeSupport());
@@ -76,7 +76,7 @@ public class JkImlGeneratorIT {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        desktopProject.artifactProducer.makeAllArtifacts();
+        desktopProject.pack();
         JkPathTree.of(top).deleteContent();
     }
 

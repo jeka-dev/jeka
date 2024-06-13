@@ -1,0 +1,11 @@
+package dev.jeka.core;
+import dev.jeka.core.java.testing.jacoco.jekaocojekaJavaBuildPlugin;
+import dev.jeka.core.java.testing.junit.JkUnit;
+
+/**
+ * Blalalala.
+ */
+@JkInjectClasspath("com.google:guava:18.0")
+@JkInjectClasspath("toto:titi:12")
+@JkInjectClasspath("foo:bar")
+public class FullBuild extends Build {

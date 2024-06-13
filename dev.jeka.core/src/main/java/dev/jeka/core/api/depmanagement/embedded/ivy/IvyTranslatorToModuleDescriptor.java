@@ -1,7 +1,23 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.publication.JkArtifactPublisher;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -53,7 +69,7 @@ class IvyTranslatorToModuleDescriptor {
 
     static DefaultModuleDescriptor toMavenPublishModuleDescriptor(JkCoordinate coordinate,
                                                                   JkDependencySet dependencies,
-                                                                  JkArtifactLocator artifactLocator) {
+                                                                  JkArtifactPublisher artifactPublisher) {
         List<JkQualifiedDependency> qualifiedDependencies = dependencies.getEntries().stream()
                 .filter(JkCoordinateDependency.class::isInstance)
                 .map(JkCoordinateDependency.class::cast)
@@ -65,14 +81,14 @@ class IvyTranslatorToModuleDescriptor {
                 .collect(Collectors.toList());
         DefaultModuleDescriptor result = toResolveModuleDescriptor(coordinate,
                 JkQualifiedDependencySet.of(qualifiedDependencies));
-        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(coordinate, artifactLocator);
+        Map<String, Artifact> artifactMap = IvyTranslatorToArtifact.toMavenArtifacts(coordinate, artifactPublisher);
         IvyTranslatorToArtifact.bind(result, artifactMap);
         return result;
     }
 
     static DefaultModuleDescriptor toIvyPublishModuleDescriptor(JkCoordinate coordinate,
                                                                 JkQualifiedDependencySet dependencies,
-                                                                List<JkIvyPublication.JkPublishedArtifact> publishedArtifacts) {
+                                                                List<JkIvyPublication.JkIvyPublishedArtifact> publishedArtifacts) {
         DefaultModuleDescriptor result = toResolveModuleDescriptor(coordinate, dependencies);
         List<IvyTranslatorToArtifact.ArtifactAndConfigurations> artifactAndConfigurationsList =
             IvyTranslatorToArtifact.toIvyArtifacts(coordinate, publishedArtifacts);

@@ -1,0 +1,125 @@
+#!/bin/bash
+
+## Script for debugging jeka bash script.
+
+DRY_RUN=true
+export DRY_RUN
+#set -x
+source ../../main/shell/jeka
+set -e
+
+SAMPLE_DIR=./sample-dir
+SUB_DIR=$SAMPLE_DIR/sub-dir
+
+echo "---------------- Test interpolated args -----------------------"
+
+array_args=("::shorthand" "arg2")
+DEFAULT_BASE_DIR="$SAMPLE_DIR"
+compute_INTERPOLATED_ARGS "${array_args[@]}"
+for elem in "${INTERPOLATED_ARGS[@]}"; do
+  echo "$elem"
+done
+
+echo
+echo "---------------- Find remote args -----------------------"
+
+array_args=("toto" "-ru" "arg2")
+index=$(find_remote_arg_index "${array_args[@]}")
+[ ! "$index" == "1" ] && echo "Failure: remote option not detected. Found : '$index'" && exit 1
+
+echo
+echo "---------------- Test getting properties -----------------------"
+
+# Test read value present in sub-dir
+prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "overriden.prop")
+echo "overriden.prop=$prop_value"
+[ "$prop_value" != "1" ] && echo "Failure: Variable 'overriden.prop' does not equal 1" && exit 1
+
+# Test read value present in sample-dir
+prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "foo")
+echo "foo=$prop_value"
+[ ! "$prop_value" == "bar" ] && echo "Failure: Variable 'foo' does not equal 'bar'" && exit 1
+
+# Test get_java_version_from_props
+prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "$JEKA_VERSION_PROP_NAME")
+echo "$JEKA_VERSION_PROP_NAME=$prop_value"
+[ ! "$prop_value" == "17" ] && echo "Failure: Variable '$JEKA_VERSION_PROP_NAME' does not equal '17'" && exit 1
+
+# Test read value non existing value is ok
+prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "non.existing")
+echo "non.existing=$prop_value"
+[ ! "$prop_value" == "" ] && echo "Failure: Variable 'non.existing' has value '$prop_value'" && exit 1
+
+# Test read value present in global dir only
+prop_value=$(get_prop_value_from_base_dir "$SUB_DIR" "jeka.jdk.17")
+echo "jeka.jdk.17=$prop_value"
+
+# Test get_java_version_from_props
+prop_value=$(get_java_version_from_props "$SUB_DIR")
+echo "get_java_version_from_props = $prop_value"
+[ ! "$prop_value" == "17" ] && echo "Failure: function 'get_java_version_from_props' does not returns '17'" && exit 1
+
+echo
+echo "---------- Test parsing arguments --------------"
+
+CMD_LINE_ARGS=("one-argument" "-v")
+echo "SHOULD_LOG_DOWNLOAD = '$SHOULD_LOG_DOWNLOAD'"
+
+CMD_LINE_ARGS=("one-argument" "other")
+compute_SHOULD_LOG_DOWNLOAD
+[ "$SHOULD_LOG_DOWNLOAD" != "" ] && echo "Failure: -lsu not present but SHOULD_LOG_DOWNLOAD is set to '$SHOULD_LOG_DOWNLOAD'" && exit 1
+
+CMD_LINE_ARGS=( "toto" "-v" "uu")
+compute_SHOULD_LOG_DOWNLOAD
+[ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
+
+CMD_LINE_ARGS=( "toto" "--verbose")
+compute_SHOULD_LOG_DOWNLOAD
+[ "$SHOULD_LOG_DOWNLOAD" != "true" ] && echo "Failure: SHOULD_LOG_DOWNLOAD was expected as 'true' but values '$SHOULD_LOG_DOWNLOAD'" && exit 1
+
+echo
+echo "---------- Test JDK Location --------------------"
+
+# Test JDK Path
+prop_value=$(get_jdk_home_from_props "$SUB_DIR" "17")
+echo "Path of jdk 17=$prop_value"
+
+# Test we can get JDK user home
+jeka_user_home=$(get_jeka_user_home)
+echo "Jeka User Home : $jeka_user_home"
+[ -z "$jeka_user_home" ] && echo "Jeka User Home is empty" && exit 1
+
+# Test git cache
+git_cache_dir=$(get_git_cache_dir)
+echo "Git Cache Dir : $git_cache_dir"
+[ -z "$git_cache_dir" ] && echo "Git cache dir is empty" && exit 1
+
+echo
+echo "-------------- Test Remote script call    -----------------"
+
+git_url="https://github.com/jeka-dev/template-examples.git#2.0"
+git_cache_folder_name=$(giturl_to_foldername "$git_url")
+echo "Folder name for caching $git_url is '$git_cache_folder_name'"
+[ "github.com_jeka-dev_template-examples.git#2.0" != "$git_cache_folder_name" ] && echo "Git cache folder name failed" && exit 1
+
+git_url="https://github.com/djeang/jeka-remote-sample-basic.git#0.0.1"
+is_git=$(is_git_url "$git_url")
+[ $is_git != "true" ] && echo "Failed, $git_url not considered as a git url" && exit 1
+is_git=$(is_git_url "/my_path")
+[ $is_git != "false" ] && echo "Failed,/my_path considered as a git url" && exit 1
+
+compute_BASE_DIR "-r" "https://github.com/djeang/jeka-remote-sample-basic.git#0.0.1"
+echo "Remote base dir : '$BASE_DIR'"
+
+#args=("-r" "./toto")
+#remote_path=$(get_remote_argument "{$args[@]}")
+#echo "$remote_path"
+
+echo
+echo "------------- Test Download jeka distrib ---------"
+
+jeka_version=$(get_prop_value_from_base_dir "$SUB_DIR" "jeka.version")
+distrib_cache_dir=$(get_cache_dir)/distributions/$jeka_version
+rm -rf $distrib_cache_dir
+compute_JEKA_DIST_DIR "$SUB_DIR"
+echo "Jeka distrib cache dir : $JEKA_DIST_DIR"

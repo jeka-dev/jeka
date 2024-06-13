@@ -1,9 +1,26 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.tooling.intellij;
 
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +33,10 @@ import java.util.stream.Collectors;
 public final class JkIml {
 
     private Path moduleDir = Paths.get("");
+
+    // when generating iml for a sub 'jeka-src' module, we need to relativize paths to $MODULE_DIR$/.. instead
+    // of $MODULE_DIR$
+    private boolean isForJekaSrc;
 
     public final Component component = new Component();
 
@@ -33,9 +54,15 @@ public final class JkIml {
         return this;
     }
 
+    public JkIml setIsForJekaSrc(boolean isForJekaSrc) {
+        this.isForJekaSrc = isForJekaSrc;
+        return this;
+    }
+
     public enum Scope {
         COMPILE, RUNTIME, TEST, PROVIDED
     }
+
 
     public class Component {
 
@@ -98,6 +125,11 @@ public final class JkIml {
             return this;
         }
 
+        /**
+         * Replaces the specified library with the specified module. The library is specified
+         * by the end of its path. For example, '-foo.bar'  will replace 'mylibs/core-foo.jar'
+         * by the specified module. Only the first matching lib is replaced.
+         */
         public Component replaceLibByModule(String libPathEndsWithFilter, String moduleName) {
             List<OrderEntry> result = orderEntries.stream()
                     .map(orderEntry -> {
@@ -114,6 +146,31 @@ public final class JkIml {
                     })
                     .collect(Collectors.toList());
             this.orderEntries = result;
+            return this;
+        }
+
+        /**
+         * Sets the <i>scope</i> and <i>exported</i> attribute to the specified module.
+         * @param moduleName The module to set attributes on.
+         * @param scope If null, scope remains unchanged.
+         * @param exported If null, scope remains unchanged.
+         * @return This object for  chaining.
+         */
+        public Component setModuleAttributes(String moduleName, Scope scope, Boolean exported) {
+            orderEntries.forEach(orderEntry -> {
+                        if (orderEntry instanceof ModuleOrderEntry) {
+                            ModuleOrderEntry entry = (ModuleOrderEntry) orderEntry;
+                            if (entry.moduleName.equals(moduleName)) {
+                                if (scope != null) {
+                                    entry.scope = scope;
+                                }
+                                if (exported != null) {
+                                    entry.exported = exported;
+                                }
+                            }
+                        }
+
+                    });
             return this;
         }
 
@@ -177,14 +234,12 @@ public final class JkIml {
 
         /**
          * Adds and parameters standard JeKa folders
-         * @param dedicatedJekaModule If true, assumes that JeKa folder is the root of the module.
          */
-        public Content addJekaStandards(boolean dedicatedJekaModule) {
-            String prefix = dedicatedJekaModule ? "" : "jeka/";
+        public Content addJekaStandards() {
             return this
-                    .addSourceFolder(prefix + "def", true, null)
-                    .addExcludeFolder(prefix + "output")
-                    .addExcludeFolder(prefix + ".work")
+                    .addSourceFolder("jeka-src", true, null)
+                    .addExcludeFolder("jeka-output")
+                    .addExcludeFolder(".jeka-work")
                     .addExcludeFolder(".idea/output");
         }
 
@@ -481,14 +536,22 @@ public final class JkIml {
             if (!original.isAbsolute()) {
                 Path moduleDirRelativePath = moduleDir.toAbsolutePath().normalize()
                         .relativize(original.toAbsolutePath().normalize());
-                return Paths.get("$MODULE_DIR$").resolve(moduleDirRelativePath);
+                String rootDirString = isForJekaSrc ? "$MODULE_DIR$/.." : "$MODULE_DIR$";
+                return Paths.get(rootDirString).resolve(moduleDirRelativePath);
             }
             Path normalized  = original.normalize();
             return substitutes.entrySet().stream()
                     .filter(pathStringEntry -> pathStringEntry.getValue() != null)
                     .filter(pathStringEntry -> normalized.startsWith(pathStringEntry.getValue()))
                     .findFirst()
-                    .map(entry -> Paths.get("$" + entry.getKey() + "$").resolve(entry.getValue().relativize(normalized)))
+                    .map(entry -> {
+                        String entryKey = "$" + entry.getKey() + "$";
+                        if (isForJekaSrc && "MODULE_DIR".equals(entry.getKey())) {
+                            entryKey = entryKey + "/..";
+                        }
+                        return Paths.get(entryKey)
+                                .resolve(entry.getValue().relativize(normalized));
+                    })
                     .orElse(normalized);
         }
     }

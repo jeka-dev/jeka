@@ -1,17 +1,20 @@
 # Welcome to JeKa! 
 
-We're glad you're here. 
+## Jeka 0.11 is coming
 
-On this site, you'll find comprehensive reference guides, tutorials, and frequently asked questions (FAQs) about using Jeka.
+Jeka 0.11 introduces significant changes and new features:
 
-The reference guide for Jeka provides detailed information on the tool's two main functions, the execution engine and 
-the build library. The execution engine allows for direct execution of Java/Kotlin source code, while the build library
-enables the building of projects.
+* The API has undergone substantial changes for increased consistency.
+* Major improvements have been made to the command-line interface.
+* Log output formatting has been greatly enhanced.
+* The project folder structures have been refined.
+* JDK management has been automated, eliminating the need for users to install and switch between different Java versions.
+* A new feature allows for applications to be run directly from sources hosted in remote Git directories.
 
-We hope that you'll find the information you need to take your Java/Kotlin projects to the next level.
+## JeKa 0.10 is still there
 
-<br/>
-<p align="center">
-<img src="images/knight-color-logo.svg" width='210' height='210'/>
-</p>
+JeKa 0.10 is of course still usable and your builds will be protected thanks to the wrapper mechanism.
 
+The documentation for JeKa 0.10 is available [here](legacy/reference-guide/execution-engine-files/)
+
+To upgrade projects to 0.11, follow [Migration Guide](migration-guide.md)

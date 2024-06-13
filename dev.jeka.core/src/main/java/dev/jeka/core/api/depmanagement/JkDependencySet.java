@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -22,15 +38,15 @@ public class JkDependencySet {
 
     private final List<JkDependency> entries;
 
-    private final Set<JkDependencyExclusion> globalExclusions;
+    private final LinkedHashSet<JkDependencyExclusion> globalExclusions;
 
     private final JkVersionProvider versionProvider;
 
-    private JkDependencySet(List<? extends JkDependency> dependencies, Set<JkDependencyExclusion> exclusions,
+    private JkDependencySet(List<? extends JkDependency> dependencies, LinkedHashSet<JkDependencyExclusion> exclusions,
                             JkVersionProvider explicitVersions) {
         super();
         this.entries = Collections.unmodifiableList(dependencies);
-        this.globalExclusions = Collections.unmodifiableSet(exclusions);
+        this.globalExclusions = exclusions;
         this.versionProvider = explicitVersions;
     }
 
@@ -52,7 +68,7 @@ public class JkDependencySet {
      * Creates a {@link JkDependencySet} to the specified scoped dependencies.
      */
     public static JkDependencySet of(List<? extends JkDependency> dependencies) {
-        return new JkDependencySet(dependencies, Collections.emptySet(), JkVersionProvider.of());
+        return new JkDependencySet(dependencies, new LinkedHashSet<>(), JkVersionProvider.of());
     }
 
     public static JkDependencySet of(JkDependency dependency) {
@@ -74,7 +90,7 @@ public class JkDependencySet {
         List<JkDependency> others = other.entries;
         JkDependencySet proto = this.and(other);
         final List<JkDependency> result = new LinkedList<>(this.entries);
-        if (hint == null) {
+        if (hint == null || hint == Hint.NONE) {
             result.addAll(others);
             return new JkDependencySet(result, globalExclusions, versionProvider);
         }
@@ -117,12 +133,12 @@ public class JkDependencySet {
      * this one.
      */
     public JkDependencySet and(List<? extends JkDependency> others) {
-        return and(null, others);
+        return and(Hint.NONE, others);
     }
 
     public JkDependencySet and(JkDependencySet other) {
         final List<JkDependency> deps = JkUtilsIterable.concatLists(this.entries, other.entries);
-        Set<JkDependencyExclusion> newGlobalExcludes = new HashSet<>(this.globalExclusions);
+        LinkedHashSet<JkDependencyExclusion> newGlobalExcludes = new LinkedHashSet<>(this.globalExclusions);
         newGlobalExcludes.addAll(other.globalExclusions);
         JkVersionProvider newVersionProvider = this.versionProvider.and(other.versionProvider);
         return new JkDependencySet(deps, newGlobalExcludes, newVersionProvider);
@@ -133,11 +149,11 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(JkDependency... others) {
-        return and(null, others);
+        return and((Hint.NONE), others);
     }
 
-    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate) {
-        return and(hint, JkCoordinate.of(coordinate));
+    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, Object ...tokens) {
+        return and(hint, JkCoordinate.of(coordinate, tokens));
     }
 
     public JkDependencySet and(Hint hint, JkModuleId jkModuleId) {
@@ -149,34 +165,38 @@ public class JkDependencySet {
     }
 
     public JkDependencySet and(JkCoordinate coordinate) {
-        return and(null, coordinate);
+        return and(Hint.NONE, coordinate);
     }
 
     public JkDependencySet and(JkModuleId jkModuleId) {
         return and(jkModuleId.toCoordinate());
     }
 
-    public JkDependencySet and(@JkDepSuggest String coordinate) {
-        return and(null, coordinate);
+    public JkDependencySet and(@JkDepSuggest String coordinate, Object... tokens) {
+        return and(null, coordinate, tokens);
     }
 
-    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, JkTransitivity transitivity) {
+    public JkDependencySet and(Hint hint, @JkDepSuggest String coordinate, JkTransitivity transitivity, Object ...tokens) {
         return and(hint, JkCoordinateDependency.of(coordinate).withTransitivity(transitivity));
     }
 
-    public JkDependencySet and(@JkDepSuggest String coordinate, JkTransitivity transitivity) {
-        return and(null, coordinate, transitivity);
+    public JkDependencySet and(@JkDepSuggest String coordinate, JkTransitivity transitivity, Object ...tokens) {
+        return and(null, coordinate, transitivity, tokens);
     }
 
     public JkDependencySet andFiles(Hint hint, Iterable<Path> paths) {
+        List<Path> effectivePaths = JkUtilsPath.disambiguate(paths);
         if (JkUtilsPath.disambiguate(paths).isEmpty()) {
             return this;
         }
-        return and(hint, JkFileSystemDependency.of(paths));
+        List<JkFileSystemDependency> fileSystemDeps = effectivePaths.stream()
+                .map(JkFileSystemDependency::of)
+                .collect(Collectors.toList());
+        return and(hint, fileSystemDeps);
     }
 
     public JkDependencySet andFiles(Iterable<Path> paths) {
-        return andFiles(null, paths);
+        return andFiles(Hint.NONE, paths);
     }
 
     public JkDependencySet andFiles(Hint hint, String... paths) {
@@ -184,7 +204,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet andFiles(String... paths) {
-        return andFiles(null, paths);
+        return andFiles(Hint.NONE, paths);
     }
 
     public JkDependencySet minus(List<JkDependency> dependencies) {
@@ -215,7 +235,7 @@ public class JkDependencySet {
         return minus(JkModuleId.of(moduleId));
     }
 
-    public JkDependencySet withMoving(Hint hint, @JkDepSuggest String moduleId) {
+    public JkDependencySet withMoving(@JkDepSuggest String moduleId, Hint hint) {
         JkDependency dependency = getMatching(JkCoordinateDependency.of(moduleId));
         return minus(dependency).and(hint, dependency);
     }
@@ -569,12 +589,12 @@ public class JkDependencySet {
     /**
      * Returns the dependencies to be excluded to the transitive chain when using this dependency.
      */
-    public Set<JkDependencyExclusion> getGlobalExclusions() {
+    public LinkedHashSet<JkDependencyExclusion> getGlobalExclusions() {
         return this.globalExclusions;
     }
 
     public JkDependencySet andGlobalExclusion(JkDependencyExclusion exclusion) {
-        final Set<JkDependencyExclusion> depExclusion = new HashSet<>(this.globalExclusions);
+        final LinkedHashSet<JkDependencyExclusion> depExclusion = new LinkedHashSet<>(this.globalExclusions);
         depExclusion.add(exclusion);
         return new JkDependencySet(this.entries, depExclusion, this.versionProvider);
     }
@@ -584,17 +604,22 @@ public class JkDependencySet {
         return andGlobalExclusion(depExclusion);
     }
 
-    public JkDependencySet withGlobalExclusions(Set<JkDependencyExclusion> excludes) {
-        final Set<JkDependencyExclusion> depExcludes = new HashSet<>(excludes);
-        return new JkDependencySet(this.entries, Collections.unmodifiableSet(depExcludes), this.versionProvider);
+    public JkDependencySet withGlobalExclusions(List<JkDependencyExclusion> excludes) {
+        final LinkedHashSet<JkDependencyExclusion> depExcludes = new LinkedHashSet<>(excludes);
+        return new JkDependencySet(this.entries, depExcludes, this.versionProvider);
     }
 
     public JkDependencySet withGlobalExclusions(@JkDepSuggest String ...moduleIds) {
-        final Set<JkDependencyExclusion> depExcludes = Arrays.stream(moduleIds)
+        final List<JkDependencyExclusion> depExcludes = Arrays.stream(moduleIds)
                 .map(JkModuleId::of)
                 .map(JkDependencyExclusion::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         return withGlobalExclusions(depExcludes);
+    }
+
+    public JkDependencySet withoutDuplicate() {
+        List<JkDependency> deps = this.entries.stream().distinct().collect(Collectors.toList());
+        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
     }
 
     /**
@@ -608,7 +633,7 @@ public class JkDependencySet {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
-                String dependencyString = coordinate.getModuleId().getColonNotation();
+                String dependencyString = coordinate.getModuleId().toColonNotation();
                 if (and && !coordinate.getVersion().isUnspecified()) {
                     dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
                 }
@@ -627,7 +652,7 @@ public class JkDependencySet {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
-                String dependencyString = coordinate.getModuleId().getColonNotation();
+                String dependencyString = coordinate.getModuleId().toColonNotation();
                 if (!coordinate.getVersion().isUnspecified() && !minus) {
                     dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
                 }
@@ -641,6 +666,8 @@ public class JkDependencySet {
     }
 
     public static class Hint {
+
+        public static final Hint NONE =new Hint(null, false, false);
 
         private final JkDependency before;
 

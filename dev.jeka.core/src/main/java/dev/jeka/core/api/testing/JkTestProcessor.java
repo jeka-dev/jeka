@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
@@ -38,7 +54,29 @@ public final class JkTestProcessor {
      * Style of progress mark to display on console while the tests are running.
      */
     public enum JkProgressOutputStyle implements Serializable {
-        FULL, TREE, ONE_LINE, SILENT, BAR
+
+        /**
+         * Print test names without silencing output
+         */
+        PLAIN,
+
+        TREE,
+
+        /**
+         * Print a test status at each unitary test execution.
+         */
+        STEP,
+
+        /**
+         * Don't print anything during whole test plan execution.
+         */
+        SILENT,
+
+        /**
+         * Display a progress bar with the name of the test currently on execution.
+         */
+        BAR;
+
     }
 
     private static final String ENGINE_SERVICE = "org.junit.platform.engine.TestEngine";
@@ -56,16 +94,30 @@ public final class JkTestProcessor {
 
     private static final String JUNIT_PLATFORM_REPORTING_MODULE = "org.junit.platform:junit-platform-reporting";
 
-    private JkJavaProcess forkingProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
+    private static final String JUNIT_PLATFORM_TEST_ENGINE_MODULE = "org.junit.platform:junit-platform-engine";
+
+    private static final String JUNIT_PLATFORM_COMMON_MODULE = "org.junit.platform:junit-platform-commons";
+
+    private JkJavaProcess forkingProcess = JkJavaProcess
+            .ofJava(JkTestProcessor.class.getName())
+            .setFailOnError(false)
             .setDestroyAtJvmShutdown(true);  // Tests are forked by default
 
     public final JkEngineBehavior engineBehavior;
 
     public final JkRunnables preActions = JkRunnables.of();
 
+    /**
+     * Collection of <i>Eunnables</i> to be executed after the test processor has run.
+     * <p>
+     * It is typically used for generating reports after a test definition has run.
+     * <p>
+     * If you want to run another test 'suite', you'll need to use {@link dev.jeka.core.api.project.JkProjectTesting#postActions}
+     * instead.
+     */
     public final JkRunnables postActions = JkRunnables.of();
 
-    private String junitPlatformVersion = "1.8.2";
+    private String junitPlatformVersion = "1.9.3";
 
     private JvmHints jvmHints = JvmHints.ofDefault();
 
@@ -80,6 +132,10 @@ public final class JkTestProcessor {
         return new JkTestProcessor();
     }
 
+    public static boolean isEngineTestPresent() {
+        return JkClassLoader.ofCurrent().isDefined(ENGINE_SERVICE);
+    }
+
     public JkJavaProcess getForkingProcess() {
         return forkingProcess;
     }
@@ -89,7 +145,7 @@ public final class JkTestProcessor {
         return this;
     }
 
-    public JkTestProcessor setJvmHints(JkJdks jdks,  JkJavaVersion javaVersion) {
+    public JkTestProcessor setJvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
         JkUtilsAssert.argument(jdks != null, "jdks argument cannot be null");
         this.jvmHints = new JvmHints(jdks, javaVersion);
         return this;
@@ -122,20 +178,23 @@ public final class JkTestProcessor {
     }
 
     private List<Path> computeClasspath(JkPathSequence testClasspath) {
-        JkClasspath result = JkClasspath.of(testClasspath);
+        JkPathSequence result = testClasspath;
         JkClassLoader classloader = JkClassLoader.ofCurrent();
         result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
         result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
+        result = addIfNeeded(result, classloader, ENGINE_SERVICE, JUNIT_PLATFORM_TEST_ENGINE_MODULE);
+        result = addIfNeeded(result, classloader, "org.junit.platform.commons.logging.LoggerFactory, ",
+                JUNIT_PLATFORM_COMMON_MODULE);
         JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
-        Class<?> testEngineClass = ucl.toJkClassLoader().load(ENGINE_SERVICE);
+        ucl.toJkClassLoader().load(ENGINE_SERVICE);
         return result.getEntries();
     }
 
-    private JkClasspath addIfNeeded(JkClasspath classpath, JkClassLoader classloader,
+    private JkPathSequence addIfNeeded(JkPathSequence classpath, JkClassLoader classloader,
                                            String className, String moduleName) {
-        JkClasspath result = classpath;
+        JkPathSequence result = classpath;
         if (!classloader.isDefined(className)) {
-            if (result.getEntryContainingClass(className) == null) {
+            if (result.findEntryContainingClass(className) == null) {
                 String dep = moduleName + ":" + this.junitPlatformVersion;
                 Path path = JkCoordinateFileProxy.of(this.repoSetSupplier.get(), dep).get();
                 result = result.and(path);
@@ -150,20 +209,24 @@ public final class JkTestProcessor {
      */
     public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
         if (!testSelection.hasTestClasses()) {
-            JkLog.trace("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
+            JkLog.info("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
             return JkTestResult.of();
         }
         final JkTestResult result;
         preActions.run();
+        JkLog.startTask("execute-tests");
         if (forkingProcess == null) {
-            JkLog.startTask("Executing tests");
             result = launchInClassloader(extraTestClasspath, testSelection);
         } else {
-            JkLog.startTask("Execute tests in forked process");
             result = launchInForkedProcess(extraTestClasspath, testSelection);
         }
         postActions.run();
         JkLog.info("Result : " + result.getTestCount());
+        List<JkTestResult.JkFailure> failures = result.getFailures();
+        if (!failures.isEmpty()) {
+            String message = failures.size() == 1 ? "%s failure found:" : "%s failures found. First failure detail:";
+            JkLog.warn(message + " %n%s", failures.size(), failures.get(0).shortMessage(3));
+        }
         JkLog.endTask();
         return result;
     }
@@ -186,12 +249,11 @@ public final class JkTestProcessor {
                 .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
         JkJavaProcess clonedProcess = forkingProcess.copy()
                 .setLogCommand(JkLog.isVerbose())
-                .setFailOnError(true)
                 .setClasspath(classpath)
                 .addParams(arg);
         Path specificJdkHome = this.jvmHints.javaHome();
         if (specificJdkHome != null) {
-            JkLog.info("Run tests on JVM %s", specificJdkHome);
+            JkLog.verbose("Run tests on JVM %s", specificJdkHome);
             clonedProcess.setCommand(specificJdkHome.resolve("bin/java").toString());
         }
         clonedProcess.exec();
@@ -283,16 +345,16 @@ public final class JkTestProcessor {
     }
 
     private static class JvmHints {
-        final JkJdks jdks;
+        final JkJavaCompilerToolChain.JkJdks jdks;
         final JkJavaVersion javaVersion;
 
-        JvmHints(JkJdks jdks, JkJavaVersion javaVersion) {
+        JvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
             this.jdks = jdks;
             this.javaVersion = javaVersion;
         }
 
         static JvmHints ofDefault() {
-            return new JvmHints(JkJdks.of(), null);
+            return new JvmHints(JkJavaCompilerToolChain.JkJdks.of(), null);
         }
 
         Path javaHome() {

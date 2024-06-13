@@ -1,0 +1,21 @@
+package your.basepackage;
+
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
+
+/**
+ * A Jeka plugin can contains zero, one or many KBeans.
+ * If your plugin does not require KBean, you can delete this class.
+ */
+@JkDoc("Explain here what your plugin is doing")
+public class XxxxxKBean extends KBean {
+
+    @JkDoc("All public fields will be exposed as KBean . Rewrite this comment to document it")
+    public String yourParam = "aDefaultValue";
+
+    @JkDoc("All public no-args methods returning void will be exposed as plugin method. \n"
+      + "Rewrite this comment to document it.")
+    public void yourMethod() {
+    }
+
+}

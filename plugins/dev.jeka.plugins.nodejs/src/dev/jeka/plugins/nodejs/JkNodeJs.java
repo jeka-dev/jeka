@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.plugins.nodejs;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
@@ -5,6 +21,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -20,13 +37,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.List;
 
+/**
+ * This class represents a wrapper for executing commands and managing the Node.js distribution.
+ */
 public class JkNodeJs {
 
     public static final String DEFAULT_NODE_VERSION = "20.10.0";
 
     private static final String DOWNLOAD_BASE_URL = "https://nodejs.org/dist/";
 
+    // Directory of NodeJs distribution
     private Path installDir;
 
     private String version = DEFAULT_NODE_VERSION;
@@ -76,10 +98,16 @@ public class JkNodeJs {
         return this;
     }
 
+    /**
+     * Returns the working directory from where npm and npx commands should be run.
+     */
     public Path getWorkingDir() {
         return workingDir;
     }
 
+    /**
+     * Returns the version of the nodeJs distribution.
+     */
     public String getVersion() {
         return version;
     }
@@ -91,7 +119,8 @@ public class JkNodeJs {
      */
     public JkNodeJs npm(String commandLine) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "bin/npm";
-        createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
+        String[] params = JkUtilsString.parseCommandline(commandLine);
+        createProcess(workingDir, cmd).setParams(params).exec();
         return this;
     }
 
@@ -102,7 +131,8 @@ public class JkNodeJs {
      */
     public JkNodeJs npx(String commandLine) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npx.cmd" : "bin/npx";
-        createProcess(workingDir, cmd).exec(JkUtilsString.translateCommandline(commandLine));
+        String[] params = JkUtilsString.parseCommandline(commandLine);
+        createProcess(workingDir, cmd).setParams(params).exec();
         return this;
     }
 
@@ -125,21 +155,39 @@ public class JkNodeJs {
     }
 
     /**
-     * Configures the specified project to include a nodeJs build right after main compilation.
+     * Configures the specified project to include a Node.js build right after main compilation.
+     *
      * @param project The project to configure
-     * @param clientBaseDir The path, relative to project base dir, of the nodeJs subproject.
-     * @param clientBuildDir The path, relative to @clientBuildDir, of the directory containing the build result.
-     * @param buildCommands The commands (npm o npx) to execute to build the nodeJs project.
+     * @param jsAppBaseDir The path of the Node.js subproject (relative to the base dir).
+     * @param distDir The path, relative to @clientBaseDir of the directory containing the build result.
+     * @param copyToDir If not empty, the result of the client  build will be copied to this directory in class dir (e.g. 'static').
+     * @param buildCommands The commands (npm o npx) to execute to build the Node.js project.
      */
-    public JkNodeJs configure(JkProject project, String clientBaseDir, String clientBuildDir,
-                              String ...buildCommands) {
-        Path baseDir = project.getBaseDir().resolve(clientBaseDir);
-        Path buildDir = baseDir.resolve(clientBuildDir);
-        project.compilation.postCompileActions.append("NodeJs", () -> {
-            this.setWorkingDir(baseDir);
-            Arrays.stream(buildCommands).forEach(this::exec);
-            JkPathTree.of(buildDir).copyTo(project.compilation.layout.resolveClassDir().resolve("static"));
+    public JkNodeJs configure(JkProject project, String jsAppBaseDir, String distDir, String copyToDir,
+                              List<String> buildCommands, List<String> testCommands) {
+        Path jsBaseDir = project.getBaseDir().resolve(jsAppBaseDir);
+        Path buildJsDir = jsBaseDir.resolve(distDir);
+
+        project.compilation.postCompileActions.append("build-js", () -> {
+            this.setWorkingDir(jsBaseDir);
+            JkConsoleSpinner.of("Building NodeJs application")
+                    .run(() -> buildCommands.forEach(this::exec));
+            JkLog.info("JS project built in %s", buildJsDir);
+            if (!JkUtilsString.isBlank(copyToDir)) {
+                Path target = project.compilation.layout.resolveClassDir().resolve(copyToDir);
+                JkPathTree.of(buildJsDir).copyTo(target, StandardCopyOption.REPLACE_EXISTING);
+                JkLog.info("Build copied to %s", target);
+            }
+
         });
+        if (!testCommands.isEmpty()) {
+            project.testing.postActions.append("test-js", () -> {
+                this.setWorkingDir(jsBaseDir);
+                JkConsoleSpinner.of("Testing NodeJs application")
+                        .run(() -> testCommands.forEach(this::exec));
+                JkLog.info("JS test successful");
+            });
+        }
         return this;
     }
 
@@ -153,7 +201,7 @@ public class JkNodeJs {
         return installDir;
     }
 
-    private JkProcess<?> createProcess(Path workingDir, String cmdName) {
+    private JkProcess createProcess(Path workingDir, String cmdName) {
         String path = System.getenv("PATH");
         Path commandFile = installDir().resolve(cmdName);
         Path nodeDir = commandFile.getParent();
@@ -163,7 +211,7 @@ public class JkNodeJs {
                 .setFailOnError(true)
                 .setEnv("PATH", pathVar)
                 .setLogCommand(true)
-                .setLogOutput(true);
+                .setLogWithJekaDecorator(true);
     }
 
     private static boolean isBinaryPresent(Path installDir) {
@@ -176,10 +224,10 @@ public class JkNodeJs {
     private static void download(String version) {
         JkPathFile tempZip = JkPathFile.of(JkUtilsPath.createTempFile("nodejs-downloded", ""));
         String url = constructDownloadUrl(version);
-        JkLog.info("Downloading " + url + "... ");
+        JkLog.verbose("Downloading %s...", url);
         tempZip.fetchContentFrom(constructDownloadUrl(version));
         Path distribPath = getDistribPath(version);
-        JkLog.info("unpack " + url + " to " + distribPath);
+        JkLog.verbose("unpack %s to %s", url, distribPath);
         if (JkUtilsSystem.IS_WINDOWS) {
             try (JkZipTree zipTree = JkZipTree.of(tempZip.get())) {
                 zipTree.goTo(nodeArchiveFolderName(version)).copyTo(distribPath, StandardCopyOption.REPLACE_EXISTING);
@@ -232,6 +280,5 @@ public class JkNodeJs {
     private static Path getDistribPath(String version) {
         return JkLocator.getCacheDir().resolve("nodejs").resolve(version);
     }
-
 
 }

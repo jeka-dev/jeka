@@ -1,8 +1,25 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsJdk;
@@ -72,14 +89,14 @@ public final class JkJavadocProcessor {
      * Actually processes and creates the javadoc files.
      */
     public void make(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
-        JkLog.startTask("Generate javadoc");
+        JkLog.startTask("generate-javadoc");
         if (srcDirs.hasNoExistingRoot() || !srcDirs.containFiles()) {
             JkLog.warn("No source file detected. Skip Javadoc.");
             JkLog.endTask();
             return;
         }
         executeCommandLine(classpath, srcDirs, outputDir);
-        JkLog.endTask();
+        JkLog.endTask("Javadoc generated in %d mills.");
     }
 
     // https://www.programcreek.com/java-api-examples/index.php?api=javax.tools.DocumentationTool
@@ -105,7 +122,7 @@ public final class JkJavadocProcessor {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
         boolean verbose = JkUtilsObject.firstNonNull(displayOutput, JkLog.isVerbose());
-        JkLog.trace(javadocExe.toString());
+        JkLog.verbose("%s", javadocExe);
         LinkedHashSet packages = computePackages(srcDirs);
         if (packages.isEmpty()) {
             JkLog.warn("No package detected. Skip Javadoc.");
@@ -114,18 +131,18 @@ public final class JkJavadocProcessor {
         JkProcess process = JkProcess.of(javadocExe.toString())
                 .addParams(computeOptions(classpath, srcDirs, outputDir))
                 .addParams(computePackages(srcDirs))
-                .setLogOutput(verbose)
+                .setLogWithJekaDecorator(verbose)
                 .setLogCommand(verbose)
                 .setFailOnError(false);
-        int code = process.exec();
-        if (code != 0) {
-            JkLog.warn("An error occurred when generating Javadoc (staus error = " + code + "). Maybe there is no public class to document." +
-                    " Relaunch the process with -lv option to see details");
+        JkProcResult result = process.exec();
+        if (!result.hasSucceed()) {
+            JkLog.warn("An error occurred when generating Javadoc (status error = " + result.getExitCode() + "). Maybe there is no public class to document." +
+                    " Relaunch the process with --verbose option to see details");
         }
     }
 
     private LinkedHashSet<String> computePackages(JkPathTreeSet srcDirs) {
-        srcDirs = srcDirs.withMatcher(JkJavaCompiler.JAVA_SOURCE_MATCHER);
+        srcDirs = srcDirs.withMatcher(JkJavaCompilerToolChain.JAVA_SOURCE_MATCHER);
         LinkedHashSet<String> result = new LinkedHashSet<>();
         for (Path relFile: srcDirs.getRelativeFiles()) {
             Path packageDir = relFile.getParent();
@@ -160,7 +177,7 @@ public final class JkJavadocProcessor {
             options.add("-quiet");
         }
         options.addAll(this.options);
-        JkLog.trace(options.toString());
+        JkLog.verbose("%s", options);
         return options;
     }
 

@@ -1,0 +1,26 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CORE BUILD skip test" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
+    <module name="dev.jeka.core" />
+    <option name="PROGRAM_PARAMETERS" value="project: pack tests.skip=true -c --stacktrace" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="MakeNoErrorCheck" enabled="false" />
+    </method>
+  </configuration>
+</component>

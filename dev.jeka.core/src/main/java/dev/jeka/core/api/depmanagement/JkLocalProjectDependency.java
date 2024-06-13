@@ -1,8 +1,26 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.depmanagement;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -13,9 +31,9 @@ public class JkLocalProjectDependency extends JkComputedDependency
         implements JkTransitivityDependency {
 
     // exported dependencies
-    private JkDependencySet exportedDependencies;
+    private final JkDependencySet exportedDependencies;
 
-    private JkTransitivity transitivity;
+    private final JkTransitivity transitivity;
 
     /*
      * Constructs a {@link JkLocalProjectDependency} from an artifact producer and the artifact file id
@@ -29,7 +47,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                 .map(dep -> dep.withIdeProjectDir(ideProjectDir))
                 .collect(Collectors.toList());
         this.exportedDependencies = JkDependencySet.of(relocatedDependencies)
-                .withGlobalExclusions(exportedDependencies.getGlobalExclusions())
+                .withGlobalExclusions(new LinkedList<>(exportedDependencies.getGlobalExclusions()))
                 .withVersionProvider(exportedDependencies.getVersionProvider());
         this.transitivity = transitivity;
     }
@@ -65,7 +83,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                     .collect(Collectors.toList());
             return JkDependencySet.of(filteredDependencies)
                     .withVersionProvider(exportedDependencies.getVersionProvider())
-                    .withGlobalExclusions(exportedDependencies.getGlobalExclusions());
+                    .withGlobalExclusions(new LinkedList<>(exportedDependencies.getGlobalExclusions()));
         }
         return JkDependencySet.of();
     }
@@ -104,7 +122,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
         JkLocalProjectDependency that = (JkLocalProjectDependency) o;
 
         if (!exportedDependencies.equals(that.exportedDependencies)) return false;
-        return transitivity != null ? transitivity.equals(that.transitivity) : that.transitivity == null;
+        return Objects.equals(transitivity, that.transitivity);
     }
 
     @Override

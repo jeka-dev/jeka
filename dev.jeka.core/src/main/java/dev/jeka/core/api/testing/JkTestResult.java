@@ -1,4 +1,23 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.testing;
+
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkException;
 
 import java.io.*;
 import java.util.Arrays;
@@ -8,7 +27,7 @@ import java.util.Set;
 
 public final class JkTestResult implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -855794466882934307L;
 
     private final long timeStarted;
 
@@ -70,7 +89,7 @@ public final class JkTestResult implements Serializable {
 
     public static class JkCount implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = -6936658324403096375L;
 
         private final long found;
 
@@ -128,58 +147,46 @@ public final class JkTestResult implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                    "found=" + found +
+                    "tests found=" + found +
                     ", started=" + started +
                     ", skipped=" + skipped +
                     ", aborted=" + aborted +
-                    ", succeded=" + succeeded +
+                    ", succeed=" + succeeded +
                     ", failed=" + failed +
                     '}';
         }
     }
 
-    public void printFailures(PrintStream printStream) {
-        for (JkFailure failure : failures) {
-            failure.print(printStream);
-            printStream.println();
-        }
-    }
 
-    public void assertNoFailure() {
+    public void assertSuccess() {
         if (failures.isEmpty()) {
             return;
         }
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            PrintStream printStream = new PrintStream(os);
-            printStream.println("" + failures.size() + " test failures : ");
-            printStream.println();
-            printFailures(printStream);
-            String message = os.toString("UTF8");
-            throw new IllegalStateException(message);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
+        throw new JkException("Failures detected in test execution");
     }
 
     public static final class JkFailure implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = -2836260954120708050L;
 
         private final JkTestIdentifier testId;
+
+        private final String throwableClassName;
 
         private final String throwableMessage;
 
         private final StackTraceElement[] stackTraces;
 
-        private JkFailure(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] stacktraces) {
+        private JkFailure(JkTestIdentifier testId, String throwableClassname,
+                          String throwableMessage, StackTraceElement[] stacktraces) {
             this.testId = testId;
             this.throwableMessage = throwableMessage;
             this.stackTraces = stacktraces;
+            this.throwableClassName = throwableClassname;
         }
 
-        public static JkFailure of(JkTestIdentifier testId, String throwableMessage, StackTraceElement[] stacktraces) {
-            return new JkFailure(testId, throwableMessage, stacktraces);
+        public static JkFailure of(JkTestIdentifier testId, String throwableClassname, String throwableMessage, StackTraceElement[] stacktraces) {
+            return new JkFailure(testId, throwableClassname, throwableMessage, stacktraces);
         }
 
         public JkTestIdentifier getTestId() {
@@ -196,12 +203,24 @@ public final class JkTestResult implements Serializable {
 
         @Override
         public String toString() {
-            System.out.println();
             return "{" +
                     "testId=" + testId +
                     ", throwableMessage='" + throwableMessage + '\'' +
                     ", stacktraces=" + Arrays.toString(stackTraces) +
                     '}';
+        }
+
+        public String shortMessage(int stackTraceEl) {
+            StringBuilder result = new StringBuilder();
+            result.append(String.format("%s %n        %s",
+                    testId.displayName,
+                    JkUtilsString.wrapStringCharacterWise(throwableClassName + " : " + throwableMessage, 120)));
+            for (int i=0; i<= stackTraceEl && i < stackTraces.length; i++) {
+                result.append("\nat ").append(stackTraces[i]);
+            }
+            result.append("\n...");
+            result.append("\nFind more details in jeka-output/test-report or relaunch using --debug option.");
+            return JkUtilsString.withLeftMargin(result.toString(), "        ");
         }
 
         void print(PrintStream printStream) {
@@ -215,7 +234,7 @@ public final class JkTestResult implements Serializable {
 
     public static final class JkTestIdentifier implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 6798288174695984997L;
 
         private final JkType type;
 

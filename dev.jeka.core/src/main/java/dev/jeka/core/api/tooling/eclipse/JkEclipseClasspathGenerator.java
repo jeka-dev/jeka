@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.tooling.eclipse;
 
 import dev.jeka.core.api.depmanagement.*;
@@ -82,7 +98,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private boolean hasJekaDefDir() {
-        return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.DEF_DIR));
+        return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.JEKA_SRC_DIR));
     }
 
     // -------------------------- setters ----------------------------
@@ -198,16 +214,16 @@ public final class JkEclipseClasspathGenerator {
 
         final Set<String> paths = new HashSet<>();
 
-        // Write sources for def classes
+        // Write sources for jeka-src
         if (hasJekaDefDir()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
-                    "path", JkConstants.DEF_DIR);
+                    "path", JkConstants.JEKA_SRC_DIR);
         }
         generateSrcAndTestSrc(writer);
 
-        // write entries for def imported projects
+        // write entries for jeka-src imported projects
         for (final Path projectFile : this.importedProjects) {
             if (!paths.add(projectFile.toAbsolutePath().toString())) {
                 continue;
@@ -222,7 +238,7 @@ public final class JkEclipseClasspathGenerator {
         }
         writeJre(writer);
 
-        // add def dependencies
+        // add jeka-src dependencies
         if (hasJekaDefDir() && defDependencyResolver != null) {
             JkQualifiedDependencySet qualifiedDependencies =
                     JkQualifiedDependencySet.ofDependencies(defDependencies.getEntries());
@@ -388,7 +404,7 @@ public final class JkEclipseClasspathGenerator {
             // Maven dependency
             if (node.isModuleNode()) {
                 final JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = node.getModuleInfo();
-                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getModuleId().getColonNotation());
+                JkCoordinate coordinate = JkCoordinate.of(moduleNodeInfo.getModuleId().toColonNotation());
                 JkDependency dependency = JkCoordinateDependency.of(coordinate);
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);

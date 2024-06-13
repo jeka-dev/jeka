@@ -1,48 +1,52 @@
-# Sonarqube Plugin for Jeka
+# Sonarqube Plugin for JeKa
 
 This plugin provides utility classes and KBean to perform Sonarqube code analysis.
 
-## How to Use Programmatically
+## Configure using KBeans
+
+[SonarqubeKBean](src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java) configures itself from KBeans found 
+in the runbase and specified options.
+
+The *SonarqubeKBean* does not launch automatically. The method `SonarqubeKBean#run` should bbe explicitly invoked.
+
+```properties
+jeka.classpath.inject=dev.jeka:sonarqube-plugin
+
+# Optional : define a command short-cut to build a project and launch Sonarqube analysis in a row.
+jeka.cmd.buildQuality=project: pack sonarqube: run
+
+# Optional tool settings
+@sonarqube.scannerVersion=5.0.1.3006
+
+# all properties starting with 'sonar.' will be injected as is in the <i>Sonarqube</i> command line.
+sonar.host.url=http://localhost:9000
+```
+
+## Configure Programmatically
 
 Just declare the plugin in your build class, as follows :
 
 ```java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkDoc;
+
 @JkDefClasspath("dev.jeka:sonarqube-plugin")
-public class Build extends JkClass {
+public class Build extends KBean {
 
-    SonarqubeJkBean sonarqube = getPlugin(SonarqubeJkBean.class);
-    ...
+    @JkDoc("Run Sonarqube analysis.")
+    public void runSonarqube() {
+        JkSonarqube.ofVersion("5.0.1.3006")
+                .setProperties(getRuntime().getProperties())  // Take Sonar properties from local.properties and System.getProperties()
+                .configureFor(project)
+                .run();
+    }
+}
 ```
-This will configure a Sonarqube KBean according the *Project KBean* declared in your build class.
+This will configure a Sonarqube KBean according the specified *project*.
 
-The `sonarqube`instance can be customized in your programmatically build class in your build 
-class or by passing standard *sonarqube* properties, such as `sonar.host.url`.
+The analysis must be triggered explicitly, by invoking the `JkSonarqube#run` method.
 
-The analysis must be triggered explicitly, by invoking the `run` method on the `sonarqube` KBean.
-
-## How to Use Dynamically
-
-The sonarqube KBean can be invoked dynamically (you don't need to declare it in your build class)
-```
-./jekaw @dev.jeka.plugins:sonarqube sonarqube#run -Dsonar.host.url=https://my.sonar/server/url
-```
-
-You can store this setting in your *local.properties* file, as follows:
-```properties
-jeka.cmd._append=@dev.jeka:sonarqube-plugin
-jeka.cmd.sonar=sonarqube#run
-jeka.cmd.build=project#pack :sonar
-
-sonar.host.url=https://my.sonar/server/url
-sonar.login=mylogin
-sonar.password=mypassword
-sonar.inclusions=...
-```
-Executing `jeka :build` will perform a project *pack* followed by a *Sonarque* analysis.
-
-See available sonar option [here](https://docs.sonarqube.org/latest/analysis/analysis-parameters/).
-
-### Example
+## Example
 
 See example [here](../../samples/dev.jeka.samples.sonarqube)
 

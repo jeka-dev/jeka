@@ -1,8 +1,12 @@
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
 
-import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkModuleId;
+import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
+import dev.jeka.core.tool.JkConstants;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -23,12 +27,13 @@ public class IvyInternalPublisherRunner {
     }
 
     public static void testPublishIvy() throws IOException {
-        final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("jeka/output/test-out"));
+        final IvyInternalPublisher jkIvyInternalPublisher = IvyInternalPublisher.of(ivyRepo().toSet(), Paths.get("jeka-output/test-out"));
         final JkCoordinate coordinate =
                 JkModuleId.of("mygroup:mymodule").toCoordinate("myVersion");
         final JkIvyPublication ivyPublication = JkIvyPublication.of()
-                .setMainArtifact(sampleJarfile(), "compile", "test");
-        final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of().of()
+                .putMainArtifact(sampleJarfile(), "compile", "test");
+        JkQualifiedDependencySet.of();
+        final JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile", "org.springframework:spring-jdbc:3.0.+");
         jkIvyInternalPublisher.publishIvy(coordinate, ivyPublication.getAllArtifacts(), deps);
     }
@@ -52,13 +57,13 @@ public class IvyInternalPublisherRunner {
     }
 
     private static JkRepo ivyRepo() throws IOException {
-        final Path baseDir = Paths.get("jeka/output/testIvyRepo");
+        final Path baseDir = Paths.get(JkConstants.OUTPUT_PATH).resolve("testIvyRepo");
         Files.createDirectories(baseDir);
         return JkRepo.of(baseDir);
     }
 
     private static JkRepo mavenRepo() throws IOException {
-        final Path baseDir = Paths.get( "jeka/output/mavenRepo");
+        final Path baseDir = Paths.get(JkConstants.OUTPUT_PATH).resolve("mavenRepo");
         Files.createDirectories(baseDir);
         return JkRepo.of(baseDir);
     }

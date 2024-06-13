@@ -1,0 +1,38 @@
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.tool.JkJekaVersionRanges;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+
+class Build extends KBean {
+
+    final JkProject project = load(ProjectKBean.class).project;
+
+    @Override
+    protected void init() {
+        project.compilation.customizeDependencies(deps -> deps
+                .andFiles(JkLocator.getJekaJarPath())
+        );
+
+        project.packaging.manifestCustomizer.add(manifest -> {
+            JkJekaVersionRanges.setCompatibilityRange(manifest,
+                    "${jekaVersion}",
+                    "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
+        });
+
+        // This section is necessary to publish on a public repository
+        project
+            .setModuleId("your.org:plugin-name")
+            .setVersion("0.0.1-SNAPSHOT");
+
+        load(MavenKBean.class).getMavenPublication()
+            .pomMetadata
+                .addApache2License()
+                .setProjectName("Jeka plugin for ....")
+                .setProjectDescription("A Jeka plugin for ...")
+                .setProjectUrl("https://github.com/your_org/your_repo")
+                .setScmUrl("https://github.com/your_org/your_repo");
+    }
+
+}

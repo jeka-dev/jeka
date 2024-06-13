@@ -25,4 +25,12 @@ public class JkUtilsStringTest {
         assertEquals("", JkUtilsString.substringAfterLast("toto=", ""));
         assertEquals("", JkUtilsString.substringAfterLast("toto=", "a"));
     }
+
+    @Test
+    public void withMarginLeft() {
+        String paragraph = "Aaaaaaaa aaaa aaa1\nBnnnnnnb  bbb2\nCCCccccccccc";
+        System.out.println("------");
+        System.out.print(JkUtilsString.withLeftMargin(paragraph, "  "));
+        System.out.println("------");
+    }
 }

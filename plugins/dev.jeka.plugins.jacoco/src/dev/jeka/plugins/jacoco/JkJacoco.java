@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.plugins.jacoco;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
@@ -7,14 +23,15 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -24,14 +41,13 @@ import java.util.stream.Collectors;
 
 /**
  * Provides convenient methods to deal with Jacoco agent and report tool.
- *
+ * <p><
  * Note : May sometime fall in this issue when running from IDE :
- * https://stackoverflow.com/questions/31720139/jacoco-code-coverage-report-generator-showing-error-classes-in-bundle-code-c
- *
+ * <a href="https://stackoverflow.com/questions/31720139/jacoco-code-coverage-report-generator-showing-error-classes-in-bundle-code-c">...</a>
+ * <p>
  * See command-line documentation :
- * https://www.jacoco.org/jacoco/trunk/doc/cli.html
- * https://www.jacoco.org/jacoco/trunk/doc/agent.html
- *
+ * <a href="https://www.jacoco.org/jacoco/trunk/doc/cli.html">...</a>
+ * <a href="https://www.jacoco.org/jacoco/trunk/doc/agent.html">...</a>
  */
 public final class JkJacoco {
 
@@ -44,7 +60,7 @@ public final class JkJacoco {
 
     public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
-    public static final String DEFAULT_VERSION = "0.8.11";
+    public static final String DEFAULT_VERSION = "0.8.12";
 
     private final ToolProvider toolProvider;
 
@@ -93,13 +109,6 @@ public final class JkJacoco {
     }
 
     /**
-     * Returns the {@link JkJacoco} object relying on jacoco-agent and jacoco-cli embedded in this plugin.
-     */
-    public static JkJacoco ofEmbedded() {
-        return new JkJacoco(new EmbeddedToolProvider());
-    }
-
-    /**
      * Configures Jacoco settings in accordance to the specified project.
      * It basically sets the report locations and instructs where source code is lying.
      */
@@ -126,7 +135,7 @@ public final class JkJacoco {
      * Concise method for configuring Jacoco based on the specified project and applying the settings to the designated
      * project's testProcessor.
      */
-    public JkJacoco configureForAndApplyTo(JkProject project) {
+    public JkJacoco configureAndApplyTo(JkProject project) {
         configureFor(project).applyTo(project.testing.testProcessor);
         return this;
     }
@@ -137,12 +146,16 @@ public final class JkJacoco {
      */
     public void applyTo(JkTestProcessor testProcessor) {
         JkUtilsAssert.state(execFile != null, "The exec file has not been specified.");
-        testProcessor.preActions.append(() -> {
+        testProcessor.preActions.append("", () -> {
             String agentOptions = agentOptions();
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
             process.addAgent(toolProvider.getAgentJar(), agentOptions);
-            JkLog.info("Instrumenting tests with Jacoco agent options : " + agentOptions);
+            String message = "Instrument tests with Jacoco";
+            if (JkLog.isVerbose()) {
+                message += " agent options : " + agentOptions;
+            }
+            JkLog.info(message);
             testProcessor.setForkingProcess(process);
             testProcessor.postActions.append(this::generateExport);
         });
@@ -194,7 +207,7 @@ public final class JkJacoco {
     }
 
     /**
-     * See https://www.jacoco.org/jacoco/trunk/doc/cli.html for report option
+     * See <a href="https://www.jacoco.org/jacoco/trunk/doc/cli.html">...</a> for report option
      */
     public JkJacoco addReportOptions(String ...args) {
         reportOptions.addAll(Arrays.asList(args));
@@ -214,7 +227,7 @@ public final class JkJacoco {
      * Generates XML and HTML reports from the exec report file.
      */
     public void generateExport() {
-        JkLog.info("Jacoco internal report created at " + execFile.toAbsolutePath().normalize());
+        JkLog.verbose("Jacoco internal report created at : %s", execFile);
         if (!reportOptions.isEmpty()) {
             if (classDir == null) {
                 JkLog.warn("No class dir specified. Cannot run jacoco report.");
@@ -250,13 +263,12 @@ public final class JkJacoco {
             if (!JkLog.isVerbose()) {
                 args.add("--quiet");
             }
-            JkLog.info("Generate Jacoco XML report with args " + args);
-
             JkJavaProcess.ofJavaJar(toolProvider.getCmdLineJar(), null)
                     .setFailOnError(true)
                     .setLogCommand(JkLog.isVerbose())
                     .addParams(args)
                     .exec();
+            JkLog.verbose("Jacoco XML report generated at : %s", OUTPUT_XML_RELATIVE_PATH);
         }
     }
 
@@ -292,8 +304,7 @@ public final class JkJacoco {
     private String agentOptions() {
         String result = String.join(",", agentOptions);
         boolean hasDestFile = agentOptions.stream()
-                .filter(option -> option.startsWith("destfile="))
-                .findFirst().isPresent();
+                .anyMatch(option -> option.startsWith("destfile="));
         if (!hasDestFile) {
             if (!JkUtilsString.isBlank(result)) {
                 result = result + ",";
@@ -332,34 +343,5 @@ public final class JkJacoco {
                     "org.jacoco:org.jacoco.cli:nodeps:" + version).get();
         }
     }
-
-    private static class EmbeddedToolProvider implements ToolProvider {
-
-        private final Path agentJarFile;
-
-        private final Path cliJarFile;
-
-        EmbeddedToolProvider() {
-            final URL agentJarUrl = JkJacoco.class.getResource("org.jacoco.agent-0.8.7-runtime.jar");
-            agentJarFile = JkUtilsIO.copyUrlContentToCacheFile(agentJarUrl, System.out,
-                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-            final URL cliJarUrl = JkJacoco.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
-            cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
-                    JkInternalEmbeddedClassloader.URL_CACHE_DIR);
-        }
-
-        @Override
-        public Path getAgentJar() {
-            return agentJarFile;
-        }
-
-        @Override
-        public Path getCmdLineJar() {
-            return cliJarFile;
-        }
-    }
-
-
-
 
 }

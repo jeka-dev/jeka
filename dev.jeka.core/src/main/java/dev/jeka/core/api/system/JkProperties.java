@@ -1,12 +1,32 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.system;
 
+import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +45,17 @@ import java.util.stream.Collectors;
  *     <code>JkProperties</code> objects can be combined to form a chain of resolution using a fallback mechanism.
  */
 public final class JkProperties {
+
+    /**
+     * A predicate used to determine if a given string is a sensitive key.
+     * A sensitive key is determined by its ending, which could be "password", "secret", "token", or "pwd".
+     * Case-insensitive comparison is used.
+     */
+    public static final Predicate<String> SENSITIVE_KEY_PATTERN = key ->
+        key.toLowerCase().endsWith("password")
+                || key.toLowerCase().endsWith("secret")
+                || key.toLowerCase().endsWith("token")
+                || key.toLowerCase().endsWith("pwd");
 
     /**
      * Environment variables exposed as JkProperties.<p>
@@ -66,12 +97,96 @@ public final class JkProperties {
         return ofSystemProperties().withFallback(ENVIRONMENT_VARIABLES);
     }
 
+    /**
+     * Returns an instance of JkProperties from system properties and environment variables,
+     * with fallback to global.properties if they exist.
+     */
     public static JkProperties ofSysPropsThenEnvThenGlobalProperties() {
         Path globalPropsFile = JkLocator.getGlobalPropertiesFile();
         if (Files.exists(globalPropsFile)) {
             return ofSysPropsThenEnv().withFallback(ofFile(globalPropsFile));
         }
         return ofSysPropsThenEnv();
+    }
+
+    /**
+     * Returns an instance of JkProperties by loading properties from the specified file.
+     */
+    public static JkProperties ofFile(Path propertyFile) {
+        Properties properties = new Properties();
+        try (InputStream is = new FileInputStream(propertyFile.toFile())) {
+            properties.load(is);
+            Path workingDir = Paths.get("").toAbsolutePath();
+            String source = propertyFile.toString();
+            if (propertyFile.isAbsolute() && propertyFile.startsWith(workingDir)) {
+                source = workingDir.relativize(propertyFile).toString();
+            }
+            return ofMap(source, JkUtilsIterable.propertiesToMap(properties));
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException(propertyFile + " not found");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Returns a JkProperties instance from this one plus the specified fallback.
+     */
+    public JkProperties withFallback(JkProperties fallback) {
+        if (fallback == null || fallback == EMPTY) {
+            return this;
+        }
+        if (this.fallback == null) {
+            return new JkProperties(this.source, this.props, fallback);
+        }
+        return new JkProperties(this.source, this.props, this.fallback.withFallback(fallback));
+    }
+
+    /**
+     * Returns the value associated with the specified property name or <code>null</code> if no value has been
+     * specified for this name.
+     * <p>
+     * See <a href="https://google.github.io/styleguide/shellguide.html#s7.3-constants-and-environment-variable-names">Environment variable conventions</a>
+     */
+    public String get(String propertyName) {
+        String rawValue = getRawValue(propertyName);
+        if (rawValue == null) {
+            return null;
+        }
+        return interpolate(rawValue);
+    }
+
+    /**
+     * Returns the value associated with the specified property name or the defaultValue if no value has been
+     * specified for this name.
+     */
+    public String get(String propertyName, String defaultValue) {
+        return Optional.ofNullable(get(propertyName)).orElse(defaultValue);
+    }
+
+    /**
+     * Checks if the given property name exists in the properties.
+     */
+    public boolean containsKey(String propName) {
+        boolean result = props.containsKey(propName);
+        if (result) {
+            return result;
+        }
+        if (fallback != null) {
+            return fallback.containsKey(propName);
+        }
+        return false;
+    }
+
+    private String getRawValue(String propName) {
+        String result =  props.get(propName);
+        if (result != null) {
+            return result;
+        }
+        if (fallback != null) {
+            return fallback.getRawValue(propName);
+        }
+        return null;
     }
 
     private static JkProperties ofEnvironmentVariables() {
@@ -91,53 +206,6 @@ public final class JkProperties {
             props.put(propName, System.getProperty(propName));
         }
         return new JkProperties(SYS_PROPS_NAME, Collections.unmodifiableMap(props), null);
-    }
-
-    public static JkProperties ofFile(Path propertyFile) {
-        Properties properties = new Properties();
-        try (InputStream is = new FileInputStream(propertyFile.toFile())) {
-            properties.load(is);
-            return ofMap(propertyFile.toString(), JkUtilsIterable.propertiesToMap(properties));
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException(propertyFile + " not found");
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    public JkProperties withFallback(JkProperties fallback) {
-        if (fallback == null || fallback == EMPTY) {
-            return this;
-        }
-        if (this.fallback == null) {
-            return new JkProperties(this.source, this.props, fallback);
-        }
-        return new JkProperties(this.source, this.props, this.fallback.withFallback(fallback));
-    }
-
-    /**
-     * Returns the value associated with the specified property name or <code>null</code> if no value has been
-     * specified for this name.
-     *
-     *  See <a href="https://google.github.io/styleguide/shellguide.html#s7.3-constants-and-environment-variable-names">Environment variable conventions</a>
-     */
-    public String get(String propertyName) {
-        String rawValue = getRawValue(propertyName);
-        if (rawValue == null) {
-            return null;
-        }
-        return interpolate(rawValue);
-    }
-
-    private String getRawValue(String propName) {
-        String result =  props.get(propName);
-        if (result != null) {
-            return result;
-        }
-        if (fallback != null) {
-            return fallback.getRawValue(propName);
-        }
-        return null;
     }
 
     private String interpolate(String string) {
@@ -188,38 +256,44 @@ public final class JkProperties {
         return result.toString();
     }
 
-    public String toKeyValueString(String margin) {
+    /**
+     * Converts the properties to a formatted column text representation.
+     *
+     * @param keyMaxLength The maximum length of the key column.
+     * @param valueMaxLength The maximum length of the value column.
+     * @param canTruncate Flag indicating whether the values can be truncated if they exceed the maximum length.
+     */
+    public JkColumnText toColumnText(int keyMaxLength, int valueMaxLength, boolean canTruncate) {
         Set<String> keys = find("");
-        StringBuilder sb = new StringBuilder();
         JkProperties systemLess = systemLess();
         if (systemLess == null) {
-            return "";
+            return JkColumnText.ofSingle(valueMaxLength, valueMaxLength);
         }
-        int maxKeyLength = keys.stream()
-                .max(Comparator.comparingInt(String::length))
-                .orElse("").length();
-        int maxValueLength = keys.stream()
-                .filter(key -> systemLess.get(key) != null)
-                .map(this::get)
-                .max(Comparator.comparingInt(String::length))
-                .orElse("").length();
+        JkColumnText columnsText = JkColumnText
+                .ofSingle(1, keyMaxLength)
+                .addColumn(1, valueMaxLength)
+                .addColumn(5, 60);
         for (String key : keys) {
             if (systemLess.get(key) == null) {
                 continue;
             }
             String value = get(key);
-            if (key.toLowerCase().endsWith("password")
-                    || key.toLowerCase().endsWith("secret")
-                    || key.toLowerCase().endsWith("token")
-                    || key.toLowerCase().endsWith("pwd")) {
+            if (SENSITIVE_KEY_PATTERN.test(key)) {
                 value = "***";
             }
-            String keyLabel = JkUtilsString.padEnd(key, maxKeyLength + 1, ' ');
-            String valueLabel = JkUtilsString.padEnd(value, maxValueLength + 2, ' ');
-            JkProperties declaringProps = getSourceDefining(key);
-            sb.append(margin + keyLabel + ":" + valueLabel + "[from " + declaringProps.source + "]\n");
+            String source = getSourceDefining(key).source;
+            if (source.endsWith("global.properties")) {
+                source = "global.properties";
+            }
+            if (canTruncate && value != null && value.length() > valueMaxLength) {
+                value = JkUtilsString.ellipse(value, valueMaxLength-3);
+            }
+            if (canTruncate && key.length() > keyMaxLength) {
+                key = JkUtilsString.ellipse(key, keyMaxLength-3);
+            }
+            columnsText.add(key, value, source);
         }
-        return sb.toString();
+        return columnsText;
     }
 
     private JkProperties getSourceDefining(String key) {

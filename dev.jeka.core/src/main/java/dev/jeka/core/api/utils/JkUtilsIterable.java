@@ -1,6 +1,26 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.utils;
 
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -31,7 +51,7 @@ public final class JkUtilsIterable {
     /**
      * @see #listOf(Iterable)
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> List<T> listOf(T... items) {
         return Arrays.asList(items);
     }
@@ -39,32 +59,26 @@ public final class JkUtilsIterable {
     /**
      * @see #listOf(Iterable)
      */
-    @SuppressWarnings("unchecked")
+
+    @SafeVarargs
     public static <T> List<T> listOf2orMore(T item1, T item2, T... others) {
         ArrayList<T> result = new ArrayList<>(others.length + 2);
         result.add(item1);
         result.add(item2);
-        for (int i = 0; i < others.length; i++) {
-            result.add(others[i]);
-        }
+        Collections.addAll(result, others);
         return result;
     }
 
     /**
      * @see #listOf(Iterable)
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> List<T> listOf1orMore(T item1, T... others) {
         ArrayList<T> result = new ArrayList<>(others.length + 1);
         result.add(item1);
-        for (int i = 0; i < others.length; i++) {
-            result.add(others[i]);
-        }
+        Collections.addAll(result, others);
         return result;
     }
-
-
-
 
     /**
      * Returns a duplicate free list of the given items
@@ -110,7 +124,7 @@ public final class JkUtilsIterable {
     /**
      * Creates a set of specified items.
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> Set<T> setOf(T... items) {
         final HashSet<T> result = new HashSet<>();
         result.addAll(Arrays.asList(items));
@@ -183,7 +197,7 @@ public final class JkUtilsIterable {
      * Returns a list that is a concatenation of the specified lists.
      * The result is not backed by specified {@link Iterable}.
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> List<T> concatLists(Iterable<? extends T>... lists) {
         final List<T> result = new LinkedList<>();
         for (final Iterable<? extends T> list : lists) {
@@ -250,6 +264,37 @@ public final class JkUtilsIterable {
         System.arraycopy(b, 0, c, aLen, bLen);
 
         return c;
+    }
+
+    public static String toMultiLineString(Iterable<?> items, String margin) {
+        StringBuilder sb = new StringBuilder();
+        for (Iterator<?> it = items.iterator(); it.hasNext();) {
+            Object item = it.next();
+            sb.append(margin + item);
+            if (it.hasNext()) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    public static void writeStringsTo(Path path, String delimiter, List<String> strings) {
+        JkUtilsPath.createFileSafely(path);
+        String content = String.join(delimiter, strings);
+        JkUtilsPath.write(path, content.getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    public static List<String> readStringsFrom(Path path, String delimiter) {
+        String content = new String(JkUtilsPath.readAllBytes(path), StandardCharsets.UTF_8);
+        return Arrays.asList(content.split(delimiter));
+    }
+
+    public static List<String> readStringSafelyFrom(Path path, String delimiter) {
+        if (!Files.exists(path)) {
+            return Collections.emptyList();
+        }
+        return readStringsFrom(path, delimiter);
     }
 
 }

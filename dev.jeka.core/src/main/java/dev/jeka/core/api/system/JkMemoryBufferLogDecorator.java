@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -16,14 +32,14 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
 
     private final PrintStream bufferStream = new PrintStream(byteArrayBufferStream);
 
-    private final PrintStream originalTargetOut;
+    private final PrintStream originalOut;
 
-    private final PrintStream originalTargetErr;
+    private final PrintStream originalErr;
 
     private JkMemoryBufferLogDecorator(JkLog.JkLogDecorator delegate) {
         this.delegate = delegate;
-        this.originalTargetOut = delegate.getTargetOut();
-        this.originalTargetErr = delegate.getTargetErr();
+        this.originalOut = delegate.getTargetOut();
+        this.originalErr = delegate.getTargetErr();
     }
 
     @Override
@@ -57,7 +73,7 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
     public static void inactivateOnJkLog() {
         JkUtilsAssert.state(jkLogInstance != null, "This decorator is not currently activated.");
         JkLog.JkLogDecorator delegate = jkLogInstance.delegate;
-        delegate.init(jkLogInstance.originalTargetOut, jkLogInstance.originalTargetErr);
+        delegate.init(jkLogInstance.originalOut, jkLogInstance.originalErr);
         jkLogInstance = null;
         JkLog.setDecorator(delegate);
     }

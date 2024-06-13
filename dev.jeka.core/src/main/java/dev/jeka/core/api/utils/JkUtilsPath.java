@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
@@ -10,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
@@ -206,6 +223,15 @@ public final class JkUtilsPath {
         }
     }
 
+    public static Stream<String> lines(Path file, Charset charset) {
+        try {
+            return Files.lines(file, charset);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+
     /**
      * Delegates to {@link Files#readAllBytes(Path)} (Path)
      */
@@ -236,6 +262,18 @@ public final class JkUtilsPath {
             Files.deleteIfExists(path);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Delegates to Files{@link #deleteIfExists(Path)}
+     */
+    public static void deleteIfExistsSafely(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (final IOException e) {
+            path.toFile().deleteOnExit();
+            JkLog.verbose("Cannot delete %s. Cause : %s", path, e.getMessage());
         }
     }
 

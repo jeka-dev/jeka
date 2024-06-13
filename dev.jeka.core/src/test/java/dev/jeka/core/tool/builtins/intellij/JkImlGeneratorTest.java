@@ -3,7 +3,6 @@ package dev.jeka.core.tool.builtins.intellij;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkClasspath;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
@@ -22,7 +21,7 @@ public class JkImlGeneratorTest {
     @Test
     public void withoutJavaProject() {
         JkImlGenerator imlGenerator = JkImlGenerator.of()
-                .setDefClasspath(JkPathSequence.of(JkClasspath.ofCurrentRuntime()))
+                .setJekaSrcClasspath(JkPathSequence.ofSysPropClassPath())
                 .setBaseDir(Paths.get(""));
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
@@ -31,10 +30,10 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProject() {
         JkProject project = JkProject.of();
-        project.compilation.configureDependencies(deps -> dependencies());
+        project.compilation.customizeDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
-                .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
+                .setJekaSrcClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
         List<JkIml.SourceFolder> sourceFolders = iml.component.getContent().getSourceFolders();
@@ -45,10 +44,10 @@ public class JkImlGeneratorTest {
     @Test
     public void withJavaProjectSimpleLayout() {
         JkProject project = JkProject.of();
-        project.compilation.configureDependencies(deps -> dependencies());
+        project.compilation.customizeDependencies(deps -> dependencies());
         JkImlGenerator imlGenerator = JkImlGenerator.of()
                 .setIdeSupport(project.getJavaIdeSupport())
-                .setDefClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
+                .setJekaSrcClasspath(JkPathSequence.of(JkLocator.getJekaJarPath()));
         project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);

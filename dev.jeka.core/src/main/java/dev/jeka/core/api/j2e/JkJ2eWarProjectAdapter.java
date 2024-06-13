@@ -1,10 +1,24 @@
+/*
+ * Copyright 2014-2024  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package dev.jeka.core.api.j2e;
 
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkStandardFileArtifactProducer;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -41,37 +55,17 @@ public class JkJ2eWarProjectAdapter {
     }
 
     /**
-     * Configures a project in order it publishes war archive.
-     * @param publishedAsMainArtifact if true, war will be published as the main artifact, so without any dependencies.
-     * @param keepJar if false, no jar archive will be created/deployed.
+     * Configures the specified project to produce and publish WAR archive.
      */
-    public void configure(JkProject project, boolean publishedAsMainArtifact, boolean keepJar) {
-        JkUtilsAssert.argument(publishedAsMainArtifact || keepJar,
-                "Both publishedAsMainArtifact and keepJar cannot be false.");
-        Path staticResourceDir = project.getBaseDir().resolve("src/main/webapp/static");
-        JkStandardFileArtifactProducer artifactProducer = project.artifactProducer;
-        Consumer<Path> originalJarMaker = path -> artifactProducer.makeMainArtifact();
-        Consumer<Path> warMaker = path -> generateWar(path, project);
-        if (publishedAsMainArtifact) {
-            JkArtifactId originalMainArtifactId = artifactProducer.getMainArtifactId();
-            artifactProducer
-                    .setMainArtifactExt("war")
-                    .putMainArtifact(warMaker);
-            if (!keepJar) {
-                artifactProducer
-                        .removeArtifact(originalMainArtifactId);
-            }
-        } else {
-            artifactProducer
-                    .putArtifact(JkArtifactId.of("", ".war"), warMaker);
-        }
-    }
-
     public void configure(JkProject project) {
-        configure(project, true, false);
+        JkArtifactId warArtifact = JkArtifactId.ofMainArtifact("war");
+        Path warFile = project.artifactLocator.getArtifactPath(warArtifact);
+        Consumer<Path> warMaker = path -> generateWar(project, path);
+        project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION,
+                () -> warMaker.accept(warFile));
     }
 
-    public void generateWar(Path dist, JkProject project) {
+    public void generateWar(JkProject project, Path targetPath) {
         final Path effectiveWebappPath;
         if (webappPath != null) {
             effectiveWebappPath = project.getBaseDir().resolve(webappPath);
@@ -79,25 +73,25 @@ public class JkJ2eWarProjectAdapter {
             Path src =  project.compilation.layout.getSources().toList().get(0).getRoot();
             effectiveWebappPath = src.resolveSibling("webapp");
         }
-        generateWar(project, dist, effectiveWebappPath, extraStaticResourcePath, generateExploded);
+        generateWar(project, targetPath, effectiveWebappPath, extraStaticResourcePath, generateExploded);
     }
 
-    private static void generateWar(JkProject project, Path destFile, Path webappPath, Path extraStaticResourcePath,
+    private static void generateWar(JkProject project, Path targetFile, Path webappPath, Path extraStaticResourcePath,
                                     boolean generateDir) {
 
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
                 .setClassDir(project.compilation.layout.resolveClassDir())
                 .setExtraStaticResourceDir(extraStaticResourcePath)
-                .setLibs(project.packaging.resolveRuntimeDependencies().getFiles().getEntries())
+                .setLibs(project.packaging.resolveRuntimeDependenciesAsFiles())
                 .setWebappDir(webappPath);
         project.compilation.runIfNeeded();
         project.testing.runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
             archiver.generateWarDir(dirPath);
-            JkPathTree.of(dirPath).zipTo(destFile);
+            JkPathTree.of(dirPath).zipTo(targetFile);
         } else {
-            archiver.generateWarFile(destFile);
+            archiver.generateWarFile(targetFile);
         }
     }
 

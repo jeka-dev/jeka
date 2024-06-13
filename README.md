@@ -3,130 +3,127 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/JekaBuildTool.svg?style=social)](https://twitter.com/JekaBuildTool)  
 
 
-#  What is JeKa ?
+<img src="./docs/images/logo-plain-gradient.svg" width="100" align="right" hspace="15"  />
 
-<img src="./docs/images/knight-color-logo.svg" width="100" align="left" hspace="15"  />
+> [!IMPORTANT]
+> JeKa 0.11.0 has been released!!!
+> 
+> This release brings major and drastic changes compared to previous JeKa versions.
+> 
+> The content of this page reflects the new version and does not apply to 0.10.x. 
+> 
+> The existing IDE plugin for IntelliJ still works with Jeka 0.10.x but is no longer compatible with the new version. 
+> A new plugin for Jeka 0.11.x is under development.
+> 
+> The official documentation provides information for both versions and a migration guide.
 
-Essentially, <strong>JeKa</strong> is an automation tool that enables users to execute Java / Kotlin source code 
-directly from the command line.
+##  What is JeKa ?
 
-It comes bundled with a library and a component model that cater to the requirements of building Java projects.
+**JeKa** is a Java build tool for building or executing Java applications and scripts 
+directly from source code.
 
-These elements can be utilized independently or in combination, tailored to specific needs from basic scripts to sophisticated software build and delivery pipelines.
+Its key features include:
 
-These objectives can be achieved programmatically or by configuring properties for the reusable components.
+-  **JDKs Management:** Automatically downloads and selects the appropriate JDKs. No need to have Java already installed on the host machine.
 
-Thanks to the component model, plugins are available to seamlessly integrate technologies such as  *Spring-Boot*, *OpenApi*, 
-*NodeJs*, *Protobuf*, *SonarQube* and more.
 
-# Why JeKa ?
+-  **Direct App Execution:** Run applications directly from their Git repository, providing a means to distribute Java applications as source.
 
-## Short Answer
 
-JeKa provides an alternative to mainstream Java build tools, for individuals frustrated with technologies they perceive 
-as old, heavy, rigid or bloated.
+-  **Portable Builds:** JeKa downloads everything needed for building your projects (JDKs, Maven deps, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
 
-It introduces a breath of fresh air in this domain by offering a light and versatile solution for 
-building projects and automate tasks using Java language.
 
-## But also ...
+-  **Customizable and Extendable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
+   Also, JeKa provides a simple plugin mechanism that allows for easy extension.
 
-JeKa fills the gap between **dev** and **ops** by allowing the entire process to be implemented in a single language,
-for say : **Java** or **Kotlin**. This includes tasks like *development*, *building*, *creating pipelines*, *testing*, 
-*deploying containers* and *provisioning platforms*.
 
-Generally, devOps tasks are implemented using scripts or configuration files with specific template languages around, 
-resulting in a proliferation of languages and technologies that increase cognitive load 
-and may discourage developers from fully committing to devOps tasks or implementing them poorly.
+-  **Kotlin Support:** Scripts or applications can also be implemented using the *Kotlin* language.
 
-Bringing **Java or Kotlin** to the **devOps side** can not only lead to better developer engagement but also more careful 
-and **robust** implementation due to the **statically typed** nature of these languages. 
-This is especially true when working with well-designed, expressive APIs. 
-One other good thing is that Jeka works only with familiar Java structure making tasks implementation manageable
-by ops with basic Java knowledge.
 
-Nevertheless, JeKa is very flexible and allows users to pick only the parts they are interested in by integrating 
-with any tool providing a command-line interface (such as Maven, Gradle, Kubectl, Helm, Terraform, etc.).
+## Use-cases
 
-# Examples
+- **Use Java for scripting** 
 
-- [Build for a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
-- [Build for a Spring-Boot application](https://github.com/jeka-dev/working-examples/blob/master/springboot-api/jeka/def/Build.java)
+  JeKa makes it ridiculously easy to write and execute scripts using the Java language.
+  Write your automated tasks directly in Java, using third-party dependencies or not, and execute them from anywhere, without any setup.
+
+
+- **Build projects - Create delivery pipelines** 
+  
+  Build projects and seamlessly combine scripts to create comprehensive CI/CD pipelines that can run anywhere, 
+  from IDE debugger to cloud CI/CD environments. 
+  
+  JeKa can also complement other build tools such as *Maven* or *Gradle* to fulfill their missing features.
+
+
+- **Deliver applications as sources** 
+
+  JeKa can execute entire Java applications of any kind and size directly from their Git repository. 
+  
+  Simply commit or tag your repository to release your application.
+
+
+- **Make Java fun for newcomers**
+
+  Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
+
+  Write directly Java code that can be build and executed from anywhere with minimal or zero setup.
+
+
+- **Centralize build logic**
+
+  Centralize build and CI/CD logic for shared use and extension across projects within the organization.
+  
+
+## Examples
+
+- [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
+- [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
+
+
+- [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
+- [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+
+
+- [Build a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
-# See in Action
-
-Click images to see videos.
-
-[<img src="media/getting-started.png" width="30%" alt="Video" align="center">](https://www.youtube.com/embed/hUFvbmFggUY?si=ogamIIU_YYir4vH "Jeka in Action")
-&nbsp;&nbsp;&nbsp;Write scripts in Java, and execute it from command line
-
-
-[<img src="media/springboot-prog.png" width="30%"  alt="Video" align="center">](https://www.youtube.com/embed/rUmhMhYRdr0?si=CYPAu21LdY-40xCy "Jeka in Action")
-&nbsp;&nbsp;&nbsp;Build a Spring-Boot project and programmatically
-
-# What Makes JeKa User Friendly ?
-
-Thanks to its wrapper and the [Plugin for IntelliJ](https://github.com/jerkar/jeka-ide-intellij), you don't need to install anything on your machine to run Jeka. You only need a JDK 8 or higher.
-
-JeKa is extremely lightweight, the full distribution size is around 1 MB including source code. The whole tool is contained in a single jar of approximately 600 KB and has zero dependencies.
-
-Jeka does its best to not obfuscate what is happening behind the scene, making it easy to discover and troubleshoot issues encountered during execution.
-
-
-# Get JeKa
-
-The simpler way to get JeKa is by using [IntelliJ plugin](https://github.com/jerkar/jeka-ide-intellij) that will 
-handle distribution installation for you. Anyway you can get the binary distributions from the following places :
-
-* Snapshots : https://oss.sonatype.org/content/repositories/snapshots/dev/jeka/jeka-core/
-* Milestones and Release Candidates : https://github.com/orgs/jeka-dev/packages?repo_name=jeka
-* Releases : https://repo1.maven.org/maven2/dev/jeka/jeka-core/
-
-The distribution is the file named jeka-core-x.x.x-distrib.zip. 
-
-# How to Use JeKa ?
+## Getting Started
 
 Visit following pages according your expectation :
 
-* [Getting Started (Needs Intellij Plugin)](https://jeka-dev.github.io/jeka/tutorials/gui-getting-started/#getting-started-with-jeka)
 * [Reference Guide](https://jeka-dev.github.io/jeka/)
 * [Working examples](https://github.com/jeka-dev/working-examples)
 
-# External Plugins
+## Plugins
 
-JeKa comes with plugins out-of-the-box. These plugins cover most of the common needs a Java developer has when building 
-a project. This includes plugins for IDE metadata generation (IntelliJ, Eclipse), 
-dependency management, Git, Java project building, testing, GPG signing, binary repositories, 
-Maven interaction, scaffolding, and JEE Web ARchives.
+### Bundled Plugins
 
-Nevertheless, JeKa is extensible and other plugins exist outside the main distribution. Some of them are located in the
-same monorepo, which means that you don't need to specify their version as JeKa will automatically pick the right version for you.
+JeKa comes with plugins out-of-the-box. These plugins cover most of the common needs for building a project. 
+This includes IDE integration (IntelliJ Eclipse), 
+dependency management, compilation, testing, Git, GPG signing, Scaffolding, Maven publication, Docker image maker, ...
 
-### Plugins Hosted in JeKa Monorepo
+You can have a description of these plugins by executing command `jeka --help`.
+
+
+### External Plugins
+
+External plugins require to be explicitly imported.
+
+The following plugins are hosted in same monorepo then JeKa, and so are released in conjunction 
+which means that we don't need to specify their version when importing.
 
 * [Springboot Plugin](plugins/dev.jeka.plugins.springboot)
 * [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
 * [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
 * [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
 * [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
+* [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
 
-### Known Plugins Hosted outside this repo
+The following plugins are maintained in their own repos.
 
 * [OpenApi Plugin](https://github.com/jeka-dev/openapi-plugin)
 
-
-# Roadmap/Ideas
-
-We hope the 0.10.xx series to be the last prior 1.0.0.
-0.10.xx series is a considerable improvement from 0.9.xx.
-We expect our users to give feedbacks to finalise the product.
-
-* Stabilize the API based on user feedback. The API is functional now, but it can be improved with user input.
-* Improve Kotlin integration
-* Provide a plugin for Android
-
-Please visit [release note](https://github.com/jerkar/jeka/blob/master/release-note.md) and [issues](issues) for roadmap.
 
 # Community
 
@@ -141,13 +138,13 @@ You can also use direct emailing for questions and support : djeangdev@yahoo.fr
 
 A twitter account also exist : https://twitter.com/djeang_dev
 
-# Versioning 
+## Versioning 
 
 JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
-# Developer Notes
+## Developer Notes
 
-## How is Organized this Repo ?
+### How is Organized this Repo ?
 
 This repository is organized as a _monorepo_. It contains The JeKa core project along plugins and samples for 
 automation testing.
@@ -159,23 +156,24 @@ automation testing.
 
 JeKa builds itself. To build JeKa full distribution from sources, the simpler is to use your IDE.
 
-## Build JeKa from IntelliJ
+### Build JeKa from IntelliJ
 
 * Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
 * If you have not installed JeKa plugin, add the `JEKA_CACHE_DIR` variable pointing on [USER_HOME]/.jeka/cache
 * Make sure the project is configured with a JDK8 or higher.
 * Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
 * Run 'FAST BUILD' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
+* Set environment variable `JEKA_HOME` = *[JeKa project location]/dev.jeka.core/jeka/output/distrib* and add it to `PATH` environment.
 
 > For debugging the project, you may have to set up Intellij in order to workaround with an Intellij issue :
 > Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
 > [See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
 
 
-## Build JeKa from Command Line
+### Build JeKa from Command Line
 
 JeKa builds itself, but we need to compile the JeKa sources prior to execute it. 
-Fot this, a small _Ant_ script bootstraps the build process by compiling JeKa first then launch 
+For this, a small _Ant_ script bootstraps the build process by compiling JeKa first then launch 
 the JeKa build.
 
 At the repository root dir, execute : `ant -f .github\workflows\build.xml`.
@@ -188,13 +186,17 @@ Cause of Sonarqube scanner, this command has to be run with a JDK >= 11.
 
 Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
 
-You must install _Python_ and _Material for MkDocs_ on your computer (`pip install mkdocs-material`) prior to execute following command lines from the repo root directory :
-- `mkdocs serve` : generate and serve the documentation on localhost:8000
+You must install _Python_ and _Material for MkDocs_ on your computer 
+(`pip install mkdocs-material`) prior to execute following command lines from the repo root directory :
+```shell
+mkdocs serve
+```
+This generates and serves the documentation on localhost:8000
 
 The documentation is also supposed to be regenerated after each push/pull-request.
 
 
-### How to Release ?
+## How to Release ?
 
 Just use the [github release mechanism](https://github.com/jeka-dev/jeka/releases).
 Creating a release implies creating a tag. This will trigger a build and a publication on Maven Central.
@@ -202,4 +204,5 @@ Creating a release implies creating a tag. This will trigger a build and a publi
 <p align="center">
     <img src="docs/images/mascot.png" width='420' height='420' />
 </p>
+
 

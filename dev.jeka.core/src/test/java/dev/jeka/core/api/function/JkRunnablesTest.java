@@ -10,7 +10,7 @@ public class JkRunnablesTest {
         Runnable dummyRunnable = () -> {};
         JkRunnables runnables = JkRunnables.of()
                 .append("lime", dummyRunnable)
-                .appendAfter("apple", "orange", dummyRunnable)
+                .insertAfter("apple", "orange", dummyRunnable)
                 .append("orange", dummyRunnable);
         Assert.assertEquals("orange", runnables.getRunnableNames().get(1));
         Assert.assertEquals("apple", runnables.getRunnableNames().get(2));
@@ -22,7 +22,7 @@ public class JkRunnablesTest {
         JkRunnables runnables = JkRunnables.of()
                 .append("lime", dummyRunnable)
                 .append("orange", dummyRunnable)
-                .appendBefore("apple", "orange" ,dummyRunnable);
+                .insertBefore("apple", "orange" ,dummyRunnable);
         Assert.assertEquals("apple", runnables.getRunnableNames().get(1));
         Assert.assertEquals("orange", runnables.getRunnableNames().get(2));
     }
