@@ -157,11 +157,11 @@ class MasterBuild extends KBean {
                 projectJkBean -> JkVersionFromGit.of().handleVersioning(projectJkBean.project)
         );
         String branch = JkGit.of().getCurrentBranch();
-        JkLog.verbose("Current build branch: %s", branch);
-        JkLog.verbose("current ossrhUser:  %s", ossrhUser);
+        JkLog.info("Current build branch: %s", branch);
+        JkLog.info("current ossrhUser:  %s", ossrhUser);
 
-        // Publish artifacts only if we are on 'master' branch
-        if (JkUtilsIterable.listOf("HEAD", "master", "0.11.x").contains(branch) && ossrhUser != null) {
+        // Publish artifacts on maven central only if we are on 'master' branch
+        if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
