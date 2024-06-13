@@ -51,17 +51,16 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         JkPathTree.of(tempDir).deleteRoot();
 
         // Scaffold for Jeka  plugin
-        /*
         scaffoldAndCheckInTemp(
                 "project: scaffold scaffold.kind=PLUGIN",
                 "project: pack", true);
-
-         */
 
         // Check IntelliJ + Eclipse metadata
         Path workingDir = scaffoldAndCheckInTemp(
                 "project: scaffold",
                 "project: clean pack", false);
+
+
         runWithDistribJekaShell(workingDir, "eclipse: files");
         runWithDistribJekaShell(workingDir, "intellij: iml -D" + IntellijKBean.IML_SKIP_MODULE_XML_PROP + "=true");
         JkUtilsAssert.state(Files.exists(workingDir.resolve("src/main/java")),
@@ -74,6 +73,7 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         runWithDistribJekaShell(path, scaffoldCmdLine);
         runWithDistribJekaShell(path, checkCommandLine);
         //runWithBaseDirJekaShell(path, checkCommandLine);
+
         if (deleteAfter) {
             JkPathTree.of(path).deleteRoot();
         }
