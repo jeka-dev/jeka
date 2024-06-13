@@ -22,7 +22,8 @@ However, you'll be able to upgrade your base install by executing `jeka-install`
 
 ## Windows
 
-For installing and running, JeKa needs only *curl* be installed on the system.
+For installing and running JeKa on Windows, you don't need to install 3rd party software.
+Currently there's no install script available, you need to install it manually.
 
 ## Manual installation
 
