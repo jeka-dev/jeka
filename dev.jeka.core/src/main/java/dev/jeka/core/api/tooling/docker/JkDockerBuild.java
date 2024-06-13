@@ -360,16 +360,24 @@ public class JkDockerBuild {
          * Adds a Dockerfile step that creates a directory, belonging to the 'nonroot' user if such a
          * user exists.
          */
-        public StepContainer addNonRootMkdir(String dirPath) {
+        public StepContainer addNonRootMkdirs(String dirPath, String ...extraDirs) {
             return add(context -> {
-                if (userId == null) {
-                    context.add("RUN mkdir -p " + dirPath);
-                } else {
-                    String step = String.format("RUN mkdir -p %s && chown -R ${uid}:${gid} %s", dirPath, dirPath);
-                    context.add(step);
+                StringBuilder sb = new StringBuilder("Run ");
+                sb.append(mkdirInstrcution(dirPath));
+                for (String extraDir : extraDirs) {
+                    sb.append(" \\\n    && ");
+                    sb.append(mkdirInstrcution(extraDir));
                 }
+                context.add(sb.toString());
             });
+        }
 
+        private String mkdirInstrcution(String dirPath) {
+            if (userId == null) {
+                return "mkdir -p " + dirPath;
+            } else {
+                return String.format("mkdir -p %s && chown -R ${uid}:${gid} %s", dirPath, dirPath);
+            }
         }
 
 

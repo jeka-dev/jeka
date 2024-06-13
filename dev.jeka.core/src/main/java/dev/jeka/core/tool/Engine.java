@@ -434,7 +434,11 @@ class Engine {
         if (javaCompileSpec.getSources().containFiles() && ToolProvider.getSystemJavaCompiler() == null) {
             throw new JkException(NO_JDK_MSG);
         }
-        return JkJavaCompilerToolChain.of().compile(javaCompileSpec);
+        if (jekaSource.containFiles()) {
+            return JkJavaCompilerToolChain.of().compile(javaCompileSpec);
+        }
+        JkLog.verbose("jeka-src dir does not contain sources. Skip compile");
+        return true;
     }
 
     private List<String> findKBeanClassNames() {

@@ -58,7 +58,8 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     private JkDockerJvmBuild() {
         this.setBaseImage(BASE_IMAGE);
         this.nonRootSteps.add(this::enhance);
-        this.rootSteps.addNonRootMkdir("/app");
+        this.rootSteps.addNonRootMkdirs("/app", "/workdir");
+        this.rootSteps.add("WORKDIR /workdir");
     }
 
     /**
@@ -80,6 +81,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         super.buildImage(contextDir, imageName);
         JkLog.info("Pass extra JVM options : Use '-e JAVA_TOOL_OPTIONS=...'");
         JkLog.info("Pass program arguments : Add arguments to the end of the command line");
+        JkLog.info("Map host current dir with container working dir : Use -v $PWD:/workdir option");
     }
 
     /**
