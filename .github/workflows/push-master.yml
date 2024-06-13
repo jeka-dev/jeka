@@ -16,8 +16,6 @@ jobs:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow --tag
 
-    - run: echo "Current branch = ${{ github.ref }}"
-
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
@@ -36,6 +34,7 @@ jobs:
         JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+        GITHUB_BRANCH: ${{ github.ref }}
       run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
       
     - name: Save JeKa cache

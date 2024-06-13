@@ -37,6 +37,7 @@ import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
+import org.omg.CORBA.Environment;
 
 import java.io.IOException;
 
@@ -97,7 +98,7 @@ class MasterBuild extends KBean {
 
         System.out.println("==============================================");
         System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
-        System.out.println("Branch from Git          : " + JkGit.of(getBaseDir()).getCurrentBranch());
+        System.out.println("Branch from Git          : " + computeBranchName());
         System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit());
         System.out.println("Tag Count from Git       : " + JkGit.of(getBaseDir()).getTagsOfCurrentCommit().size());
         System.out.println("Effective version        : " + effectiveVersion);
@@ -156,12 +157,12 @@ class MasterBuild extends KBean {
         getImportedKBeans().get(ProjectKBean.class, false).forEach(
                 projectJkBean -> JkVersionFromGit.of().handleVersioning(projectJkBean.project)
         );
-        String branch = JkGit.of().getCurrentBranch();
+        String branch = computeBranchName();
         JkLog.info("Current build branch: %s", branch);
         JkLog.info("current ossrhUser:  %s", ossrhUser);
 
         // Publish artifacts on maven central only if we are on 'master' branch
-        if (JkUtilsIterable.listOf("HEAD", "master").contains(branch) && ossrhUser != null) {
+        if (JkUtilsIterable.listOf("HEAD", "master", "refs/heads/master").contains(branch) && ossrhUser != null) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
@@ -182,6 +183,15 @@ class MasterBuild extends KBean {
         if (getRunbase().getProperties().get("sonar.host.url") != null) {
             coreBuild.load(SonarqubeKBean.class).run();
         }
+    }
+
+    // For a few time ago, JkGit.of().getCurrentBranch() returns 'null' on githyb
+    private static String computeBranchName() {
+        String githubBranch = System.getenv("GITHUB_BRANCH");
+        if (githubBranch != null) {
+            return githubBranch;
+        }
+        return JkGit.of().getCurrentBranch();
     }
 
     @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
