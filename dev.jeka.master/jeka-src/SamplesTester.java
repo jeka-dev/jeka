@@ -23,8 +23,8 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Test caching by running twice
         Path sampleBaseDir = Paths.get("../samples/dev.jeka.samples.baselib").normalize();
-        //runWithDistribJekaShell(sampleBaseDir, "ok");
-        //runWithDistribJekaShell(sampleBaseDir, "ok");
+        runWithDistribJekaShell(sampleBaseDir, "ok");
+        runWithDistribJekaShell(sampleBaseDir, "ok");
 
 
         // Test with injecting dep via @JkInjectClasspath(...)

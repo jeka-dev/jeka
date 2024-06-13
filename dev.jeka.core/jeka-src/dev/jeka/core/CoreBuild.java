@@ -119,7 +119,7 @@ public class CoreBuild extends KBean {
         JkPathFile.of(binDir.resolve("jeka")).setPosixExecPermissions();
         JkPathFile.of(binDir.resolve("jeka-update")).setPosixExecPermissions();
         if (!project.testing.isSkipped() && runIT) {
-            //testScaffolding();
+            //stScaffolding();
             new DockerTester().run();
             new ShellRemoteTester().run();
 
