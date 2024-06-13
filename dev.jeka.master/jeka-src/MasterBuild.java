@@ -162,7 +162,7 @@ class MasterBuild extends KBean {
         JkLog.info("current ossrhUser:  %s", ossrhUser);
 
         // Publish artifacts on maven central only if we are on 'master' branch
-        if (JkUtilsIterable.listOf("HEAD", "master", "refs/heads/master").contains(branch) && ossrhUser != null) {
+        if (shouldPublishOnMavenCentral()) {
             JkLog.startTask("Publishing artifacts to Maven Central");
             getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
@@ -183,6 +183,14 @@ class MasterBuild extends KBean {
         if (getRunbase().getProperties().get("sonar.host.url") != null) {
             coreBuild.load(SonarqubeKBean.class).run();
         }
+    }
+
+    private  boolean shouldPublishOnMavenCentral() {
+        String branchOrTag = computeBranchName();
+        if (branchOrTag != null && branchOrTag.startsWith("refs/heads/") && ossrhUser != null) {
+            return true;
+        }
+        return false;
     }
 
     // For a few time ago, JkGit.of().getCurrentBranch() returns 'null' on githyb
