@@ -399,7 +399,7 @@ final class IvyPublisherForMaven {
 
     private static void includeManagedDependencies(Path pomFile, Map<JkModuleId, JkVersion> managedDependencies) {
         JkDomDocument dom = JkDomDocument.parse(pomFile);
-        JkDomElement dependenciesEl = dom.root().get("managedDependency").get("dependencies").make();
+        JkDomElement dependenciesEl = dom.root().get("dependencyManagement").get("dependencies").make();
         managedDependencies.forEach((key, value) -> dependenciesEl
                 .add("dependency")
                     .add("groupId").text(key.getGroup()).make().__
