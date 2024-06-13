@@ -187,7 +187,7 @@ class MasterBuild extends KBean {
 
     private  boolean shouldPublishOnMavenCentral() {
         String branchOrTag = computeBranchName();
-        if (branchOrTag != null && branchOrTag.startsWith("refs/heads/") && ossrhUser != null) {
+        if (branchOrTag != null && branchOrTag.startsWith("refs/tags/") && ossrhUser != null) {
             return true;
         }
         return false;
