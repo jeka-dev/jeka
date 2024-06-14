@@ -19,6 +19,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -46,8 +47,7 @@ class PicocliHelp {
     }
 
     static void printVersionHelp(PrintStream printStream) {
-        CommandLine commandLine = PicocliCommands.stdHelp();
-        commandLine.printVersionHelp(printStream);
+        printStream.println(JkInfo.getJekaVersion());
     }
 
     static void printCmdHelp(JkPathSequence classpath,
