@@ -21,11 +21,9 @@ set -e
 # Script for installing and upgrading JeKa
 # Authors: Jerome Angibaud
 
-# curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jeka-install | $(echo $0) -s - install
-# curl -s https://jeka.dev/install.sh | $(echo $0) -s - install check
+# curl -s https://raw.githubusercontent.com/jeka-dev/jeka/0.11.x/dev.jeka.core/src/main/shell/jeka-update | $(echo $0) -s - install
 
-
-#declare MAVEN_REPO="https://oss.sonatype.org/content/repositories/snapshots"
+# declare MAVEN_REPO="https://oss.sonatype.org/content/repositories/snapshots"
 declare MAVEN_REPO="https://repo1.maven.org/maven2"
 declare MANUAL_NOTICE="https://jeka-dev.github.io/jeka/reference-guide/installation"
 
@@ -75,9 +73,6 @@ compute_LAST_VERSION() {
   local url
   url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
   LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
-
-  # TODO remove
-  LAST_VERSION=0.11.x-SNAPSHOT
 }
 
 compute_LAST_RELEASE() {
@@ -161,7 +156,7 @@ install() {
   echo "Installing Jeka Version $LAST_VERSION in $install_dir ..."
   download_and_unpack "$url" "$install_dir" "zip"
   chmod +x "$install_dir/jeka"
-  chmod +x "$install_dir/jeka-install"
+  chmod +x "$install_dir/jeka-update"
 
   # Adapt shell script
   compute_SHELL_CONFIG_FILE
