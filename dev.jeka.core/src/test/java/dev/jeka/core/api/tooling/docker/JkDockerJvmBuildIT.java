@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 
-public class JkDockerJvmBuildTest {
+public class JkDockerJvmBuildIT {
 
     @Test
     @Ignore  // Fails in automated test cause no jeka-output/classes dir exist

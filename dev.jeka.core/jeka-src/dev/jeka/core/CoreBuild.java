@@ -50,7 +50,7 @@ public class CoreBuild extends KBean {
 
     public final JkProject project = load(ProjectKBean.class).project;
 
-    public boolean runIT;
+    public boolean runIT = false;
 
     @Override
     protected void init()  {

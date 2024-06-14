@@ -11,9 +11,12 @@ Execute: `jeka intellij: iml` to sync the project with Intellij.
 
 If the project seems not being reflected in IntelliJ, go to the Intellij project root dir, then execute `jeka intellij: initProject`.
 
-## Configure project with text
+!!! tip
+    A README.md file is generated at the root of the project, mentioning the usual commands to run.
 
-We can configure basic aspects of a project using text configuration only.
+## Configure project with properties
+
+We can configure basic aspects of a project using properties configuration only.
 
 ### Add dependencies
 

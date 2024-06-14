@@ -244,7 +244,7 @@ public final class JkProjectScaffold extends JkScaffold {
 
     private void generateReadme() {
         String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
-        JkPathFile.of(project.getBaseDir().resolve("README.MD")).createIfNotExist().write(content);
+        JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist().write(content);
     }
 
 

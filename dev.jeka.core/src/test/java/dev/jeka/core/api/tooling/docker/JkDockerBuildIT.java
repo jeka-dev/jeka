@@ -23,7 +23,7 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class JkDockerBuildTest {
+public class JkDockerBuildIT {
 
     @Test
     public void simple_root() throws Exception {
@@ -32,7 +32,7 @@ public class JkDockerBuildTest {
         }
         JkLog.setDecorator(JkLog.Style.INDENT);
         //JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-        final Path extraFile = Paths.get(JkDockerBuildTest.class.getResource("toto.txt").toURI());
+        final Path extraFile = Paths.get(JkDockerBuildIT.class.getResource("toto.txt").toURI());
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         dockerBuild.nonRootSteps.addCopy(extraFile, "/my_toto.txt", false);
         dockerBuild.nonRootSteps.add("ENTRYPOINT [\"echo\"]");

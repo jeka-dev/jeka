@@ -143,7 +143,7 @@ public final class JkBaseScaffold extends JkScaffold {
     private void generateReadme() {
         if (this.baseScaffoldOption.kind != Kind.JEKA_SCRIPT) {
             String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md"));
-            JkPathFile.of(baseDir.resolve("README.MD")).createIfNotExist().write(content);
+            JkPathFile.of(baseDir.resolve("README.md")).createIfNotExist().write(content);
         }
     }
 
