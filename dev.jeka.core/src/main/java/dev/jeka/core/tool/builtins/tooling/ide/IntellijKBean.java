@@ -95,6 +95,8 @@ public final class IntellijKBean extends KBean {
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
         JkLog.info("Iml file generated at " + imlPath);
+
+        /*  why did we need to generate modules.xml ?
         if ("true".equals(getRunbase().getProperties().get(IML_SKIP_MODULE_XML_PROP))) {
             return;
         }
@@ -103,6 +105,7 @@ public final class IntellijKBean extends KBean {
             intelliJProject.generateModulesXml(imlPath);
             JkLog.info("%s generated.", intelliJProject.getModulesXmlPath());
         }
+         */
     }
 
     /**

@@ -211,7 +211,7 @@ public final class JkImlGenerator {
         jekaSrcClasspath.and(jekaSrcImportedProjects).getEntries().stream()
                 .filter(path -> !importedClasspath.getEntries().contains(path))
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
-                .filter(path -> !path.endsWith(JkConstants.JEKA_SRC_CLASSES_DIR))
+                .filter(path -> path.toString().contains("..") || !path.endsWith(JkConstants.JEKA_SRC_CLASSES_DIR))  // does not include the work jeka-src classes of this project
                 .forEach(path -> orderEntries.add(path, JkIml.Scope.TEST));
         return new LinkedList<>(orderEntries.orderEntries);
     }
