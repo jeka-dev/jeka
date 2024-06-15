@@ -51,7 +51,7 @@ download_and_unpack() {
       mkdir -p "$dir"
       gzip -cd "$temp_file" | tar xf - -C "$dir"
   else
-    unzip -q -o -j "$temp_file" -d "$dir" -x '__MACOSX/*'
+    unzip -q -o -j "$temp_file" -d "$dir"
   fi
   rm "$temp_file"
 }
@@ -68,11 +68,11 @@ check_prerequisites() {
 }
 
 compute_LAST_VERSION() {
-  local group_id="dev.jeka"
-  local artifact_id="jeka-core"
   local url
-  url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
-  LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
+  #url="http://search.maven.org/solrsearch/select?q=g:$group_id+AND+a:$artifact_id&rows=1&wt=json"
+  #LAST_VERSION=$(curl -sL "$url" | sed -n 's|.*"latestVersion":"\([^"]*\)".*|\1|p')
+  url="https://repo1.maven.org/maven2/dev/jeka/jeka-core/maven-metadata.xml"
+  LAST_VERSION=$(curl -sL "$url" | awk -F'[<>]' '/<latest>/ {print $3}')
 }
 
 compute_LAST_RELEASE() {
@@ -125,7 +125,7 @@ install() {
     echo "Your system seems to already have JeKa installed at : $current_jeka_path"
     echo "If it is a an old version of jeka (<0.11), you can rename it (i.e. jeka-legacy) and re-run this script."
     echo
-    echo "If it is an recent version, you can update it by executing 'jeka-install' or 'jeka-install <version>'."
+    echo "If it is an recent version, you can update it by executing 'jeka-update' or 'jeka-update <version>'."
     echo "You can see latest versions here : https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions"
     echo ""
     echo "For manual install/fixing, check your $SHELL_CONFIG_FILE file"
@@ -171,7 +171,7 @@ install() {
     echo "Checking install with 'jeka --version'. This requires JDK download."
     jeka --version
     echo "Jeka is properly installed."
-    echo "Later on, you can upgrade to a different JeKa version by running either 'jeka-install' or 'jeka-install <version>'."
+    echo "Later on, you can upgrade to a different JeKa version by running either 'jeka-update' or 'jeka-update <version>'."
   else
     echo "Jeka is installed. You can check by executing 'jeka --version'."
   fi
