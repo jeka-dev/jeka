@@ -25,7 +25,9 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -41,6 +43,8 @@ public final class JkTestSelection implements Serializable {
     public static final String STANDARD_INCLUDE_PATTERN = "^(Test.*|.+[.$]Test.*|.*Tests?)$";
 
     public static final String IT_INCLUDE_PATTERN = ".*IT";
+
+    private transient Supplier<Path> rootResolver = () -> Paths.get("");
 
     private JkPathSequence testClassRoots = JkPathSequence.of();
 
@@ -165,9 +169,17 @@ public final class JkTestSelection implements Serializable {
         return discoveryConfigurer;
     }
 
-    public JkTestSelection customizeTestClassRoots(UnaryOperator<JkPathSequence> pathSequencer) {
-        testClassRoots = pathSequencer.apply(testClassRoots);
+    /**
+     * If some testClassRoots are defined with relative paths, these ones will be resolved
+     * against the path supplied by the specified supplier.
+     */
+    public JkTestSelection setRootResolver(Supplier<Path> rootPathResolver) {
+        this.rootResolver = rootPathResolver;
         return this;
+    }
+
+    public void resolveTestRootClasses() {
+        testClassRoots = testClassRoots.resolvedTo(rootResolver.get());
     }
 
     /**

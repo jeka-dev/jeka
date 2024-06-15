@@ -67,6 +67,51 @@ import java.util.stream.Collectors;
  * The {@link JkProject#pack()} method is supposed to generates the artifacts
  * (or simply perform actions as deploying docker image) locally. By default, it generates
  * a regular binary jar, but it can be customized for your needs.
+ * <p>
+ * The following represents a tree of the JkProject API.
+ * <pre><code>
+ * project
+ * +- baseDir
+ * +- outputDir (generally values to ${baseDir}/jeka-output dir)
+ * +- artifactLocator (define paths of created artifact files -jar files- )
+ * |  +- methods: getArtifactPath(), getMainArtifactPath(), ....
+ * +- duplicateDependencyConflictStrategy
+ * +- jvmTargetVersion
+ * +- sourceEncoding
+ * +- javaCompileToolChain
+ * +- dependencyResolver
+ * +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
+ * |  +- layout (where are located sources, resources and compiled classes)
+ * |  +- source generators (plugin mechanism for generating source files)
+ * |  +- dependencies   (stands for compile dependencies)
+ * |  +- preCompileActions (including resources processing)
+ * |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
+ * |  +- postCompileActions
+ * |  +- methods : resolveDependencies(), run()
+ * +- testing
+ * |  +- testCompilation (same as for 'prod' compilation but configured for tests purpose)
+ * |  +- breakOnFailure (true/false)
+ * |  +- skipped (true/false)
+ * |  +- testProcessor
+ * |  |  +- forkedProcess (configured the forked process who will run tests)
+ * |  |  +- preActions
+ * |  |  +- postActions
+ * |  |  +- engineBehavior
+ * |  |  |  +- testReportDir
+ * |  |  |  +- progressDisplayer
+ * |  |  |  +- launcherConfiguration (based on junit5 platform API)
+ * |  |  +- testSelection
+ * |  |  |  +- includePatterns
+ * |  |  |  +- includeTags
+ * |  +- method : run()
+ * +- packaging (produces javadoc and source jar and bin jars)
+ * |  +- javadocConfiguration
+ * |  +- runtimeDependencies
+ * |  +- manifest
+ * |  +- fatJar (customize produced fat/uber jar if any)
+ * |  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
+ * + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()
+ * </code></pre>
  */
 public final class JkProject implements JkIdeSupportSupplier {
 

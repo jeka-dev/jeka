@@ -3,22 +3,26 @@
 !!! note
     You don't need to install JeKa to build projects hosting *jeka* scripts in their Git repository.
     
-    Nevertheless, this is practical to have it installed for invoking it easily from everywhere.
+    Nevertheless, this is convenient to have it installed for invoking it easily from everywhere.
 
 
 ## MacOS and Linux
 
-For installing and running, JeKa requires *curl* and *unzip* be installed on the system.
-
 Execute :
 ```shell
-curl -s -L https://jeka.dev/install.sh | $(echo $0) -s - install check
+curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
+
+!!! note
+    For installing and running JeKa, *bash*, *curl*, and *unzip* are required. This is generally the case
+    for macOS and most Linux distributions. If any of these tools are missing, you can install them on Ubuntu
+    by executing `apt-get update && apt-get install -y curl unzip`.
+
 This installs JeKa, and launches a sanity checks that triggers a JDK download.
 
 Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
 the application to run.
-However, you'll be able to upgrade your base install by executing `jeka-install` command.
+However, you'll be able to upgrade your base install by executing `jeka-update` command.
 
 ## Windows
 

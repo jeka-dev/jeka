@@ -192,8 +192,8 @@ public class JkProjectTesting {
      */
     public JkTestSelection createDefaultTestSelection() {
         return JkTestSelection.of()
-                .addTestClassRoots(Paths.get(compilation.layout.getClassDir()))
-                .customizeTestClassRoots(paths -> paths.resolvedTo(project.getOutputDir()));
+                .addTestClassRoots(compilation.layout.resolveClassDir())
+                .setRootResolver(project::getBaseDir);
     }
 
     /**
@@ -213,6 +213,7 @@ public class JkProjectTesting {
     }
 
     private void executeWithTestProcessor() {
+        testSelection.resolveTestRootClasses();
         JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
         if (breakOnFailures) {
             result.assertSuccess();

@@ -91,9 +91,9 @@ public class CoreBuild extends KBean {
         load(MavenKBean.class).getMavenPublication()
                 .putArtifact(DISTRIB_FILE_ID)
                 .pomMetadata
-                    .setProjectName("jeka")
+                    .setProjectName("JeKa")
                     .addApache2License()
-                    .setProjectDescription("Automate with plain Java code and nothing else.")
+                    .setProjectDescription("Build and Run Java Code from Everywhere")
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
