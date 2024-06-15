@@ -85,7 +85,6 @@ Its key features include:
 - [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
 
-- [Build a Java Library](samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/demo/JkProjectApiSimple.java)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
 ## Getting Started
