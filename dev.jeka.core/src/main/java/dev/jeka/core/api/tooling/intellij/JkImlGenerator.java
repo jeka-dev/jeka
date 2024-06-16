@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.tooling.intellij;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
@@ -50,6 +51,10 @@ public final class JkImlGenerator {
     private JkPathSequence jekaSrcClasspath = JkPathSequence.of();
 
     private JkPathSequence jekaSrcImportedProjects = JkPathSequence.of();
+
+    // These are the dependencies for the runbase.
+    // This is used only to download sources, as for bin jar, we relieve on runbase classpath.
+    private JkDependencySet runbaseDependencies = JkDependencySet.of();
 
     /* When true, path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of explicit absolute path. */
     private boolean useVarPath = true;
@@ -104,6 +109,14 @@ public final class JkImlGenerator {
 
     public JkImlGenerator setJekaSrcClasspath(JkPathSequence jekaSrcClasspath) {
         this.jekaSrcClasspath = jekaSrcClasspath;
+        return this;
+    }
+
+    /**
+     * Only needed to download sources declared od jeka-src dependencies
+     */
+    public JkImlGenerator setRunbaseDependencies(JkDependencySet runbaseDependencies) {
+        this.runbaseDependencies = runbaseDependencies;
         return this;
     }
 
@@ -209,15 +222,30 @@ public final class JkImlGenerator {
         return iml;
     }
 
-    private static void downloadSources(JkDependencyResolver depResolver, JkResolveResult resolveResult) {
+    private void downloadSources(JkDependencyResolver depResolver, JkResolveResult resolveResult) {
         JkLog.info("Download sources");
+
+        JkResolutionParameters resolutionParameters = depResolver.getDefaultParams().copy()
+                .setFailOnDependencyResolutionError(false);
+
+        // resolve runbase dependencies
+        JkDependencySet runbaseCSourceDeps = JkDependencySet.of();
+        if (this.runbaseDependencies.hasModules()) {
+            JkResolveResult runbaseResolve = depResolver.resolve(runbaseDependencies, resolutionParameters);
+            runbaseCSourceDeps = collectSourceDeps(runbaseResolve);
+        }
+
+        JkDependencySet regularSourceDeps = collectSourceDeps(resolveResult);
+
+        depResolver.resolve(runbaseCSourceDeps.and(regularSourceDeps), resolutionParameters);
+    }
+
+    private static JkDependencySet collectSourceDeps(JkResolveResult resolveResult) {
         List<JkCoordinateDependency> deps = resolveResult.getDependencyTree().getDescendantModuleCoordinates().stream()
                 .map(jkCoordinate -> jkCoordinate.withClassifiers("sources"))
                 .map(JkCoordinateDependency::of)
                 .collect(Collectors.toList());
-        JkResolutionParameters resolutionParameters = depResolver.getDefaultParams().copy()
-                .setFailOnDependencyResolutionError(false);
-        depResolver.resolve(JkDependencySet.of(deps), resolutionParameters);
+        return JkDependencySet.of(deps);
     }
 
     private Path baseDir() {

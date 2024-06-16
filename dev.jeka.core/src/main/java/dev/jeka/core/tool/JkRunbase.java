@@ -75,6 +75,8 @@ public final class JkRunbase {
 
     private JkDependencySet exportedDependencies;
 
+    private JkDependencySet fullDependencies;
+
     private final JkPathSequence importedBaseDirs = JkPathSequence.of();
 
     // Note: An empty container has to be present at instantiation time for sub-runBases, as
@@ -135,6 +137,13 @@ public final class JkRunbase {
      */
     public JkDependencySet getExportedDependencies() {
         return this.exportedDependencies;
+    }
+
+    /**
+     * Returns the complete dependencies of the JkRunbase instance. This values to exported + private dependencies.
+     */
+    public JkDependencySet getFullDependencies() {
+        return this.fullDependencies;
     }
 
     /**
@@ -211,6 +220,10 @@ public final class JkRunbase {
 
     void setExportedDependencies(JkDependencySet exportedDependencies) {
         this.exportedDependencies = exportedDependencies;
+    }
+
+    void setFullDependencies(JkDependencySet fullDependencies) {
+        this.fullDependencies = fullDependencies;
     }
 
     KBeanAction.Container getEffectiveActions() {

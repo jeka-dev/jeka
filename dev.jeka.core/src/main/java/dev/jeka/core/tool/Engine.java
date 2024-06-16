@@ -218,7 +218,7 @@ class Engine {
 
         if (skipJekaSrc) {
             JkLog.debugEndTask();
-            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs, kbeanClasspath);
+            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs, kbeanClasspath, dependencies);
             return this.classpathSetupResult;
         }
 
@@ -250,7 +250,7 @@ class Engine {
 
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
-                runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs);
+                runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs, dependencies);
         JkLog.debugEndTask();
         return classpathSetupResult;
     }
@@ -294,6 +294,7 @@ class Engine {
         runbase.setClasspath(classpathSetupResult.runClasspath);
         runbase.setExportedClassPath(classpathSetupResult.exportedClasspath);
         runbase.setExportedDependencies(classpathSetupResult.exportedDependencies);
+        runbase.setFullDependencies(classpathSetupResult.fullDependencies);
         runbase.assertValid(); // fail-fast. bugfix purpose
 
         // initialise runbase with resolved commands
@@ -504,19 +505,23 @@ class Engine {
         final List<Engine> subBaseDirs;
         final JkDependencySet exportedDependencies;
         final boolean compileResult;
+        final JkDependencySet fullDependencies;
 
         ClasspathSetupResult(boolean compileResult,
                              JkPathSequence runClasspath,  // The full classpath to run Jeka upon
                              JkPathSequence kbeanClasspath, // The classpath to find in KBeans
                              JkPathSequence exportedClasspath,
                              JkDependencySet exportedDependencies,
-                             List<Engine> subBaseDirs) {
+                             List<Engine> subBaseDirs,
+                             JkDependencySet fullDependencies) {
             this.compileResult = compileResult;
             this.runClasspath = runClasspath;
             this.kbeanClasspath = kbeanClasspath;  // does not contain jeka-src-classes
             this.exportedClasspath = exportedClasspath;
             this.exportedDependencies = exportedDependencies;
             this.subBaseDirs = subBaseDirs;
+            this.fullDependencies = fullDependencies;
+
         }
 
     }
@@ -587,7 +592,8 @@ class Engine {
     private ClasspathSetupResult compileLessClasspathResult(
             ParsedSourceInfo parsedSourceInfo,
             List<Engine> subBaseDirs,
-            JkPathSequence classpath) {
+            JkPathSequence classpath,
+            JkDependencySet fullDependencies) {
 
         return new ClasspathSetupResult(
                 true,
@@ -597,7 +603,8 @@ class Engine {
                         dependencyResolver.resolveFiles(parsedSourceInfo.getExportedDependencies())),
                 parsedSourceInfo.getExportedDependencies()
                         .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER),
-                subBaseDirs);
+                subBaseDirs,
+                fullDependencies);
     }
 
 }

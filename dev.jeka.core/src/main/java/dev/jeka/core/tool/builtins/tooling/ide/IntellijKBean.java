@@ -77,6 +77,7 @@ public final class IntellijKBean extends KBean {
                 .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
                 .setDownloadSources(this.downloadSources)
+                .setRunbaseDependencies(this.getRunbase().getFullDependencies())
                 .setUseVarPath(useVarPath);
         if (!JkUtilsString.isBlank(jdkName)) {
             imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
