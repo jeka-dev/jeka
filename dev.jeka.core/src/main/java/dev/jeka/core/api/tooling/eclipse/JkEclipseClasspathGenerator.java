@@ -409,7 +409,7 @@ public final class JkEclipseClasspathGenerator {
                 Properties attributeProps = copyOfPropsOf(dependency, this.attributes);
                 Properties accessruleProps = copyOfPropsOf(dependency, this.accessRules);
                 writeModuleEntry(writer,
-                        moduleNodeInfo.getResolvedVersionedModule(),
+                        moduleNodeInfo.getResolvedCoordinate(),
                         moduleNodeInfo.getFiles(), repos, allPaths, attributeProps, accessruleProps);
 
                 // File dependencies (file system + computed)

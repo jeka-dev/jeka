@@ -152,9 +152,9 @@ public class JkResolvedDependencyNode {
     }
 
     /**
-     * Returns the versioned modules which with this result has been created.
+     * Returns a set of module coordinates for all descendant modules of this dependency node.
      */
-    public Set<JkCoordinate> getChildModules() {
+    public Set<JkCoordinate> getDescendantModuleCoordinates() {
         return resolvedModules(true);
     }
 
@@ -391,7 +391,7 @@ public class JkResolvedDependencyNode {
         /**
          * Shorthand for {@link #jkModuleId} + {@link #getResolvedVersion()}
          */
-        public JkCoordinate getResolvedVersionedModule() {
+        public JkCoordinate getResolvedCoordinate() {
             return jkModuleId.toCoordinate(resolvedVersion.getValue());
         }
 

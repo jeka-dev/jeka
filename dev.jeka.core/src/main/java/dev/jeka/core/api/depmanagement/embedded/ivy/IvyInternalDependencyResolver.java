@@ -55,12 +55,6 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
     private static final Random RANDOM = new Random();
 
-    private static final String[] IVY_24_ALL_CONF = new String[] { "*(public)" };
-
-    private static final String COMPILE = "compile";
-
-    private static final String RUNTIME ="runtime";
-
     private final JkRepoSet repoSet;
 
     private IvyInternalDependencyResolver(JkRepoSet repoSet) {

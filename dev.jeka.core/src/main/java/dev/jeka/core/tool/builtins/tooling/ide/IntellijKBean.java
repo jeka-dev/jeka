@@ -41,11 +41,11 @@ public final class IntellijKBean extends KBean {
     public static final String IML_SKIP_MODULE_XML_PROP = "jeka.intellij.iml.skip.moduleXml";
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JEKA_REPO$ and $JEKA_HOME$ path variable instead of absolute paths.")
-    private final boolean useVarPath = true;
+    private boolean useVarPath = true;
 
     @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
             "(only a warning will be notified).")
-    private final boolean failOnDepsResolutionError = true;
+    private boolean failOnDepsResolutionError = true;
 
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
@@ -55,6 +55,9 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("If mentioned, the generated iml will specify this jdkName")
     private String jdkName;
+
+    @JkDoc("If true, sources will be downloaded will resolving dependencies")
+    private boolean downloadSources = false;
 
     /**
      * Underlying imlGenerator used to generate Iml. <p>
@@ -73,6 +76,7 @@ public final class IntellijKBean extends KBean {
                 .setJekaSrcImportedProjects(this.getRunbase().getImportBaseDirs())
                 .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
+                .setDownloadSources(this.downloadSources)
                 .setUseVarPath(useVarPath);
         if (!JkUtilsString.isBlank(jdkName)) {
             imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));

@@ -97,7 +97,7 @@ public final class JkResolveResult {
      * Shorthand for <code>dependencyTree.childModules(JkModuleId)</code>
      */
     public Set<JkCoordinate> getInvolvedCoordinates() {
-        return this.depTree.getChildModules();
+        return this.depTree.getDescendantModuleCoordinates();
     }
 
     /**

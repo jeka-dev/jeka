@@ -16,8 +16,12 @@
 
 package dev.jeka.core.api.tooling.intellij;
 
+import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
@@ -36,6 +40,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Provides method to generate and read Eclipse metadata files.
@@ -62,7 +67,7 @@ public final class JkImlGenerator {
 
     private boolean failOnDepsResolutionError = true;
 
-    private boolean isForJekaSrc;
+    private boolean downloadSources = true;
 
     private JkImlGenerator() {
     }
@@ -89,6 +94,11 @@ public final class JkImlGenerator {
 
     public JkImlGenerator setUseVarPath(boolean useVarPath) {
         this.useVarPath = useVarPath;
+        return this;
+    }
+
+    public JkImlGenerator setDownloadSources(boolean downloadSources) {
+        this.downloadSources = downloadSources;
         return this;
     }
 
@@ -178,10 +188,15 @@ public final class JkImlGenerator {
                     .filter(path -> !testSourcePaths.contains(path))
                     .forEach(path -> iml.component.getContent().addSourceFolder(path, false, "java-test-resource"));
             JkDependencyResolver depResolver = ideSupport.getDependencyResolver();
-            JkResolvedDependencyNode tree = depResolver.resolve(
-                    ideSupport.getDependencies(),
-                    depResolver.getDefaultParams().copy().setFailOnDependencyResolutionError(failOnDepsResolutionError))
-                    .getDependencyTree();
+            JkResolutionParameters resolutionParameters = depResolver.getDefaultParams().copy()
+                    .setFailOnDependencyResolutionError(failOnDepsResolutionError);
+            JkResolveResult resolveResult = depResolver.resolve(ideSupport.getDependencies(), resolutionParameters);
+            JkResolvedDependencyNode tree =resolveResult.getDependencyTree();
+
+            if (downloadSources) {
+                downloadSources(depResolver, resolveResult);
+            }
+
             JkLog.verbose("Dependencies resolved");
             iml.component.getOrderEntries().addAll(projectOrderEntries(tree));  // too slow
             for (Path path : ideSupport.getGeneratedSourceDirs()) {
@@ -192,6 +207,17 @@ public final class JkImlGenerator {
         imlConfigurer.accept(iml);
         JkLog.verbose("Iml object generated");
         return iml;
+    }
+
+    private static void downloadSources(JkDependencyResolver depResolver, JkResolveResult resolveResult) {
+        JkLog.info("Download sources");
+        List<JkCoordinateDependency> deps = resolveResult.getDependencyTree().getDescendantModuleCoordinates().stream()
+                .map(jkCoordinate -> jkCoordinate.withClassifiers("sources"))
+                .map(JkCoordinateDependency::of)
+                .collect(Collectors.toList());
+        JkResolutionParameters resolutionParameters = depResolver.getDefaultParams().copy()
+                .setFailOnDependencyResolutionError(false);
+        depResolver.resolve(JkDependencySet.of(deps), resolutionParameters);
     }
 
     private Path baseDir() {

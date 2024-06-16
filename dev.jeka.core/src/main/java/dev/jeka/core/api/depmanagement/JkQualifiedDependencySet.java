@@ -51,7 +51,6 @@ public class JkQualifiedDependencySet {
         TRANSITIVITY_TARGET_CONF_MAP.put(JkTransitivity.COMPILE, MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF);
         TRANSITIVITY_TARGET_CONF_MAP.put(JkTransitivity.RUNTIME, MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF
                 + ", " + RUNTIME_TARGET_CONF);
-
     }
 
     private final List<JkQualifiedDependency> entries;
