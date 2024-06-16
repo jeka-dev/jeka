@@ -294,7 +294,7 @@ public class JkNexusRepos {
 
     private void doWaitForClosing(String repositoryId) throws IOException {
         long startMillis = System.currentTimeMillis();
-        JkLog.startTask("Waiting for repository " + repositoryId + " to be closed. It make take a while ...");
+        JkLog.startTask("Waiting for repository " + repositoryId + " to be closed. It may take a while ...");
         while (true) {
             if (System.currentTimeMillis() - startMillis > CLOSE_TIMEOUT_MILLIS) {
                 throw new IllegalStateException("Timeout waiting for repository close.");
