@@ -341,7 +341,7 @@ public class Main {
             }
             if (kbeanClassName == null) {
                 throw new IllegalStateException("Property '@" + propName + "' does not match to any KBean. " +
-                        "Execute `jeka : --help' to see available KBeans.");
+                        "Execute `jeka --doc' to see available KBeans.");
             }
             if (propName.contains(".")) {
                 String fieldName = JkUtilsString.substringAfterFirst(propName, ".");
