@@ -19,7 +19,7 @@
 
 ##  What is JeKa ?
 
-**JeKa** is a Java build tool for building or executing Java applications and scripts 
+**JeKa** is a Java build tool for building or executing Java applications and scripts, 
 directly from source code.
 
 Its key features include:
