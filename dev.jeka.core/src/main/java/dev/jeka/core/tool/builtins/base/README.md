@@ -16,12 +16,19 @@ Run jar
 ```shell
 jeka base: runJar programArgs="" jvmOptions=""
 ```
+
+Run jar 
+This will directly run the built application, without checking if sources have changed since last run
+```
+jeka -p
+```
+
+### Docker
+
 Show info about docker image
 ```shell
 jeka docker: info
 ```
-
-### Docker
 
 Create image
 ```shell
