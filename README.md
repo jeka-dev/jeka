@@ -85,6 +85,7 @@ Its key features include:
 - [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
 
+- [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
 - [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
 ## Getting Started

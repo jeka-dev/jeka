@@ -67,6 +67,9 @@ public final class BaseKBean extends KBean {
     @JkDoc("Space separated list of program arguments to pass to the command line running the program.")
     public String programArgs = "";
 
+    @JkDoc("module group and name used for publication. Formatted as 'groupId:nameId'")
+    public String moduleId;
+
     @JkDoc
     final BaseScaffoldOptions scaffold = new BaseScaffoldOptions();
 
@@ -84,7 +87,7 @@ public final class BaseKBean extends KBean {
 
     private Supplier<String> mainClassFinder = this::findMainClass;
 
-    private JkModuleId moduleId;
+    private JkModuleId module;
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
@@ -96,6 +99,9 @@ public final class BaseKBean extends KBean {
     protected void init() {
         baseScaffold = JkBaseScaffold.of(this);
         packActions.append(CREATE_JAR_ACTION, this::buildJar);
+        if (!JkUtilsString.isBlank(moduleId)) {
+            setModuleId(this.moduleId);
+        }
     }
 
     // We can not just run Application#main cause Spring-Boot seems
@@ -141,7 +147,7 @@ public final class BaseKBean extends KBean {
     @JkDoc("Displays info about this SelfApp")
     public void info() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Module Id    : " + this.moduleId).append("\n");
+        sb.append("Module Id    : " + this.module).append("\n");
         sb.append("Version      : " + this.getVersion()).append("\n");
         sb.append("Main Class   : " + this.getMainClass()).append("\n");
         sb.append("JVM Options  : " + jvmOptions).append("\n");
@@ -230,7 +236,7 @@ public final class BaseKBean extends KBean {
      * The module ID is used for naming Docker image and in Maven publication.
      */
     public JkModuleId getModuleId() {
-        return moduleId;
+        return module;
     }
 
     /**
@@ -240,7 +246,7 @@ public final class BaseKBean extends KBean {
      * @param moduleId The module ID formatted as <i>group:name</i>.
      */
     public BaseKBean setModuleId(String moduleId) {
-        this.moduleId = JkModuleId.of(moduleId);
+        this.module = JkModuleId.of(moduleId);
         return this;
     }
 
@@ -324,6 +330,13 @@ public final class BaseKBean extends KBean {
                 .addBuildInfo();
         manifestCustomizers.accept(manifest);
         return manifest;
+    }
+
+    /**
+     * Creates a main JAR file at the specified target path.
+     */
+    public void createMainJar(Path target) {
+        jarMaker.accept(target);
     }
 
     /**

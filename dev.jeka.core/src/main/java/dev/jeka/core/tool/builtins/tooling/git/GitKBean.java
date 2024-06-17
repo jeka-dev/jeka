@@ -34,11 +34,8 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 )
 public final class GitKBean extends KBean {
 
-    @JkDoc("Some prefer to prefix version tags like 'v1.3.1' for version '1.3.1'. In such cases, this value can be set to 'v' or any chosen prefix")
-    public String versionTagPrefix = "";
 
-    @JkDoc("If true, this Kbean will handle versioning of ProjectKBean or BaseKBean found in the runbase.")
-    public boolean handleVersioning;
+    public final Versioning versioning = new Versioning();
 
     public final JkGit git = JkGit.of(getBaseDir());
 
@@ -46,8 +43,8 @@ public final class GitKBean extends KBean {
 
     @Override
     protected void init() {
-        versionFromGit = JkVersionFromGit.of(getBaseDir(), versionTagPrefix);
-        if (handleVersioning) {
+        versionFromGit = JkVersionFromGit.of(getBaseDir(), versioning.tagPrefix);
+        if (versioning.on) {
             getRunbase().find(BaseKBean.class).ifPresent(selfKBean ->
                     versionFromGit.handleVersioning(selfKBean));
             getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
@@ -89,6 +86,19 @@ public final class GitKBean extends KBean {
      */
     public JkVersionFromGit gerVersionFromGit() {
         return versionFromGit;
+    }
+
+    public static class Versioning {
+
+        @JkDoc("If true, a version computed from the current Git branch/tag will be injected into the Maven KBean to " +
+                "determine the published version.")
+        public boolean on =false;
+
+        @JkDoc("Some prefer to prefix version tags like 'v1.3.1' instead of simply using '1.3.1'. " +
+                "In such cases, this value can be set to 'v' or any other chosen prefix.")
+        public String tagPrefix = "";
+
+
     }
 
 }

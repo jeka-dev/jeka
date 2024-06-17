@@ -117,7 +117,7 @@ public final class MavenKBean extends KBean {
                         baseKBean.getRunbase().getExportedDependencies(),
                         JkCoordinate.ConflictStrategy.TAKE_FIRST))
                 .setBomResolutionRepos(baseKBean.getRunbase().getDependencyResolver()::getRepos)
-                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
+                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID, baseKBean::createMainJar)
                 .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, baseKBean::createSourceJar)
                 .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, baseKBean::createJavadocJar);
     }
