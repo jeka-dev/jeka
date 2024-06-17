@@ -25,11 +25,6 @@ jeka -p
 
 ### Docker
 
-Show info about docker image
-```shell
-jeka docker: info
-```
-
 Create image
 ```shell
 jeka docker: build
