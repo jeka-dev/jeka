@@ -159,7 +159,7 @@ public class JkNodeJs {
      *
      * @param project The project to configure
      * @param jsAppBaseDir The path of the Node.js subproject (relative to the base dir).
-     * @param distDir The path, relative to @clientBaseDir of the directory containing the build result.
+     * @param distDir The path, relative to <code>jsAppBaseDir</code> of the directory containing the build result.
      * @param copyToDir If not empty, the result of the client  build will be copied to this directory in class dir (e.g. 'static').
      * @param buildCommands The commands (npm o npx) to execute to build the Node.js project.
      */
