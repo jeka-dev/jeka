@@ -12,22 +12,21 @@ Execute :
 ```shell
 curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
-
-!!! note
-    For installing and running JeKa, *bash*, *curl*, and *unzip* are required. This is generally the case
-    for macOS and most Linux distributions. If any of these tools are missing, you can install them on Ubuntu
-    by executing `apt-get update && apt-get install -y curl unzip`.
-
 This installs JeKa, and launches a sanity checks that triggers a JDK download.
 
 Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
 the application to run.
 However, you'll be able to upgrade your base install by executing `jeka-update` command.
 
+!!! note
+For installing and running JeKa, *bash*, *curl*, and *unzip* are required. This is generally the case
+for macOS and most Linux distributions. If any of these tools are missing, you can install them on Ubuntu
+by executing `apt-get update && apt-get install -y curl unzip`.
+
 ## Windows
 
 For installing and running JeKa on Windows, you don't need to install 3rd party software.
-Currently there's no install script available, you need to install it manually.
+As there's currently no install script available, you need to install it manually.
 
 ## Manual installation
 
