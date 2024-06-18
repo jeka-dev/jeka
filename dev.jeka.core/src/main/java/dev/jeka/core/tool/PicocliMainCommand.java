@@ -162,6 +162,10 @@ public class PicocliMainCommand {
             description = "Log on stderr instead of stdout.")
     private boolean logOnStderr;
 
+    @Option(names = {"--ivy-verbose"},
+            description = "Log verbose Ivy messages")
+    private boolean logIvyVerbose;
+
     @Option(names = {"--doc"},
             description = "Display documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc'.")
     private boolean fakeDoc;  // Handled at upper level
@@ -182,7 +186,8 @@ public class PicocliMainCommand {
                 logDuration,
                 logStyle,
                 logAnimations,
-                logOnStderr);
+                logOnStderr,
+                logIvyVerbose);
     }
 
     BehaviorSettings behaviorSettings() {

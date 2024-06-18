@@ -284,6 +284,13 @@ public final class JkProperties {
             String source = getSourceDefining(key).source;
             if (source.endsWith("global.properties")) {
                 source = "global.properties";
+            } else {
+                Path sourcePath = Paths.get(source);
+                if (sourcePath.isAbsolute()) {
+                    Path relPath = Paths.get(".").toAbsolutePath().relativize(sourcePath);
+                    source = relPath.toString();
+                }
+
             }
             if (canTruncate && value != null && value.length() > valueMaxLength) {
                 value = JkUtilsString.ellipse(value, valueMaxLength-3);

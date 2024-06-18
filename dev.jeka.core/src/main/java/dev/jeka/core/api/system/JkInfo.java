@@ -30,6 +30,8 @@ public final class JkInfo {
 
     private static String version;
 
+    private static boolean logIvyVerboseMessages;
+
     public static final String JEKA_MODULE_ID = "dev.jeka:jeka-core";
 
     public JkInfo() {
@@ -58,6 +60,22 @@ public final class JkInfo {
             }
         }
         return version;
+    }
+
+    public static String getVersion() {
+        return version;
+    }
+
+    public static void setVersion(String version) {
+        JkInfo.version = version;
+    }
+
+    public static boolean isLogIvyVerboseMessages() {
+        return logIvyVerboseMessages;
+    }
+
+    public static void setLogIvyVerboseMessages(boolean logIvyVerboseMessages) {
+        JkInfo.logIvyVerboseMessages = logIvyVerboseMessages;
     }
 
     private static String readVersionFrom(String manifestPath) {

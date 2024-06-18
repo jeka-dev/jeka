@@ -102,7 +102,7 @@ public class Main {
             engine = Engine.of(baseDir, behavior.skipCompile,
                     downloadRepos, dependencies, logs, behavior);
 
-            // Compile jeka-src and resolve its dependencies
+            // Compile jeka-src and resolve the dependencies and kbeans
             JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
             if (logs.runtimeInformation) {
                 logRuntimeInfoBase(engine, props);
@@ -118,10 +118,10 @@ public class Main {
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
             // Handle doc ([kbean]: --doc)
-            String kbeanHelp = cmdArgs.kbeanDoc();
-            if (kbeanHelp != null) {
+            String kbeanDoc = cmdArgs.kbeanDoc();
+            if (kbeanDoc != null) {
                 JkRunbase.setKBeanResolution(kBeanResolution);
-                if (JkUtilsString.isBlank(kbeanHelp)) {
+                if (JkUtilsString.isBlank(kbeanDoc)) {
                     PicocliHelp.printCmdHelp(
                                     engine.resolveClassPaths().runClasspath,
                                     kBeanResolution,
@@ -132,7 +132,7 @@ public class Main {
                 boolean found = PicocliHelp.printKBeanHelp(
                         engine.resolveClassPaths().runClasspath,
                         kBeanResolution.allKbeans,
-                        kbeanHelp,
+                        kbeanDoc,
                         System.out);
                 System.exit(found ? 0 : 1);
             }

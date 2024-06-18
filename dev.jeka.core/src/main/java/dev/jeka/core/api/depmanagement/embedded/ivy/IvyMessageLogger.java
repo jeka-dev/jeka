@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.depmanagement.embedded.ivy;
 
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
@@ -38,12 +39,12 @@ final class IvyMessageLogger extends AbstractMessageLogger {
             JkLog.verbose(message);  // This should not appear at jeka info level
             break;
         case Message.MSG_VERBOSE:
-            if (JkLog.Verbosity.DEBUG.equals(JkLog.verbosity())) {
+            if (JkInfo.isLogIvyVerboseMessages()) {
                 JkLog.verbose(message);
             }
             break;
         case Message.MSG_DEBUG:
-            if (JkLog.Verbosity.DEBUG.equals(JkLog.verbosity())) {
+            if (JkInfo.isLogIvyVerboseMessages()) {
                 JkLog.verbose(message);
             }
             break;
