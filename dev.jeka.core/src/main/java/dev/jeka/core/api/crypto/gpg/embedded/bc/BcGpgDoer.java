@@ -104,16 +104,27 @@ final class BcGpgDoer implements JkInternalGpgDoer {
         }
     }
 
+    @Override
+    public void sign(InputStream streamToSign, OutputStream signatureStream,
+                     String asciiKey, String keyPassphrase, boolean armorSignature) {
+
+    }
+
     static void sign(InputStream toSign, InputStream keyRing, String keyName, OutputStream out, char[] pass,
-            boolean armor) {
-        if (armor) {
+            boolean armorSignature) {
+        if (armorSignature) {
             out = new ArmoredOutputStream(out);
         }
         final PGPSecretKey pgpSecretKey = readSecretKey(keyRing, keyName);
+
+        doSign(toSign, out, pass, pgpSecretKey);
+    }
+
+    private static void doSign(InputStream toSign, OutputStream out, char[] pass, PGPSecretKey pgpSecretKey) {
+        final PGPDigestCalculatorProvider pgpDigestCalculatorProvider = new BcPGPDigestCalculatorProvider();
+        final PBESecretKeyDecryptor secretKeyDecryptor = new BcPBESecretKeyDecryptorBuilder(
+                pgpDigestCalculatorProvider).build(pass);
         try {
-            final PGPDigestCalculatorProvider pgpDigestCalculatorProvider = new BcPGPDigestCalculatorProvider();
-            final PBESecretKeyDecryptor secretKeyDecryptor = new BcPBESecretKeyDecryptorBuilder(
-                    pgpDigestCalculatorProvider).build(pass);
             final PGPPrivateKey pgpPrivKey = pgpSecretKey.extractPrivateKey(secretKeyDecryptor);
             final int secretKeyAlgo = pgpSecretKey.getPublicKey().getAlgorithm();
             final PGPContentSignerBuilder signerBuilder = new BcPGPContentSignerBuilder(secretKeyAlgo, HASH_ALGO);
@@ -210,6 +221,10 @@ final class BcGpgDoer implements JkInternalGpgDoer {
 
     private BcGpgDoer() {
         // Do nothing
+    }
+
+    private static void signAscKey(InputStream toSign, OutputStream out, String ascKey, String keyPassphrase) {
+        throw new IllegalStateException("not implemented");
     }
 
 }
