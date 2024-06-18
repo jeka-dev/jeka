@@ -81,8 +81,14 @@ Its key features include:
 - [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
 
 
+
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 - [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+
+
+
+- [Build a web application with just 3 lines of configuration, using a specific template](https://github.com/jeka-dev/working-examples/tree/master/springboot-reactjs-using-template)
+
 
 
 - [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
