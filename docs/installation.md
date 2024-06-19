@@ -1,7 +1,7 @@
 # Installation
 
 !!! note
-    You don't need to install JeKa to build projects hosting *jeka* scripts in their Git repository.
+    You don't need to install JeKa to build projects hosting *jeka* shell scripts in their Git repository.
     
     Nevertheless, this is convenient to have it installed for invoking it easily from everywhere.
 
@@ -12,11 +12,6 @@ Execute :
 ```shell
 curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
-This installs JeKa, and launches a sanity checks that triggers a JDK download.
-
-Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
-the application to run.
-However, you'll be able to upgrade your base install by executing `jeka-update` command.
 
 !!! note
     For installing and running JeKa, *bash*, *curl*, and *unzip* are required. This is generally the case
@@ -26,7 +21,7 @@ However, you'll be able to upgrade your base install by executing `jeka-update` 
 ## Windows
 
 For installing and running JeKa on Windows, you don't need to install 3rd party software.
-As there's currently no install script available, you need to install it manually.
+As there's currently no install script available for now *(work in progress)*, you need to install it manually.
 
 ## Manual installation
 
@@ -37,9 +32,15 @@ The manual installation is straightforward and may help when script installation
 - Unzip the content of the zip file and copy the content of 'bin' directory to an arbitrary directory ([USER HOME]/.jeka/bin for instance)
 - Add this directory to your PATH environment variable.
 
-## Sanity check
+## Post Install
 
-Once installed, you can open a new terminal session and execute `jeka --help` to see runtime details.
+Installation via script may include a sanity check that triggers a JDK download (cause of the 'check' argument passed to the install script)
+
+Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
+the application to run.
+However, you'll be able to upgrade your base install by executing `jeka-update` command.
+
+Open a new terminal session and execute `jeka --help` to access JeKa help.
 
 
 
