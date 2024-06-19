@@ -77,18 +77,18 @@ Its key features include:
 
 ## Examples`
 
-### Run Java applications directly from their source repo
+### Run Java Applications directly from their Source Repository
 
 - [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
 - [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
 
-### Build and test E2E
+### Build and Test E2E
 
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 - [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
 
 
-### Reuse Build logic
+### Reuse Build Logic
 - [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/working-examples/tree/master/springboot-reactjs-using-template)
 
 
