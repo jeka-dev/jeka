@@ -108,7 +108,7 @@ Visit following pages according your expectation :
 
 ## KBeans
 
-KBeans are JeKa components that expose functionnalities to command line. They can also be conveniently 
+KBeans are JeKa components that expose functionnalities to the command line. They can also be conveniently 
 activated and configured via properties, or via other KBeans.
 
 Plugins generally contain one KBean, but they can contain zero or many.
