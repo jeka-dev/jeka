@@ -75,24 +75,29 @@ Its key features include:
   Centralize build and CI/CD logic for shared use and extension across projects within the organization.
   
 
-## Examples
+## Examples`
+
+### Run Java applications directly from their source repo
 
 - [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
 - [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
 
-
+### Build 
 
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
+- [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
+
+
+### Reuse Build logic
+- [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/working-examples/tree/master/springboot-reactjs-using-template)
+
+
+### Complete existing Build Tool
 - [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
+<br/>
 
-
-- [Build a web application with just 3 lines of configuration, using a specific template](https://github.com/jeka-dev/working-examples/tree/master/springboot-reactjs-using-template)
-
-
-
-- [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
-- [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
+[Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
 
 ## Getting Started
 
