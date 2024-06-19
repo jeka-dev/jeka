@@ -60,19 +60,19 @@ Its key features include:
 
   JeKa can execute entire Java applications of any kind and size directly from their Git repository. 
   
-  Simply commit or tag your repository to release your application.
+  Simply commit or tag repository to publish application.
 
 
 - **Make Java fun for newcomers**
 
   Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
 
-  Write directly Java code that can be build and executed from anywhere with minimal or zero setup.
+  Write directly Java code that can be built and executed from anywhere with minimal or zero setup.
 
 
 - **Centralize build logic**
 
-  Centralize build and CI/CD logic for shared use and extension across projects within the organization.
+  Define project build and CI/CD logic in one place, and reuse accross all your organization.
   
 
 ## Examples`
@@ -82,7 +82,7 @@ Its key features include:
 - [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
 - [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
 
-### Build 
+### Build and test E2E
 
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 - [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
@@ -92,7 +92,7 @@ Its key features include:
 - [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/working-examples/tree/master/springboot-reactjs-using-template)
 
 
-### Complete existing Build Tool
+### Complete existing Build Tools
 - [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
 <br/>
@@ -106,20 +106,26 @@ Visit following pages according your expectation :
 * [Reference Guide](https://jeka-dev.github.io/jeka/)
 * [Working examples](https://github.com/jeka-dev/working-examples)
 
-## Plugins
+## KBeans
 
-### Bundled Plugins
+KBeans are JeKa components that expose functionnalities to command line. They can also be conveniently 
+activated and configured via properties, or via other KBeans.
 
-JeKa comes with plugins out-of-the-box. These plugins cover most of the common needs for building a project. 
-This includes IDE integration (IntelliJ Eclipse), 
+Plugins generally contain one KBean, but they can contain zero or many.
+
+### Bundled KBeans
+
+JeKa is bundled with KBeans covering : IDE integration (IntelliJ Eclipse), Java/Kotlin Project building, Maven publication, Git integration, Docker and more. 
+
+You can get a description of the functionalities provided by the KBeans by executing `jeka --doc` 
+
+Additionnaly JeKa offers high and low level api for dealing with 
 dependency management, compilation, testing, Git, GPG signing, Scaffolding, Maven publication, Docker image maker, ...
-
-You can have a description of these plugins by executing command `jeka --help`.
 
 
 ### External Plugins
 
-External plugins require to be explicitly imported.
+External plugins require to be explicitly imported. They are hosted as jar file in Maven Central.
 
 The following plugins are hosted in same monorepo then JeKa, and so are released in conjunction 
 which means that we don't need to specify their version when importing.
