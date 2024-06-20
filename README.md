@@ -89,7 +89,7 @@ Its key features include:
 
 
 ### Reuse Build Logic
-- [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/working-examples/tree/master/springboot-reactjs-using-template)
+- [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/demo-build-templates-consumer)
 
 
 ### Complete existing Build Tools
