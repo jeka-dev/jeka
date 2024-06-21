@@ -75,7 +75,7 @@ Its key features include:
   Define project build and CI/CD logic in one place, and reuse accross all your organization.
   
 
-## Examples`
+## Examples
 
 ### Run Java Applications directly from their Source Repository
 
