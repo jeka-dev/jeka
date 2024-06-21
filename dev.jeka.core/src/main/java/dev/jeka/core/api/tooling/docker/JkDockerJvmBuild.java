@@ -79,9 +79,9 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     @Override
     public void buildImage(Path contextDir, String imageName) {
         super.buildImage(contextDir, imageName);
-        JkLog.info("Pass extra JVM options : Use '-e JAVA_TOOL_OPTIONS=...'");
+        JkLog.info("Pass extra JVM options : Use '-e JAVA_TOOL_OPTIONS=...' option");
         JkLog.info("Pass program arguments : Add arguments to the end of the command line");
-        JkLog.info("Map host current dir with container working dir : Use -v $PWD:/workdir option");
+        JkLog.info("Map host current dir with container working dir : Use '-v $PWD:/workdir' option");
     }
 
     /**
