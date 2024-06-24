@@ -17,6 +17,7 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkDependencySetModifier;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
@@ -61,6 +62,9 @@ public class JkProjectPackaging {
      */
     public final JkJavadocProcessor javadocProcessor;
 
+    public final JkDependencySetModifier runtimeDependencies = JkDependencySetModifier.of()
+            .modify(deps -> baseDependencies());
+
     private final JkProject project;
 
     private JkPathTreeSet fatJarExtraContent = JkPathTreeSet.ofEmpty();
@@ -70,8 +74,6 @@ public class JkProjectPackaging {
     String mainClass;
 
     private Supplier<String> mainClassFinder;
-
-    private Function<JkDependencySet, JkDependencySet> dependencySetModifier = x -> x;
 
     private JkResolveResult cachedJkResolveResult;
 
@@ -235,38 +237,13 @@ public class JkProjectPackaging {
     }
 
     /**
-     * Specifies the dependencies to add or remove from the production compilation dependencies to
-     * get the runtime dependencies.
-     *
-     * @param modifier A function that define the runtime dependencies from the compilation ones.
-     */
-    public JkProjectPackaging customizeRuntimeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        this.dependencySetModifier = modifier;
-        return this;
-    }
-
-    /**
-     * Returns the runtime dependencies computed from 'compile' dependencies and modified
-     * through {@link #customizeRuntimeDependencies(Function)}
-     */
-    public JkDependencySet getRuntimeDependencies() {
-        JkDependencySet baseDependencies = project.compilation.getDependencies();
-        if (project.isIncludeTextAndLocalDependencies()) {
-            baseDependencies = baseDependencies
-                    .minus(project.textAndLocalDeps().getCompile().getEntries())
-                    .and(project.textAndLocalDeps().getRuntime());
-        }
-        return dependencySetModifier.apply(baseDependencies);
-    }
-
-    /**
      * Returns the resolved (and cached) dependencies needed at runtime.
      */
     public JkResolveResult resolveRuntimeDependencies() {
         if (cachedJkResolveResult != null) {
             return cachedJkResolveResult;
         }
-        cachedJkResolveResult = project.dependencyResolver.resolve(getRuntimeDependencies()
+        cachedJkResolveResult = project.dependencyResolver.resolve(runtimeDependencies.get()
                 .normalised(project.getDuplicateConflictStrategy()));
         return cachedJkResolveResult;
     }
@@ -275,7 +252,7 @@ public class JkProjectPackaging {
      * Retrieves the runtime dependencies as a sequence of files.
      */
     public List<Path> resolveRuntimeDependenciesAsFiles() {
-        return project.dependencyResolver.resolveFiles(getRuntimeDependencies());
+        return project.dependencyResolver.resolveFiles(runtimeDependencies.get());
     }
 
     /**
@@ -293,6 +270,21 @@ public class JkProjectPackaging {
 
     String declaredMainClass() {
         return mainClass;
+    }
+
+    /*
+     * Returns the base dependencies upon which to construct runtime deps.
+     * It includes compile dependencies + dependencies declared as runtime
+     * in both dependencies.txt and file located in conventional dir.
+     */
+    private JkDependencySet baseDependencies() {
+        JkDependencySet baseDependencies = project.compilation.dependencies.get();
+        if (project.isIncludeTextAndLocalDependencies()) {
+            baseDependencies = baseDependencies
+                    .minus(project.textAndLocalDeps().getCompile().getEntries())
+                    .and(project.textAndLocalDeps().getRuntime());
+        }
+        return baseDependencies;
     }
 
     private String findMainClass() {
@@ -319,7 +311,7 @@ public class JkProjectPackaging {
     private boolean createJavadocFiles() {
         JkProjectCompilation compilation = project.compilation;
         Iterable<Path> classpath = project.dependencyResolver
-                .resolve(compilation.getDependencies().normalised(project.getDuplicateConflictStrategy())).getFiles();
+                .resolve(compilation.dependencies.get().normalised(project.getDuplicateConflictStrategy())).getFiles();
         JkPathTreeSet sources = compilation.layout.resolveSources();
         if (!sources.containFiles()) {
             return false;

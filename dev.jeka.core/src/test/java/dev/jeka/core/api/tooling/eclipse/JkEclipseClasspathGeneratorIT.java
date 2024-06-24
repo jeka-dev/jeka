@@ -24,11 +24,9 @@ public class JkEclipseClasspathGeneratorIT {
         final JkProject baseProject = JkProject.of()
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
-            .setBaseDir(top.resolve("base"))
-            .flatFacade()
-                .customizeCompileDeps(deps -> deps
-                        .and("org.apache.httpcomponents.client5:httpclient5:5.1.3"))
-                .getProject();
+            .setBaseDir(top.resolve("base"));
+        baseProject.compilation.dependencies
+                .add("org.apache.httpcomponents.client5:httpclient5:5.1.3");
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
             .setDefDependencies(baseProject.dependencyResolver,
@@ -41,8 +39,7 @@ public class JkEclipseClasspathGeneratorIT {
         coreProject
             .apply(this::configureCompileLayout)
             .setBaseDir(top.resolve("core"))
-            .compilation
-                .customizeDependencies(deps -> deps.and(baseProject.toDependency()));
+            .compilation.dependencies.add(baseProject.toDependency());
         coreProject
             .testing
                 .compilation
@@ -64,8 +61,7 @@ public class JkEclipseClasspathGeneratorIT {
             .apply(this::configureCompileLayout)
             .apply(this::configureTestCompileLayout)
             .setBaseDir(top.resolve("desktop"))
-            .compilation
-                    .customizeDependencies(deps -> deps.and(coreProject.toDependency()));
+            .compilation.dependencies.add(coreProject.toDependency());
         desktopProject.pack();
         final JkEclipseClasspathGenerator desktopGenerator =
                 JkEclipseClasspathGenerator.of(desktopProject.getJavaIdeSupport());

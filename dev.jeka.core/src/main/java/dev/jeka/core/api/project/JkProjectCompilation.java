@@ -17,7 +17,7 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.depmanagement.JkDependencySetModifier;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -65,7 +64,8 @@ public class JkProjectCompilation {
 
     public final JkCompileLayout layout;
 
-    private Function<JkDependencySet, JkDependencySet> dependenciesModifier = deps -> deps;
+    public final JkDependencySetModifier dependencies = JkDependencySetModifier.of()
+            .modify(deps -> baseDependencies());
 
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
@@ -151,17 +151,8 @@ public class JkProjectCompilation {
         return this;
     }
 
-    public JkProjectCompilation customizeDependencies(Function<JkDependencySet, JkDependencySet> modifier) {
-        this.dependenciesModifier = dependenciesModifier.andThen(modifier);
-        return this;
-    }
-
     public List<Path> resolveDependenciesAsFiles() {
-        return project.dependencyResolver.resolveFiles(getDependencies());
-    }
-
-    public JkDependencySet getDependencies() {
-        return dependenciesModifier.apply(baseDependencies());
+        return project.dependencyResolver.resolveFiles(dependencies.get());
     }
 
     public JkProjectCompilation addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {

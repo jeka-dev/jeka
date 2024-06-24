@@ -21,13 +21,11 @@ class SonarqubeBuild extends KBean {
 
     protected void init() {
         JkProject project = projectKBean.project;
-        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade()
+        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .mixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .customizeCompileDeps(deps -> deps
-                        .andFiles(JkLocator.getJekaJarPath())
-                );
+                .compileDependencies.add((JkLocator.getJekaJarPath()));
         load(MavenKBean.class).getMavenPublication()
                     .pomMetadata
                         .setProjectName("Jeka plugin for Sonarqube")

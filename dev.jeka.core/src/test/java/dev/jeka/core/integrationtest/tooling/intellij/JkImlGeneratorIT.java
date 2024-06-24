@@ -28,10 +28,9 @@ public class JkImlGeneratorIT {
         baseProject
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
-            .setBaseDir(base)
-            .compilation
-                    .customizeDependencies(deps -> deps
-                        .and(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6")));
+            .setBaseDir(base);
+        baseProject.compilation.dependencies
+            .add(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"));
         final JkImlGenerator baseGenerator = JkImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();
@@ -43,8 +42,7 @@ public class JkImlGeneratorIT {
         coreProject
                 .apply(this::configureCompileLayout)
                 .setBaseDir(core)
-                .compilation
-                    .customizeDependencies(deps -> deps.and(baseProject.toDependency()));
+                .compilation.dependencies.add(baseProject.toDependency());
         coreProject
                 .testing
                     .compilation
@@ -66,10 +64,8 @@ public class JkImlGeneratorIT {
         desktopProject
             .apply(this::configureCompileLayout)
             .apply(this::configureEmptyTestCompileLayout)
-            .setBaseDir(desktop)
-                .compilation
-                    .customizeDependencies(deps -> deps
-                        .and(coreProject.toDependency()));
+            .setBaseDir(desktop);
+        desktopProject.compilation.dependencies.add(coreProject.toDependency());
         final JkImlGenerator desktopGenerator = JkImlGenerator.of()
                 .setIdeSupport(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.computeIml().toDoc().toXml();

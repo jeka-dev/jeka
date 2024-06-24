@@ -160,7 +160,7 @@ public final class JkProjectScaffold extends JkScaffold {
     private void configureScaffold() {
 
         if (useSimpleStyle) {
-            project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+            project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
             addJekaPropValue(SIMPLE_STYLE_PROP);
         }
 

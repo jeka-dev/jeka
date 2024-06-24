@@ -51,12 +51,9 @@ class Junit5Build extends KBean {
         project
             .testing
                 .compilation
-                    .customizeDependencies(deps -> deps
-                        .and("org.jdom:jdom2:2.0.6")
-                    )
-                    .customizeDependencies(deps -> deps
-                        .and("org.junit.jupiter:junit-jupiter:5.8.2")
-                    );
+                    .dependencies
+                        .add("org.jdom:jdom2:2.0.6")
+                        .add("org.junit.jupiter:junit-jupiter:5.8.2");
         project
             .testing
                 .testProcessor

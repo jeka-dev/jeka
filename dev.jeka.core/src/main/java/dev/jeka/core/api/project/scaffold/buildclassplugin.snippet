@@ -1,4 +1,5 @@
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.tool.JkJekaVersionRanges;
 import dev.jeka.core.tool.KBean;
@@ -11,15 +12,11 @@ class Build extends KBean {
 
     @Override
     protected void init() {
-        project.compilation.customizeDependencies(deps -> deps
-                .andFiles(JkLocator.getJekaJarPath())
-        );
+        project.compilation.dependencies
+                .add(JkLocator.getJekaJarPath());
 
-        project.packaging.manifestCustomizer.add(manifest -> {
-            JkJekaVersionRanges.setCompatibilityRange(manifest,
-                    "${jekaVersion}",
+        JkJekaVersionRanges.setCompatibilityRange(project.packaging.getManifest(), JkInfo.getVersion(),
                     "https://raw.githubusercontent.com/your_org/your_repo/master/breaking_versions.txt");
-        });
 
         // This section is necessary to publish on a public repository
         project

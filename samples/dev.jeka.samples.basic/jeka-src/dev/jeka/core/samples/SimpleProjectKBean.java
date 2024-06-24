@@ -35,14 +35,12 @@ public class SimpleProjectKBean extends KBean {
     @Override
     protected void init() {
         JkProject project = projectKBean.project;
-        project.flatFacade()
-               .addCompileDeps(
-                       "com.google.guava:guava:30.0-jre",
-                       "com.sun.jersey:jersey-server:1.19.4"
-               )
-               .addTestDeps(
-                       "org.junit.jupiter:junit-jupiter:5.10.1"
-               )
+        project.flatFacade.compileDependencies
+                .add("com.google.guava:guava:30.0-jre")
+                .add( "com.sun.jersey:jersey-server:1.19.4");
+        project.flatFacade.testDependencies
+               .add("org.junit.jupiter:junit-jupiter:5.10.1");
+        project.flatFacade
                .addTestExcludeFilterSuffixedBy("IT", skipIT);
        project
            .setJvmTargetVersion(JkJavaVersion.V8)
@@ -54,9 +52,8 @@ public class SimpleProjectKBean extends KBean {
                     .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
        project
            .packaging
-               .customizeRuntimeDependencies(deps -> deps
-                       .and("com.github.djeang:vincer-dom:1.2.0")
-               );
+               .runtimeDependencies
+                       .add("com.github.djeang:vincer-dom:1.2.0");
        project
            .testing
                 .testProcessor

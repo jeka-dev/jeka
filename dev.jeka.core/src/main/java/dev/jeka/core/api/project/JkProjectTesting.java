@@ -244,8 +244,8 @@ public class JkProjectTesting {
 
         @Override
         protected JkDependencySet baseDependencies() {
-            JkDependencySet base = project.packaging.getRuntimeDependencies()
-                    .merge(project.compilation.getDependencies()).getResult();
+            JkDependencySet base = project.packaging.runtimeDependencies.get()
+                    .merge(project.compilation.dependencies.get()).getResult();
             if (project.isIncludeTextAndLocalDependencies()) {
                 base = project.textAndLocalDeps().getTest().and(base);
             }

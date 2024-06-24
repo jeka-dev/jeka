@@ -221,7 +221,7 @@ class MasterBuild extends KBean {
     @JkDoc("Clean build of core + plugins bypassing tests.")
     public void buildFast() {
         getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
-            bean.project.flatFacade().skipTests(true);
+            bean.project.flatFacade.skipTests(true);
             bean.clean();
             bean.project.pack();
         });

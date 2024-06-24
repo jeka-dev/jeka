@@ -319,8 +319,8 @@ public final class JkSonarqube {
         final Path baseDir = project.getBaseDir();
         JkPathSequence libs = JkPathSequence.of();
         if (provideProdLibs) {
-            JkDependencySet deps = project.compilation.getDependencies()
-                    .merge(project.packaging.getRuntimeDependencies()).getResult();
+            JkDependencySet deps = project.compilation.dependencies.get()
+                    .merge(project.packaging.runtimeDependencies.get()).getResult();
             libs = project.dependencyResolver.resolve(deps).getFiles();
         }
         final Path testReportDir = project.testing.getReportDir();
@@ -353,7 +353,7 @@ public final class JkSonarqube {
                 .setPathProperty(JAVA_LIBRARIES, libs)
                 .setPathProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
         if (provideTestLibs) {
-            JkDependencySet deps = project.testing.compilation.getDependencies();
+            JkDependencySet deps = project.testing.compilation.dependencies.get();
             JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
             this.setPathProperty(JAVA_TEST_LIBRARIES, testLibs);
         }

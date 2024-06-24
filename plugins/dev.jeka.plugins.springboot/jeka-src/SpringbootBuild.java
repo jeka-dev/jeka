@@ -23,16 +23,12 @@ public class SpringbootBuild extends KBean {
     @Override
     protected void init() {
         JkProject project = projectBean.project;
-        project
-                .setJvmTargetVersion(JkJavaVersion.V8)
-                .flatFacade()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .customizeCompileDeps(deps -> deps
-                        .andFiles(JkLocator.getJekaJarPath())
-                )
-                .customizeRuntimeDeps(deps -> deps
-                        .minus(JkFileSystemDependency.of(JkLocator.getJekaJarPath()))
-                );
+        project.setJvmTargetVersion(JkJavaVersion.V8)
+                .flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+        project.compilation.dependencies
+                        .add(JkLocator.getJekaJarPath());
+        project.packaging.runtimeDependencies
+                        .remove(JkLocator.getJekaJarPath());
         project.compilation.layout.setResources(JkPathTreeSet.ofRoots("resources"));
         project.testing.setSkipped(true);
         project.setModuleId("dev.jeka:springboot-plugin");

@@ -140,8 +140,8 @@ public final class JkSpringbootProject {
      * @return This oject for chaining.
      */
     public JkSpringbootProject includeParentBom(String version) {
-        project.compilation.customizeDependencies(deps -> deps
-                .and(BOM_COORDINATE + version));
+        project.compilation.dependencies
+                .add(BOM_COORDINATE + version);
         return this;
     }
 

@@ -154,7 +154,6 @@ public final class JkProject implements JkIdeSupportSupplier {
      */
     public final JkRunnables packActions = JkRunnables.of();
 
-    private Consumer<Path> jarMaker;
 
     /**
      * Object responsible for resolving dependencies.
@@ -192,6 +191,13 @@ public final class JkProject implements JkIdeSupportSupplier {
      */
     public final JkRunnables cleanExtraActions = JkRunnables.of();
 
+    /**
+     * Convenient facade for configuring the project.
+     */
+    public final JkProjectFlatFacade flatFacade;
+
+    private Consumer<Path> jarMaker;
+
     private Path baseDir = Paths.get("");
 
     private String outputDir = JkConstants.OUTPUT_PATH;
@@ -226,6 +232,7 @@ public final class JkProject implements JkIdeSupportSupplier {
         jarMaker = packaging::createBinJar;
         packActions.append(CREATE_JAR_ACTION,
                 () -> jarMaker.accept(artifactLocator.getMainArtifactPath()));
+        flatFacade = new JkProjectFlatFacade(this);
     }
 
     /**
@@ -241,13 +248,6 @@ public final class JkProject implements JkIdeSupportSupplier {
     public JkProject apply(Consumer<JkProject> projectConsumer) {
         projectConsumer.accept(this);
         return this;
-    }
-
-    /**
-     * Returns a convenient facade for configuring the project.
-     */
-    public JkProjectFlatFacade flatFacade() {
-        return new JkProjectFlatFacade(this);
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
@@ -424,9 +424,9 @@ public final class JkProject implements JkIdeSupportSupplier {
      * (source locations, file count, declared dependencies, ...).
      */
     public String getInfo() {
-        JkDependencySet compileDependencies = compilation.getDependencies();
-        JkDependencySet runtimeDependencies = packaging.getRuntimeDependencies();
-        JkDependencySet testDependencies = testing.compilation.getDependencies();
+        JkDependencySet compileDependencies = compilation.dependencies.get();
+        JkDependencySet runtimeDependencies = packaging.runtimeDependencies.get();
+        JkDependencySet testDependencies = testing.compilation.dependencies.get();
         StringBuilder builder = new StringBuilder();
 
         String declaredMainClassName = packaging.declaredMainClass();
@@ -474,9 +474,9 @@ public final class JkProject implements JkIdeSupportSupplier {
      * Displays the resolved dependency tree on the console.
      */
     public void displayDependencyTree() {
-        displayDependencyTree("compile", compilation.getDependencies());
-        displayDependencyTree("runtime", packaging.getRuntimeDependencies());
-        displayDependencyTree("test", testing.compilation.getDependencies());
+        displayDependencyTree("compile", compilation.dependencies.get());
+        displayDependencyTree("runtime", packaging.runtimeDependencies.get());
+        displayDependencyTree("test", testing.compilation.dependencies.get());
     }
 
     /**
@@ -485,9 +485,9 @@ public final class JkProject implements JkIdeSupportSupplier {
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         JkQualifiedDependencySet qualifiedDependencies = JkQualifiedDependencySet.computeIdeDependencies(
-                compilation.getDependencies(),
-                packaging.getRuntimeDependencies(),
-                testing.compilation.getDependencies(),
+                compilation.dependencies.get(),
+                packaging.runtimeDependencies.get(),
+                testing.compilation.dependencies.get(),
                 JkCoordinate.ConflictStrategy.TAKE_FIRST);
         JkIdeSupport ideSupport = JkIdeSupport.of(baseDir)
             .setSourceVersion(jvmTargetVersion)
@@ -522,8 +522,8 @@ public final class JkProject implements JkIdeSupportSupplier {
      * is meant to be consumed by an external project.
      */
     public JkLocalProjectDependency toDependency(Runnable artifactMaker, Path artifactPath, JkTransitivity transitivity) {
-       JkDependencySet exportedDependencies = compilation.getDependencies()
-               .merge(packaging.getRuntimeDependencies()).getResult();
+       JkDependencySet exportedDependencies = compilation.dependencies.get()
+               .merge(packaging.runtimeDependencies.get()).getResult();
         return JkLocalProjectDependency.of(artifactMaker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }
@@ -567,9 +567,9 @@ public final class JkProject implements JkIdeSupportSupplier {
         }
         Element root = document.createElement("dependencies");
         document.appendChild(root);
-        root.appendChild(xmlDeps(document, "compile", compilation.getDependencies()));
-        root.appendChild(xmlDeps(document, "runtime", packaging.getRuntimeDependencies()));
-        root.appendChild(xmlDeps(document, "test", testing.compilation.getDependencies()));
+        root.appendChild(xmlDeps(document, "compile", compilation.dependencies.get()));
+        root.appendChild(xmlDeps(document, "runtime", packaging.runtimeDependencies.get()));
+        root.appendChild(xmlDeps(document, "test", testing.compilation.dependencies.get()));
         return document;
     }
 

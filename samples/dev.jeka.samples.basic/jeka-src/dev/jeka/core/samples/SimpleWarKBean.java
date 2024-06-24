@@ -29,18 +29,17 @@ public class SimpleWarKBean extends KBean {
 
     @Override
     protected void init() {
-        project.flatFacade()
-                   .customizeCompileDeps(deps -> deps
-                           .and("com.google.guava:guava:30.0-jre")
-                           .and("javax.servlet:javax.servlet-api:4.0.1"))
-                   .setModuleId("dev.jeka.samples:war-project")
-                   .setVersion("1.0-SNAPSHOT")
-                   .customizeRuntimeDeps(compileDeps -> compileDeps
-                           .minus("javax.servlet:javax.servlet-api"))
-                   .setJvmTargetVersion(JkJavaVersion.V8);
-
-        project.compilation.layout.emptySources().addSource("src/main/javaweb");
+        project.setModuleId("dev.jeka.samples:war-project")
+                .setVersion("1.0-SNAPSHOT")
+                .setJvmTargetVersion(JkJavaVersion.V8)
+                .compilation.layout.emptySources().addSource("src/main/javaweb");
         project.testing.setSkipped(true);
+
+        project.flatFacade.compileDependencies.modify(deps -> deps
+                .and("com.google.guava:guava:30.0-jre")
+                .and("javax.servlet:javax.servlet-api:4.0.1"));
+        project.flatFacade.runtimeDependencies
+                .remove("javax.servlet:javax.servlet-api");
         JkJ2eWarProjectAdapter.of().configure(project);
     }
 

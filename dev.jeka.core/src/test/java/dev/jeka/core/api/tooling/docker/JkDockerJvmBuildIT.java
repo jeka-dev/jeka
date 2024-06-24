@@ -35,20 +35,18 @@ public class JkDockerJvmBuildIT {
             return;
         }
         JkLog.setDecorator(JkLog.Style.INDENT);
-        JkProject project = JkProject.of().flatFacade()
-                .customizeCompileDeps(deps -> deps
-                        .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
-                        .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .customizeRuntimeDeps(deps -> deps
-                        .and("org.postgresql:postgresql:42.2.19")
-                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-                        .minus("javax.servlet:javax.servlet-api"))
-                .customizeTestDeps(deps -> deps
-                        .and(JkDependencySet.Hint.first(), "org.mockito:mockito-core:2.10.0")
-                )
+        JkProject project = JkProject.of();
+        project.compilation.dependencies
+                        .add("com.google.guava:guava:23.0", JkTransitivity.NONE)
+                        .add("javax.servlet:javax.servlet-api:4.0.1");
+        project.packaging.runtimeDependencies
+                        .add("org.postgresql:postgresql:42.2.19")
+                        .remove("javax.servlet:javax.servlet-api");
+       project.testing.compilation.dependencies
+                        .add("org.mockito:mockito-core:2.10.0");
+       project.flatFacade
                 .setModuleId("my:project").setVersion("MyVersion")
-                .setMainClass("dev.jeka.core.tool.Main")
-                .getProject();
+                .setMainClass("dev.jeka.core.tool.Main");
         JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project);
         dockerJvmBuild.nonRootSteps.insertBefore("COPY classpath.txt", "# rem for testing 'insertBefore'");
         String imageName = "jk-testunit-jvm";

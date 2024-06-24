@@ -58,9 +58,13 @@ public class JkDockerBuildIT {
         if (!JkDocker.isPresent()) {
             return;
         }
-        simpleNonRootWithBaseImage("ubuntu");
+        JkLog.setDecorator(JkLog.Style.INDENT);
+        JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         simpleNonRootWithBaseImage("alpine:latest");
         simpleNonRootWithBaseImage(JkDockerJvmBuild.BASE_IMAGE);
+        simpleNonRootWithBaseImage("ubuntu");
+
+
     }
 
     private void simpleNonRootWithBaseImage(String baseImage) {

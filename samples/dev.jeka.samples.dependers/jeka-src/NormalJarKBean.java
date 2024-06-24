@@ -33,10 +33,9 @@ public class NormalJarKBean extends KBean {
     @Override
     protected void init() {
         JkProject project = projectKBean.project;
-        project.flatFacade().setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
-        project.compilation.customizeDependencies(deps -> deps
-                .and(sampleBuild.projectKBean.project.toDependency())
-        );
+        project.flatFacade.setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
+        project.compilation.dependencies
+                .add(sampleBuild.projectKBean.project.toDependency());
     }
 
     public void cleanPack() {

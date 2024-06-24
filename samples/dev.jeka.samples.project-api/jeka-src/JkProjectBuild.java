@@ -80,21 +80,20 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
             .compilation
                 .addJavaCompilerOptions("-g")
                 .addSourceGenerator(new MySourceGenerator()) /// Custom basic source generator
-                .customizeDependencies(deps -> deps
-                    .and("com.google.api-client:google-api-client:1.30.7")
-                        .withLocalExclusions("com.google.guava:guava")  // remove dependency to avoid conflict
-                    .and("com.google.guava:guava:28.0-jre")
-                    .and("org.codehaus.plexus:plexus-container-default:2.1.0")
-                );
+                .dependencies
+                    .addWithExclusions("com.google.api-client:google-api-client:1.30.7",
+                        "com.google.guava:guava")  // remove dependency to avoid conflict
+                    .add("com.google.guava:guava:28.0-jre")
+                    .add("org.codehaus.plexus:plexus-container-default:2.1.0");
+
 
         // Control on 'test code compilation' (same as for 'prod code')
         project
             .testing
                 .compilation
                     .addJavaCompilerOptions("-g")
-                    .customizeDependencies(deps -> deps
-                            .and("org.junit.jupiter:junit-jupiter:5.10.1")
-                    );
+                    .dependencies
+                            .add("org.junit.jupiter:junit-jupiter:5.10.1");
 
         // Control on test selection to run
         project
@@ -120,10 +119,9 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
             .packaging
                 .customizeFatJarContent(pathTreeSet ->  pathTreeSet
                         .withMatcher(JkPathMatcher.of(false, "**/*.jks")))
-                .customizeRuntimeDependencies(deps -> deps
-                        .minus("org.codehaus.plexus:plexus-container-default")
-                        .and("com.h2database:h2:2.2.224")
-                );
+                .runtimeDependencies
+                        .remove("org.codehaus.plexus:plexus-container-default")
+                        .add("com.h2database:h2:2.2.224");
         return project;
     }
 

@@ -57,13 +57,10 @@ public class SignedArtifactsKBean extends KBean {
 
     protected void init() {
         JkProject project = projectKBean.project;
-        project.flatFacade()
-            .customizeCompileDeps(deps -> deps
-                .and(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"))
-            )
-            .customizeTestDeps(deps -> deps
-                .and(SimpleProjectKBean.JUNIT5)
-            );
+        project.flatFacade.compileDependencies
+                .add(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"));
+        project.flatFacade.testDependencies
+                .add(SimpleProjectKBean.JUNIT5);
 
         mavenPublication = load(MavenKBean.class).getMavenPublication();
         mavenPublication

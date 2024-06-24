@@ -87,8 +87,8 @@ public final class JkProtobuf {
                 .setProtocJarVersion(protocVersion);
         project.compilation.addSourceGenerator(sourceGenerator);
         if (!JkUtilsString.isBlank(protobufVersion)) {
-            project.compilation.customizeDependencies(deps -> deps
-                    .and("com.google.protobuf:protobuf-java:" + protobufVersion));
+            project.compilation.dependencies
+                    .add("com.google.protobuf:protobuf-java:" + protobufVersion);
         }
     }
 

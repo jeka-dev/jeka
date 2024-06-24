@@ -348,16 +348,16 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.setJvmTargetVersion(version);
         }
         applyRepoConfigOn(project);
-        project.flatFacade().setLayoutStyle(layout.style);
+        project.flatFacade.setLayoutStyle(layout.style);
         if (layout.mixSourcesAndResources) {
-            project.flatFacade().mixResourcesAndSources();
+            project.flatFacade.mixResourcesAndSources();
         }
         JkJavaCompilerToolChain compilerToolChain = project.compilerToolChain;
         if (!compilerToolChain.isToolOrProcessSpecified()) {
             compilerToolChain.setJdkHints(jdks(), true);
         }
         if (pack.jarType != null) {
-            project.flatFacade().setMainArtifactJarType(pack.jarType);
+            project.flatFacade.setMainArtifactJarType(pack.jarType);
         }
         if (pack.mainClass != null) {
             project.packaging.setMainClass(pack.mainClass);

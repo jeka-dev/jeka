@@ -71,7 +71,7 @@ public class SpringbootScaffoldTest {
     public void scaffoldProject_regularWithSimpleLayout_ok() throws IOException {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
-        project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+        project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         JkProjectScaffold.of(project)
                 .setTemplate(JkProjectScaffold.Kind.REGULAR)
                 .setUseSimpleStyle(true)

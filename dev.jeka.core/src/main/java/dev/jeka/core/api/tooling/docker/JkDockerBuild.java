@@ -66,11 +66,11 @@ public class JkDockerBuild {
     public static final String TEMURIN_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
             "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot";
 
-    public static final String UBUNTU_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
-            "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot";
+    public static final String UBUNTU_ADD_USER_TEMPLATE = "RUN groupadd --gid ${GID} nonrootgroup && \\\n" +
+            "    useradd --uid ${UID} --gid ${GID} --create-home nonroot && passwd -d nonroot";
 
     public static final String ALPINE_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
-            "    adduser --uid ${UID} -g ${GID} --disabled-password --gecos \"\" nonroot\n";
+            "    adduser --uid ${UID} -g ${GID} --disabled-password nonroot\n";
 
     /**
      * Steps to be inserted in Dockerfile, prior 'nonroot' user switch.
@@ -405,7 +405,8 @@ public class JkDockerBuild {
             if (Files.exists(tempPath)) {
                 tempPath = context.dir.resolve("imported-files").resolve(file.getFileName().toString() + UUID.randomUUID());
             }
-            context.add("COPY " + context.dir.relativize(tempPath) + " " + containerPath);
+            context.add("COPY " + context.dir.relativize(tempPath).toString().replace('\\', '/')
+                    + " " + containerPath);
             if (!context.dry) {
                 JkUtilsPath.createDirectories(tempPath.getParent());
                 if (Files.isDirectory(file)) {

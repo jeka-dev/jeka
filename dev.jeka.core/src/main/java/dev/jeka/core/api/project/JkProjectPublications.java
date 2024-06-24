@@ -33,8 +33,8 @@ public class JkProjectPublications {
                 .setModuleIdSupplier(project::getModuleId)
                 .setVersionSupplier(project::getVersion)
                 .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        project.compilation.getDependencies(),
-                        project.packaging.getRuntimeDependencies(),
+                        project.compilation.dependencies.get(),
+                        project.packaging.runtimeDependencies.get(),
                         project.getDuplicateConflictStrategy()))
                 .setBomResolutionRepos(project.dependencyResolver::getRepos)
                 .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
@@ -51,8 +51,8 @@ public class JkProjectPublications {
                 .setVersionSupplier(project::getVersion)
                 .setModuleIdSupplier(project::getModuleId)
                 .configureDependencies(deps -> JkIvyPublication.getPublishDependencies(
-                        project.compilation.getDependencies(),
-                        project.packaging.getRuntimeDependencies(),
+                        project.compilation.dependencies.get(),
+                        project.packaging.runtimeDependencies.get(),
                         project.getDuplicateConflictStrategy()));
     }
 

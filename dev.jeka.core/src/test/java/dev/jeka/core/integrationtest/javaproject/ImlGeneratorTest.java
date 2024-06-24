@@ -11,14 +11,13 @@ public class ImlGeneratorTest {
     @Test
     public void generateIml_springbootProject_ok() {
 
-        JkProject project = JkProject.of().flatFacade()
-                .customizeCompileDeps(deps -> deps
-                        .and("org.springframework.boot:spring-boot-starter-web:" + VERSION)
-                )
-                .customizeTestDeps(deps -> deps
-                        .and("org.springframework.boot:spring-boot-starter-test:" + VERSION)
+        JkProject project = JkProject.of();
+        project.compilation.dependencies
+                    .add("org.springframework.boot:spring-boot-starter-web:" + VERSION);
+        project.testing.compilation.dependencies.modify(deps -> deps
+                    .and("org.springframework.boot:spring-boot-starter-test:" + VERSION)
                             .withLocalExclusions("org.junit.vintage:junit-vintage-engine")
-                ).getProject();
+                );
         JkImlGenerator imlGenerator = JkImlGenerator.of().setIdeSupport(project.getJavaIdeSupport());
         String xml = imlGenerator.computeIml().toDoc().toXml();
         System.out.println(xml);

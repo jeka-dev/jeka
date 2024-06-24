@@ -24,11 +24,11 @@ public class FatJarKBean extends KBean {
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
 
         JkProject project = load(ProjectKBean.class).project;
-        project.flatFacade().setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
-        project.flatFacade()
-                .customizeCompileDeps(deps -> deps
-                        .and("com.google.guava:guava:22.0")
-                        .and(sampleBuild.projectKBean.project.toDependency()));
+        project.flatFacade.setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
+        project.flatFacade
+                .compileDependencies
+                        .add("com.google.guava:guava:22.0")
+                        .add(sampleBuild.projectKBean.project.toDependency());
     }
    
 }

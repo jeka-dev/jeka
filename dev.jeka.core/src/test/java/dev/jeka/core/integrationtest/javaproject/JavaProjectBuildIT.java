@@ -31,45 +31,42 @@ public class JavaProjectBuildIT {
     @Test
     public void publish_maven_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
-        JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .customizeCompileDeps(deps -> deps
-                        .and("com.google.guava:guava:23.0")
-                        .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .customizeRuntimeDeps(deps -> deps
-                        .and("org.postgresql:postgresql:42.2.19")
-                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-                        .minus("javax.servlet:javax.servlet-api"))
-                .customizeTestDeps(deps -> deps
-                        .and("org.mockito:mockito-core:2.10.0")
-                )
+        JkProject project = JkProject.of().setBaseDir(root.resolve("base"));
+        project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+        project.compilation.dependencies
+                        .add("com.google.guava:guava:23.0")
+                        .add("javax.servlet:javax.servlet-api:4.0.1");
+        project.packaging.runtimeDependencies
+                        .add("org.postgresql:postgresql:42.2.19")
+                        .modify(deps -> deps.withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME))
+                        .remove("javax.servlet:javax.servlet-api");
+        project.testing.compilation.dependencies
+                        .add("org.mockito:mockito-core:2.10.0");
+        project
                 .setModuleId("my:project").setVersion("MyVersion-snapshot")
-                .setVersion("1-SNAPSHOT")
-                .getProject();
+                .setVersion("1-SNAPSHOT");
         project.pack();
         JkMavenPublication mavenPublication = JkProjectPublications.mavenPublication(project).publishLocal();
         mavenPublication.publishLocal();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.COMPILE, mavenPublication.getDependencies()
                 .get("com.google.guava:guava").getTransitivity());
-
     }
 
     @Test
     public void publish_ivy_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
-        JkProject project = JkProject.of().setBaseDir(root.resolve("base")).flatFacade()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .customizeCompileDeps(deps -> deps
-                        .and("com.google.guava:guava:23.0")
-                        .and("javax.servlet:javax.servlet-api:4.0.1"))
-                .customizeRuntimeDeps(deps -> deps
-                        .and("org.postgresql:postgresql:42.2.19")
-                        .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-                        .minus("javax.servlet:javax.servlet-api"))
-                .customizeTestDeps(deps -> deps
-                        .and("org.mockito:mockito-core:2.10.0")
-                ).getProject();
+        JkProject project = JkProject.of().setBaseDir(root.resolve("base"));
+        project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+        project.compilation.dependencies
+                .add("com.google.guava:guava:23.0")
+                .add("javax.servlet:javax.servlet-api:4.0.1");
+        project.packaging.runtimeDependencies
+                        .add("org.postgresql:postgresql:42.2.19")
+                        .modify(deps -> deps.withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME))
+                        .remove("javax.servlet:javax.servlet-api");
+       project.testing.compilation.dependencies
+                        .add("org.mockito:mockito-core:2.10.0");
 
         JkIvyPublication ivyPublication = JkProjectPublications.ivyPublication(project)
                 .setModuleId("my:module")

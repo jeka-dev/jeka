@@ -70,7 +70,7 @@ public class JkProjectScaffoldTest {
     public void scaffold_withSimpleLayout_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
-        project.flatFacade().setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+        project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
 
         JkProjectScaffold.of(project).setUseSimpleStyle(true).run();
 

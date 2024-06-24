@@ -271,14 +271,12 @@ public class DependencySetResolutionIT {
 
     @Test
     public void resolve_usingSeveralClassifierOnSingleLine_ok() {
-        JkProject project = JkProject.of()
-                .setJvmTargetVersion(JkJavaVersion.V11)
-                .flatFacade()
-                    .customizeCompileDeps(deps -> deps
-                        .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE)
-                        .and("org.openjfx:javafx-controls:linux:11.0.2", JkTransitivity.NONE)
-                        .and("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE))
-                .getProject();
+        JkProject project = JkProject.of();
+        project.setJvmTargetVersion(JkJavaVersion.V11);
+        project.compilation.dependencies
+                        .add("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE)
+                        .add("org.openjfx:javafx-controls:linux:11.0.2", JkTransitivity.NONE)
+                        .add("org.openjfx:javafx-controls:mac:11.0.2", JkTransitivity.NONE);
         project.setIncludeTextAndLocalDependencies(false);
         JkPathSequence paths = JkPathSequence.of(project.compilation.resolveDependenciesAsFiles());
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));
@@ -288,11 +286,9 @@ public class DependencySetResolutionIT {
     @Test
     public void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
         JkProject project = JkProject.of()
-                .setJvmTargetVersion(JkJavaVersion.V11)
-                .flatFacade()
-                .customizeCompileDeps(deps -> deps
-                        .and("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE))
-                .getProject();
+                .setJvmTargetVersion(JkJavaVersion.V11);
+        project.compilation.dependencies
+                .add("org.openjfx:javafx-controls:win:11.0.2", JkTransitivity.NONE);
         project.setIncludeTextAndLocalDependencies(false);
         JkPathSequence paths = JkPathSequence.of(project.compilation.resolveDependenciesAsFiles());
         paths.getEntries().forEach(path -> System.out.println(path.getFileName()));

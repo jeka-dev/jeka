@@ -29,18 +29,14 @@ public class SpringbootSampleBuild extends KBean {
 
     @Override
     protected void init() {
-        projectKBean.project.flatFacade()
-                //.setJvmTargetVersion(JkJavaVersion.V17)
-                .addCompileDeps(
-                        "org.springframework.boot:spring-boot-starter-web",
-                        "org.springframework.boot:spring-boot-starter-data-jpa"
-                )
-                .addRuntimeDeps(
-                        "com.h2database:h2:1.4.200"
-                )
-                .addTestDeps(
-                        "org.springframework.boot:spring-boot-starter-test"
-                )
+        projectKBean.project.compilation.dependencies
+                .add("org.springframework.boot:spring-boot-starter-web")
+                .add("org.springframework.boot:spring-boot-starter-data-jpa");
+        projectKBean.project.packaging.runtimeDependencies
+                .add("com.h2database:h2:1.4.200");
+        projectKBean.project.testing.compilation.dependencies
+                .add(       "org.springframework.boot:spring-boot-starter-test");
+        projectKBean.project
                 .setModuleId("dev.jeka:samples-springboot")
                 .setVersion("0.0.1-SNAPSHOT");  // Snapshot is necessary otherwise it can not deploy twice in maven local repo
         JkSpringbootProject.of(projectKBean.project)

@@ -91,8 +91,8 @@ public class JkKotlinJvm {
         JkProjectCompilation prodCompile = project.compilation;
         JkProjectCompilation testCompile = project.testing.compilation;
         prodCompile
-                .customizeDependencies(deps -> deps.andVersionProvider(kotlinVersionProvider()))
-                .preCompileActions
+                .dependencies.addVersionProvider(kotlinVersionProvider());
+        prodCompile.preCompileActions
                     .replaceOrInsertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
                         () -> compileKotlinInSpinner(project, kotlinSourceDir));
         testCompile
@@ -105,8 +105,8 @@ public class JkKotlinJvm {
         prodCompile.layout.setSources(javaInKotlinDir);
         testCompile.layout.setSources(javaInKotlinTestDir);
         if (addStdlib) {
-            prodCompile.customizeDependencies(this::addStdLibsToProdDeps);
-            testCompile.customizeDependencies(this::addStdLibsToTestDeps);
+            prodCompile.dependencies.modify(this::addStdLibsToProdDeps);
+            testCompile.dependencies.modify(this::addStdLibsToTestDeps);
         }
 
         /*

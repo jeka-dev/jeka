@@ -43,8 +43,17 @@ public class JkProjectFlatFacade {
 
     private final JkProject project;
 
+    public final JkDependencySetModifier compileDependencies;
+
+    public final JkDependencySetModifier runtimeDependencies;
+
+    public final JkDependencySetModifier testDependencies;
+
     JkProjectFlatFacade(JkProject project) {
         this.project = project;
+        this.compileDependencies = project.compilation.dependencies;;
+        this.runtimeDependencies = project.packaging.runtimeDependencies;
+        this.testDependencies = project.testing.compilation.dependencies;
     }
 
     /**
@@ -130,64 +139,18 @@ public class JkProjectFlatFacade {
         return this;
     }
 
-    /**
-     * Customizes the compilation dependencies of the project using the provided modifier function.
-     */
-    public JkProjectFlatFacade customizeCompileDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.compilation.customizeDependencies(modifier);
-        return this;
-    }
 
-    /**
-     * Customizes the runtime dependencies of the project using the provided modifier function.
-     */
-    public JkProjectFlatFacade customizeRuntimeDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.packaging.customizeRuntimeDependencies(modifier);
-        return this;
-    }
-
-    /**
-     * Customizes the test dependencies of the project using the provided modifier function.
-     */
-    public JkProjectFlatFacade customizeTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        project.testing.compilation.customizeDependencies(modifier);
-        return this;
-    }
-
-    /**
-     * Adds compile dependencies to the project.
-     *
-     * @param coordinates the dependencies to be added in the format of group:artifactId:version
-     */
-    public JkProjectFlatFacade addCompileDeps(@JkDepSuggest String... coordinates) {
-        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, coordinates);
-        return customizeCompileDeps(addFun);
-    }
 
     /**
      * Adds compile-only dependencies to the project.
      *
-     * @param coordinates the dependencies to be added in the format of group:artifactId:version
+     * @param coordinate the dependency to be added in the format of group:artifactId:version
      */
-    public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String... coordinates) {
-        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, coordinates);
-        customizeCompileDeps(addFun);
-        String[] groupAndNames = Arrays.stream(coordinates)
-                .map(JkCoordinate::of)
-                .map(coordinate -> coordinate.getModuleId().toColonNotation())
-                .toArray(String[]::new);
-        UnaryOperator<JkDependencySet> minusFun = deps -> minus(deps, groupAndNames);
-        return customizeRuntimeDeps(minusFun);
-    }
-
-    /**
-     * Adds runtime dependencies to the project.
-     *
-     * @param coordinates the dependencies to be added in the format of group:artifactId:version
-     */
-    public JkProjectFlatFacade addRuntimeDeps(@JkDepSuggest String... coordinates) {
-        UnaryOperator<JkDependencySet> addFun = deps -> add(deps, coordinates);
-        return customizeRuntimeDeps(addFun);
+    public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String coordinate) {
+        compileDependencies.add(coordinate);
+        String moduleId = JkCoordinate.of(coordinate).getModuleId().toColonNotation();
+        runtimeDependencies.remove(moduleId);
+        return this;
     }
 
     /**
@@ -317,7 +280,8 @@ public class JkProjectFlatFacade {
     }
 
     private JkProjectFlatFacade prependTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        return customizeTestDeps(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
+        testDependencies.modify(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
+        return this;
     }
 
     private JkDependencySet add(JkDependencySet deps, String... descriptors) {

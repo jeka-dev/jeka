@@ -28,15 +28,14 @@ public class ThirdPartyDependenciesKBean extends KBean {
 
     @Override
     protected void init() {
-        projectKBean.project.flatFacade()
-            .customizeCompileDeps(deps -> deps
-                .and(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("3.1.0"))
-                .and(JkPopularLibs.GUAVA.toCoordinate("30.0-jre")))
-            .customizeRuntimeDeps(compileDeps -> compileDeps
-                .minus(JkPopularLibs.JAVAX_SERVLET_API))
-            .customizeTestDeps(deps -> deps
-                .and(SimpleProjectKBean.JUNIT5)
-                .and(JkPopularLibs.MOCKITO_ALL.toCoordinate("1.10.19")));
+        projectKBean.project.flatFacade.compileDependencies
+                .add(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("3.1.0"))
+                .add(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"));
+        projectKBean.project.flatFacade.runtimeDependencies
+                .remove(JkPopularLibs.JAVAX_SERVLET_API.getDotNotation());
+        projectKBean.project.flatFacade.testDependencies
+                .add(SimpleProjectKBean.JUNIT5)
+                .add(JkPopularLibs.MOCKITO_ALL.toCoordinate("1.10.19"));
     }
 
     @JkDoc("Performs some load test using http client")
