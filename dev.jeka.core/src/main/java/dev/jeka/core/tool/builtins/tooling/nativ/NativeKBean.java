@@ -56,14 +56,25 @@ public class NativeKBean extends KBean {
         }
         String relTarget = JkUtilsString.substringBeforeLast(jar.toString(), ".jar");
         Path target = Paths.get(relTarget).toAbsolutePath();
-        Path nativeImageExe = toolPath();
-        JkProcess.of(nativeImageExe.toString(), "--no-fallback")
+        String nativeImageExe = toolPath().toString();
+        /*
+        if (JkUtilsSystem.IS_WINDOWS) {
+            nativeImageExe = JkUtilsString.substringBeforeLast(nativeImageExe, ".");
+        }
+
+         */
+
+        String regexp = "^(?!.*\\.class$).*$";
+        //String regexp = ".*(?<!\\.class)"; // works on linux/macos only
+        JkProcess.of(nativeImageExe, "--no-fallback")
                 .addParams("-H:+UnlockExperimentalVMOptions")
-                .addParams("-H:IncludeResources=.*(?<!\\.class)")
+                .addParams("-H:IncludeResources=" + regexp)
                 .addParamsIf(hasMessageBundle, "-H:IncludeResourceBundles=MessagesBundle")
                 .addParams("-jar", jar.toString())
                 .addParams("-H:Name=" + target)
                 .setLogCommand(true)
+                .setCollectStderr(true)
+                .setCollectStdout(true)
                 .setLogWithJekaDecorator(true)
                 .exec();
         JkLog.info("Generated in %s", target);

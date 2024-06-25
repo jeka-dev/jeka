@@ -190,7 +190,6 @@ function install() {
   $extractor = [ZipExtractor]::new($url, $installDir)
   $extractor.ExtractRootContent()
   Add-Path "$installDir"
-  MessageInfo "JeKa $version is installed."
 }
 
 function Main {
@@ -203,6 +202,27 @@ function Main {
   if ($cmdLineArgs.GetIndexOfFirstOf("install") -ne -1) {
     $version = Get-LastVersion
     install($version)
+    if ($cmdLineArgs.GetIndexOfFirstOf("check") -ne -1) {
+      MessageInfo "Checking install with 'jeka --version'. This requires JDK download."
+      jeka --version
+    }
+    MessageInfo "JeKa $version is properly installed."
+    MessageInfo "Later on, you can upgrade to a different JeKa version by running either 'jeka-update' or 'jeka-update <version>'."
+
+  } else {
+    $version
+    if ($arguments.Count -eq 0) {
+      $version = Get-LastVersion
+    } else {
+      $version = $arguments[0]
+    }
+    Write-Host "Updating Jeka to version $version ? [y/n]"
+    $user_input = Read-Host
+    if ($user_input -ne "y") {
+      exit 1
+    }
+    install($version)
+    MessageInfo "Jeka updated to version $version"
   }
 }
 
