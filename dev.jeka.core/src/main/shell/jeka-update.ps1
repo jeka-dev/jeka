@@ -56,13 +56,14 @@ function Get-JekaUserHome {
   }
 }
 
-function Get-CacheDir([string]$jekaUserHome) {
-  if ([string]::IsNullOrEmpty($env:JEKA_CACHE_DIR)) {
-    return $jekaUserHome + "\cache"
-  }
-  else {
-    return $env:JEKA_CACHE_DIR
-  }
+
+
+function Get-LastVersion() {
+  $metadataUrl = "https://repo1.maven.org/maven2/dev/jeka/jeka-core/maven-metadata.xml"
+  $xmlContent = Invoke-WebRequest -Uri $metadataUrl
+  $xml = [xml]$xmlContent
+  $latestVersion = $xml.metadata.versioning.latest
+  return $latestVersion
 }
 
 class CmdLineArgs {
@@ -124,6 +125,9 @@ class ZipExtractor {
     Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
     $subDirs = Get-ChildItem -Path $tempDir -Directory
     $root = $tempDir + "\" + $subDirs[0]
+    if (Test-Path -Path $this.dir) {
+      Remove-Item -Path $this.dir -Recurse -Force
+    }
     Move-Item -Path $root -Destination $this.dir -Force
     Remove-Item -Path $zipFile
     Remove-Item -Path $tempDir -Recurse
@@ -144,85 +148,62 @@ class ZipExtractor {
   }
 }
 
+function Add-Path {
+  param (
+    [string]$DirectoryPath
+  )
+
+  # Determine the registry scope (user or machine)
+  $registryScope = 'HKEY_CURRENT_USER'
+
+  # Get the current PATH value from the registry
+  $currentPath = Get-ItemProperty -Path "Registry::$registryScope\Environment" -Name PATH
+
+  # Split the current PATH into an array of directories
+  $existingPaths = $currentPath.Path.Split(';')
+
+  # Check if the directory path is already in the PATH
+  if ($existingPaths -notcontains $DirectoryPath) {
+    # Add the new directory to the existing paths
+    $newPath = $currentPath.Path + ";$DirectoryPath"
+
+    # Update the PATH in the registry
+    Set-ItemProperty -Path "Registry::$registryScope\Environment" -Name PATH -Value $newPath
+
+    # Broadcast a WM_SETTINGCHANGE message to reload the environment
+    [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+
+    Write-Host "Added '$DirectoryPath' to the PATH."
+  } else {
+    Write-Host "'$DirectoryPath' is already in the PATH."
+  }
+}
+
+function install() {
+  param([string]$version)
+
+  $mavenRepo = "https://repo1.maven.org/maven2"
+  $url = $mavenRepo + "/dev/jeka/jeka-core/" + $version + "/jeka-core-" + $version + "-distrib.zip"
+  $installDir = Get-JekaUserHome
+  $installDir = "$installDir\bin"
+  MessageInfo "Installing Jeka version $version in $installDir"
+  $extractor = [ZipExtractor]::new($url, $installDir)
+  $extractor.ExtractRootContent()
+  Add-Path "$installDir"
+  MessageInfo "JeKa $version is installed."
+}
+
 function Main {
   param(
     [array]$arguments
   )
 
-  #$argLine = $arguments -join '|'
-  #MessageInfo "Raw arguments |$argLine|"
-  $jekaUserHome = Get-JekaUserHome
-  $cacheDir = Get-CacheDir($jekaUserHome)
-  $globalPropFile = $jekaUserHome + "\global.properties"
-
   # Get interpolated cmdLine, while ignoring Base dir
-  $rawCmdLineArgs = [CmdLineArgs]::new($arguments)
-  if ($rawCmdLineArgs.IsQuietFlagPresent()) {
-    $global:QuietFlag = $true
+  $cmdLineArgs = [CmdLineArgs]::new($arguments)
+  if ($cmdLineArgs.GetIndexOfFirstOf("install") -ne -1) {
+    $version = Get-LastVersion
+    install($version)
   }
-  $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
-  $cmdLineArgs = $rawProps.InterpolatedCmdLine()
-
-  # Resolve basedir and interpolate cmdLine according props declared in base dir
-  $remoteArg = $cmdLineArgs.GetRemoteBaseDirArg()
-  $updateArg = $cmdLineArgs.IsUpdateFlagPresent()
-  $baseDirResolver = [BaseDirResolver]::new($remoteArg, $cacheDir, $updateArg)
-  $baseDir = $baseDirResolver.GetPath()
-  $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
-  $cmdLineArgs = $props.InterpolatedCmdLine()
-  $joinedArgs = $cmdLineArgs.args -join " "
-  if ($cmdLineArgs.IsVerboseFlagPresent()) {
-    $VerbosePreference = 'Continue'
-  }
-  MessageVerbose "Interpolated cmd line : $joinedArgs"
-
-  # Compute Java command
-  $jdks = [Jdks]::new($props, $cacheDir)
-  $javaCmd = $jdks.GetJavaCmd()
-
-  # -p option present : try to execute program directly, bypassing jeka engine
-  if ($cmdLineArgs.IsProgramFlagPresent()) {
-    $progArgs = $cmdLineArgs.GetProgramArgs()  # arguments metionned after '-p'
-    $progDir = $baseDir + "\jeka-output"
-    $prog = [ProgramExecutor]::new($progDir, $progArgs)
-    $progFile = $prog.FindProg()
-    if ($progFile -ne '') {
-      ExecProg -javaCmd $javaCmd -progFile $progFile -cmdLineArgs $progArgs
-      exit $LASTEXITCODE
-    }
-
-    # No executable or Jar found : launch a build
-    $buildCmd = $props.GetValue("jeka.program.build")
-    MessageInfo "jeka.program.build=$buildCmd"
-    if (!$buildCmd) {
-      $srcDir = $baseDir + "\src"
-      if ([System.IO.Directory]::Exists($srcDir)) {
-        $buildCmd = "project: pack -Djeka.skip.tests=true --stderr"
-      } else {
-        $buildCmd = "base: pack -Djeka.skip.tests=true --stderr"
-      }
-    }
-    $buildArgs = [Props]::ParseCommandLine($buildCmd)
-    $leadingArgs = $cmdLineArgs.GetPriorProgramArgs()
-    $effectiveArgs = $leadingArgs + $buildArgs
-    MessageInfo "Building with command : $effectiveArgs"
-    ExecJekaEngine -baseDir $baseDir -cacheDir $cacheDir -props $props -javaCmd $javaCmd -cmdLineArgs $effectiveArgs
-    if ($LASTEXITCODE -ne 0) {
-      Exit-Error "Build exited with error code $LASTEXITCODE. Cannot execute program"
-    }
-    $progFile = $prog.FindProg()
-    if ($progFile -eq '') {
-      Exit-Error "No program found to be executed in $progDir"
-    }
-    ExecProg -javaCmd $javaCmd -progFile $progFile -cmdLineArgs $progArgs
-    exit $LASTEXITCODE
-
-  # Execute Jeke engine
-  } else {
-    ExecJekaEngine -javaCmd $javaCmd -baseDir $baseDir -cacheDir $cacheDir -props $props -cmdLineArgs $cmdLineArgs.args
-    exit $LASTEXITCODE
-  }
-
 }
 
 $ErrorActionPreference = "Stop"

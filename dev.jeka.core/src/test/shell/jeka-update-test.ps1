@@ -1,0 +1,1 @@
+. ..\..\shell\jeka_update.ps1

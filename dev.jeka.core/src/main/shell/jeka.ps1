@@ -344,6 +344,7 @@ class Jdks {
   hidden Install([string]$distrib, [string]$version, [string]$targetDir) {
     MessageInfo "Downloading JDK $distrib $version. It may take a while..."
     $jdkurl="https://api.foojay.io/disco/v3.0/directuris?distro=$distrib&javafx_bundled=false&libc_type=c_std_lib&archive_type=zip&operating_system=windows&package_type=jdk&version=$version&architecture=x64&latest=available"
+    MessageVerbose "Downloading from $jdkUrl"
     $zipExtractor = [ZipExtractor]::new($jdkurl, $targetDir)
     $zipExtractor.ExtractRootContent()
   }
@@ -435,8 +436,12 @@ class ZipExtractor {
     Remove-Item -Path $tempDir
     Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
     $subDirs = Get-ChildItem -Path $tempDir -Directory
-    $root = $tempDir + "\" + $subDirs[0]
-    Move-Item -Path $root -Destination $this.dir -Force
+    $root = "$tempDir\$($subDirs[0])"
+    MessageVerbose "Copying downloaded JDK $root to $($this.dir)"
+    if (-not (Test-Path -Path $this.dir)) {
+      New-Item -ItemType Directory -Path $this.dir
+    }
+    Move-Item -Path "$root\*" -Destination $this.dir -Force
     Remove-Item -Path $zipFile
     Remove-Item -Path $tempDir -Recurse
   }

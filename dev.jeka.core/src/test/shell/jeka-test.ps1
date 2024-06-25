@@ -7,3 +7,5 @@ if ($myUrl -match $gitUrlRegex) {
 } else {
     Write-Host "_____$myUrl------not remote"
 }
+
+
