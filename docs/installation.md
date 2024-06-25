@@ -20,8 +20,10 @@ curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 
 ## Windows
 
-For installing and running JeKa on Windows, you don't need to install 3rd party software.
-As there's currently no install script available for now *(work in progress)*, you need to install it manually.
+Execute in PowerShell :
+```shell
+iex "& { $(iwr -useb https://jeka.dev/install.ps1) } install check"
+```
 
 ## Manual installation
 

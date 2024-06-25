@@ -23,6 +23,8 @@
 # The passed arguments are interpolated then passed to JeKA engine.
 #
 
+$ErrorActionPreference = "Stop"
+
 function MessageInfo {
   param([string]$msg)
   if ($global:QuietFlag -ne $true) {
@@ -56,8 +58,6 @@ function Get-JekaUserHome {
   }
 }
 
-
-
 function Get-LastVersion() {
   $metadataUrl = "https://repo1.maven.org/maven2/dev/jeka/jeka-core/maven-metadata.xml"
   $xmlContent = Invoke-WebRequest -Uri $metadataUrl
@@ -74,7 +74,7 @@ class CmdLineArgs {
   }
 
 
- [int] GetIndexOfFirstOf([Array]$candidates) {
+  [int] GetIndexOfFirstOf([Array]$candidates) {
     foreach ($arg in $candidates) {
       $index = $this.args.IndexOf($arg)
       if ($index -ne -1) {
@@ -125,9 +125,6 @@ class ZipExtractor {
     Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
     $subDirs = Get-ChildItem -Path $tempDir -Directory
     $root = $tempDir + "\" + $subDirs[0]
-    if (Test-Path -Path $this.dir) {
-      Remove-Item -Path $this.dir -Recurse -Force
-    }
     Move-Item -Path $root -Destination $this.dir -Force
     Remove-Item -Path $zipFile
     Remove-Item -Path $tempDir -Recurse
@@ -184,8 +181,11 @@ function install() {
 
   $mavenRepo = "https://repo1.maven.org/maven2"
   $url = $mavenRepo + "/dev/jeka/jeka-core/" + $version + "/jeka-core-" + $version + "-distrib.zip"
-  $installDir = Get-JekaUserHome
-  $installDir = "$installDir\bin"
+  $jekaHome = Get-JekaUserHome
+  if (!(Test-Path -Path $jekaHome)) {
+    $null = [System.IO.Directory]::CreateDirectory($jekaHome)
+  }
+  $installDir = "$jekaHome\bin"
   MessageInfo "Installing Jeka version $version in $installDir"
   $extractor = [ZipExtractor]::new($url, $installDir)
   $extractor.ExtractRootContent()
@@ -201,13 +201,24 @@ function Main {
   $cmdLineArgs = [CmdLineArgs]::new($arguments)
   if ($cmdLineArgs.GetIndexOfFirstOf("install") -ne -1) {
     $version = Get-LastVersion
+    MessageInfo ""
     install($version)
+    MessageInfo "JeKa $version is installed."
+
     if ($cmdLineArgs.GetIndexOfFirstOf("check") -ne -1) {
-      MessageInfo "Checking install with 'jeka --version'. This requires JDK download."
-      jeka --version
+      MessageInfo ""
+      MessageInfo "Now, let's check installation. This requires JDK download."
+      cmd.exe /c "$(Get-JekaUserHome)\bin\jeka --version"
+      if ($LASTEXITCODE -ne 0) {
+        exit 1
+      }
+      MessageInfo ""
+      MessageInfo "Everything seems fine."
     }
-    MessageInfo "JeKa $version is properly installed."
-    MessageInfo "Later on, you can upgrade to a different JeKa version by running either 'jeka-update' or 'jeka-update <version>'."
+    MessageInfo "" # needed as jeka --version does not inclue carriage return
+
+    MessageInfo "Later, update JeKa by running 'jeka-update' or 'jeka-update <version>."
+    MessageInfo "Please start a new shell to run jeka."
 
   } else {
     $version
