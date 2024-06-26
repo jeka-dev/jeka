@@ -249,14 +249,6 @@ public abstract class JkScaffold {
             StringBuilder sb = new StringBuilder();
             if (!JkUtilsString.isBlank(jekaDistribLocation)) {
                 sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
-
-            } else {
-                String effectiveJekaVersion = jekaVersion != null ? jekaVersion : lastJekaVersion();
-
-                // TODO remove this check when 0.11.x will be released.
-                if (!effectiveJekaVersion.startsWith("0.10.")) {
-                    sb.append("jeka.version=" + effectiveJekaVersion + "\n");
-                }
             }
 
             if (!JkUtilsString.isBlank(this.jekaDistribRepo)) {

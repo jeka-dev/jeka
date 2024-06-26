@@ -298,10 +298,13 @@ public final class JkUtilsPath {
             return;
         }
         try {
-            if (path.getParent() != null) {
-                Files.createDirectories(path.getParent());
+            Path parentDir = path.getParent();
+            if (parentDir != null && !Files.exists(parentDir)) {
+                Files.createDirectories(parentDir);
             }
             Files.createFile(path, attrs);
+        } catch (FileAlreadyExistsException e) {
+            JkLog.warn("File {} already exists", path); // Oddly happens time to time
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

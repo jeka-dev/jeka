@@ -70,7 +70,7 @@ class IntelliJProject {
      * Finds all .iml files in the specified root directory and its subdirectories.
      */
     public List<Path> findImlFiles() {
-        return JkPathTree.of(rootDir).andMatching(true, "**.iml").getFiles();
+        return JkPathTree.of(rootDir).andMatching(true, "**.iml").andMatching(false, ".jeka-work/**/*").getFiles();
     }
 
     /**

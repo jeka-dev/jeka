@@ -159,17 +159,15 @@ public final class JkProjectScaffold extends JkScaffold {
      */
     private void configureScaffold() {
 
+        addJekaPropValue("@project=");
         if (useSimpleStyle) {
             project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
             addJekaPropValue(SIMPLE_STYLE_PROP);
         }
 
-        addJekaPropValue("@project=");
-
         if (kind == Kind.REGULAR) {
             String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
             addFileEntry(BUILD_CLASS_PATH, code);
-            //addJekaPropValue(JkConstants.DEFAULT_KBEAN_PROP + "=project");
 
         } else if (kind == Kind.PLUGIN) {
             String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");
