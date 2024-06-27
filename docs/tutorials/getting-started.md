@@ -26,6 +26,8 @@ class Script extends KBean {
 !!! tip
     If you use *IntelliJ*, execute `jeka intellij: iml` to synchronize the IDE metadata. 
     If IntelliJ does not reflect changes, execute `jeka intellij: initProject`
+    By default, 'jeka-src' is declared as a test source folder of the Intellij module.
+    You can make it live in its own module by executing `jeka intellij: jekaSrcAsModule`
 
 Execute `jeka hello`. A *Hello World* message is printed on console.
 ```{ .txt .no-copy }
@@ -120,6 +122,10 @@ dependencies and execute `jeka --inspect`.
 This displays runtime information about JeKa run, including the resulting classpath.
 
 You can add, as many `@JkInjectClasspath` annotations you need, on the class.
+
+!!! note
+    JeKa also accept JBang notation for declaring dependencies.
+    You can use `//DEPS com.github.lalyos:jfiglet:0.0.9"` in place of `@JkInjectClasspath("com.github.lalyos:jfiglet:0.0.9")`
 
 ### Use BOM dependencies
 

@@ -27,17 +27,16 @@ See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-
 Nothing prevents to use JeKa in conjunction of Maven or Gradle in the same project,
 except that in IDE, synchronisation may interfere between the 2 systems.
 
-To avoid that, JeKa proposes a simple solution :
+To avoid that, JeKa proposes a simple solution. In your existing Maven/Gradle project do :
 
-1. Creates the project in IDE as you normally do for Maven or Gradle
-2. Execute : `jeka base: scaffold`. This generates the folder/file structure for JeKa
-3. Add `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` in *jeka.properties* file.
-4. Execute : `jeka intellij: iml`. The iml file should be created under *jeka-src* folder.
-5. Execute : `jeka intellij: initProject`. To create a module according the generated iml file.
+1. Execute : `jeka base: scaffold`. This generates the folder/file structure for JeKa
+2. Execute `jeka intellij: jekaSrcAsModule` in root dir
+
+This will add a property `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` in your *jeka.properties* file.
 
 !!! note
     'jeka-src' should now live in its own Intellij module. If your IDE does not reflect 
-    this state after executing step 5, just close and re-open the project.
+    this state, just close and re-open the project.
 
 Now *jeka-src* live in its own IntelliJ module.
 Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.

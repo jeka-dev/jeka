@@ -21,6 +21,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
@@ -30,6 +31,7 @@ import dev.jeka.core.tool.Main;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -86,31 +88,11 @@ public final class IntellijKBean extends KBean {
         }
     }
 
+
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
         Path imlPath = getImlFile();
-
-        // Determine if we are trying to generate an iml for the 'jeka-src' submodule
-        String extensionLessFileName = JkUtilsString.substringBeforeLast(imlPath.getFileName().toString(), ".");
-        boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName);
-        JkIml iml = imlGenerator.computeIml(isForJekaSrcModule);
-
-        JkPathFile.of(imlPath)
-                .deleteIfExist()
-                .createIfNotExist()
-                .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        JkLog.info("Iml file generated at " + imlPath);
-
-        /*  why did we need to generate modules.xml ?
-        if ("true".equals(getRunbase().getProperties().get(IML_SKIP_MODULE_XML_PROP))) {
-            return;
-        }
-        IntelliJProject intelliJProject = IntelliJProject.of(getBaseDir());
-        if (!Files.exists(intelliJProject.getModulesXmlPath())) {
-            intelliJProject.generateModulesXml(imlPath);
-            JkLog.info("%s generated.", intelliJProject.getModulesXmlPath());
-        }
-         */
+        generateIml(imlPath);
     }
 
     /**
@@ -136,6 +118,37 @@ public final class IntellijKBean extends KBean {
                         })
                 .distinct()
                 .forEach(this::generateImlExec);
+    }
+
+    @JkDoc("Make jeka-src dir an IntelliJ module")
+    public void jekaSrcAsModule() {
+
+        // remove current iml file if exist
+        if (isMavenOrGradlePresent()) {
+            Path currentImlFile = getImlFile();
+            JkUtilsPath.deleteIfExists(currentImlFile);
+        }
+
+        // Append the property to jeka.properties
+        Path newImlFile = imlFile == null ?
+                getBaseDir().resolve(JkConstants.JEKA_SRC_DIR).resolve(".idea").resolve("jeka-src.iml")
+                : getBaseDir().resolve(imlFile);
+        String relativePath = getBaseDir().relativize(newImlFile).toString();
+        Path jekaPropertesPath = getBaseDir().resolve(JkConstants.PROPERTIES_FILE);
+        String property = "@intellij.imlFile=" + relativePath;
+        boolean alreadyPresent = JkUtilsPath.readAllLines(jekaPropertesPath).stream()
+                        .map(String::trim)
+                        .anyMatch(property::equals);
+        if (!alreadyPresent) {
+            JkUtilsPath.write(jekaPropertesPath, ("\n" + property).getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            JkLog.info("Added %s to %s", property, JkConstants.PROPERTIES_FILE );
+        }
+
+        // generate iml
+        this.generateIml(newImlFile);
+        this.modulesXml();
+        JkLog.info("Please, close the project and re-open it to make changes effective.");
+
     }
 
     @JkDoc("Re-init the project by deleting workspace.xml and touching iml file")
@@ -202,6 +215,19 @@ public final class IntellijKBean extends KBean {
         return this;
     }
 
+    private void generateIml(Path imlPath) {
+        // Determine if we are trying to generate an iml for the 'jeka-src' submodule
+        String extensionLessFileName = JkUtilsString.substringBeforeLast(imlPath.getFileName().toString(), ".");
+        boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName);
+        JkIml iml = imlGenerator.computeIml(isForJekaSrcModule);
+
+        JkPathFile.of(imlPath)
+                .deleteIfExist()
+                .createIfNotExist()
+                .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
+        JkLog.info("Iml file generated at " + imlPath);
+    }
+
     private void generateImlExec(Path moduleDir) {
         JkLog.startTask("Generate iml file on '%s'", moduleDir);
         Main.exec(moduleDir, "intellij#iml", "-dci");
@@ -210,6 +236,13 @@ public final class IntellijKBean extends KBean {
 
     private Path getImlFile() {
         return Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(getBaseDir()));
+    }
+
+    private boolean isMavenOrGradlePresent() {
+        return Files.exists(getBaseDir().resolve("pom.xml")) ||
+                Files.exists(getBaseDir().resolve("gradle")) ||
+                Files.exists(getBaseDir().resolve("build.gradle")) ||
+                Files.exists(getBaseDir().resolve("build.gradle.kts"));
     }
 
 
