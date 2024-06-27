@@ -52,6 +52,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Version of the project. Can be used by a CI/CD tool to inject version.")
     public String version;
 
+    @JkDoc("Module id of the project. Only needed if the project is published on a Maven repository.")
+    public String moduleId;
+
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
@@ -339,6 +342,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         if (!JkUtilsString.isBlank(version)) {
             project.setVersion(version);
+        }
+        if (!JkUtilsString.isBlank(moduleId)) {
+            project.setModuleId(moduleId);
         }
         project.dependencyResolver.setFileSystemCacheDir(getBaseDir().resolve(JkConstants.JEKA_WORK_PATH)
                 .resolve("project-dep-resolution-cache"));
