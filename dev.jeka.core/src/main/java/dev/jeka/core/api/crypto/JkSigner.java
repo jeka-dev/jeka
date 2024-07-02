@@ -47,9 +47,7 @@ public interface JkSigner extends JkFileSigner {
         JkPathFile.of(targetSignatureFile).deleteIfExist().createIfNotExist();
         try(InputStream is = JkUtilsIO.inputStream(fileToSgn.toFile());
             OutputStream os = JkUtilsIO.outputStream(targetSignatureFile.toFile(), false)) {
-
             sign(is, os);
-
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -41,38 +41,54 @@ public final class JkGpgSigner implements JkSigner {
     private static final JkInternalGpgDoer INTERNAL_GPG_DOER =
             JkInternalGpgDoer.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
 
-    private final Path secretRingPath;
+    private final Path secretRingPath;  // if the key is contained in a file
+
+    private final String keyName; // if the key is contained in a file
+
+    private final String asciiKey; // if key is passed as an asc string
 
     private final String passphrase;
 
-    private final String keyName;
 
-    private JkGpgSigner(Path secretRingPath, String password, String keyName) {
+
+    private JkGpgSigner(Path secretRingPath, String passphrase, String keyName, String asciiKey) {
         super();
         this.secretRingPath = secretRingPath;
-        this.passphrase = password;
+        this.passphrase = passphrase;
         this.keyName = keyName;
+        this.asciiKey = asciiKey;
     }
 
     /**
-     * Creates a new instance of JkGpg with the specified secret ring, password, and key name.
+     * Creates a new instance of {@link JkGpgSigner} with the specified secret ring, passphrase, and key name.
      *
      * @param secRing    the path to the secret ring file
-     * @param password   the password for the secret ring file
+     * @param passphrase   the passphrase for the secret ring file
      * @param keyName    the name of the key to use within the secret ring file.
      *                   Can be empty if secRing contains a single key.
      * @return a new instance of JkGpg
      */
-    public static JkGpgSigner of(Path secRing, String password, String keyName) {
-        return new JkGpgSigner(secRing, password, keyName);
+    public static JkGpgSigner ofSecretRing(Path secRing, String passphrase, String keyName) {
+        return new JkGpgSigner(secRing, passphrase, keyName, null);
     }
 
     /**
-     * Creates a JkGpg with the specified secret key ring, assuming the secret ring
+     * Creates a {@link JkGpgSigner} with the specified secret key ring, assuming the secret ring
      * contains a single key.
      */
-    public static JkGpgSigner of(Path secRing, String password) {
-        return of(secRing, password, "");
+    public static JkGpgSigner ofSecretRing(Path secRing, String password) {
+        return ofSecretRing(secRing, password, "");
+    }
+
+    /**
+     * Creates a new instance of {@link JkGpgSigner} with the specified ascii key and passphrase.
+     *
+     * @param asciiKey The armored key to use for signing. It is generally by exporting key in asc format
+     * @param passphrase The passphrase for the armored key. The exported key is protected by a passphrase.
+     *                 This is the passphrase to use for decoding the armored key.
+     */
+    public static JkGpgSigner ofAsciiKey(String asciiKey, String passphrase) {
+        return new JkGpgSigner(null, passphrase, null, asciiKey);
     }
 
     /**
@@ -94,7 +110,23 @@ public final class JkGpgSigner implements JkSigner {
         }
         String secretKeyPassword = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.passphrase"),
                 System.getenv("JEKA_GPG_PASSPHRASE"), "");
-        return JkGpgSigner.of(sec, secretKeyPassword, "");
+        return JkGpgSigner.ofSecretRing(sec, secretKeyPassword, "");
+    }
+
+    /**
+     * Creates a new instance of {@link JkGpgSigner} with the standard properties.<br/>
+     * Use <code>jeka.gpg.secret-key</code> property or <code>JEKA_GPG_SECRET_KEY</code> for passing private ascii key.
+     * <br/>
+     * Use <code>jeka.gpg.passphrase</code> property or <code>EKA_GPG_PASSPHRASE</code> for passing key password
+     *
+     * @return a new instance of JkGpgSigner
+     */
+    public static JkGpgSigner ofStandardProperties() {
+        String asciikey = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.secret-key"),
+                System.getenv("JEKA_GPG_SECRET_KEY"), System.getenv("jeka.gpg.secret-key"));
+        String secretKeyPassword = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.passphrase"),
+                System.getenv("JEKA_GPG_PASSPHRASE"), System.getenv("jeka.gpg.passphrase"));
+        return JkGpgSigner.ofAsciiKey(asciikey, secretKeyPassword);
     }
 
     /**
@@ -103,7 +135,7 @@ public final class JkGpgSigner implements JkSigner {
      * @param keyName Can be empty if secret ring contains a single key.
      */
     public static JkGpgSigner ofDefaultGnuPg(String password, String keyName) {
-        return of(getDefaultGpgSecretRingPath(), password, keyName);
+        return ofSecretRing(getDefaultGpgSecretRingPath(), password, keyName);
     }
 
     /**
@@ -125,8 +157,12 @@ public final class JkGpgSigner implements JkSigner {
 
     @Override
     public void sign(InputStream streamToSign, OutputStream signatureStream) {
+        if (this.asciiKey != null) {
+            INTERNAL_GPG_DOER.sign(streamToSign, signatureStream, asciiKey, passwordAsCharArray());
+            return;
+        }
         assertSecretRingExist();
-        INTERNAL_GPG_DOER.sign(streamToSign, signatureStream, secretRingPath, keyName, passwordAsCharArray(), true);
+        INTERNAL_GPG_DOER.sign(streamToSign, signatureStream, secretRingPath, keyName, passwordAsCharArray());
     }
 
     private char[] passwordAsCharArray() {

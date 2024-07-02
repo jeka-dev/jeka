@@ -132,6 +132,14 @@ public class JkRepoProperties {
         return result;
     }
 
+    public String getPublishUsername() {
+        return properties.get("jeka.repos.publish.username");
+    }
+
+    public String getPublishPassword() {
+        return properties.get("jeka.repos.publish.password");
+    }
+
     private JkRepoSet getRepos(String propertyName) {
         String nameOrUrls = properties.get(propertyName);
         if (JkUtilsString.isBlank(nameOrUrls)) {

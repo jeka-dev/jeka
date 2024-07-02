@@ -16,7 +16,7 @@ public class BcGpgDoerTest {
         Path asmSignature = Files.createTempFile("jeka", ".asm");
         InputStream secring = JkGpgTest.class.getResourceAsStream("secring.gpg");
         BcGpgDoer.sign(sample(), secring, "",
-                JkUtilsIO.outputStream(asmSignature.toFile(), false), "jerkar".toCharArray(), true);
+                JkUtilsIO.outputStream(asmSignature.toFile(), false), "jerkar".toCharArray());
         final boolean result = BcGpgDoer.verify(sample(), JkUtilsIO.inputStream(asmSignature.toFile()),
                 JkGpgTest.class.getResourceAsStream("pubring.gpg"));
         System.out.println(result);

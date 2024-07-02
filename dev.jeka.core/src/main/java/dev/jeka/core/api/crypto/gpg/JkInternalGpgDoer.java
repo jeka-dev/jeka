@@ -33,10 +33,10 @@ public interface JkInternalGpgDoer {
                    Path publicRingPath);
 
     void sign(InputStream streamToSign, OutputStream signatureStream,
-              Path secretRingPath, String keyName, char[] pass, boolean armor);
+              Path secretRingPath, String keyName, char[] pass);
 
     void sign(InputStream streamToSign, OutputStream signatureStream,
-              String asciiKey, String keyPassphrase, boolean armorSignature);
+              String asciiKey, char[] keyPassphrase);
 
     static JkInternalGpgDoer of(JkProperties properties) {
         return Cache.get(properties);
