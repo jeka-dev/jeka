@@ -86,7 +86,7 @@ Its key features include:
 
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 - [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
-- [Deploy a library on Maven Central](https://github.com/djeang/vincer-dom/blob/master/jeka.properties)
+- [Deploy a library on Maven Central](https://github.com/jeka-dev/openapi-plugin?tab=readme-ov-file#publication-on-maven-central)
 
 
 ### Reuse Build Logic
