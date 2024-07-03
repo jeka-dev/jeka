@@ -17,6 +17,7 @@
 package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.crypto.JkSigner;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsObject;
@@ -122,10 +123,15 @@ public final class JkGpgSigner implements JkSigner {
      * @return a new instance of JkGpgSigner
      */
     public static JkGpgSigner ofStandardProperties() {
+        String unset = "-- unset --";
         String asciikey = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.secret-key"),
-                System.getenv("JEKA_GPG_SECRET_KEY"), System.getenv("jeka.gpg.secret-key"));
+                System.getenv("JEKA_GPG_SECRET_KEY"), System.getenv("jeka.gpg.secret-key"), unset);
         String secretKeyPassword = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.passphrase"),
-                System.getenv("JEKA_GPG_PASSPHRASE"), System.getenv("jeka.gpg.passphrase"));
+                System.getenv("JEKA_GPG_PASSPHRASE"), System.getenv("jeka.gpg.passphrase"), unset);
+        if (unset.equals(asciikey)) {
+            JkLog.warn("No signing key where found in JEKA_GPG_SECRET_KEY or jeka.gpg.secret-key properties");
+            JkLog.warn("No passphrase signing key where found in JEKA_GPG_PASSPHRASE or jeka.gpg.passphrase properties");
+        }
         return JkGpgSigner.ofAsciiKey(asciikey, secretKeyPassword);
     }
 
