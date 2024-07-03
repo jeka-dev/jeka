@@ -254,7 +254,7 @@ class MasterBuild extends KBean {
 
     private JkRepoSet publishRepo() {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);
-        JkGpgSigner gpg = JkGpgSigner.ofStandardProject(this.getBaseDir());
+        JkGpgSigner gpg = JkGpgSigner.ofStandardProperties();
         JkRepo releaseRepo =  JkRepo.ofMavenOssrhDeployRelease(ossrhUser, ossrhPwd,  gpg);
         releaseRepo.publishConfig
                     .setVersionFilter(jkVersion -> !jkVersion.isSnapshot());
