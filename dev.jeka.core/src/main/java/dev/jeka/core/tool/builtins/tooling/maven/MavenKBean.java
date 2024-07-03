@@ -160,17 +160,7 @@ public final class MavenKBean extends KBean {
         return result;
     }
 
-    public static class JkPublication {
 
-        private JkPublication() {}
-
-        @JkDoc("POM metadata to publish. Mainly useful for publishing to Maven Central")
-        public final JkPomMetadata metadata = new JkPomMetadata();
-
-        @JkDoc("If not null, the publication will be published on this repo")
-        public PredefinedRepo predefinedRepo;
-
-    }
 
     public static class JkPomMetadata {
 
@@ -230,7 +220,17 @@ public final class MavenKBean extends KBean {
                 );
             }
         }
+    }
 
+    public static class JkPublication {
+
+        @JkDoc("POM metadata to publish. Mainly useful for publishing to Maven Central")
+        public final JkPomMetadata metadata = new JkPomMetadata();
+
+        @JkDoc("If not null, the publication will be published on this repo")
+        public PredefinedRepo predefinedRepo;
+
+        private JkPublication() {}
 
     }
 
