@@ -31,8 +31,8 @@ jobs:
       env:
         OSSRH_USER: ${{ secrets.OSSRH_USER }}
         OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
-        jeka.gpg.secret-key: ${{ secrets.GPG_SECRET_KEY}}
-        jeka.gpg.passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        JEKA_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY}}
+        JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         GITHUB_BRANCH: ${{ github.ref }}
