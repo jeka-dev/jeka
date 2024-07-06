@@ -72,6 +72,8 @@ public class JkProjectFlatFacade {
             project.setJarMaker(project.packaging::createBinJar);
         } else if (jarType == JkProjectPackaging.JarType.FAT) {
             project.setJarMaker(project.packaging::createFatJar);
+        } else if (jarType == JkProjectPackaging.JarType.SHADE) {
+            project.setJarMaker(project.packaging::createShadeJar);
         } else {
             throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
         }

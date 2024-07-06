@@ -15,6 +15,7 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
+import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
@@ -36,7 +37,9 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
 
     AntStyleKBean() {
         load(IntellijKBean.class)
-                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, false )
+        ;
 
     }
 

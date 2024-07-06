@@ -19,7 +19,9 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsZip;
 
@@ -114,6 +116,11 @@ public final class JkJarPacker {
 
         // On Windows, this may happen that the deletion fails cause another process is using it
         JkUtilsPath.deleteIfExistsSafely(originalJar);
+    }
+
+    public static void makeShadeJar(Path originalJar, Iterable<Path> extraJars, Path outputJar) {
+        JkInternalJarShader.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties())
+                .shade(originalJar, JkUtilsIterable.setOf(extraJars), outputJar);
     }
 
 }

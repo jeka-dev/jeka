@@ -134,6 +134,14 @@ public class JkDependencySetModifier {
     }
 
     /**
+     * Removes all dependencies from the JkDependencySetModifier.
+     */
+    public JkDependencySetModifier removeAll() {
+        modifier = modifier.andThen(deps -> JkDependencySet.of());
+        return this;
+    }
+
+    /**
      * Removes a file-based dependency from the JkDependencySetModifier.
      *
      * @param file the file representing the dependency to be removed

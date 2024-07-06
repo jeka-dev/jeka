@@ -29,6 +29,7 @@ import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkDoc;
 
 import java.nio.file.Files;
@@ -49,7 +50,10 @@ public class JkProjectPackaging {
         REGULAR,
 
         @JkDoc("Jar including classes and resources of dependencies. This Jar is not shaded.")
-        FAT
+        FAT,
+
+        @JkDoc("Jar including classes and resources of dependencies, by relocating packages of dependencies for avoiding classpath collisions.")
+        SHADE
     }
 
     /**
@@ -177,6 +181,21 @@ public class JkProjectPackaging {
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
         JkLog.endTask("Fat Jar created at " + friendlyPath(target));
+    }
+
+    /**
+     * Same as createFatJar but relocate packages of the dependency jars in
+     * order to not collide with dependencies in classpath.
+     */
+    public void createShadeJar(Path target) {
+        JkLog.startTask("create-shade-jar");
+        Path mainJar = JkUtilsPath.createTempFile("jk_original-shade-", ".jar");
+        JkUtilsPath.deleteIfExists(mainJar);
+        createBinJar(mainJar);
+        Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
+        JkJarPacker.makeShadeJar(mainJar, classpath, target);
+        JkUtilsPath.deleteIfExists(mainJar);
+        JkLog.endTask("Shade Jar created at " + friendlyPath(target));
     }
 
     /**
