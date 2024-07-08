@@ -39,12 +39,24 @@ org.junit.jupiter:junit-jupiter:5.8.1
 
 ### Configure jar type
 
-By default, JeKa produce regular jar files. Nevertheless it can be configured to produce fat jar (jar including all dependencies).
-
+By default, JeKa produce regular jar files. Nevertheless it can be configured to produce *fat jar* (jar including all dependencies), 
+or *shade jar* (same with relocated packages to avoid classpath collision).
 
 Edit *jeka.properties* and add :
 ```properties
 @project.pack.jarType=FAT
+```
+This configure project to create a single jar which is a *fat jar*. This is perfectly fine for bundling applications.
+
+If you bundle a library, you may prefer to create an additional *shade* jar, that embeds dependency jars gracefully.
+
+For this, edit *jeka.properties* and add :
+```properties
+# Create an extra jar suffixed with 'all-deps*
+@project.pack.shadeJarClassifier=all-deps
+
+# Instruct Maven plugin to publish it as well.
+@maven.publication.extraArtifacts=all-deps
 ```
 
 ### Configure Layout

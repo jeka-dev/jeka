@@ -190,6 +190,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("Type of jar to produce for the main artifact.")
         public JkProjectPackaging.JarType jarType = JkProjectPackaging.JarType.REGULAR;
 
+        @JkDoc("If not blank, the project will produce an extra shade jar having the specified classifier name.\n" +
+                "A shade Jar embeds classes coming from dependency jars. The dependency class packages are relocated to " +
+                "avoid potential collisions with other jar present in the classpath.")
+        public String shadeJarClassifier;
+
         @JkDoc("Main class name to include in Manifest. Use 'auto' to automatic discovering.")
         public String mainClass;
 
@@ -367,6 +372,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         if (pack.mainClass != null) {
             project.packaging.setMainClass(pack.mainClass);
+        }
+        if (!JkUtilsString.isBlank(pack.shadeJarClassifier)) {
+            project.flatFacade.addShadeJarArtifact(pack.shadeJarClassifier);
         }
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());

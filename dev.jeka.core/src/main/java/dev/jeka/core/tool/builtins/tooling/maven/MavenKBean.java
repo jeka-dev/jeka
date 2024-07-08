@@ -24,13 +24,17 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @JkDoc("Manages Maven publication for project and 'jeka-src'")
 public final class MavenKBean extends KBean {
@@ -86,8 +90,6 @@ public final class MavenKBean extends KBean {
         JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
     }
 
-
-
     /**
      * Returns the Maven Publication associated with this KBean
      */
@@ -95,7 +97,6 @@ public final class MavenKBean extends KBean {
 
         // maven Can't be instantiated in init(), cause it will fail if there is no project or self kbean,
         // that may happen when doing a 'showPomDeps'.
-
         if (mavenPublication != null) {
             return mavenPublication;
         }
@@ -123,6 +124,9 @@ public final class MavenKBean extends KBean {
 
         // Add Publish Repos from JKProperties
         mavenPublication.setRepos(getPublishReposFromProps());
+
+        // Add artifacts declared in "publication.extraArtifacts"
+        publication.extraArtifacts().forEach(mavenPublication::putArtifact);
         
         return mavenPublication;
     }
@@ -229,6 +233,29 @@ public final class MavenKBean extends KBean {
 
         @JkDoc("If not null, the publication will be published on this repo")
         public PredefinedRepo predefinedRepo;
+
+        @JkDoc("Coma separated string of artifact classifiers to publish, in format [classifier] or [classifier].[extension].\n" +
+               "This assumes the artifact file be present in jeka-output dir.\n" +
+                "Example: 'alldeps', 'doc.zip'")
+        public String extraArtifacts;
+
+        private List<JkArtifactId> extraArtifacts() {
+            if (JkUtilsString.isBlank(extraArtifacts)) {
+                return Collections.emptyList();
+            }
+            return Arrays.stream(extraArtifacts.split(","))
+                    .map(String::trim)
+                    .map(JkPublication::parse)
+                    .collect(Collectors.toList());
+        }
+
+        private static JkArtifactId parse(String artifactId) {
+            if (artifactId.contains(".")) {
+                return JkArtifactId.of(JkUtilsString.substringBeforeFirst(artifactId, "."),
+                        JkUtilsString.substringAfterFirst(artifactId, "."));
+            }
+            return JkArtifactId.of(artifactId, "jar");
+        }
 
         private JkPublication() {}
 

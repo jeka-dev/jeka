@@ -17,6 +17,7 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -77,6 +78,13 @@ public class JkProjectFlatFacade {
         } else {
             throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
         }
+        return this;
+    }
+
+    public JkProjectFlatFacade addShadeJarArtifact(String classifier) {
+        JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
+        Path path = project.artifactLocator.getArtifactPath(artifactId);
+        project.packActions.append(() -> project.packaging.createShadeJar(path));
         return this;
     }
 
