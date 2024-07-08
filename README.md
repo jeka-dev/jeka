@@ -93,8 +93,8 @@ Its key features include:
 - [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/demo-build-templates-consumer)
 
 
-### Complete existing Build Tools
-- [JeKa used along Maven to build and run Quarkus native app](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+### Combine with existing Build Tools
+- [Use JeKa along Maven to build and run Quarkus native app from anywhere](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
 <br/>
 
