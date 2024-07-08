@@ -1,7 +1,7 @@
 # Installation
 
 !!! note
-    You don't need to install JeKa to build projects hosting *jeka* shell scripts in their Git repository.
+    You don't need to install JeKa to build projects that have *JeKa* shell scripts in their Git repository.
     
     Nevertheless, this is convenient to have it installed for invoking it easily from everywhere.
 
