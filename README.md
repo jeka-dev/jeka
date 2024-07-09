@@ -17,6 +17,19 @@
 > 
 > The official documentation provides information for both versions and a migration guide.
 
+## Contribute 
+
+Are you a developer, technical writer, or user interested in making an impact?
+We invite you to join us in contributing code, documenting knowledge, or providing valuable feedback.
+Your participation is crucial in creating something great.
+At Jeka, every contribution counts, and every voice matters.
+Collaborate with like-minded individuals and help shape the future of our community.
+
+Let’s build, learn, and grow together. Join us and make a difference.
+
+See [contribution page](CONTRIBUTING.md) for starting.
+
+
 ##  What is JeKa ?
 
 **JeKa** is a Java build tool for building or executing Java applications and scripts, 
@@ -38,7 +51,6 @@ Its key features include:
 
 
 -  **Kotlin Support:** Scripts or applications can also be implemented using the *Kotlin* language.
-
 
 ## Use-cases
 
@@ -123,7 +135,6 @@ You can get a description of the functionalities provided by the KBeans by execu
 Additionnaly JeKa offers high and low level api for dealing with 
 dependency management, compilation, testing, Git, GPG signing, Scaffolding, Maven publication, Docker image maker, ...
 
-
 ### External Plugins
 
 External plugins require to be explicitly imported. They are hosted as jar file in Maven Central.
@@ -142,85 +153,31 @@ The following plugins are maintained in their own repos.
 
 * [OpenApi Plugin](https://github.com/jeka-dev/openapi-plugin)
 
+## Versioning
 
-# Community
+JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
+
+## Community
 
 <a class="btn btn-link btn-neutral" href="https://projects.ow2.org/view/jeka">
               <img src="https://jeka.dev/images/ow2.svg" alt="Image" height="60" width="60"></a>
               
 This project is supported by OW2 consortium.
 
-You can ask question using regular using [this repository issues](https://github.com/jerkar/jerkar/issues).
+Issues: https://github.com/jeka-dev/jeka/issues
 
-You can also use direct emailing for questions and support : djeangdev@yahoo.fr
+Discussions: https://github.com/orgs/jeka-dev/discussions
 
-A twitter account also exist : https://twitter.com/djeang_dev
+Twitter: https://github.com/jeka-dev/jeka
 
-## Versioning 
-
-JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
-
-## Developer Notes
-
-### How is Organized this Repo ?
-
-This repository is organized as a _monorepo_. It contains The JeKa core project along plugins and samples for 
-automation testing.
-
-* dev.jeka.core : Complete JeKa tool
-* plugins : JeKa plugins released along JeKa core (Springboot, NodeJs, Jacoco and Sonarqube)
-* samples : Sample projects serving for examples and automation testing
-* dev.jeka.master : The master build for building all together.
-
-JeKa builds itself. To build JeKa full distribution from sources, the simpler is to use your IDE.
-
-### Build JeKa from IntelliJ
-
-* Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
-* If you have not installed JeKa plugin, add the `JEKA_CACHE_DIR` variable pointing on [USER_HOME]/.jeka/cache
-* Make sure the project is configured with a JDK8 or higher.
-* Run 'FULL BUILD' in Intellij _Run Configurations_ to perform a full build of core + plugins + complete test suite.
-* Run 'FAST BUILD' in Intellij _Run Configurations_ to perform a fast build of the core without tests.
-* Set environment variable `JEKA_HOME` = *[JeKa project location]/dev.jeka.core/jeka/output/distrib* and add it to `PATH` environment.
-
-> For debugging the project, you may have to set up Intellij in order to workaround with an Intellij issue :
-> Settings/Preferences | Build, Execution, Deployment | Debugger | Data Views | Kotlin | enable "Disable coroutine agent.
-> [See here](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu)
+Email support : support@jeka.dev
 
 
-### Build JeKa from Command Line
-
-JeKa builds itself, but we need to compile the JeKa sources prior to execute it. 
-For this, a small _Ant_ script bootstraps the build process by compiling JeKa first then launch 
-the JeKa build.
-
-At the repository root dir, execute : `ant -f .github\workflows\build.xml`.
-
-To build the project including Sonarqube and test coverage  : `ant -f .github\workflows\build.xml -Dsonar.host.url=... `.  
-Cause of Sonarqube scanner, this command has to be run with a JDK >= 11.
 
 
-## How to Edit Documentation ?
-
-Documentation is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). Documentation sources are located (here)[docs].
-
-You must install _Python_ and _Material for MkDocs_ on your computer 
-(`pip install mkdocs-material`) prior to execute following command lines from the repo root directory :
-```shell
-mkdocs serve
-```
-This generates and serves the documentation on localhost:8000
-
-The documentation is also supposed to be regenerated after each push/pull-request.
 
 
-## How to Release ?
 
-Just use the [github release mechanism](https://github.com/jeka-dev/jeka/releases).
-Creating a release implies creating a tag. This will trigger a build and a publication on Maven Central.
 
-<p align="center">
-    <img src="docs/images/mascot.png" width='420' height='420' />
-</p>
 
 
