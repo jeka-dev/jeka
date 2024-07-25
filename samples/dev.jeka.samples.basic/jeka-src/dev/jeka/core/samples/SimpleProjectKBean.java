@@ -42,26 +42,26 @@ public class SimpleProjectKBean extends KBean {
                .add("org.junit.jupiter:junit-jupiter:5.10.1");
         project.flatFacade
                .addTestExcludeFilterSuffixedBy("IT", skipIT);
-       project
+        project
            .setJvmTargetVersion(JkJavaVersion.V8)
            .compilerToolChain
                 .setForkedWithDefaultProcess();
-       project
+        project
            .dependencyResolver
                 .getDefaultParams()
                     .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
-       project
+        project
            .packaging
                .runtimeDependencies
                        .add("com.github.djeang:vincer-dom:1.2.0");
-       project
+        project
            .testing
                 .testProcessor
                     .setForkingProcess(false)
                     .engineBehavior
                         .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
 
-       load(MavenKBean.class).getMavenPublication()
+        load(MavenKBean.class).getMavenPublication()
                .setModuleId("dev.jeka:sample-javaplugin")
                .setVersion("1.0-SNAPSHOT")
                .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose

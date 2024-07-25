@@ -84,6 +84,11 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create .war file : " + this.createWarFile);
     }
 
+    public void makeNative() {
+        new NativeMaker(load(ProjectKBean.class).project).generateAotAssets();
+
+    }
+
     private void customizeProjectKBean(ProjectKBean projectKBean) {
 
         // Customize scaffold

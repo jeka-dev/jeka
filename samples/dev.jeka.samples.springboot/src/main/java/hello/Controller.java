@@ -22,7 +22,5 @@ class Controller {
             this.whom = whom;
         }
 
-
-
     }
 }

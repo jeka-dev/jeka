@@ -261,13 +261,13 @@ class Props {
     }
 
     $jekaPropertyFilePath = $this.baseDir + '\jeka.properties'
-
     $value = [Props]::GetValueFromFile($jekaPropertyFilePath, $propName)
     if ('' -eq $value) {
       $parentDir = $this.baseDir + '\..'
       $parentJekaPropsFile = $parentDir + '\jeka.properties'
       if (Test-Path $parentJekaPropsFile) {
-        $value = [Props]::GetValueFromFile($parentJekaPropsFile, $propName)
+        $parentDirProps = [Props]::new($this.cmdLineArgs, $parentDir, $this.globalPropFile)
+        $value = $parentDirProps.GetValue($propName)
       } else {
         $value = [Props]::GetValueFromFile($this.globalPropFile, $propName)
       }
@@ -358,7 +358,7 @@ class Jdks {
   }
 
   hidden [string] JavaHome() {
-    if ($Env:JEKA_JAVA_HOME -ne $null) {
+    if ($null -ne $Env:JEKA_JAVA_HOME) {
       return $Env:JEKA_JAVA_HOME
     }
     $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
@@ -480,7 +480,6 @@ class ProgramExecutor {
 
   [string] FindProg() {
     $dir = $this.folder
-    $exist = [System.IO.Directory]::Exists("$dir")
     if (-not (Test-Path $dir)) {
       return $null
     }
