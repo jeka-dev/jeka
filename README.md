@@ -173,8 +173,7 @@ Twitter: https://github.com/jeka-dev/jeka
 Email support : support@jeka.dev
 
 
-
-<img alt="mascot" src="docs/images/mascot.png" align="center" />
+<img alt="mascot" src="docs/images/mascot.png" align="center" width="50%" height="50%" />
 
 
 
