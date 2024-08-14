@@ -9,9 +9,9 @@ We need to differentiate KBean, methods, and properties when parsing command lin
 
 KBean names can be all lowercase, causing confusion with method names. 
 Using `@KBeanName method1 method2 ...` might face conflict with [@file-arguments](https://picocli.info/#AtFiles) 
-and require the *shift* key on some keyboards. 
+and may require using *shift* key on some keyboards. 
 
-However, a colon as `KBeanName: method1 method2 ...` doesn't need the `shift` key, despite being less noticeable.
+However, a colon as `KBeanName: method1 method2 ...` doesn't require to use `shift` key, despite being less noticeable.
 
 ## Decision
 Jeka adopts the colon notation for KBean.

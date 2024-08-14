@@ -38,13 +38,13 @@ public class JkCompileLayout {
 
     public enum Style {SIMPLE, MAVEN}
 
-    private static final String GENERATED_SOURCE_PATH = "generated_sources/java";
+    private static final String GENERATED_SOURCE_PATH = "generated-sources/java";
 
-    private static final String GENERATED_RESOURCE_PATH = "generated_resources";
+    private static final String GENERATED_RESOURCE_PATH = "generated-resources";
 
-    private static final String GENERATED_TEST_SOURCE_PATH = "generated_test_sources/java";
+    private static final String GENERATED_TEST_SOURCE_PATH = "generated-test-sources/java";
 
-    private static final String GENERATED_TEST_RESOURCE_PATH = "generated_test_resources";
+    private static final String GENERATED_TEST_RESOURCE_PATH = "generated-test-resources";
 
     /**
      * Filter to consider as resources everything but java source stuff.

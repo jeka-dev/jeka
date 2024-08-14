@@ -76,6 +76,7 @@ public class NativeKBean extends KBean {
                 .setCollectStderr(true)
                 .setCollectStdout(true)
                 .setLogWithJekaDecorator(true)
+                .setDestroyAtJvmShutdown(true)
                 .exec();
         JkLog.info("Generated in %s", target);
         JkLog.info("Run: %s", relTarget);

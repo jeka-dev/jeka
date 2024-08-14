@@ -16,6 +16,7 @@
 
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
@@ -23,6 +24,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
+import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.util.Optional;
 
@@ -85,7 +87,16 @@ public final class SpringbootKBean extends KBean {
     }
 
     public void makeNative() {
-        new NativeMaker(load(ProjectKBean.class).project).generateAotAssets();
+        JkProject project = load(ProjectKBean.class).project;
+
+        project.compilation.layout.addSource("jeka-output/generated-sources/java/spring-aot");
+        project.compilation.layout.addSource("jeka-output/generated-resources/spring-aot");
+        project.compilation.run();
+        new NativeMaker(project).prepareAot();
+
+
+        //project.packaging.createFatJar();
+        //load(NativeKBean.class).build();
 
     }
 

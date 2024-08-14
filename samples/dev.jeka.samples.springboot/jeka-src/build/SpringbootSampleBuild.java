@@ -50,6 +50,10 @@ public class SpringbootSampleBuild extends KBean {
         projectKBean.pack();
     }
 
+    public void packNative() {
+        springbootKBean.makeNative();
+    }
+
     public void testRun() {
         System.out.println(this.aa);
         cleanPack();
