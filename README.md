@@ -174,6 +174,8 @@ Email support : support@jeka.dev
 
 
 
+<img alt="mascot" src="docs/images/mascot.png" align="center" />
+
 
 
 
