@@ -44,6 +44,21 @@ However, you'll be able to upgrade your base install by executing `jeka-update` 
 
 Open a new terminal session and execute `jeka --help` to access JeKa help.
 
+## Docker Image - Zero Install
+
+JeKa can be executed using the Docker image [jekadev/jeka](https://hub.docker.com/r/jekadev/jeka). This can be useful to force build execution on a 
+Linux host, which is mandatory to produce Java native image for Linux and containers.
+
+For this, execute : `docker run -docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jekadev/jeka [JEKA ARGUMENTS]`.
+
+- `-v $HOME/.jeka/cache4c:/cache` tells jeka to use a specific cache when running with container, as JDK or other tools 
+cached by Jeka may differ from the ones used by the host system.
+
+- `-v .:/workdir jeka --version` lets Jeka operate in the current directory of the host machine
+
+- `[JEKA ARGUMENTS]` stands for regular jeka you would pass to jeka command line as `project: back' or '--help'.
+
+
 
 
 
