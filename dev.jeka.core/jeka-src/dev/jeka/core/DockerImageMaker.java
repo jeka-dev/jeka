@@ -16,6 +16,7 @@
 
 package dev.jeka.core;
 
+import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
@@ -29,8 +30,6 @@ public class DockerImageMaker {
     public static final String GROUP = "djeang";
 
     public static final String IMAGE_NAME = GROUP + "/jeka";
-
-
 
     // Run : docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jeka --version
     public static void createImage() {
@@ -63,6 +62,12 @@ public class DockerImageMaker {
         JkDocker.exec("image", "tag", IMAGE_NAME, imageNameWithVersion);
         JkDocker.exec("login", "-u", GROUP, "-p", password);
         JkDocker.exec("push", imageNameWithVersion);
+        if (!JkVersion.of(version).isSnapshot()) {
+            String imageNameWithLatest= IMAGE_NAME + ":latest";
+            JkDocker.exec("image", "tag", IMAGE_NAME, imageNameWithLatest);
+            JkDocker.exec("push", imageNameWithVersion);
+        }
+        JkDocker.exec("logout");
     }
 
     public static void main(String[] args) {

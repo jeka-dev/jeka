@@ -27,7 +27,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
@@ -38,7 +37,6 @@ import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
-import org.omg.CORBA.Environment;
 
 import java.io.IOException;
 
@@ -179,7 +177,7 @@ class MasterBuild extends KBean {
 
             // Create a Docker Image of Jeka and publish it to docker hub
             if (System.getenv(DOCKERHUB_TOKEN_ENV_NAME) != null) {
-                publishKekaDockerImage(effectiveVersion);
+                publishJekaDockerImage(effectiveVersion);
             }
 
             // If not on 'master' branch, publish only locally
@@ -309,7 +307,7 @@ class MasterBuild extends KBean {
         return result;
     }
 
-    private void publishKekaDockerImage(String version) {
+    private void publishJekaDockerImage(String version) {
         DockerImageMaker.createImage();
         DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));
     }
