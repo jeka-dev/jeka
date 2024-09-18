@@ -39,6 +39,9 @@ public class DockerImageMaker {
         if (!Files.exists(jekaDist)) {
             jekaDist = Paths.get("dev.jeka.core").resolve(jekaDist);
         }
+        if(!Files.exists(jekaDist)) {
+            jekaDist = Paths.get("..").resolve(jekaDist).normalize();
+        }
         dockerBuild.setUserId(null); // Use only root user
         dockerBuild.rootSteps
                 .add("RUN apt update")
