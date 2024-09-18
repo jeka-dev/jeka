@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 
 public class DockerImageMaker {
 
-    public static final String GROUP = "djeang";
+    public static final String GROUP = "jekadev";
 
     public static final String IMAGE_NAME = GROUP + "/jeka";
 
@@ -65,7 +65,7 @@ public class DockerImageMaker {
         if (!JkVersion.of(version).isSnapshot()) {
             String imageNameWithLatest= IMAGE_NAME + ":latest";
             JkDocker.exec("image", "tag", IMAGE_NAME, imageNameWithLatest);
-            JkDocker.exec("push", imageNameWithVersion);
+            JkDocker.exec("push", imageNameWithLatest);
         }
         JkDocker.exec("logout");
     }
