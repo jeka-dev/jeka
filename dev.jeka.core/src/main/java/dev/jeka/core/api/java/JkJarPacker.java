@@ -20,13 +20,12 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsZip;
+import dev.jeka.core.api.utils.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.jar.JarFile;
@@ -92,11 +91,11 @@ public final class JkJarPacker {
      * The result jar does not contain other jars as zip entry but content of the other jars is merged with the content
      * of original jar.
      * @param resultFile Result file
-     * @param otherJars content of other jar to merge with the original jar
+     * @param otherEntries List of other jars or class dirs to merge with the original jar
      * @param filter Only files matching this filter will be included in the resulting fat jar, either it comes from
      *               dependencies or not.
      */
-    public void makeFatJar(Path resultFile, Iterable<Path> otherJars, PathMatcher filter) {
+    public void makeFatJar(Path resultFile, Iterable<Path> otherEntries, PathMatcher filter) {
         Path originalJar = JkUtilsPath.createTempFile("jk-jar-original", ".jar");
         JkUtilsPath.deleteFile(originalJar);
         classtrees.andMatcher(filter).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(originalJar);
@@ -104,12 +103,15 @@ public final class JkJarPacker {
         if (manifest != null && !manifest.isEmpty()) {
             jarWriter.writeManifest(manifest.getManifest());
         }
-        jarWriter.writeEntries(JkUtilsZip.jarFile(originalJar));
-        for (Path extraZip : otherJars) {
-            try (JarFile jarFile = JkUtilsZip.jarFile(extraZip)) {
-                jarWriter.writeEntries(jarFile);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+        for (Path extraEntry : otherEntries) {
+            if (Files.isDirectory(extraEntry)) {
+                jarWriter.writeEntries(extraEntry, EXCLUDE_SIGNATURE_MATCHER);
+            } else {
+                try (JarFile jarFile = JkUtilsZip.jarFile(extraEntry)) {
+                    jarWriter.writeEntries(jarFile);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             }
         }
         jarWriter.close();

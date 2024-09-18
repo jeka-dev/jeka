@@ -180,6 +180,7 @@ public class JkProjectPackaging {
                 .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
+        System.out.println("---------" + project.compilation.layout.resolveClassDir());
         JkLog.endTask("Fat Jar created at " + friendlyPath(target));
     }
 
@@ -202,10 +203,8 @@ public class JkProjectPackaging {
      * Creates a fat jar at conventional location.
      */
     public Path createFatJar() {
-        JkLog.startTask("pack-fat-jar");
         Path path = project.artifactLocator.getArtifactPath(JkArtifactId.of("fat", "jar"));
         createFatJar(path);
-        JkLog.endTask("Fat jar created at " + friendlyPath(path));
         return path;
     }
 

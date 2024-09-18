@@ -15,6 +15,7 @@
  */
 
 import dev.jeka.core.CoreBuild;
+import dev.jeka.core.DockerImageMaker;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
@@ -45,6 +46,8 @@ import java.io.IOException;
 @JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
 @JkInjectClasspath("../plugins/dev.jeka.plugins.nexus/jeka-output/classes")
 class MasterBuild extends KBean {
+
+    private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;
@@ -174,6 +177,11 @@ class MasterBuild extends KBean {
             github.publishGhRelease();
             JkLog.endTask();
 
+            // Create a Docker Image of Jeka and publish it to docker hub
+            if (System.getenv(DOCKERHUB_TOKEN_ENV_NAME) != null) {
+                publishKekaDockerImage(effectiveVersion);
+            }
+
             // If not on 'master' branch, publish only locally
         } else {
             JkLog.startTask("publish-locally");
@@ -183,9 +191,11 @@ class MasterBuild extends KBean {
         if (getRunbase().getProperties().get("sonar.host.url") != null) {
             coreBuild.load(SonarqubeKBean.class).run();
         }
+
+
     }
 
-    private  boolean shouldPublishOnMavenCentral() {
+    private boolean shouldPublishOnMavenCentral() {
         String branchOrTag = computeBranchName();
         if (branchOrTag != null &&
                 (branchOrTag.startsWith("refs/tags/") || branchOrTag.equals("refs/heads/master"))
@@ -297,6 +307,11 @@ class MasterBuild extends KBean {
         });
         adaptMavenConfig(result);
         return result;
+    }
+
+    private void publishKekaDockerImage(String version) {
+        DockerImageMaker.createImage();
+        DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));
     }
 
     /**

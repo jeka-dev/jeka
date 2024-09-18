@@ -128,9 +128,8 @@ public final class JkPathMatcher implements PathMatcher {
      * Returns this matcher as a {@link Predicate}
      */
     public Predicate<Path> toPredicate() {
-        return path -> matcher.matches(path);
+        return matcher::matches;
     }
-
     // ------------------------- check methods ---------------------------
 
     @Override

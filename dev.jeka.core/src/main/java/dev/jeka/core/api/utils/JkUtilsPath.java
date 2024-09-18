@@ -18,10 +18,7 @@ package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -153,6 +150,14 @@ public final class JkUtilsPath {
             return contentRoot.toString();
         }
 
+    }
+
+    public static InputStream newInputStream(Path path, OpenOption... openOptions) {
+        try {
+            return Files.newInputStream(path, openOptions);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 

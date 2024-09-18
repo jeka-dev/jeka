@@ -18,6 +18,7 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -47,7 +48,8 @@ class NativeMaker {
         JkJavaProcess.ofJava("org.springframework.boot.SpringApplicationAotProcessor")
                 .setClasspath(classpath)
                 .addParams(getAotArguments())
-                .setInheritIO(true)
+                .setLogCommand(JkLog.isVerbose())
+                .setInheritIO(false)
                 .exec();
     }
 

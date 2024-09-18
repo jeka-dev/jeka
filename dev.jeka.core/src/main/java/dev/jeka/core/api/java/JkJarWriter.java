@@ -16,16 +16,19 @@
 
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -34,8 +37,8 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
 /**
- * Writes JAR content, ensuring valid directory entries are always create and
- * duplicate items are ignored.
+ * Writes JAR content, ensuring valid directory entries are always created and
+ * duplicated items are ignored.
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
@@ -119,6 +122,22 @@ import java.util.zip.ZipEntry;
                 JkUtilsIO.closeQuietly(inputStream);
             }
         }
+    }
+
+    /**
+     * Write entries from the specific directories and matching the specified matcher.
+     */
+    public void writeEntries(Path dir, PathMatcher matcher) {
+        JkPathTree.of(dir).andMatcher(matcher).stream()
+                .excludeDirectories()
+                .relativizeFromRoot()
+                .forEach(file -> {
+                    try (InputStream is = JkUtilsPath.newInputStream(dir.resolve(file))) {
+                        this.writeEntry(file.toString(), is);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
     }
 
     /**

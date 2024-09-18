@@ -1,5 +1,7 @@
 package hello;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,6 +12,9 @@ class Controller {
     public Greeting helloWorld() {
         return new Greeting("Hi", "World");
     }
+
+    @Value("${my.value}")
+    private String myvalue;
 
     public static class Greeting {
 
@@ -22,5 +27,10 @@ class Controller {
             this.whom = whom;
         }
 
+    }
+
+    @PostConstruct
+    public void post() {
+        System.out.println("----------------" + myvalue);
     }
 }

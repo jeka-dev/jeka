@@ -1,4 +1,3 @@
-import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;

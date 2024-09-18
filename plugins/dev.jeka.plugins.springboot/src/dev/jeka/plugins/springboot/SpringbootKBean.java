@@ -16,8 +16,13 @@
 
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
@@ -26,8 +31,17 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Set;
 
+
+/*
+ *  Inspired from :
+ *     - https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/main/java/org/springframework/boot/maven
+ */
 @JkDoc(
         "Adapt projectKBean or baseKBean for Spring-Boot.\n" +
         "- Produce bootable jars\n" +
@@ -87,15 +101,37 @@ public final class SpringbootKBean extends KBean {
     }
 
     public void makeNative() {
+
         JkProject project = load(ProjectKBean.class).project;
-
-        project.compilation.layout.addSource("jeka-output/generated-sources/java/spring-aot");
-        project.compilation.layout.addSource("jeka-output/generated-resources/spring-aot");
-        project.compilation.run();
+        JkLog.startTask("process-springboot-aot");
         new NativeMaker(project).prepareAot();
+        JkLog.endTask();
 
+        // compile
+        JkLog.startTask("compile-generated-sources");
+        project.compilation.layout.addSource("jeka-output/spring-aot/generated-sources");
+        project.compilation.layout.addResource(project.getOutputDir().resolve("spring-aot/generated-resources"));
+        Path generatedClassesDir = project.getOutputDir().resolve("spring-aot/generated-classes/");
+        project.compilation.dependencies.add(generatedClassesDir);
+        project.compilation.run();
+        JkPathTree.of(generatedClassesDir).copyTo(project.compilation.layout.resolveClassDir());
+        JkLog.endTask();
 
-        //project.packaging.createFatJar();
+        // create native image
+        String exeFilename = project.artifactLocator.getMainArtifactPath().toString();
+        exeFilename = JkUtilsString.substringBeforeLast(exeFilename, ".jar");
+        JkPathSequence pathSequence = JkPathSequence.of(project.compilation.layout.resolveClassDir())
+                .and(project.packaging.resolveRuntimeDependenciesAsFiles());
+        JkNativeImage nativeImage = JkNativeImage.ofClasspath(pathSequence.getEntries());
+
+        // -- set reachability metadata info
+        nativeImage.reachabilityMetadata.setDependencies(() ->
+                project.packaging.resolveRuntimeDependencies().getDependencyTree().getDescendantModuleCoordinates());
+        nativeImage.reachabilityMetadata.setExtractDir(
+                project.getOutputDir().resolve("graalvm-reachability-metadata-repo"));
+
+        nativeImage.make(Paths.get(exeFilename));
+
         //load(NativeKBean.class).build();
 
     }

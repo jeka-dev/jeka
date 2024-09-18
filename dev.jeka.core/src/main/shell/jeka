@@ -715,8 +715,9 @@ compute_JEKA_CLASSPATH() {
     jar_file="$dist_dir/$JEKA_JAR_NAME"
   fi
   if [ ! -f "$jar_file" ]; then
-    msg "Cannot find JeKa jar file $jar_file."
-    msg "Are you sure the JeKa distribution you use is properly packaged ?"
+    msg "Cannot find Jeka jar file $jar_file"
+    msg "Are you sure the jeka.version is correctly specified in your project's jeka.properties file ?"
+    msg "Or, if you're executing Jeka from the global distribution, it might not be packaged correctly."
     exit 1
   fi
   JEKA_CLASSPATH="$boot_dir_args$jar_file"

@@ -166,7 +166,11 @@ public class Main {
             String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
             CommandLine commandLine = e.getCommandLine();
             commandLine.getErr().println(errorTxt + e.getMessage());
+
             String suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka --doc|@ to see available commands and parameters");
+            if (e.getMessage().startsWith("Unknown option")) {
+                suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka --help|@ to see available options");
+            }
             commandLine.getErr().println(suggestTxt);
             if (logs.stackTrace) {
                 e.printStackTrace(commandLine.getErr());

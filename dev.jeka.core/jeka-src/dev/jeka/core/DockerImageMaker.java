@@ -17,6 +17,7 @@
 package dev.jeka.core;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.docker.JkDocker;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 
 import java.nio.file.Files;
@@ -25,7 +26,11 @@ import java.nio.file.Paths;
 
 public class DockerImageMaker {
 
-    public static final String IMAGE_NAME = "jeka";
+    public static final String GROUP = "djeang";
+
+    public static final String IMAGE_NAME = GROUP + "/jeka";
+
+
 
     // Run : docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jeka --version
     public static void createImage() {
@@ -48,6 +53,13 @@ public class DockerImageMaker {
                 .add("ENTRYPOINT [\"/root/.jeka/bin/jeka\"]");
         Path ctxDir = dockerBuild.buildImage(IMAGE_NAME);
         System.out.println("Jeka image built from " + ctxDir);
+    }
+
+    public static void pushImage(String version, String password) {
+        String imageNameWithVersion = IMAGE_NAME + ":" + version;
+        JkDocker.exec("image", "tag", IMAGE_NAME, imageNameWithVersion);
+        JkDocker.exec("login", "-u", GROUP, "-p", password);
+        JkDocker.exec("push", imageNameWithVersion);
     }
 
     public static void main(String[] args) {
