@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.tooling.docker;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.system.JkProcess;
@@ -23,6 +25,8 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -91,10 +95,7 @@ public class JkDocker {
     }
 
     /**
-     * Retrieves the names of all images present in the Docker registry.
-     * The image are formatted as `repository:tag'. The tag is always present, it values 'latest' by default.
-     *
-     * @return A set of strings representing the names of the images in the repository.
+     * Prepares a JkProcess object to execute Jeka in a Docker container.
      */
     public static Set<String> getImageNames() {
         List<String> rawResult = prepareExec("images", "--format", "{{.Repository}}:{{.Tag}}")
@@ -104,6 +105,41 @@ public class JkDocker {
         return rawResult.stream()
                 .map(String::trim)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Prepares a JkProcess object to execute Jeka in a Docker container.
+     * This can be useful for creating native executable runnable in a container.
+     * <p>
+     * The latest <i>jekadev/jeka</i> image will be used to execute <i>jeka</i>.<br/>
+     * The container will be map volumes to execute Jeka in the working directory, and
+     * to fetch cache in <i>$HOME/.jeka/cache4c:/cache</i> dir.<br/>
+     * You can force a specific version of Jeka by adding <code>-Djeka.version=xxx</code> to <code>jekaCommandArgs</code>
+     *
+     * @param jekaCommandArgs The argument to pass to JeKa
+     */
+    public static JkProcess prepareExecJeka(Path workingDir, String... jekaCommandArgs) {
+        JkProcess process =  JkDocker.prepareExec("run" ,
+                "-v", JkLocator.getCacheDir().getParent().resolve("cache4c").normalize() + ":/cache",
+                "-v", workingDir.toAbsolutePath() + ":/workdir",
+                "-t",
+                "jekadev/jeka"
+                );
+        process.addParams(jekaCommandArgs);
+        return process;
+    }
+
+    public static JkProcess prepareExecJeka(String... jekaCommandArgs) {
+        return prepareExecJeka(Paths.get(""), jekaCommandArgs);
+    }
+
+    /**
+     * Executes Jeka in a docker container.
+     *
+     * @see JkDocker#prepareExecJeka(Path, String...)
+     */
+    public static JkProcResult execJeka(String... jekaCommandArgs) {
+        return prepareExecJeka(Paths.get(""), jekaCommandArgs).exec();
     }
 
 }

@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 /**
  * Docker Builder assistant for creating Docker images running Java programs.
- *
  */
 public class JkDockerJvmBuild extends JkDockerBuild {
 

@@ -47,6 +47,16 @@ public final class DockerKBean extends KBean {
     private String lastRunningContainerName;
 
     /**
+     * Computes the name of the Docker image based on the specified project.
+     *
+     * @param project The JkProject instance containing the module ID, version, and base directory.
+     * @return The computed image name.
+     */
+    public static String computeImageName(JkProject project) {
+        return computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
+    }
+
+    /**
      * Handler on the Docker build configuration for customizing built images.
      */
     private final JkConsumers<JkDockerJvmBuild> customizer = JkConsumers.of();
@@ -96,6 +106,8 @@ public final class DockerKBean extends KBean {
         customizer.add(dockerBuildCustomizer);
     }
 
+
+
     /**
      * Retrieves the name of the last or current running container, launched using {@link #run()} method.
      */
@@ -128,11 +140,11 @@ public final class DockerKBean extends KBean {
         JkProject project = projectKBean.project;
         this.imageName = !JkUtilsString.isBlank(imageName)
                 ? imageName
-                : computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
+                : computeImageName(project);
         this.customize(dockerBuild -> dockerBuild.adaptTo(project));
     }
 
-    private String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
+    private static String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
         String name;
         String versionTag = computeVersion(version);
         if (moduleId != null) {
@@ -149,7 +161,7 @@ public final class DockerKBean extends KBean {
         return name + ":" + versionTag;
     }
 
-    private String computeVersion(JkVersion version) {
+    private static String computeVersion(JkVersion version) {
         if (version.isSnapshot()) {
             return "latest";
         }

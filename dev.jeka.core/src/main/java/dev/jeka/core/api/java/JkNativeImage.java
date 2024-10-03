@@ -101,7 +101,7 @@ public class JkNativeImage {
                     .addParams("-H:IncludeResources=" + regexp)
                     .addParamsIf(hasMessageBundle, "-H:IncludeResourceBundles=MessagesBundle");
         } else {
-            process = process.addParams("-classpath", JkPathSequence.of(classpath).toColonSeparatedPath());
+            process = process.addParams("-classpath", JkPathSequence.of(classpath).toPath());
         }
         process = process
                 .addParams("--no-fallback")
@@ -330,6 +330,5 @@ public class JkNativeImage {
 
         }
     }
-
 
 }
