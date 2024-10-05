@@ -91,19 +91,20 @@ public final class JkJarPacker {
      * The result jar does not contain other jars as zip entry but content of the other jars is merged with the content
      * of original jar.
      * @param resultFile Result file
-     * @param otherEntries List of other jars or class dirs to merge with the original jar
+     * @param extraEntries List of other jars or class dirs to merge with the original jar
      * @param filter Only files matching this filter will be included in the resulting fat jar, either it comes from
      *               dependencies or not.
      */
-    public void makeFatJar(Path resultFile, Iterable<Path> otherEntries, PathMatcher filter) {
+    public void makeFatJar(Path resultFile, Iterable<Path> extraEntries, PathMatcher filter) {
         Path originalJar = JkUtilsPath.createTempFile("jk-jar-original", ".jar");
         JkUtilsPath.deleteFile(originalJar);
         classtrees.andMatcher(filter).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(originalJar);
         JkJarWriter jarWriter = JkJarWriter.of(resultFile);
+        jarWriter.writeEntries(JkUtilsZip.jarFile(originalJar));
         if (manifest != null && !manifest.isEmpty()) {
             jarWriter.writeManifest(manifest.getManifest());
         }
-        for (Path extraEntry : otherEntries) {
+        for (Path extraEntry : extraEntries) {
             if (Files.isDirectory(extraEntry)) {
                 jarWriter.writeEntries(extraEntry, EXCLUDE_SIGNATURE_MATCHER);
             } else {

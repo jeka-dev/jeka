@@ -18,6 +18,10 @@ class SamplesTester extends JekaCommandLineExecutor {
             run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 docker: build -c");
         }
 
+        // Run project app
+        run("dev.jeka.samples.project-app", "-Djeka.java.version=17 project: runJar run.programArgs=oo" +
+                " -c");
+
         // Test also if the KBean hosted in jeka-src, is considered as the default KBean
         run("dev.jeka.samples.baselib", "base: pack : ok --debug --inspect");
 

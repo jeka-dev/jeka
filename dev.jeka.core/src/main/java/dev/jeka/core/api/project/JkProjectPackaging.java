@@ -35,6 +35,7 @@ import dev.jeka.core.tool.JkDoc;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -174,13 +175,12 @@ public class JkProjectPackaging {
      */
     public void createFatJar(Path target) {
         project.compilation.runIfNeeded();
-        Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
+        List<Path> classpath = resolveRuntimeDependenciesAsFiles();
         JkLog.startTask("create-fat-jar");
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
-        System.out.println("---------" + project.compilation.layout.resolveClassDir());
         JkLog.endTask("Fat Jar created at " + friendlyPath(target));
     }
 
