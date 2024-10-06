@@ -44,7 +44,7 @@ public class DockerImageMaker {
         dockerBuild.setUserId(null); // Use only root user
         dockerBuild.rootSteps
                 .add("RUN apt update")
-                .add("RUN apt install -y curl && apt install -y unzip && apt install -y git && apt install -y gcc");
+                .add("RUN apt install -y curl && apt install -y unzip && apt install -y git && apt install -y gcc && apt install -y install libz-dev");
         dockerBuild.nonRootSteps
                 .add("RUN mkdir /workdir && mkdir root/.jeka && mkdir /cache && ln -s /cache root/.jeka/cache")
                 .addCopy(jekaDist.resolve("jeka"), "/root/.jeka/bin/")
