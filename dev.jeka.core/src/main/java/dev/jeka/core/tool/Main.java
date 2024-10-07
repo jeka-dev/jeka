@@ -318,7 +318,7 @@ public class Main {
     }
 
     private static boolean shouldPrintExceptionDetails(LogSettings logs) {
-        return logs.debug || logs.stackTrace;
+        return logs.verbose || logs.debug || logs.stackTrace;
     }
 
     private static void printException(LogSettings logs, Throwable e) {

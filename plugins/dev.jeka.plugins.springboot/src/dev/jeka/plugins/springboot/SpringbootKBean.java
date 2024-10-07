@@ -118,7 +118,7 @@ public final class SpringbootKBean extends KBean {
     public void makeNativeDocker() {
         String execName = defaultNativeExecName() + "-for-container";
         JkDocker.execJeka("springboot:",  "makeNative",
-                "-native.execName=" + execName);
+                "nativeOps.execName=" + execName);
         JkDockerBuild dockerBuild = dockerBuildForNative(execName);
         String imageName = DockerKBean.computeImageName(load(ProjectKBean.class).project);
         dockerBuild.buildImage(imageName);
