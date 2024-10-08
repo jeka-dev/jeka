@@ -17,12 +17,14 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkConstants;
@@ -101,7 +103,16 @@ public class JkNativeImage {
                     .addParams("-H:IncludeResources=" + regexp)
                     .addParamsIf(hasMessageBundle, "-H:IncludeResourceBundles=MessagesBundle");
         } else {
-            process = process.addParams("-classpath", JkPathSequence.of(classpath).toPath());
+            String classpathContent = JkPathSequence.of(classpath).toPath();
+            final String classpathArg;
+            if (classpathContent.length() <= 2048) {
+                classpathArg = classpathContent;
+            } else {
+                Path tempArgFile = JkUtilsPath.createTempFile("jeka-native-image-cp", ".txt");
+                JkPathFile.of(tempArgFile).write(classpathContent);
+                classpathArg = "@" + tempArgFile;
+            }
+            process = process.addParams("-classpath", classpathArg);
         }
         process = process
                 .addParams("--no-fallback")
