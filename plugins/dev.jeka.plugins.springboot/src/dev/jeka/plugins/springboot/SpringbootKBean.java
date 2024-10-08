@@ -179,6 +179,8 @@ public final class SpringbootKBean extends KBean {
     private JkDockerBuild dockerBuildForNative(Path execPath) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         String nativeExecName = nativeExecName();
+        dockerBuild.setBaseImage("alpine:latest");
+        dockerBuild.setAddUserTemplate(JkDockerBuild.ALPINE_ADD_USER_TEMPLATE);
         dockerBuild.rootSteps
                 .addNonRootMkdirs("app", "workdir");
         dockerBuild.nonRootSteps

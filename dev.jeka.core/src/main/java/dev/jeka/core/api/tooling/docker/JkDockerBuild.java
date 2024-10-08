@@ -362,7 +362,7 @@ public class JkDockerBuild {
          */
         public StepContainer addNonRootMkdirs(String dirPath, String ...extraDirs) {
             return add(context -> {
-                StringBuilder sb = new StringBuilder("Run ");
+                StringBuilder sb = new StringBuilder("RUN ");
                 sb.append(mkdirInstrcution(dirPath));
                 for (String extraDir : extraDirs) {
                     sb.append(" \\\n    && ");
