@@ -22,6 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -316,6 +317,23 @@ public final class JkPathFile {
             return null;
         }
         return  filename.substring(index + 1);
+    }
+
+    public void dos2Unix(Path target) {
+        try (Stream<String> lines = Files.lines(path);
+             BufferedWriter writer = Files.newBufferedWriter(target)) {
+
+            lines.forEach(line -> {
+                try {
+                    writer.write(line.replaceAll("\r", ""));
+                    writer.write("\n");
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override

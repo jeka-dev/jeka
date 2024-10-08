@@ -16,29 +16,29 @@
 
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
-import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.LinkedList;
 import java.util.Optional;
-import java.util.Set;
 
 
 /*
@@ -75,7 +75,6 @@ public final class SpringbootKBean extends KBean {
 
     @Override
     protected void init() {
-
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
         Optional<BaseKBean> optionalBaseKBean = getRunbase().find(BaseKBean.class);
 
@@ -108,36 +107,63 @@ public final class SpringbootKBean extends KBean {
 
     @JkDoc("Create native executable springboot application")
     public void makeNative() {
-        Path execPath = JkUtilsString.isBlank(nativeOps.execName) ?
-                defaultNaliveImagePath() :
-                getOutputDir().resolve(nativeOps.execName);
-        makeNative(execPath);
+        makeNative(nativeExecPath());
     }
 
     @JkDoc("Create a docker image running a native executable of the springboot app")
     public void makeNativeDocker() {
-        String execName = defaultNativeExecName() + "-for-container";
-        JkDocker.execJeka("springboot:",  "makeNative",
-                "nativeOps.execName=" + execName);
-        JkDockerBuild dockerBuild = dockerBuildForNative(execName);
+        final Path execPath;
+        if (JkUtilsSystem.IS_LINUX) {
+            execPath = nativeExecPath();
+            if (!Files.exists(execPath)) {
+                makeNative(execPath);
+            }
+        } else {
+            Path projectDirForLinux = this.getOutputDir().resolve("project-for-container");
+            JkPathTree pathTree = JkPathTree.of(this.getBaseDir()).andMatching(false,
+                    ".jeka-work/**/*", "jeka-output/**/*");
+
+            // We need to copy the project in another dir and apply a dos2Unix transformation
+            // Then, we can invoke docker on this directory
+            if (JkUtilsSystem.IS_WINDOWS) {
+                pathTree.stream()
+                        .filter(Files::isRegularFile)
+                        .forEach(path -> {
+                            Path relativePath = this.getBaseDir().relativize(path);
+                            Path targetPath = projectDirForLinux.resolve(relativePath);
+                            JkUtilsPath.createDirectories(targetPath.getParent());
+                            JkPathFile.of(path).dos2Unix(targetPath);
+                        });
+            } else {
+                pathTree.copyTo(projectDirForLinux);
+            }
+            // Invoke native compilation via a container
+            String jekaVersion = Optional.ofNullable(this.nativeOps.jekaVersionInDocker).orElse(JkInfo.getJekaVersion());
+            JkDocker.prepareExecJeka(projectDirForLinux,"-Djeka.version=" + jekaVersion
+                    , "springboot:",  "makeNative").exec();
+            execPath = projectDirForLinux.resolve("jeka-output").resolve(nativeExecName());
+        }
+
+        // Create image using the created native exec
+        JkDockerBuild dockerBuild = dockerBuildForNative(execPath);
         String imageName = DockerKBean.computeImageName(load(ProjectKBean.class).project);
         dockerBuild.buildImage(imageName);
     }
 
     @JkDoc("Displays the DockerBuild file used to create Docker native image")
     public void renderDockerBuild() {
-        String execName = defaultNativeExecName() + "-for-container";
-        JkDockerBuild dockerBuild = dockerBuildForNative(execName);
+        JkDockerBuild dockerBuild = dockerBuildForNative(nativeExecPath());
         System.out.println(dockerBuild.render());
     }
 
-    private JkDockerBuild dockerBuildForNative(String execName) {
+    private JkDockerBuild dockerBuildForNative(Path execPath) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
+        String nativeExecName = nativeExecName();
         dockerBuild.nonRootSteps
                 .addNonRootMkdirs("app", "workdir")
-                .addCopy(getOutputDir().resolve(execName), "/app/" + execName)
+                .addCopy(execPath, "/app/" + nativeExecName)
                 .add("WORKDIR /workdir")
-                .add("ENTRYPOINT [\"/app/" + execName + "\"]");
+                .add("ENTRYPOINT [\"/app/" + nativeExecName + "\"]");
         this.nativeOps.dockerImageCustomizers.accept(dockerBuild);
         return dockerBuild;
     }
@@ -173,14 +199,14 @@ public final class SpringbootKBean extends KBean {
         nativeImage.make(execPath);
     }
 
-    private String defaultNativeExecName() {
+    private String nativeExecName() {
         JkProject project = load(ProjectKBean.class).project;
         String exeFilename = project.artifactLocator.getMainArtifactPath().getFileName().toString();
         return JkUtilsString.substringBeforeLast(exeFilename, ".jar");
     }
 
-    private Path defaultNaliveImagePath() {
-        return getOutputDir().resolve(defaultNativeExecName());
+    private Path nativeExecPath() {
+        return getOutputDir().resolve(nativeExecName());
     }
 
     private void customizeProjectKBean(ProjectKBean projectKBean) {
@@ -224,17 +250,16 @@ public final class SpringbootKBean extends KBean {
         private NativeOptions() {
         }
 
-        @JkDoc("Name of the native executable to create. A default relevant name will be peaked if left to null.")
-        public String execName;
-
+        @JkDoc("The name of the docker image containing the springboot native app")
         public String dockerImageName;
+
+        // Testing purpose
+        public String jekaVersionInDocker;
 
         /**
          * Allows to customize generated Docker image for native exec.
          */
         public final JkConsumers<JkDockerBuild> dockerImageCustomizers = JkConsumers.of();
-
-
 
     }
 
