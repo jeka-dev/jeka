@@ -17,6 +17,7 @@
 package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
@@ -38,6 +39,9 @@ import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -119,9 +123,17 @@ public final class SpringbootKBean extends KBean {
                 makeNative(execPath);
             }
         } else {
+            JkLog.startTask("Creating native image using Docker");
             Path projectDirForLinux = this.getOutputDir().resolve("project-for-container");
+            if (Files.exists(projectDirForLinux)) {
+                JkPathTree.of(projectDirForLinux).deleteRoot();
+            }
             JkPathTree pathTree = JkPathTree.of(this.getBaseDir()).andMatching(false,
                     ".jeka-work/**/*", "jeka-output/**/*");
+            if (nativeOps.hasCopyExcludePatterns()) {
+                pathTree = pathTree.withMatcher(JkPathMatcher.of(false, nativeOps.copyExcludePatterns()));
+            }
+
 
             // We need to copy the project in another dir and apply a dos2Unix transformation
             // Then, we can invoke docker on this directory
@@ -132,7 +144,12 @@ public final class SpringbootKBean extends KBean {
                             Path relativePath = this.getBaseDir().relativize(path);
                             Path targetPath = projectDirForLinux.resolve(relativePath);
                             JkUtilsPath.createDirectories(targetPath.getParent());
-                            JkPathFile.of(path).dos2Unix(targetPath);
+                            try {
+                                JkPathFile.of(path).dos2Unix(targetPath);
+                            } catch (Exception e) {
+                                JkLog.warn("Error while dos2unix file %s. Just copy as is.", path);
+                                JkUtilsPath.copy(path, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                            }
                         });
             } else {
                 pathTree.copyTo(projectDirForLinux);
@@ -140,8 +157,11 @@ public final class SpringbootKBean extends KBean {
             // Invoke native compilation via a container
             String jekaVersion = Optional.ofNullable(this.nativeOps.jekaVersionInDocker).orElse(JkInfo.getJekaVersion());
             JkDocker.prepareExecJeka(projectDirForLinux,"-Djeka.version=" + jekaVersion
-                    , "springboot:",  "makeNative").exec();
+                    , "springboot:",  "makeNative")
+                    .addParamsIf(nativeOps.hasAotProfile(), "nativeOps.aotProfiles=" + nativeOps.aotProfiles)
+                    .exec();
             execPath = projectDirForLinux.resolve("jeka-output").resolve(nativeExecName());
+            JkLog.endTask();
         }
 
         // Create image using the created native exec
@@ -159,8 +179,9 @@ public final class SpringbootKBean extends KBean {
     private JkDockerBuild dockerBuildForNative(Path execPath) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         String nativeExecName = nativeExecName();
+        dockerBuild.rootSteps
+                .addNonRootMkdirs("app", "workdir");
         dockerBuild.nonRootSteps
-                .addNonRootMkdirs("app", "workdir")
                 .addCopy(execPath, "/app/" + nativeExecName)
                 .add("WORKDIR /workdir")
                 .add("ENTRYPOINT [\"/app/" + nativeExecName + "\"]");
@@ -172,7 +193,11 @@ public final class SpringbootKBean extends KBean {
 
         JkProject project = load(ProjectKBean.class).project;
         JkLog.startTask("process-springboot-aot");
-        new NativeMaker(project).prepareAot();
+        NativeMaker nativeMaker = new NativeMaker(project);
+        if (nativeOps.hasAotProfile()) {
+            nativeMaker.profiles.addAll(Arrays.asList(nativeOps.aotProfiles()));
+        }
+        nativeMaker.prepareAot();
         JkLog.endTask();
 
         // compile
@@ -253,16 +278,45 @@ public final class SpringbootKBean extends KBean {
         @JkDoc("The name of the docker image containing the springboot native app")
         public String dockerImageName;
 
-        // Testing purpose
+        @JkDoc("The springboot profiles that should be activated while processing AOT")
+        public String aotProfiles;
+
+        @JkDoc("For testing purpose : force the jeka version executed in docker container while invoking makeNativeDocker")
         public String jekaVersionInDocker;
+
+        @JkDoc("When creating a Docker native image on Windows or macOS, " +
+                "the project is copied to another directory " +
+                "to generate the native image using Docker from that location. " +
+                "Use these exclude patterns to avoid copying specific files.")
+        public String copyProjectExcludePatterns;
 
         /**
          * Allows to customize generated Docker image for native exec.
          */
         public final JkConsumers<JkDockerBuild> dockerImageCustomizers = JkConsumers.of();
 
+        private boolean hasAotProfile() {
+            return !JkUtilsString.isBlank(this.aotProfiles);
+        }
+
+        private String[] aotProfiles() {
+            if (hasAotProfile()) {
+                return aotProfiles.split(",");
+            }
+            return new String[0];
+        }
+
+        private boolean hasCopyExcludePatterns() {
+            return !JkUtilsString.isBlank(this.copyProjectExcludePatterns);
+        }
+
+        private String[] copyExcludePatterns() {
+            if (hasCopyExcludePatterns()) {
+                return copyProjectExcludePatterns.split(",");
+            }
+            return new String[0];
+        }
+
     }
-
-
 
 }

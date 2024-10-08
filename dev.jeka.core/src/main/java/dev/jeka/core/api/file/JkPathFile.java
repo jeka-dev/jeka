@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -327,17 +328,27 @@ public final class JkPathFile {
                 try {
                     writer.write(line.replaceAll("\r", ""));
                     writer.write("\n");
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
+                } catch (IOException | UncheckedIOException e) {
+                    throw unchecked("Error while dos2unix file " + path, e);
                 }
             });
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        } catch (IOException | UncheckedIOException e) {
+            throw unchecked("Error while dos2unix file " + path, e);
         }
     }
 
     @Override
     public String toString() {
         return path.toString();
+    }
+
+    private static UncheckedIOException unchecked(String message, Exception cause) {
+        if (cause instanceof IOException) {
+            return new UncheckedIOException(message, (IOException) cause);
+        }
+        if (cause instanceof UncheckedIOException) {
+            return new UncheckedIOException(message, ((UncheckedIOException) cause).getCause());
+        }
+        throw new IllegalStateException();
     }
 }

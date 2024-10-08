@@ -33,9 +33,9 @@ class NativeMaker {
 
     private final JkProject project;
 
-    private final List<String> profiles = new LinkedList<>();
+    public final List<String> profiles = new LinkedList<>();
 
-    private final List<String> aotRunArguments = new LinkedList<>();
+    public final List<String> aotRunArguments = new LinkedList<>();
 
     NativeMaker(JkProject project) {
         this.project = project;

@@ -395,7 +395,7 @@ public class JkDockerBuild {
             if (!Files.exists(file)) {
                 String msg = "File " + file + " not found creating Dockerfile entry " + containerPath + " in "
                         + context.dir;
-                if (!optional) {
+                if (!optional && !context.dry) {
                     throw new IllegalArgumentException(msg);
                 } else {
                     JkLog.verbose(msg);
