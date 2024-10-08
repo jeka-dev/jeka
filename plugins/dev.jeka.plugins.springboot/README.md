@@ -71,6 +71,57 @@ class MyBuild extends KBean {
 
 }
 ```
+
+## Native Support (Experimental)
+
+### Generate Native Image Executable
+
+To create a native executable of your application for the current platform, run the following command:
+
+```shell
+jeka springboot: makeNative
+```
+
+It is possible to specify the Spring profiles to active at build time :
+
+```shell
+jeka springboot: makeNative nativeOps.aotProfiles=profile-a,profile-b
+```
+
+### Create Docker Image running the native executable
+
+To create a Docker Image of the native application, execute:
+
+```shell
+jeka springboot: makeNativeDocker
+```
+
+This will create a docker image, running the springboot executable application with non-root user.
+
+Note:
+If your running on Windows or Macos, Jeka will run the native compilation into a Docker container, order it is generated 
+foe Linux.
+
+To see the content of the generated image, execute:
+
+```shell
+jeka springboot: renderDockerBuild
+```
+#### Customize the Docker Image
+
+- Force generated image name : `nativeOps.dockerImageName`
+
+- Customize image programmatically :
+
+```java
+    load(SpringbootKBean.class).nativeOps.dockerImageCustomizers.add(dockerBuild -> {
+        dockerBuild
+        ...
+        .setBaseImage("ubuntu:latest");
+        });
+```
+
+
 Visit [source code](src/dev/jeka/plugins/springboot/JkSpringbootProject) to see available options.
 
 
