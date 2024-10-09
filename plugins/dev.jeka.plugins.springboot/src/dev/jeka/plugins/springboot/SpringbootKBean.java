@@ -186,8 +186,7 @@ public final class SpringbootKBean extends KBean {
     private JkDockerBuild dockerBuildForNative(Path execPath) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         String nativeExecName = nativeExecName();
-        dockerBuild.setBaseImage("alpine:latest");
-        dockerBuild.setAddUserTemplate(JkDockerBuild.ALPINE_ADD_USER_TEMPLATE);
+        dockerBuild.setBaseImage("ubuntu:latest");  // fail with alpine cause the generated image is dynamically linked to glibc
         dockerBuild.rootSteps
                 .addNonRootMkdirs("app", "workdir");
         dockerBuild.nonRootSteps
@@ -306,7 +305,7 @@ public final class SpringbootKBean extends KBean {
 
         @JkDoc("How the native image should be linked when created for Docker image. " +
                 "FULLY is the most portable has it does not require any lib installed on the base image.")
-        public JkNativeImage.StaticLinkage dockerImageStaticLinkage = JkNativeImage.StaticLinkage.FULLY;
+        public JkNativeImage.StaticLinkage dockerImageStaticLinkage = JkNativeImage.StaticLinkage.NONE;
 
         /**
          * Allows to customize generated Docker image for native exec.
