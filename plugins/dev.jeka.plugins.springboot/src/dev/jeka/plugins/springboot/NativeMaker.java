@@ -61,8 +61,13 @@ class NativeMaker {
         aotArguments.add(aotBaseDir.resolve("generated-sources").toString());
         aotArguments.add(aotBaseDir.resolve("generated-resources").toString());
         aotArguments.add(aotBaseDir.resolve("generated-classes").toString());
-        aotArguments.add(this.project.getModuleId().getGroup());
-        aotArguments.add(this.project.getModuleId().getName());
+        if (this.project.getModuleId() != null) {
+            aotArguments.add(this.project.getModuleId().getGroup());
+            aotArguments.add(this.project.getModuleId().getName());
+        } else {
+            aotArguments.add(this.project.getBaseDir().getFileName().toString());
+            aotArguments.add(this.project.getBaseDir().getFileName().toString());
+        }
         aotArguments.addAll(resolveArguments());
         return aotArguments;
     }

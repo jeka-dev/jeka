@@ -346,7 +346,14 @@ public class JkDockerBuild {
          * The file will be copied within the Docker build context and a step will be added to Dockerfile.
          */
         public StepContainer addCopy(Path fileOrDir, String containerPath, boolean optional) {
-            return add(context -> copyFileInContext(fileOrDir, containerPath, context, optional));
+            return add(context -> copyFileInContext(fileOrDir, containerPath, context, false, optional));
+        }
+
+        /**
+         * Same as {@link #addCopy(Path, String, boolean) but let nonroot user own the copied file.
+         */
+        public StepContainer addCopyNonRoot(Path fileOrDir, String containerPath, boolean optional) {
+            return add(context -> copyFileInContext(fileOrDir, containerPath, context, true, optional));
         }
 
         /**
@@ -354,6 +361,13 @@ public class JkDockerBuild {
          */
         public StepContainer addCopy(Path fileOrDir, String containerPath) {
             return addCopy(fileOrDir, containerPath, false);
+        }
+
+        /**
+         * Same as {@link #addCopyNonRoot(Path, String, boolean)} with optional=false
+         */
+        public StepContainer addCopyNonRoot(Path fileOrDir, String containerPath) {
+            return addCopyNonRoot(fileOrDir, containerPath, false);
         }
 
         /**
@@ -391,7 +405,7 @@ public class JkDockerBuild {
             return result;
         }
 
-        private void copyFileInContext(Path file, String containerPath, Context context, boolean optional) {
+        private void copyFileInContext(Path file, String containerPath, Context context, boolean nonRoot, boolean optional) {
             if (!Files.exists(file)) {
                 String msg = "File " + file + " not found creating Dockerfile entry " + containerPath + " in "
                         + context.dir;
@@ -405,7 +419,8 @@ public class JkDockerBuild {
             if (Files.exists(tempPath)) {
                 tempPath = context.dir.resolve("imported-files").resolve(file.getFileName().toString() + UUID.randomUUID());
             }
-            context.add("COPY " + context.dir.relativize(tempPath).toString().replace('\\', '/')
+            String ownArg = nonRoot ? "--chown=nonroot:nonrootg " : "";
+            context.add("COPY " + ownArg + context.dir.relativize(tempPath).toString().replace('\\', '/')
                     + " " + containerPath);
             if (!context.dry) {
                 JkUtilsPath.createDirectories(tempPath.getParent());

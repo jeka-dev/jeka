@@ -114,7 +114,7 @@ public final class SpringbootKBean extends KBean {
 
     @JkDoc("Create native executable springboot application")
     public void makeNative() {
-        makeNative(nativeExecPath());
+        makeNative(nativeExecPath(), this.nativeOps.staticLinkage);
     }
 
     @JkDoc("Create a docker image running a native executable of the springboot app")
@@ -124,7 +124,7 @@ public final class SpringbootKBean extends KBean {
         if (JkUtilsSystem.IS_LINUX) {
             execPath = nativeExecPath();
             if (!Files.exists(execPath)) {
-                makeNative(execPath);
+                makeNative(execPath, this.nativeOps.dockerImageStaticLinkage);
             }
         } else {
             JkLog.startTask("Creating native image using Docker");
@@ -162,7 +162,10 @@ public final class SpringbootKBean extends KBean {
             String jekaVersion = Optional.ofNullable(this.nativeOps.jekaVersionInDocker).orElse(JkInfo.getJekaVersion());
             JkDocker.prepareExecJeka(projectDirForLinux,"-Djeka.version=" + jekaVersion
                     , "springboot:",  "makeNative")
+                    .addParams("nativeOps.staticLinkage=" + this.nativeOps.dockerImageStaticLinkage)
                     .addParamsIf(nativeOps.hasAotProfile(), "nativeOps.aotProfiles=" + nativeOps.aotProfiles)
+                    .addParamsIf(JkLog.isVerbose(), "--verbose")
+                    .addParamsIf(JkLog.isDebug(), "--debug")
                     .exec();
             execPath = projectDirForLinux.resolve("jeka-output").resolve(nativeExecName());
             JkLog.endTask();
@@ -188,14 +191,14 @@ public final class SpringbootKBean extends KBean {
         dockerBuild.rootSteps
                 .addNonRootMkdirs("app", "workdir");
         dockerBuild.nonRootSteps
-                .addCopy(execPath, "/app/" + nativeExecName)
+                .addCopyNonRoot(execPath, "/app/" + nativeExecName)
                 .add("WORKDIR /workdir")
                 .add("ENTRYPOINT [\"/app/" + nativeExecName + "\"]");
         this.nativeOps.dockerImageCustomizers.accept(dockerBuild);
         return dockerBuild;
     }
 
-    private void makeNative(Path execPath) {
+    private void makeNative(Path execPath, JkNativeImage.StaticLinkage linkage) {
 
         JkProject project = load(ProjectKBean.class).project;
         JkLog.startTask("process-springboot-aot");
@@ -227,7 +230,9 @@ public final class SpringbootKBean extends KBean {
         nativeImage.reachabilityMetadata.setExtractDir(
                 project.getOutputDir().resolve("graalvm-reachability-metadata-repo"));
 
-        nativeImage.make(execPath);
+        nativeImage
+                .setStaticLinkage(linkage)
+                .make(execPath);
     }
 
     private String nativeExecName() {
@@ -295,6 +300,13 @@ public final class SpringbootKBean extends KBean {
                 "to generate the native image using Docker from that location. " +
                 "Use these exclude patterns to avoid copying specific files.")
         public String copyProjectExcludePatterns;
+
+        @JkDoc("How the native image should be linked when created for local host.")
+        public JkNativeImage.StaticLinkage staticLinkage = JkNativeImage.StaticLinkage.NONE;
+
+        @JkDoc("How the native image should be linked when created for Docker image. " +
+                "FULLY is the most portable has it does not require any lib installed on the base image.")
+        public JkNativeImage.StaticLinkage dockerImageStaticLinkage = JkNativeImage.StaticLinkage.FULLY;
 
         /**
          * Allows to customize generated Docker image for native exec.

@@ -45,11 +45,17 @@ import java.util.stream.Stream;
 
 public class JkNativeImage {
 
+    public enum StaticLinkage {
+        NONE, FULLY, MOSTLY
+    }
+
     public final ReachabilityMetadata reachabilityMetadata = new ReachabilityMetadata();
 
     private final Path fatJar;
 
     private final List<Path> classpath;
+
+    private StaticLinkage staticLinkage = StaticLinkage.NONE;
 
     private JkNativeImage(Path fatJar, List<Path> classpath) {
         this.fatJar = fatJar;
@@ -64,6 +70,10 @@ public class JkNativeImage {
         return new JkNativeImage(null, classpath);
     }
 
+    public JkNativeImage setStaticLinkage(StaticLinkage staticLinkage) {
+        this.staticLinkage = staticLinkage;
+        return this;
+    }
 
     /**
      * Generates a native image at the specified location
@@ -113,6 +123,11 @@ public class JkNativeImage {
                 classpathArg = "@" + tempArgFile;
             }
             process = process.addParams("-classpath", classpathArg);
+        }
+        if (staticLinkage == StaticLinkage.FULLY) {
+            process.addParams("--static", "--libc=musl");
+        } else if (staticLinkage == StaticLinkage.MOSTLY) {
+            process.addParams("--static-nolibc");
         }
         process = process
                 .addParams("--no-fallback")
