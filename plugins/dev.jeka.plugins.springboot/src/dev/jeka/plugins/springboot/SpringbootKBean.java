@@ -39,6 +39,7 @@ import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +77,8 @@ public final class SpringbootKBean extends KBean {
 
     @JkDoc("Options related to native image creation")
     private NativeOptions nativeOps = new NativeOptions();
+
+
 
     @Override
     protected void init() {
@@ -116,6 +119,7 @@ public final class SpringbootKBean extends KBean {
 
     @JkDoc("Create a docker image running a native executable of the springboot app")
     public void makeNativeDocker() {
+        JkDocker.assertPresent();;
         final Path execPath;
         if (JkUtilsSystem.IS_LINUX) {
             execPath = nativeExecPath();
@@ -129,11 +133,11 @@ public final class SpringbootKBean extends KBean {
                 JkPathTree.of(projectDirForLinux).deleteRoot();
             }
             JkPathTree pathTree = JkPathTree.of(this.getBaseDir()).andMatching(false,
-                    ".jeka-work/**/*", "jeka-output/**/*");
+                      "jeka-output/**/*")
+                    .andMatcher(path -> !path.toString().startsWith("."));
             if (nativeOps.hasCopyExcludePatterns()) {
-                pathTree = pathTree.withMatcher(JkPathMatcher.of(false, nativeOps.copyExcludePatterns()));
+                pathTree = pathTree.andMatcher(JkPathMatcher.of(false, nativeOps.copyExcludePatterns()));
             }
-
 
             // We need to copy the project in another dir and apply a dos2Unix transformation
             // Then, we can invoke docker on this directory
