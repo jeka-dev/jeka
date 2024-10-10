@@ -16,32 +16,29 @@
 
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathMatcher;
-import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.file.*;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
+import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,6 +98,8 @@ public final class SpringbootKBean extends KBean {
                 dockerBuild.setExposedPorts(8080);
             }
         }));
+
+
 
     }
 
@@ -183,6 +182,33 @@ public final class SpringbootKBean extends KBean {
         System.out.println(dockerBuild.render());
     }
 
+    private List<Path> generateAotEnrichment(JkProject project) {
+        JkLog.startTask("process-springboot-aot");
+        AotEnricher aotEnricher = AotEnricher.of(project);
+        if (nativeOps.hasAotProfile()) {
+            aotEnricher.profiles.addAll(Arrays.asList(nativeOps.aotProfiles()));
+        }
+        aotEnricher.generate();
+
+        List<Path> classpath = new LinkedList<>(aotEnricher.getClasspath());
+        classpath.add(aotEnricher.getGeneratedClassesDir());
+        Path compiledGeneratedSources = project.getOutputDir()
+                .resolve("spring-aot/compiled-generated-sources");
+        JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
+                .setSources(JkPathTreeSet.ofRoots(aotEnricher.getGeneratedSourcesDir()))
+                .setClasspath(classpath)
+                .setOutputDir(compiledGeneratedSources);
+        JkUtilsAssert.state(project.compilerToolChain.compile(compileSpec),
+                "Error while compiling classes generated for AOT");
+        JkLog.endTask();
+
+        List<Path> result = new LinkedList<>();
+        result.add(aotEnricher.getGeneratedClassesDir());
+        result.add(aotEnricher.getGeneratedResourcesDir());
+        result.add(compiledGeneratedSources);
+        return result;
+    }
+
     private JkDockerBuild dockerBuildForNative(Path execPath) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         String nativeExecName = nativeExecName();
@@ -201,30 +227,31 @@ public final class SpringbootKBean extends KBean {
 
         JkProject project = load(ProjectKBean.class).project;
         JkLog.startTask("process-springboot-aot");
-        NativeMaker nativeMaker = new NativeMaker(project);
+        AotEnricher aotEnricher = AotEnricher.of(project);
         if (nativeOps.hasAotProfile()) {
-            nativeMaker.profiles.addAll(Arrays.asList(nativeOps.aotProfiles()));
+            aotEnricher.profiles.addAll(Arrays.asList(nativeOps.aotProfiles()));
         }
-        nativeMaker.prepareAot();
-        JkLog.endTask();
+        aotEnricher.generate();
 
-        // compile
-        JkLog.startTask("compile-generated-sources");
-        project.compilation.layout.addSource("jeka-output/spring-aot/generated-sources");
-        project.compilation.layout.addResource(project.getOutputDir().resolve("spring-aot/generated-resources"));
-        Path generatedClassesDir = project.getOutputDir().resolve("spring-aot/generated-classes/");
-        project.compilation.dependencies.add(generatedClassesDir);
-        project.compilation.run();
-        JkPathTree.of(generatedClassesDir).copyTo(project.compilation.layout.resolveClassDir());
+        List<Path> classpath = new LinkedList<>(aotEnricher.getClasspath());
+        classpath.add(aotEnricher.getGeneratedClassesDir());
+        Path compiledGeneratedSources = project.getOutputDir()
+                .resolve("jeka-output/spring-aot/compiled-generated-sources");
+        JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
+                        .setSources(JkPathTreeSet.ofRoots(aotEnricher.getGeneratedSourcesDir()))
+                        .setClasspath(classpath)
+                        .setOutputDir(compiledGeneratedSources);
+        JkUtilsAssert.state(project.compilerToolChain.compile(compileSpec),
+                "Error while compiling classes generated for AOT");
         JkLog.endTask();
 
         // create native image
-        JkPathSequence pathSequence = JkPathSequence.of(project.compilation.layout.resolveClassDir())
-                .and(project.packaging.resolveRuntimeDependenciesAsFiles());
-        JkNativeImage nativeImage = JkNativeImage.ofClasspath(pathSequence.getEntries());
+        classpath.add(compiledGeneratedSources);
+        classpath.add(aotEnricher.getGeneratedResourcesDir());
+        JkNativeImage nativeImage = JkNativeImage.ofClasspath(classpath);
 
         // -- set reachability metadata info
-        nativeImage.reachabilityMetadata.setDependencies(() ->
+        nativeImage.reachabilityMetadata.setDependencies(
                 project.packaging.resolveRuntimeDependencies().getDependencyTree().getDescendantModuleCoordinates());
         nativeImage.reachabilityMetadata.setExtractDir(
                 project.getOutputDir().resolve("graalvm-reachability-metadata-repo"));
@@ -260,6 +287,13 @@ public final class SpringbootKBean extends KBean {
         if (springRepo != null) {
             springbootProject.addSpringRepo(springRepo);
         }
+
+        // Configure native kbean
+        getRunbase().find(NativeKBean.class).ifPresent(nativeKBean -> {
+            nativeKBean.includeMainClassArg = false;
+            nativeKBean.setAotAssetDirs(() ->
+                    this.generateAotEnrichment(projectKBean.project));
+        });
     }
 
     private void customizeBaseKBean(BaseKBean baseKBean) {

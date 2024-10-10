@@ -10,6 +10,7 @@ import dev.jeka.plugins.springboot.JkSpringbootProject;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
 @JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
+//@JkInjectClasspath("dev.jeka:springboot-plugin")
 public class SpringbootSampleBuild extends KBean {
 
     public String aa;
@@ -42,7 +43,7 @@ public class SpringbootSampleBuild extends KBean {
                 .setVersion("0.0.1-SNAPSHOT");  // Snapshot is necessary otherwise it can not deploy twice in maven local repo
         JkSpringbootProject.of(projectKBean.project)
                 .configure()
-                .includeParentBom("3.3.3");
+                .includeParentBom("3.3.4");
     }
 
 

@@ -35,10 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,32 +43,47 @@ import java.util.stream.Stream;
 public class JkNativeImage {
 
     public enum StaticLinkage {
-        NONE, FULLY, MOSTLY
+
+        /** No static linkage **/
+        NONE,
+
+        /** Static-link everything except  **/
+        MOSTLY,
+
+        /** Static-link everything using musl-libc **/
+        MUSL,
     }
 
     public final ReachabilityMetadata reachabilityMetadata = new ReachabilityMetadata();
-
-    private final Path fatJar;
 
     private final List<Path> classpath;
 
     private StaticLinkage staticLinkage = StaticLinkage.NONE;
 
-    private JkNativeImage(Path fatJar, List<Path> classpath) {
-        this.fatJar = fatJar;
+    private String mainClass;
+
+    private final List<String> extraParams = new LinkedList<>();
+
+    private JkNativeImage(List<Path> classpath) {
         this.classpath = classpath;
     }
 
-    public static JkNativeImage ofFatjar(Path fatJar) {
-        return new JkNativeImage(fatJar, null);
-    }
-
     public static JkNativeImage ofClasspath(List<Path> classpath) {
-        return new JkNativeImage(null, classpath);
+        return new JkNativeImage(classpath);
     }
 
     public JkNativeImage setStaticLinkage(StaticLinkage staticLinkage) {
         this.staticLinkage = staticLinkage;
+        return this;
+    }
+
+    public JkNativeImage addExtraParams(String... params) {
+        this.extraParams.addAll(Arrays.asList(params));
+        return this;
+    }
+
+    public JkNativeImage setMainClass(String mainClass) {
+        this.mainClass = mainClass;
         return this;
     }
 
@@ -84,11 +96,7 @@ public class JkNativeImage {
         assertToolPresent();
         boolean hasMessageBundle = false;
         final Path resourceBundle;
-        if (fatJar != null) {
-            try (JkZipTree jarTree = JkZipTree.of(fatJar)) {
-                resourceBundle = jarTree.get("MessagesBundle.properties");
-            }
-        } else if (!classpath.isEmpty()) {
+        if (!classpath.isEmpty()) {
             Path mainDir = classpath.get(0);
             JkPathTree pathTree = JkPathTree.of(mainDir);
             resourceBundle = pathTree.get("MessagesBundle.properties");
@@ -101,62 +109,43 @@ public class JkNativeImage {
         }
 
         String nativeImageExe = toolPath().toString();
-
-        String regexp = "^(?!.*\\.class$).*$";
-        //String regexp = ".*(?<!\\.class)"; // works on linux/macos only
         JkProcess process = JkProcess.of(nativeImageExe);
-        if (classpath == null) {
-            process = process.addParams("-jar", fatJar.toString());
 
-            // For jar we need to explicitly declare resources and message bundles
-            process
-                    .addParams("-H:IncludeResources=" + regexp)
-                    .addParamsIf(hasMessageBundle, "-H:IncludeResourceBundles=MessagesBundle");
+        String classpathContent = JkPathSequence.of(classpath).toPath();
+        final String classpathArg;
+        if (classpathContent.length() <= 2048) {  // error thrown when cmd line is too large
+            classpathArg = classpathContent;
         } else {
-            String classpathContent = JkPathSequence.of(classpath).toPath();
-            final String classpathArg;
-            if (classpathContent.length() <= 2048) {
-                classpathArg = classpathContent;
-            } else {
-                Path tempArgFile = JkUtilsPath.createTempFile("jeka-native-image-cp", ".txt");
-                JkPathFile.of(tempArgFile).write(classpathContent);
-                classpathArg = "@" + tempArgFile;
-            }
-            process = process.addParams("-classpath", classpathArg);
+            Path tempArgFile = JkUtilsPath.createTempFile("jeka-native-image-cp", ".txt");
+            JkPathFile.of(tempArgFile).write(classpathContent);
+            classpathArg = "@" + tempArgFile;
         }
-        if (staticLinkage == StaticLinkage.FULLY) {
+        process = process.addParams("-classpath", classpathArg);
+
+        if (staticLinkage == StaticLinkage.MUSL) {
             process.addParams("--static", "--libc=musl");
         } else if (staticLinkage == StaticLinkage.MOSTLY) {
             process.addParams("--static-nolibc");
         }
         process = process
                 .addParams("--no-fallback")
+                .addParamsIf(!JkUtilsString.isBlank(mainClass), "-H:Class=" + mainClass)
                 .addParams("-o",  target.toString())
-                .addParams("-H:+UnlockExperimentalVMOptions")
+                //.addParams("-H:+UnlockExperimentalVMOptions")
                 .setLogCommand(true)
-                .setCollectStderr(true)
-                .setCollectStdout(true)
-                .setLogWithJekaDecorator(true)
+               // .setCollectStderr(true)
+               // .setCollectStdout(true)
+               // .setLogWithJekaDecorator(true)
+                .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true);
         String reachabilityArg = reachabilityMetadata.repoDirsToIncludeAsString();
         if (!reachabilityArg.isEmpty()) {
             process.addParams("-H:ConfigurationFileDirectories="+reachabilityArg);
         }
+        process.addParams(this.extraParams);
         process.exec();
         JkLog.info("Generated in %s", target);
         JkLog.endTask();
-    }
-
-    public Path make() {
-        JkUtilsAssert.state(fatJar != null, "You must specify a target path when creating a native image without using" +
-                " a JAR file. Use make(targetPath) instead.");
-        String relTarget = JkUtilsString.substringBeforeLast(fatJar.toString(), ".jar");
-        if (relTarget.endsWith("-fat")) {
-            relTarget = JkUtilsString.substringBeforeLast(relTarget, "-fat");
-        }
-        Path target = Paths.get(relTarget);
-        make(target);
-        return Paths.get(relTarget);
     }
 
     private static Path toolPath() {
@@ -186,10 +175,12 @@ public class JkNativeImage {
 
     public class ReachabilityMetadata {
 
+        public static final String DEFAULT_REPO_VERSION =  "0.10.3";
+
         private boolean useRepo = true;
 
         // The version of the metadata repo to download.
-        private String repoVersion = "0.10.3";
+        private String repoVersion = DEFAULT_REPO_VERSION;
 
         // repos for downloading reachability metadata
         private JkRepoSet downloadRepos = JkRepo.ofMavenCentral().toSet();
@@ -198,7 +189,7 @@ public class JkNativeImage {
 
         // Dependencies for which looking for reachability metadata.
         // This should contain all transitive dependencies used at runtime
-        private Supplier<? extends Collection<JkCoordinate>> dependencySupplier;
+        private Collection<JkCoordinate> dependencies;
 
         public ReachabilityMetadata setUseRepo(boolean useRepo) {
             this.useRepo = useRepo;
@@ -215,13 +206,13 @@ public class JkNativeImage {
             return this;
         }
 
-        public ReachabilityMetadata setDependencies(Supplier<? extends Collection<JkCoordinate>> dependencySupplier) {
-            this.dependencySupplier = dependencySupplier;
+        public ReachabilityMetadata setDependencies(Collection<JkCoordinate> dependencies) {
+            this.dependencies =  dependencies;
             return this;
         }
 
-        public ReachabilityMetadata setDependencies(Collection<JkCoordinate> dependencies) {
-            this.dependencySupplier = () -> dependencies;
+        public ReachabilityMetadata setDownloadRepos(JkRepoSet downloadRepos) {
+            this.downloadRepos = downloadRepos;
             return this;
         }
 
@@ -238,9 +229,9 @@ public class JkNativeImage {
             }
             extractReachabilityMetadata();
             Repo repo = new Repo(extractDir);
-            if (dependencySupplier != null) {
+            if (dependencies != null) {
                 JkLog.verbose("Extracting reachability metadata from resolved dependencies");
-                return dependencySupplier.get().stream()
+                return dependencies.stream()
                         .map(repo::metadataFolderFor)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());

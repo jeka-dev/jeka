@@ -13,6 +13,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea/output" />
       <excludeFolder url="file://$MODULE_DIR$/.jeka-work" />
       <excludeFolder url="file://$MODULE_DIR$/jeka-output" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="jdk" jdkName="17" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />

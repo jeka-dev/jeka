@@ -16,14 +16,18 @@
 
 package dev.jeka.core.tool.builtins.tooling.nativ;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -31,79 +35,90 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Supplier;
 
 @JkDoc("Creates native images (experimental !)\n" +
         "A native images is an executable file created from Java bytecode.\n" +
         "This KBean allows to create native images from executable jars generated from the project.")
 public class NativeKBean extends KBean {
 
+    private Supplier<List<Path>> aotAssetDirs = Collections::emptyList;
+
+    @JkDoc("Extra arguments to pass to nativa-image executable.")
+    public String args;
+
+    @JkDoc("Tell if the generated executable must by statically linked with native libs")
+    public JkNativeImage.StaticLinkage staticLinkage = JkNativeImage.StaticLinkage.NONE;
+
+    @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
+    public boolean useMetadataRepo = true;
+
+    @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
+    public String metadataRepoVersion = JkNativeImage.ReachabilityMetadata.DEFAULT_REPO_VERSION;
+
+    @JkDoc("If false, the main class won't be specified in command line arguments. " +
+            "This means that it is expected to be mentioned in aot config files.")
+    public boolean includeMainClassArg = true;
+
     @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
             "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
-    public void build() {
-        assertToolPresent();
-        JkProject project = load(ProjectKBean.class).project;
-        Path jar = project.artifactLocator.getMainArtifactPath();
-        if (!Files.exists(jar)) {
-            project.packaging.createFatJar(jar);
-        }
-        boolean hasMessageBundle = false;
-        try (JkZipTree jarTree = JkZipTree.of(jar)) {
-            Path resourceBundle = jarTree.get("MessagesBundle.properties");
-            if (Files.exists(resourceBundle)) {
-                hasMessageBundle = true;
-                JkLog.verbose("Found MessagesBundle to include in the native image.");
-            }
-        }
-        String relTarget = JkUtilsString.substringBeforeLast(jar.toString(), ".jar");
-        Path target = Paths.get(relTarget).toAbsolutePath();
-        String nativeImageExe = toolPath().toString();
-        /*
-        if (JkUtilsSystem.IS_WINDOWS) {
-            nativeImageExe = JkUtilsString.substringBeforeLast(nativeImageExe, ".");
+    public void make() {
+        Optional<ProjectKBean> optionalProject = this.getRunbase().find(ProjectKBean.class);
+        if (optionalProject.isPresent()) {
+            JkProject project = optionalProject.get().project;
+            project.compilation.runIfNeeded();
+            build(project);
+        } else {
+            throw new JkException("No project found in Runbase");
         }
 
-         */
-
-        String regexp = "^(?!.*\\.class$).*$";
-        //String regexp = ".*(?<!\\.class)"; // works on linux/macos only
-        JkProcess.of(nativeImageExe, "--no-fallback")
-                .addParams("-H:+UnlockExperimentalVMOptions")
-                .addParams("-H:IncludeResources=" + regexp)
-                .addParamsIf(hasMessageBundle, "-H:IncludeResourceBundles=MessagesBundle")
-                .addParams("-jar", jar.toString())
-                .addParams("-H:Name=" + target)
-                .setLogCommand(true)
-                .setCollectStderr(true)
-                .setCollectStdout(true)
-                .setLogWithJekaDecorator(true)
-                .setDestroyAtJvmShutdown(true)
-                .exec();
-        JkLog.info("Generated in %s", target);
-        JkLog.info("Run: %s", relTarget);
     }
 
-    private static Path toolPath() {
-        Path javaHome = JkJavaProcess.CURRENT_JAVA_HOME;
-        return JkUtilsSystem.IS_WINDOWS ?
-                javaHome.resolve("bin/native-image.cmd") :
-                javaHome.resolve("bin/native-image");
+    /**
+     * Sets the directories containing ahead-of-time compilation assets for the native image.
+     *
+     * @param aotAssetDirs A supplier providing a list of paths to the AOT assets directories.
+     */
+    public NativeKBean setAotAssetDirs(Supplier<List<Path>> aotAssetDirs) {
+        this.aotAssetDirs = aotAssetDirs;
+        return this;
     }
 
-    private static boolean isPresent() {
-        try {
-            return JkProcess.of(toolPath().toString(), "--version")
-                    .exec()
-                    .hasSucceed();
-        } catch (UncheckedIOException e) {
-            return false;
+    private void build(JkProject project) {
+        List<Path> classpath = new LinkedList<>();
+        classpath.add(project.compilation.layout.resolveClassDir());
+        final List<Path> depsAsFiles;
+        final Set<JkCoordinate> depsAsCoordinates;
+        if (this.useMetadataRepo) {
+            JkResolveResult resolveResult = project.packaging.resolveRuntimeDependencies();
+            depsAsFiles = resolveResult.getFiles().getEntries();
+            depsAsCoordinates = resolveResult.getDependencyTree().getDescendantModuleCoordinates();
+        } else {
+            depsAsFiles = project.packaging.resolveRuntimeDependenciesAsFiles();
+            depsAsCoordinates = null;
         }
+        classpath.addAll(depsAsFiles);
+        classpath.addAll(0, this.aotAssetDirs.get());
+        JkNativeImage nativeImage = JkNativeImage.ofClasspath(classpath);
+        if (!JkUtilsString.isBlank(this.args)) {
+            nativeImage.addExtraParams(JkUtilsString.parseCommandline(this.args));
+        }
+        if (this.includeMainClassArg) {
+            nativeImage.setMainClass(project.packaging.getMainClass());
+        }
+        nativeImage.reachabilityMetadata
+                .setUseRepo(useMetadataRepo)
+                .setRepoVersion(metadataRepoVersion)
+                .setDependencies(depsAsCoordinates)
+                .setDownloadRepos(project.dependencyResolver.getRepos())
+                .setExtractDir(project.getOutputDir().resolve("aot-discovery-metadata-repo"));
+
+        String name = project.artifactLocator.getMainArtifactPath().toString();
+        name = JkUtilsString.substringBeforeLast(name, ".jar");
+        nativeImage.make(Paths.get(name));
     }
 
-    private static void assertToolPresent() {
-        if (!isPresent()) {
-            throw new IllegalStateException("The project seems not to be configured for using graalvm JDK.\n" +
-                    "Please set 'jeka.java.distrib=graalvm' in jeka.properties in order to build native images.");
-        }
-    }
+
 
 }
