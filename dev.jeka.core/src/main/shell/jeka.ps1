@@ -390,7 +390,7 @@ class JekaDistrib {
     $jekaVersion = $this.props.GetValue("jeka.version")
 
     # If version not specified, use jeka jar present in running distrib
-    if ($jekaVersion -eq '') {
+    if ($jekaVersion -eq '' -or $jekaVersion -eq '.') {
       $dir = $PSScriptRoot
       $jarFile = $dir + "\dev.jeka.jeka-core.jar"
       if (! [System.IO.File]::Exists($jarFile)) {
@@ -455,7 +455,13 @@ class ZipExtractor {
   hidden [string] Download() {
     $downloadFile = [System.IO.Path]::GetTempFileName() + ".zip"
     $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile($this.url, $downloadFile)
+    try {
+        $webClient.DownloadFile($this.url, $downloadFile)
+    } catch {
+      $msg = "Error while downloading : " + $this.url
+      Write-Error $msg
+      Exit-Error "$($_.Exception.Message)"
+    }
     $webClient.Dispose()
     return $downloadFile
   }

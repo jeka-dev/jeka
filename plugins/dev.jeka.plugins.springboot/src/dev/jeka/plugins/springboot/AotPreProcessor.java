@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-class AotEnricher {
+class AotPreProcessor {
 
     private final List<Path> classpath;
 
@@ -44,7 +44,7 @@ class AotEnricher {
 
     public final List<String> aotRunArguments = new LinkedList<>();
 
-    AotEnricher(List<Path> classpath, String mainClass, Path outputDir, JkModuleId moduleId) {
+    AotPreProcessor(List<Path> classpath, String mainClass, Path outputDir, JkModuleId moduleId) {
         this.classpath = classpath;
         this.mainClass = mainClass;
         this.outputDir = outputDir;
@@ -54,7 +54,7 @@ class AotEnricher {
         this.generatedClassesDir = outputDir.resolve("generated-classes");
     }
 
-    static AotEnricher of(JkProject project) {
+    static AotPreProcessor of(JkProject project) {
         JkModuleId moduleId1 = Optional.ofNullable(project.getModuleId())
                 .orElse(JkModuleId.of(
                         project.getBaseDir().toAbsolutePath().getFileName().toString(),
@@ -64,7 +64,7 @@ class AotEnricher {
         classpath.addAll(project.packaging.resolveRuntimeDependenciesAsFiles());
         String mainClass = project.packaging.getMainClass();
         Path outputDir = project.getOutputDir().resolve("spring-aot");
-        return new AotEnricher(classpath, mainClass, outputDir, moduleId1);
+        return new AotPreProcessor(classpath, mainClass, outputDir, moduleId1);
 
     }
 

@@ -72,9 +72,8 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Specific Spring repo where to download spring artifacts. Not needed if you use official release.")
     private JkSpringRepo springRepo;
 
-    @JkDoc("Options related to native image creation")
-    private NativeOptions nativeOps = new NativeOptions();
-
+    @JkDoc("The springboot profiles that should be activated while processing AOT")
+    public String aotProfiles;
 
 
     @Override
@@ -111,71 +110,6 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create .war file : " + this.createWarFile);
     }
 
-    @JkDoc("Create native executable springboot application")
-    public void makeNative() {
-        makeNative(nativeExecPath(), this.nativeOps.staticLinkage);
-    }
-
-    @JkDoc("Create a docker image running a native executable of the springboot app")
-    public void makeNativeDocker() {
-        JkDocker.assertPresent();;
-        final Path execPath;
-        if (JkUtilsSystem.IS_LINUX) {
-            execPath = nativeExecPath();
-            if (!Files.exists(execPath)) {
-                makeNative(execPath, this.nativeOps.dockerImageStaticLinkage);
-            }
-        } else {
-            JkLog.startTask("Creating native image using Docker");
-            Path projectDirForLinux = this.getOutputDir().resolve("project-for-container");
-            if (Files.exists(projectDirForLinux)) {
-                JkPathTree.of(projectDirForLinux).deleteRoot();
-            }
-            JkPathTree pathTree = JkPathTree.of(this.getBaseDir()).andMatching(false,
-                      "jeka-output/**/*")
-                    .andMatcher(path -> !path.toString().startsWith("."));
-            if (nativeOps.hasCopyExcludePatterns()) {
-                pathTree = pathTree.andMatcher(JkPathMatcher.of(false, nativeOps.copyExcludePatterns()));
-            }
-
-            // We need to copy the project in another dir and apply a dos2Unix transformation
-            // Then, we can invoke docker on this directory
-            if (JkUtilsSystem.IS_WINDOWS) {
-                pathTree.stream()
-                        .filter(Files::isRegularFile)
-                        .forEach(path -> {
-                            Path relativePath = this.getBaseDir().relativize(path);
-                            Path targetPath = projectDirForLinux.resolve(relativePath);
-                            JkUtilsPath.createDirectories(targetPath.getParent());
-                            try {
-                                JkPathFile.of(path).dos2Unix(targetPath);
-                            } catch (Exception e) {
-                                JkLog.warn("Error while dos2unix file %s. Just copy as is.", path);
-                                JkUtilsPath.copy(path, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                            }
-                        });
-            } else {
-                pathTree.copyTo(projectDirForLinux);
-            }
-            // Invoke native compilation via a container
-            String jekaVersion = Optional.ofNullable(this.nativeOps.jekaVersionInDocker).orElse(JkInfo.getJekaVersion());
-            JkDocker.prepareExecJeka(projectDirForLinux,"-Djeka.version=" + jekaVersion
-                    , "springboot:",  "makeNative")
-                    .addParams("nativeOps.staticLinkage=" + this.nativeOps.dockerImageStaticLinkage)
-                    .addParamsIf(nativeOps.hasAotProfile(), "nativeOps.aotProfiles=" + nativeOps.aotProfiles)
-                    .addParamsIf(JkLog.isVerbose(), "--verbose")
-                    .addParamsIf(JkLog.isDebug(), "--debug")
-                    .exec();
-            execPath = projectDirForLinux.resolve("jeka-output").resolve(nativeExecName());
-            JkLog.endTask();
-        }
-
-        // Create image using the created native exec
-        JkDockerBuild dockerBuild = dockerBuildForNative(execPath);
-        String imageName = DockerKBean.computeImageName(load(ProjectKBean.class).project);
-        dockerBuild.buildImage(imageName);
-    }
-
     @JkDoc("Displays the DockerBuild file used to create Docker native image")
     public void renderDockerBuild() {
         JkDockerBuild dockerBuild = dockerBuildForNative(nativeExecPath());
@@ -184,18 +118,18 @@ public final class SpringbootKBean extends KBean {
 
     private List<Path> generateAotEnrichment(JkProject project) {
         JkLog.startTask("process-springboot-aot");
-        AotEnricher aotEnricher = AotEnricher.of(project);
-        if (nativeOps.hasAotProfile()) {
-            aotEnricher.profiles.addAll(Arrays.asList(nativeOps.aotProfiles()));
+        AotPreProcessor aotPreProcessor = AotPreProcessor.of(project);
+        if (hasAotProfile()) {
+            aotPreProcessor.profiles.addAll(Arrays.asList(aotProfiles()));
         }
-        aotEnricher.generate();
+        aotPreProcessor.generate();
 
-        List<Path> classpath = new LinkedList<>(aotEnricher.getClasspath());
-        classpath.add(aotEnricher.getGeneratedClassesDir());
+        List<Path> classpath = new LinkedList<>(aotPreProcessor.getClasspath());
+        classpath.add(aotPreProcessor.getGeneratedClassesDir());
         Path compiledGeneratedSources = project.getOutputDir()
                 .resolve("spring-aot/compiled-generated-sources");
         JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
-                .setSources(JkPathTreeSet.ofRoots(aotEnricher.getGeneratedSourcesDir()))
+                .setSources(JkPathTreeSet.ofRoots(aotPreProcessor.getGeneratedSourcesDir()))
                 .setClasspath(classpath)
                 .setOutputDir(compiledGeneratedSources);
         JkUtilsAssert.state(project.compilerToolChain.compile(compileSpec),
@@ -203,8 +137,8 @@ public final class SpringbootKBean extends KBean {
         JkLog.endTask();
 
         List<Path> result = new LinkedList<>();
-        result.add(aotEnricher.getGeneratedClassesDir());
-        result.add(aotEnricher.getGeneratedResourcesDir());
+        result.add(aotPreProcessor.getGeneratedClassesDir());
+        result.add(aotPreProcessor.getGeneratedResourcesDir());
         result.add(compiledGeneratedSources);
         return result;
     }
@@ -219,46 +153,7 @@ public final class SpringbootKBean extends KBean {
                 .addCopyNonRoot(execPath, "/app/" + nativeExecName)
                 .add("WORKDIR /workdir")
                 .add("ENTRYPOINT [\"/app/" + nativeExecName + "\"]");
-        this.nativeOps.dockerImageCustomizers.accept(dockerBuild);
         return dockerBuild;
-    }
-
-    private void makeNative(Path execPath, JkNativeImage.StaticLinkage linkage) {
-
-        JkProject project = load(ProjectKBean.class).project;
-        JkLog.startTask("process-springboot-aot");
-        AotEnricher aotEnricher = AotEnricher.of(project);
-        if (nativeOps.hasAotProfile()) {
-            aotEnricher.profiles.addAll(Arrays.asList(nativeOps.aotProfiles()));
-        }
-        aotEnricher.generate();
-
-        List<Path> classpath = new LinkedList<>(aotEnricher.getClasspath());
-        classpath.add(aotEnricher.getGeneratedClassesDir());
-        Path compiledGeneratedSources = project.getOutputDir()
-                .resolve("jeka-output/spring-aot/compiled-generated-sources");
-        JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
-                        .setSources(JkPathTreeSet.ofRoots(aotEnricher.getGeneratedSourcesDir()))
-                        .setClasspath(classpath)
-                        .setOutputDir(compiledGeneratedSources);
-        JkUtilsAssert.state(project.compilerToolChain.compile(compileSpec),
-                "Error while compiling classes generated for AOT");
-        JkLog.endTask();
-
-        // create native image
-        classpath.add(compiledGeneratedSources);
-        classpath.add(aotEnricher.getGeneratedResourcesDir());
-        JkNativeImage nativeImage = JkNativeImage.ofClasspath(classpath);
-
-        // -- set reachability metadata info
-        nativeImage.reachabilityMetadata.setDependencies(
-                project.packaging.resolveRuntimeDependencies().getDependencyTree().getDescendantModuleCoordinates());
-        nativeImage.reachabilityMetadata.setExtractDir(
-                project.getOutputDir().resolve("graalvm-reachability-metadata-repo"));
-
-        nativeImage
-                .setStaticLinkage(linkage)
-                .make(execPath);
     }
 
     private String nativeExecName() {
@@ -314,60 +209,15 @@ public final class SpringbootKBean extends KBean {
         );
     }
 
-    public static class NativeOptions {
+    private boolean hasAotProfile() {
+        return !JkUtilsString.isBlank(this.aotProfiles);
+    }
 
-        private NativeOptions() {
+    private String[] aotProfiles() {
+        if (hasAotProfile()) {
+            return aotProfiles.split(",");
         }
-
-        @JkDoc("The name of the docker image containing the springboot native app")
-        public String dockerImageName;
-
-        @JkDoc("The springboot profiles that should be activated while processing AOT")
-        public String aotProfiles;
-
-        @JkDoc("For testing purpose : force the jeka version executed in docker container while invoking makeNativeDocker")
-        public String jekaVersionInDocker;
-
-        @JkDoc("When creating a Docker native image on Windows or macOS, " +
-                "the project is copied to another directory " +
-                "to generate the native image using Docker from that location. " +
-                "Use these exclude patterns to avoid copying specific files.")
-        public String copyProjectExcludePatterns;
-
-        @JkDoc("How the native image should be linked when created for local host.")
-        public JkNativeImage.StaticLinkage staticLinkage = JkNativeImage.StaticLinkage.NONE;
-
-        @JkDoc("How the native image should be linked when created for Docker image. " +
-                "FULLY is the most portable has it does not require any lib installed on the base image.")
-        public JkNativeImage.StaticLinkage dockerImageStaticLinkage = JkNativeImage.StaticLinkage.NONE;
-
-        /**
-         * Allows to customize generated Docker image for native exec.
-         */
-        public final JkConsumers<JkDockerBuild> dockerImageCustomizers = JkConsumers.of();
-
-        private boolean hasAotProfile() {
-            return !JkUtilsString.isBlank(this.aotProfiles);
-        }
-
-        private String[] aotProfiles() {
-            if (hasAotProfile()) {
-                return aotProfiles.split(",");
-            }
-            return new String[0];
-        }
-
-        private boolean hasCopyExcludePatterns() {
-            return !JkUtilsString.isBlank(this.copyProjectExcludePatterns);
-        }
-
-        private String[] copyExcludePatterns() {
-            if (hasCopyExcludePatterns()) {
-                return copyProjectExcludePatterns.split(",");
-            }
-            return new String[0];
-        }
-
+        return new String[0];
     }
 
 }
