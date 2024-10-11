@@ -20,6 +20,7 @@ import dev.jeka.core.api.system.JkLog;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Path;
 
 public class JkUtilsNet {
 
@@ -191,6 +192,41 @@ public class JkUtilsNet {
         }
 
     }
+
+    /**
+     * Downloads the specified url file at the specified file.
+     * @param fileURL the file tu dowload
+     * @param saveFilePath The filesytem location to get the file once downloaded
+     */
+    public static void downloadFile(String fileURL, Path saveFilePath) {
+        try {
+            URL url = new URL(fileURL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setInstanceFollowRedirects(true);
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStream inputStream = connection.getInputStream();
+                FileOutputStream outputStream = new FileOutputStream(saveFilePath.toString());
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.close();
+                inputStream.close();
+            } else {
+                connection.disconnect();
+                throw new IllegalStateException("No file to download at " + fileURL + " : Server replied with HTTP code: " + responseCode);
+            }
+            connection.disconnect();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+    }
+
 
     public static class BasicHttpResponse {
 

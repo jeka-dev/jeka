@@ -113,6 +113,14 @@ public final class JkUtilsPath {
         return new JkZipRoot(zipFile, fileSystem.getPath("/"));
     }
 
+    public static void move(Path jdkHome, Path jdkDir, StandardCopyOption ... options) {
+        try {
+            Files.move(jdkHome, jdkDir, options);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /**
      *  A container object representing both a zip file and its content. The content is seen as a regular
      *  <code>Path</code> representing the content root.
@@ -562,6 +570,44 @@ public final class JkUtilsPath {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    /**
+     * Move directory along all its children and subdirectories recursively
+     */
+    public static void moveDir(Path source, Path target) {
+        // First, copy all contents from source to target directory
+        walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path targetDir = target.resolve(source.relativize(dir));
+                if (!Files.exists(targetDir)) {
+                    Files.createDirectories(targetDir);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+        // Then, delete the original directory and its contents
+        walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
 }

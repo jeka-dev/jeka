@@ -86,4 +86,10 @@ public final class JkUtilsZip {
         }
         JkUtilsPath.deleteFile(temp);
     }
+
+    public static void unzip(Path zipFile, Path target) {
+        try (JkZipTree zip = JkZipTree.of(zipFile)) {
+            zip.copyTo(target, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
 }
