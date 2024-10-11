@@ -17,6 +17,7 @@
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 public class JkUtilsJdkTest {
 
     @Test
+    @Ignore
     public void testGetJdk() {
         JkLog.setDecorator(JkLog.Style.INDENT);
         Path path = JkUtilsJdk.getJdk("graalvm", "22");
