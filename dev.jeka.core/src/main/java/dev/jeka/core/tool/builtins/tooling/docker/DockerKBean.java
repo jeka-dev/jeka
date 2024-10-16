@@ -19,32 +19,45 @@ package dev.jeka.core.tool.builtins.tooling.docker;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.docker.JkDocker;
+import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
+import dev.jeka.core.api.tooling.docker.JkDockerNative;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-@JkDoc("Builds and runs image based on project or 'jeka-src' (Requires a Docker client)")
+@JkDoc("Builds and runs image based on project.%n" +
+        "This KBean can build JVM and Native (AOT) images from an existing project."
+)
 public final class DockerKBean extends KBean {
 
     @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
             "If not set, the image name will be inferred form project info.")
     public String imageName;
 
+    @JkDoc("Explicit full name of the native image to build. See imageName.")
+    public String nativeImageName;
+
     public final RunOptions run = new RunOptions();
 
     public final BuildOptions build = new BuildOptions();
 
-    private String lastRunningContainerName;
+    /*
+     * Handler on the Docker build configuration for customizing built images.
+     */
+    private final JkConsumers<JkDockerJvmBuild> jvmImageCustomizer = JkConsumers.of();
+
+    private final JkConsumers<JkDockerBuild.StepContainer> nativeImageCustomizer = JkConsumers.of();
 
     /**
      * Computes the name of the Docker image based on the specified project.
@@ -55,11 +68,6 @@ public final class DockerKBean extends KBean {
     public static String computeImageName(JkProject project) {
         return computeImageName(project.getModuleId(), project.getVersion(), project.getBaseDir());
     }
-
-    /**
-     * Handler on the Docker build configuration for customizing built images.
-     */
-    private final JkConsumers<JkDockerJvmBuild> customizer = JkConsumers.of();
 
     @Override
     protected void init() {
@@ -80,21 +88,6 @@ public final class DockerKBean extends KBean {
         dockerBuild().buildImage(getOutputDir().resolve(dirName), imageName);
     }
 
-    @JkDoc("Runs Docker image and wait until termination.")
-    public void run() {
-        JkDocker.assertPresent();
-        this.lastRunningContainerName = "jeka-" + imageName.replace(':', '-');
-        String runOptions = JkUtilsString.isBlank(run.options) ? "" : run.options.trim() + " ";
-        String args = String.format("%s--rm %s-e \"JAVA_TOOL_OPTIONS=%s\" --name %s %s %s",
-                runOptions,
-                dockerBuild().portMappingArgs(),
-                run.jvmOptions,
-                this.lastRunningContainerName,
-                imageName,
-                run.programArgs);
-        JkDocker.execCmdLine("run", args);
-    }
-
     @JkDoc("Displays info about the Docker image.")
     public void info() {
         String buildInfo = dockerBuild().info(this.imageName); // May trigger a compilation to find the main class
@@ -102,24 +95,54 @@ public final class DockerKBean extends KBean {
         JkLog.info(buildInfo);
     }
 
-    public void customize(Consumer<JkDockerJvmBuild> dockerBuildCustomizer) {
-        customizer.add(dockerBuildCustomizer);
+    @JkDoc("Builds native Docker image in local registry.")
+    public void buildNative() {
+        String dirName = "docker-build-native-" + imageName.replace(':', '#');
+        nativeDockerBuild().buildImage(getOutputDir().resolve(dirName), imageName);
     }
 
-
+    @JkDoc("Displays info about the native Docker image.")
+    public void infoNative() {
+        String buildInfo = nativeDockerBuild().render(); // May trigger a compilation to find the main class
+        JkLog.info("Image Name        : " + this.imageName);
+        JkLog.info(buildInfo);
+    }
 
     /**
-     * Retrieves the name of the last or current running container, launched using {@link #run()} method.
+     * Adds a customizer function for customizing the Docker JVM image to build.
      */
-    public String getLastRunningContainerName() {
-        return lastRunningContainerName;
+    public void customizeJvmImage(Consumer<JkDockerJvmBuild> dockerBuildCustomizer) {
+        jvmImageCustomizer.add(dockerBuildCustomizer);
+    }
+
+    /**
+     * Adds a customizer function for customizing the Dockerbuild that will generate the Native image.
+     */
+    public void customizeNativeImage(Consumer<JkDockerBuild.StepContainer> dockerBuildCustomizer) {
+        nativeImageCustomizer.add(dockerBuildCustomizer);
     }
 
     private JkDockerJvmBuild dockerBuild() {
         JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of();
         dockerBuild.setBaseImage(build.baseImage);
-        customizer.accept(dockerBuild);
+        jvmImageCustomizer.accept(dockerBuild);
         return dockerBuild;
+    }
+
+    private JkDockerBuild nativeDockerBuild() {
+        return nativeDockerBuild(load(ProjectKBean.class).project);
+    }
+
+    private JkDockerBuild nativeDockerBuild(JkProject project) {
+        NativeKBean nativeKBean = this.load(NativeKBean.class);
+        JkNativeImage nativeImage =  nativeKBean.nativeImage(project);
+
+        JkDockerBuild result = JkDockerNative.of(nativeImage)
+                .setBaseImage(build.nativeBaseImage)
+                .setUseNonrootUser(build.nonrootUser)
+                .dockerBuild();
+        nativeImageCustomizer.accept(result.rootSteps);
+        return result;
     }
 
     private void configureForBase(BaseKBean baseKBean) {
@@ -128,7 +151,7 @@ public final class DockerKBean extends KBean {
                 ? imageName
                 : computeImageName(baseKBean.getModuleId(), baseKBean.getVersion(), baseKBean.getBaseDir());
 
-        this.customize(dockerBuild ->  dockerBuild
+        this.customizeJvmImage(dockerBuild ->  dockerBuild
                 .setMainClass(baseKBean.getMainClass())
                 .setClasses(baseKBean.getAppClasses())
                 .setClasspath(baseKBean.getAppClasspath())
@@ -141,7 +164,10 @@ public final class DockerKBean extends KBean {
         this.imageName = !JkUtilsString.isBlank(imageName)
                 ? imageName
                 : computeImageName(project);
-        this.customize(dockerBuild -> dockerBuild.adaptTo(project));
+        this.nativeImageName = !JkUtilsString.isBlank(nativeImageName)
+                ? nativeImageName
+                : "native-" + computeImageName(project);
+        this.customizeJvmImage(dockerBuild -> dockerBuild.adaptTo(project));
     }
 
     private static String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
@@ -184,6 +210,12 @@ public final class DockerKBean extends KBean {
 
         @JkDoc("Base image to construct the Docker image.")
         public String baseImage = JkDockerJvmBuild.BASE_IMAGE;
+
+        @JkDoc("Base image for the native Docker image to build")
+        public String nativeBaseImage = "ubuntu:latest";
+
+        @JkDoc("If true, the image will be configured for running with the 'nonroot' user.")
+        public boolean nonrootUser = true;
 
     }
 

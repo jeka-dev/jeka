@@ -18,21 +18,14 @@ package dev.jeka.core.tool.builtins.tooling.nativ;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.file.JkZipTree;
-import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -49,7 +42,7 @@ public class NativeKBean extends KBean {
     public String args;
 
     @JkDoc("Tell if the generated executable must by statically linked with native libs")
-    public JkNativeImage.StaticLinkage staticLinkage = JkNativeImage.StaticLinkage.NONE;
+    public JkNativeImage.StaticLink staticLink = JkNativeImage.StaticLink.NONE;
 
     @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
     public boolean useMetadataRepo = true;
@@ -63,7 +56,7 @@ public class NativeKBean extends KBean {
 
     @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
             "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
-    public void make() {
+    public void compile() {
         Optional<ProjectKBean> optionalProject = this.getRunbase().find(ProjectKBean.class);
         if (optionalProject.isPresent()) {
             JkProject project = optionalProject.get().project;
@@ -85,7 +78,7 @@ public class NativeKBean extends KBean {
         return this;
     }
 
-    private void build(JkProject project) {
+    public JkNativeImage nativeImage(JkProject project) {
         List<Path> classpath = new LinkedList<>();
         classpath.add(project.compilation.layout.resolveClassDir());
         final List<Path> depsAsFiles;
@@ -107,18 +100,21 @@ public class NativeKBean extends KBean {
         if (this.includeMainClassArg) {
             nativeImage.setMainClass(project.packaging.getMainClass());
         }
+        nativeImage.setStaticLinkage(staticLink);
         nativeImage.reachabilityMetadata
                 .setUseRepo(useMetadataRepo)
                 .setRepoVersion(metadataRepoVersion)
                 .setDependencies(depsAsCoordinates)
                 .setDownloadRepos(project.dependencyResolver.getRepos())
                 .setExtractDir(project.getOutputDir().resolve("aot-discovery-metadata-repo"));
-
-        String name = project.artifactLocator.getMainArtifactPath().toString();
-        name = JkUtilsString.substringBeforeLast(name, ".jar");
-        nativeImage.make(Paths.get(name));
+        return nativeImage;
     }
 
-
+    private void build(JkProject project) {
+        JkNativeImage nativeImage = nativeImage(project);
+        String pathString = project.artifactLocator.getMainArtifactPath().toString();
+        pathString = JkUtilsString.substringBeforeLast(pathString, ".jar");
+        nativeImage.make(Paths.get(pathString.replace('\\', '/')));
+    }
 
 }

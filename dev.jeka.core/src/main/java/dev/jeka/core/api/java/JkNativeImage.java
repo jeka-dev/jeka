@@ -19,11 +19,10 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -36,13 +35,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JkNativeImage {
 
-    public enum StaticLinkage {
+    public static final String DEFAULT_GRAALVM_VERSION = "23";;
+
+    public enum StaticLink {
 
         /** No static linkage **/
         NONE,
@@ -58,7 +58,7 @@ public class JkNativeImage {
 
     private final List<Path> classpath;
 
-    private StaticLinkage staticLinkage = StaticLinkage.NONE;
+    private StaticLink staticLink = StaticLink.NONE;
 
     private String mainClass;
 
@@ -72,8 +72,8 @@ public class JkNativeImage {
         return new JkNativeImage(classpath);
     }
 
-    public JkNativeImage setStaticLinkage(StaticLinkage staticLinkage) {
-        this.staticLinkage = staticLinkage;
+    public JkNativeImage setStaticLinkage(StaticLink staticLink) {
+        this.staticLink = staticLink;
         return this;
     }
 
@@ -87,46 +87,38 @@ public class JkNativeImage {
         return this;
     }
 
+    public List<Path> getClasspath() {
+        return classpath;
+    }
+
+    public StaticLink getStaticLinkage() {
+        return staticLink;
+    }
+
     /**
      * Generates a native image at the specified location
      * @param target
      */
     public void make(Path target) {
         JkLog.startTask("make-native-image");
-        assertToolPresent();
-        boolean hasMessageBundle = false;
-        final Path resourceBundle;
-        if (!classpath.isEmpty()) {
-            Path mainDir = classpath.get(0);
-            JkPathTree pathTree = JkPathTree.of(mainDir);
-            resourceBundle = pathTree.get("MessagesBundle.properties");
-        } else {
-            resourceBundle = null;
-        }
-        if (resourceBundle != null && Files.exists(resourceBundle)) {
-            hasMessageBundle = true;
-            JkLog.verbose("Found MessagesBundle to include in the native image.");
-        }
 
         String nativeImageExe = toolPath().toString();
         JkProcess process = JkProcess.of(nativeImageExe);
-
-        String classpathContent = JkPathSequence.of(classpath).toPath();
-        final String classpathArg;
-        if (classpathContent.length() <= 2048) {  // error thrown when cmd line is too large
-            classpathArg = classpathContent;
+        List<String> params = getNativeImageParams(target.toString(), JkPathSequence.of(classpath).toPath());
+        if (JkUtilsSystem.IS_WINDOWS) {
+            params = params.stream()
+                    .map(arg -> arg.replace("\\", "\\\\"))
+                    .collect(Collectors.toList());
+        }
+        String paramsString = String.join( " ", params);
+        if (paramsString.length() <= 2048) {  // error thrown when cmd line is too large
+            process.addParams(params);
         } else {
             Path tempArgFile = JkUtilsPath.createTempFile("jeka-native-image-cp", ".txt");
-            JkPathFile.of(tempArgFile).write(classpathContent);
-            classpathArg = "@" + tempArgFile;
+            JkPathFile.of(tempArgFile).write(paramsString);
+            process.addParams("@" + tempArgFile);
         }
-        process = process.addParams("-classpath", classpathArg);
 
-        if (staticLinkage == StaticLinkage.MUSL) {
-            process.addParams("--static", "--libc=musl");
-        } else if (staticLinkage == StaticLinkage.MOSTLY) {
-            process.addParams("--static-nolibc");
-        }
         process = process
                 .addParams("--no-fallback")
                 .addParamsIf(!JkUtilsString.isBlank(mainClass), "-H:Class=" + mainClass)
@@ -138,18 +130,59 @@ public class JkNativeImage {
                // .setLogWithJekaDecorator(true)
                 .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true);
-        String reachabilityArg = reachabilityMetadata.repoDirsToIncludeAsString();
-        if (!reachabilityArg.isEmpty()) {
-            process.addParams("-H:ConfigurationFileDirectories="+reachabilityArg);
-        }
-        process.addParams(this.extraParams);
+
         process.exec();
         JkLog.info("Generated in %s", target);
         JkLog.endTask();
     }
 
+    public List<String> getNativeImageParams(String targetPath, String classpath) {
+        List<String> params = new LinkedList<>();
+
+        if (!JkUtilsString.isBlank(classpath)) {
+            params.add("-classpath");
+            params.add(classpath);
+        }
+
+        if (staticLink == StaticLink.MUSL) {
+            params.add("--static");
+            params.add("--libc=musl");
+        } else if (staticLink == StaticLink.MOSTLY) {
+            params.add("--static-nolibc");
+        }
+        params.add("--no-fallback");
+        if (!JkUtilsString.isBlank(mainClass)) {
+            params.add("-H:Class=" + mainClass);
+        }
+        params.add("-o");
+        params.add(targetPath);
+
+        String reachabilityArg = reachabilityMetadata.repoDirsToIncludeAsString();
+        if (!reachabilityArg.isEmpty()) {
+            params.add("-H:ConfigurationFileDirectories="+reachabilityArg);
+        }
+        params.addAll(this.extraParams);
+        return params;
+    }
+
+    public List<Path> getAotMetadataRepoPaths() {
+        return reachabilityMetadata.repoDirsToInclude();
+    }
+
     private static Path toolPath() {
-        Path javaHome = JkJavaProcess.CURRENT_JAVA_HOME;
+        Path candidate = currentToolPath();
+        if (Files.exists(candidate)) {
+            return candidate;
+        }
+        Path graalvmHome = JkUtilsJdk.getJdk("graalvm", DEFAULT_GRAALVM_VERSION);
+        return toolPath(graalvmHome);
+    }
+
+    private static Path currentToolPath() {
+        return toolPath(JkJavaProcess.CURRENT_JAVA_HOME);
+    }
+
+    private static Path toolPath(Path javaHome) {
         return JkUtilsSystem.IS_WINDOWS ?
                 javaHome.resolve("bin/native-image.cmd") :
                 javaHome.resolve("bin/native-image");
@@ -157,21 +190,13 @@ public class JkNativeImage {
 
     private static boolean isPresent() {
         try {
-            return JkProcess.of(toolPath().toString(), "--version")
+            return JkProcess.of(currentToolPath().toString(), "--version")
                     .exec()
                     .hasSucceed();
         } catch (UncheckedIOException e) {
             return false;
         }
     }
-
-    private static void assertToolPresent() {
-        if (!isPresent()) {
-            throw new IllegalStateException("The project seems not to be configured for using graalvm JDK.\n" +
-                    "Please set 'jeka.java.distrib=graalvm' in jeka.properties in order to build native images.");
-        }
-    }
-
 
     public class ReachabilityMetadata {
 

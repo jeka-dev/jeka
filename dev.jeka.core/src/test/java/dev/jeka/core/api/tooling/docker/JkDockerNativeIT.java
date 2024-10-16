@@ -14,23 +14,28 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.api.utils;
+package dev.jeka.core.api.tooling.docker;
 
-import dev.jeka.core.api.system.JkLog;
-import org.junit.Assert;
+import dev.jeka.core.api.java.JkNativeImage;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.nio.file.Files;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
-public class JkUtilsJdkTest {
+public class JkDockerNativeIT {
 
     @Test
-    @Ignore
-    public void testGetJdk() {
-        JkLog.setDecorator(JkLog.Style.INDENT);
-        Path path = JkUtilsJdk.getJdk("graalvm", "22");
-        Assert.assertTrue(Files.exists(path.resolve("bin")));
+    public void run() throws Exception {
+        List<Path> cp = JkUtilsIterable.listOf(Paths.get("lib-a"),
+                Paths.get("lib-b"), Paths.get("lib-c"),  Paths.get("/toto/lib-c"));
+        JkNativeImage nativeImage = JkNativeImage.ofClasspath(cp);
+        JkDockerNative dockerNative = JkDockerNative.of(nativeImage);
+        System.out.println(dockerNative.dockerBuild().render());
+
+
     }
 }

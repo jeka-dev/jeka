@@ -30,7 +30,7 @@ class BaseAppBuild extends KBean {
 
         // configure image
         if (getRunbase().find(DockerKBean.class).isPresent()) {
-            load(DockerKBean.class).customize(dockerBuild -> dockerBuild
+            load(DockerKBean.class).customizeJvmImage(dockerBuild -> dockerBuild
                     .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
                     .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
                     .nonRootSteps.addCopy(getBaseDir().resolve("jeka.properties"), "/toto.txt", false)

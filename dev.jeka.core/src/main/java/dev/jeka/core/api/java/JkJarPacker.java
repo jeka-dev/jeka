@@ -121,6 +121,22 @@ public final class JkJarPacker {
         JkUtilsPath.deleteIfExistsSafely(originalJar);
     }
 
+    public static void makeFatJar(Iterable<Path> jarOrDirs, Path outputJar) {
+        JkJarWriter jarWriter = JkJarWriter.of(outputJar);
+        for (Path entry : jarOrDirs) {
+            if (Files.isDirectory(entry)) {
+                jarWriter.writeEntries(entry, EXCLUDE_SIGNATURE_MATCHER);
+            } else {
+                try (JarFile jarFile = JkUtilsZip.jarFile(entry)) {
+                    jarWriter.writeEntries(jarFile);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+        }
+        jarWriter.close();
+    }
+
     public static void makeShadeJar(Path originalJar, Iterable<Path> extraJars, Path outputJar) {
         JkInternalJarShader.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties())
                 .shade(originalJar, JkUtilsIterable.setOf(extraJars), outputJar);

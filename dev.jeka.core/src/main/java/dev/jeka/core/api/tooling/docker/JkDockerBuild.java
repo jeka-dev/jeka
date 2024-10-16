@@ -25,6 +25,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -113,6 +114,10 @@ public class JkDockerBuild {
     public final JkDockerBuild setBaseImage(String baseImage) {
         this.baseImage = baseImage;
         return this;
+    }
+
+    public String getBaseImage() {
+        return baseImage;
     }
 
     /**
@@ -415,19 +420,21 @@ public class JkDockerBuild {
                     JkLog.verbose(msg);
                 }
             }
-            Path tempPath = context.dir.resolve("imported-files").resolve(file.getFileName());
-            if (Files.exists(tempPath)) {
-                tempPath = context.dir.resolve("imported-files").resolve(file.getFileName().toString() + UUID.randomUUID());
+            String candidateFileName = file.getFileName().toString();
+            while (context.importedFileNames.contains(candidateFileName)) {
+                candidateFileName = "_" + candidateFileName;
             }
+            Path tempPath = context.dir.resolve("imported-files").resolve(candidateFileName);
+            context.importedFileNames.add(candidateFileName);
             String ownArg = nonRoot ? "--chown=nonroot:nonrootg " : "";
             context.add("COPY " + ownArg + context.dir.relativize(tempPath).toString().replace('\\', '/')
                     + " " + containerPath);
             if (!context.dry) {
                 JkUtilsPath.createDirectories(tempPath.getParent());
                 if (Files.isDirectory(file)) {
-                    JkPathTree.of(file).copyTo(tempPath);
+                    JkPathTree.of(file).copyTo(tempPath, StandardCopyOption.REPLACE_EXISTING);
                 } else {
-                    JkUtilsPath.copy(file, tempPath);
+                    JkUtilsPath.copy(file, tempPath, StandardCopyOption.REPLACE_EXISTING);
                 }
             }
 
@@ -448,6 +455,8 @@ public class JkDockerBuild {
          * some expansive copy operation can be avoided.
          */
         public final boolean dry;
+
+        private final Set<String> importedFileNames = new HashSet<>();
 
         public Context(Path dir, boolean dry) {
             this.dir = dir;

@@ -16,16 +16,12 @@
 
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.file.*;
-import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.docker.JkDocker;
-import dev.jeka.core.api.tooling.docker.JkDockerBuild;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
@@ -34,9 +30,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,13 +86,11 @@ public final class SpringbootKBean extends KBean {
 
         // Configure Docker KBean to add port mapping on run
         Optional<DockerKBean> optionalDockerKBean = getRunbase().find(DockerKBean.class);
-        optionalDockerKBean.ifPresent(dockerKBean -> dockerKBean.customize(dockerBuild -> {
+        optionalDockerKBean.ifPresent(dockerKBean -> dockerKBean.customizeJvmImage(dockerBuild -> {
             if (dockerBuild.getExposedPorts().isEmpty()) {
                 dockerBuild.setExposedPorts(8080);
             }
         }));
-
-
 
     }
 
@@ -108,12 +100,6 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create Bootable Jar : " + this.createBootJar);
         JkLog.info("Create original Jar : " + this.createOriginalJar);
         JkLog.info("Create .war file : " + this.createWarFile);
-    }
-
-    @JkDoc("Displays the DockerBuild file used to create Docker native image")
-    public void renderDockerBuild() {
-        JkDockerBuild dockerBuild = dockerBuildForNative(nativeExecPath());
-        System.out.println(dockerBuild.render());
     }
 
     private List<Path> generateAotEnrichment(JkProject project) {
@@ -143,28 +129,6 @@ public final class SpringbootKBean extends KBean {
         return result;
     }
 
-    private JkDockerBuild dockerBuildForNative(Path execPath) {
-        JkDockerBuild dockerBuild = JkDockerBuild.of();
-        String nativeExecName = nativeExecName();
-        dockerBuild.setBaseImage("ubuntu:latest");  // fail with alpine cause the generated image is dynamically linked to glibc
-        dockerBuild.rootSteps
-                .addNonRootMkdirs("app", "workdir");
-        dockerBuild.nonRootSteps
-                .addCopyNonRoot(execPath, "/app/" + nativeExecName)
-                .add("WORKDIR /workdir")
-                .add("ENTRYPOINT [\"/app/" + nativeExecName + "\"]");
-        return dockerBuild;
-    }
-
-    private String nativeExecName() {
-        JkProject project = load(ProjectKBean.class).project;
-        String exeFilename = project.artifactLocator.getMainArtifactPath().getFileName().toString();
-        return JkUtilsString.substringBeforeLast(exeFilename, ".jar");
-    }
-
-    private Path nativeExecPath() {
-        return getOutputDir().resolve(nativeExecName());
-    }
 
     private void customizeProjectKBean(ProjectKBean projectKBean) {
 
@@ -173,22 +137,16 @@ public final class SpringbootKBean extends KBean {
 
         JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project)
                 .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
-        /*
-        if (springbootVersion != null) {
-            springbootProject.includeParentBom(springbootVersion);
-        }
 
-         */
         if (springRepo != null) {
             springbootProject.addSpringRepo(springRepo);
         }
 
         // Configure native kbean
-        getRunbase().find(NativeKBean.class).ifPresent(nativeKBean -> {
-            nativeKBean.includeMainClassArg = false;
-            nativeKBean.setAotAssetDirs(() ->
-                    this.generateAotEnrichment(projectKBean.project));
-        });
+        NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
+        nativeKBean.includeMainClassArg = false;
+        nativeKBean.setAotAssetDirs(() ->
+                this.generateAotEnrichment(projectKBean.project));
     }
 
     private void customizeBaseKBean(BaseKBean baseKBean) {
