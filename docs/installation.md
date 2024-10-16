@@ -60,7 +60,7 @@ cached by Jeka may differ from the ones used by the host system.
 
 - `-v .:/workdir jeka --version` lets Jeka operate in the current directory of the host machine
 
-- `[JEKA ARGUMENTS]` stands for regular jeka you would pass to jeka command line as `project: back' or '--help'.
+- `[JEKA ARGUMENTS]` stands for regular jeka arguments you would pass to jeka command line as `project: back' or '--help'.
 
 
 

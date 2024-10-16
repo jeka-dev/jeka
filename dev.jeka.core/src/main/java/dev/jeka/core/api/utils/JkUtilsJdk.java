@@ -76,6 +76,8 @@ public final class JkUtilsJdk {
         Path expandDir = JkUtilsPath.createTempDirectory(tempBaseName);
         if (JkUtilsSystem.IS_WINDOWS) {
             JkUtilsZip.unzip(tempArchive, expandDir);
+        } else {
+            JkUtilsZip.expandTarGz(tempArchive, expandDir);
         }
         Path jdkHome = JkPathTree.of(expandDir).streamBreathFirst()
                 .filter(path -> "bin".equals(path.getFileName().toString()))
@@ -86,8 +88,6 @@ public final class JkUtilsJdk {
         JkUtilsPath.deleteFile(tempArchive);
         JkPathTree.of(expandDir).deleteRoot();
         return jdkDir;
-
-
     }
 
     private static Path jdkPath(String distrib, String majorVersion) {

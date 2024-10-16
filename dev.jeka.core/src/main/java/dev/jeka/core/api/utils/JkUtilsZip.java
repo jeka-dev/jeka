@@ -18,6 +18,7 @@ package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.system.JkProcess;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,5 +92,11 @@ public final class JkUtilsZip {
         try (JkZipTree zip = JkZipTree.of(zipFile)) {
             zip.copyTo(target, StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    public static void expandTarGz(Path tarGzFile, Path target) {
+        JkProcess.of("tar", "-xf", tarGzFile.toString(), "-C", target.toString())
+                .setLogCommand(true)
+                .run();
     }
 }
