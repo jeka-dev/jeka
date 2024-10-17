@@ -82,12 +82,23 @@ class DockerTester extends JekaCommandLineExecutor  {
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
 
+        /*
         JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", ShellRemoteTester.COW_SAY_URL, "docker:",
                         "run", "run.programArgs=toto", "--quiet")
                 .setLogCommand(true)
                 .setCollectStdout(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
+         */
+
+        JkProcResult result = JkDocker.prepareExec("run",
+                "--rm", "github.com_jeka-dev_demo-cowsay:0.0.1", "toto")
+                .setLogCommand(true)
+                .setInheritIO(false)
+                .setLogWithJekaDecorator(true)
+                .setCollectStdout(true)
+                .exec();
+
         String output = result.getStdoutAsString();
         JkUtilsAssert.state(output.contains("toto"), "Command output was '%s', " +
                 "expecting containing 'toto'", output);
