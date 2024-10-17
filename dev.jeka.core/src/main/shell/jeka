@@ -645,7 +645,7 @@ compute_JEKA_DIST_DIR() {
   else
     local jeka_version=
     jeka_version=$(get_prop_value_from_base_dir "$base_dir" "jeka.version")
-    if [ -z "$jeka_version" ]; then
+    if [[ -z "$jeka_version" || "$jeka_version" == "." ]]; then
       JEKA_DIST_DIR="$CURRENT_SCRIPT_DIR"  # if no version and distrib location specified, use the current script dir
     else
       local distrib_cache_dir
