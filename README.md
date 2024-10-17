@@ -37,18 +37,13 @@ directly from source code.
 
 Its key features include:
 
--  **JDKs Management:** Automatically downloads and selects the appropriate JDKs. No need to have Java already installed on the host machine.
+-  **Portable Builds:** JeKa automatically downloads the required JDKs and tools, this includes *JDKs, Graalvm, Maven deps, NodeJs, 
+   OpenAPI, JeKa itself and more*. You won't need to setup your machine or a container images prior building. 
 
-
--  **Direct App Execution:** Run applications directly from their Git repository, providing a means to distribute Java applications as source.
-
-
--  **Portable Builds:** JeKa downloads everything needed for building your projects (JDKs, Maven deps, NodeJs, OpenAPI tooling, etc. including JeKa itself!)
-
+-  **Direct App Execution:** JeKa  run applications directly from their Git repository, providing a means to distribute Java applications as source.
 
 -  **Customizable and Extendable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
    Also, JeKa provides a simple plugin mechanism that allows for easy extension.
-
 
 -  **Kotlin Support:** Scripts or applications can also be implemented using the *Kotlin* language.
 
@@ -58,7 +53,6 @@ Its key features include:
 
   JeKa makes it ridiculously easy to write and execute scripts using the Java language.
   Write your automated tasks directly in Java, using third-party dependencies or not, and execute them from anywhere, without any setup.
-
 
 - **Build projects - Create delivery pipelines** 
   
@@ -79,12 +73,12 @@ Its key features include:
 
   Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
 
-  Write directly Java code that can be built and executed from anywhere with minimal or zero setup.
+  Write Java code and execute it directly from anywhere, with minimal or zero setup.
 
 
 - **Centralize build logic**
 
-  Define project build and CI/CD logic in one place, and reuse accross all your organization.
+  Define project build and CI/CD logic in one place, and reuse across all your organization.
   
 
 ## Examples
