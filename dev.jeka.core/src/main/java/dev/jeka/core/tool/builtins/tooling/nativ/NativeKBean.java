@@ -24,6 +24,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Path;
@@ -60,13 +61,12 @@ public class NativeKBean extends KBean {
     @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
             "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
     public void compile() {
-        Optional<ProjectKBean> optionalProject = this.getRunbase().find(ProjectKBean.class);
-        if (optionalProject.isPresent()) {
-            JkProject project = optionalProject.get().project;
+        JkProject project = ProjectKBean.findProject(this.getRunbase());
+        if (project != null) {
             project.compilation.runIfNeeded();
             build(project);
         } else {
-            throw new JkException("No project found in Runbase");
+            throw new JkException("No project found in Runbase. Native compilation not yet implemented for base kbean.");
         }
 
     }

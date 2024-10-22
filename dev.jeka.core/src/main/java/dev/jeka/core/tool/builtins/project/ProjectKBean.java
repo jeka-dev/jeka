@@ -29,17 +29,17 @@ import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInjectProperty;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import org.w3c.dom.Document;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 @JkDoc("Manages the build and execution of a JVM project hosted in the base directory")
@@ -104,6 +104,20 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     }
 
     // ------------------------------- command line methods -----------------------------
+
+    public static JkProject findProject(JkRunbase runbase) {
+        Optional<ProjectKBean> optionalProjectKBean = runbase.find(ProjectKBean.class);
+        if (optionalProjectKBean.isPresent()) {
+            return optionalProjectKBean.get().project;
+        }
+        if (runbase.find(BaseKBean.class).isPresent()) {
+            return null;
+        }
+        if (Files.isDirectory(runbase.getBaseDir().resolve("src"))) {
+            return runbase.load(ProjectKBean.class).project;
+        }
+        return null;
+    }
 
     @JkDoc("Delete the content of jeka-output directory and might execute extra clean actions")
     public void clean() {

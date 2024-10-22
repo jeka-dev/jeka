@@ -202,7 +202,7 @@ public final class JkRunbase {
         return this.properties;
     }
 
-    Path getBaseDir() {
+    public Path getBaseDir() {
         return baseDir;
     }
 
