@@ -342,8 +342,8 @@ public class JkDockerBuild {
         /**
          * Inserts a step in Dockerfile, just before the specified one.
          */
-        public StepContainer insertBefore(String stepStartingWith, String stepToInsert) {
-            return add(context -> context.insertBefore(stepStartingWith, stepToInsert));
+        public StepContainer insertBefore(String stepStartingWith, String ... stepsToInsert) {
+            return add(context -> context.insertBefore(stepStartingWith, stepsToInsert));
         }
 
         /**
@@ -468,13 +468,15 @@ public class JkDockerBuild {
             return this;
         }
 
-        public Context insertBefore(String startingWith, String stepToInsert) {
+        public Context insertBefore(String startingWith, String ...stepsToInsert) {
             ListIterator<String> listIterator = this.steps.listIterator();
             while (listIterator.hasNext()) {
                 String nextStep = listIterator.next();
                 if (nextStep.startsWith(startingWith)) {
                     listIterator.previous();
-                    listIterator.add(stepToInsert);
+                    for (String stepToInsert : stepsToInsert) {
+                        listIterator.add(stepToInsert);
+                    }
                     return this;
                 }
             }

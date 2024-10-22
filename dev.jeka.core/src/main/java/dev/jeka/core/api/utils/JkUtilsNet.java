@@ -86,7 +86,7 @@ public class JkUtilsNet {
             HttpURLConnection connection = (HttpURLConnection) actualUrl.openConnection();
             connection.setRequestMethod("GET");
             if (log) {
-                System.out.printf("Pinging %s ...", url);
+                System.out.printf("Pinging %s ...%n", url);
             }
             connection.connect();
             int statusCode = connection.getResponseCode();

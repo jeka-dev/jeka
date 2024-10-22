@@ -38,7 +38,7 @@ public class NativeKBean extends KBean {
 
     private Supplier<List<Path>> aotAssetDirs = Collections::emptyList;
 
-    @JkDoc("Extra arguments to pass to nativa-image executable.")
+    @JkDoc("Extra arguments to pass to native-image compiler.")
     public String args;
 
     @JkDoc("Tell if the generated executable must by statically linked with native libs")
