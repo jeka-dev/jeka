@@ -18,6 +18,8 @@ package dev.jeka.core.tool.builtins.tooling.docker;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkNativeImage;
 import dev.jeka.core.api.project.JkProject;
@@ -32,6 +34,7 @@ import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -103,6 +106,12 @@ public final class DockerKBean extends KBean {
 
     @JkDoc("Builds native Docker image in local registry.")
     public void buildNative() {
+
+        // compile java if not already done
+        JkProject project = load(ProjectKBean.class).project;
+        if (!JkPathTree.of(project.compilation.layout.resolveClassDir()).containFiles()) {
+            project.compilation.run();
+        }
         String dirName = "docker-build-native-" + jvmImageName.replace(':', '#');
         nativeDockerBuild().buildImage(getOutputDir().resolve(dirName), jvmImageName);
     }
@@ -198,12 +207,6 @@ public final class DockerKBean extends KBean {
             return "latest";
         }
         return version.toString();
-    }
-
-    public static class BuildOptions {
-
-
-
     }
 
 }
