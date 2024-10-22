@@ -54,6 +54,9 @@ public class NativeKBean extends KBean {
             "This means that it is expected to be mentioned in aot config files.")
     public boolean includeMainClassArg = true;
 
+    @JkDoc("If true, all resources will be included in the native image.")
+    public boolean includeAllResources;
+
     @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
             "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
     public void compile() {
@@ -100,6 +103,7 @@ public class NativeKBean extends KBean {
         if (this.includeMainClassArg) {
             nativeImage.setMainClass(project.packaging.getMainClass());
         }
+        nativeImage.setIncludesAllResources(this.includeAllResources);
         nativeImage.setStaticLinkage(staticLink);
         nativeImage.reachabilityMetadata
                 .setUseRepo(useMetadataRepo)

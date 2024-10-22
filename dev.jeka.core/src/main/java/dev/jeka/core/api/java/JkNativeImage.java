@@ -19,6 +19,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
@@ -64,6 +65,8 @@ public class JkNativeImage {
 
     private final List<String> extraParams = new LinkedList<>();
 
+    private boolean includesAllResources = false;
+
     private JkNativeImage(List<Path> classpath) {
         this.classpath = classpath;
     }
@@ -87,6 +90,11 @@ public class JkNativeImage {
         return this;
     }
 
+    public JkNativeImage setIncludesAllResources(boolean includesAllResources) {
+        this.includesAllResources = includesAllResources;
+        return this;
+    }
+
     public List<Path> getClasspath() {
         return classpath;
     }
@@ -105,16 +113,14 @@ public class JkNativeImage {
         String nativeImageExe = toolPath().toString();
         JkProcess process = JkProcess.of(nativeImageExe);
         List<String> params = getNativeImageParams(target.toString(), JkPathSequence.of(classpath).toPath());
-        if (JkUtilsSystem.IS_WINDOWS) {
-            params = params.stream()
-                    .map(arg -> arg.replace("\\", "\\\\"))
-                    .collect(Collectors.toList());
-        }
         String paramsString = String.join( " ", params);
         if (paramsString.length() <= 2048) {  // error thrown when cmd line is too large
             process.addParams(params);
         } else {
             Path tempArgFile = JkUtilsPath.createTempFile("jeka-native-image-cp", ".txt");
+            if (JkUtilsSystem.IS_WINDOWS) {
+                paramsString = paramsString.replace("\\", "\\\\");
+            }
             JkPathFile.of(tempArgFile).write(paramsString);
             process.addParams("@" + tempArgFile);
         }
@@ -123,11 +129,7 @@ public class JkNativeImage {
                 .addParams("--no-fallback")
                 .addParamsIf(!JkUtilsString.isBlank(mainClass), "-H:Class=" + mainClass)
                 .addParams("-o",  target.toString())
-                //.addParams("-H:+UnlockExperimentalVMOptions")
                 .setLogCommand(true)
-               // .setCollectStderr(true)
-               // .setCollectStdout(true)
-               // .setLogWithJekaDecorator(true)
                 .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true);
 
@@ -136,12 +138,12 @@ public class JkNativeImage {
         JkLog.endTask();
     }
 
-    public List<String> getNativeImageParams(String targetPath, String classpath) {
+    public List<String> getNativeImageParams(String targetPath, String classpathAsString) {
         List<String> params = new LinkedList<>();
 
-        if (!JkUtilsString.isBlank(classpath)) {
+        if (!JkUtilsString.isBlank(classpathAsString)) {
             params.add("-classpath");
-            params.add(classpath);
+            params.add(classpathAsString);
         }
 
         if (staticLink == StaticLink.MUSL) {
@@ -151,11 +153,38 @@ public class JkNativeImage {
             params.add("--static-nolibc");
         }
         params.add("--no-fallback");
+        if (JkLog.isVerbose()) {
+            params.add("--verbose");
+        }
         if (!JkUtilsString.isBlank(mainClass)) {
             params.add("-H:Class=" + mainClass);
         }
         params.add("-o");
         params.add(targetPath);
+
+        // Resource bundles
+        boolean hasMessageBundle = false;
+        final Path resourceBundle;
+        if (!classpath.isEmpty()) {
+            Path mainDir = classpath.get(0);
+            JkPathTree pathTree = JkPathTree.of(mainDir);
+            resourceBundle = pathTree.get("MessagesBundle.properties");
+        } else {
+            resourceBundle = null;
+        }
+        if (resourceBundle != null && Files.exists(resourceBundle)) {
+            hasMessageBundle = true;
+            JkLog.verbose("Found MessagesBundle to include in the native image.");
+        }
+        if (hasMessageBundle) {
+            params.add("-H:IncludeResourceBundles=MessagesBundle");
+        }
+
+        // All resources
+        if (includesAllResources) {
+            String regexp = "^(?!.*\\.class$).*$";
+            params.add("-H:IncludeResources=" + regexp);
+        }
 
         String reachabilityArg = reachabilityMetadata.repoDirsToIncludeAsString();
         if (!reachabilityArg.isEmpty()) {
@@ -270,7 +299,7 @@ public class JkNativeImage {
                         .collect(Collectors.toList());
             } else {
                 JkLog.warn("No dependencies were supplied, and no classpath was declared. " +
-                        "Unable to find any reachability metadata..");
+                        "Unable to find any reachability metadata.");
                 return Collections.emptyList();
             }
         }
