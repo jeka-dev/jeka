@@ -41,7 +41,11 @@ public class AdminKBean extends KBean {
         Path globalProps = JkLocator.getGlobalPropertiesFile();
         JkPathFile.of(globalProps).createIfNotExist();
         if (!GraphicsEnvironment.isHeadless()) {
-            Desktop.getDesktop().edit(globalProps.toFile());
+            if (JkUtilsSystem.IS_WINDOWS) {
+                JkProcess.of("notepad", globalProps.toString()).exec();
+            } else {
+                Desktop.getDesktop().edit(globalProps.toFile());
+            }
         } else if (!JkUtilsSystem.IS_WINDOWS) {
             JkProcess.of("nano", globalProps.toString())
                     .setInheritIO(true)
