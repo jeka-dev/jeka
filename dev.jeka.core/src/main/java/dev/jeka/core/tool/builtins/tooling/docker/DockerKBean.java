@@ -113,7 +113,7 @@ public final class DockerKBean extends KBean {
             project.compilation.run();
         }
         String dirName = "docker-build-native-" + jvmImageName.replace(':', '#');
-        nativeDockerBuild().buildImage(getOutputDir().resolve(dirName), jvmImageName);
+        nativeDockerBuild().buildImage(getOutputDir().resolve(dirName), nativeImageName);
     }
 
     @JkDoc("Displays info about the native Docker image.")
