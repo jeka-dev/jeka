@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  */
 public class JkDockerJvmBuild extends JkDockerBuild {
 
-    public static final String BASE_IMAGE = "eclipse-temurin";
+    public static final String BASE_IMAGE = "eclipse-temurin:23-jdk-alpine";
 
     private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
 
@@ -56,6 +56,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
 
     private JkDockerJvmBuild() {
         this.setBaseImage(BASE_IMAGE);
+        this.setAddUserTemplate(JkDockerBuild.ALPINE_ADD_USER_TEMPLATE);
         this.nonRootSteps.add(this::enhance);
         this.rootSteps.addNonRootMkdirs("/app", "/workdir");
         this.rootSteps.add("WORKDIR /workdir");

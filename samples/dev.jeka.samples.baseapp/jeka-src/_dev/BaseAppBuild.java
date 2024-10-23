@@ -1,5 +1,6 @@
 package _dev;
 
+import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInjectClasspath;
 import dev.jeka.core.tool.KBean;
@@ -33,6 +34,7 @@ class BaseAppBuild extends KBean {
             load(DockerKBean.class).customizeJvmImage(dockerBuild -> dockerBuild
                     .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
                     .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
+                    .setAddUserTemplate(JkDockerBuild.TEMURIN_ADD_USER_TEMPLATE)
                     .nonRootSteps.addCopy(getBaseDir().resolve("jeka.properties"), "/toto.txt", false)
             );
         }
