@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  */
 public class JkDockerJvmBuild extends JkDockerBuild {
 
-    public static final String BASE_IMAGE = "eclipse-temurin:21.0.2_13-jdk-jammy";
+    public static final String BASE_IMAGE = "eclipse-temurin";
 
     private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
 

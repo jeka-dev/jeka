@@ -70,6 +70,7 @@ public class JkDocker {
                 .addParams(params)
                 .setLogCommand(true)
                 .setInheritIO(true)
+                .setDestroyAtJvmShutdown(true)
                 .setFailOnError(true);  // By default, it is wise to fail when an error occurs
     }
 
