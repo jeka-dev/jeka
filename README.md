@@ -102,6 +102,8 @@ Its key features include:
 ### Combine with existing Build Tools
 - [Use JeKa along Maven to build and run Quarkus native app from anywhere](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
+### Native and Docker Images
+- [Create Docker Images for Spring-Boot Native effortlessly](https://github.com/jeka-dev/demo-project-springboot-headless)
 <br/>
 
 [Other Examples of projects built with JeKa](https://github.com/jeka-dev/working-examples).
