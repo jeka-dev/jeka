@@ -16,6 +16,7 @@
 
 package dev.jeka.core.tool.builtins.admin;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProcess;
@@ -38,6 +39,7 @@ public class AdminKBean extends KBean {
     @JkDoc("Edit global.properties file.")
     public void editGlobalProps() throws IOException {
         Path globalProps = JkLocator.getGlobalPropertiesFile();
+        JkPathFile.of(globalProps).createIfNotExist();
         if (!GraphicsEnvironment.isHeadless()) {
             Desktop.getDesktop().edit(globalProps.toFile());
         } else if (!JkUtilsSystem.IS_WINDOWS) {
