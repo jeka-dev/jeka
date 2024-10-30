@@ -32,6 +32,8 @@ See [contribution page](CONTRIBUTING.md) for starting.
 
 ##  What is JeKa ?
 
+*Read the [6 raisons why I created JeKa](docs/articles/listicle-why-i-made-it.md) article.*
+
 **JeKa** is a Java build tool for building or executing Java applications and scripts, 
 directly from source code.
 
@@ -67,7 +69,6 @@ Its key features include:
   JeKa can execute entire Java applications of any kind and size directly from their Git repository. 
   
   Simply commit or tag repository to publish application.
-
 
 - **Make Java fun for newcomers**
 
