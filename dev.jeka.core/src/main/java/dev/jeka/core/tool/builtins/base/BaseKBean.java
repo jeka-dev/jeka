@@ -16,14 +16,17 @@
 
 package dev.jeka.core.tool.builtins.base;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -165,7 +168,9 @@ public final class BaseKBean extends KBean {
 
     @JkDoc("Displays exported dependency tree on console.")
     public void depTree() {
-        String output = getRunbase().getDependencyResolver().resolve(getRunbase().getExportedDependencies())
+        JkDependencySet deps = getRunbase().getExportedDependencies()
+                .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
+        String output = getRunbase().getDependencyResolver().resolve(deps)
                 .getDependencyTree().toStringTree();
         JkLog.info(output);
     }
@@ -406,5 +411,7 @@ public final class BaseKBean extends KBean {
         public JkBaseScaffold.Kind kind = JkBaseScaffold.Kind.JEKA_SCRIPT;
 
     }
+
+
 
 }

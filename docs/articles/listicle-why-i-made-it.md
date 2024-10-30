@@ -1,32 +1,37 @@
-# X reasons why I created JaKa
+# 5 reasons why I created JeKa
 
 ## 1. Execute Java code directly
+   When automating a Java projects, you might have been frustrated of not being 
+   able to do it easily. Moreover, using extra languages comes with their own issues.
 
-## 2. Object Oriented library for building projects
+   *Why not just write Java code and execute it ?*
 
-## 3. Minimal configuration - Less Setup
+   JeKa make it possible to execute Java source code directly from IDE or command-line, whatever  
+   it is a single-file or multi-files structure, containing dependencies or not.
 
-## 4. Easy Templating 
+   Now, I can elaborate my build and deployment using Java, exactly as I do for my production code.
+   
 
-## 5. Docker and Native Image out-of-the-box
+## 2. Build Projects using dumb simple Java 
+   I wanted to be able to build projects exactly as I run a Java method on IDE : run/debug transparently 
+   in IDE.
+
+   JeKa contains a build library along a reusable component model to make it a first-class build tool. 
+
+   With JeKaa, I can easily model and implement full CI/CD pipelines in Java, launch them from anywhere, or debug them in IDE.
+
+## 3. Simple Reusable Components
+   
+   
+   
+
+## 3. Few configuration as possible
+   JeKa proposes sensitive defaults to avoid unneeded configuration.
+   Configuration is expressed in a concise property file but can also be accessed directly by Java API.
+   
+
+## 5. Make Java Simpler
 
 
 
 
-
-# 5 Key Features of Jeka: The Ultimate Development Build Tool
-
-## 1. Execute Java Code Directly
-- Run Java code without needing extensive setup or additional tools.
-
-## 2. Object-Oriented Library for Building Projects
-- Utilize an object-oriented library to streamline and enhance your project-building process.
-
-## 3. Minimal Configuration - Less Setup
-- Benefit from a tool that requires minimal configuration, allowing you to accomplish a lot with very little setup.
-
-## 4. Easy Templating
-- Simplify your development process with easy-to-use templating features.
-
-## 5. Docker and Native Image Out-of-the-Box
-- Enjoy built-in support for Docker and native image creation, right out of the box.

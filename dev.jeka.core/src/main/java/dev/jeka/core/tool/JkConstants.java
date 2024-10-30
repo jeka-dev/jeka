@@ -78,7 +78,7 @@ public final class JkConstants {
     /*
      * If version is not specified for dependencies of 'dev.jeka' group, then use the running Jeka version
      */
-    static final JkVersionProvider JEKA_VERSION_PROVIDER = JkVersionProvider.of("dev.jeka:*",
+    public static final JkVersionProvider JEKA_VERSION_PROVIDER = JkVersionProvider.of("dev.jeka:*",
             JkInfo.getJekaVersion());
 
     static final String KBEAN_CMD_SUFFIX = ":";
