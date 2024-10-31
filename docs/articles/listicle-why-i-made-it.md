@@ -9,7 +9,7 @@ Usually, Java developers write plugins/tasks for their build tool, or use script
 
 Ideally, Java developers should be able to write Java code in a project directory, and run it directly from the IDE or command line, without concerns about compilation, dependencies, or JDK setup.
 
-JeKa provides a structure to run Java source code seamlessly from your IDE or the command line, without needing a pre-installed JDK/JRE.
+JeKa provides a structure to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for a scripting, from simple tasks to complex needs
 
 ## 2. Build Java with Java
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach makes tools more tedious to extend and harder to debug.
