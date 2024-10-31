@@ -9,24 +9,25 @@ Usually, Java developers write plugins/tasks for their build tool, or use script
 
 Ideally, Java developers should be able to write Java code in a project directory, and run it directly from the IDE or command line, without concerns about compilation, dependencies, or JDK setup.
 
-JeKa provides a structure to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for scripting, from simple tasks to complex needs.
+JeKa provides a structure, to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for scripting, from simple tasks to complex needs. Additionaly it provides script facilities for direct method execution.
 
 ## 2. Use Java to build Java
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
 
 I would expect a build tool that I can configure or extend using simple stupid Java. I would like to tacle build/delivery complexity the same 
-way I do for regular code.
+way I do for regular code. Meaning design, implement, re-factorize, test, share in jar files, run in debugger,... Java code.
 
-By featuring a comprehensive Java library for building projects and a lightweight layer of reusable components, Jeka can be used as a pure Java build tool,
+By including a comprehensive Java library for building projects and a lightweight layer of reusable components, Jeka can be used as a pure Java build tool,
 with straightfoward configuration, extension and troubleshooting.
 
 
 ## 3. Portability without Containers
 Traditional build tools, often rely on the presence of a specific JDK or other third-party tools on the host machine. These dependencies make builds less portable, as some requirements are either implicit or accessible only within specific container images.
 
-I would project source repo to be built from anywhere, with a very limited prerequisites, either it be on windows, Linux or macOS, without installing software or setting environment variables.
+I would expect projects to be built from anywhere, with a very limited prerequisites, either it be on windows, Linux, macOS without installing software or setting environment variables. 
 
-JeKa approaches this differently by fetching all necessary third-party tools, including the correct JDK and JeKa version, as part of the build itself. This way, tool dependencies and their versions become a defined part of the build process, making builds more portable, consistent, and reproducible across different environments, from Windows workstations to cloud CI/CD. 
+JeKa fetches all necessary third-party tools, including the correct JDK and JeKa version, as part of the build itself. This way, tool dependencies and their versions become a defined part of the build process, making builds more portable, consistent, and reproducible across different environments, from Windows workstations to cloud CI/CD. 
+For example, you won't need to install *GraalVM* or *Node.Js* to build native images or JS applications.
 
 
 ## 4. Minimalist Configuration
