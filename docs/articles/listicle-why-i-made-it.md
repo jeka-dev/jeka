@@ -24,24 +24,22 @@ with straightfoward configuration, extension and troubleshooting.
 ## 3. High Portability
 Traditional build tools often rely on a specific JDK or third-party tools on the host machine, making builds less portable due to implicit requirements or dependencies tied to specific container images.
 
-I expect projects to be built anywhere—on Windows, Linux, or macOS—without the need to install additional software or set environment variables. Portability should also allow for friendly troubleshooting and debugging, so without relying on containers.
+I believe projects should be able to build on any platform—Windows, Linux, or macOS—without needing to install extra software or set up environment variables. Portability shouldn’t make troubleshooting and debugging harder, so it shouldn’t requires running on containers.
 
 JeKa addresses these concerns by fetching all necessary third-party tools, including the correct JDK and JeKa version, as part of the build process. This ensures that tool dependencies and their versions are explicitly defined, enhancing portability, consistency, and reproducibility across environments, from Windows workstations to cloud CI/CD. 
 For instance, you won't need to install GraalVM or Node.js to build native images or JavaScript applications.
 
 ## 4. Minimalist Configuration
-When starting a Java project, there should be zero setup required beyond specifying library dependencies for coding. Information like group/name, versioning, and other settings can be specified later, if needed.
+Traditional build tools often require a minimum configuration, such as project name, version, and plugin declarations, which can feel excessive for getting started.
 
-JeKa is designed with sensible defaults, reducing the need for configuration to a strict minimum. For most common scenarios, you can get started with nearly zero setup and zero build code.
+I expect zero setup (beyond specifying library dependencies) to begin coding, testing, and packaging a new Java project. Information like group/name, versioning, and other details can be inferred with default values and specified later if needed.
+
+JeKa is designed with sensible defaults, minimizing the need for configuration. For most common scenarios, you can get started with nearly zero setup and no build code.
 
 ## 5. Distribute Applications as Source
-Distributing a Java application traditionally involves:
-- Creating JAR files and OS-specific scripts.
-- Packaging files in an archive.
-- Publishing to a binary repository.
-- Providing detailed instructions on how to download and run.
+Typically, distributing a Java application involves creating JAR files and OS-specific scripts, packaging the files into an archive, publishing them to a binary repository, and providing detailed instructions on how to download and run the application.
 
-*Why not just publish the source code on a public Git repository?*
+I would like clients run a Java application, with a single command pointing at its project Git repository.
 
 With JeKa, you can run an entire Java application directly from its source code. On the first run, the application is built into a JAR and cached, allowing it to be executed efficiently without the need for precompiled binaries.
 
