@@ -5,16 +5,20 @@ JeKa is a unique tool for building or executing Java. It was designed with featu
 ## 1. Run Java Code Directly
 As a Java developer, I often need to write automated tasks for my projects, such as test data generators, configuration generators, or DevOps orchestration.
 
-Usually, Java developers write plugins/tasks for their build tool, or use scripts in languages like *Bash*, *Groovy*, or *Python*. These solutions are not ideal, as they may require specific (and sometimes cryptic) syntax, unique debugging methods, or additional runtime environments on the host machine.
+Usually, Java developers write plugins/tasks for their build tool, or use scripts in languages like *Bash*, *Groovy*, or *Python*. These solutions are not ideal, as they may require specific (and sometimes cryptic) syntax, unique debugging methods, or portability issues.
 
 Ideally, Java developers should be able to write Java code in a project directory, and run it directly from the IDE or command line, without concerns about compilation, dependencies, or JDK setup.
 
 JeKa provides a structure to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for scripting, from simple tasks to complex needs.
 
-## 2. Build Java with Java
+## 2. Use Java to build Java
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
 
-In contrast, JeKa includes a comprehensive Java library for building projects, and a thin layer of reusable components that can be manipulated directly from Java code. This makes JeKa straightforward to extend, debug and troubleshoot with, as there is no extra layer between user code and the processing code.
+I would expect a build tool that I can configure or extend using simple stupid Java.
+
+JeKa includes a comprehensive Java library for building projects, and a thin layer of reusable components that can be manipulated directly from Java code.
+
+This makes JeKa straightforward to extend, debug and troubleshoot with, as there is no extra layer between user code and the processing code.
 
 The entire build and delivery logic can be modeled and implemented in Java, organized as needed to manage complexity and re-use logic across projects effectively.
 
