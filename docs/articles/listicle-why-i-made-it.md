@@ -48,9 +48,10 @@ This approach makes it incredibly convenient to develop Java tools that clients 
 
 
 ## 6. Simplify Java for Newcomers
-Usually, Java developers rely on complex build tools that use XML or Kotlin configurations for building projects. This setup often has a steep learning curve, which can be daunting for newcomers and make Java seem overly complicated.
+Usually, Java developers rely on complex build tools that use XML or Kotlin configurations for building projects. This setup often has a steep learning curve, which can be daunting for newcomers and make Java seem overly complicated. Moreover, installing or changing Java version involves knitting with JDKs and environment variables.
 
-It would be better if Java developers could build, run, or publish applications with near-zero effort.
+Ideally, beginers should focus on writting code, test it and execute without being affected/stopped by the build tool. Changing Java version, should 
+be a matter of single line of configuration.
 
-JeKa provides these features effortlessly, allowing users to focus on writing effective code while gradually learning the specific configurations as needed.
+JeKa adresses this concern, by gradually learning the specific configurations as needed.````
 
