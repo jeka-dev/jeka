@@ -14,7 +14,7 @@ Ideally, Java developers should be able to write Java code in a project director
 
 JeKa provides a structure, to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for scripting, from simple tasks to complex needs. Additionaly it provides script facilities for direct method execution.
 
-## 2. Use Java to build Java
+## 2. Use Java to Build Java
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
 
 I would expect a build tool that I can configure or extend using simple stupid Java. I would like to tacle build/delivery complexity the same 
