@@ -7,11 +7,9 @@ As a Java developer, I often need to write automated tasks for my projects, such
 
 Usually, Java developers write plugins/tasks for their build tool, or use scripts in languages like *Bash*, *Groovy*, or *Python*. These solutions are not ideal, as they may require specific (and sometimes cryptic) syntax, unique debugging methods, or additional runtime environments on the host machine.
 
-Ideally, Java developers should be able to write Java code in a designated directory within the project and run it directly from either the IDE or command line, without worrying about compilation, dependency management, or JDK installation.
+Ideally, Java developers should be able to write Java code in a project directory, and run it directly from the IDE or command line, without concerns about compilation, dependencies, or JDK setup.
 
-That's exactly what JeKa provides. JeKa allows Java source code (single or multi-file) to run seamlessly from your IDE or the command line, without needing a pre-installed JDK/JRE.
-
-With JeKa, we can use Java as a first-class choice for a scripting language.
+JeKa provides a structure to run Java source code seamlessly from your IDE or the command line, without needing a pre-installed JDK/JRE.
 
 ## 2. Build Java with Java
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach makes tools more tedious to extend and harder to debug.
