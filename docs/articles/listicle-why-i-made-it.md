@@ -21,14 +21,13 @@ By including a comprehensive Java library for building projects and a lightweigh
 with straightfoward configuration, extension and troubleshooting.
 
 
-## 3. Portability without Containers
-Traditional build tools, often rely on the presence of a specific JDK or other third-party tools on the host machine. These dependencies make builds less portable, as some requirements are either implicit or accessible only within specific container images.
+## 3. High Portability
+Traditional build tools often rely on a specific JDK or third-party tools on the host machine, making builds less portable due to implicit requirements or dependencies tied to specific container images.
 
-I would expect projects to be built from anywhere, with a very limited prerequisites, either it be on windows, Linux, macOS without installing software or setting environment variables. 
+I expect projects to be built anywhere—on Windows, Linux, or macOS—without the need to install additional software or set environment variables. Portability should also allow for friendly troubleshooting and debugging, so without relying on containers.
 
-JeKa fetches all necessary third-party tools, including the correct JDK and JeKa version, as part of the build itself. This way, tool dependencies and their versions become a defined part of the build process, making builds more portable, consistent, and reproducible across different environments, from Windows workstations to cloud CI/CD. 
-For example, you won't need to install *GraalVM* or *Node.Js* to build native images or JS applications.
-
+JeKa addresses these concerns by fetching all necessary third-party tools, including the correct JDK and JeKa version, as part of the build process. This ensures that tool dependencies and their versions are explicitly defined, enhancing portability, consistency, and reproducibility across environments, from Windows workstations to cloud CI/CD. 
+For instance, you won't need to install GraalVM or Node.js to build native images or JavaScript applications.
 
 ## 4. Minimalist Configuration
 When starting a Java project, there should be zero setup required beyond specifying library dependencies for coding. Information like group/name, versioning, and other settings can be specified later, if needed.
