@@ -38,9 +38,9 @@ JeKa is designed with sensible defaults, minimizing the need for configuration. 
 
 ## 5. Distribute Applications as Source
 
-Typically, distributing a Java application involves creating JAR files and OS-specific scripts, packaging the files into an archive, publishing them to a binary repository, and providing detailed instructions on how to download and run the application.
+Typically, distributing a Java application involves creating JAR files and OS-specific scripts, packaging the files into an archive, publishing them to a binary repository, and providing detailed instructions on how to download and run the application... Not that simple!
 
-I want clients to be able to run my Java application with a single command that points to its Git repository, allowing me to simply push or tag the repository to release new versions.
+I Would like clients to be able to run my Java application with a single command that points to its Git repository, allowing me to simply push or tag the repository to release new versions.
 
 With JeKa, you can run an entire Java application directly from its source code. On the first run, the application is built into a JAR (or native executable) and cached, enabling efficient execution without the need for precompiled binaries.
 
