@@ -14,16 +14,18 @@ JeKa provides a structure to run Java source code seamlessly from your IDE or th
 ## 2. Use Java to build Java
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
 
-I would expect a build tool that I can configure or extend using simple stupid Java.
+I would expect a build tool that I can configure or extend using simple stupid Java. I would like to tacle build/delivery complexity the same 
+way I do for production code.
 
 JeKa includes a comprehensive Java library for building projects, and a thin layer of reusable components that can be manipulated directly from Java code.
 
 This makes JeKa straightforward to extend, debug and troubleshoot with, as there is no extra layer between user code and the processing code.
 
-The entire build and delivery logic can be modeled and implemented in Java, organized as needed to manage complexity and re-use logic across projects effectively.
 
 ## 3. Portability without Containers
 Traditional build tools, often rely on the presence of a specific JDK or other third-party tools on the host machine. These dependencies make builds less portable, as some requirements are either implicit or accessible only within specific container images.
+
+I would expect a sour
 
 JeKa approaches this differently by fetching all necessary third-party tools, including the correct JDK and JeKa version, as part of the build itself. This way, tool dependencies and their versions become a defined part of the build process, making builds more portable, consistent, and reproducible across different environments, from Windows workstations to cloud CI/CD. 
 
