@@ -18,9 +18,9 @@ JeKa provides a structure, to run Java source code seamlessly from your IDE or t
 Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
 
 I would expect a build tool that I can configure or extend using simple stupid Java. I would like to tacle build/delivery complexity the same 
-way I do for regular code. Meaning design, implement, re-factorize, test, share in jar files, run in debugger,... Java code.
+way I do for regular code.
 
-By including a comprehensive Java library for building projects and a lightweight layer of reusable components, Jeka can be used as a pure Java build tool,
+By including a comprehensive Java library for building projects and a thin layer of reusable components, Jeka can be used as a pure Java build tool,
 with straightfoward configuration, extension and troubleshooting.
 
 
