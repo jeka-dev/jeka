@@ -32,7 +32,7 @@ For instance, you won't need to install GraalVM or Node.js to build native image
 ## 4. Minimalist Configuration
 Traditional build tools often require a minimum configuration, such as project name, version, and plugin declarations, which can feel excessive for getting started.
 
-I expect zero setup (beyond specifying library dependencies) to begin coding, testing, and packaging a new Java project. Information like group/name, versioning, and other details can be inferred with default values and specified later if needed.
+I expect zero setup (beyond specifying library dependencies) to start coding, testing, and packaging a new Java project. Information like group/name, versioning, and other details can be inferred with default values and specified later if needed.
 
 JeKa is designed with sensible defaults, minimizing the need for configuration. For most common scenarios, you can get started with nearly zero setup and no build code.
 
@@ -48,10 +48,11 @@ This approach makes it incredibly convenient to develop Java tools that clients 
 
 
 ## 6. Simplify Java for Newcomers
-Usually, Java developers rely on complex build tools that use XML or Kotlin configurations for building projects. This setup often has a steep learning curve, which can be daunting for newcomers and make Java seem overly complicated. Moreover, installing or changing Java version involves knitting with JDKs and environment variables.
 
-Ideally, beginers should focus on writting code, test it and execute without being affected/stopped by the build tool. Changing Java version, should 
-be a matter of single line of configuration.
+Traditionally, Java developers rely on complex build tools that use XML or Kotlin configurations to build applications. This setup often has a steep learning curve, which can be daunting for newcomers and makes Java seem overly complicated. Additionally, installing or changing the Java version usually involves configuring JDKs and adjusting environment variables.
 
-JeKa adresses this concern, by gradually learning the specific configurations as needed.````
+Ideally, beginners should be able to focus on writing, testing, and running code without being hindered by build tools. Also, switching Java versions should be as simple as a single line of configuration.
+
+JeKa addresses these challenges by minimizing required configuration, offering common functionality out-of-the-box, and creating a streamlined learning experience.
+
 
