@@ -1,6 +1,9 @@
 # 6 Reasons why I Made JeKa
 
-JeKa is a unique tool for building or executing Java. It was designed with features to simplify and enhance Java development.
+As a seasoned Java developer, I’ve always seen Java as a simple language burdened by complex tooling, often making simple tasks overly complicated. 
+While the language is evolving to favor simplicity, the tooling remains hardly the same.
+
+With JeKa, I set out to address what I felt was missing in existing build tools. Here are six reasons why JeKa is built differently:
 
 ## 1. Run Java Code Directly
 As a Java developer, I often need to write automated tasks for my projects, such as test data generators, configuration generators, or DevOps orchestration.
@@ -45,7 +48,6 @@ I Would like clients to be able to run my Java application with a single command
 With JeKa, you can run an entire Java application directly from its source code. On the first run, the application is built into a JAR (or native executable) and cached, enabling efficient execution without the need for precompiled binaries.
 
 This approach makes it incredibly convenient to develop Java tools that clients can start using right away, simply by referencing a Git URL.
-
 
 ## 6. Simplify Java for Newcomers
 
