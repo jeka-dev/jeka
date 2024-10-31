@@ -1,4 +1,4 @@
-# 6 Reasons why I Created JeKa
+# 6 Reasons why I Made JeKa
 
 JeKa is a unique tool for building or executing Java. It was designed with features to simplify and enhance Java development.
 
@@ -9,14 +9,14 @@ Usually, Java developers write plugins/tasks for their build tool, or use script
 
 Ideally, Java developers should be able to write Java code in a project directory, and run it directly from the IDE or command line, without concerns about compilation, dependencies, or JDK setup.
 
-JeKa provides a structure to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for a scripting, from simple tasks to complex needs
+JeKa provides a structure to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for scripting, from simple tasks to complex needs.
 
 ## 2. Build Java with Java
-Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach makes tools more tedious to extend and harder to debug.
+Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
 
-In contrast, JeKa includes a comprehensive build library and a thin layer of reusable components that can be manipulated directly from Java code. This allows for easier debugging and troubleshooting, as there is no extra layer between user code and the processing code.
+In contrast, JeKa includes a comprehensive Java library for building projects, and a thin layer of reusable components that can be manipulated directly from Java code. This makes JeKa straightforward to extend, debug and troubleshoot with, as there is no extra layer between user code and the processing code.
 
-The entire build and delivery logic can be modeled and implemented in Java, organized as needed to manage complexity and share across projects effectively.
+The entire build and delivery logic can be modeled and implemented in Java, organized as needed to manage complexity and re-use logic across projects effectively.
 
 ## 3. Portability without Containers
 Traditional build tools, often rely on the presence of a specific JDK or other third-party tools on the host machine. These dependencies make builds less portable, as some requirements are either implicit or accessible only within specific container images.
