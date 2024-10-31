@@ -37,18 +37,20 @@ I expect zero setup (beyond specifying library dependencies) to begin coding, te
 JeKa is designed with sensible defaults, minimizing the need for configuration. For most common scenarios, you can get started with nearly zero setup and no build code.
 
 ## 5. Distribute Applications as Source
+
 Typically, distributing a Java application involves creating JAR files and OS-specific scripts, packaging the files into an archive, publishing them to a binary repository, and providing detailed instructions on how to download and run the application.
 
-I would like clients run a Java application, with a single command pointing at its project Git repository.
+I want clients to be able to run my Java application with a single command that points to its Git repository, allowing me to simply push or tag the repository to release new versions.
 
-With JeKa, you can run an entire Java application directly from its source code. On the first run, the application is built into a JAR and cached, allowing it to be executed efficiently without the need for precompiled binaries.
+With JeKa, you can run an entire Java application directly from its source code. On the first run, the application is built into a JAR (or native executable) and cached, enabling efficient execution without the need for precompiled binaries.
 
-This makes it incredibly convenient to develop Java tools that clients can start using right away, simply by pointing to a Git URL.
+This approach makes it incredibly convenient to develop Java tools that clients can start using right away, simply by referencing a Git URL.
+
 
 ## 6. Simplify Java for Newcomers
-Traditionally, Java developers rely on complex build tools that use XML or Kotlin configurations for building projects. This setup often has a steep learning curve, which can be daunting for newcomers and make Java seem overly complicated.
+Usually, Java developers rely on complex build tools that use XML or Kotlin configurations for building projects. This setup often has a steep learning curve, which can be daunting for newcomers and make Java seem overly complicated.
 
-It would be ideal if Java developers could build, run, or publish applications with minimal effort.
+It would be better if Java developers could build, run, or publish applications with near-zero effort.
 
 JeKa provides these features effortlessly, allowing users to focus on writing effective code while gradually learning the specific configurations as needed.
 
