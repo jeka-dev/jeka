@@ -27,6 +27,7 @@ import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -353,6 +354,22 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         this.setLogCommand(true).tagAndPush(newTag);
     }
 
+    /**
+     * Executes a Git diff command between the specified commits and returns a list of files changed.
+     *
+     * @param commitFrom The starting commit of the diff.
+     * @param commitTo The ending commit of the diff. This can value <i>HEAD</i>.
+     * @return A FileList instance containing the list of files changed between the two commits.
+     */
+    public FileList diiff(String commitFrom, String commitTo) {
+        List<String> rawResults = copy()
+                .setParams("--no-pager", "diff", "--name-only", commitFrom, commitTo)
+                .setCollectStdout(true)
+                .execAndCheck()
+                .getStdoutAsMultiline();
+        return new FileList(rawResults);
+    }
+
     @Override
     public JkGit copy() {
         return new JkGit(this);
@@ -366,6 +383,23 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
             }
         }
         return procResult;
+    }
+
+    public static class FileList {
+
+        private final List<String> files;
+
+        private FileList(List<String> files) {
+            this.files = files;
+        }
+
+        public List<String> get() {
+            return Collections.unmodifiableList(files);
+        }
+
+        public boolean hasFileStartingWith(String prefix) {
+            return files.stream().anyMatch(file -> file.startsWith(prefix));
+        }
     }
 
 }

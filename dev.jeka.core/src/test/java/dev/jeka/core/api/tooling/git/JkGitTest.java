@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.tooling.git;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -52,4 +53,15 @@ public class JkGitTest {
     public void getTagsOfCurrentCommit() {
         System.out.printf("--%s--%n", git.getTagsOfCurrentCommit());
     }
+
+    @Test
+    public void diff() {
+       JkGit.FileList fileList = git.diiff("22453db1627c559c2c3549a1c54793697366332c",
+                "250f6702d7bf9ac1b12881f5e6384393f2b76cdc");
+        Assert.assertEquals(1, fileList.get().size());
+       fileList.get().forEach(System.out::println);
+       Assert.assertTrue(fileList.hasFileStartingWith("docs/"));
+    }
+
+
 }
