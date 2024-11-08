@@ -23,17 +23,18 @@ import java.lang.annotation.Target;
 
 /**
  * Adds an entry to the jeka-src classpath where this annotation is declared.
- * Typically, the annotated element is a <code>JkClass</code> class from 'jeka/def' source directory.
- * But when used on a public field of type  <code>JkClass</code> within a <code>JkClass</code> class,
- * the annotated field is injected with an initialised <code>JkClass</code> instance of the imported project.<p>
+ * Typically, the annotated element is a <code>KBean</code> class from 'jeka/def' source directory.
+ * But when used on a public field of type  <code>KBean</code> within a <code>KBean</code> class,
+ * the annotated field is injected with an initialised <code>KBean</code> instance of the imported project.<p>
  *
  * Example :
  * <pre><code>
- * public class FatJarBuild extends JkClass {
+ * public class FatJarBuild extends KBean {
  *
- *     ProjectJkBean projectPlugin = getPlugin(ProjectJkBean.class);
+ *     @JkInjectRunbase
+ *     ProjectKBean projectKBean;
  *
- *     @JkDefImport("../anotherJekaProject")
+ *     @JkInjectRunbase("../anotherJekaProject")
  *     private AClassicBuild sampleBuild;
  *
  *     ...
@@ -47,6 +48,6 @@ import java.lang.annotation.Target;
 public @interface JkInjectRunbase {
 
     /** Dependee project relative path */
-    String value();
+    String value() default "";
 
 }

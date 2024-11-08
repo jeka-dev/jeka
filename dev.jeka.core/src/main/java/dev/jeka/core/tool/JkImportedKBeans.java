@@ -18,6 +18,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -99,9 +100,10 @@ public final class JkImportedKBeans {
             JkLog.verbose("Projects imported by %s : %s", masterBean, fields);
         }
         for (final Field field : fields) {
-            final JkInjectRunbase jkProject = field.getAnnotation(JkInjectRunbase.class);
+            final JkInjectRunbase jkInjectRunbase = field.getAnnotation(JkInjectRunbase.class);
+            String importedDir = jkInjectRunbase.value();
             final KBean importedJkClass = createImportedJkBean(
-                    (Class<? extends KBean>) field.getType(), jkProject.value(), masterBean.getBaseDir());
+                    (Class<? extends KBean>) field.getType(), importedDir, masterBean.getBaseDir());
             try {
                 JkUtilsReflect.setFieldValue(masterBean, field, importedJkClass);
             } catch (final RuntimeException e) {
@@ -125,7 +127,9 @@ public final class JkImportedKBeans {
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
-            result.add(importedJkClass);
+            if (!JkUtilsString.isBlank(importedDir) && !".".equals(importedDir)) {
+                result.add(importedJkClass);
+            }
         }
         return result;
     }

@@ -129,8 +129,8 @@ public final class JkGpgSigner implements JkSigner {
         String secretKeyPassword = JkUtilsObject.firstNonNull(System.getProperty("jeka.gpg.passphrase"),
                 System.getenv("JEKA_GPG_PASSPHRASE"), System.getenv("jeka.gpg.passphrase"), unset);
         if (unset.equals(asciikey)) {
-            JkLog.warn("No signing key where found in JEKA_GPG_SECRET_KEY or jeka.gpg.secret-key properties");
-            JkLog.warn("No passphrase signing key where found in JEKA_GPG_PASSPHRASE or jeka.gpg.passphrase properties");
+            JkLog.verbose("No signing key where found in JEKA_GPG_SECRET_KEY or jeka.gpg.secret-key properties");
+            JkLog.verbose("No passphrase signing key where found in JEKA_GPG_PASSPHRASE or jeka.gpg.passphrase properties");
         }
         return JkGpgSigner.ofAsciiKey(asciikey, secretKeyPassword);
     }

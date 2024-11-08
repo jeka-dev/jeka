@@ -95,7 +95,9 @@ final class SourceParser {
         annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
-            info.importedBaseDirs.add(baseDir.resolve(value));
+            if (!JkUtilsString.isBlank(value) && !".".equals(value)) {
+                info.importedBaseDirs.add(baseDir.resolve(value));
+            }
             return;
         }
 
