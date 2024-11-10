@@ -154,7 +154,6 @@ public final class SpringbootKBean extends KBean {
         // customize scaffold
         baseKBean.getBaseScaffold().addCustomizer(SpringbootScaffold::customize);
 
-        baseKBean.setMainClass(BaseKBean.AUTO_FIND_MAIN_CLASS);
         baseKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
                 getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
 

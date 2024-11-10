@@ -63,8 +63,11 @@ public class NativeKBean extends KBean {
     public void compile() {
         JkProject project = ProjectKBean.findProject(this.getRunbase());
         if (project != null) {
+            boolean detectMainClass = project.packaging.isDetectMainClass();
+            project.packaging.setDetectMainClass(true);
             project.compilation.runIfNeeded();
             build(project);
+            project.packaging.setDetectMainClass(detectMainClass);
         } else {
             throw new JkException("No project found in Runbase. Native compilation not yet implemented for base kbean.");
         }

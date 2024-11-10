@@ -58,12 +58,6 @@ public final class BaseKBean extends KBean {
 
     public static final String CREATE_JAR_ACTION = "create-jar";
 
-    /**
-     * Represents the value "auto" usable in {@link #setMainClass(String)}
-     * to indicate that the main class should be discovered automatically.
-     */
-    public static final String AUTO_FIND_MAIN_CLASS = "auto";
-
     @JkDoc("Space separated list of options to pass to the JVM that will run the program.")
     public String jvmOptions = "";
 
@@ -85,8 +79,6 @@ public final class BaseKBean extends KBean {
     public final JkRunnables packActions = JkRunnables.of();
 
     public final JkConsumers<JkManifest> manifestCustomizers = JkConsumers.of();
-
-    private String mainClass = AUTO_FIND_MAIN_CLASS;
 
     private Supplier<String> mainClassFinder = this::findMainClass;
 
@@ -257,14 +249,10 @@ public final class BaseKBean extends KBean {
 
     /**
      * Returns the actual main class to be used for launching the application or executable JAR.
-     * If the main class is already set, it will be returned. Otherwise, the main class will be determined
-     * by searching for the unique main class in the JAR file created by the {@link #buildJar()} method.
+     * This method returns <code>null</code> if no main class has been detected.
      */
     public String getMainClass() {
-        if (AUTO_FIND_MAIN_CLASS.equals(mainClass)) {
-            return mainClassFinder.get();
-        }
-        return mainClass;
+        return mainClassFinder.get();
     }
 
     /**
@@ -274,15 +262,6 @@ public final class BaseKBean extends KBean {
      */
     public JkBaseScaffold getBaseScaffold() {
         return baseScaffold;
-    }
-
-    /**
-     * Sets the main class. The main class is used to launch the application or executable JAR.
-     *
-     * @param mainClass The main class to be set.
-     */
-    public void setMainClass(String mainClass) {
-        this.mainClass = mainClass;
     }
 
     /**

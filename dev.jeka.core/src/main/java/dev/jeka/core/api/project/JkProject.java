@@ -129,12 +129,6 @@ public final class JkProject implements JkIdeSupportSupplier {
 
     public static final String CREATE_JAR_ACTION = "create-jar";
 
-    /**
-     * This constant represents the value "auto" and is used in {@link JkProjectPackaging#setMainClass(String)} (String)}
-     * to indicate that the main class should be discovered automatically..
-     */
-    public static final String AUTO_FIND_MAIN_CLASS = "auto";
-
     public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
 
     public static final String PROJECT_LIBS_DIR = "libs";
@@ -429,16 +423,7 @@ public final class JkProject implements JkIdeSupportSupplier {
         JkDependencySet testDependencies = testing.compilation.dependencies.get();
         StringBuilder builder = new StringBuilder();
 
-        String declaredMainClassName = packaging.declaredMainClass();
-        if (JkProject.AUTO_FIND_MAIN_CLASS.equals(declaredMainClassName)) {
-            if (JkPathTree.of(compilation.layout.resolveClassDir()).exists()) {
-                String effectiveMainClassName = packaging.getMainClass();
-                if (effectiveMainClassName == null) {
-                    effectiveMainClassName = "not main class found";
-                }
-                declaredMainClassName += " (" + effectiveMainClassName + ")";
-            }
-        }
+        String declaredMainClassName = packaging.getMainClass();
 
         Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200).setAdjustLeft(true)
                 .add("ModuleId", moduleId)

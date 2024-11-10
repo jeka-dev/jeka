@@ -110,7 +110,7 @@ public final class JkSpringbootProject {
             project.packActions.replaceOrAppend("include-manifest", project.packaging::copyManifestInClassDir);
         }
 
-        project.packaging.setMainClass(JkProject.AUTO_FIND_MAIN_CLASS);
+        project.packaging.setDetectMainClass(true);
         project.packaging.setMainClassFinder(() -> {
             try {
                 return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());

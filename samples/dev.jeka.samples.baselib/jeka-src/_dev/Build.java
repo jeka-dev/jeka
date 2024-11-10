@@ -15,8 +15,7 @@ class Build extends KBean {
     protected void init() {
         load(IntellijKBean.class)
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-        load(BaseKBean.class)
-                .setMainClass(null);
+        load(BaseKBean.class);
     }
 
     @JkDoc("Used by sample tests o check if this bean is considered as the default kbean")

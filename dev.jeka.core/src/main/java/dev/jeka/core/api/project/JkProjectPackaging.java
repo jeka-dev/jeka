@@ -30,6 +30,7 @@ import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 
 import java.nio.file.Files;
@@ -77,6 +78,8 @@ public class JkProjectPackaging {
     private final PathMatcher fatJarFilter = JkPathMatcher.of(); // take all
 
     String mainClass;
+
+    private boolean detectMainClass;
 
     private Supplier<String> mainClassFinder;
 
@@ -216,9 +219,19 @@ public class JkProjectPackaging {
     }
 
     /**
+     * Sets whether to detect the main class when running or building the project.
+     */
+    public JkProjectPackaging setDetectMainClass(boolean detectMainClass) {
+        this.detectMainClass = detectMainClass;
+        return this;
+    }
+
+    public boolean isDetectMainClass() {
+        return detectMainClass;
+    }
+
+    /**
      * Sets the main class name to use in #runXxx and for building docker images.
-     * The value <code>"auto"</code> means that it will bbe auto-discovered, this value
-     * can be referenced using constant {@link JkProject#AUTO_FIND_MAIN_CLASS}
      */
     public JkProjectPackaging setMainClass(String mainClass) {
         this.mainClass = mainClass;
@@ -240,7 +253,7 @@ public class JkProjectPackaging {
      * library projects.
      */
     public String getMainClass() {
-        if (JkProject.AUTO_FIND_MAIN_CLASS.equals(mainClass)) {
+        if (JkUtilsString.isBlank(mainClass) && detectMainClass) {
             return mainClassFinder.get();
         }
         return this.mainClass;

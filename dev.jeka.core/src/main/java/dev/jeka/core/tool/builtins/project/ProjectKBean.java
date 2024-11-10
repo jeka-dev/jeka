@@ -212,6 +212,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("Main class name to include in Manifest. Use 'auto' to automatic discovering.")
         public String mainClass;
 
+        @JkDoc("If true and no mainClass specified, it will be detected and added to the Manifest.")
+        public boolean detectMainClass;
+
     }
 
     /**
@@ -387,6 +390,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (pack.mainClass != null) {
             project.packaging.setMainClass(pack.mainClass);
         }
+        project.packaging.setDetectMainClass(pack.detectMainClass);
         if (!JkUtilsString.isBlank(pack.shadeJarClassifier)) {
             project.flatFacade.addShadeJarArtifact(pack.shadeJarClassifier);
         }
