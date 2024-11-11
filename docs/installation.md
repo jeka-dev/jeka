@@ -50,9 +50,9 @@ JeKa can be executed using the Docker image [jekadev/jeka](https://hub.docker.co
 Linux host, which is mandatory to produce Java native image for Linux and containers.
 
 For this, execute : 
-  - Linux/Macos        : `docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jekadev/jeka [JEKA ARGUMENTS]`
-  - Windows Powershell : `docker run -v ${HOME}\.jeka\cache4c:/cache -v ${PWD}:/workdir jekadev/jeka [JEKA ARGUMENTS]`
-  - Windows cmd        : `docker run -v %USERPROFILE%\.jeka\cache4c:/cache -v %cd%:/workdir jekadev/jeka [JEKA ARGUMENTS]`
+- Linux/Macos        : `docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jekadev/jeka [JEKA ARGUMENTS]`
+- Windows Powershell : `docker run -v ${HOME}\.jeka\cache4c:/cache -v ${PWD}:/workdir jekadev/jeka [JEKA ARGUMENTS]`
+- Windows cmd        : `docker run -v %USERPROFILE%\.jeka\cache4c:/cache -v %cd%:/workdir jekadev/jeka [JEKA ARGUMENTS]`
 
 Notes:
 - `-v $HOME/.jeka/cache4c:/cache` tells jeka to use a specific cache when running with container, as JDK or other tools 
