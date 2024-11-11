@@ -19,6 +19,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
+import javafx.scene.chart.ScatterChart;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -36,6 +37,14 @@ import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
  * @author Jerome Angibaud
  */
 public final class JkCoordinate {
+
+    private static final String ERROR_MESSAGE = "Coordinate specification '%s' is not correct. Should be one of \n" +
+            "  group:name \n" +
+            "  group:name:version \n" +
+            "  group:name:classifiers:version \n" +
+            "  group:name:classifiers:extension:version \n" +
+            "  group:name:classifiers:extension: \n" +
+            "where classifiers can be a coma separated list of classifier.";
 
     private final JkModuleId moduleId;
 
@@ -102,38 +111,36 @@ public final class JkCoordinate {
     public static JkCoordinate of(@JkDepSuggest String coordinate, Object...tokens) {
         String formattedCoordinate = String.format(coordinate, tokens);
         final String[] strings = formattedCoordinate.split( ":");
-        final String errorMessage = "Coordinate specification '" + formattedCoordinate + "' is not correct. Should be one of \n" +
-                "  group:name \n" +
-                "  group:name:version \n" +
-                "  group:name:classifiers:version \n" +
-                "  group:name:classifiers:extension:version \n" +
-                "  group:name:classifiers:extension: \n" +
-                "where classifiers can be a coma separated list of classifier.";
-
-        JkUtilsAssert.argument(isCoordinateDescription(formattedCoordinate), errorMessage);
+        JkUtilsAssert.argument(isCoordinateDescription(formattedCoordinate), ERROR_MESSAGE, formattedCoordinate);
         int separatorCount = JkUtilsString.countOccurrence(formattedCoordinate, ':');
-        final JkModuleId jkModuleId = JkModuleId.of(strings[0], strings[1]);
-        if (separatorCount == 1 && strings.length == 2) {
-            return of(jkModuleId, JkVersion.UNSPECIFIED);
+        try {
+
+
+            final JkModuleId jkModuleId = JkModuleId.of(strings[0], strings[1]);
+            if (separatorCount == 1 && strings.length == 2) {
+                return of(jkModuleId, JkVersion.UNSPECIFIED);
+            }
+            if (separatorCount == 2 && strings.length == 3) {
+                return of(jkModuleId, JkVersion.of(strings[2]));
+            }
+            if (separatorCount == 3 && strings.length == 4) {
+                return of(jkModuleId, JkVersion.of(strings[3])).withClassifiers(blankToNull(strings[2]));
+            }
+            if (separatorCount == 4 && strings.length == 3) {
+                return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifierAndType(blankToNull(strings[2]), null);
+            }
+            if (separatorCount == 4 && strings.length == 4) {
+                return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifierAndType(blankToNull(strings[2]),
+                        blankToNull(strings[3]));
+            }
+            if (separatorCount == 4 && strings.length == 5) {
+                return of(jkModuleId, JkVersion.of(strings[4])).withClassifierAndType(blankToNull(strings[2])
+                        , blankToNull(strings[3]));
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format(ERROR_MESSAGE, formattedCoordinate), e);
         }
-        if (separatorCount == 2 && strings.length == 3) {
-            return of(jkModuleId, JkVersion.of(strings[2]));
-        }
-        if (separatorCount == 3 && strings.length == 4) {
-            return of(jkModuleId, JkVersion.of(strings[3])).withClassifiers(blankToNull(strings[2]));
-        }
-        if (separatorCount == 4 && strings.length == 3) {
-            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifierAndType(blankToNull(strings[2]), null);
-        }
-        if (separatorCount == 4 && strings.length == 4) {
-            return of(jkModuleId, JkVersion.UNSPECIFIED).withClassifierAndType(blankToNull(strings[2]),
-                    blankToNull(strings[3]));
-        }
-        if (separatorCount == 4 && strings.length == 5) {
-            return of(jkModuleId, JkVersion.of(strings[4])).withClassifierAndType(blankToNull(strings[2])
-                    , blankToNull(strings[3]));
-        }
-        throw new IllegalArgumentException(errorMessage);
+        throw new IllegalArgumentException(String.format(ERROR_MESSAGE, formattedCoordinate));
     }
 
     public boolean isTransitiveByDefault() {
