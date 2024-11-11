@@ -70,6 +70,10 @@ Its key features include:
   
   Simply commit or tag repository to publish application.
 
+ - **Centralize build logic**
+
+   Define project build and CI/CD logic in one place, and reuse across all your organization.
+
 - **Make Java fun for newcomers**
 
   Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
@@ -77,24 +81,22 @@ Its key features include:
   Write Java code and execute it directly from anywhere, with minimal or zero setup.
 
 
-- **Centralize build logic**
 
-  Define project build and CI/CD logic in one place, and reuse across all your organization.
   
 
 ## Examples
 
 ### Run Java Applications directly from their Source Repository
 
-- [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
-- [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
+- [Execute the 'cow says' cmd-line program directly from its Github repo](https://github.com/jeka-dev/demo-cowsay)
+- [Execute a calculator GUI app directly from its Github repo](https://github.com/djeang/Calculator-jeka)
 
 ### Build and Test E2E
-
-- [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
-- [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
-- [Publish a library on Maven Central](https://github.com/jeka-dev/openapi-plugin?tab=readme-ov-file#publication-on-maven-central) See [also](https://github.com/djeang/vincer-dom)
-
+- [CLI application with a zero-conf build](https://github.com/jeka-dev/demo-base-application)
+- [Java library published on Maven Central](https://github.com/djeang/vincer-dom)
+- [Spring-Boot application with a build configured using properties only](https://github.com/jeka-dev/demo-springboot-simple)
+- [Same but with a build configured with Java code](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
+- [Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 
 ### Reuse Build Logic
 - [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/demo-build-templates-consumer)
