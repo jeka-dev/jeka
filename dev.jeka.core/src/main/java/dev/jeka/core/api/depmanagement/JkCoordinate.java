@@ -19,7 +19,6 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
-import javafx.scene.chart.ScatterChart;
 
 import java.nio.file.Path;
 import java.util.Objects;
