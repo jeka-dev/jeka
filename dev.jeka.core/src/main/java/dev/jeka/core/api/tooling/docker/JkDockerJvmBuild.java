@@ -93,7 +93,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
             JkLog.verbose("No compiled classes found. Force compile.");
             project.compilation.runIfNeeded();
         }
-        String mainClass = project.packaging.getMainClass();
+        String mainClass = project.packaging.getOrFindMainClass();
         JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project. Please, set the @project.pack.mainClass property.");
         return this
                 .setClasses(classTree)

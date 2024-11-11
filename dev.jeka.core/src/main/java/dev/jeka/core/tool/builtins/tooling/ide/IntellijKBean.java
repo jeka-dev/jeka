@@ -133,7 +133,8 @@ public final class IntellijKBean extends KBean {
         Path newImlFile = imlFile == null ?
                 getBaseDir().resolve(JkConstants.JEKA_SRC_DIR).resolve(".idea").resolve("jeka-src.iml")
                 : getBaseDir().resolve(imlFile);
-        String relativePath = getBaseDir().relativize(newImlFile).toString();
+        String relativePath = getBaseDir().relativize(newImlFile).toString()
+                .replace('\\', '/');
         Path jekaPropertesPath = getBaseDir().resolve(JkConstants.PROPERTIES_FILE);
         String property = "@intellij.imlFile=" + relativePath;
         boolean alreadyPresent = JkUtilsPath.readAllLines(jekaPropertesPath).stream()

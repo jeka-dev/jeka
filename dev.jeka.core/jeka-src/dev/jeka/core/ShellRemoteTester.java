@@ -31,7 +31,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
 
     private static final String GIT_URL = "https://github.com/jeka-dev/sample-for-integration-test.git#0.0.1";
 
-    static final String COW_SAY_URL = "https://github.com/jeka-dev/demo-cowsay#0.0.1";
+    static final String COW_SAY_URL = "https://github.com/jeka-dev/demo-cowsay#0.0.6";
 
     private static final String SNAPSHOT_REPO = "https://oss.sonatype.org/content/repositories/snapshots";
 
@@ -153,7 +153,7 @@ class ShellRemoteTester  extends JekaCommandLineExecutor {
         // We want also testing that sys properties declared as program arguments are
         // handled as regular sys properties
         JkProcResult result = JkProcess.of(jekaShellPath.toString(),
-                        "-ru", COW_SAY_URL, "-p",  "Hello JeKa", "-Dcowsay.prefix=Mooo")
+                        "-ru", COW_SAY_URL, "-Djeka.version=.", "-p",  "Hello JeKa", "-Dcowsay.prefix=Mooo")
                 .setLogCommand(true)
                 .setCollectStdout(true)
                 .setCollectStderr(true)

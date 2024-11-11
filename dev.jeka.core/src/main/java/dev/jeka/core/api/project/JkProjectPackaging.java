@@ -260,6 +260,17 @@ public class JkProjectPackaging {
     }
 
     /**
+     * Retrieves the main class name of the project. If the main class name is not provided,
+     * it will try to discover it.
+     */
+    public String getOrFindMainClass() {
+        if (!JkUtilsString.isBlank(mainClass)) {
+            return mainClass;
+        }
+        return this.mainClassFinder.get();
+    }
+
+    /**
      * Allows customizing thz content of produced fat jar.
      */
     public JkProjectPackaging customizeFatJarContent(Function<JkPathTreeSet, JkPathTreeSet> customizer) {

@@ -42,8 +42,8 @@ class DockerTester extends JekaCommandLineExecutor  {
             return;
         }
         JkLog.info("Docker detected : run docker tests");
-        // TODO re-enable tests
-        //cowsayBuildAndRunImage();
+
+        cowsayBuildAndRunImage();
 
         //buildInstallImage();
         //runImage();
@@ -94,7 +94,7 @@ class DockerTester extends JekaCommandLineExecutor  {
          */
 
         JkProcResult result = JkDocker.prepareExec("run",
-                "--rm", "github.com_jeka-dev_demo-cowsay:0.0.1", "toto")
+                "--rm", "github.com_jeka-dev_demo-cowsay:0.0.6", "toto")
                 .setLogCommand(true)
                 .setInheritIO(false)
                 .setLogWithJekaDecorator(true)
