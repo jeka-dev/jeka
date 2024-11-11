@@ -70,6 +70,10 @@ Its key features include:
   
   Simply commit or tag repository to publish application.
 
+ - **Centralize build logic**
+
+   Define project build and CI/CD logic in one place, and reuse across all your organization.
+
 - **Make Java fun for newcomers**
 
   Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
@@ -77,9 +81,7 @@ Its key features include:
   Write Java code and execute it directly from anywhere, with minimal or zero setup.
 
 
-- **Centralize build logic**
 
-  Define project build and CI/CD logic in one place, and reuse across all your organization.
   
 
 ## Examples
