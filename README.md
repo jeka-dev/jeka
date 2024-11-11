@@ -86,11 +86,12 @@ Its key features include:
 
 ### Run Java Applications directly from their Source Repository
 
-- [Execute the 'cow says' cmd-line program directly from Github](https://github.com/jeka-dev/demo-cowsay)
-- [Execute a calculator GUI app directly from Github](https://github.com/djeang/Calculator-jeka)
+- [Execute the 'cow says' cmd-line program directly from its Github repo](https://github.com/jeka-dev/demo-cowsay)
+- [Execute a calculator GUI app directly from its Github repo](https://github.com/djeang/Calculator-jeka)
 
 ### Build and Test E2E
-
+- [Simple Spring Boot application with a build configured using properties only](https://github.com/jeka-dev/demo-springboot-simple)
+- [Same but with a build configured with Java code](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
 - [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 - [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
 - [Publish a library on Maven Central](https://github.com/jeka-dev/openapi-plugin?tab=readme-ov-file#publication-on-maven-central) See [also](https://github.com/djeang/vincer-dom)
