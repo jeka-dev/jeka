@@ -25,6 +25,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
@@ -290,7 +291,7 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * Writes the contents of this JkPathSequence to the specified file path.
      */
     public void writeTo(Path path) {
-        JkPathFile.of(path).deleteIfExist().createIfNotExist().write(toPath());
+        JkPathFile.of(path).createIfNotExist().write(toPath(), StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     @Override
