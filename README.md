@@ -90,12 +90,11 @@ Its key features include:
 - [Execute a calculator GUI app directly from its Github repo](https://github.com/djeang/Calculator-jeka)
 
 ### Build and Test E2E
-- [Simple Spring Boot application with a build configured using properties only](https://github.com/jeka-dev/demo-springboot-simple)
+- [CLI application with a zero-conf build](https://github.com/jeka-dev/demo-base-application)
+- [Java library published on Maven Central](https://github.com/djeang/vincer-dom)
+- [Spring-Boot application with a build configured using properties only](https://github.com/jeka-dev/demo-springboot-simple)
 - [Same but with a build configured with Java code](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
 - [Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
-- [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
-- [Publish a library on Maven Central](https://github.com/jeka-dev/openapi-plugin?tab=readme-ov-file#publication-on-maven-central) See [also](https://github.com/djeang/vincer-dom)
-
 
 ### Reuse Build Logic
 - [Build a Spring-Boot + ReactJs application with just 3 lines of configuration.](https://github.com/jeka-dev/demo-build-templates-consumer)
