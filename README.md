@@ -92,7 +92,7 @@ Its key features include:
 ### Build and Test E2E
 - [Simple Spring Boot application with a build configured using properties only](https://github.com/jeka-dev/demo-springboot-simple)
 - [Same but with a build configured with Java code](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
-- [Build a Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
+- [Springboot-Agular application, including Sonarqube analysis and Docker E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 - [Build, run, dockerize, and publish application with zero-conf](https://github.com/jeka-dev/demo-base-application)
 - [Publish a library on Maven Central](https://github.com/jeka-dev/openapi-plugin?tab=readme-ov-file#publication-on-maven-central) See [also](https://github.com/djeang/vincer-dom)
 
