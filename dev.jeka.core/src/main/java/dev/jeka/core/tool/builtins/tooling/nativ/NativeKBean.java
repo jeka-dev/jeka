@@ -104,7 +104,7 @@ public class NativeKBean extends KBean {
             nativeImage.addExtraParams(JkUtilsString.parseCommandline(this.args));
         }
         if (this.includeMainClassArg) {
-            nativeImage.setMainClass(project.packaging.getMainClass());
+            nativeImage.setMainClass(project.packaging.getOrFindMainClass());
         }
         nativeImage.setIncludesAllResources(this.includeAllResources);
         nativeImage.setStaticLinkage(staticLink);
