@@ -26,6 +26,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -46,6 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -680,6 +682,82 @@ public final class JkProject implements JkIdeSupportSupplier {
                 () -> moduleId != null ? moduleId.getDotNotation()
                         : baseDir.toAbsolutePath().getFileName().toString()
         );
+    }
+
+    public JkBuildable asBuildable() {
+
+        return new JkBuildable() {
+
+            @Override
+            public void compileIfNeeded() {
+                compilation.runIfNeeded();
+            }
+
+            @Override
+            public JkDependencyResolver getDependencyResolver() {
+                return dependencyResolver;
+            }
+
+            @Override
+            public Path getMainJarPath() {
+                return artifactLocator.getMainArtifactPath();
+            }
+
+            @Override
+            public Adapted getAdapted() {
+                return Adapted.PROJECT;
+            }
+
+            @Override
+            public boolean compile(JkJavaCompileSpec compileSpec) {
+                return JkProject.this.compilerToolChain.compile(compileSpec);
+            }
+
+            @Override
+            public Path getClassDir() {
+                return compilation.layout.resolveClassDir();
+            }
+
+            @Override
+            public JkResolveResult resolveRuntimeDependencies() {
+                return packaging.resolveRuntimeDependencies();
+            }
+
+            @Override
+            public List<Path> getRuntimeDependenciesAsFiles() {
+                return packaging.resolveRuntimeDependenciesAsFiles();
+            }
+
+            @Override
+            public JkVersion getVersion() {
+                return JkProject.this.getVersion();
+            }
+
+            @Override
+            public JkModuleId getModuleId() {
+                return moduleId;
+            }
+
+            @Override
+            public Path getOutputDir() {
+                return JkProject.this.getOutputDir();
+            }
+
+            @Override
+            public Path getBaseDir() {
+                return JkProject.this.getBaseDir();
+            }
+
+            @Override
+            public String getMainClass() {
+                return packaging.getOrFindMainClass();
+            }
+
+            @Override
+            public String toString() {
+                return JkProject.this.toString();
+            }
+        };
     }
 
 }

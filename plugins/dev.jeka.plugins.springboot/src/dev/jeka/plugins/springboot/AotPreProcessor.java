@@ -18,6 +18,7 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 
@@ -54,16 +55,16 @@ class AotPreProcessor {
         this.generatedClassesDir = outputDir.resolve("generated-classes");
     }
 
-    static AotPreProcessor of(JkProject project) {
-        JkModuleId moduleId1 = Optional.ofNullable(project.getModuleId())
+    static AotPreProcessor of(JkBuildable buildable) {
+        JkModuleId moduleId1 = Optional.ofNullable(buildable.getModuleId())
                 .orElse(JkModuleId.of(
-                        project.getBaseDir().toAbsolutePath().getFileName().toString(),
-                        project.getBaseDir().toAbsolutePath().getFileName().toString()));
+                        buildable.getBaseDir().toAbsolutePath().getFileName().toString(),
+                        buildable.getBaseDir().toAbsolutePath().getFileName().toString()));
         List<Path> classpath = new LinkedList<>();
-        classpath.add(project.compilation.layout.resolveClassDir());
-        classpath.addAll(project.packaging.resolveRuntimeDependenciesAsFiles());
-        String mainClass = project.packaging.getMainClass();
-        Path outputDir = project.getOutputDir().resolve("spring-aot");
+        classpath.add(buildable.getClassDir());
+        classpath.addAll(buildable.getRuntimeDependenciesAsFiles());
+        String mainClass = buildable.getMainClass();
+        Path outputDir = buildable.getOutputDir().resolve("spring-aot");
         return new AotPreProcessor(classpath, mainClass, outputDir, moduleId1);
 
     }

@@ -20,11 +20,11 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.project.JkBuildable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,8 +72,8 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     /**
      * Creates a JkDockerBuild instance for the specified JkProject.
      */
-    public static JkDockerJvmBuild of(JkProject project) {
-        return of().adaptTo(project);
+    public static JkDockerJvmBuild of(JkBuildable buildable) {
+        return of().adaptTo(buildable);
     }
 
     @Override
@@ -87,17 +87,17 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     /**
      * Adapts this JkDockerBuild instance to build the specified JkProject.
      */
-    public JkDockerJvmBuild adaptTo(JkProject project) {
-        JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
+    public JkDockerJvmBuild adaptTo(JkBuildable buildable) {
+        JkPathTree classTree = JkPathTree.of(buildable.getClassDir());
         if (!classTree.withMatcher(JkPathMatcher.of("**/*class")).containFiles()) {
             JkLog.verbose("No compiled classes found. Force compile.");
-            project.compilation.runIfNeeded();
+            buildable.compileIfNeeded();
         }
-        String mainClass = project.packaging.getOrFindMainClass();
+        String mainClass = buildable.getMainClass();
         JkUtilsAssert.state(mainClass != null, "No main class has been defined or found on this project. Please, set the @project.pack.mainClass property.");
         return this
                 .setClasses(classTree)
-                .setClasspath(project.packaging.resolveRuntimeDependenciesAsFiles())
+                .setClasspath(buildable.getRuntimeDependenciesAsFiles())
                 .setMainClass(mainClass);
     }
 

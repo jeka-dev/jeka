@@ -18,6 +18,7 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -102,9 +103,9 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create .war file : " + this.createWarFile);
     }
 
-    private List<Path> generateAotEnrichment(JkProject project) {
+    private List<Path> generateAotEnrichment(JkBuildable buildable) {
         JkLog.startTask("process-springboot-aot");
-        AotPreProcessor aotPreProcessor = AotPreProcessor.of(project);
+        AotPreProcessor aotPreProcessor = AotPreProcessor.of(buildable);
         if (hasAotProfile()) {
             aotPreProcessor.profiles.addAll(Arrays.asList(aotProfiles()));
         }
@@ -112,13 +113,13 @@ public final class SpringbootKBean extends KBean {
 
         List<Path> classpath = new LinkedList<>(aotPreProcessor.getClasspath());
         classpath.add(aotPreProcessor.getGeneratedClassesDir());
-        Path compiledGeneratedSources = project.getOutputDir()
+        Path compiledGeneratedSources = buildable.getOutputDir()
                 .resolve("spring-aot/compiled-generated-sources");
         JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
                 .setSources(JkPathTreeSet.ofRoots(aotPreProcessor.getGeneratedSourcesDir()))
                 .setClasspath(classpath)
                 .setOutputDir(compiledGeneratedSources);
-        JkUtilsAssert.state(project.compilerToolChain.compile(compileSpec),
+        JkUtilsAssert.state(buildable.compile(compileSpec),
                 "Error while compiling classes generated for AOT");
         JkLog.endTask();
 
@@ -146,7 +147,7 @@ public final class SpringbootKBean extends KBean {
         NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
         nativeKBean.includeMainClassArg = false;
         nativeKBean.setAotAssetDirs(() ->
-                this.generateAotEnrichment(projectKBean.project));
+                this.generateAotEnrichment(projectKBean.project.asBuildable()));
     }
 
     private void customizeBaseKBean(BaseKBean baseKBean) {
@@ -164,6 +165,12 @@ public final class SpringbootKBean extends KBean {
                 path,
                 baseKBean.getManifest())
         );
+
+        // Configure native kbean
+        NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
+        nativeKBean.includeMainClassArg = false;
+        nativeKBean.setAotAssetDirs(() ->
+                this.generateAotEnrichment(baseKBean.asBuildable()));
     }
 
     private boolean hasAotProfile() {

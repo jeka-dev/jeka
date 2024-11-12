@@ -16,8 +16,12 @@
 
 package dev.jeka.core.tool.builtins.project;
 
+import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -30,6 +34,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import org.w3c.dom.Document;
@@ -105,19 +110,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     // ------------------------------- command line methods -----------------------------
 
-    public static JkProject findProject(JkRunbase runbase) {
-        Optional<ProjectKBean> optionalProjectKBean = runbase.find(ProjectKBean.class);
-        if (optionalProjectKBean.isPresent()) {
-            return optionalProjectKBean.get().project;
-        }
-        if (runbase.find(BaseKBean.class).isPresent()) {
-            return null;
-        }
-        if (Files.isDirectory(runbase.getBaseDir().resolve("src"))) {
-            return runbase.load(ProjectKBean.class).project;
-        }
-        return null;
-    }
+
 
     @JkDoc("Delete the content of jeka-output directory and might execute extra clean actions")
     public void clean() {

@@ -47,7 +47,7 @@ public class JkDockerJvmBuildIT {
        project.flatFacade
                 .setModuleId("my:project").setVersion("MyVersion")
                 .setMainClass("dev.jeka.core.tool.Main");
-        JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project);
+        JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project.asBuildable());
         dockerJvmBuild.nonRootSteps.insertBefore("COPY classpath.txt", "# rem for testing 'insertBefore'");
         String imageName = "jk-testunit-jvm";
 

@@ -20,6 +20,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
@@ -27,6 +28,8 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -205,6 +208,36 @@ public final class JkRunbase {
     public Path getBaseDir() {
         return baseDir;
     }
+
+    /**
+     * Finds either a ProjectKBean or a BaseKBean present in this runbase.
+     * The result is returned as a JkBuildable abstraction or <code>null</code>
+     * if no such structure is discovered in this runbase.
+     */
+    public JkBuildable findBuildable() {
+        Optional<ProjectKBean> optionalProjectKBean = this.find(ProjectKBean.class);
+        if (optionalProjectKBean.isPresent()) {
+            return optionalProjectKBean.get().project.asBuildable();
+        }
+        if (this.find(BaseKBean.class).isPresent()) {
+            return this.find(BaseKBean.class).get().asBuildable();
+        }
+        if (Files.isDirectory(this.getBaseDir().resolve("src"))) {
+            return this.load(ProjectKBean.class).project.asBuildable();
+        }
+        return null;
+    }
+
+    /**
+     * @see #findBuildable()
+     */
+    public JkBuildable getBuildable() {
+        return Optional.ofNullable(findBuildable()).orElseThrow(
+                () -> new JkException("Cannot find project or base KBean in this runbase " + this.getBaseDir())
+        );
+    }
+
+
 
     void setDependencyResolver(JkDependencyResolver resolverArg) {
         dependencyResolver = resolverArg;

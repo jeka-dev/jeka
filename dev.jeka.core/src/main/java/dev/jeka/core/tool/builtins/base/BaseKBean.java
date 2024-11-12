@@ -19,14 +19,14 @@ package dev.jeka.core.tool.builtins.base;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.JkVersionProvider;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
-import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -36,6 +36,7 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 
 import java.nio.file.Files;
@@ -302,6 +303,10 @@ public final class BaseKBean extends KBean {
                 .andMatching(false, "_*", "_*/**", ".*", "**/.*");
     }
 
+
+
+
+
     /**
      * Returns the {@link JkManifest} for the application.
      * The manifest includes the created by attribute,
@@ -389,6 +394,85 @@ public final class BaseKBean extends KBean {
         @JkDoc("Kind of Jeka base to generate.")
         public JkBaseScaffold.Kind kind = JkBaseScaffold.Kind.JEKA_SCRIPT;
 
+    }
+
+    public JkBuildable asBuildable() {
+
+        return new JkBuildable() {
+
+            @Override
+            public Path getClassDir() {
+                Path tempDirClass = JkUtilsPath.createTempDirectory("jk-");
+                BaseKBean.this.getAppClasses().copyTo(tempDirClass);
+                return tempDirClass;
+            }
+
+            @Override
+            public JkResolveResult resolveRuntimeDependencies() {
+                JkDependencySet deps = getRunbase().getExportedDependencies()
+                        .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
+                return getRunbase().getDependencyResolver().resolve(deps);
+            }
+
+            @Override
+            public List<Path> getRuntimeDependenciesAsFiles() {
+                return BaseKBean.this.getAppClasspath();
+            }
+
+            @Override
+            public JkVersion getVersion() {
+                return BaseKBean.this.getVersion();
+            }
+
+            @Override
+            public JkModuleId getModuleId() {
+                return BaseKBean.this.getModuleId();
+            }
+
+            @Override
+            public Path getOutputDir() {
+                return BaseKBean.this.getOutputDir();
+            }
+
+            @Override
+            public Path getBaseDir() {
+                return BaseKBean.this.getBaseDir();
+            }
+
+            @Override
+            public String getMainClass() {
+                return BaseKBean.this.getMainClass();
+            }
+
+            @Override
+            public void compileIfNeeded() {
+                // base source are always compiled when running
+            }
+
+            @Override
+            public JkDependencyResolver getDependencyResolver() {
+                return getRunbase().getDependencyResolver();
+            }
+
+            @Override
+            public Path getMainJarPath() {
+                return BaseKBean.this.getJarPath();
+            }
+
+            @Override
+            public Adapted getAdapted() {
+                return Adapted.BASE;
+            }
+
+            @Override
+            public boolean compile(JkJavaCompileSpec compileSpec) {
+                return JkJavaCompilerToolChain.of().compile(compileSpec);
+            }
+
+            public String toString() {
+                return BaseKBean.this.toString();
+            }
+        };
     }
 
 

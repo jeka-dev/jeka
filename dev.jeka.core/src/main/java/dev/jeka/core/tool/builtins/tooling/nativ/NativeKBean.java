@@ -19,17 +19,19 @@ package dev.jeka.core.tool.builtins.tooling.nativ;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.java.JkNativeImage;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 @JkDoc("Creates native images (experimental !)\n" +
@@ -61,13 +63,10 @@ public class NativeKBean extends KBean {
     @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
             "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
     public void compile() {
-        JkProject project = ProjectKBean.findProject(this.getRunbase());
-        if (project != null) {
-            boolean detectMainClass = project.packaging.isDetectMainClass();
-            project.packaging.setDetectMainClass(true);
-            project.compilation.runIfNeeded();
-            build(project);
-            project.packaging.setDetectMainClass(detectMainClass);
+        JkBuildable buildable = getRunbase().findBuildable();
+        if (buildable != null) {
+            buildable.compileIfNeeded();
+            build(buildable);
         } else {
             throw new JkException("No project found in Runbase. Native compilation not yet implemented for base kbean.");
         }
@@ -84,17 +83,18 @@ public class NativeKBean extends KBean {
         return this;
     }
 
-    public JkNativeImage nativeImage(JkProject project) {
+
+    public JkNativeImage nativeImage(JkBuildable buildable) {
         List<Path> classpath = new LinkedList<>();
-        classpath.add(project.compilation.layout.resolveClassDir());
+        classpath.add(buildable.getClassDir());
         final List<Path> depsAsFiles;
         final Set<JkCoordinate> depsAsCoordinates;
         if (this.useMetadataRepo) {
-            JkResolveResult resolveResult = project.packaging.resolveRuntimeDependencies();
+            JkResolveResult resolveResult = buildable.resolveRuntimeDependencies();
             depsAsFiles = resolveResult.getFiles().getEntries();
             depsAsCoordinates = resolveResult.getDependencyTree().getDescendantModuleCoordinates();
         } else {
-            depsAsFiles = project.packaging.resolveRuntimeDependenciesAsFiles();
+            depsAsFiles = buildable.getRuntimeDependenciesAsFiles();
             depsAsCoordinates = null;
         }
         classpath.addAll(depsAsFiles);
@@ -104,7 +104,7 @@ public class NativeKBean extends KBean {
             nativeImage.addExtraParams(JkUtilsString.parseCommandline(this.args));
         }
         if (this.includeMainClassArg) {
-            nativeImage.setMainClass(project.packaging.getOrFindMainClass());
+            nativeImage.setMainClass(buildable.getMainClass());
         }
         nativeImage.setIncludesAllResources(this.includeAllResources);
         nativeImage.setStaticLinkage(staticLink);
@@ -112,14 +112,14 @@ public class NativeKBean extends KBean {
                 .setUseRepo(useMetadataRepo)
                 .setRepoVersion(metadataRepoVersion)
                 .setDependencies(depsAsCoordinates)
-                .setDownloadRepos(project.dependencyResolver.getRepos())
-                .setExtractDir(project.getOutputDir().resolve("aot-discovery-metadata-repo"));
+                .setDownloadRepos(buildable.getDependencyResolver().getRepos())
+                .setExtractDir(buildable.getOutputDir().resolve("aot-discovery-metadata-repo"));
         return nativeImage;
     }
 
-    private void build(JkProject project) {
-        JkNativeImage nativeImage = nativeImage(project);
-        String pathString = project.artifactLocator.getMainArtifactPath().toString();
+    private void build(JkBuildable buildable) {
+        JkNativeImage nativeImage = nativeImage(buildable);
+        String pathString = buildable.getMainJarPath().toString();
         pathString = JkUtilsString.substringBeforeLast(pathString, ".jar");
         nativeImage.make(Paths.get(pathString.replace('\\', '/')));
     }

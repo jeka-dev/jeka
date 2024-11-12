@@ -398,6 +398,9 @@ class Engine {
         if (!globalSuccess && !behaviorSettings.forceMode) {
             throw new JkException("Compilation of %s failed.", jekaSrcDir);
         }
+
+
+
         return new CompileResult(globalSuccess, extraClasspath);
     }
 
