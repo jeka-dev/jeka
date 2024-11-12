@@ -1,60 +1,49 @@
-# 6 Reasons why I Made JeKa
+# 5 Reasons why I Made JeKa
 
-As a seasoned Java developer, I’ve always seen Java as a simple language burdened by complex tooling, often making simple tasks overly complicated. 
-While the language is evolving to favor simplicity, the tooling remains hardly the same.
-
-With JeKa, I set out to address what I felt was missing in existing build tools. Here are six reasons why JeKa is built differently:
+As a Java developer, I've always appreciated Java static typing and simplicity
+but often find surrounding tooling unnecessarily complex and inconvenient. Here’s why I developed JeKa as an alternative:
 
 ## 1. Run Java Code Directly
-As a Java developer, I often need to write automated tasks for my projects, such as test data generators, configuration generators, or DevOps orchestration.
 
-Usually, Java developers write plugins/tasks for their build tool, or use scripts in languages like *Bash*, *Groovy*, or *Python*. These solutions are not ideal, as they may require specific (and sometimes cryptic) syntax, unique debugging methods, or portability issues.
+Automating tasks—like generating test data or deploying binaries—often requires writing complex extensions for build tools or using scripts in languages like Bash or Groovy, adding setup and debugging challenges.
 
-Ideally, Java developers should be able to write Java code in a project directory, and run it directly from the IDE or command line, without concerns about compilation, dependencies, or JDK setup.
+I wanted the simplicity of writing Java code that leverages the Java ecosystem, runnable from either the IDE or command line, allowing for easy debugging and the benefits of object-oriented design.
 
-JeKa provides a structure, to run Java source code seamlessly from your IDE or the command line—no JDK required—making Java a first-class choice for scripting, from simple tasks to complex needs. Additionaly it provides script facilities for direct method execution.
+With JeKa, you can write and execute Java method directly from the IDE or command line, and add third-party libraries by specifying Maven dependencies directly within the source code.
 
-## 2. Use Java to Build Java
-Traditional Java build tools are written in *Java* but expose an external DSL API (XML, Kotlin, etc.) to configure them. This approach isolates public from internal API but makes tools more tedious to extend and harder to debug.
+## 2. Build Java with Java
 
-I would expect a build tool that I can configure or extend using simple stupid Java. I would like to tacle build/delivery complexity the same 
-way I do for regular code.
+Most Java build tools rely on configuration languages like XML or Kotlin, which can complicate debugging and extending for developers.
 
-By including a comprehensive Java library for building projects and a thin layer of reusable components, Jeka can be used as a pure Java build tool,
-with straightfoward configuration, extension and troubleshooting.
+I believe configuration is best done in Java (or with properties for simpler cases), maintaining consistency
+between development and tooling configuration/extension.
+
+With JeKa, configuration and extensions are written directly in Java, making build tasks as navigable,
+debuggable and reusable as regular code.
+
+## 3. Minimal Configuration
+
+Setting up a Java build often means defining project names, versions, and plugin details, even for small projects.
+
+Ideally, we should be able to specify zero build configuration to compile, test, package or dockerize an application.
+
+With Jeka, you can get started immediately, specifying only library dependencies and filling in details later as needed.
+
+## 4. High Portability
+
+With traditional build tools, builds often rely on specific JDK versions or third-party software installed on the build machine.
+
+I wanted a tool that minimizes these dependencies so builds run seamlessly from any environment, without requiring a pre-installed JDK on the build machine and making Java version changes easy.
+
+JeKa achieves this by automatically fetching any necessary tools or JDK versions, ensuring a consistent experience everywhere.
 
 
-## 3. High Portability
-Traditional build tools often rely on a specific JDK or third-party tools on the host machine, making builds less portable due to implicit requirements or dependencies tied to specific container images.
+## 5. Source-Based Distribution
 
-I believe projects should be able to build on any platform—Windows, Linux, or macOS—without needing to install extra software or set up environment variables. Portability shouldn’t make troubleshooting and debugging harder, so it shouldn’t requires running on containers.
+Distributing Java applications is often complex: it involves creating JAR files, OS-specific launch scripts, installation/run documentation, infrastructure for hosting binaries, and a process for pushing updates.
 
-JeKa addresses these concerns by fetching all necessary third-party tools, including the correct JDK and JeKa version, as part of the build process. This ensures that tool dependencies and their versions are explicitly defined, enhancing portability, consistency, and reproducibility across environments, from Windows workstations to cloud CI/CD. 
-For instance, you won't need to install GraalVM or Node.js to build native images or JavaScript applications.
+Ideally, we should be able to push code to a public Git repository, allowing users to run it with a single command.
 
-## 4. Minimalist Configuration
-Traditional build tools often require a minimum configuration, such as project name, version, and plugin declarations, which can feel excessive for getting started.
-
-I expect zero setup (beyond specifying library dependencies) to start coding, testing, and packaging a new Java project. Information like group/name, versioning, and other details can be inferred with default values and specified later if needed.
-
-JeKa is designed with sensible defaults, minimizing the need for configuration. For most common scenarios, you can get started with nearly zero setup and no build code.
-
-## 5. Distribute Applications as Source
-
-Typically, distributing a Java application involves creating JAR files and OS-specific scripts, packaging the files into an archive, publishing them to a binary repository, and providing detailed instructions on how to download and run the application... Not that simple!
-
-I Would like clients to be able to run my Java application with a single command that points to its Git repository, allowing me to simply push or tag the repository to release new versions.
-
-With JeKa, you can run an entire Java application directly from its source code. On the first run, the application is built into a JAR (or native executable) and cached, enabling efficient execution without the need for precompiled binaries.
-
-This approach makes it incredibly convenient to develop Java tools that clients can start using right away, simply by referencing a Git URL.
-
-## 6. Simplify Java for Newcomers
-
-Traditionally, Java developers rely on complex build tools that use XML or Kotlin configurations to build applications. This setup often has a steep learning curve, which can be daunting for newcomers and makes Java seem overly complicated. Additionally, installing or changing the Java version usually involves configuring JDKs and adjusting environment variables.
-
-Ideally, beginners should be able to focus on writing, testing, and running code without being hindered by build tools. Also, switching Java versions should be as simple as a single line of configuration.
-
-JeKa addresses these challenges by minimizing required configuration, offering common functionality out-of-the-box, and creating a streamlined learning experience.
+Thanks to its high portability, JeKa enables any Java application to be built and run with a single command on most machines, efficiently caching binaries after the initial run for faster execution.
 
 
