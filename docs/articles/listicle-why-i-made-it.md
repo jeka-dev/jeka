@@ -11,17 +11,15 @@ I wanted the simplicity of writing Java code that can run from either the IDE or
 
 With JeKa, we can write and execute Java methods directly from the IDE or command line, and add third-party libraries by specifying Maven dependencies directly within the source code.
 
-## 2. Configure Builds with Java or Properties
+## 2. Configure Builds with Java
 
-Most Java build tools rely on configuration languages like XML or Kotlin, which can complicate debugging and extending and burden cognitive load..
+Most Java build tools rely on configuration languages like XML or Kotlin, which add complexity and cognitive load, obscure the internal model, and make it more difficult to extend.
 
-I believe configuration is best done in Java (or with properties for simpler cases), maintaining consistency
-between development and tooling configuration/extension.
+I believe a build tool should simply be a thin component model around a Java library that is configurable and extendable with plain Java code or simple properties for basic cases.
 
-With JeKa, configuration and extensions are written directly in Java, making build tasks as navigable,
-debuggable and reusable as regular code.
+Jeka is designed with these ideas in mind, making build code as navigable, debuggable, and reusable as regular code.
 
-## 3. Minimal Configuration
+## 3. Write Minimalist Configuration (or not at all)
 
 Setting up a Java build often means defining project names, versions, and plugin details, even for small projects.
 
