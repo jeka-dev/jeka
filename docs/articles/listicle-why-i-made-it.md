@@ -7,13 +7,13 @@ but often find surrounding tooling unnecessarily complex and inconvenient. Here�
 
 Automating tasks—like generating test data or deploying binaries—often requires writing complex extensions for build tools or using scripts in languages like Bash or Groovy, adding setup and debugging challenges.
 
-I wanted the simplicity of writing Java code that can run from either the IDE or the command line, making it easy to debug, run in CI/CD, and leverage existing Java skills. I also needed scripts that could rely on third-party libraries without managing them manually.
+I wanted the simplicity of writing Java code that can run from either the IDE or the command line, making it easy to debug, run in CI/CD, and leverage existing Java design skills for handling complex tasks. I also needed scripts that could rely on third-party libraries without manual dependency management.
 
 With JeKa, we can write and execute Java methods directly from the IDE or command line, and add third-party libraries by specifying Maven dependencies directly within the source code.
 
-## 2. Build Java with Java
+## 2. Configure Builds with Java or Properties
 
-Most Java build tools rely on configuration languages like XML or Kotlin, which can complicate debugging and extending for developers.
+Most Java build tools rely on configuration languages like XML or Kotlin, which can complicate debugging and extending and burden cognitive load..
 
 I believe configuration is best done in Java (or with properties for simpler cases), maintaining consistency
 between development and tooling configuration/extension.
