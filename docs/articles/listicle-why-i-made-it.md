@@ -7,9 +7,9 @@ but often find surrounding tooling unnecessarily complex and inconvenient. Here�
 
 Automating tasks—like generating test data or deploying binaries—often requires writing complex extensions for build tools or using scripts in languages like Bash or Groovy, adding setup and debugging challenges.
 
-I wanted the simplicity of writing Java code that leverages the Java ecosystem, runnable from either the IDE or command line, allowing for easy debugging and the benefits of object-oriented design.
+I wanted the simplicity of writing Java code that can run from either the IDE or the command line, making it easy to debug, run in CI/CD, and leverage existing Java skills. I also needed scripts that could rely on third-party libraries without managing them manually.
 
-With JeKa, you can write and execute Java method directly from the IDE or command line, and add third-party libraries by specifying Maven dependencies directly within the source code.
+With JeKa, we can write and execute Java methods directly from the IDE or command line, and add third-party libraries by specifying Maven dependencies directly within the source code.
 
 ## 2. Build Java with Java
 
