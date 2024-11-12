@@ -91,7 +91,7 @@ Its key features include:
 - [Execute the 'cow says' cmd-line program directly from its Github repo](https://github.com/jeka-dev/demo-cowsay)
 - [Execute a calculator GUI app directly from its Github repo](https://github.com/djeang/Calculator-jeka)
 
-### Build and Test E2E
+### Build and Create Pipelines
 - [CLI application with a zero-conf build](https://github.com/jeka-dev/demo-base-application)
 - [Java library published on Maven Central](https://github.com/djeang/vincer-dom)
 - [Spring-Boot application with a build configured using properties only](https://github.com/jeka-dev/demo-springboot-simple)
