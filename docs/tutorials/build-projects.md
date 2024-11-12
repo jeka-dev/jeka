@@ -159,14 +159,14 @@ jeka project: runJar programArgs="myArg1 myArg2"
 
 ### Docker commands
 
-Create an executable Docker file
+Create a Docker image of the application
 ```shell
 jeka docker: build
 ```
 
-Run the executable Docker file
+Create a Docker image of the application compiled to native.
 ```shell
-jeka docker: run programArgs
+jeka docker: buildNative
 ```
 
 ### Maven publish commands
