@@ -32,7 +32,7 @@ See [contribution page](CONTRIBUTING.md) for starting.
 
 ##  What is JeKa ?
 
-*Read [5 raisons why I made JeKa](docs/articles/listicle-why-i-made-it.md).*
+*Read [5 raisons why JeKa](https://github.com/djeang/djeang.github.io/blob/master/articles/jeka/listicle-why-i-made-it.md).*
 
 **JeKa** is a Java build tool for building or executing Java applications and scripts, 
 directly from source code.
