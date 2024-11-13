@@ -25,13 +25,13 @@ Setting up a Java build often means defining project names, versions, and plugin
 
 Ideally, we should be able to specify zero build configuration to accomplish standard tasks such as compiling, testing, creating regular or uber JARs, compiling to native, or creating Docker images—specifying only library dependencies and filling in additional details as needed.
 
-Jeka relies heavily on conventions to minimize the configuration required to the bare minimum.
+JeKa minimizes the required configuration to the bare minimum, using defaults and conventions whenever possible
 
 ## 4. High Portability
 
 Traditional build tool generaly rely on JDK or third-party software installed on the build machine.
 
-Ideally, the build tool should be responsible for fetching the required tooling (such as the JDK) based on the build configuration or defaults. This makes the build more portable and eliminates the need for managing different Java versions.
+Ideally, the build tool should handle fetching the necessary tools (including the required JeKa and JDK versions) based on the build configuration or defaults. This approach enhances portability and removes the need to manage multiple Java versions.
 
 JeKa achieves this by automatically fetching all necessary tools, including itself, ensuring a consistent experience across all environments.
 
@@ -42,5 +42,7 @@ Distributing Java applications is not straightforward: it involves creating JAR 
 A much simpler process would consist in pushing application code to a public Git repository, and let user execute it on their machine with a single command.
 
 Thanks to its high portability, JeKa enables any Java application to be transparently built and run with a single command on most machines, efficiently caching binaries after the initial run for faster execution.
+
+ 
 
 
