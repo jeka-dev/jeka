@@ -43,6 +43,7 @@ A simpler approach would be to push the application code to a public Git reposit
 
 Thanks to its high portability, JeKa enables any Java application to be built and run with a single command on most machines. It caches binaries after the initial run, ensuring direct execution for subsequent runs.
 
+ ## Conclusion
  
-
-
+While Java as a language has evolved towards greater simplicity and conciseness, the surrounding tooling has not kept pace, remaining complex and configuration-heavy.
+Tools like **JeKa**, **Jbang**, and **bld** address this by offering lightweight, minimal-setup environments that streamline build and execution, making Java projects easier to start and manage with just a few commands.
