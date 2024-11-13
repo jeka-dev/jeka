@@ -17,7 +17,7 @@ Most Java build tools rely on configuration languages like XML or Kotlin, which 
 
 I’d expect basic build configuration to be handled with simple properties, while more specific or complex requirements could be addressed with structured Java code that’s easy to refactor, share, and debug.
 
-In addition to its ability to execute Java code, JeKa offers a set of classes and a flexible component model designed to handle simple to complex build tasks. These tasks can be seamlessly executed as standard Java code.
+In addition to its ability to execute Java code, JeKa offers a set of classes and a flexible component model designed to handle simple to complex build tasks. These tasks can be seamlessly configured and executed as standard Java code.
 
 ## 3. Write Minimalist Configuration (or not at all)
 
@@ -39,9 +39,9 @@ JeKa achieves this by automatically fetching all necessary tools, including itse
 
 Distributing Java applications is not straightforward: it involves creating JAR files, OS-specific launch scripts, installation/run documentation, infrastructure for hosting binaries, and a process for pushing updates.
 
-A much simpler process would consist in pushing application code to a public Git repository, and let user execute it on their machine with a single command.
+A simpler approach would be to push the application code to a public Git repository and allow users to execute it efficiently on their machines with a single command, without additional JVM launch time.
 
-Thanks to its high portability, JeKa enables any Java application to be transparently built and run with a single command on most machines, efficiently caching binaries after the initial run for faster execution.
+Thanks to its high portability, JeKa enables any Java application to be built and run with a single command on most machines. It caches binaries after the initial run, ensuring direct execution for subsequent runs.
 
  
 
