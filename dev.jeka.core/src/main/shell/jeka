@@ -67,6 +67,7 @@ declare JDK_DOWNLOAD_ARCH
 declare IS_VERBOSE # we should not log anything when on the green path, except if '-lsu' arg is present
 declare IS_QUIET # we should log only error msg
 
+declare CLEAN_JEKA_OUTPUT # We should delete the jeka-output dir
 declare LOG_DEBUG # DEBUG
 declare DRY_RUN  # Debugging purpose
 declare DEFAULT_BASE_DIR="."
@@ -209,13 +210,15 @@ download_and_unpack() {
 # Arguments:
 #   None
 #######################################
-compute_VERBOSE_QUIET() {
+compute_VERBOSE_QUIET_CLEAN() {
   for arg in "${CMD_LINE_ARGS[@]}"
     do
       if [ "$arg" == "--verbose" ] || [ "$arg" == "-v" ] || [ "$arg" == "-d" ] || [ "$arg" == "--debug" ]; then
           IS_VERBOSE="true"
       elif [ "$arg" == "--quiet" ] || [ "$arg" == "-q" ]; then
           IS_QUIET="true"
+      elif [ "$arg" == "--clean" ] || [ "$arg" == "-c" ]; then
+          CLEAN_JEKA_OUTPUT="true"
       fi
     done
 }
@@ -1051,7 +1054,10 @@ filter_out_sysProp() {
 # Script starts here
 ##############################################################
 
-compute_VERBOSE_QUIET
+compute_VERBOSE_QUIET_CLEAN
+if [[ "$CLEAN_JEKA_OUTPUT" == "true" ]] && [ -d "jeka-output" ]; then
+    rm -rf "jeka-output"
+fi
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 
