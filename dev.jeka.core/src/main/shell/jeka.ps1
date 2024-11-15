@@ -212,6 +212,12 @@ class CmdLineArgs {
     return ($remoteIndex -ne -1)
   }
 
+  [bool] IsCleanFlagPresent() {
+    $remoteArgs= @("-c", "--clean")
+    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
+    return ($remoteIndex -ne -1)
+  }
+
   [array] FilterOutSysProp() {
     $result = @()
     foreach ($item in $this.args) {
@@ -562,6 +568,9 @@ function Main {
   }
   $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
   $cmdLineArgs = $rawProps.InterpolatedCmdLine()
+  if (($cmdLineArgs.IsCleanFlagPresent()) -and (Test-Path .\jeka-output)) {
+    Remove-Item .\jeka-output -Recurse -Force
+  }
 
   # Resolve basedir and interpolate cmdLine according props declared in base dir
   $remoteArg = $cmdLineArgs.GetRemoteBaseDirArg()
