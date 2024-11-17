@@ -16,12 +16,8 @@
 
 package dev.jeka.core.tool.builtins.project;
 
-import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
-import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
 import dev.jeka.core.api.java.JkJavaProcess;
@@ -32,19 +28,17 @@ import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
-import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
+import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 import org.w3c.dom.Document;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 
 @JkDoc("Manages the build and execution of a JVM project hosted in the base directory")
@@ -100,6 +94,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
+
+    public final JkGitVersioning gitVersioning = JkGitVersioning.of();
 
     private JkProjectScaffold projectScaffold;
 
@@ -357,6 +353,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         if (!JkUtilsString.isBlank(version)) {
             project.setVersion(version);
+        }
+        if (gitVersioning.enable) {
+            JkVersionFromGit.of(getBaseDir(), gitVersioning.tagPrefix).handleVersioning(project);
         }
         if (!JkUtilsString.isBlank(moduleId)) {
             project.setModuleId(moduleId);

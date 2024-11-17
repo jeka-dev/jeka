@@ -30,6 +30,7 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -38,6 +39,7 @@ import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
+import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,6 +70,8 @@ public final class BaseKBean extends KBean {
     @JkDoc("module group and name used for publication. Formatted as 'groupId:nameId'")
     public String moduleId;
 
+    public JkGitVersioning gitVersioning = JkGitVersioning.of();
+
     @JkDoc
     final BaseScaffoldOptions scaffold = new BaseScaffoldOptions();
 
@@ -97,6 +101,9 @@ public final class BaseKBean extends KBean {
         packActions.append(CREATE_JAR_ACTION, this::buildJar);
         if (!JkUtilsString.isBlank(moduleId)) {
             setModuleId(this.moduleId);
+        }
+        if (gitVersioning.enable) {
+            JkVersionFromGit.of(getBaseDir(), gitVersioning.tagPrefix).handleVersioning(this);
         }
     }
 
