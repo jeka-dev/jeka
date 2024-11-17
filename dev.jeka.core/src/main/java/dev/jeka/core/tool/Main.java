@@ -352,7 +352,7 @@ public class Main {
                 Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
                 if (!KBeanDescription.of(kbeanClass, false).isContainingField(fieldName)) {
                     throw new IllegalStateException("Property '@" + propName + "' does not match any field in "
-                            + beanName + " KBean. Execute 'jeka " + beanName + ": --help' to see available fields.");
+                            + beanName + " KBean. Execute 'jeka " + beanName + ": --doc' to see available fields.");
                 }
 
             }
