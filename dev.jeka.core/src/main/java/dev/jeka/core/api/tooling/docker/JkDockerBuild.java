@@ -324,7 +324,7 @@ public class JkDockerBuild {
         private final JkConsumers<Context> operations = JkConsumers.of();
 
         /**
-         * Appends the specified step in the Dockerfile.
+         * Appends the specified step at the end of step container.
          */
         public StepContainer add(String step) {
             operations.add(context -> context.steps.add(step));
@@ -349,6 +349,8 @@ public class JkDockerBuild {
         /**
          * Convenient method to add a COPY step on a file/dir located outside of the building context.
          * The file will be copied within the Docker build context and a step will be added to Dockerfile.
+         *
+         * @param optional fail if false and file does not exist.
          */
         public StepContainer addCopy(Path fileOrDir, String containerPath, boolean optional) {
             return add(context -> copyFileInContext(fileOrDir, containerPath, context, false, optional));
