@@ -355,24 +355,10 @@ public class JkDockerBuild {
         }
 
         /**
-         * Same as {@link #addCopy(Path, String, boolean) but let nonroot user own the copied file.
-         */
-        public StepContainer addCopyNonRoot(Path fileOrDir, String containerPath, boolean optional) {
-            return add(context -> copyFileInContext(fileOrDir, containerPath, context, true, optional));
-        }
-
-        /**
          * Same as {@link #addCopy(Path, String, boolean)} with optional=false
          */
         public StepContainer addCopy(Path fileOrDir, String containerPath) {
             return addCopy(fileOrDir, containerPath, false);
-        }
-
-        /**
-         * Same as {@link #addCopyNonRoot(Path, String, boolean)} with optional=false
-         */
-        public StepContainer addCopyNonRoot(Path fileOrDir, String containerPath) {
-            return addCopyNonRoot(fileOrDir, containerPath, false);
         }
 
         /**
