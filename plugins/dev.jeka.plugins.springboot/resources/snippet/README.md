@@ -6,12 +6,12 @@ This springboot project is built using [JeKa](https://jeka.dev) and its [Springb
 
 To create a bootable jar, execute :
 ```shell
-./jekaw project#pack
+jeka project: pack
 ```
 
 To run the bootable jar built by `project#pack`, execute :
 ```shell
-./jekaw project#runJar
+jeka project: runJar
 ```
 
 

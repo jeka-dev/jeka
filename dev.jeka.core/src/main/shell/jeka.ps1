@@ -86,7 +86,7 @@ class BaseDirResolver {
     $path = $this.cacheDir + "\git\" + $this.FolderName()
     if ([System.IO.Directory]::Exists($path)) {
       if ($this.updateFlag) {
-        Remove-Item -Path $path -Recurse -Force
+        Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
         $this.GitClone($path)
       }
     } else {
@@ -569,7 +569,7 @@ function Main {
   $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
   $cmdLineArgs = $rawProps.InterpolatedCmdLine()
   if (($cmdLineArgs.IsCleanFlagPresent()) -and (Test-Path .\jeka-output)) {
-    Remove-Item .\jeka-output -Recurse -Force
+    Remove-Item .\jeka-output -Recurse -Force -ErrorAction SilentlyContinue
   }
 
   # Resolve basedir and interpolate cmdLine according props declared in base dir

@@ -29,16 +29,23 @@ jeka intellij: iml
 
 ### Docker
 
-Create image
+Create image:
 ```shell
 jeka docker: build
-
 ```
-Show info about image
+
+Show info about image:
 ```shell
 jeka docker: info
 ```
-Run image
+
+Create native image:
 ```shell
-jeka docker: run
+jeka docker: buildNative
 ```
+
+Show info about native image
+```shell
+jeka docker: infoNative
+```
+

@@ -212,9 +212,9 @@ class MasterBuild extends KBean {
         return JkGit.of().getCurrentBranch();
     }
 
-    @JkDoc("Convenient method to set Posix permission for all jekaw files on git.")
+    @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
     public void setPosixPermissions() {
-        JkPathTree.of("../samples").andMatching("*/jekaw", "**/jekaw").getFiles().forEach(path -> {
+        JkPathTree.of("../samples").andMatching("*/jeka", "**/jeka").getFiles().forEach(path -> {
             JkLog.info("Setting exec permission on git for file " + path);
             JkProcess.ofCmdLine("git update-index --chmod=+x " + path).run();
         });
