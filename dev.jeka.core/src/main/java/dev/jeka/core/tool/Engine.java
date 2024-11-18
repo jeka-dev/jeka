@@ -412,7 +412,10 @@ class Engine {
     private KotlinCompileResult compileWithKotlin(JkPathSequence classpath, List<String> compileOptions) {
         String kotVer = properties.get(JkKotlinCompiler.KOTLIN_VERSION_OPTION);
         JkUtilsAssert.state(!JkUtilsString.isBlank(kotVer),
-                "No jeka.kotlin.version property has been defined on base dir %s", baseDir);
+                "No Kotlin version has been defined for %s.%n" +
+                        " Please, mention 'jeka.kotlin.version=xxx' in %s.",
+                baseDir,
+                baseDir.resolve(JkConstants.PROPERTIES_FILE));
         JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(dependencyResolver.getRepos(), kotVer)
                 .setLogOutput(true)
                 .setFailOnError(!behaviorSettings.forceMode)

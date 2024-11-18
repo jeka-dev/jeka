@@ -102,7 +102,14 @@ public final class JkPathFile {
             if (path.getParent() != null) {
                 JkUtilsPath.createDirectories(path.getParent());
             }
-            JkUtilsPath.createFile(path);
+            try {
+                Files.createFile(path);
+            } catch (FileAlreadyExistsException e) {
+                // Ignore if file already exist. We observed that it can happen in despite the initial check
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+
         }
         return this;
     }
