@@ -1,0 +1,27 @@
+package _dev;
+
+import dev.jeka.core.tool.JkJekaVersionRanges;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
+
+// Declare non-prod dependencies here (build, tests, compile-only deps)
+${inject}
+class Build extends KBean {
+
+    final BaseKBean baseKBean = load(BaseKBean.class);
+
+    @Override
+    protected void init() {
+
+        // Optionally specify the compatible Jeka version range for this plugin.
+        JkJekaVersionRanges.setCompatibilityRange(baseKBean.getManifest(),
+
+            // Specify the minimum required JeKa version for this plugin
+            "0.11.1",
+
+            // Replace with your location, or use null to skip the compatibility limit
+            "https://raw.githubusercontent.com/jeka-dev/openapi-plugin/master/breaking_versions.txt");
+    }
+
+}

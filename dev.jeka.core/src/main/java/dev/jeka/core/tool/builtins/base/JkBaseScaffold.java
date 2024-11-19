@@ -42,7 +42,7 @@ public final class JkBaseScaffold extends JkScaffold {
     public static final String SCRIPT_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Script.java";
 
     public enum Kind {
-        JEKA_SCRIPT, APP
+        JEKA_SCRIPT, APP, PLUGIN
     }
 
     public static final List<String> devDeps = new LinkedList<>();
@@ -134,15 +134,25 @@ public final class JkBaseScaffold extends JkScaffold {
             addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", junitDeps(), devDeps));
             addFileEntry(TEST_CLASS_PATH, code("MyTest.snippet"));
             addFileEntry(APP_CLASS_PATH, code("App.snippet", deps));
-
-        } else {
+        } else if (baseScaffoldOption.kind == Kind.JEKA_SCRIPT) {
             addFileEntry(SCRIPT_CLASS_PATH, code("Script.snippet", deps, devDeps));
+        } else if (baseScaffoldOption.kind == Kind.PLUGIN) {
+            addFileEntry(JkConstants.JEKA_SRC_DIR + "/org/example/MyPlugin.java", code("PluginKBean.snippet"));
+            addFileEntry(BUILD_CLASS_PATH, code("BuildPlugin.snippet", junitDeps()));
+            addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/samples/Sample1.java",
+                    code("SamplePlugin.snippet"));
+        } else {
+            throw new IllegalStateException("Not implemented");
         }
+
     }
 
     private void generateReadme() {
-        if (this.baseScaffoldOption.kind != Kind.JEKA_SCRIPT) {
+        if (this.baseScaffoldOption.kind == Kind.APP) {
             String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md"));
+            JkPathFile.of(baseDir.resolve("README.md")).createIfNotExist().write(content);
+        }  else if (this.baseScaffoldOption.kind == Kind.PLUGIN) {
+            String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README_PLUGIN.md"));
             JkPathFile.of(baseDir.resolve("README.md")).createIfNotExist().write(content);
         }
     }

@@ -34,11 +34,11 @@ Show info about image
 jeka docker: info
 ```
 
-Create native image
+Create native image:
 ```shell
 jeka docker: buildNative
 ```
-Show info about native image
+Show info about native image:
 ```shell
 jeka docker: infoNative
 ```
