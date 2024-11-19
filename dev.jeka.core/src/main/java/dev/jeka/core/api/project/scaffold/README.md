@@ -44,8 +44,13 @@ Create native image:
 jeka docker: buildNative
 ```
 
-Show info about native image
+Show info about native image:
 ```shell
 jeka docker: infoNative
+```
+
+Create minimalist Docker image:
+```shell
+jeka docker: buildNative nativeBaseImage=gcr.io/distroless/static-debian12:nonroot native: staticLink=MUSL
 ```
 
