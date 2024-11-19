@@ -10,10 +10,6 @@ Keeping all code in *jeka-src* simplifies both setup and testing due to shared c
 
 For adding dependencies, utilize the `@JkInjectClasspath` annotation. Any annotations declared under the `_dev` package will not be included in the transitive dependencies of your final extension.
 
-## Some Extensions to Check Out
-- A plugin for integrating *OpenAPI* tech: https://github.com/jeka-dev/openapi-plugin
-- An extension offering templates for building Springboot-ReactJS with quality metrics: https://github.com/jeka-dev/demo-build-templates
-
 ## Versioning Your Extension
 
 ### Setting a Compatible Version Range
@@ -32,10 +28,6 @@ Keeping all code in *jeka-src* simplifies both setup and testing due to shared c
 
 For adding dependencies, utilize the `@JkInjectClasspath` annotation. Any annotations declared under the `_dev` package will not be included in the transitive dependencies of your final extension.
 
-## Some Extensions to Check Out
-- A plugin for integrating *OpenAPI* tech: https://github.com/jeka-dev/openapi-plugin
-- An extension offering templates for building Springboot-ReactJS with quality metrics: https://github.com/jeka-dev/demo-build-templates/
-
 ## Versioning Your Extension
 
 ### Setting a Compatible Version Range
@@ -43,3 +35,7 @@ You can define a version range your extension is compatible with JeKa. While you
 
 ### Version Numbering for Your Extension
 We strongly suggest using the versioning scheme xx.xx.xx-y for your extension. In this scheme, xx.xx.xx represents the minimum required JeKa version, while y indicates the iteration of your extension.
+
+## Examples
+- A plugin for integrating *OpenAPI* tech: https://github.com/jeka-dev/openapi-plugin
+- An extension offering templates for building Springboot-ReactJS with quality metrics: https://github.com/jeka-dev/demo-build-templates
