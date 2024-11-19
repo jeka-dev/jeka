@@ -239,6 +239,9 @@ public final class MavenKBean extends KBean {
                 "Example: 'alldeps', 'doc.zip'")
         public String extraArtifacts;
 
+        private JkPublication() {
+        }
+
         private List<JkArtifactId> extraArtifacts() {
             if (JkUtilsString.isBlank(extraArtifacts)) {
                 return Collections.emptyList();
@@ -256,8 +259,6 @@ public final class MavenKBean extends KBean {
             }
             return JkArtifactId.of(artifactId, "jar");
         }
-
-        private JkPublication() {}
 
     }
 

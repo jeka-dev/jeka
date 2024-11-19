@@ -1,5 +1,6 @@
 package _dev;
 
+import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.tool.JkJekaVersionRanges;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkInjectClasspath;
@@ -13,12 +14,14 @@ class Build extends KBean {
 
     @Override
     protected void init() {
+        baseKBean.setModuleId("my-group:my-artifactId");
+        baseKBean.setVersion(JkInfo.getJekaVersion() + "-0");
 
         // Optionally specify the compatible Jeka version range for this plugin.
         JkJekaVersionRanges.setCompatibilityRange(baseKBean.getManifest(),
 
-            // Specify the minimum required JeKa version for this plugin
-            "0.11.1",
+            // Specify the minimum JeKa version required for this plugin, typically the version used during development
+            JkInfo.getJekaVersion(),
 
             // Replace with your location, or use null to skip the compatibility limit
             "https://raw.githubusercontent.com/jeka-dev/openapi-plugin/master/breaking_versions.txt");
