@@ -138,7 +138,9 @@ public class Main {
             }
 
             // Validate KBean properties
-            validateKBeanProps(props, kBeanResolution.allKbeans);
+            if (!behavior.forceMode) {
+                validateKBeanProps(props, kBeanResolution.allKbeans);
+            }
 
             // Parse command line to get action beans
             KBeanAction.Container actionContainer = CmdLineParser.parse(
