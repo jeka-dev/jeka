@@ -68,6 +68,16 @@ class Engine {
     private static final JkPathMatcher KOTLIN_DEF_SOURCE_MATCHER = JkPathMatcher.of(true, "**.kt")
             .and(false, "**/_*", "_*");
 
+    private static final Comparator<Path> PATH_COMPARATOR = (o1, o2) -> {
+        if (o1.getNameCount() < o2.getNameCount()) {
+            return -1;
+        }
+        if (o1.getNameCount() > o2.getNameCount()) {
+            return 1;
+        }
+        return o1.compareTo(o2);
+    };
+
     static final JkPathMatcher JAVA_OR_KOTLIN_SOURCE_MATCHER = JAVA_DEF_SOURCE_MATCHER.or(KOTLIN_DEF_SOURCE_MATCHER);
 
 
@@ -271,6 +281,7 @@ class Engine {
                 .excludeDirectories()
                 .relativizeFromRoot()
                 .filter(path -> path.getFileName().toString().endsWith(".class"))
+                .sorted(PATH_COMPARATOR)
                 .map(Engine::classNameFromClassFilePath)
                 .filter(kbeanClassNames::contains)
                 .collect(Collectors.toList());
