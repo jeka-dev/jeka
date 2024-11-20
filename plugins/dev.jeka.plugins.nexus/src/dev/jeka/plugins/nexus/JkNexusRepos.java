@@ -45,7 +45,6 @@ public class JkNexusRepos {
 
     private static final String TASK_NAME = "Closing and releasing repositories";
 
-
     private static final long CLOSE_TIMEOUT_MILLIS = 15 * 60 * 1000L;
 
     private static final long CLOSE_WAIT_INTERVAL_MILLIS = 10_000L;
@@ -128,9 +127,9 @@ public class JkNexusRepos {
      * Repositories not in OPEN status at time of invoking this method won't be released.
      */
     public void closeAndReleaseOpenRepositories() {
-        JkLog.startTask("Closing and releasing staged repositories");
+        JkLog.startTask("Nexus: Closing and releasing staged repositories");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
-        JkLog.info("Found staging repositories : ");
+        JkLog.info("Nexus: Found staging repositories : ");
         stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNameFilters))
@@ -138,10 +137,10 @@ public class JkNexusRepos {
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
         if (profileNameFilters.length != 0) {
-            JkLog.info("Taking in account repositories with profile name in "
+            JkLog.info("Nexus: Taking in account repositories with profile name in "
                     + Arrays.asList(profileNameFilters));
         }
-        JkLog.info("Repositories to close and release : " + openRepoIds);
+        JkLog.info("Nexus: Repositories to close and release : " + openRepoIds);
         close(openRepoIds);
         openRepoIds.forEach(this::waitForClosing);
         release(openRepoIds);
@@ -152,7 +151,7 @@ public class JkNexusRepos {
      * Closes repositories in OPEN Status, waits for all repos are closed then releases all repositories..
      */
     public void closeAndRelease() {
-        JkLog.startTask("Closing and releasing staged repository");
+        JkLog.startTask("Nexus: Closing and releasing staged repository");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
         JkLog.info("Found staging repositories : ");
         stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
@@ -162,7 +161,7 @@ public class JkNexusRepos {
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
         if (profileNameFilters.length != 0) {
-            JkLog.info("Taking in account repositories with profile name in "
+            JkLog.info("Nexus: Taking in account repositories with profile name in "
                     + Arrays.asList(profileNameFilters));
         }
         close(openRepoIds);
@@ -177,7 +176,7 @@ public class JkNexusRepos {
                 .filter(repo -> JkStagingRepo.Status.CLOSED == repo.getStatus())
                 .map(JkStagingRepo::getId)
                 .collect(Collectors.toList());
-        JkLog.info("Releasing repositories " + closedRepoIds);
+        JkLog.info("Nexus: Releasing repositories " + closedRepoIds);
         release(closedRepoIds);
         JkLog.endTask();
     }
@@ -215,7 +214,7 @@ public class JkNexusRepos {
     }
 
     public void autoReleaseAfterPublication(JkMavenPublication mavenPublication) {
-        mavenPublication.postActions.append(TASK_NAME, this::closeAndReleaseOpenRepositories);
+        mavenPublication.postActions.replaceOrAppend(TASK_NAME, this::closeAndReleaseOpenRepositories);
     }
 
     private List<JkStagingRepo> doFindStagingRepositories() throws IOException {
@@ -256,7 +255,7 @@ public class JkNexusRepos {
             JkLog.info("No staging repository to close.");
             return;
         }
-        JkLog.startTask("Sending 'close' command to repositories : " + repositoryIds);
+        JkLog.startTask("Nexus: Sending 'close' command to repositories : " + repositoryIds);
         URL url = new URL(baseUrl + "/service/local/staging/bulk/close");
         HttpURLConnection con = connection(url);
         con.setRequestMethod("POST");
@@ -273,10 +272,10 @@ public class JkNexusRepos {
 
     private void doRelease(List<String> repositoryIds) throws IOException {
         if (repositoryIds.isEmpty()) {
-            JkLog.info("No repository to release.");
+            JkLog.info("Nexus: No repository to release.");
             return;
         }
-        JkLog.startTask("Releasing repositories " + repositoryIds);
+        JkLog.startTask("Nexus: Releasing repositories " + repositoryIds);
         URL url = new URL(baseUrl + "/service/local/staging/bulk/promote");
         HttpURLConnection con = connection(url);
         con.setRequestMethod("POST");
@@ -294,10 +293,10 @@ public class JkNexusRepos {
 
     private void doWaitForClosing(String repositoryId) throws IOException {
         long startMillis = System.currentTimeMillis();
-        JkLog.startTask("Waiting for repository " + repositoryId + " to be closed. It may take a while ...");
+        JkLog.startTask("Nexus: Waiting for repository " + repositoryId + " to be closed. It may take a while ...");
         while (true) {
             if (System.currentTimeMillis() - startMillis > CLOSE_TIMEOUT_MILLIS) {
-                throw new IllegalStateException("Timeout waiting for repository close.");
+                throw new IllegalStateException("Nexus: Timeout waiting for repository close.");
             }
             JkUtilsSystem.sleep(CLOSE_WAIT_INTERVAL_MILLIS);
             JkStagingRepo repo = doGetRepository(repositoryId);
