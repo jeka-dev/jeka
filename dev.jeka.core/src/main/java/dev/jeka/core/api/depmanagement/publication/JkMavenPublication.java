@@ -279,14 +279,14 @@ public final class JkMavenPublication {
      */
     public String info() {
         StringBuilder sb = new StringBuilder();
-        sb.append("ModuleId    : " + this.moduleIdSupplier.get() + "\n");
-        sb.append("Version     : " + this.versionSupplier.get() + "\n");
-        sb.append("Repos       : " + "\n");
+        sb.append("Published ModuleId    : " + this.moduleIdSupplier.get() + "\n");
+        sb.append("Published Version     : " + this.versionSupplier.get() + "\n");
+        sb.append("Published Repos       : " + "\n");
         this.repos.getRepos().forEach(repo -> sb.append("  " + repo + "\n"));
-        sb.append("Artifacts   : " +  "\n");
+        sb.append("Published Artifacts   : " +  "\n");
         Arrays.stream(this.artifactPublisher.info().split("\n")).forEach(
                 line -> sb.append("  " + line + "\n"));
-        sb.append("Dependencies : " + "\n");
+        sb.append("Published Dependencies : " + "\n");
         getDependencies().withResolvedBoms(this.repos).toResolvedModuleVersions().getEntries().forEach(
                 dep -> sb.append("  " + dep + "\n"));
         return sb.toString();
