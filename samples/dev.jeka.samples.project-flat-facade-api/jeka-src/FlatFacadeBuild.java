@@ -21,7 +21,7 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
@@ -31,7 +31,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
  * The dependencies declared here are only for demonstration purpose and not necessary to build.
  * the project.
  */
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")
+@JkDep("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")
 class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Sets if the Integration Tests should be run.")

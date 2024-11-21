@@ -10,7 +10,7 @@ import dev.jeka.core.api.utils.jekaUtilsIterable;
 /**
  * Blallaaa
  */
-@JkInjectClasspath("commons-lang:commons-lang:2.6")
+@JkDep("commons-lang:commons-lang:2.6")
 public class DepManagedBuild extends Build {
 
 	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");

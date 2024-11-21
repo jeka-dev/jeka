@@ -114,7 +114,7 @@ class PluginScaffoldTester extends JekaCommandLineExecutor {
     private String scaffoldArgs(String original)  {
 
         // inject springboot-plugin.jar both as a jeka dependencies (for running plugin)
-        // And as a substitute of  @JkInjectClasspath("${jeka.springboot.plugin.dependency}") in scaffolded project
+        // And as a substitute of  @JkDep("${jeka.springboot.plugin.dependency}") in scaffolded project
         return String.format(original + " -Djeka.springboot.plugin.dependency=%s -cp=%s",
                 sprinbootPluginJar,
                 sprinbootPluginJar);

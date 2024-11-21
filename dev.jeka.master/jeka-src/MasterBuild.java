@@ -40,9 +40,9 @@ import github.Github;
 
 import java.io.IOException;
 
-@JkInjectClasspath("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
-@JkInjectClasspath("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
-@JkInjectClasspath("../plugins/dev.jeka.plugins.nexus/jeka-output/classes")
+@JkDep("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
+@JkDep("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
+@JkDep("../plugins/dev.jeka.plugins.nexus/jeka-output/classes")
 class MasterBuild extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";

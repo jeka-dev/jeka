@@ -91,6 +91,14 @@ final class SourceParser {
             return;
         }
 
+        // Handle JkDep
+        annotationParser = new AnnotationParser(line, JkDep.class);
+        if (annotationParser.isMatching()) {
+            String value = annotationParser.readUniqueStringValue();
+            info.addDep(!privateFolder, JkDependency.of(baseDir, value));
+            return;
+        }
+
         // Handle JkInjectRunbase
         annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
         if (annotationParser.isMatching()) {

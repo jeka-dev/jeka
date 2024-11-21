@@ -3,7 +3,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -12,7 +12,7 @@ import dev.jeka.plugins.jacoco.JkJacoco;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")  // For local testing
+@JkDep("../../plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")  // For local testing
 public class JacocoSampleBuild extends KBean {
 
     ProjectKBean projectKBean = load(ProjectKBean.class);

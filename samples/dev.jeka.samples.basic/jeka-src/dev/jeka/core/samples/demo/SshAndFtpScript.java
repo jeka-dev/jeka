@@ -20,7 +20,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -31,8 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-@JkInjectClasspath("com.jcraft:jsch:0.1.55")
-@JkInjectClasspath("commons-net:commons-net:3.6")
+@JkDep("com.jcraft:jsch:0.1.55")
+@JkDep("commons-net:commons-net:3.6")
 class SshAndFtpScript extends KBean {
 
     @JkDoc("Upload the binary file on the FTP server.")

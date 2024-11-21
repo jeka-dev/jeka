@@ -34,7 +34,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
 
 
-        // Test with injecting dep via @JkInjectClasspath(...)
+        // Test with injecting dep via @JkDep(...)
         run("dev.jeka.samples.springboot", "-la=false -c -cw " +
                 "project: pack runJar run.programArgs=auto-close maven: publishLocal -Djeka.java.version=17");
 
@@ -46,7 +46,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         // Test with injecting plugin dep via jeka.properties file
         run("dev.jeka.samples.protobuf", "-ivc project: pack");
 
-        // Test with injecting dep via @JkInjectClasspath(...)
+        // Test with injecting dep via @JkDep(...)
         run("dev.jeka.samples.jacoco", "-la=false -cp=../../plugins/dev.jeka.plugins.jacoco " +
                 "project: pack : checkGeneratedReport");
 

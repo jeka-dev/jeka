@@ -128,7 +128,7 @@ public final class BaseKBean extends KBean {
     public void test() {
         if (!JkTestProcessor.isEngineTestPresent()) {
             throw new JkException("No engine test class found in current classloader. " +
-                    "You should add @JkInjectClasspath(\"org.junit.jupiter:junit-jupiter\") dependencies" +
+                    "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies" +
                     "to the classpath for testing.");
         }
         JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getAppClasses().getRoot());

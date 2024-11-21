@@ -22,7 +22,7 @@ import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -101,14 +101,14 @@ public final class JkBaseScaffold extends JkScaffold {
     }
 
     /**
-     * Converts a list of dependencies into a string representation of {@link JkInjectClasspath} annotations.
+     * Converts a list of dependencies into a string representation of {@link JkDep} annotations.
      *
      * @param deps The list of dependencies to convert.
      * @return The string representation of JkInject annotations.
      */
     public static String toJkInject(List<String> deps) {
         List<String> injects = deps.stream()
-                .map(dep -> "@" + JkInjectClasspath.class.getSimpleName() + "(\"" + dep + "\")")
+                .map(dep -> "@" + JkDep.class.getSimpleName() + "(\"" + dep + "\")")
                 .collect(Collectors.toList());
         return String.join("\n", injects);
     }

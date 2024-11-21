@@ -26,13 +26,11 @@ import java.lang.annotation.*;
  * directory (as "../lib-folder/mylib.jar" or "libs/*.jar")
  *
  * @author Jerome Angibaud
- * @deprecated Use @JkDep instead
  */
-@Deprecated
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-@Repeatable(JkInjectClasspath.JkImports.class)
-public @interface JkInjectClasspath {
+@Repeatable(JkDep.JkImports.class)
+public @interface JkDep {
 
     /**
      * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0")
@@ -47,7 +45,7 @@ public @interface JkInjectClasspath {
     @interface JkImports {
 
         @JkDepSuggest
-        JkInjectClasspath[] value();
+        JkDep[] value();
     }
 
 }

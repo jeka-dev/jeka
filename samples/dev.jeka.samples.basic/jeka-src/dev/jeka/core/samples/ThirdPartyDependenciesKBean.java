@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.apache.commons.httpclient.HttpClient;
@@ -18,10 +18,9 @@ import static dev.jeka.core.api.depmanagement.JkPopularLibs.*;
  * This build demonstrates how to use 3rd party dependencies into your build class.
  * 
  * @author Jerome Angibaud
- * @formatter:off
  */
-@JkInjectClasspath("commons-httpclient:commons-httpclient:3.1")
-@JkInjectClasspath("com.google.guava:guava:21.0")
+@JkDep("commons-httpclient:commons-httpclient:3.1")
+@JkDep("com.google.guava:guava:21.0")
 public class ThirdPartyDependenciesKBean extends KBean {
 
     ProjectKBean projectKBean = load(ProjectKBean.class);

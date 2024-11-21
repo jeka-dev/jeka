@@ -1,10 +1,10 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 
-@JkInjectClasspath("${dependencyDescription}")
+@JkDep("${dependencyDescription}")
 class Build extends KBean {
 
     JkProject project = load(ProjectKBean.class).project;

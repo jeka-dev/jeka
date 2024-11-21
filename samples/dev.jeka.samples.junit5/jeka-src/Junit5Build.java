@@ -2,7 +2,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -31,7 +31,7 @@ import java.nio.file.Path;
  * {@link org.junit.platform.launcher.core.LauncherConfig} and
  * {@link org.junit.platform.launcher.LauncherDiscoveryRequest}.
  */
-@JkInjectClasspath("org.junit.platform:junit-platform-launcher:1.8.2")
+@JkDep("org.junit.platform:junit-platform-launcher:1.8.2")
 class Junit5Build extends KBean {
 
     final ProjectKBean projectKBean = load(ProjectKBean.class);

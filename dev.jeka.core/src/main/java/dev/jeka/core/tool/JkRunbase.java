@@ -124,7 +124,7 @@ public final class JkRunbase {
      * Returns the exported classpath used by the JkRunbase instance.
      * <p>
      * The exported classpath is the classpath minus 'private' dependencies. Private dependencies
-     * are declared using <code>@JkInjectClasspath</code> in a class that is in package with root
+     * are declared using <code>@JkDep</code> in a class that is in package with root
      * folder name stating with <code>_</code>.
      */
     public JkPathSequence getExportedClasspath() {
@@ -135,7 +135,7 @@ public final class JkRunbase {
      * Returns the exported dependencies of the JkRunbase instance.
      * <p>
      * The exported dependencies is the dependencies minus 'private' dependencies. Private dependencies
-     * are declared using <code>@JkInjectClasspath</code> in a class that is in package with root
+     * are declared using <code>@JkDep</code> in a class that is in package with root
      * folder name stating with <code>_</code>.
      */
     public JkDependencySet getExportedDependencies() {

@@ -8,7 +8,7 @@ Keeping all code in *jeka-src* simplifies both setup and testing due to shared c
 - `org.example` package: Rename this to fit your needs. It will contain the extension's production code.
 - `_dev.samples` package: This can store test code for your extension development.
 
-For adding dependencies, utilize the `@JkInjectClasspath` annotation. Any annotations declared under the `_dev` package will not be included in the transitive dependencies of your final extension.
+For adding dependencies, utilize the `@JkDep` annotation. Any annotations declared under the `_dev` package will not be included in the transitive dependencies of your final extension.
 
 ## Versioning Your Extension
 
@@ -26,7 +26,7 @@ Keeping all code in *jeka-src* simplifies both setup and testing due to shared c
 - `org.example` package: Rename this to fit your needs. It will contain the extension's production code.
 - `_dev.samples` package: This can store test code for your extension development.
 
-For adding dependencies, utilize the `@JkInjectClasspath` annotation. Any annotations declared under the `_dev` package will not be included in the transitive dependencies of your final extension.
+For adding dependencies, utilize the `@JkDep` annotation. Any annotations declared under the `_dev` package will not be included in the transitive dependencies of your final extension.
 
 ## Versioning Your Extension
 

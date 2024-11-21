@@ -2,15 +2,15 @@ package build;
 
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
-@JkInjectClasspath("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
-//@JkInjectClasspath("dev.jeka:springboot-plugin")
+@JkDep("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
+//@JkDep("dev.jeka:springboot-plugin")
 public class SpringbootSampleBuild extends KBean {
 
     public String aa;

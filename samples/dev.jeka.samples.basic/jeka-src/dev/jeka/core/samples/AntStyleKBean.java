@@ -17,7 +17,7 @@ import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
@@ -32,7 +32,7 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-@JkInjectClasspath("org.apache.httpcomponents:httpclient:4.5.6")
+@JkDep("org.apache.httpcomponents:httpclient:4.5.6")
 public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
 
     AntStyleKBean() {

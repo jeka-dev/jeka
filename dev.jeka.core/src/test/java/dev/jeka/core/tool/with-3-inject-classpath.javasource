@@ -5,7 +5,7 @@ import dev.jeka.core.java.testing.junit.JkUnit;
 /**
  * Blalalala.
  */
-@JkInjectClasspath("com.google:guava:18.0")
-@JkInjectClasspath("toto:titi:12")
-@JkInjectClasspath("foo:bar")
+@JkDep("com.google:guava:18.0")
+@JkDep("toto:titi:12")
+@JkDep("foo:bar")
 public class FullBuild extends Build {

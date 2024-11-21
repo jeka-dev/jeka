@@ -56,7 +56,7 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
-@JkInjectClasspath("dev.jeka:springboot-plugin")
+@JkDep("dev.jeka:springboot-plugin")
 class MyBuild extends KBean {
 
   JkProject project = JkProject.of();
