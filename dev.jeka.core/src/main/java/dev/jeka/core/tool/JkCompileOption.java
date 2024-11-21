@@ -29,13 +29,11 @@ import java.lang.annotation.*;
  *
  *
  * @author Jerome Angibaud
- * @deprecated Use @JkCompileOption instead
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-@Repeatable(JkInjectCompileOption.JkInjectCompileOptions.class)
-@Deprecated
-public @interface JkInjectCompileOption {
+@Repeatable(JkCompileOption.JkCompileOptions.class)
+public @interface JkCompileOption {
 
     /**
      * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0")
@@ -48,8 +46,8 @@ public @interface JkInjectCompileOption {
      * Repeatable container.
      */
     @Target(ElementType.TYPE)
-    @interface JkInjectCompileOptions {
-        JkInjectCompileOption[] value();
+    @interface JkCompileOptions {
+        JkCompileOption[] value();
     }
 
 }

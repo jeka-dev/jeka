@@ -91,7 +91,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkDep
+        // Handle JkInjectClasspath
         annotationParser = new AnnotationParser(line, JkDep.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -111,6 +111,13 @@ final class SourceParser {
 
         // Handle JkInjectCompileOption
         annotationParser = new AnnotationParser(line, JkInjectCompileOption.class);
+        if (annotationParser.isMatching()) {
+            String value = annotationParser.readUniqueStringValue();
+            info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));
+        }
+
+        // Handle JkInjectCompileOption
+        annotationParser = new AnnotationParser(line, JkCompileOption.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
             info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));

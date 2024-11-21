@@ -11,8 +11,8 @@ import dev.jeka.core.api.utils.jekaUtilsIterable;
  * Blallaaa
  */
 @JkDep("commons-lang:commons-lang:2.6")
-@JkInjectCompileOption("-opt1 -opt2 ")
-@JkInjectCompileOption("opt3")
+@JkCompileOption("-opt1 -opt2 ")
+@JkCompileOption("opt3")
 public class DepManagedBuild extends Build {
 
 	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
