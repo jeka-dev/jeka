@@ -199,9 +199,6 @@ class PicocliHelp {
             synopsis.add(header);
             List<String> descLines = Arrays.asList(beanDescription.synopsisDetail.split("\n"));
             synopsis.addAll(descLines);
-            if (!descLines.isEmpty()) {
-                synopsis.add("");
-            }
         }
         if (!beanDescription.beanFields.isEmpty()) {
             synopsis.add("Fields");

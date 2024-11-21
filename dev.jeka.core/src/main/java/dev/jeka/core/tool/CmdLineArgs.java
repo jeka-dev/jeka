@@ -187,6 +187,7 @@ class CmdLineArgs {
         if (!kbeanArg.endsWith(":")) {
             return "";
         }
-        return JkUtilsString.substringBeforeFirst(kbeanArg, ":");
+        String prefix =  JkUtilsString.substringBeforeFirst(kbeanArg, ":");
+        return prefix.isEmpty() ? "-default-" : prefix;
     }
 }

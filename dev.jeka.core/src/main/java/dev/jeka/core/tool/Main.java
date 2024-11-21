@@ -121,7 +121,9 @@ public class Main {
             String kbeanDoc = cmdArgs.kbeanDoc();
             if (kbeanDoc != null) {
                 JkRunbase.setKBeanResolution(kBeanResolution);
-                if (JkUtilsString.isBlank(kbeanDoc)) {
+                boolean isDefaultKBean = "-default-".equals(kbeanDoc) && kBeanResolution.defaultKbeanClassname != null;
+                String kbean = isDefaultKBean ? kBeanResolution.defaultKbeanClassname : kbeanDoc;
+                if (JkUtilsString.isBlank(kbean) ) {
                     PicocliHelp.printCmdHelp(
                                     engine.resolveClassPaths().runClasspath,
                                     kBeanResolution,
@@ -132,9 +134,13 @@ public class Main {
                 boolean found = PicocliHelp.printKBeanHelp(
                         engine.resolveClassPaths().runClasspath,
                         kBeanResolution.allKbeans,
-                        kbeanDoc,
+                        kbean,
                         System.out);
-                System.exit(found ? 0 : 1);
+                if (!found) {
+                    System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanDoc);
+                    System.exit(1);
+                }
+                System.exit(0);
             }
 
             // Validate KBean properties
