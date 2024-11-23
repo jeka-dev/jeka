@@ -9,21 +9,22 @@ theme:
     palette :
       # Palette toggle for light mode
       # Palette toggle for dark mode
-      - scheme: slate
-        toggle:
-          icon: material/brightness-4
-          name: Switch to light mode
-        primary: 'deep purple'
-        accent: 'purple'
-
-        favicon: images/knight-color-logo.svg
-
       - scheme: default
         toggle:
           icon: material/brightness-7
           name: Switch to dark mode
         primary: 'deep purple'
         accent: 'purple'
+        
+      - scheme: slate
+        toggle:
+          icon: material/brightness-4
+          name: Switch to light mode
+        primary: 'deep purple'
+        accent: 'purple'
+        favicon: images/knight-color-logo.svg
+
+      
 
 
     features:
