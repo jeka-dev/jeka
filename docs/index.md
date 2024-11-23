@@ -3,7 +3,7 @@
 JeKa is a modern build tool for Java, designed to simplify and streamline your development experience. It reshapes Java application building for a generation of developers seeking lightweight, accessible, yet powerful solutions.
 
 ### Next-Gen Java Build Tool
-Java is evolving to become more developer- and cloud-native-friendly. Developers no longer want to deal with heavy tools, 
+Java is evolving to become more developer-friendly and cloud-native ready. Developers no longer want to deal with heavy tools, 
 verbose XML configurations, or external DSLs. JeKa aligns with this vision by offering:
 
 - **Simplicity at its Core**: Configure with properties or pure Java—no XML, no YAML, no DSL.
