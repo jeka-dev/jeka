@@ -10,6 +10,8 @@ verbose XML configurations, or external DSLs. JeKa aligns with this vision by of
 - **No Setup Hassle**: Start building regular or cloud-native applications immediately, with minimal configuration and requirements.
 - **Gradual Complexity**: Handle advanced scenarios using intuitive mechanisms without unnecessary complexity.
 - **DevOps Bridge**: Implement complex pipeline logic with robust Java and share it across your teams.
+- **Super-lightweight**: JeKa consists of a single zero-dependency JAR under 2MB. Install and upgrade in a flash.
+
 
 ### Ready to explore?
 
