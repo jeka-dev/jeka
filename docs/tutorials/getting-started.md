@@ -318,20 +318,26 @@ In this example, we'll add the nodeJs plugin. The plugin doanload Nodejs version
 and then execute the specified command line.
 
 ```shell
-jeka -cp=dev.jeka:nodejs-plugin nodeJs: version="20.12.2" exec cmdLine="npx cowsay Hello"
+jeka -cp=dev.jeka:nodejs-plugin nodeJs: version="20.12.2" exec cmdLine="npx cowsay Hello JeKa"
 ```
 This should display:
 ```
 Directory not found /Users/jerome/temp-jeka-tests/client-js, use current dir as working dir.
 Task: start-program >npx cowsay Hello
-       _______
-      < Hello >
-       -------
+       ___________
+      < Hello JeKa>
+       -----------
               \   ^__^
                \  (oo)\_______
                   (__)\       )\/\
                       ||----w |
                       ||     ||
+      npm notice 
+      npm notice New minor version of npm available! 10.5.0 -> 10.9.1
+      npm notice Changelog: <https://github.com/npm/cli/releases/tag/v10.9.1>
+      npm notice Run `npm install -g npm@10.9.1` to update!
+      npm notice 
+
 ```
 
 You can have more info about *NodeJs* plugin by executing 
