@@ -314,7 +314,7 @@ or declare it using `@JkDep` annotation in any class from *jeka-src*.
 
 This is also possible to augment classpath dynamically from the command line, using the `-cp`option.
 
-In this example, we'll add the nodeJs plugin. The plugin doanload Nodejs version 2à.12.2 (if needed) 
+In this example, we'll add the nodeJs plugin. The plugin doanload Nodejs version 20.12.2 (if needed) 
 and then execute the specified command line.
 
 ```shell
