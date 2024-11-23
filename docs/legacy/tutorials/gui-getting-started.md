@@ -34,7 +34,7 @@ We get a workable Jeka project from which we can :
 
 ## Import 3rd Party libraries <a name="import"></a>
 
-We can also import 3rd-party libraries to use in our build classes by using the `@JkInjectClasspath`annotation.
+We can also import 3rd-party libraries to use in our build classes by using the `@JkDep`annotation.
 
 Libraries referenced with coordinates will come into classpath along with all their dependencies.
 
@@ -43,7 +43,7 @@ Libraries referenced with coordinates will come into classpath along with all th
 Do not forget to refresh *iml* explicitly when the Jeka classpath has been changed.
 
 !!! Tip
-    Use _Ctrl+space_ when editing `@JkInjectClasspath` to get dependency auto-completion.
+    Use _Ctrl+space_ when editing `@JkDep` to get dependency auto-completion.
 
     ![plot](images/third-party-suggest.png)
 

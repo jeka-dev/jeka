@@ -47,11 +47,11 @@ It's possible to transitively inject dependencies into classpaths by either anno
 
 #### Inject from Def Classes
 
-Annotate a _def class_ with `@JkInjectClasspath` mentioning either a module coordinate or a path on the local file system.
+Annotate a _def class_ with `@JkDep` mentioning either a module coordinate or a path on the local file system.
 
 ```Java
-@JkInjectClasspath("org.seleniumhq.selenium:selenium-remote-driver:4.0.0")
-@JkInjectClasspath("../libs/myutils.jar")
+@JkDep("org.seleniumhq.selenium:selenium-remote-driver:4.0.0")
+@JkDep("../libs/myutils.jar")
 class MyBuild {
   ...
 }
@@ -63,7 +63,7 @@ class MyBuild {
     `jeka intellij#iml` or `jeka eclipse#files`
 
 !!! warning
-    Dependencies imported via `@JkInjectClasspath` are imported for all def classes and not only for the annotated class.
+    Dependencies imported via `@JkDep` are imported for all def classes and not only for the annotated class.
 
 
 #### Inject from Command Line

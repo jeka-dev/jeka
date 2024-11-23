@@ -96,9 +96,9 @@ Your script can depends on libs located in a Maven repository, or on folder/jar 
 
 Annotate `Script` class with  :
 ```java
-import dev.jeka.core.tool.JkInjectClasspath;
+import dev.jeka.core.tool.JkDep;
 
-@JkInjectClasspath("com.github.lalyos:jfiglet:0.0.9")
+@JkDep("com.github.lalyos:jfiglet:0.0.9")
 class Script extends KBean {
 ```
 ... and execute `jeka intellij: iml` to use the imported library in IDE.
@@ -121,20 +121,20 @@ This library has no transitive dependency, but it could have. Try to import any 
 dependencies and execute `jeka --inspect`. 
 This displays runtime information about JeKa run, including the resulting classpath.
 
-You can add, as many `@JkInjectClasspath` annotations you need, on the class.
+You can add, as many `@JkDep` annotations you need, on the class.
 
 !!! note
     JeKa also accept JBang notation for declaring dependencies.
-    You can use `//DEPS com.github.lalyos:jfiglet:0.0.9"` in place of `@JkInjectClasspath("com.github.lalyos:jfiglet:0.0.9")`
+    You can use `//DEPS com.github.lalyos:jfiglet:0.0.9"` in place of `@JkDep("com.github.lalyos:jfiglet:0.0.9")`
 
 ### Use BOM dependencies
 
 In some cases, we may need to use a BOM dependency which provides versioning information on other dependencies we might use.
 
 ```java
-@JkInjectClasspath("com.google.cloud:libraries-bom::pom:5.0.0")
-@JkInjectClasspath("com.google.cloud:google-cloud-storage")
-@JkInjectClasspath("com.google.cloud:oogle-cloud-bigquery")
+@JkDep("com.google.cloud:libraries-bom::pom:5.0.0")
+@JkDep("com.google.cloud:google-cloud-storage")
+@JkDep("com.google.cloud:oogle-cloud-bigquery")
 ```
 
 ### Dependencies on file system
@@ -142,11 +142,11 @@ In some cases, we may need to use a BOM dependency which provides versioning inf
 There is 2 way of adding local file system dependencies :
 
   - simply add a jar in *jeka-boot* dir (create this dir if not present)
-  - annotate class with `@JkInjectClasspath()`
+  - annotate class with `@JkDep()`
 
 ```java
-@JkInjectClasspath("../other-project/mylib.jar")
-@JkInjectClasspath("../other-project/my-classes")
+@JkDep("../other-project/mylib.jar")
+@JkDep("../other-project/my-classes")
 ```
 
 ### Define dependencies with properties
@@ -303,7 +303,7 @@ jeka.inject.classpath=\
   dev.jeka:openapi-plugin:0.11.0.1
 ```
 
-or declare it using `@JkInjectClasspath` annotation in any class from *jeka-src*.
+or declare it using `@JkDep` annotation in any class from *jeka-src*.
 
 !!! Note
     When omitting the version for a dependency of group 'dev.jeka', as in 'dev.jeka:springboot-plugin', 

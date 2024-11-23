@@ -1,12 +1,21 @@
 # Installation
 
-!!! note
-    You don't need to install JeKa to build projects that have *JeKa* shell scripts in their Git repository.
-    
-    Nevertheless, this is convenient to have it installed for invoking it easily from everywhere.
+You don’t need to install JeKa to run scripts locally written by others, as it is usually included with the scripts.
 
+The CLI installation allows you to run remote scripts and create JeKa projects from the command line.
 
-## MacOS and Linux
+## IntelliJ Plugin
+
+For a pure IDE experience, you don't need to install CLI, just install the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka).
+
+## CLI for Windows
+
+Execute in PowerShell :
+```shell
+iex "& { $(iwr -useb https://jeka.dev/install.ps1) } install check"
+```
+
+## CLI for MacOS and Linux
 
 Execute :
 ```shell
@@ -14,18 +23,12 @@ curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
 
 !!! note
-    For installing and running JeKa, *bash*, *curl*, and *unzip* are required. This is generally the case
-    for macOS and most Linux distributions. If any of these tools are missing, you can install them on Ubuntu
-    by executing `apt-get update && apt-get install -y curl unzip`.
+    JeKa requires *bash*, *curl*, and *unzip*, usually available on macOS and Linux.
 
-## Windows
+    On Ubuntu, install missing tools with: `apt-get update && apt-get install -y curl unzip`.
 
-Execute in PowerShell :
-```shell
-iex "& { $(iwr -useb https://jeka.dev/install.ps1) } install check"
-```
 
-## Manual installation
+## Manual CLI installation
 
 The manual installation is straightforward and may help when script installation fails.
 
@@ -50,17 +53,25 @@ JeKa can be executed using the Docker image [jekadev/jeka](https://hub.docker.co
 Linux host, which is mandatory to produce Java native image for Linux and containers.
 
 For this, execute : 
+
 - Linux/Macos        : `docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jekadev/jeka [JEKA ARGUMENTS]`
 - Windows Powershell : `docker run -v ${HOME}\.jeka\cache4c:/cache -v ${PWD}:/workdir jekadev/jeka [JEKA ARGUMENTS]`
 - Windows cmd        : `docker run -v %USERPROFILE%\.jeka\cache4c:/cache -v %cd%:/workdir jekadev/jeka [JEKA ARGUMENTS]`
 
-Notes:
-- `-v $HOME/.jeka/cache4c:/cache` tells jeka to use a specific cache when running with container, as JDK or other tools 
-cached by Jeka may differ from the ones used by the host system.
+!!! notes
 
-- `-v .:/workdir jeka --version` lets Jeka operate in the current directory of the host machine
+    `-v $HOME/.jeka/cache4c:/cache` 
+    
+    Tells jeka to use a specific cache when running with container, as JDK or other tools 
+    cached by Jeka may differ from the ones used by the host system.
+    
+    `-v .:/workdir jeka --version` 
+    
+    Lets Jeka operate in the current directory of the host machine
 
-- `[JEKA ARGUMENTS]` stands for regular jeka arguments you would pass to jeka command line as `project: back' or '--help'.
+    `[JEKA ARGUMENTS]` 
+    
+    Stands for regular jeka arguments you would pass to jeka command line as `project: back' or '--help'.
 
 
 

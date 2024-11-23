@@ -4,7 +4,8 @@ theme:
     logo: images/logo-plain-white.svg
     favicon: images/logo-plain-gradient.svg
     font:
-      text: Roboto
+      text: 'Inter'
+      code: 'Fire Code'
     palette :
       # Palette toggle for light mode
       # Palette toggle for dark mode
@@ -12,15 +13,17 @@ theme:
         toggle:
           icon: material/brightness-4
           name: Switch to light mode
-        primary: purple
+        primary: 'deep purple'
+        accent: 'purple'
+
         favicon: images/knight-color-logo.svg
 
       - scheme: default
         toggle:
           icon: material/brightness-7
           name: Switch to dark mode
-        primary: purple
-        accent: indigo
+        primary: 'deep purple'
+        accent: 'purple'
 
 
     features:
@@ -75,3 +78,6 @@ markdown_extensions:
     - pymdownx.superfences
     - pymdownx.highlight:
         anchor_linenums: true
+        
+extra_css:
+  - stylesheets/extra.css

@@ -77,7 +77,7 @@ Jeka can use any JSR199 Java compiler to compile your Java code. Just set the co
 ```java
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
-@JkInjectClasspath("org.eclipse.jdt.core.compiler:ecj:4.6.1")
+@JkDep("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class Build extends JkBean {
     
     ...
