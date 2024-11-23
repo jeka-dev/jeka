@@ -1,17 +1,25 @@
 # Frequented Asked Questions
 
-## General
+## Network - Security
 
-### I'm behind a firewall that prevent to access to Maven Central, what can I do ?
+### My organization prevents access to Maven Central. What can I do?
 
-If you cannot access to Maven Central repository for whatever reason, you should use 
-a Maven repository that is accessible from your organisation. 
+You can [configure Maven repositories](reference/properties/#repositories) in a central place by editing the *[USER HOME]/.jeka/global.properties* file.
 
-This [section](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) explains how you can setup the upload repository globally or for a given project.
+To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a URL file. This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
 
-Alternatively, you can define the JEKA_REPOS_DOWNLOAD environment variable.
+!!! Note
+    In the future, JeKa distribution fetching will rely on the same mechanism as regular Maven dependencies, avoiding the need to specify the `jeka.distrib.location`. Create a GitHub issue if you need this feature.
 
-See [here](https://jeka-dev.github.io/jeka/reference-guide/execution-engine-properties/#repositories) for more details.
+### My organization prevents downloading JDKs. What can I do?
+
+YYou can specify a local location for each JDK version you are using as follows:
+```properties
+jeka.jdk.11=/my/path/to/jdk11/home
+jeka.jdk.17=/my/path/to/jdk17/home
+...
+```
+This information can be stored in the project's jeka.properties file, in [USER HOME]/.jeka/global.properties, or passed as environment variables.
 
 ### I'm behind a proxy, how should I configure Jeka ?
 
@@ -22,29 +30,34 @@ JeKa just leverages the standard Java mechanism to handle proxy. For example, Yo
 
 See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be-used-by-the-jvm) for more details on arguments.
 
-### How can I use Maven/Gradle in conjunction with JeKa ?
+## Legacy Tools
 
-Nothing prevents to use JeKa in conjunction of Maven or Gradle in the same project,
-except that in IDE, synchronisation may interfere between the 2 systems.
+### How can I use Maven/Gradle in conjunction with JeKa?
 
-To avoid that, JeKa proposes a simple solution. In your existing Maven/Gradle project do :
+Nothing prevents using JeKa alongside Maven or Gradle in the same project, except that in an IDE, synchronization may interfere between the two systems.
 
-1. Execute : `jeka base: scaffold`. This generates the folder/file structure for JeKa
-2. Execute `jeka intellij: jekaSrcAsModule` in root dir
+To avoid this, the `jeka-src` folder should exist in its own IntelliJ module. JeKa provides a simple way to accomplish this.
 
-This will add a property `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` in your *jeka.properties* file.
+#### Using IntelliJ Plugin:
+
+Right-click on the `jeka-src` folder, and a menu entry will allow you to turn the `jeka-src` directory into a module.
+
+#### Using the Command Line:
+
+In your existing Maven/Gradle project, do the following:
+
+1. Execute: `jeka base:scaffold`. This generates the folder/file structure for JeKa.
+2. Execute: `jeka intellij:jekaSrcAsModule` in the root directory.
+
+This will add the property `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` to your *jeka.properties* file.
 
 !!! note
-    'jeka-src' should now live in its own Intellij module. If your IDE does not reflect 
-    this state, just close and re-open the project.
+The `jeka-src` folder should now exist in its own IntelliJ module. If your IDE does not reflect this change, close and reopen the project.
 
-Now *jeka-src* live in its own IntelliJ module.
-Simply execute `jeka intellij: iml`to sync JeKa without impacting Maven/Gradle.
-
+Now, the `jeka-src` folder is managed in its own IntelliJ module. Simply execute `jeka intellij:iml` to sync JeKa without affecting Maven/Gradle.
 
 !!! warning
-    Do not remove the `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from *jeka.property* file, otherwise you will
-    still face sync issues.
+Do not remove the `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from the *jeka.properties* file, or you may face synchronization issues.
 
 ### How can I migrate my project from Maven ?
 
@@ -53,6 +66,8 @@ _JeKa_ helps translating all dependencies declared in a _Maven_ project into the
 Assuming _Maven_ is already installed and there is a _pom.xml_ file at the root of the project, 
 execute `jeka maven: showPomDeps` to display _Java_ code/configuration to 
 copy-paste in a build class or *dependencies.txt* file.
+
+## Performance - Caching
 
 ### How to cache downloaded dependencies in Github-actions ?
 
@@ -80,7 +95,7 @@ For this, we can use [cache action](https://github.com/actions/cache) as follow:
         key: ${{ runner.os }}
 ```
 
-## Compilation
+## Misc
 
 ### How can I use Eclipse compiler in Jeka ?
 
@@ -90,21 +105,21 @@ Jeka can use any JSR199 Java compiler to compile your Java code. Just set the co
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkDep("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkBean {
+public class Build extends KBean {
     
     ...
     project.compilerToolChain.setCompileTool(new EclipseCompiler());
 }
 ```
 
-### How can I sync Eclipse/Intellij without using ProjectKBean ?
+### How can I sync Eclipse/IntelliJ without using `ProjectKBean`?
 
-`ProjectKBean` KBean provides IDE sync out-of-the-box but you may prefer to not use it.
+`ProjectKBean` and `BaseKBean` provide IDE synchronization out-of-the-box, but you may prefer not to use them.
 
-Just let your KBean implements `JkJavaIdeSupport` and implement the unique method that is 
-proving info necessary to generate IDE metadata file.
+If you use a different structure to build your project, simply let your `KBean` implement `JkJavaIdeSupport` and implement the required method to provide the information necessary to generate IDE metadata files.
 
-Then, for sync, just execute `jeka intellij: iml` as usual.
+For synchronization, just execute `jeka intellij:iml` as usual.
+
 
 
 

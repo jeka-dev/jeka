@@ -1,20 +1,27 @@
-# Welcome to JeKa! 
+# Welcome to JeKa
 
-## Jeka 0.11 is coming
+JeKa is a modern build tool for Java, designed to simplify and streamline your development experience. 
+In a world where developers seek lightweight, accessible and powerfull solutions, JeKa reimagines what building Java applications can be.
 
-Jeka 0.11 introduces significant changes and new features:
+### Next-Gen Java Build Tool
+Java is evolving to become more developer- and cloud-native-friendly. Developers no longer want to deal with heavy tools, 
+verbose XML configurations, or external DSLs. JeKa aligns with this vision by offering:
 
-* The API has undergone substantial changes for increased consistency.
-* Major improvements have been made to the command-line interface.
-* Log output formatting has been greatly enhanced.
-* The project folder structures have been refined.
-* JDK management has been automated, eliminating the need for users to install and switch between different Java versions.
-* A new feature allows for applications to be run directly from sources hosted in remote Git directories.
+- **Simplicity at its Core**: Configure with properties or pure Java—no XML, no YAML, no DSL.
+- **No Setup Hassle**: Start building regular or cloud-native applications immediately, with minimal configuration and requirements.
+- **Gradual Complexity**: Handle advanced scenarios using intuitive mechanisms without unnecessary complexity.
+- **DevOps Bridge**: Implement complex pipeline logic with robust Java and share it across your teams.
 
-## JeKa 0.10 is still there
+### Ready to explore?
 
-JeKa 0.10 is of course still usable and your builds will be protected thanks to the wrapper mechanism.
+The easiest way to get started is by using the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka). 
+You don't need to install *JeKa* for that.
 
-The documentation for JeKa 0.10 is available [here](legacy/reference-guide/execution-engine-files/)
+1. Start a [new project](images/new-project-snapshot.png) and play with the scaffolded example.  
+You can have a brief look at the [tutorial](tutorials/getting-started.md) to get an idea of what you can do.
 
-To upgrade projects to 0.11, follow [Migration Guide](migration-guide.md)
+2. You can create projects in the IDE using *Project - Java App/Lib* or *Project - Springboot* templates. They scaffold basic projects, providing code and build instructions in `README.md` files.
+
+3. Explore and experiment with  [examples](examples.md).
+
+Have fun !

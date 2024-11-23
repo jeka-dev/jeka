@@ -47,8 +47,8 @@ nav:
     - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md
-    - Migration Guide (0.10 -> 0.11): migration-guide.md
     - Legacy (version  0.10.x) :
+      - Migration Guide (0.10 -> 0.11): migration-guide.md
       - Reference Guide:
           - Execution Engine:
             - File Structure: legacy/reference-guide/execution-engine-files.md

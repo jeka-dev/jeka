@@ -627,7 +627,7 @@ compute_BASE_DIR() {
 
 #######################################
 # Computes the location of JeKa distribution directory according the JeKa version
-# used for the current BASE DIR. This may implies to dowload the distribution.
+# used for the current BASE DIR. This may implies to download the distribution.
 # Global Vars:
 #   JEKA_DIST_DIR (write)
 # Arguments:
