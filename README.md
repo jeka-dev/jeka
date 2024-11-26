@@ -27,7 +27,7 @@ JeKa is a modern Java build tool designed for simplicity, combining ease of use 
 - **Use Java for scripting:** Write scripts, DevOps pipelines or applications in Java, runnable directly from source code.
 - **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
-- **Smooth learning curve for newcomers:** Learn Java effortlessly, without complex XML or intimidating tools.
+- **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating tools.
 
 ## Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
