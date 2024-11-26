@@ -27,8 +27,8 @@ It combines accessibility for newcomers with the ability to handle complex scena
 ## Use Cases
 - **Use Java for scripting:** Write DevOps pipelines or applications in Java, runnable directly from source code.
 - **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
-- **Application delivery:** Push your code to GitHub, and users can instantly run it without setup.
-- **Welcome Java newcomers:** Avoid complex XML or learning DSLs for your first build.
+- **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
+- **Smooth learning curve for newcomers:** Learn Java effortlessly, without complex XML or intimidating tools.
 
 ## Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
