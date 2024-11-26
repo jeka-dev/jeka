@@ -45,7 +45,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 - **Example:** `jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p Hello JeKa`
 
 **Help**
-- Display help on console:  `jeka --help`
+- Display help on console: `jeka --help`
 - Display docs on KBeans: `jeka --doc`
 
 **Configure using properties**
