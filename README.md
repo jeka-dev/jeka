@@ -76,7 +76,7 @@ class Build extends KBean {
   ...
 ```
 
-Visit the [Documentation](https://jeka-dev.github.io/jeka/), and explore the [examples](https://jeka-dev.github.io/jeka/examples/).
+Visit the [documentation](https://jeka-dev.github.io/jeka/), and explore the [examples](https://jeka-dev.github.io/jeka/examples/).
 
 
 ## External Plugins
