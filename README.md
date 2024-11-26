@@ -24,7 +24,7 @@ JeKa is a modern Java build tool designed for simplicity, combining ease of use 
 - **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
 
 ## Use Cases
-- **Use Java for scripting:** Write DevOps pipelines or applications in Java, runnable directly from source code.
+- **Use Java for scripting:** Write scripts, DevOps pipelines or applications in Java, runnable directly from source code.
 - **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
 - **Smooth learning curve for newcomers:** Learn Java effortlessly, without complex XML or intimidating tools.
