@@ -11,8 +11,7 @@
 
 ## Description
 
-JeKa is a modern Java build tool focused on simplicity.  
-It combines accessibility for newcomers with the ability to handle complex scenarios gracefully.
+JeKa is a modern Java build tool designed for simplicity, combining ease of use with robust handling of complex scenarios.
 
 ## Features
 - **Zero-Config Builds:** Build Java projects with no setup required.
