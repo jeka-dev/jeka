@@ -5,152 +5,122 @@
 
 <img src="./docs/images/logo-plain-gradient.svg" width="100" align="right" hspace="15"  />
 
-> [!IMPORTANT]
-> JeKa 0.11.0 has been released!!!
-> 
-> This release brings major and drastic changes compared to previous JeKa versions.
-> 
-> The content of this page reflects the new version and does not apply to 0.10.x. 
-> 
-> The existing IDE plugin for IntelliJ still works with Jeka 0.10.x but is no longer compatible with the new version. 
-> A new plugin for Jeka 0.11.x is under development.
-> 
-> The official documentation provides information for both versions and a migration guide.
+# JeKa
 
-## Contribute 
+**The Next-Gen Build Tool for Java & Co**
 
-Are you a developer, technical writer, or user interested in making an impact?
-We invite you to join us in contributing code, documenting knowledge, or providing valuable feedback.
-Your participation is crucial in creating something great.
-At Jeka, every contribution counts, and every voice matters.
-Collaborate with like-minded individuals and help shape the future of our community.
+## Description
 
-Let’s build, learn, and grow together. Join us and make a difference.
+JeKa is a modern Java build tool focused on simplicity.  
+It combines accessibility for newcomers with the ability to handle complex scenarios gracefully.
 
-See [contribution page](CONTRIBUTING.md) for starting.
+## Features
+- **Zero-Config Builds:** Build Java projects with no setup required.
+- **Java-Based Configuration:** Customize builds with simple properties or plain Java code.
+- **Full Portability:** Automatically download specific versions of the JDK, JeKa, or third-party tools if missing.
+- **Cloud-Native Ready:** Effortless native compilation and Docker image creation.
+- **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code.
+- **Instant App Deployment:** Push application code to Git, and it's ready to use—no pipeline required.
+- **Simple Extensions:** Easily integrate third-party tools or handle complex scenarios with minimal effort.
+- **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
+
+## Use Cases
+- **Use Java for scripting:** Write DevOps pipelines or applications in Java, runnable directly from source code.
+- **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
+- **Application delivery:** Push your code to GitHub, and users can instantly run it without setup.
+- **Welcome Java newcomers:** Avoid complex XML or learning DSLs for your first build.
+
+## Installation
+Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
+
+## Usage (Examples)
+
+**Execute build methods**
+- **Compile, test and create JAR**: `jeka project: pack`
+- **Compile to native executable**: `jeka native: compile`
+- **Create a JVM-based Docker image**: `jeka docker: build`
+- **Create a native-based Docker image**: `jeka docker: buildNative`
+
+**Execute Java applications**
+- **Run a Java application directly from its Git repository**: `jeka -r <git url> -p [program args...]`
+- **Example:** `jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p Hello JeKa`
+
+**Help**
+- Display help on console:  `jeka --help`
+- Display docs on KBeans: `jeka --doc`
+
+**Configure using properties**
+```properties
+jeka.inject.classpath=dev.jeka:jacoco-plugin dev.jeka:sonarqube-plugin
+
+@project.moduleId=my-org:my-lib
+@project.gitVersioning.enable=true
+@project.pack.jarType=SHADE
+
+@jacoco.jacocoVersion=0.8.12
+```
+
+**Configure using Java code**
+
+```java
+@JkDep("commons-net:commons-net:3.11.1")
+class Build extends KBean {
+
+  final JkProject project = load(ProjectKBean.class).project;
+
+  @JkDoc("Deploy Spring-Boot application on remote server")
+  public void deploy() {
+    Path jar = project.artifactLocator.getMainArtifactPath();
+    this.sendThroughFtp(jar);
+    this.sendRestartCommand();
+  }
+  ...
+```
+
+Visit the [Documentation](https://jeka-dev.github.io/jeka/), and explore the [examples](https://jeka-dev.github.io/jeka/examples/).
 
 
-##  What is JeKa ?
+## External Plugins
 
-*Read [5 raisons why JeKa](https://github.com/djeang/djeang.github.io/blob/master/articles/jeka/listicle-why-i-made-it.md).*
+External plugins must be explicitly imported and are hosted as JAR files on Maven Central.
 
-**JeKa** is a Java build tool for building or executing Java applications and scripts, 
-directly from source code.
+The following plugins are part of JeKa’s monorepo and are released together, so their version does not need to be specified when importing:
+- [Spring Boot Plugin](plugins/dev.jeka.plugins.springboot)
+- [SonarQube Plugin](plugins/dev.jeka.plugins.sonarqube)
+- [JaCoCo Plugin](plugins/dev.jeka.plugins.jacoco)
+- [Node.js Plugin](plugins/dev.jeka.plugins.nodejs)
+- [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
+- [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
 
-Its key features include:
+The following plugin is maintained in a separate repository:
+- [OpenAPI Plugin](https://github.com/jeka-dev/openapi-plugin)
 
--  **Portable Builds:** JeKa automatically downloads the required JDKs and tools, this includes *JDKs, Graalvm, Maven deps, NodeJs, 
-   OpenAPI, JeKa itself and more*. You won't need to setup your machine or a container images prior building. 
+## Community
 
--  **Direct App Execution:** JeKa  run applications directly from their Git repository, providing a means to distribute Java applications as source.
+- **Contribute:** [Contribution Guide](https://github.com/jeka-dev/jeka/blob/master/CONTRIBUTING.md)
+- **Issues:** [Report or track issues](https://github.com/jeka-dev/jeka/issues)
+- **Discussions:** [Join discussions](https://github.com/orgs/jeka-dev/discussions)
+- **Twitter:** [Follow us](https://github.com/jeka-dev/jeka)
+- **Email Support:** <a href="mailto:support@jeka.dev">support@jeka.dev</a>
 
--  **Customizable and Extendable:** JeKa can be configured with a concise **property file** for generic cases, or by **Java code** for specific needs.
-   Also, JeKa provides a simple plugin mechanism that allows for easy extension.
+This project is supported by the OW2 Consortium.
 
--  **Kotlin Support:** Scripts or applications can also be implemented using the *Kotlin* language.
-
-## Use-cases
-
-- **Use Java for scripting** 
-
-  JeKa makes it ridiculously easy to write and execute scripts using the Java language.
-  Write your automated tasks directly in Java, using third-party dependencies or not, and execute them from anywhere, without any setup.
-
-- **Build projects - Create delivery pipelines** 
-  
-  Build projects and seamlessly combine scripts to create comprehensive CI/CD pipelines that can run anywhere, 
-  from IDE debugger to cloud CI/CD environments. 
-  
-  JeKa can also complement other build tools such as *Maven* or *Gradle* to fulfill their missing features.
-
-
-- **Deliver applications as sources** 
-
-  JeKa can execute entire Java applications of any kind and size directly from their Git repository. 
-  
-  Simply commit or tag repository to publish application.
-
- - **Centralize build logic**
-
-   Define project build and CI/CD logic in one place, and reuse across all your organization.
-
-- **Make Java fun for newcomers**
-
-  Say goodbye to learning legacy build tools and grappling with JDKs when starting with Java.
-
-  Write Java code and execute it directly from anywhere, with minimal or zero setup.
-
-## Examples
-
-See [here](https://jeka-dev.github.io/jeka/examples/)
-
-## Getting Started
-
-Visit following pages according your expectation :
-
-* [Reference Guide](https://jeka-dev.github.io/jeka/)
-* [Working examples](https://github.com/jeka-dev/working-examples)
-
-## KBeans
-
-KBeans are JeKa components that expose functionnalities to the command line. They can also be conveniently 
-activated and configured via properties, or via other KBeans.
-
-Plugins generally contain one KBean, but they can contain zero or many.
-
-### Bundled KBeans
-
-JeKa is bundled with KBeans covering : IDE integration (IntelliJ Eclipse), Java/Kotlin Project building, Maven publication, Git integration, Docker and more. 
-
-You can get a description of the functionalities provided by the KBeans by executing `jeka --doc` 
-
-Additionnaly JeKa offers high and low level api for dealing with 
-dependency management, compilation, testing, Git, GPG signing, Scaffolding, Maven publication, Docker image maker, ...
-
-### External Plugins
-
-External plugins require to be explicitly imported. They are hosted as jar file in Maven Central.
-
-The following plugins are hosted in same monorepo then JeKa, and so are released in conjunction 
-which means that we don't need to specify their version when importing.
-
-* [Springboot Plugin](plugins/dev.jeka.plugins.springboot)
-* [Sonarqube Plugin](plugins/dev.jeka.plugins.sonarqube)
-* [Jacoco Plugin](plugins/dev.jeka.plugins.jacoco)
-* [NodeJs Plugin](plugins/dev.jeka.plugins.nodejs)
-* [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
-* [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
-
-The following plugins are maintained in their own repos.
-
-* [OpenApi Plugin](https://github.com/jeka-dev/openapi-plugin)
+<a class="btn btn-link btn-neutral" href="https://projects.ow2.org/view/jeka">
+  <img src="https://jeka.dev/images/ow2.svg" alt="OW2 Logo" height="60" width="60" />
+</a>
 
 ## Versioning
 
 JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
-## Community
+## Roadmap
 
-<a class="btn btn-link btn-neutral" href="https://projects.ow2.org/view/jeka">
-              <img src="https://jeka.dev/images/ow2.svg" alt="Image" height="60" width="60"></a>
-              
-This project is supported by OW2 consortium.
+- Enhance existing functionality based on user feedback.
+- Develop a dedicated plugin for Kubernetes.
+- Provide examples showcasing JeKa's use for provisioning cloud platforms via their SDKs.
 
-Issues: https://github.com/jeka-dev/jeka/issues
+<p align="center">
+    <img src="docs/images/mascot.png" width='420' height='420' />
+</p>
 
-Discussions: https://github.com/orgs/jeka-dev/discussions
-
-Twitter: https://github.com/jeka-dev/jeka
-
-Email support : support@jeka.dev
-
-
-<img alt="mascot" src="docs/images/mascot.png" align="center" width="50%" height="50%" />
-
-
-
-
-
-
-
-
+ 
