@@ -13,19 +13,23 @@
 
 JeKa is a modern Java build tool designed for simplicity, combining ease of use with robust handling of complex scenarios.
 
+It targets a generation of Java developers who prefer simple, Java-centric tools over complex XML-based 
+or external DSL-based solutions for building their applications.
+
 ## Features
-- **Zero-Config Builds:** Build Java projects with no setup required.
-- **Java-Based Configuration:** Customize builds with simple properties or plain Java code - No XML, No DSL.
-- **Full Portability:** Automatically download specific versions of the JDK, JeKa, or third-party tools if missing.
-- **Cloud-Native Ready:** Effortless native compilation and Docker image creation.
-- **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code.
-- **Instant App Deployment:** Push application code to Git, and it's ready to use—no pipeline required.
+- **Zero-Config Builds:** Build Java projects with zero setup — no configuration required.
+- **Java-Based Configuration:** Customize builds with simple properties or plain Java code — no XML, No DSL.
+- **Full Portability:** Automatically download specific versions of the JDK, JeKa, or third-party tools if missing — no JDK required.
+- **Cloud-Native Ready:** Effortless native compilation and Docker image creation — no setup or configuration needed.
+- **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code — no compilation and dep management needed.
+- **Instant App Deployment:** Push application code to Git, and it's ready to run — no pipeline required.
 - **Simple Extensions:** Easily integrate third-party tools or handle complex scenarios with minimal effort.
+- **Super Lightweight:** Comes as a zero-dependency JAR of less than 2MB.
 - **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring-Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
 
 ## Use Cases
-- **Use Java for scripting:** Write scripts, DevOps pipelines or applications in Java, runnable directly from source code.
 - **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
+- **Use Java for scripting:** Write scripts, DevOps pipelines or applications in Java, runnable directly from source code.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
 - **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating tools.
 
