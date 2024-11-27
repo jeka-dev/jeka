@@ -15,13 +15,13 @@ JeKa is a modern Java build tool designed for simplicity, combining ease of use 
 
 ## Features
 - **Zero-Config Builds:** Build Java projects with no setup required.
-- **Java-Based Configuration:** Customize builds with simple properties or plain Java code.
+- **Java-Based Configuration:** Customize builds with simple properties or plain Java code - No XML, No DSL.
 - **Full Portability:** Automatically download specific versions of the JDK, JeKa, or third-party tools if missing.
 - **Cloud-Native Ready:** Effortless native compilation and Docker image creation.
 - **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code.
 - **Instant App Deployment:** Push application code to Git, and it's ready to use—no pipeline required.
 - **Simple Extensions:** Easily integrate third-party tools or handle complex scenarios with minimal effort.
-- **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
+- **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring-Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
 
 ## Use Cases
 - **Use Java for scripting:** Write scripts, DevOps pipelines or applications in Java, runnable directly from source code.
