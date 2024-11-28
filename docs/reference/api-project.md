@@ -151,8 +151,6 @@ The dependencies will be the ones declared in the *== COMPILE ==* or *== RUNTIME
 !!! tip
     If you are using Jeka plugin for Intellij, hit `ctrl+<space>` for displaying suggestions.
 
-## Resolve Deoendendecies Programatically
-
 ## Resolve Dependencies Programmatically
 
 To resolve dependencies that make up the runtime classpath, you can use either of the following methods:
