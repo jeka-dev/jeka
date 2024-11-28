@@ -133,7 +133,7 @@ Use `:` to explicitly reference the default KBean and avoid ambiguity.
 Example: `jeka : --doc` shows the default KBean's documentation, while `jeka --doc` displays overall documentation.
 
 
-## Let KBeans Cooperate
+## KBean Collaboration
 
 _KBeans_ can interact with one another by declaring dependencies using the `KBean#load(MyBean.class)` method, as shown in the [simple example](#simple-example).
 
@@ -144,7 +144,7 @@ When a _KBean_ depends on another, it is best practice to declare the dependency
 - It is visible in IDE tools, making the relationship clear.
 
 
-## KBeans in Multi-Project Setups
+## Multi-Project setup
 
 In multi-project scenarios, it is common for a _KBean_ in one project to access a _KBean_ instance from another project. This can be achieved in a statically typed manner:
 
@@ -164,7 +164,8 @@ There are a bunch of _KBeans_ bundled within _Jeka_. Those _KBeans_ are always p
 
 ### project
 
-`ProjectKBean` acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
+[`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
+acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
 This _KBean_ provides core methods for fundamental build tasks, including **compiling**, **testing**, and **packaging**.
 
 To work effectively with this KBean, it's helpful to have an [overview](api-project.md) of the capabilities offered by the `JkProject` object.
@@ -206,16 +207,118 @@ A KBean that reads te underlying `JkProject` to extract information.
 - [Protobuf KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java):
   A KBean that adds a Proto-buffer code generation to the underlying `JkProject`.
 
+### base
+
+[`BaseKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/base/BaseKBean.java), similar to `ProjectKBean`, facilitates building JVM-based code hosted entirely in the *jeka-src* folder with a simpler classpath organization.
+
+- **Single Classpath**: By default, there is a single classpath. However, if a `_dev` package exists in the code structure, its contents are excluded when creating JARs, native executables, or Docker images. Typically, build and test classes are placed in `_dev` for application builds.
+- **Dependency Declaration**: Dependencies are declared by annotating any class with the `@JkDep` annotation. Dependencies within the `_dev` package are excluded from production artifacts.
+
+**Key Features**
+
+- Resolves dependencies, compiles code, and runs tests.
+- Creates various types of JAR files out-of-the-box: regular, fat, shaded, source, and Javadoc JARs.
+- Infers project versions from Git metadata.
+- Executes packaged JARs.
+- Displays dependency trees and project setups.
+- Scaffolds skeletons for new projects.
+
+**Example**
+
+- [Base Application](https://github.com/jeka-dev/demo-base-application): The `BaseKBean` is set as the default KBean in `jeka.properties`. The accompanying `README.md` file details the available `base:` methods that can be invoked.
+
+### native
+
+[`NativeKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/nativ/NativeKBean.java) enables native compilation for *project* and *base* KBeans.
+
+**Key Features**
+
+- Compiles classes into native executables.
+- Automatically applies AOT metadata.
+- Simplifies resource inclusion.
+- Handles static linkage with minimal configuration.
+
+**Example of Configuration in jeka.properties:**
+```properties
+@native.includeAllResources=true
+@native.staticLink=MUSL
+@native.metadataRepoVersion=0.10.3
+```
+
+Invocation: `jeka native: compile`
+
+### docker
+
+[`DockerKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/docker/DockerKBean.java) allows the creation of Docker images for both *project* and *base* KBeans. It supports generating JVM-based images as well as minimalist Docker images containing only the native executable.
+
+**Key Features:**
+
+- Efficiently create layered and secure Docker images for JVM applications
+- Generate secure, optimized Docker images for native applications
+- Infer image name/version from the project
+- Optionally switch to a non-root user (configurable)
+- Customize the generated image via Java API
+
+**Example Invocation:**
+- `jeka docker:buildNative`: Builds a native Docker image of your application.
+
+**Example Configuration:**
+```properties
+@docker.nativeBaseImage=gcr.io/distroless/static-debian12:nonroot
+```
+
+**Example For Image customization:**
+```java
+protected void init() {
+    load(DockerKBean.class).customizeJvmImage(dockerBuild -> dockerBuild
+            .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
+            .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
+            .setAddUserTemplate(JkDockerBuild.TEMURIN_ADD_USER_TEMPLATE)
+            .nonRootSteps   // inserted after  USER nonroot
+                .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
+                .add("RUN chmod a+rw /release.md ")
+    );
+}
+```
+This KBean allows customizing the Docker image programmatically using the [Jeka libs for Docker](api-docker.md).
+
+It’s easy to see the customization result by executing `jeka docker: info`. 
+This will display details about the built image, including the generated Dockerfile. 
+You can also visit the generated Docker build directory, 
+which contains all the Docker context needed to build the image with a Docker client.
+
+### maven 
+
+[`MavenKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/maven/MavenKBean.java) provides ability to publish artifacts on a 
+Maven repository. The artifacts are those produces by *project* or *base* Kbeans. 
+It also provides convenient mean to migrate from Maven prajects.
+
+**Key Features:**
+
+- publish on local or remote repositories, artifacts produced by projects
+- display info about publication, especially transitive dependencies published along the atifacts
+- property or programmatic configuration for published POM metadata and dependencies
+- property or programmatic configuration for publication repository
+
+
+
+
+
+### git
+
+[`GitKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/git/GitKBean.java) provides convenient git command combos such as:
+
+- Displaying a list of commit messages since the last tag.
+- Pushing remote tags with guards to ensure the local workspace is clean.
+
+
   
 ### intellij
 
-`IntellijKBean` provides methods for generating metadata files for _IntelliJ_ IDE. The content of an _iml_ file is computed 
+[`IntellijKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/ide/IntellijKBean.java) provides methods for generating metadata files for _IntelliJ_ IDE. The content of an _iml_ file is computed 
 according the `JkProject` object found in _project KBean_.
 
 This _KBean_ proposes an extension point through its `configure` methods in order to modify the resulting iml
 (e.g. using a module dependency instead of a library dependency).
 
 
-### git
-
-`GitKBean` exposes some common git command combos. It can also auto-inject a version inferred from Git into *project* KBean.

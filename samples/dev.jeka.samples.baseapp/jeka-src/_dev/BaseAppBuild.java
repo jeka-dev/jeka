@@ -8,6 +8,8 @@ import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
+import java.nio.file.Paths;
+
 @JkDep("org.springframework.boot:spring-boot-starter-test")
 
 @JkDep("../../plugins/dev.jeka.plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
@@ -35,7 +37,9 @@ class BaseAppBuild extends KBean {
                     .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
                     .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
                     .setAddUserTemplate(JkDockerBuild.TEMURIN_ADD_USER_TEMPLATE)
-                    .nonRootSteps.addCopy(getBaseDir().resolve("jeka.properties"), "/toto.txt", false)
+                    .nonRootSteps
+                            .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
+                            .add("RUN chmod a+rw /release.md ")
             );
         }
     }
