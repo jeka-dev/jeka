@@ -1,22 +1,23 @@
 ## KBeans
 
-_KBean_ is the central concept of the execution engine. _KBeans_ are classes with declared executable methods. 
-There is only one _KBean_ instance by _KBean_ class in any given Jeka base dir..
+_KBean_ is the central concept of the execution engine. _KBeans_ are classes with declared executable methods.  
+There is only one _KBean_ instance per _KBean_ class in any given Jeka base directory.
 
-_KBean_ classes share the following characteristics :
+_KBean_ classes share the following characteristics:
 
-* They extend `KBean` class.
-* They may declare `public void` methods without taking any arguments. All these methods can be invoked from the command line.
-* They may declare `public` fields _(aka KBean properties)_. These field values can be injected from the command line.
-  These can also be non-public fields annotated with `@JkDoc`.
-* They must provide a no-arg constructor
-* They may override `init()` method
-* They must be instantiated by the execution engine and not from the user code. 
+* They extend the `KBean` class.
+* They may declare `public void` methods without arguments. All these methods can be invoked from the command line.
+* They may declare `public` fields _(also known as KBean properties)_. These field values can be injected from the command line.  
+  Additionally, they can have non-public fields annotated with `@JkDoc`.
+* They must provide a no-argument constructor.
+* They may override the `init()` method.
+* They must be instantiated by the execution engine and not by user code.
 
 ### Simple Example
 
-The following KBeans expose the `cleanPublish` method which delegates the creation of jar files to the 'project' KBean.
+The following KBeans expose the `cleanPublish` method, which delegates the creation of JAR files to the `project` KBean.  
 `ProjectKBean` is available on the Jeka classpath as it is part of the standard KBeans bundled in the JeKa distribution.
+
 
 ```Java
 import dev.jeka.core.api.project.JkProject;
@@ -28,14 +29,11 @@ public class SimpleJkBean extends KBean {
 
     @Override  
     protected void init() {  // When init() is invoked, projectKBean field instances has already been injected.
-        projectKBean.project.simpleFacade()
-                .addCompileDeps(
-                        "com.google.guava:guava:30.0-jre",
-                        "com.sun.jersey:jersey-server:1.19.4"
-                )
-                .addTestDeps(
-                        "org.junit.jupiter:junit-jupiter:5.8.1"
-                );
+        projectKBean.project.flatFacade.compileDependencies
+                .add("com.google.guava:guava:30.0-jre")
+                .add("com.sun.jersey:jersey-server:1.19.4");
+        projectKBean.project.flatFacade.testDependencies
+                .add("org.junit.jupiter:junit-jupiter:5.8.1");
     }
 
     @JkDoc("Clean, compile, test, create jar files, and publish them.")
@@ -50,121 +48,109 @@ public class SimpleJkBean extends KBean {
 
 ### KBean Methods
 
-A _KBean_ method is a specific method defined in a KBean class, designed to be executable from the command line interface. For successful recognition as a _command_, the method should adhere to the following criteria:
+A _KBean method_ is a specific method defined in a KBean class, designed to be executable from the command line interface. For successful recognition as a _command_, the method must adhere to the following criteria:
 
-* It should be designated as `public`.
-* It should be an instance method, not static or abstract.
-* It should not require any arguments upon invocation.
-* It should not return any value, indicated by a `void` return type.
+* It must be designated as `public`.
+* It must be an instance method, not static or abstract.
+* It must not require any arguments upon invocation.
+* It must not return any value, as indicated by a `void` return type.
 
 ### KBean Attributes
 
-A _KBean attribute_ is a `public` instance field of a KBean class. Its value can be injected from the command line, 
-or from property file. 
-It can be also non-public fields annotated with `@JkDoc`.
+A _KBean attribute_ is a `public` instance field of a KBean class. Its value can be injected from the command line or from a property file.  
+Additionally, it can be a non-public field annotated with `@JkDoc`.
 
-Attributes can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ within.
+Attributes can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ into the field.
 
-For more details on field accepted types, see `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
+For more details on field accepted types, see the `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
 
-_KBean properties_ can also be nested composite objects, see example in `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
+_KBean attributes_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
 ### Naming KBeans
 
-In order to be referenced conveniently, _KBeans_ can be called by names. For any given _JkBean_ class, accepted names are :
+To be referenced conveniently, _KBeans_ can be identified by specific names. For any given _KBean_ class, the accepted names are:
 
-1. Full qualified class name
-2. Uncapitalized simple class name (e.g. 'myBuild' matches 'org.example.MyBuild')
-3. Uncapitalized simple class Name without 'JkBean' suffix (.g. 'project' matches 'dev.jeka.core.tool.builtin.project.ProjectKBean')
+1. Fully qualified class name.
+2. Uncapitalized simple class name (e.g., `myBuild` matches `org.example.MyBuild`).
+3. Uncapitalized simple class name without the `KBean` suffix (e.g., `project` matches `dev.jeka.core.tool.builtin.project.ProjectKBean`).
 
 !!! tip
-    Execute `jeka`, at the root of a project to display _KBeans_ present in _Jeka classpath_.
+    Execute `jeka` at the root of a project to display the _KBeans_ available on the _Jeka classpath_.
 
-### Document KBeans 
+### Document KBeans
 
-_KBean_ classes, methods, and properties can be annotated with `@JkDoc` annotation in order to provide self documentation.
+_KBean_ classes, methods, and attributes can be annotated with the `@JkDoc` annotation to provide self-documentation.  
+The text provided in these annotations is displayed when running the command:  
+`jeka <kbeanName>: --doc`
 
-Text within these annotations is displayed when invoking `help` method on the console.
+### Invoke KBeans
 
-### Invoke KBeans 
+#### From the Command Line
 
-#### From Command Line
+_KBean_ methods can be executed directly from the command line using the syntax:
 
-KBean methods can be invoked from the command line using 
+`jeka <kbeanName>: [methodName...] [attributeName=xxx...]`
 
-`jeka [kbeanName]#methoName [kbeanName]#[propertyName]=xxx`  
+**Example:** `jeka project: info pack tests.fork=false pack.jarType=FAT jacoco: sonarqube: run`
 
-Many methods/properties can be invoked in a single command line.
+You can call multiple methods and set multiple attributes in a single command.
 
 !!! info
-    _[kbeanName]_ prefix can be omitted. By default, it will be resolved on the bean mentioned by the *-kb=* option, 
-    or the first KBean found in _def_ dir, if the option is not present. 
-    Search is executed by alphabetical order of fully qualified class names. 
-    Example : `jeka toSomething aProperty=xxxx`
-    It is also possible to refer to the default KBean by using *:#* prefix.
-    Example : `jeka : toSomething aProperty=xxxx`
+    The _[kbeanName]_ prefix is optional. By default, it resolves to:
+      - The bean specified by the `jeka.default.kbean` properties if any.
+      - Or the first KBean found in the _jeka-src_ directory (sorted alphabetically by fully qualified class names).
 
+    **Examples:**
+    `jeka doSomething aProperty=xxxx`  
+    `jeka : doSomething aProperty=xxxx`  
+
+The ` : ` symbol explicitly refers to the default KBean.
 
 #### From IntelliJ Jeka Plugin
 
-[IntelliJ Jeka Plugin] allows the invocation of methods directly from the editor or the explorer tool window.
+The [IntelliJ Jeka Plugin](https://plugins.jetbrains.com/plugin/24505-jeka) enables invoking KBean methods directly from the IDE, 
+either from the code editor or the project explorer tool window.
 
-#### From naked IDE
+#### From a Plain IDE Setup
 
-_KBean_ methods can also be launched/debugged from IDE using classic `main` methods.
+_KBean_ methods can also be launched or debugged in an IDE by invoking the `dev.jeka.core.tool.Main` method and passing the corresponding command-line arguments.
 
-In _KBean_ class, declare one or several main methods as :
-
-```Java
- public static void main(String[] args) {
-        JkInit.instanceOf(MyBuild.class, args).cleanPack();
-    }
-
-  public static class Release {
-      public static void main(String[] args) {
-          JkInit.instanceOf(MyBuild.class, args, "-runIT").release();
-      }
-  }
-```
-_KBean_ must be instantiated using `JkInit#instanceOf` in order for it to be set up properly. 
-
-The arguments passed in the `main` method are interpreted as command line arguments.
-
-Launching or debugging this way is performant as all build classes and their dependencies are already on classpath. Therefore, no compilation or dependency resolution is needed.
-
+**Example:**  
+Invoking the `dev.jeka.core.tool.Main` method with arguments `project:` and `compile` will instantiate the `ProjectKBean` class and invoke its `compile` method.
 
 !!! warning
-    Be careful to launch the _main_ method using _module dir_ as _working dir_. On _IntelliJ_, this is not the default (it uses _project dir_).
+    Ensure that the _main_ method is launched with the **module directory** set as the **working directory**.  
+    In IntelliJ, the default working directory is the _project directory_, which may cause issues.
 
-    To change _intelliJ_ defaults, follow : **Edit Configurations | Edit configuration templates... |  Application | Working Directory : $MODULE_DIR$**.
-
-
-Sometimes, you may need to mimic the command line behavior more closely, for debugging purposes or to pass '@' arguments.
-
-* Create an IDE launcher for a Java Application
-* Set `dev.jeka.tool.Main` as Java main class.
-* Set the same command line arguments as you would do for invoking from command line (Do not include _jeka_ command).
+    To update IntelliJ defaults:  
+    - Navigate to **Run | Edit Configurations... | Application | Working Directory**  
+    - Set the value to `$MODULE_DIR$`.
 
 
-### Let KBeans cooperate
+### Let KBeans Cooperate
 
-Generally _KBeans_ interact with each other by declaring KBeans using `KBean#load(MyBean.class)` method as shown in [this example](#simple-example).
+_KBeans_ can interact with one another by declaring dependencies using the `KBean#load(MyBean.class)` method, as shown in the [simple example](#simple-example).
 
-When a _KBean_ depends on another one, it's good to declare it as an instance field of the first bean, as this 
-dependency will be mentioned in the auto-generated documentation and showed explicitly in IDE tool.
+Alternatively, you can use the `KBean#find(MyKBean.class)` method, which returns an `Optional<KBean>` containing the instance only if it already exists in the context.
 
-### KBeans in Multi-Projects
+When a _KBean_ depends on another, it is best practice to declare the dependency as an instance field in the dependent _KBean_. This approach has several benefits:
+- The dependency is explicitly documented in the auto-generated documentation.
+- It is visible in IDE tools, making the relationship clear.
 
-In a multi-project, it's quite common that a _KBean_ accesses a _KBean_ instance from another project. 
-You can achieve this in a statically typed way.
 
-* In _master_ _KBean_, declare a field of type `KBean` (e.g. ´JkBean importedBuild;`). It doesn't have to be public.
-* Annotate it with `@JkInjectProject` mentioning the relative path of the imported project (e.g. `@JkInjectProject("../anotherModule")).
-* Execute `jeka intellij: iml` or `jeka eclipse: files`.
-* Redefine the declared type from `KBean` to the concrete type of imported _KBean_
-* Now, master _KBean_ can access the imported _KBean_ in a static typed way.
-* See example [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
-* Be mindful that the imported _KBean_ must deal with file paths using `KBean#getBaseDir` in order for it to be safely executed from any working directory.
+### KBeans in Multi-Project Setups
+
+In multi-project scenarios, it is common for a _KBean_ in one project to access a _KBean_ instance from another project. This can be achieved in a statically typed manner:
+
+1. In the **master** _KBean_, declare a field of type `KBean` (e.g., `KBean importedBuild;`). This field does not need to be public.
+2. Annotate the field, by specifying the relative path of the imported project (e.g., `@JkInjectRunbase("../anotherModule")`).
+3. Run the command `jeka intellij: iml` or `jeka eclipse: files` to refresh project metadata.
+4. Change the declared field type from `KBean` to the concrete type of the imported _KBean_.
+5. The master _KBean_ can now access the imported _KBean_ in a type-safe manner.
+6. For an example, see [this implementation](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
+
+!!! tip
+    Ensure that the imported _KBean_ uses `KBean#getBaseDir` for handling file paths. This practice ensures safe execution from any working directory.
 
 ### Bundled KBeans
 
