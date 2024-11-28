@@ -150,7 +150,6 @@ public class JkProjectFlatFacade {
     }
 
 
-
     /**
      * Adds compile-only dependencies to the project.
      *
@@ -161,16 +160,6 @@ public class JkProjectFlatFacade {
         String moduleId = JkCoordinate.of(coordinate).getModuleId().toColonNotation();
         runtimeDependencies.remove(moduleId);
         return this;
-    }
-
-    /**
-     * Adds test dependencies to the project.
-     *
-     * @param coordinates the dependencies to be added in the format of group:artifactId:version
-     */
-    public JkProjectFlatFacade addTestDeps(@JkDepSuggest String... coordinates) {
-        UnaryOperator<JkDependencySet> addFun = deps -> addFirst(deps, coordinates);
-        return prependTestDeps(addFun);
     }
 
 
@@ -212,7 +201,7 @@ public class JkProjectFlatFacade {
     }
 
     /**
-     * The published version will be computed according the git last commit message.
+     * The published version will be computed according the last Git commit message.
      *
      * @see JkGit#getVersionFromCommitMessage(String)
      */
@@ -287,38 +276,6 @@ public class JkProjectFlatFacade {
      */
     public JkProject getProject() {
         return project;
-    }
-
-    private JkProjectFlatFacade prependTestDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        testDependencies.modify(deps -> deps.and(JkDependencySet.Hint.first(), modifier.apply(JkDependencySet.of())));
-        return this;
-    }
-
-    private JkDependencySet add(JkDependencySet deps, String... descriptors) {
-        JkDependencySet result = deps;
-        for (String descriptor : descriptors) {
-            result = result.and(descriptor);
-        }
-        return result;
-    }
-
-    private JkDependencySet addFirst(JkDependencySet deps, String... descriptors) {
-        JkDependencySet result = deps;
-        List<String> items = new LinkedList<>(Arrays.asList(descriptors));
-        Collections.reverse(items);
-        for (String descriptor : items) {
-            result = result.and(JkDependencySet.Hint.first(), descriptor);
-        }
-        return result;
-    }
-
-
-    private JkDependencySet minus(JkDependencySet deps, String... descriptors) {
-        JkDependencySet result = deps;
-        for (String descriptor : descriptors) {
-            result = result.minus(descriptor);
-        }
-        return result;
     }
 
 }

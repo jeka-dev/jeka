@@ -1,4 +1,3 @@
-## KBeans
 
 _KBean_ is the central concept of the execution engine. _KBeans_ are classes with declared executable methods.  
 There is only one _KBean_ instance per _KBean_ class in any given Jeka base directory.
@@ -13,7 +12,7 @@ _KBean_ classes share the following characteristics:
 * They may override the `init()` method.
 * They must be instantiated by the execution engine and not by user code.
 
-### Simple Example
+## Simple Example
 
 The following KBeans expose the `cleanPublish` method, which delegates the creation of JAR files to the `project` KBean.  
 `ProjectKBean` is available on the Jeka classpath as it is part of the standard KBeans bundled in the JeKa distribution.
@@ -46,7 +45,7 @@ public class SimpleJkBean extends KBean {
 
 ```
 
-### KBean Methods
+## KBean Methods
 
 A _KBean method_ is a specific method defined in a KBean class, designed to be executable from the command line interface. For successful recognition as a _command_, the method must adhere to the following criteria:
 
@@ -55,18 +54,22 @@ A _KBean method_ is a specific method defined in a KBean class, designed to be e
 * It must not require any arguments upon invocation.
 * It must not return any value, as indicated by a `void` return type.
 
-### KBean Attributes
+## KBean Attributes
 
 A _KBean attribute_ is a `public` instance field of a KBean class. Its value can be injected from the command line or from a property file.  
 Additionally, it can be a non-public field annotated with `@JkDoc`.
 
 Attributes can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ into the field.
 
+We can also inject value using *jeka.properties
+
 For more details on field accepted types, see the `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
 
 _KBean attributes_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
-### Naming KBeans
+
+
+## Naming KBeans
 
 To be referenced conveniently, _KBeans_ can be identified by specific names. For any given _KBean_ class, the accepted names are:
 
@@ -77,15 +80,15 @@ To be referenced conveniently, _KBeans_ can be identified by specific names. For
 !!! tip
     Execute `jeka` at the root of a project to display the _KBeans_ available on the _Jeka classpath_.
 
-### Document KBeans
+## Document KBeans
 
 _KBean_ classes, methods, and attributes can be annotated with the `@JkDoc` annotation to provide self-documentation.  
 The text provided in these annotations is displayed when running the command:  
 `jeka <kbeanName>: --doc`
 
-### Invoke KBeans
+## Invoke KBeans
 
-#### From the Command Line
+### From the Command Line
 
 _KBean_ methods can be executed directly from the command line using the syntax:
 
@@ -94,24 +97,14 @@ _KBean_ methods can be executed directly from the command line using the syntax:
 **Example:** `jeka project: info pack tests.fork=false pack.jarType=FAT jacoco: sonarqube: run`
 
 You can call multiple methods and set multiple attributes in a single command.
+    
 
-!!! info
-    The _[kbeanName]_ prefix is optional. By default, it resolves to:
-      - The bean specified by the `jeka.default.kbean` properties if any.
-      - Or the first KBean found in the _jeka-src_ directory (sorted alphabetically by fully qualified class names).
-
-    **Examples:**
-    `jeka doSomething aProperty=xxxx`  
-    `jeka : doSomething aProperty=xxxx`  
-
-The ` : ` symbol explicitly refers to the default KBean.
-
-#### From IntelliJ Jeka Plugin
+### From IntelliJ Jeka Plugin
 
 The [IntelliJ Jeka Plugin](https://plugins.jetbrains.com/plugin/24505-jeka) enables invoking KBean methods directly from the IDE, 
 either from the code editor or the project explorer tool window.
 
-#### From a Plain IDE Setup
+### From a Plain IDE Setup
 
 _KBean_ methods can also be launched or debugged in an IDE by invoking the `dev.jeka.core.tool.Main` method and passing the corresponding command-line arguments.
 
@@ -127,7 +120,20 @@ Invoking the `dev.jeka.core.tool.Main` method with arguments `project:` and `com
     - Set the value to `$MODULE_DIR$`.
 
 
-### Let KBeans Cooperate
+## Default KBean
+
+The _[kbeanName]_ prefix is optional and defaults to:
+
+- The KBean specified by the `jeka.default.kbean` property (if set).
+- Otherwise, the first KBean found in the _jeka-src_ directory, ordered alphabetically by fully qualified class name.
+
+Example: `jeka doSomething aProperty=xxxx` invokes the `doSomething` method of the default KBean.
+
+Use `:` to explicitly reference the default KBean and avoid ambiguity.  
+Example: `jeka : --doc` shows the default KBean's documentation, while `jeka --doc` displays overall documentation.
+
+
+## Let KBeans Cooperate
 
 _KBeans_ can interact with one another by declaring dependencies using the `KBean#load(MyBean.class)` method, as shown in the [simple example](#simple-example).
 
@@ -138,7 +144,7 @@ When a _KBean_ depends on another, it is best practice to declare the dependency
 - It is visible in IDE tools, making the relationship clear.
 
 
-### KBeans in Multi-Project Setups
+## KBeans in Multi-Project Setups
 
 In multi-project scenarios, it is common for a _KBean_ in one project to access a _KBean_ instance from another project. This can be achieved in a statically typed manner:
 
@@ -152,19 +158,56 @@ In multi-project scenarios, it is common for a _KBean_ in one project to access 
 !!! tip
     Ensure that the imported _KBean_ uses `KBean#getBaseDir` for handling file paths. This practice ensures safe execution from any working directory.
 
-### Bundled KBeans
+## Bundled KBeans
 
 There are a bunch of _KBeans_ bundled within _Jeka_. Those _KBeans_ are always present.
 
-#### project
+### project
 
-`ProjectKBean` provides a wrapper around a `JkProject` for building JVM-based projects. This _KBean_ initialises 
-a default sensitive project object and provides a classic method for building a project (compile, package in jar, publish ...)
+`ProjectKBean` acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
+This _KBean_ provides core methods for fundamental build tasks, including **compiling**, **testing**, and **packaging**.
 
-This _KBean_ proposes an extension point through its `configure(JkProject)` method. This way, other _KBeans_ can 
-modify the properties of the project to be built.
+To work effectively with this KBean, it's helpful to have an [overview](api-project.md) of the capabilities offered by the `JkProject` object.
 
-#### intellij
+**Key Features**
+- Resolves dependencies, compiles code, and runs tests.
+- Creates various types of JAR files out-of-the-box, including regular, fat, shaded, source, and Javadoc JARs.
+- Infers project versions from Git metadata.
+- Executes packaged JARs.
+- Displays dependency trees and project setups.
+- Scaffolds skeletons for new projects.
+
+Additionally, `ProjectKBean` serves as a central point of interaction for other KBeans, enabling them to access project details and extend or enhance the build process.
+
+**Example for getting information about source files:**
+```Java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
+class MyBuild extends KBean {
+
+    final JkProject project = load(ProjectKBean.class).project;
+    
+    private List<Path> allSourceFiles;
+    
+    protected void init() {
+        allSourceFiles = project.compilation.layout.resolveSources().getFiles();
+        ...
+    }
+}
+```
+
+**Example taken from JeKa:**
+
+- [Jacoco KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.jacoco/src/dev/jeka/plugins/jacoco/JacocoKBean.java): 
+A KBean that reads te underlying `JkProject` and modifies its testing behavior.
+- [Sonarqube KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.sonarqube/src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java):
+A KBean that reads te underlying `JkProject` to extract information.
+- [Protobuf KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java):
+  A KBean that adds a Proto-buffer code generation to the underlying `JkProject`.
+
+  
+### intellij
 
 `IntellijKBean` provides methods for generating metadata files for _IntelliJ_ IDE. The content of an _iml_ file is computed 
 according the `JkProject` object found in _project KBean_.
@@ -173,6 +216,6 @@ This _KBean_ proposes an extension point through its `configure` methods in orde
 (e.g. using a module dependency instead of a library dependency).
 
 
-#### git
+### git
 
 `GitKBean` exposes some common git command combos. It can also auto-inject a version inferred from Git into *project* KBean.

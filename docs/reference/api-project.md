@@ -1,14 +1,15 @@
 # Project API
 
-This is the Jeka high-level API to build Java/JVM projects. API classes belong to  `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
+The Jeka Project API provides a high-level interface for building Java/JVM projects. Its core classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
 
-It introduces the concept of `JkProject` from where it performs compilation, testing, resources processing, packaging, publication, and more.
-`JkProject` is the root of a deep structure embracing the *parent-chaining* pattern for readability.
+At the heart of this API is the `JkProject` class, which acts as the central entry point for performing key build tasks, including compilation, testing, resource processing, packaging, publication, and more.  
+`JkProject` serves as the root of a comprehensive object-oriented structure, encapsulating all the information and behavior needed to build JVM-based projects.
 
-The API contains a lot of extension points to add specific behaviors.
+The API is designed with numerous extension points, making it highly flexible for incorporating specific or custom build behaviors.
 
-### Project Structure 
-``` title="JkProject structure"
+
+## Project Structure 
+```
 project
 +- baseDir
 +- outputDir
@@ -54,61 +55,63 @@ project
 + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
 
-For convenience, `JkProject` provides a facade in order to make common settings friendly,
-without navigating deep into the structure. From facade, you can
-setup dependencies, java version, project layout, test behavior, test selection and publication.
+## Flat Facade
+
+For convenience, `JkProject` offers a simplified facade to easily configure common settings without delving into its deeper structure.
 
 ```Java
-JkProject.of().flatFacade()
-   .configureCompileDependencies(deps -> deps
-           .and("com.google.guava:guava:21.0")
-           .and("com.sun.jersey:jersey-server:1.19.4")
-           .and("org.junit.jupiter:junit-jupiter-engine:5.6.0"))
-   .configureRuntimeDependencies(deps -> deps
-           .minus("org.junit.jupiter:junit-jupiter-engine")
-           .and("com.github.djeang:vincer-dom:1.2.0"))
-   .configureTestDependencies(deps -> deps
-           .and("org.junit.vintage:junit-vintage-engine:5.6.0"))
-   .addTestExcludeFilterSuffixedBy("IT", false)
-   .setJavaVersion(JkJavaVersion.V8)
-   .setPublishedModuleId("dev.jeka:sample-javaplugin")
-   .setPublishedVersion("1.0-SNAPSHOT");
-
+JkProjectFlatFacade projectFacade = JkProject.of().flatFacade;
+projectFacade
+       .setPublishedModuleId("dev.jeka:sample-javaplugin")
+       .setVersionFromGitTag()
+       .mixResourcesAndSources()
+       .setLayoutStyle(SIMPLE)
+       .addTestExcludeFilterSuffixedBy("IT", false);
+projectFacade.compileDependnecies
+       .add("com.google.guava:guava:21.0")
+       .add("com.sun.jersey:jersey-server:1.19.4")
+       .add("org.junit.jupiter:junit-jupiter-engine:5.6.0");
+projectFacade.runtimeDependencies
+       .remove("org.junit.jupiter:junit-jupiter-engine")
+       .add("com.github.djeang:vincer-dom:1.2.0");
+projectFacade.testDependencies
+       .add("org.junit.vintage:junit-vintage-engine:5.6.0");
 ```
 
-If the façade is not sufficient to set up the project build, you can use the main API.
-`JkProject` instances are highly configurable.
+See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.project-api/jeka-src/JkProjectBuild.java).
 
-Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java) .
+## Project Dependencies
 
-### Dependencies
+Project dependencies in Jeka are managed differently from Maven/Gradle. 
+Instead of defining a single collection of dependencies for a specific scope/configuration, 
+Jeka uses three distinct classpaths: **compile**, **runtime**, and **test**. 
+Each is defined independently but related to the others.
 
-Project dependencies are managed differently than in Maven/Gradle. Instead of defining 
-a single collection of dependencies, each bounded for a specific scope/configuration, 
-Jeka projects define 3 distinct classpaths : compile, runtime and test.
+- **Compile classpath:** Set via `JkProject.compilation.dependencies`.
+- **Runtime classpath:** Built from the compile classpath, modifiable with `JkProject.packaging.runtimeDependencies`.
+- **Test classpath:** Merges the compile and runtime classpaths, further customizable via `JkProject.testing.compilation.dependencies`.
 
-Each classpath defines its own set of dependencies independently, though they are defined relatively to each other.
+To programmatically add a *compile-only* dependency, you can:
 
-*Compile classpath :* is defined using `project.getCompilation().configureDependencies()`.
+1. Add it to the *compile* classpath and exclude it from the *runtime* classpath.
+2. Use the `JkFlatFacade.addCompileOnlyDeps` method.
 
-*Runtime classpath :* is defined from *Compile Classpath*. This base can be modified using `project.packaging.configureDependencies()`.
 
-*Test classpath :* is defined from a merge of *Compile Classpath* and *Runtime Classpath*. This base can be modified 
-using `project.getTesing().getCompilation().configureDependencies()`
+### Full Text Description
 
-#### Full Text Description
+An entire project dependency set can be declared using a full text description.
 
-An entire project dependency set can be declared with full text description.
+By default, if a file named `project-dependencies.txt` exists in *[PROJECT_DIR]/jeka*, its content is used to define project dependencies.
 
-By default, if a file named `project-dependencies.txt` is present in *[PROJECT_DIR]/jeka*, this content is taken 
-in account to specify project dependencies.
+Dependencies must follow the format:  
+`group:module:[classifier]:[type]:[version]`, where *classifier*, *type*, and *version* are optional.  
+See `JkCoordinate.of(String description)` for details.
 
-Dependencies have to be declared with the format `group:module:[classifier]:[type]:[version]` where *classifier*, *type* and *version' are optional.  
-See `JkCoordinate.of(String description)* for details.
+To import a *bill-of-materials* (BOM), declare a dependency as:  
+`group:module::pom:version`.
 
-To import *bill-of-materials* (aka *BOM*) just declare a dependency as 'group:module::pom:version'
+You can use `@` and `@@` symbols to specify dependency exclusions.
 
-Symbols `@` and `@@` can be used to mention dependency exclusions.
 
 !!! example
 
@@ -148,8 +151,16 @@ The dependencies will be the ones declared in the *== COMPILE ==* or *== RUNTIME
 !!! tip
     If you are using Jeka plugin for Intellij, hit `ctrl+<space>` for displaying suggestions.
 
+## Resolve Deoendendecies Programatically
 
+## Resolve Dependencies Programmatically
 
+To resolve dependencies that make up the runtime classpath, you can use either of the following methods:
+
+- `JkProject.packaging.resolveRuntimeDependencies()` to fetch the resolution tree, allowing you to reason about the dependency resolution tree.
+- `JkProject.packaging.resolveRuntimeDependenciesAsFiles()` to directly fetch the resolved classpath (a list of JAR files).
+
+The second option may be faster, as it caches the result from a previous invocation.
 
 
 
