@@ -1,5 +1,6 @@
 import dev.jeka.core.JekaCommandLineExecutor;
 import dev.jeka.core.api.tooling.docker.JkDocker;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,8 +44,11 @@ class SamplesTester extends JekaCommandLineExecutor {
                 "-cp=../../plugins/dev.jeka.plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar " +
                 "project: info pack sonarqube: -Djeka.java.version=17");
 
-        // Test with injecting plugin dep via jeka.properties file
-        run("dev.jeka.samples.protobuf", "-ivc project: pack");
+        // Protobuf seems failed on last macos ship
+        if (!(JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64())) {
+            // Test with injecting plugin dep via jeka.properties file
+            run("dev.jeka.samples.protobuf", "-ivc project: pack");
+        }
 
         // Test with injecting dep via @JkDep(...)
         run("dev.jeka.samples.jacoco", "-la=false -cp=../../plugins/dev.jeka.plugins.jacoco " +

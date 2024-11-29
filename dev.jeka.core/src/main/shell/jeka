@@ -468,6 +468,10 @@ find_remote_arg_index() {
 #######################################
 is_remote_arg() {
   local arg="$1"
+   if [[ "$arg" == "--remote" ]]; then
+      result="true"
+      return 0
+  fi
   if [[ "$arg" != -* ]]; then
     result="false"
     return 0
@@ -605,6 +609,11 @@ compute_BASE_DIR() {
   local option=${array[(($index))]}
   local next_index=$((index + 1))
   local remote_arg=${array[$next_index]}
+
+  ## in case of a "-u" arg between "-r" and remote location arg
+  if [[ "$remote_arg" == -* ]]; then
+       remote_arg=${array[$next_index+1]}
+  fi
   local need_update="false"
 
   # check if cmdline contains -u or --update options, prior the -parameters

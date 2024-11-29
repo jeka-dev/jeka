@@ -224,6 +224,7 @@ public final class JkJavaCompilerToolChain {
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Compile using command " + process.getCommand());
+        JkLog.info("Compile options: " + compileSpec.getOptions());
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));

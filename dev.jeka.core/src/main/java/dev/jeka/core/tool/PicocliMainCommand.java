@@ -115,7 +115,7 @@ public class PicocliMainCommand {
             description = "Specify remote code base location. LOCATION may be a folder path, Git url or an alias.")
     private String fakeRemote;  // Handled at shell level
 
-    @Option(names = { "-u", "--remote-update"},
+    @Option(names = { "-u", "--update"},
             description = "Forcing Git update when used with '--remote' or '-r'.")
     private boolean fakeRemoteUpdate;  // Handled at shell level
 

@@ -40,7 +40,6 @@ public class ProtobufKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "com.google.protobuf:protobuf-java:")
     public String protobufVersion = "3.21.12";
 
-    @Deprecated
     protected void init() {
         JkProject project = load(ProjectKBean.class).project;
         JkProtobuf.of()

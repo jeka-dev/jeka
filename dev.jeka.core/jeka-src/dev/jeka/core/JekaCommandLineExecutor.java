@@ -78,6 +78,8 @@ public abstract class JekaCommandLineExecutor {
         }
         boolean showOutput = JkLog.isVerbose();
         //boolean showOutput = true;
+        String javaVersion = (JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64()) ?
+                "11" : "8";
         JkProcess process = JkProcess.of(cmd.toString())
                 .setWorkingDir(baseDir)
                 .setDestroyAtJvmShutdown(true)
@@ -86,7 +88,7 @@ public abstract class JekaCommandLineExecutor {
                 .setCollectStdout(!showOutput)
                 .setCollectStderr(!showOutput)
                 .setFailOnError(true)
-                .addParamsIf(!cmdLine.contains("-Djeka.java.version="), "-Djeka.java.version=8")
+                .addParamsIf(!cmdLine.contains("-Djeka.java.version="), "-Djeka.java.version=" + javaVersion)
                 .addParams(JkUtilsString.parseCommandline(cmdLine))
                 //.inheritJkLogOptions()
                 .addParams("--stacktrace")

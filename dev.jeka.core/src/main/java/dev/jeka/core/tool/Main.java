@@ -43,9 +43,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Remove -r arguments sent by shell script
-        String[] filteredArgs = new CmdLineArgs(args).withoutShellArgs().get();
-
         // Get the code base directory sent by script shell
         String basedirProp = System.getProperty("jeka.current.basedir");
         Path workingDir = Paths.get("");

@@ -120,7 +120,8 @@ class CmdLineArgs {
         return arg.endsWith(KBEAN_CMD_SUFFIX);
     }
 
-    private static String[] filterShellArgs(String[] originalArgs) {
+    // non-private for testing
+    static String[] filterShellArgs(String... originalArgs) {
         if (originalArgs.length == 0) {
             return originalArgs;
         }
@@ -131,7 +132,16 @@ class CmdLineArgs {
             if (index != -1) {
                 result.remove(index);
                 if (index < result.size()) {
-                    result.remove(index);
+                    String nextToken = result.get(index);
+
+                    // if there is a -u or --update between -r and remote location arg, we must add +1 offset
+                    if ("-u".equals(nextToken) || "--update".equals(nextToken)) {
+                        if (index+1 < result.size()) {
+                            result.remove(index+1);
+                        }
+                    } else {
+                        result.remove(index);
+                    }
                 }
                 return result.toArray(new String[0]);
             }

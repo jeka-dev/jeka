@@ -37,7 +37,8 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
             int value = Integer.parseInt(stringValue);
             return new JkJavaVersion(value);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Java version should be an integer as 8, 11, 12,... was " + stringValue);
+            throw new IllegalArgumentException("Java version should be an integer as 8, 11, 12,... was '"
+                    + stringValue + "'");
         }
     }
 
