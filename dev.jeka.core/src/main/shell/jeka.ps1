@@ -173,7 +173,11 @@ class CmdLineArgs {
     if ($remoteIndex -eq -1) {
       return $null
     }
-    return $this.args[$remoteIndex + 1]
+    $candidate = $this.args[$remoteIndex + 1]
+    if ($candidate -eq "-u" -or $candidate -eq "--update") {
+      $candidate = $this.args[$remoteIndex + 2]
+    }
+    return $candidate
   }
 
   [array] GetProgramArgs() {
@@ -190,7 +194,7 @@ class CmdLineArgs {
   }
 
   [bool] IsUpdateFlagPresent() {
-    $remoteArgs= @("-ru", "-ur", "-u", "--remote-update")
+    $remoteArgs= @("-ru", "-ur", "-u", "--update")
     $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
     return ($remoteIndex -ne -1)
   }
