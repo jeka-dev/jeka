@@ -516,7 +516,8 @@ public final class JkProject implements JkIdeSupportSupplier {
     }
 
     /**
-     * Executes the pack action defined for this project.
+     * Executes the packing process for this project, which includes compiling, testing, and creating JAR files.
+     *
      * @see JkProject#packActions
      */
     public void pack() {

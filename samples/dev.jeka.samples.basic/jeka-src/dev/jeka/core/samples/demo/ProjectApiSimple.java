@@ -18,11 +18,11 @@ class ProjectApiSimple extends KBean {
     ProjectApiSimple() {
         project.flatFacade
                 .setMainArtifactJarType(JkProjectPackaging.JarType.FAT); // Produce a fat Jar
-        project.flatFacade.compileDependencies
+        project.flatFacade.dependencies.compile
                 .add("com.google.guava:guava:32.1.3-jre")
                 .add("org.slf4j:slf4j-simple:2.0.9");
          project.flatFacade.addCompileOnlyDeps("org.projectlombok:lombok:1.18.30");
-         project.flatFacade.testDependencies
+         project.flatFacade.dependencies.test
                  .add("org.junit.jupiter:junit-jupiter:5.10.1")
                  .add("org.mockito:mockito-core:5.7.0");
          project

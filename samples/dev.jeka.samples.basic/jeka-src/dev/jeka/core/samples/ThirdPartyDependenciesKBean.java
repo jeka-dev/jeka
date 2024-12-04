@@ -27,12 +27,12 @@ public class ThirdPartyDependenciesKBean extends KBean {
 
     @Override
     protected void init() {
-        projectKBean.project.flatFacade.compileDependencies
+        projectKBean.project.flatFacade.dependencies.compile
                 .add(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("3.1.0"))
                 .add(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"));
-        projectKBean.project.flatFacade.runtimeDependencies
+        projectKBean.project.flatFacade.dependencies.runtime
                 .remove(JkPopularLibs.JAVAX_SERVLET_API.getDotNotation());
-        projectKBean.project.flatFacade.testDependencies
+        projectKBean.project.flatFacade.dependencies.test
                 .add(SimpleProjectKBean.JUNIT5)
                 .add(JkPopularLibs.MOCKITO_ALL.toCoordinate("1.10.19"));
     }

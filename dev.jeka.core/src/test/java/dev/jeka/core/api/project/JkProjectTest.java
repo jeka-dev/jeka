@@ -43,9 +43,9 @@ public class JkProjectTest {
         project.compilation.dependencies.add("a:a").add("a:a1");
         project.flatFacade.addCompileOnlyDeps("a:a2");
 
-        project.flatFacade.runtimeDependencies.add("c:c");
+        project.flatFacade.dependencies.runtime.add("c:c");
 
-        project.flatFacade.testDependencies.add("b:b");
+        project.flatFacade.dependencies.test.add("b:b");
 
         Assert.assertEquals(3, project.compilation.dependencies.get().getEntries().size());
         Assert.assertEquals(3, project.packaging.runtimeDependencies.get().getEntries().size());
@@ -58,11 +58,11 @@ public class JkProjectTest {
         project.compilation.dependencies
                         .add("com.google.guava:guava:23.0", JkTransitivity.NONE)
                         .add("javax.servlet:javax.servlet-api:4.0.1");
-        project.flatFacade.runtimeDependencies
+        project.flatFacade.dependencies.runtime
                         .add("org.postgresql:postgresql:42.2.19")
                         .modify(deps -> deps.withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME))
                         .remove("javax.servlet:javax.servlet-api");
-        project.flatFacade.testDependencies
+        project.flatFacade.dependencies.test
                         .modify(deps -> deps.and(Hint.first(), "org.mockito:mockito-core:2.10.0"));
         project.setModuleId("my:project").setVersion("MyVersion");
         JkDependencySet testDependencies = project.testing.compilation.dependencies.get();
@@ -78,7 +78,7 @@ public class JkProjectTest {
         JkVersionProvider versionProvider = JkVersionProvider.of()
                 .and("javax.servlet:javax.servlet-api", "4.0.1");
         JkProject project = JkProject.of();
-        project.flatFacade.runtimeDependencies
+        project.flatFacade.dependencies.runtime
                         .addVersionProvider(versionProvider)
                         .add("javax.servlet:javax.servlet-api");
         JkDependencySet testDeps = project.testing.compilation.dependencies.get();
@@ -186,7 +186,7 @@ public class JkProjectTest {
 
         Path base = top.resolve("base");
         JkProject baseProject = JkProject.of().setBaseDir(base);
-        baseProject.flatFacade.compileDependencies
+        baseProject.flatFacade.dependencies.compile
                     .add(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.14"));
         baseProject.compilation.layout
                 .emptySources().addSource("src")

@@ -43,8 +43,9 @@ nav:
     - Reference:
         - KBeans: reference/kbeans.md
         - Properties: reference/properties.md
-        - Api:
+        - Build Library:
             - Project: reference/api-project.md
+            - Docker: reference/api-docker.md 
     - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md

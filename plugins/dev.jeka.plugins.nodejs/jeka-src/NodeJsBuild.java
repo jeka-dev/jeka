@@ -23,9 +23,9 @@ public class NodeJsBuild extends KBean {
         JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
                 .setModuleId("dev.jeka:nodejs-plugin")
-                .mixResourcesAndSources()
+                .setMixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .compileDependencies
+                .dependencies.compile
                         .add(JkLocator.getJekaJarPath());
         load(MavenKBean.class).getMavenPublication()
                     .pomMetadata

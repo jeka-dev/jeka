@@ -1,24 +1,18 @@
 # Project API
 
-The Jeka Project API provides a high-level interface for building Java/JVM projects. 
-At the heart of this API is the `JkProject` class, which acts as the central entry point for performing build tasks. 
-
+The **Jeka Project API** provides a high-level interface for building Java/JVM projects. At the core of this API is the `JkProject` class, which serves as the central entry point for performing build tasks.
 
 ## Classes
 
-Its core classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
+The classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
 
+### **`JkProject` Class**
 
-### `JkProject` class
+The `JkProject` class contains all the essential definitions for building a JVM project, including source locations, build output, testing, packaging (e.g., creating JAR files), compiler settings, dependencies, and more.
 
-This class contains all the necessary definitions for building a JVM project, 
-including source locations, build output, testing, packaging (e.g., creating JAR files), compiler settings, 
-dependencies, and more.
+Designed with multiple extension points, it provides flexibility for integrating custom or specific build behaviors.
 
-This class is designed with numerous extension points, making it highly flexible for incorporating specific or custom build behaviors.
-
-To handle all of these concerns efficiently, the class is designed with a detailed structure as follows:
-
+To manage all of these concerns efficiently, the class is structured as follows:
 
 ```
 project
@@ -66,7 +60,7 @@ project
 + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
 
-## Flat Facade
+#### Flat Facade
 
 For convenience, `JkProject` offers a simplified facade to easily configure common settings without delving into its deeper structure.
 
@@ -78,50 +72,49 @@ projectFacade
        .mixResourcesAndSources()
        .setLayoutStyle(SIMPLE)
        .addTestExcludeFilterSuffixedBy("IT", false);
-projectFacade.compileDependnecies
+projectFacade.dependencies.compile
        .add("com.google.guava:guava:21.0")
        .add("com.sun.jersey:jersey-server:1.19.4")
        .add("org.junit.jupiter:junit-jupiter-engine:5.6.0");
-projectFacade.runtimeDependencies
+projectFacade.dependencies.runtime
        .remove("org.junit.jupiter:junit-jupiter-engine")
        .add("com.github.djeang:vincer-dom:1.2.0");
-projectFacade.testDependencies
+projectFacade.dependencies.test
        .add("org.junit.vintage:junit-vintage-engine:5.6.0");
+projectFacade.doPack();  // compile, test and create jar
 ```
 
 See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.project-api/jeka-src/JkProjectBuild.java).
 
-## Project Dependencies
+#### Project Dependencies
 
-Project dependencies in Jeka are managed differently from Maven/Gradle. 
-Instead of defining a single collection of dependencies for a specific scope/configuration, 
-Jeka uses three distinct classpaths: **compile**, **runtime**, and **test**. 
-Each is defined independently but related to the others.
+Project dependencies in Jeka are managed differently from Maven/Gradle. Instead of a single collection of dependencies for a specific scope/configuration, Jeka uses three distinct classpaths: **compile**, **runtime**, and **test**. Each is defined independently but can reference the others.
 
 - **Compile classpath:** Set via `JkProject.compilation.dependencies`.
-- **Runtime classpath:** Built from the compile classpath, modifiable with `JkProject.packaging.runtimeDependencies`.
-- **Test classpath:** Merges the compile and runtime classpaths, further customizable via `JkProject.testing.compilation.dependencies`.
+- **Runtime classpath:** Built from the compile classpath, but modifiable with `JkProject.packaging.runtimeDependencies`.
+- **Test classpath:** Merges the compile and runtime classpaths, customizable through `JkProject.testing.compilation.dependencies`.
 
-To programmatically add a *compile-only* dependency, you can:
+To programmatically add a *compile-only* dependency:
 
 1. Add it to the *compile* classpath and exclude it from the *runtime* classpath.
 2. Use the `JkFlatFacade.addCompileOnlyDeps` method.
 
 
-### Full Text Description
+##### Full Text Description
 
 An entire project dependency set can be declared using a full text description.
 
-By default, if a file named `project-dependencies.txt` exists in *[PROJECT_DIR]/jeka*, its content is used to define project dependencies.
+By default, if a file named `dependencies.txt` exists in *[PROJECT_DIR]*, its content is used to define project dependencies.
 
-Dependencies must follow the format:  
-`group:module:[classifier]:[type]:[version]`, where *classifier*, *type*, and *version* are optional.  
-See `JkCoordinate.of(String description)` for details.
+Dependencies must follow the format: `group:module:[classifier]:[type]:[version]`
+
+where *classifier*, *type*, and *version* are optional. See `JkCoordinate.of(String description)` for details.
 
 To import a *bill-of-materials* (BOM), declare a dependency as:  
 `group:module::pom:version`.
 
 You can use `@` and `@@` symbols to specify dependency exclusions.
+
 
 
 !!! example
@@ -146,30 +139,30 @@ You can use `@` and `@@` symbols to specify dependency exclusions.
     ```
 
 `== COMPILE ==`  
-Defines dependencies that will constitute the *compile* classpath.
+Defines dependencies for the *compile* classpath.
 
 `== RUNTIME ==`  
-Defines dependencies that will constitute the *runtime* classpath.  
-The dependencies will be the ones declared in the *== COMPILE ==* section plus the ones declared in the *== RUNTIME ==* section.  
-If dependencies declared in the *== compile ==* section should not be included for the *runtime* classpath, they should 
-be explicitly removed using the '-' symbol.
+Defines dependencies for the *runtime* classpath.  
+The dependencies in the *RUNTIME* section will be added to those in the *COMPILE* section.
 
+If any dependencies from the *COMPILE* section should not be included in the *runtime* classpath, they must be explicitly removed using the '-' symbol.
 
 `== TEST ==`  
-Defines dependencies that will constitute the *test* classpath.
-The dependencies will be the ones declared in the *== COMPILE ==* or *== RUNTIME ==* sections (merge) plus the ones declared in the *== TEST ==* section.  
+Defines dependencies for the *test* classpath.  
+This will include dependencies from both the *COMPILE* and *RUNTIME* sections, along with those specified in the *TEST* section.
 
-!!! tip
-    If you are using Jeka plugin for Intellij, hit `ctrl+<space>` for displaying suggestions.
+!!! tip  
+    If you're using the Jeka plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
 
 ## Resolve Dependencies Programmatically
 
-To resolve dependencies that make up the runtime classpath, you can use either of the following methods:
+To resolve dependencies that make up the runtime classpath, you can use one of the following methods:
 
-- `JkProject.packaging.resolveRuntimeDependencies()` to fetch the resolution tree, allowing you to reason about the dependency resolution tree.
-- `JkProject.packaging.resolveRuntimeDependenciesAsFiles()` to directly fetch the resolved classpath (a list of JAR files).
+- `JkProject.packaging.resolveRuntimeDependencies()` to fetch the dependency resolution tree.
+- `JkProject.packaging.resolveRuntimeDependenciesAsFiles()` to get the resolved classpath as a list of JAR files.
 
-The second option may be faster, as it caches the result from a previous invocation.
+The second option may be faster as it caches the results of previous invocations.
+
 
 
 

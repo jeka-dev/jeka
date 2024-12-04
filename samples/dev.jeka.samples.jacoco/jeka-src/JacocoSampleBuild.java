@@ -28,7 +28,7 @@ public class JacocoSampleBuild extends KBean {
         JkProject project = projectKBean.project;
         JkJacoco.ofVersion("0.8.11")
                 .configureAndApplyTo(project);
-       project.flatFacade.testDependencies
+       project.flatFacade.dependencies.test
                         .add(JkPopularLibs.JUNIT_5 + ":5.8.2");
     }
 

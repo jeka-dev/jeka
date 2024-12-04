@@ -35,10 +35,10 @@ public class SimpleProjectKBean extends KBean {
     @Override
     protected void init() {
         JkProject project = projectKBean.project;
-        project.flatFacade.compileDependencies
+        project.flatFacade.dependencies.compile
                 .add("com.google.guava:guava:30.0-jre")
                 .add( "com.sun.jersey:jersey-server:1.19.4");
-        project.flatFacade.testDependencies
+        project.flatFacade.dependencies.test
                .add("org.junit.jupiter:junit-jupiter:5.10.1");
         project.flatFacade
                .addTestExcludeFilterSuffixedBy("IT", skipIT);

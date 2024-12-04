@@ -40,7 +40,7 @@ class NexusBuild extends KBean {
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
                 .setModuleId("dev.jeka:nexus-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .compileDependencies.add(JkLocator.getJekaJarPath());
+                .dependencies.compile.add(JkLocator.getJekaJarPath());
         load(MavenKBean.class).getMavenPublication()
                 .pomMetadata
                 .setProjectName("Jeka plugin for Jacoco")

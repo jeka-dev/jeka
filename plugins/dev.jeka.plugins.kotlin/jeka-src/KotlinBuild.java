@@ -23,8 +23,8 @@ class KotlinBuild extends KBean {
             .setModuleId("dev.jeka:kotlin-plugin")
             .setJvmTargetVersion(JkJavaVersion.V8)
             .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-            .mixResourcesAndSources()
-            .compileDependencies
+            .setMixResourcesAndSources()
+            .dependencies.compile
                     .add(JkLocator.getJekaJarPath());
 
         load(MavenKBean.class).getMavenPublication()

@@ -35,10 +35,10 @@ public class SimpleWarKBean extends KBean {
                 .compilation.layout.emptySources().addSource("src/main/javaweb");
         project.testing.setSkipped(true);
 
-        project.flatFacade.compileDependencies.modify(deps -> deps
+        project.flatFacade.dependencies.compile.modify(deps -> deps
                 .and("com.google.guava:guava:30.0-jre")
                 .and("javax.servlet:javax.servlet-api:4.0.1"));
-        project.flatFacade.runtimeDependencies
+        project.flatFacade.dependencies.runtime
                 .remove("javax.servlet:javax.servlet-api");
         JkJ2eWarProjectAdapter.of().configure(project);
     }

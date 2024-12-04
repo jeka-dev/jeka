@@ -25,36 +25,37 @@ import dev.jeka.core.api.tooling.git.JkGit;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.PROD;
 import static dev.jeka.core.api.project.JkCompileLayout.Concern.TEST;
 
 /**
- * Flat facade over {@link JkProject} to access {@link JkProject} configuration
- * from a single entry point.
+ * A simplified facade over {@link JkProject} to access its configuration
+ * through a single entry point.
+ *
+ * This class organizes its methods into the following categories for easier exploration,
+ * following a consistent naming convention:
+ *
+ * <ul>
+ *   <li><b>Configuration Methods:</b> setXXX(), addXXX(), removeXXX()
+ *       <br>These methods modify the underlying project configuration.</li>
+ *   <li><b>Action Methods:</b> doXXX()
+ *       <br>These methods trigger specific actions, such as building the project.</li>
+ *   <li><b>Getter Methods:</b> getXXX()
+ *       <br>These methods retrieve information from the project.</li>
+ * </ul>
  */
 public class JkProjectFlatFacade {
 
     private final JkProject project;
 
-    public final JkDependencySetModifier compileDependencies;
-
-    public final JkDependencySetModifier runtimeDependencies;
-
-    public final JkDependencySetModifier testDependencies;
+    public final JkDependencyFacade dependencies;
 
     JkProjectFlatFacade(JkProject project) {
         this.project = project;
-        this.compileDependencies = project.compilation.dependencies;;
-        this.runtimeDependencies = project.packaging.runtimeDependencies;
-        this.testDependencies = project.testing.compilation.dependencies;
+        this.dependencies = new JkDependencyFacade();
     }
 
     /**
@@ -132,7 +133,7 @@ public class JkProjectFlatFacade {
     /**
      * The resources will be located in same the dir than the sources.
      */
-    public JkProjectFlatFacade mixResourcesAndSources() {
+    public JkProjectFlatFacade setMixResourcesAndSources() {
         project.compilation.layout.mixResourcesAndSources();
         project.testing.compilation.layout.mixResourcesAndSources();
         return this;
@@ -156,9 +157,9 @@ public class JkProjectFlatFacade {
      * @param coordinate the dependency to be added in the format of group:artifactId:version
      */
     public JkProjectFlatFacade addCompileOnlyDeps(@JkDepSuggest String coordinate) {
-        compileDependencies.add(coordinate);
+        dependencies.compile.add(coordinate);
         String moduleId = JkCoordinate.of(coordinate).getModuleId().toColonNotation();
-        runtimeDependencies.remove(moduleId);
+        dependencies.runtime.remove(moduleId);
         return this;
     }
 
@@ -166,7 +167,7 @@ public class JkProjectFlatFacade {
     /**
      * Sets whether to skip running tests for the project.
      */
-    public JkProjectFlatFacade skipTests(boolean skipped) {
+    public JkProjectFlatFacade setTestsSkipped(boolean skipped) {
         project.testing.setSkipped(skipped);
         return this;
     }
@@ -271,11 +272,73 @@ public class JkProjectFlatFacade {
         return this;
     }
 
+    // ------------------------------ action methods ---------------------------------
+
     /**
-     * Retrieves the project associated with this facade.
+     * Executes the packing process for this project, which includes compiling, testing, and creating JAR files.
+     *
+     * @see JkProject#packActions
+     */
+    public JkProjectFlatFacade doPack() {
+        project.pack();
+        return this;
+    }
+
+    /**
+     * Same as {@link #doPack()} but skips the testing phase.
+     */
+    public JkProjectFlatFacade doFastPack() {
+        project.compilation.runIfNeeded();  // Better to launch it first explicitly for log clarity
+        project.packActions.run();
+        return this;
+    }
+
+    // ----------------------------- get methods -----------------------------------
+
+    /**
+     * Returns the project associated with this facade.
      */
     public JkProject getProject() {
         return project;
+    }
+
+    /**
+     * Returns the main JAR file produced by the build.
+     */
+    public Path getMainJar() {
+        return project.artifactLocator.getMainArtifactPath();
+    }
+
+    /**
+     * Returns the directory where compiled classes are stored.
+     */
+    public Path getClassDir() {
+        return project.compilation.layout.resolveClassDir();
+    }
+
+    /**
+     * Returns the classpath used for running the built jar.
+     */
+    public List<Path> getRuntimeClasspath() {
+        return project.packaging.resolveRuntimeDependenciesAsFiles();
+    }
+
+    // -------------------------------------------------------------------
+
+    public class JkDependencyFacade {
+
+        public final JkDependencySetModifier compile;
+
+        public final JkDependencySetModifier runtime;
+
+        public final JkDependencySetModifier test;
+
+        private JkDependencyFacade() {
+            this.compile = project.compilation.dependencies;;
+            this.runtime = project.packaging.runtimeDependencies;
+            this.test = project.testing.compilation.dependencies;
+        }
+
     }
 
 }

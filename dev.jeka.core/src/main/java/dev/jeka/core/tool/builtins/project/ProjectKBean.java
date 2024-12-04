@@ -370,7 +370,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         applyRepoConfigOn(project);
         project.flatFacade.setLayoutStyle(layout.style);
         if (layout.mixSourcesAndResources) {
-            project.flatFacade.mixResourcesAndSources();
+            project.flatFacade.setMixResourcesAndSources();
         }
         JkJavaCompilerToolChain compilerToolChain = project.compilerToolChain;
         if (!compilerToolChain.isToolOrProcessSpecified()) {

@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet.Hint;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
@@ -52,7 +51,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
                 // Control on project Layout
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE) // don't use maven layout
-                .mixResourcesAndSources()  // java sources and resources are located in same folder
+                .setMixResourcesAndSources()  // java sources and resources are located in same folder
 
                 // Control on produced artifacts
                 .setMainArtifactJarType(JkProjectPackaging.JarType.FAT)
