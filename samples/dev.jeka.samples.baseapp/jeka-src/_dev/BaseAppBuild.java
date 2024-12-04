@@ -42,7 +42,7 @@ class BaseAppBuild extends KBean {
         dockerBuild.setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy");
 
         // Customize Dockerfile
-        dockerBuild
+        dockerBuild.dockerfileTemplate
                 .moveCursorBefore("ENTRYPOINT ")
                 .add("## my comment");
     }
