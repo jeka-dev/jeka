@@ -59,6 +59,7 @@ project
 |  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
 + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
+See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.project-api/jeka-src/JkProjectBuild.java).
 
 #### Flat Facade
 
@@ -83,8 +84,6 @@ projectFacade.dependencies.test
        .add("org.junit.vintage:junit-vintage-engine:5.6.0");
 projectFacade.doPack();  // compile, test and create jar
 ```
-
-See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.project-api/jeka-src/JkProjectBuild.java).
 
 #### Project Dependencies
 
