@@ -19,8 +19,8 @@ package dev.jeka.plugins.springboot;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -51,10 +51,6 @@ import java.util.Optional;
 )
 public final class SpringbootKBean extends KBean {
 
-    //@JkDoc("Version of Spring Boot version used to resolve dependency versions.")
-    //@JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    //private String springbootVersion;
-
     @JkDoc("If true, create a bootable jar artifact.")
     private final boolean createBootJar = true;
 
@@ -70,6 +66,9 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("The springboot profiles that should be activated while processing AOT")
     public String aotProfiles;
 
+    @JkDoc("Space separated string of ports to expose. This is likely to be used by external tool as Docker.")
+    public String exposedPorts="8080";
+
 
     @Override
     protected void init() {
@@ -80,24 +79,22 @@ public final class SpringbootKBean extends KBean {
         if (optionalProjectKBean.isPresent() || !optionalBaseKBean.isPresent()) {
             customizeProjectKBean(load(ProjectKBean.class));
 
-            // Otherwise, force use BaseKBean
+            // Otherwise, force to use BaseKBean
         } else {
             customizeBaseKBean(load(BaseKBean.class));
         }
 
         // Configure Docker KBean to add port mapping on run
         Optional<DockerKBean> optionalDockerKBean = getRunbase().find(DockerKBean.class);
-        optionalDockerKBean.ifPresent(dockerKBean -> dockerKBean.customizeJvmImage(dockerBuild -> {
-            if (dockerBuild.getExposedPorts().isEmpty()) {
-                dockerBuild.setExposedPorts(8080);
-            }
-        }));
-
+        if (optionalDockerKBean.isPresent()) {
+            DockerKBean dockerKBean = optionalDockerKBean.get();
+            dockerKBean.customizeJvmImage(this::customizeDockerBuild);
+            dockerKBean.customizeNativeImage(this::customizeDockerBuild);
+        }
     }
 
     @JkDoc("Provides info about this plugin configuration")
     public void info() {
- //       JkLog.info("Spring-Boot version : " + springbootVersion);
         JkLog.info("Create Bootable Jar : " + this.createBootJar);
         JkLog.info("Create original Jar : " + this.createOriginalJar);
         JkLog.info("Create .war file : " + this.createWarFile);
@@ -130,6 +127,12 @@ public final class SpringbootKBean extends KBean {
         return result;
     }
 
+    private void customizeDockerBuild(JkDockerBuild dockerBuild) {
+        if (dockerBuild.getExposedPorts().isEmpty()) {
+            dockerBuild.setExposedPorts(exposedPortAsArray());
+        }
+    }
+
 
     private void customizeProjectKBean(ProjectKBean projectKBean) {
 
@@ -143,7 +146,7 @@ public final class SpringbootKBean extends KBean {
             springbootProject.addSpringRepo(springRepo);
         }
 
-        // Configure native kbean
+        // Configure native kKBan
         NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
         nativeKBean.includeMainClassArg = false;
         nativeKBean.setAotAssetDirs(() ->
@@ -182,6 +185,12 @@ public final class SpringbootKBean extends KBean {
             return aotProfiles.split(",");
         }
         return new String[0];
+    }
+
+    private Integer[] exposedPortAsArray() {
+        return Arrays.stream(exposedPorts.split(" "))
+                .map(Integer::valueOf)
+                .toArray(Integer[]::new);
     }
 
 }

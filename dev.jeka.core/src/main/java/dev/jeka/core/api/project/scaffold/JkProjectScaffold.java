@@ -138,8 +138,8 @@ public final class JkProjectScaffold extends JkScaffold {
     }
 
     /**
-     * Removes a file entry from the list of file entries. Ths give a chance to plugins
-     * to remove non-necessary files.
+     * Removes a file entry from the list of file entries. This gives a chance to plugins
+     * to remove the non-necessary files.
      *
      * @param relativePath the path, relative to base dir.
      */
@@ -153,8 +153,8 @@ public final class JkProjectScaffold extends JkScaffold {
         }
     }
 
-    /**
-     * Configures scaffold to creates project structure, including build class, according
+    /*
+     * Configures scaffold to create project structure, including build class, according
      * the specified template.
      */
     private void configureScaffold() {

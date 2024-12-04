@@ -157,10 +157,14 @@ public final class JkRunbase {
     }
 
     /**
-     * Instantiates the specified KBean into this runbase, if it is not already present. <p>
-     * As KBeans are singleton within a runbase, this method has no effect if the bean is already loaded.
+     * Instantiates the specified KBean into the current runbase, if it is not already present. <p>
+     * Since KBeans are singletons within a runbase, calling this method has no effect if the bean is already loaded.
+     *
      * @param beanClass The class of the KBean to load.
+     *
      * @return This object for call chaining.
+     *
+     * @see JkRunbase#load(Class)
      */
     public <T extends KBean> T load(Class<T> beanClass) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");

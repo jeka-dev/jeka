@@ -20,6 +20,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -28,75 +29,159 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Docker Builder assistant for creating Docker images with 'nonroot' user.<br/>.
+ * Docker Builder assistant for defining and creating Docker images.
  * <p>
- * This clss allows to construct a Docker build context programmatically. <br/>
- * This means it can create a folder, containing the Dockerfile along the needed files to copy
- * in the image.
- * <p>
+ * This class facilitates the programmatic construction of a Docker build context directory
+ * and the execution of the <code>docker build</code> command using that context.
+ * </p>
  *
- * The builder starts from a template DockerBuild that can be augmented using
- * methods and fields.
+ * <h2>Key Features</h2>
+ * <ul>
+ *   <li>Configuring the base image</li>
+ *   <li>Adding a non-root user to the image</li>
+ *   <li>Customizing the build process with additional steps in the generated Dockerfile</li>
+ * </ul>
  *
+ * <h2>Docker Image Build Process</h2>
+ * <ol>
+ *   <li>
+ *     A static template of the Dockerfile is generated. This template may include tokens such as
+ *     <i>${baseImage}</i>, allowing flexibility when the base image or user creation steps
+ *     need to be determined dynamically.
+ *   </li>
+ *   <li>
+ *     Tokens in the static template are resolved dynamically to produce the final Dockerfile.
+ *   </li>
+ *   <li>
+ *     The build context directory is created. The generated Dockerfile and any specified files
+ *     are copied into this directory.
+ *   </li>
+ *   <li>
+ *     The <code>docker build</code> command is executed using the generated build context directory.
+ *     This operation requires Docker CLI (e.g., Docker Desktop) installed on the host machine.
+ *   </li>
+ * </ol>
+ *
+ * <h2>Default Dockerfile Template</h2>
+ * <p>The default Dockerfile template is as follows:</p>
  * <pre><code>
- * FROM ${BASE_IMAGE}
- *
- *     <------- setExposedPort()
- *
- * # create 'nonroot' user. Statements may vary according base image distro
- * # userId and groupId can be parametrized
- * # This section will be created only if #userId is not null
- * RUN addgroup --gid 1002 nonrootgroup && \
- *     adduser --uid 1001 --gid 1002 --disabled-password --gecos "" nonroot
- *
- *      <------ rootSteps
- *
- * This step will be created only if #userId is not null
- * USER nonroot
- *
- *      <------ nonRootSteps
- *
- *
+ * FROM ${baseImage}
+ * ${addNonRootUser}
  * </code></pre>
+ *
+ * <p>
+ * Users can customize this template by adding steps to the <code>dockerFileTemplate</code> field.
+ * Custom tokens (e.g., <i>${myToken}</i>) can also be defined, and their resolution logic specified
+ * using the <code>#addTokenResolver(String, Supplier&lt;String&gt;)</code> method.
+ * </p>
+ *
+ * <h2>Importing Files</h2>
+ * <p>
+ * Files can be imported into the build context using:
+ * </p>
+ * <ul>
+ *   <li><code>#addFsOperation()</code></li>
+ *   <li><code>dockerFileTemplate#addCopy(fileSystemPath, containerPath)</code></li>
+ * </ul>
+ *
+ * <h2>Building and Pushing Images</h2>
+ * <p>
+ * Once the Docker build is configured, the image can be generated using the
+ * <code>buildImage(String imageName)</code> method. The resulting image will be automatically
+ * pushed to the Docker registry.
+ * </p>
+ *
+ * <h2>Intermediate Steps</h2>
+ * <p>
+ * Intermediate steps such as <code>dockerFileTemplate.render()</code>,
+ * <code>renderDockerFile()</code>, or <code>generateContextDir()</code> can be used
+ * to aid in the configuration of the Docker build process.
+ * </p>
+ *
+ * <h2>Extensibility</h2>
+ * <p>
+ * This class can be extended to provide a specific default template and additional
+ * convenience methods.
+ * </p>
  */
 public class JkDockerBuild {
 
-    public static final String TEMURIN_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
-            "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot";
+    private static final String CREATE_NON_ROOT_TOKEN = "createNonRootUser";
 
-    public static final String UBUNTU_ADD_USER_TEMPLATE = "RUN groupadd --gid ${GID} nonrootgroup && \\\n" +
-            "    useradd --uid ${UID} --gid ${GID} --create-home nonroot && passwd -d nonroot";
+    private static final String SWITCH_NON_ROOT_TOKEN = "switchNonRootUser";
 
-    public static final String ALPINE_ADD_USER_TEMPLATE = "RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
-            "    adduser --uid ${UID} -g ${GID} --disabled-password nonroot\n";
+    private static final String CHOWN_DIR_TOKEN = "chownDir";
 
-    /**
-     * Steps to be inserted in Dockerfile, prior 'nonroot' user switch.
-     * These steps will be executed under 'root' user.
-     */
-    public final StepContainer rootSteps = new StepContainer();
+    private static final String GROUP_ID_TOKEN = "GID";
 
-    /**
-     * Steps to be inserted in Dockerfile, after 'nonroot' user switch.
-     * These steps will be executed under 'root' user.<p>
-     * If the image is not defined to create a nonroot user, these steps will be executed under
-     * root user, after the rootSteps.
-     */
-    public final StepContainer nonRootSteps = new StepContainer();
+    private static final String USER_ID_TOKEN = "UID";
+
+    private static final String BASE_IMAGE_TOKEN = "baseImage";
+
+    public final DockerfileTemplate dockerfileTemplate = new DockerfileTemplate();
 
     private String baseImage = "ubuntu";
 
-    private Integer userId = 1001;
+    private NonRootUserCreationMode nonRootUserCreationMode = NonRootUserCreationMode.AUTO;
 
-    private Integer groupId;
+    private int userId = 1001;
 
-    private String addUserTemplate;
+    private int groupId = 1002;
+
+    private String addUserStatement;
 
     private final List<Integer> exposedPorts = new LinkedList<>();
 
+    // Contains the copy or similar operation to be done, next the build context dir is created.
+    // The "path" to consume stands for the build context dir.
+    private JkConsumers<Path> fsOperations = JkConsumers.of();
+
+    // keeps the imported files into a set avoid duplicate names
+    private final Set<String> importedFiles = new HashSet<>();
+
+    // The supplied object will be turned in string via #toString()
+    private final Map<String, Supplier<Object>> tokenResolvers = new HashMap<>();
+
+    /**
+     * Defines the modes for creating a nonroot user in a Docker image.<br/>
+     */
+    public enum NonRootUserCreationMode {
+
+        /** Always create a nonroot user */
+        ALWAYS,
+
+        /** Never create a nonroot user */
+        NEVER,
+
+        /**
+         * Creates a nonroot user if it cannot be determined whether the base image already includes one.
+         * The determination is based on the image name.
+         */
+        AUTO
+    }
+
+    public enum AddUserStatement {
+
+        TEMURIN("RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
+                "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot"),
+
+        UBUNTU("RUN groupadd --gid ${GID} nonrootgroup && \\\n" +
+                "    useradd --uid ${UID} --gid ${GID} --create-home nonroot && passwd -d nonroot"),
+
+        ALPINE("RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
+                "    adduser --uid ${UID} -g ${GID} --disabled-password nonroot");
+
+        public final String statement;
+
+        AddUserStatement(String statement) {
+            this.statement = statement;
+        }
+
+    }
 
     /**
      * Creates a {@link JkDockerBuild instannce.}
@@ -106,7 +191,20 @@ public class JkDockerBuild {
     }
 
     protected JkDockerBuild() {
+        dockerfileTemplate
+                .add("FROM " + decorateToken(BASE_IMAGE_TOKEN))
+                .add(decorateToken(CREATE_NON_ROOT_TOKEN))
+                .add(decorateToken(SWITCH_NON_ROOT_TOKEN));
+
+        tokenResolvers.put(BASE_IMAGE_TOKEN, this::getBaseImage);
+        tokenResolvers.put(USER_ID_TOKEN, () -> this.userId);
+        tokenResolvers.put(GROUP_ID_TOKEN, () -> this.groupId);
+        tokenResolvers.put(CREATE_NON_ROOT_TOKEN, this::userCreationStatement);
+        tokenResolvers.put(SWITCH_NON_ROOT_TOKEN, () -> hasNonRootUserCreation() ? "USER nonroot" : "");
+        tokenResolvers.put(CHOWN_DIR_TOKEN, this::resolveChownDir);
     }
+
+    // ---------------- Getters / setters -----------------------------
 
     /**
      * Sets the base image name to use a s the base image in the docker file.
@@ -120,26 +218,59 @@ public class JkDockerBuild {
         return baseImage;
     }
 
+    public final JkDockerBuild setNonRootUserCreationMode(NonRootUserCreationMode nonRootUserCreationMode) {
+        this.nonRootUserCreationMode = nonRootUserCreationMode;
+        return this;
+    }
+
     /**
-     * Set userId to be used as nonroot user.
-     * @param userId The userId, or <code>null</code> to use the root user and skip nonroot user creation
+     * Checks whether the image includes a step to create a non-root user.
+     *
+     * @return true if a non-root user creation step is present, false otherwise.
      */
-    public final JkDockerBuild setUserId(Integer userId) {
+    public final boolean hasNonRootUserCreation() {
+        if (nonRootUserCreationMode == NonRootUserCreationMode.NEVER) {
+            return false;
+        } else if (nonRootUserCreationMode == NonRootUserCreationMode.ALWAYS) {
+            return true;
+        }
+        return !this.baseImage.contains("nonroot");
+    }
+
+    /**
+     * Sets the Docker statement for adding a 'nonroot' user.<br/>
+     * The placeholders "${UID}" and "${GID}" will be replaced with the user ID and group ID
+     * configured for this instance, respectively.
+     */
+    public final JkDockerBuild setAddUserStatement(String addUserTemplate) {
+        this.addUserStatement = addUserTemplate;
+        return this;
+    }
+
+    /**
+     * @see #setAddUserStatement(String)
+     */
+    public final JkDockerBuild setAddUserStatement(AddUserStatement addUserTemplate) {
+        return setAddUserStatement(addUserTemplate.statement);
+    }
+
+    /**
+     * Sets the user ID for the 'nonroot' user.<br/>
+     *
+     * @param userId the user ID to assign.
+     */
+    public final JkDockerBuild setUserId(int userId) {
         this.userId = userId;
         return this;
     }
 
+    /**
+     * Sets the group ID for the 'nonroot' user.<br/>
+     *
+     * @param groupId the group ID to assign.
+     */
     public final JkDockerBuild setGroupId(int groupId) {
         this.groupId = groupId;
-        return this;
-    }
-
-    /**
-     * Sets the docker statement for adding a user.  "${UID}" and "$[GID}" will be
-     * replaced by respectively the userId and the groupId set on this instance.
-     */
-    public final JkDockerBuild setAddUserTemplate(String addUserTemplate) {
-        this.addUserTemplate = addUserTemplate;
         return this;
     }
 
@@ -160,30 +291,83 @@ public class JkDockerBuild {
     }
 
     /**
-     * Builds the docker image with the specified image name.
-     * @param contextDir the folder where the docker file will be generated, and from where will be resolve COPY paths.
-     * @param imageName The name of the image to be build. It may contains or not a tag name.
+     * Returns a string representation of the command line arguments for port mapping in the Docker image.
      */
-    public void buildImage(Path contextDir, String imageName) {
+    protected final String getPortMappingArgs() {
+        return cmdLinePortMapping(this.exposedPorts);
+    }
+
+    // ------------------- Customize Dockerfile ------------------------------------
+
+
+
+    /**
+     * Specifies how to resolve the given token. The value supplier can return any type of object,
+     * which will be converted to a String using the {@link #toString()} method.
+     */
+    public JkDockerBuild addTokenResolver(String token, Supplier<Object> valueSupplier) {
+        this.tokenResolvers.put(token, valueSupplier);
+        return this;
+    }
+
+    // ------------------------ customize build context dir --------------------
+
+    /**
+     * Adds an operation to be executed immediately after the build context directory is created.<p>
+     * This is typically used to import files or directories into the context directory.
+     *
+     * @param fsOperation a {@link Consumer<Path>} that accepts the path to the build context directory.
+     */
+    public JkDockerBuild addFsOperation(Consumer<Path> fsOperation) {
+        fsOperations.add(fsOperation);
+        return this;
+    }
+
+    // ------------------------------ Build methods  --------------------------------------------
+
+    /**
+     * Render the final Dockerfile.
+     */
+    public String renderDockerfile() {
+        String dockerfileContent = dockerfileTemplate.render(this);
+        dockerfileContent = interpolate(dockerfileContent, true);
+
+        // Adds exposed ports to the end of the Dockerfile.
+        String exposedPortStatements = dockecBuildExposedPorts(this.exposedPorts);
+        if (!exposedPortStatements.isEmpty()) {
+            dockerfileContent =  dockerfileContent + "\n" + exposedPortStatements;
+        }
+        return dockerfileContent;
+    }
+
+    /**
+     * Builds the Docker image with the specified image name.<br/>
+     *
+     * @param buildContextDir the directory where the Dockerfile will be generated and from which COPY paths will be resolved.
+     * @param imageName the name of the image to build. It may include a tag name.
+     */
+    public void buildImage(Path buildContextDir, String imageName) {
         JkDocker.assertPresent();
-        this.generateContextDir(contextDir, false);
-        JkDocker.prepareExec("build", "-t", imageName, contextDir.toString())
+        this.generateContextDir(buildContextDir);
+        JkDocker.prepareExec("build", "-t", imageName, buildContextDir.toString())
                 .setInheritIO(true)
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
                 .setInheritIO(false)
                 .exec();
 
-        String portMapping = portMappingArgs();
-        JkLog.info("Run docker image       : docker run --rm %s%s", portMapping, imageName);
+        String portMapping = getPortMappingArgs();
+        JkLog.info("Run docker image: docker run --rm %s%s", portMapping, imageName);
     }
 
     /**
-     * Same as {@link #buildImage(Path, String)} but without needing passing a context directory.<p>
-     * The context directory will be created on a random temp dir.
-     * @return The path of the context dir.
+     * Similar to {@link #buildImage(Path, String)}, but without requiring a context directory to be specified.<p>
+     * A temporary context directory will be created in a random location.
+     *
+     * @return the path of the created context directory.
      */
-    public Path buildImage(String imageName) {
+
+    public Path buildImageInTemp(String imageName) {
         Path contextDir = JkUtilsPath.createTempDirectory("jeka-docker-build-context");
         JkLog.verbose("Using context dir %s for building Docker image %s" , contextDir, imageName);
         buildImage(contextDir, imageName);
@@ -191,284 +375,290 @@ public class JkDockerBuild {
     }
 
     /**
-     * Renders the effective Dockerfile
+     * Generates the build context directory without building the Docker image. This can be useful for debugging purposes.<p>
+     * This method is automatically called when {@link #buildImage(Path, String)} is invoked.
      */
-    public final String render() {
-        Path temp = JkUtilsPath.createTempDirectory("jk-dockerbuild-");
-        String result = generateContextDir(temp, true);
-        if (Files.exists(temp)) {
-            JkPathTree.of(temp).deleteRoot();
-        }
-        return result;
+    public void generateContextDir(Path buildContextDir) {
+        String dockerfileContent = renderDockerfile();
+        JkPathFile.of(buildContextDir.resolve("Dockerfile")).write(dockerfileContent);
+        this.fsOperations.accept(buildContextDir);
     }
 
-    /**
-     * Returns a string representation of the command line arguments for port mapping in the Docker image.
-     */
-    public final String portMappingArgs() {
-        String portMapping = "";
-        if (!this.exposedPorts.isEmpty()) {
-            portMapping = this.exposedPorts.stream()
-                    .map(Object::toString)
-                    .reduce("-p ", (init, port) -> init  + port + ":" + port + " ");
-        }
-        return portMapping;
-    }
+    // ------------ utility method -------------
 
     /**
-     * The specification of the 'nonroot' group id is optional.
-     * If not mentioned explicitly, it values userId + 1
-     * If userId values <code>null</code> and groupId, is not mentionned, this methods returns <code>null</code>
+     * Renders a human-readable string representation of the information used
+     * to build the image.
      */
-    public final Integer getEffectiveGroupId() {
-        if (this.groupId != null) {
-            return groupId;
-        }
-        if (userId == null) {
-            return null;
-        }
-        return groupId(userId);
-    }
-
-    /**
-     * Returns <code>true</code> if a 'nonroot' is declaredd
-     */
-    public final boolean hasNonRootUser() {
-        return userId != null;
-    }
-
-    /**
-     * Transform a list of argument to a string as <code>["arg1", "arg2", ...]</code> suitable
-     * to insert as ENTRYPOINT or CMD step arguments.
-     */
-    public static String toArrayQuotedString(List<String> args) {
-        if (args == null) {
-            return null;
-        }
+    public String renderInfo() {
+        String rule = "-------------------------------------------------";
         StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        args.forEach(arg -> sb.append("\"").append(arg).append("\", "));
-        if (!args.isEmpty()) {
-            sb.setLength(sb.length() - 2);
-        }
-        sb.append("]");
+
+        sb.append(rule).append("\n");
+        sb.append("Dockerfile Template:\n");
+        sb.append(rule).append("\n");
+        sb.append(dockerfileTemplate.render(this)).append("\n");
+
+        sb.append(rule).append("\n");
+        sb.append("Dockerfile :\n");
+        sb.append(rule).append("\n");
+        sb.append(renderDockerfile()).append("\n");
+        sb.append(rule).append("\n");
         return sb.toString();
     }
 
-    private String generateContextDir(Path contextDir, boolean dry) {
+    static String decorateToken(String token) {
+        return "${" + token + "}";
+    }
 
-        // Handle exposed ports
-        String exposedPortStatements = exposedPorts.isEmpty() ? "" :
-                "EXPOSE " + exposedPorts.stream().map(i -> Integer.toString(i))
-                        .collect(Collectors.joining(" ")) + "\n";
-
-        String dockerBuildTemplate =
-                "FROM ${baseImage}\n" +
-                        exposedPortStatements +
-                        userCreationStatement() +
-                        this.rootSteps.process(contextDir, dry) +
-                        "\n" +
-                        switchUser() +
-                        this.nonRootSteps.process(contextDir, dry);
-
-        String dockerfileContent = dockerBuildTemplate.replace("${baseImage}", baseImage);
-        if (!dry) {
-            JkPathFile.of(contextDir.resolve("Dockerfile")).write(dockerfileContent);
+    protected String computeImportedFileRelativePath(Path fileToCopy, String targetDirRelPath) {
+        String candidateFileName = targetDirRelPath + "/" + fileToCopy.getFileName().toString();
+        while (importedFiles.contains(candidateFileName)) {
+            candidateFileName = "_" + candidateFileName;
         }
-        return dockerfileContent;
+        return candidateFileName;
+    }
+
+    /**
+     * Transform a list as [a,b,c] in a string as <i>"a", "b", "c"</i>
+     */
+    protected static String toDoubleQuotedArgs(String ...args) {
+        StringBuilder sb = new StringBuilder();
+        Arrays.stream(args).forEach(arg -> sb.append("\"").append(arg).append("\", "));
+        if (args.length > 0) {
+            sb.setLength(sb.length() - 2);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * @see #toDoubleQuotedArgs(String...)
+     */
+    protected static String toDoubleQuotedArgs(List<String> args) {
+        return toDoubleQuotedArgs(args.toArray(new String[0]));
+    }
+
+    //----------------------  private methods --------------------------------------------------
+
+    private String interpolate(String dockerFileCandidate, boolean goRecursive) {
+        String result = dockerFileCandidate;
+        for (Map.Entry<String, Supplier<Object>> entry : tokenResolvers.entrySet()) {
+            String token = decorateToken(entry.getKey());
+            String value = JkUtilsObject.toString(entry.getValue().get());
+            result = result.replace(token, value);
+        }
+        int tokenCount = JkUtilsString.countOccurrence(result, '{');
+        if (tokenCount == 0 || !goRecursive) {
+            return result;
+        }
+        String redoResult = interpolate(result, false);
+        if (redoResult.equals(redoResult)) {
+            return result;
+        }
+        return interpolate(result, true);
     }
 
     private String userCreationStatement() {
-        if (userId == null) {
+        if (!this.hasNonRootUserCreation()) {
             return "";
         }
-        int gid = groupId(userId);
-        String template = getAddUserTemplate() + "\n";
-        return template.replace("${UID}", userId.toString()).replace("${GID}", Integer.toString(gid));
-    }
-
-    private String switchUser() {
-        if (userId == null) {
-            return "";
-        }
-        return "USER nonroot\n";
+        String template = inferAddUserTemplate();
+        template = template
+                .replace(decorateToken(USER_ID_TOKEN), Integer.toString(userId))
+                .replace(decorateToken(GROUP_ID_TOKEN), Integer.toString(groupId));
+        return template;
     }
 
     private static String toString(List<String> statements) {
         return statements.stream().reduce("", (init, step) -> init + step + "\n" );
     }
 
-    private int groupId(int uid) {
-        if (this.groupId != null) {
-            return this.groupId;
+    private String inferAddUserTemplate() {
+        if (!JkUtilsString.isBlank(addUserStatement)) {
+            return addUserStatement;
         }
-        return uid + 1;  // Some distrib as Alpine does not allow group creation having the same id than a user
-    }
-
-    private String getAddUserTemplate() {
-        if (!JkUtilsString.isBlank(addUserTemplate)) {
-            return addUserTemplate;
-        }
-        if (baseImage.contains("ubuntu")) {
-            return UBUNTU_ADD_USER_TEMPLATE;
+        if (baseImage.contains("alpine")) {    // should be tested first as 'alpine' may also appear in temurin based image.
+            return AddUserStatement.ALPINE.statement;
+        } else if (baseImage.contains("ubuntu")) {
+            return AddUserStatement.UBUNTU.statement;
         } else if (baseImage.contains("temurin")) {
-            return TEMURIN_ADD_USER_TEMPLATE;
-        } else if (baseImage.contains("alpine")) {
-            return ALPINE_ADD_USER_TEMPLATE;
+            return AddUserStatement.TEMURIN.statement;
         }
-        return UBUNTU_ADD_USER_TEMPLATE;
+        return AddUserStatement.UBUNTU.statement;
     }
 
-    public class StepContainer {
+    private String mkdirStatement(String dirPath) {
+        return String.format("mkdir -p %s ${%s}%s", dirPath, CHOWN_DIR_TOKEN, dirPath);
+    }
 
-        private final JkConsumers<Context> operations = JkConsumers.of();
+    private String resolveChownDir() {
+        return hasNonRootUserCreation() ? "&& chown -R nonroot:nonrootgroup " : "";
+    }
+
+
+
+    private void importFile(Path buildContextDir, String relativeInsidePath, Path ousideContextPath, boolean optional) {
+        if (!optional && !Files.exists(ousideContextPath)) {
+            String msg = "File " + ousideContextPath + " not found while creating a Dockerfile entry in "
+                    + buildContextDir +  ".";
+            throw new IllegalArgumentException(msg);
+        }
+        Path insideContextPath = buildContextDir.resolve(relativeInsidePath);
+        JkUtilsPath.createDirectories(insideContextPath.getParent());
+        if (Files.isDirectory(ousideContextPath)) {
+            JkPathTree.of(ousideContextPath).copyTo(insideContextPath, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            JkUtilsPath.copy(ousideContextPath, insideContextPath, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+
+    static String dockecBuildExposedPorts(List<Integer> exposedPorts) {
+        return exposedPorts.isEmpty() ? "" :
+                "EXPOSE " + exposedPorts.stream().map(i -> Integer.toString(i))
+                        .collect(Collectors.joining(" "));
+    }
+
+    static String cmdLinePortMapping(List<Integer> exposedPorts) {
+        String portMapping = "";
+        if (!exposedPorts.isEmpty()) {
+            portMapping = exposedPorts.stream()
+                    .map(Object::toString)
+                    .reduce("-p ", (init, port) -> init  + port + ":" + port + " ");
+        }
+        return portMapping;
+    }
+
+    public class DockerfileTemplate {
+
+        private int index = 0;
+
+        private final List<String> buildSteps = new LinkedList<>();
+
+        private DockerfileTemplate() {
+        }
 
         /**
          * Appends the specified step at the end of step container.
          */
-        public StepContainer add(String step) {
-            operations.add(context -> context.steps.add(step));
+        public final DockerfileTemplate add(String step) {
+            buildSteps.add(index, step);
+            index++;
             return this;
         }
 
         /**
-         * Appends the specified operation to the build context
+         * Removes the build step currently at cursor position.
          */
-        public StepContainer add(Consumer<Context> operation) {
-            operations.add(operation);
+        public final DockerfileTemplate remove() {
+            buildSteps.remove(index);
             return this;
         }
 
         /**
-         * Inserts a step in Dockerfile, just before the specified one.
-         */
-        public StepContainer insertBefore(String stepStartingWith, String ... stepsToInsert) {
-            return add(context -> context.insertBefore(stepStartingWith, stepsToInsert));
-        }
-
-        /**
-         * Convenient method to add a COPY step on a file/dir located outside of the building context.
-         * The file will be copied within the Docker build context and a step will be added to Dockerfile.
+         * A convenient method to add a COPY step for a file or directory located outside the Docker build context.<p>
+         * The specified file or directory will be copied into the Docker build context, and a corresponding COPY step
+         * will be added to the Dockerfile.
          *
-         * @param optional fail if false and file does not exist.
+         * @param chownNonroot if true, includes the '--chown=nonroot:nonrootg' option in the COPY statement.
+         * @param optional if false, an error is thrown if the specified file or directory does not exist.
          */
-        public StepContainer addCopy(Path fileOrDir, String containerPath, boolean optional) {
-            return add(context -> copyFileInContext(fileOrDir, containerPath, context, false, optional));
+        public final DockerfileTemplate addCopy(Path fileOrDirToCopy, String containerPath, boolean chownNonroot, boolean optional) {
+            String insidePath = computeImportedFileRelativePath(fileOrDirToCopy, "imported-files");
+            fsOperations.add(buildContextDir -> {
+                importFile(buildContextDir, insidePath, fileOrDirToCopy, false);
+            });
+            String ownArg = chownNonroot ? "--chown=nonroot:nonrootg " : "";
+            return add("COPY " + ownArg + insidePath + " " + containerPath);
         }
 
         /**
-         * Same as {@link #addCopy(Path, String, boolean)} with optional=false
+         * @see #addCopy(Path, String, boolean, boolean)
          */
-        public StepContainer addCopy(Path fileOrDir, String containerPath) {
-            return addCopy(fileOrDir, containerPath, false);
+        public DockerfileTemplate addCopy(Path fileOrDirToCopy, String containerPath, boolean chownNonroot) {
+            return addCopy(fileOrDirToCopy, containerPath, chownNonroot, false);
+        }
+
+        /**
+         * @see #addCopy(Path, String, boolean, boolean)
+         */
+        public DockerfileTemplate addCopy(Path fileOrDirToCopy, String containerPath) {
+            return addCopy(fileOrDirToCopy, containerPath, false, false);
         }
 
         /**
          * Adds a Dockerfile step that creates a directory, belonging to the 'nonroot' user if such a
          * user exists.
          */
-        public StepContainer addNonRootMkdirs(String dirPath, String ...extraDirs) {
-            return add(context -> {
-                StringBuilder sb = new StringBuilder("RUN ");
-                sb.append(mkdirInstrcution(dirPath));
-                for (String extraDir : extraDirs) {
-                    sb.append(" \\\n    && ");
-                    sb.append(mkdirInstrcution(extraDir));
-                }
-                context.add(sb.toString());
-            });
-        }
-
-        private String mkdirInstrcution(String dirPath) {
-            if (userId == null) {
-                return "mkdir -p " + dirPath;
-            } else {
-                return String.format("mkdir -p %s && chown -R ${uid}:${gid} %s", dirPath, dirPath);
+        public DockerfileTemplate addNonRootMkDirs(String dirPath, String ...extraDirs) {
+            StringBuilder sb = new StringBuilder("RUN ");
+            sb.append(mkdirStatement(dirPath));
+            for (String extraDir : extraDirs) {
+                sb.append(" \\\n    && ");
+                sb.append(mkdirStatement(extraDir));
             }
+            return add(sb.toString());
         }
-
-
-        private String process(Path contextDir, boolean dry) {
-            Context context = new Context(contextDir, dry);
-            operations.accept(context);
-            String result =  String.join("\n", context.steps);
-            result = userId != null ? result.replace("${uid}", Integer.toString(userId)) : result;
-            Integer gid = getEffectiveGroupId();
-            result = gid != null ? result.replace("${gid}", Integer.toString(gid)) : result;
-            return result;
-        }
-
-        private void copyFileInContext(Path file, String containerPath, Context context, boolean nonRoot, boolean optional) {
-            if (!Files.exists(file)) {
-                String msg = "File " + file + " not found creating Dockerfile entry " + containerPath + " in "
-                        + context.dir;
-                if (!optional && !context.dry) {
-                    throw new IllegalArgumentException(msg);
-                } else {
-                    JkLog.verbose(msg);
-                }
-            }
-            String candidateFileName = file.getFileName().toString();
-            while (context.importedFileNames.contains(candidateFileName)) {
-                candidateFileName = "_" + candidateFileName;
-            }
-            Path tempPath = context.dir.resolve("imported-files").resolve(candidateFileName);
-            context.importedFileNames.add(candidateFileName);
-            String ownArg = nonRoot ? "--chown=nonroot:nonrootg " : "";
-            context.add("COPY " + ownArg + context.dir.relativize(tempPath).toString().replace('\\', '/')
-                    + " " + containerPath);
-            if (!context.dry) {
-                JkUtilsPath.createDirectories(tempPath.getParent());
-                if (Files.isDirectory(file)) {
-                    JkPathTree.of(file).copyTo(tempPath, StandardCopyOption.REPLACE_EXISTING);
-                } else {
-                    JkUtilsPath.copy(file, tempPath, StandardCopyOption.REPLACE_EXISTING);
-                }
-            }
-
-        }
-    }
-
-    public static class Context {
-
-        private final List<String> steps = new LinkedList<>();
 
         /**
-         * The context dir where files and Dockerfile will be generated
+         * Adds an entrypoint build step
          */
-        public final Path dir;
+        public DockerfileTemplate addEntrypoint(String ...args) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            sb.append(toDoubleQuotedArgs(args));
+            sb.append("]");
+            return add("ENTRYPOINT " + sb);
+        }
+
+        // ------------------------------ Move Cursor ---------------------------------------------
 
         /**
-         * If dry = true, this mean we want only rendering rhe Dockerfile as text. Thus
-         * some expansive copy operation can be avoided.
+         * Positions the cursor just before the first build step that begins with the specified prefix.<p>
+         * Any subsequent build steps added will be appended starting from this position.
+         *
+         * @param prefix the prefix of the build step to locate
+         * @return the updated builder or context for chaining
          */
-        public final boolean dry;
-
-        private final Set<String> importedFileNames = new HashSet<>();
-
-        public Context(Path dir, boolean dry) {
-            this.dir = dir;
-            this.dry = dry;
-        }
-
-        public Context add(String step) {
-            steps.add(step);
-            return this;
-        }
-
-        public Context insertBefore(String startingWith, String ...stepsToInsert) {
-            ListIterator<String> listIterator = this.steps.listIterator();
-            while (listIterator.hasNext()) {
-                String nextStep = listIterator.next();
-                if (nextStep.startsWith(startingWith)) {
-                    listIterator.previous();
-                    for (String stepToInsert : stepsToInsert) {
-                        listIterator.add(stepToInsert);
-                    }
+        public DockerfileTemplate moveCursorBefore(String prefix) {
+            int i = 0;
+            for (String step : buildSteps) {
+                if (step.startsWith(prefix)) {
+                    this.index = i;
                     return this;
                 }
+                i++;
             }
+            throw noSuchStepFoundException(prefix);
+        }
+
+
+        public DockerfileTemplate moveCursorNext() {
+            this.index++;
             return this;
+        }
+
+        /**
+         * Moves the cursor just before ${switchNonRootUser} token.
+         *
+         * @see #moveCursorBefore(String)
+         */
+        public DockerfileTemplate moveCursorBeforeNonRootUserSwitch() {
+            return moveCursorBefore(decorateToken(SWITCH_NON_ROOT_TOKEN));
+        }
+
+        /**
+         * Renders the Dockerfile template, with tokens still present.
+         *
+         * @param jkDockerBuild
+         */
+        public String render(JkDockerBuild jkDockerBuild) {
+            return String.join("\n", buildSteps);
+        }
+
+        private IllegalArgumentException noSuchStepFoundException(String step) {
+            return new IllegalArgumentException("No step starting with " + step + " found. " +
+                    "Existing steps are:\n" + String.join("\n", buildSteps));
         }
     }
 

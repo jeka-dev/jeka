@@ -41,19 +41,20 @@ public class DockerImageMaker {
         if(!Files.exists(jekaDist)) {
             jekaDist = Paths.get("..").resolve(jekaDist).normalize();
         }
-        dockerBuild.setUserId(null); // Use only root user
-        dockerBuild.rootSteps
+        dockerBuild.setNonRootUserCreationMode(JkDockerBuild.NonRootUserCreationMode.NEVER);
+        dockerBuild.dockerfileTemplate
                 .add("RUN apt update")
-                .add("RUN apt install -y curl unzip git gcc libz-dev");  // gcc and libz-dev is for graalvm
-        dockerBuild.nonRootSteps
+                .add("RUN apt install -y curl unzip git gcc libz-dev")  // gcc and libz-dev is for graalvm
+
                 .add("RUN mkdir /workdir && mkdir root/.jeka && mkdir /cache && ln -s /cache root/.jeka/cache")
                 .addCopy(jekaDist.resolve("jeka"), "/root/.jeka/bin/")
                 .addCopy(jekaDist.resolve("dev.jeka.jeka-core.jar"), "/root/.jeka/bin/")
                 .add("RUN chmod +x /root/.jeka/bin/jeka")
 
                 .add("WORKDIR /workdir")
-                .add("ENTRYPOINT [\"/root/.jeka/bin/jeka\"]");
-        Path ctxDir = dockerBuild.buildImage(IMAGE_NAME);
+                .addEntrypoint("/root/.jeka/bin/jeka");
+
+        Path ctxDir = dockerBuild.buildImageInTemp(IMAGE_NAME);
         System.out.println("Jeka image built from " + ctxDir);
     }
 

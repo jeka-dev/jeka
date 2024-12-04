@@ -1,14 +1,25 @@
 # Project API
 
-The Jeka Project API provides a high-level interface for building Java/JVM projects. Its core classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
-
-At the heart of this API is the `JkProject` class, which acts as the central entry point for performing key build tasks, including compilation, testing, resource processing, packaging, publication, and more.  
-`JkProject` serves as the root of a comprehensive object-oriented structure, encapsulating all the information and behavior needed to build JVM-based projects.
-
-The API is designed with numerous extension points, making it highly flexible for incorporating specific or custom build behaviors.
+The Jeka Project API provides a high-level interface for building Java/JVM projects. 
+At the heart of this API is the `JkProject` class, which acts as the central entry point for performing build tasks. 
 
 
-## Project Structure 
+## Classes
+
+Its core classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
+
+
+### `JkProject` class
+
+This class contains all the necessary definitions for building a JVM project, 
+including source locations, build output, testing, packaging (e.g., creating JAR files), compiler settings, 
+dependencies, and more.
+
+This class is designed with numerous extension points, making it highly flexible for incorporating specific or custom build behaviors.
+
+To handle all of these concerns efficiently, the class is designed with a detailed structure as follows:
+
+
 ```
 project
 +- baseDir

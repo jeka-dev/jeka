@@ -1,14 +1,12 @@
 package _dev;
 
-import dev.jeka.core.api.tooling.docker.JkDockerBuild;
+import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.SpringbootKBean;
-
-import java.nio.file.Paths;
 
 @JkDep("org.springframework.boot:spring-boot-starter-test")
 
@@ -30,22 +28,23 @@ class BaseAppBuild extends KBean {
 
     @Override
     protected void init() {
-
-        // configure image
-        if (getRunbase().find(DockerKBean.class).isPresent()) {
-            load(DockerKBean.class).customizeJvmImage(dockerBuild -> dockerBuild
-                    .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
-                    .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
-                    .setAddUserTemplate(JkDockerBuild.TEMURIN_ADD_USER_TEMPLATE)
-                    .nonRootSteps
-                            .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
-                            .add("RUN chmod a+rw /release.md ")
-            );
-        }
+        this.find(DockerKBean.class).ifPresent(dockerKBean ->
+            dockerKBean.customizeJvmImage(this::customizeDockerBuild)
+        );
     }
 
     public void clean() {
         cleanOutput();
+    }
+
+    private void customizeDockerBuild(JkDockerJvmBuild dockerBuild) {
+        dockerBuild.addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "");
+        dockerBuild.setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy");
+
+        // Customize Dockerfile
+        dockerBuild
+                .moveCursorBefore("ENTRYPOINT ")
+                .add("## my comment");
     }
 
 }

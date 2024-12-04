@@ -21,21 +21,15 @@ import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkNativeImage;
-import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.tooling.docker.JkDockerBuild;
-import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
-import dev.jeka.core.api.tooling.docker.JkDockerNative;
+import dev.jeka.core.api.tooling.docker.*;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 @JkDoc("Builds and runs image based on project.%n" +
@@ -43,11 +37,12 @@ import java.util.function.Consumer;
 )
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Explicit full name of the image to build. It may contains a tag to identify the version. %n" +
-            "If not set, the image name will be inferred form project info.")
+    @JkDoc("Explicit full name of the JVM image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"
+            + "If not specified, the image name will be inferred form the project information.")
     public String jvmImageName;
 
-    @JkDoc("Explicit full name of the native image to build. See imageName.")
+    @JkDoc("Explicit full name of the native image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"
+            + "If not specified, the image name will be inferred form the project information.")
     public String nativeImageName;
 
     @JkDoc("Base image to construct the Docker image.")
@@ -56,15 +51,18 @@ public final class DockerKBean extends KBean {
     @JkDoc("Base image for the native Docker image to build")
     public String nativeBaseImage = "ubuntu:latest";
 
-    @JkDoc("If true, the image will be configured for running with the 'nonroot' user.")
-    public boolean nonrootUser = true;
+    @JkDoc("Specifies the policy for creating a non-root user in the native Docker image.")
+    public JkDockerBuild.NonRootUserCreationMode nativeNonRootUser = JkDockerBuild.NonRootUserCreationMode.AUTO;
+
+    @JkDoc("Specifies the policy for creating a non-root user in the JVM Docker image.")
+    public JkDockerBuild.NonRootUserCreationMode jvmNonRootUser = JkDockerBuild.NonRootUserCreationMode.AUTO;
 
     /*
      * Handler on the Docker build configuration for customizing built images.
      */
     private final JkConsumers<JkDockerJvmBuild> jvmImageCustomizer = JkConsumers.of();
 
-    private final JkConsumers<JkDockerBuild.StepContainer> nativeImageCustomizer = JkConsumers.of();
+    private final JkConsumers<JkDockerNativeBuild> nativeImageCustomizer = JkConsumers.of();
 
     /**
      * Computes the name of the Docker image based on the specified project.
@@ -76,47 +74,38 @@ public final class DockerKBean extends KBean {
         return computeImageName(buildable.getModuleId(), buildable.getVersion(), buildable.getBaseDir());
     }
 
-    @Override
-    protected void init() {
-        JkBuildable buildable = getRunbase().getBuildable();
-        JkLog.verbose("Configure docker for %", buildable);
-        this.configureFor(buildable);
-    }
-
     @JkDoc("Builds Docker image in local registry.")
     public void build() {
-        String dirName = "docker-build-" + jvmImageName.replace(':', '#');
-        jvmDockerBuild().buildImage(getOutputDir().resolve(dirName), jvmImageName);
+        JkBuildable buildable = getBuildable(true);
+        String imageName = resolveJvmImageName();
+        String dirName = "docker-build-" + imageName.replace(':', '#');
+        jvmDockerBuild(buildable).buildImage(getOutputDir().resolve(dirName), imageName);
     }
 
     @JkDoc("Displays info about the Docker image.")
     public void info() {
-        String buildInfo = jvmDockerBuild().info(this.jvmImageName); // May trigger a compilation to find the main class
-        JkLog.info("Image Name        : " + this.jvmImageName);
+        String imageName = resolveJvmImageName();
+        JkBuildable buildable = getRunbase().getBuildable();
+        String buildInfo = jvmDockerBuild(buildable).renderInfo(); // May trigger a compilation to find the main class
+        JkLog.info("Image Name        : " + imageName);
         JkLog.info(buildInfo);
     }
 
     @JkDoc("Builds native Docker image in local registry.")
     public void buildNative() {
-
-        // compile java if not already done
-       JkBuildable buildable = getRunbase().getBuildable();
-        if (!JkPathTree.of(buildable.getClassDir()).containFiles()) {
-            buildable.compileIfNeeded();
-        }
-        String dirName = "docker-build-native-" + jvmImageName.replace(':', '#');
-        nativeDockerBuild(buildable).buildImage(getOutputDir().resolve(dirName), nativeImageName);
+        JkBuildable buildable = getBuildable(true);
+        String imageName = resolveNativeImageName();
+        String dirName = "docker-build-" + imageName.replace(':', '#');
+        nativeDockerBuild(buildable).buildImage(getOutputDir().resolve(dirName), imageName);
     }
 
     @JkDoc("Displays info about the native Docker image.")
     public void infoNative() {
+        String imageName = resolveNativeImageName();
         JkBuildable buildable = getRunbase().getBuildable();
-        String buildInfo = nativeDockerBuild(buildable).render(); // May trigger a compilation to find the main class
-        JkLog.info("Image Name        : " + this.jvmImageName);
-        JkLog.info("Dockerfile : ");
-        JkLog.info("-------------------------------------------------");
-        JkLog.info(buildInfo);
-        JkLog.info("-------------------------------------------------");
+        JkLog.info("Image Name        : " + imageName);
+        String info = nativeDockerBuild(buildable).renderInfo(); // May trigger a compilation to find the main class
+        JkLog.info(info);
     }
 
     /**
@@ -129,41 +118,63 @@ public final class DockerKBean extends KBean {
     /**
      * Adds a customizer function for customizing the Dockerbuild that will generate the Native image.
      */
-    public void customizeNativeImage(Consumer<JkDockerBuild.StepContainer> dockerBuildCustomizer) {
+    public void customizeNativeImage(Consumer<JkDockerNativeBuild> dockerBuildCustomizer) {
         nativeImageCustomizer.add(dockerBuildCustomizer);
     }
 
-    private JkDockerJvmBuild jvmDockerBuild() {
+    /**
+     * Returns the resolved name of the built JVM image, substituting placeholders and falling back to a
+     * default if no name is explicitly defined.
+     */
+    public String resolveJvmImageName() {
+        JkBuildable buildable = getBuildable(false);
+        return !JkUtilsString.isBlank(jvmImageName)?
+                resolvePlaceHolder(jvmImageName, buildable)  :
+                computeImageName(buildable);
+    }
+
+    /**
+     * Returns the resolved name of the built native image, substituting placeholders and falling back to a
+     * default if no name is explicitly defined.
+     */
+    public String resolveNativeImageName() {
+        JkBuildable buildable = getBuildable(false);
+        return !JkUtilsString.isBlank(nativeImageName)
+                ? resolvePlaceHolder(nativeImageName, buildable)
+                : "native-" + computeImageName(buildable);
+    }
+
+    private JkBuildable getBuildable(boolean ensureClassesAreCompiled) {
+
+        // compile java if not already done
+        JkBuildable buildable = getRunbase().getBuildable();
+        if (!JkPathTree.of(buildable.getClassDir()).containFiles() && ensureClassesAreCompiled) {
+            buildable.compileIfNeeded();
+        }
+        return buildable;
+    }
+
+
+
+    private JkDockerJvmBuild jvmDockerBuild(JkBuildable buildable) {
         JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of();
-        dockerBuild.setBaseImage(jvmBaseImage);
+        dockerBuild.setNonRootUserCreationMode(jvmNonRootUser);
+        JkLog.verbose("Configure JVM Docker image for %s", buildable);
+        dockerBuild.adaptTo(buildable);
         jvmImageCustomizer.accept(dockerBuild);
         return dockerBuild;
     }
 
-    private JkDockerBuild nativeDockerBuild(JkBuildable buildable) {
+    private JkDockerNativeBuild nativeDockerBuild(JkBuildable buildable) {
         NativeKBean nativeKBean = this.load(NativeKBean.class);
+        JkLog.verbose("Configure native Docker image for %s", buildable);
         JkNativeImage nativeImage =  nativeKBean.nativeImage(buildable);
-
-        JkDockerBuild result = JkDockerNative.of(nativeImage)
-                .setBaseImage(nativeBaseImage)
-                .setUseNonrootUser(nonrootUser)
-                .dockerBuild();
-        nativeImageCustomizer.accept(result.rootSteps);
-        return result;
+        JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeImage);
+        dockerBuild.setBaseImage(nativeBaseImage);
+        dockerBuild.setNonRootUserCreationMode(nativeNonRootUser);
+        nativeImageCustomizer.accept(dockerBuild);
+        return dockerBuild;
     }
-
-    private void configureFor(JkBuildable buildable) {
-        JkLog.verbose("Configure DockerKBean for ProjectKBean %s", buildable);
-        this.jvmImageName = !JkUtilsString.isBlank(jvmImageName)
-                ? jvmImageName
-                : computeImageName(buildable);
-        this.nativeImageName = !JkUtilsString.isBlank(nativeImageName)
-                ? nativeImageName
-                : "native-" + computeImageName(buildable);
-        this.customizeJvmImage(dockerBuild -> dockerBuild.adaptTo(buildable));
-    }
-
-
 
     private static String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
         String name;
@@ -187,6 +198,13 @@ public final class DockerKBean extends KBean {
             return "latest";
         }
         return version.toString();
+    }
+
+    private String resolvePlaceHolder(String candidateName, JkBuildable buildable) {
+        return candidateName
+                .replace("${groupId}", buildable.getModuleId().getGroup())
+                .replace("${artifactId}", buildable.getModuleId().getName())
+                .replace("${version}", buildable.getVersion().toString());
     }
 
 }

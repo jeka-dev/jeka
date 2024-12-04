@@ -20,11 +20,11 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.project.JkBuildable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +34,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Docker Builder assistant for creating Docker images running Java programs.
+ * Docker Builder assistant for creating Docker images that run JVM applications.<br/>
+ *
+ * Provides functionality tailored to JVM programs, such as setting classes, classpaths,
+ * agents, and Maven repositories for fetching tools.
  */
 public class JkDockerJvmBuild extends JkDockerBuild {
 
@@ -52,14 +55,35 @@ public class JkDockerJvmBuild extends JkDockerBuild {
 
     protected JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
 
-    private final Map<Object, String> agents = new HashMap<>();
+    //. agent jar or coordinate -> agent option string
+    private final Map<PathOrCoordinate, String> agents = new HashMap<>();
 
     private JkDockerJvmBuild() {
+
+        // Create template
         this.setBaseImage(BASE_IMAGE);
-        this.setAddUserTemplate(JkDockerBuild.ALPINE_ADD_USER_TEMPLATE);
-        this.nonRootSteps.add(this::enhance);
-        this.rootSteps.addNonRootMkdirs("/app", "/workdir");
-        this.rootSteps.add("WORKDIR /workdir");
+        dockerfileTemplate
+                .moveCursorBeforeNonRootUserSwitch()
+                .addNonRootMkDirs("/app", "/workdir")
+                .moveCursorNext()  // move after user switch
+                .add("COPY agents /app/agents")
+                .add("COPY libs /app/libs")
+                .add("COPY snapshot-libs /app/snapshot-libs")
+                .add("COPY classpath.txt /app/classpath.txt")
+                .add("COPY resources /app/classes")
+                .add("COPY classes /app/classes")
+
+                .add("WORKDIR /workdir")
+
+                 // Create command line
+                .add("ENTRYPOINT [ ${javaCmdLine} ]")
+                .add("CMD []");
+
+        // Resolve template tokens
+        addTokenResolver("javaCmdLine", this::javaCommandLine);
+
+        // Create needed files in build context dir
+        addFsOperation(this::importFiles);
     }
 
     /**
@@ -79,9 +103,10 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     @Override
     public void buildImage(Path contextDir, String imageName) {
         super.buildImage(contextDir, imageName);
-        JkLog.info("Pass extra JVM options : Use '-e JAVA_TOOL_OPTIONS=...' option");
-        JkLog.info("Pass program arguments : Add arguments to the end of the command line");
-        JkLog.info("Map host current dir with container working dir : Use '-v $PWD:/workdir' option");
+        JkLog.info("- Pass additional JVM options using the '-e JAVA_TOOL_OPTIONS=...' option.");
+        JkLog.info("- Pass program arguments by appending them to the end of the command line.");
+        JkLog.info("- Map the host's current directory to the container's working directory using the '-v $PWD:/workdir' option.");
+
     }
 
     /**
@@ -131,7 +156,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
      * @param agentOptions The agent options that will be prepended to '-javaagent:' option
      */
     public JkDockerJvmBuild addAgent(Path file, String agentOptions) {
-        this.agents.put(file, agentOptions);
+        this.agents.put(new PathOrCoordinate(file), agentOptions);
         return this;
     }
 
@@ -141,7 +166,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
      * @param agentOptions The agent options that will be prepended to '-javaagent:' option
      */
     public JkDockerJvmBuild addAgent(@JkDepSuggest String agentCoordinate, String agentOptions) {
-        this.agents.put(agentCoordinate, agentOptions);
+        this.agents.put(new PathOrCoordinate(agentCoordinate), agentOptions);
         return this;
     }
 
@@ -154,85 +179,16 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         return this;
     }
 
-    private void enhance(Context context) {
-
-        // Handle Java layers
-        List<Path> sanitizedLibs = sanitizedLibs();
-
-        // -- Create non-snapshot layer
-        Path libs = context.dir.resolve("libs");
-        JkUtilsPath.createDirectories(libs);
-        sanitizedLibs.stream()
-                .filter(path -> !CHANGING_LIB.test(path))
-                .map(JkPathFile::of)
-                .forEach(file -> file.copyToDir(libs, StandardCopyOption.REPLACE_EXISTING));
-        context.add("COPY libs /app/libs");
-
-        // -- Create snapshot layer
-        Path snapshotLibs = context.dir.resolve("snapshot-libs");
-        JkUtilsPath.createDirectories(snapshotLibs);
-        sanitizedLibs.stream()
-                .filter(CHANGING_LIB)
-                .map(JkPathFile::of)
-                .forEach(file -> file.copyToDir(snapshotLibs, StandardCopyOption.REPLACE_EXISTING));
-        context.add("COPY snapshot-libs /app/snapshot-libs");
-
-        // -- Add classpath.txt layer
-        Path classpathTxt = context.dir.resolve("classpath.txt");
-        String classpathTxtContent = createClasspathArgs(sanitizedLibs);
-        JkPathFile.of(classpathTxt).deleteIfExist().write(classpathTxtContent);
-        context.add("COPY classpath.txt /app/classpath.txt");
-
-        // -- add resource layer
-        Path resources = context.dir.resolve("resources");
-        JkUtilsPath.createDirectories(resources);
-        resourceFiles().copyTo(resources, StandardCopyOption.REPLACE_EXISTING);
-        context.add("COPY resources /app/resources");
-
-        // -- add class layer
-        Path classes = context.dir.resolve("classes");
-        JkUtilsPath.createDirectories(classes);
-        classFiles().copyTo(classes, StandardCopyOption.REPLACE_EXISTING);
-        context.add("COPY classes /app/classes");
-
-        // Handle agents
-        Map<Object, Path> agentBuildDirMap = copyAgents(context.dir);
-        String agentCopy = createAgentCopyInstruction(agentBuildDirMap);
-        String agentInstructions = createAgentOptions(agentBuildDirMap);
-        if (!agentInstructions.trim().isEmpty() && !agentInstructions.endsWith(" ")) {
-            agentInstructions = agentInstructions + " ";
-        }
-        context.add(agentCopy);
-
-        // Handle entryPoint
-        List<String> args = new LinkedList<>();
-        args.add("java");
-        args.addAll(Arrays.asList(JkUtilsString.parseCommandline(agentInstructions)));
-        args.add("-cp");
-        args.add("@/app/classpath.txt");
-        args.add(mainClass);
-        String argLine = toArrayQuotedString(args);
-        context.add("ENTRYPOINT " + argLine);
-        context.add("CMD []");
-
-    }
-
     /**
      * Returns a formatted string that contains information about this Docker build.
      */
-    public String info(String imageName) {
-
+    @Override
+    public String renderInfo() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Image Name : " + imageName + "\n");
-        sb.append("Dockerfile :\n");
-        sb.append("-------------------------------------------------\n");
-        sb.append(render()).append("\n");
-        sb.append("-------------------------------------------------\n");
 
         sb.append("Agents            : ").append("\n");
         this.agents.entrySet().forEach(entry
                 -> sb.append("  " + entry.getKey()  + "=" + entry.getValue() + "\n"));
-
         List<Path> libs = sanitizedLibs();
         sb.append("Released libs     :").append("\n");
         libs.stream().filter(CHANGING_LIB.negate()).forEach(item -> sb.append("  " + item + "\n"));
@@ -248,9 +204,93 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         sb.append("Main class        : " + this.mainClass).append("\n");
         sb.append("Classpath         : " ).append("\n");
         this.classpath.forEach(item -> sb.append("  " + item + "\n"));
-
+        sb.append(super.renderInfo());
         return sb.toString();
     }
+
+    private String javaCommandLine() {
+        List<String> cmdLine = new ArrayList<>();
+        cmdLine.add("java");
+        cmdLine.addAll(computeAgentArgumentsAsList());
+        cmdLine.add("-cp");
+        cmdLine.add("@/app/classpath.txt");
+        cmdLine.add(mainClass);
+        return toDoubleQuotedArgs(cmdLine);
+    }
+
+    private void importFiles(Path buildContextDir) {
+        Map<PathOrCoordinate, String> agentFileContainerPaths = computeAgentFileContainerPaths();
+
+        // Handle Java layers
+        List<Path> sanitizedLibs = sanitizedLibs();
+
+        // -- Create non-snapshot layer
+        Path libs = buildContextDir.resolve("libs");
+        JkUtilsPath.createDirectories(libs);
+        sanitizedLibs.stream()
+                .filter(path -> !CHANGING_LIB.test(path))
+                .map(JkPathFile::of)
+                .forEach(file -> file.copyToDir(libs, StandardCopyOption.REPLACE_EXISTING));
+
+
+        // -- Create snapshot layer
+        Path snapshotLibs = buildContextDir.resolve("snapshot-libs");
+        JkUtilsPath.createDirectories(snapshotLibs);
+        sanitizedLibs.stream()
+                .filter(CHANGING_LIB)
+                .map(JkPathFile::of)
+                .forEach(file -> file.copyToDir(snapshotLibs, StandardCopyOption.REPLACE_EXISTING));
+
+
+        // -- Add classpath.txt layer
+        Path classpathTxt =buildContextDir.resolve("classpath.txt");
+        String classpathTxtContent = createClasspathArgs(sanitizedLibs);
+        JkPathFile.of(classpathTxt).deleteIfExist().write(classpathTxtContent);
+
+
+        // -- add resource layer
+        Path resources = buildContextDir.resolve("resources");
+        JkUtilsPath.createDirectories(resources);
+        resourceFiles().copyTo(resources, StandardCopyOption.REPLACE_EXISTING);
+
+
+        // -- add class layer
+        Path classes = buildContextDir.resolve("classes");
+        JkUtilsPath.createDirectories(classes);
+        classFiles().copyTo(classes, StandardCopyOption.REPLACE_EXISTING);
+
+
+        // Handle agents
+        Path agentDir = buildContextDir.resolve("agents");
+        JkUtilsPath.createDirectories(agentDir);
+        agentFileContainerPaths.forEach( (fileOrCoordinate, containerPath) -> {
+            JkPathFile.of(fileOrCoordinate.getOrFetch()).copyToDir(agentDir, StandardCopyOption.REPLACE_EXISTING);
+        });
+    }
+
+    private List<String> computeAgentArgumentsAsList() {
+        Map<PathOrCoordinate, String> agentFileContainerPaths = computeAgentFileContainerPaths();
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<PathOrCoordinate, String> entry : agents.entrySet()) {
+            String agentPath =  agentFileContainerPaths.get(entry.getKey());
+            String arg = "-javaagent:" + agentPath;
+            if (!JkUtilsString.isBlank(entry.getValue())) {
+                arg = arg + "=" + entry.getValue();
+            }
+            result.add(arg);
+        }
+        return result;
+    }
+
+    private Map<PathOrCoordinate, String> computeAgentFileContainerPaths() {
+        Map<PathOrCoordinate, String> result = new HashMap<>();
+        for (Map.Entry<PathOrCoordinate, String> entry : this.agents.entrySet()) {
+            String fileName = entry.getKey().toPathLocation().getFileName().toString();
+            result.put(entry.getKey(), "/app/agents/" + fileName);
+        }
+        return result;
+    }
+
 
     private JkPathTree classFiles() {
         return classes.andMatcher(CLASS_MATCHER);
@@ -273,9 +313,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         }
         sanitizedLibs.forEach(path -> classpathValue.append(":/app/libs/" + path.getFileName()));
         return classpathValue.toString();
-
     }
-
 
     private Map<Object, Path> copyAgents(Path contextDir) {
         Map<Object, Path> result = new HashMap<>();
@@ -299,29 +337,74 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         return result;
     }
 
-    private String createAgentOptions(Map<Object, Path> buildDirMap) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Object, String> entry : agents.entrySet()) {
-            Path buildDirFile = buildDirMap.get(entry.getKey());
-            String agentPath =  "/app/agents/" + buildDirFile.getFileName();
-            sb.append("-javaagent:" + agentPath);
-            if (!JkUtilsString.isBlank(entry.getValue())) {
-                sb.append("=" + entry.getValue());
-            }
-            sb.append(" ");
-        }
-        return sb.toString();
-    }
+
 
     private String createAgentCopyInstruction(Map<Object, Path> buildDirMap) {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Object, String> entry : this.agents.entrySet()) {
+        for (Map.Entry<PathOrCoordinate, String> entry : this.computeAgentFileContainerPaths().entrySet()) {
             Path buildDirFile = buildDirMap.get(entry.getKey());
             String from =  "agents/" + buildDirFile.getFileName();
             String to = "/app/agents/" + buildDirFile.getFileName();
             sb.append("COPY " + from + " " + to + "\n");
         }
         return sb.toString();
+    }
+
+
+
+    private class PathOrCoordinate {
+
+        private final Path path;
+
+        private final JkCoordinate coordinate;
+
+        private PathOrCoordinate(Path path, JkCoordinate coordinate) {
+            this.path = path;
+            this.coordinate = coordinate;
+        }
+
+        PathOrCoordinate(Path path) {
+            this(path, null);
+        }
+
+        PathOrCoordinate(String coordinate) {
+            this(null, JkCoordinate.of(coordinate));
+        }
+
+        // Get path without downloading
+        Path toPathLocation() {
+            if (path != null) {
+                return path;
+            }
+            return coordinate.cachePath();
+        }
+
+        Path getOrFetch() {
+            if (path != null) {
+                return path;
+            }
+            return JkCoordinateFileProxy.of(repos, coordinate).get();
+        }
+
+        @Override
+        public final boolean equals(Object o) {
+            if (!(o instanceof PathOrCoordinate)) return false;
+
+            PathOrCoordinate that = (PathOrCoordinate) o;
+            return Objects.equals(path, that.path) && Objects.equals(coordinate, that.coordinate);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hashCode(path);
+            result = 31 * result + Objects.hashCode(coordinate);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return path != null ? path.toString() : coordinate.toString();
+        }
     }
 }
 

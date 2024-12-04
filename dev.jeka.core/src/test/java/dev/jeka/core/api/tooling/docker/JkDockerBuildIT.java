@@ -26,20 +26,34 @@ import java.nio.file.Paths;
 public class JkDockerBuildIT {
 
     @Test
-    public void simple_root() throws Exception {
+    public void simple() throws Exception {
         if (!JkDocker.isPresent()) {
             return;
         }
         JkLog.setDecorator(JkLog.Style.INDENT);
         //JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         final Path extraFile = Paths.get(JkDockerBuildIT.class.getResource("toto.txt").toURI());
+
         JkDockerBuild dockerBuild = JkDockerBuild.of();
-        dockerBuild.nonRootSteps.addCopy(extraFile, "/my_toto.txt", false);
-        dockerBuild.nonRootSteps.add("ENTRYPOINT [\"echo\"]");
-        dockerBuild.nonRootSteps.add("CMD [\"titi\"]");
-        dockerBuild.setUserId(null);
+
+        // Add Root
+        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch();
+        dockerBuild.dockerfileTemplate.add("## Comment appended in root user section");
+        dockerBuild.dockerfileTemplate.add("## 2nd Comment appended in root user section");
+
+        // Add non root
+        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch().moveCursorNext();
+        dockerBuild.dockerfileTemplate.addCopy(extraFile, "/my_toto.txt", false);
+        dockerBuild.dockerfileTemplate.add("ENTRYPOINT [\"echo\"]");
+        dockerBuild.dockerfileTemplate.add("CMD [\"titi\"]");
         String imageName = "jk-test-simpleroot";
-        System.out.println(dockerBuild.render());
+
+        // render
+        System.out.println("----------- raw docker file");
+        System.out.println(dockerBuild.dockerfileTemplate.render(dockerBuild));
+        System.out.println("----------- resolved docker file");
+        System.out.println(dockerBuild.renderDockerfile());
+
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
         System.out.println("Cereating buidcontext in " + contextDir);
         dockerBuild.buildImage(contextDir, imageName);
@@ -69,12 +83,14 @@ public class JkDockerBuildIT {
 
     private void simpleNonRootWithBaseImage(String baseImage) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
-        dockerBuild.nonRootSteps.add("ENTRYPOINT [\"echo\", \"toto\"]");
+        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch().moveCursorNext();
+        dockerBuild.dockerfileTemplate.addEntrypoint("echo", "toto");
         dockerBuild.setBaseImage(baseImage);
-        //dockerBuild.setUserId(1001);
-        //dockerBuild.setGroupId("1002");
         String imageName = "jk-test-simplenonroot-" + baseImage;
-        System.out.println(dockerBuild.render());
+        System.out.println("----------- raw docker file");
+        System.out.println(dockerBuild.dockerfileTemplate.render(dockerBuild));
+        System.out.println("----------- raw docker file");
+        System.out.println(dockerBuild.renderDockerfile());
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
         dockerBuild.buildImage(contextDir, imageName);
         JkDocker.prepareExec("run", imageName)

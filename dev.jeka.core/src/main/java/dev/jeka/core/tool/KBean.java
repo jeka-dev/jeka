@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Base class for KBean. User code is not supposed to instantiate KBeans using 'new' but usinng
@@ -110,14 +111,17 @@ public abstract class KBean {
     }
 
     /**
-     * Instantiates the specified KBean into the current runbase, if it is not already present. <p>
-     * As KBeans are singleton within a runbase, this method has no effect if the bean is already loaded.
-     * @param beanClass The class of the KBean to load.
-     * @return This object for call chaining.
      * @see JkRunbase#load(Class)
      */
     public <T extends KBean> T load(Class<T> beanClass) {
         return runbase.load(beanClass);
+    }
+
+    /**
+     * @see JkRunbase#find(Class)
+     */
+    public <T extends KBean> Optional<T> find(Class<T> beanClass){
+        return runbase.find(beanClass);
     }
 
     static boolean nameMatches(String className, String nameCandidate) {

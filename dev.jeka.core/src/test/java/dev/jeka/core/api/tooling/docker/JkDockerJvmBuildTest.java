@@ -25,38 +25,33 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JkDockerJvmBuildIT {
+public class JkDockerJvmBuildTest {
 
     @Test
-    @Ignore  // Fails in automated test cause no jeka-output/classes dir exist
-    public void simple() {
-        if (!JkDocker.isPresent()) {
-            return;
-        }
+    public void testAgents() {
         JkLog.setDecorator(JkLog.Style.INDENT);
 
-        JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project().asBuildable());
-        dockerJvmBuild.dockerfileTemplate
-                .moveCursorBefore("COPY classpath.txt")
-                .add( "# rem for testing 'insertBefore'");
-        String imageName = "jk-testunit-jvm";
-
+        JkProject project = project();
+        if (!Files.exists(project.getBaseDir().resolve("jeka-output/classes"))) {
+            return;  // Fails in automated test cause no jeka-output/classes dir exist
+        }
+        JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project.asBuildable());
+        dockerJvmBuild.addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.10.0", "myAgentOption");
         System.out.println(dockerJvmBuild.renderInfo());
 
-        // now run the image
-        Path contextDir =JkUtilsPath.createTempDirectory("jk-test");
-        System.out.println(contextDir);
-        dockerJvmBuild.buildImage(contextDir, imageName);
-        JkDocker.prepareExec("run", imageName)
-                .setLogCommand(true)
-                .addParams("--version")
-                .setInheritIO(false)
-                .setLogWithJekaDecorator(true)
-                .exec();
-        JkDocker.prepareExec("image", "rm", "--force", imageName);
+        // Test docker files is correct
+        Assert.assertTrue(dockerJvmBuild.renderDockerfile().contains("/app/agents/"));
+
+        // Test build dir is properly generated
+        Path dir = JkUtilsPath.createTempDirectory("jk-test");
+        dockerJvmBuild.generateContextDir(dir);
+        Assert.assertTrue("No files found in " + dir.resolve("agents"),
+                JkPathTree.of(dir.resolve("agents")).containFiles());
     }
+
 
     private JkProject project() {
         JkProject project = JkProject.of();

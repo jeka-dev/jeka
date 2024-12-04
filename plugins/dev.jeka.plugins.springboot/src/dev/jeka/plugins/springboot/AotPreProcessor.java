@@ -19,7 +19,6 @@ package dev.jeka.plugins.springboot;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
@@ -32,8 +31,6 @@ class AotPreProcessor {
     private final List<Path> classpath;
 
     private final String mainClass;
-
-    private final Path outputDir;
 
     private final JkModuleId moduleId;
 
@@ -48,7 +45,6 @@ class AotPreProcessor {
     AotPreProcessor(List<Path> classpath, String mainClass, Path outputDir, JkModuleId moduleId) {
         this.classpath = classpath;
         this.mainClass = mainClass;
-        this.outputDir = outputDir;
         this.moduleId = moduleId;
         this.generatedSourcesDir = outputDir.resolve("generated-sources");
         this.generatedResourcesDir = outputDir.resolve("generated-resources");
@@ -66,7 +62,6 @@ class AotPreProcessor {
         String mainClass = buildable.getMainClass();
         Path outputDir = buildable.getOutputDir().resolve("spring-aot");
         return new AotPreProcessor(classpath, mainClass, outputDir, moduleId1);
-
     }
 
     void generate() {
@@ -77,7 +72,6 @@ class AotPreProcessor {
                 .setInheritIO(false)
                 .exec();
     }
-
 
     public Path getGeneratedSourcesDir() {
         return generatedSourcesDir;
