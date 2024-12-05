@@ -182,12 +182,12 @@ By default, the dependencies are resolved using *Maven central* repository.
 
 We can change it programatically, by using `JkProject.dependencyResolver.setRepos()` method.
 
-#### Display generic info on a project
+#### Display Generic Info
 
 We can display project info such as locations, source file count, version, moduleID, and more by displaying the
 result of the `JkProject.getInfo()` method.
 
-#### Build project
+#### Build Project
 
 Different phases of the build can be invoked using the following methods:
 
@@ -198,7 +198,7 @@ Different phases of the build can be invoked using the following methods:
 
 In the next section, we'll detail the classes involved in the entire build process.
 
-## JkProjectCompilation class
+### JkProjectCompilation Class
 
 Handles the compilation tasks for a `JkProject`.  
 This class is used for both production and test code compilation.  
