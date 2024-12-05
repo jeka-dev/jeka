@@ -76,9 +76,9 @@ projectFacade
 projectFacade.dependencies.compile
        .add("com.google.guava:guava:21.0")
        .add("com.sun.jersey:jersey-server:1.19.4")
-       .add("org.junit.jupiter:junit-jupiter-engine:5.6.0");
+       .add("org.projectlombok:lombok:1.18.36");
 projectFacade.dependencies.runtime
-       .remove("org.junit.jupiter:junit-jupiter-engine")
+       .remove("org.projectlombok:lombok")
        .add("com.github.djeang:vincer-dom:1.2.0");
 projectFacade.dependencies.test
        .add("org.junit.vintage:junit-vintage-engine:5.6.0");
@@ -87,33 +87,40 @@ projectFacade.doPack();  // compile, test and create jar
 
 #### Project Dependencies
 
-Project dependencies in Jeka are managed differently from Maven/Gradle. Instead of a single collection of dependencies for a specific scope/configuration, Jeka uses three distinct classpaths: **compile**, **runtime**, and **test**. Each is defined independently but can reference the others.
+Project dependencies in Jeka are managed differently from Maven/Gradle. 
+Instead of a single collection of dependencies for a specific scope/configuration, 
+Jeka uses three distinct classpaths: **compile**, **runtime**, and **test**. Each is defined independently but can reference the others.
 
-- **Compile classpath:** Set via `JkProject.compilation.dependencies`.
-- **Runtime classpath:** Built from the compile classpath, but modifiable with `JkProject.packaging.runtimeDependencies`.
-- **Test classpath:** Merges the compile and runtime classpaths, customizable through `JkProject.testing.compilation.dependencies`.
+- **Compile classpath:** 
 
-To programmatically add a *compile-only* dependency:
+Classpath needed to compile the classes.
 
-1. Add it to the *compile* classpath and exclude it from the *runtime* classpath.
-2. Use the `JkFlatFacade.addCompileOnlyDeps` method.
+- **Runtime classpath:** 
 
+Classpath needed to run the build application or to embedded with the built library (embedded in jar or specified as transitive dependencies).
 
-##### Full Text Description
+This classpath is automatically constructed by taking the compile classpath upon which other libraries can be added or removed.
 
-An entire project dependency set can be declared using a full text description.
+- **Test classpath:** 
 
-By default, if a file named `dependencies.txt` exists in *[PROJECT_DIR]*, its content is used to define project dependencies.
+Classpath needed to compile and run the tests. 
+
+This classpath is constructed by merging the compile and runtime classpaths upon which other libraries can be added or removed.
+
+**Coordinate syntax**
 
 Dependencies must follow the format: `group:module:[classifier]:[type]:[version]`
+where *classifier*, *type*, and *version* are optional. See [`JkCoordinate` javadoc](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkCoordinate.java) for details.
 
-where *classifier*, *type*, and *version* are optional. See `JkCoordinate.of(String description)` for details.
+To import a *bill-of-materials* (BOM), declare a dependency as: `group:module::pom:version`.
 
-To import a *bill-of-materials* (BOM), declare a dependency as:  
-`group:module::pom:version`.
+Using the programatic api, you can also declare filesystem dependencies, meaning jar files located in 
+the project code base.
 
-You can use `@` and `@@` symbols to specify dependency exclusions.
 
+**Dependency Description - Full Text**
+
+Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/dependencies.txt* file.
 
 
 !!! example
@@ -137,14 +144,16 @@ You can use `@` and `@@` symbols to specify dependency exclusions.
 
     ```
 
+As shown on the above example, we can use `@` and `@@` symbols to specify dependency exclusions.`
+
 `== COMPILE ==`  
 Defines dependencies for the *compile* classpath.
 
 `== RUNTIME ==`  
-Defines dependencies for the *runtime* classpath.  
-The dependencies in the *RUNTIME* section will be added to those in the *COMPILE* section.
+Defines dependencies for the *runtime* classpath.
 
-If any dependencies from the *COMPILE* section should not be included in the *runtime* classpath, they must be explicitly removed using the '-' symbol.
+If any dependencies from the *COMPILE* section should not be included in the *runtime* classpath, 
+they must be explicitly removed using the '-' symbol.
 
 `== TEST ==`  
 Defines dependencies for the *test* classpath.  
@@ -153,7 +162,7 @@ This will include dependencies from both the *COMPILE* and *RUNTIME* sections, a
 !!! tip  
     If you're using the Jeka plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
 
-## Resolve Dependencies Programmatically
+**Resolve Dependencies Programmatically**
 
 To resolve dependencies that make up the runtime classpath, you can use one of the following methods:
 
@@ -161,6 +170,48 @@ To resolve dependencies that make up the runtime classpath, you can use one of t
 - `JkProject.packaging.resolveRuntimeDependenciesAsFiles()` to get the resolved classpath as a list of JAR files.
 
 The second option may be faster as it caches the results of previous invocations.
+
+**Display Dependency tree on the console**
+
+The dependency tree and the resulting classpath can be displayed on the console using:
+`JkProject.displayDependencyTree()` methods.
+
+**Change the Maven repository**
+
+By default, the dependencies are resolved using *Maven central* repository.
+
+We can change it programatically, by using `JkProject.dependencyResolver.setRepos()` method.
+
+#### Display generic info on a project
+
+We can display project info such as locations, source file count, version, moduleID, and more by displaying the
+result of the `JkProject.getInfo()` method.
+
+#### Build project
+
+Different phases of the build can be invoked using the following methods:
+
+- `JkProject.compilation.generateSources()`: Generates sources if any source generators are registered.
+- `JkProject.compilation.run()`: Runs the entire compilation process, including source generation and other registered compilation tasks.
+- `JkProject.testing.run()`: Compiles tests and runs them. This also includes production code compilation if it hasn't been done yet.
+- `JkProject.pack()`: Creates the main JAR and any additional JARs specifically configured. This includes running tests if they haven't been executed.
+
+In the next section, we'll detail the classes involved in the entire build process.
+
+## JkProjectCompilation class
+
+Handles the compilation tasks for a `JkProject`.  
+This class is used for both production and test code compilation.  
+It offers configuration methods for defining:
+
+- The locations of source files and compiled classes.
+- Dependencies required for compilation.
+- The compiler and compilation options.
+- Source code generators attached to the compilation task.
+- Additional `pre` and `post` actions tied to the compilation phase.
+- Interpolators for resource processing.
+
+
 
 
 

@@ -27,13 +27,27 @@ import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
 import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
 
 /**
- * Set of identifiers for binary artifact.
- * Most of the time 1 coordinate identifies 1 artifacts, identified with its group name and version.
+ * Represents a set of identifiers for binary artifacts.<p>
  *
- * Nevertheless, This is possible that a coordinate leads to several artifact, having same group/name/version
- * but with different classifier/type.
+ * The coordinate pattern is expressed as follows:
+ * <ul>
+ *   <li><code>group:name</code></li>
+ *   <li><code>group:name:version</code></li>
+ *   <li><code>group:name:classifier(s):version</code></li>
+ *   <li><code>group:name:classifier(s):type:version</code></li>
+ * </ul>
  *
- * @author Jerome Angibaud
+ * <p><b>Notes:</b></p>
+ * <ul>
+ *   <li>Classifiers can be a single classifier or a comma-separated list (e.g., <i>linux,mac</i>).</li>. In this case,
+ *   the coordinate stands for two artifacts.
+ *   <li>The empty string represents the default classifier.</li>
+ *   <li>Version can be:</li>
+ *   <ul>
+ *     <li><code>'?'</code> if unspecified</li>
+ *     <li><code>'+'</code> to select the highest available version</li>
+ *   </ul>
+ * </ul>
  */
 public final class JkCoordinate {
 
@@ -96,16 +110,9 @@ public final class JkCoordinate {
     }
 
     /**
-     * Description can be :
-     * group:name
-     * group:name:version
-     * group:name:classifiers...:version
-     * group:name:classifiers:type:version
-     *
-     * classifiers may be a single classifier or a list as <i>linux,mac</i>. The empty string
-     * stands for the default classifier.
-     *
-     * Version can be a '?' if it is unspecified or a '+' to take the highest existing version.
+     * Creates a new {@link JkCoordinate} from the given string representation of a dependency coordinate.
+     * T
+     * @throws IllegalArgumentException if the coordinate format does not adhere to the expected pattern.
      */
     public static JkCoordinate of(@JkDepSuggest String coordinate, Object...tokens) {
         String formattedCoordinate = String.format(coordinate, tokens);

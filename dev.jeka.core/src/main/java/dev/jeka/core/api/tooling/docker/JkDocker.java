@@ -91,6 +91,11 @@ public class JkDocker {
         }
     }
 
+    /**
+     * Asserts that Docker is present and responsive on the system.
+     *
+     * @throws IllegalStateException if the Docker daemon is not running or unresponsive.
+     */
     public static void assertPresent() {
         JkUtilsAssert.state(isPresent(), "Operation halted. Docker client unresponsive. Is Docker daemon running?");
     }
