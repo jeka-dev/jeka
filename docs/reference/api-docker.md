@@ -52,7 +52,7 @@ dockerBuild.dockerfileTemplate
 dockerBuild.buildImageInTemp("my-image:latest");  // Create the Docker image in a random temp dir
 ```
 
-```dockerfile title="Dockerfile result"
+```dockerfile title="Generated Dockerfile"
 FROM eclipse-temurin:21-jdk-alpine
 RUN addgroup --gid 1002 nonrootgroup && \
     adduser --uid 1001 -g 1002 --disabled-password nonroot
@@ -86,7 +86,7 @@ JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project.asBuildable())
 dockerBuild.buildImageInTemp("my-jvm-image:latest");  // Create the Docker image in a random temp dir
 ```
 
-```dockerfile title="Dockerfile result"
+```dockerfile title="Generated Dockerfile"
 FROM eclipse-temurin:23-jdk-alpine
 RUN addgroup --gid 1002 nonrootgroup && \
     adduser --uid 1001 -g 1002 --disabled-password nonroot
@@ -121,13 +121,14 @@ It requires building a native executable with static linking on `libc` (e.g., us
 ```java title="Example"
 JkNativeCompilation nativeCompilation = getNativeCompilation(); 
 nativeCompilation.setStaticLinkage(MUSL);
+
 JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeCompilation);
 dockerBuild.setBaseImage("gcr.io/distroless/static-debian12:nonroot");
 
 dockerBuild.buildImageInTemp("my-jvm-image:latest");  // Create the Docker image in a random temp dir
 ```
 
-```dockerfile title="Dockerfile result"
+```dockerfile title="Generated Dockerfile"
 FROM ghcr.io/graalvm/native-image-community:23-muslib AS build
 COPY imported-files/j2objc-annotations-3.0.0.jar /root/cp/j2objc-annotations-3.0.0.jar
 COPY imported-files/error_prone_annotations-2.28.0.jar /root/cp/error_prone_annotations-2.28.0.jar
