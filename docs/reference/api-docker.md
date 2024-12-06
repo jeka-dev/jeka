@@ -45,11 +45,7 @@ JkDockerBuild dockerBuild = JkDockerBuild.of()
         .setExposedPorts(8080);
 
 dockerBuild.dockerfileTemplate
-        .moveCursorBeforeUserNonRoot()   // next steps will happen in the root section
-        .addCopy(Paths.get("/user/me/certs/my-cert.jks"), "/app/my-cert.jks")
-        .add("RUN keytool -import -file my-cert.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit")
-        .moveCursorNext();               // next steps will happen in the non-root section         
-    .addCopy(Paths.get("/users/me/jars/my-app.jar"), "/app/my-app.jar")
+        .addCopy(Paths.get("/users/me/jars/my-app.jar"), "/app/my-app.jar")
         .add("WORKDIR /app")
         .addEntrypoint("java", "-jar", "/app/my-app.jar");
 
@@ -60,8 +56,6 @@ dockerBuild.buildImageInTemp("my-image:latest");  // Create the Docker image in 
 FROM eclipse-temurin:21-jdk-alpine
 RUN addgroup --gid 1002 nonrootgroup && \
     adduser --uid 1001 -g 1002 --disabled-password nonroot
-COPY imported-files/my-cert.jks /app/my-cert.jks
-RUN keytool -import -file my-cert.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
 USER nonroot
 COPY imported-files/hello-jeka.jar /app/my-app.jar
 WORKDIR /app
@@ -88,6 +82,7 @@ An extension of `JkDockerBuild` that provides additional methods to:
 JkProject project = project();
 JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project.asBuildable())
     .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.10.0", "myAgentOption");
+
 dockerBuild.buildImageInTemp("my-jvm-image:latest");  // Create the Docker image in a random temp dir
 ```
 
