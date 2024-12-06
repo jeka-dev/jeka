@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.tooling.docker;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -33,7 +35,8 @@ public class JkDockerNativeTest {
 
         List<Path> cp = new LinkedList<>();
         cp.add( Paths.get(JkDockerBuildIT.class.getResource("hello-jeka.jar").toURI()) );
-        cp.addAll( JkDependencyResolver.of().resolveFiles("com.google.guava:guava:33.3.1-jre") );
+        cp.addAll( JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral())
+                .resolveFiles("com.google.guava:guava:33.3.1-jre") );
 
         JkNativeCompilation nativeBuild = JkNativeCompilation.ofClasspath(cp);
         nativeBuild.setStaticLinkage(JkNativeCompilation.StaticLink.MUSL);
