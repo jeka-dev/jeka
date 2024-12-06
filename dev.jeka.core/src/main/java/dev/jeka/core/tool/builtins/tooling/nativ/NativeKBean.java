@@ -98,29 +98,29 @@ public class NativeKBean extends KBean {
         }
         classpath.addAll(depsAsFiles);
         classpath.addAll(0, this.aotAssetDirs.get());
-        JkNativeCompilation nativeImage = JkNativeCompilation.ofClasspath(classpath);
+        JkNativeCompilation nativeCompilation = JkNativeCompilation.ofClasspath(classpath);
         if (!JkUtilsString.isBlank(this.args)) {
-            nativeImage.addExtraParams(JkUtilsString.parseCommandline(this.args));
+            nativeCompilation.addExtraParams(JkUtilsString.parseCommandline(this.args));
         }
         if (this.includeMainClassArg) {
-            nativeImage.setMainClass(buildable.getMainClass());
+            nativeCompilation.setMainClass(buildable.getMainClass());
         }
-        nativeImage.setIncludesAllResources(this.includeAllResources);
-        nativeImage.setStaticLinkage(staticLink);
-        nativeImage.reachabilityMetadata
+        nativeCompilation.setIncludesAllResources(this.includeAllResources);
+        nativeCompilation.setStaticLinkage(staticLink);
+        nativeCompilation.reachabilityMetadata
                 .setUseRepo(useMetadataRepo)
                 .setRepoVersion(metadataRepoVersion)
                 .setDependencies(depsAsCoordinates)
                 .setDownloadRepos(buildable.getDependencyResolver().getRepos())
                 .setExtractDir(buildable.getOutputDir().resolve("aot-discovery-metadata-repo"));
-        return nativeImage;
+        return nativeCompilation;
     }
 
     private void build(JkBuildable buildable) {
-        JkNativeCompilation nativeImage = nativeImage(buildable);
+        JkNativeCompilation nativeCompilation = nativeImage(buildable);
         String pathString = buildable.getMainJarPath().toString();
         pathString = JkUtilsString.substringBeforeLast(pathString, ".jar");
-        nativeImage.make(Paths.get(pathString.replace('\\', '/')));
+        nativeCompilation.make(Paths.get(pathString.replace('\\', '/')));
     }
 
 }
