@@ -56,6 +56,12 @@ import java.util.stream.Stream;
  *
  * 4. Invoke GraalVM *nativeImage* program
  *
+ * The user creates a JkNativeCompilation by supplying a list of jar file to compile, then configure:
+ *
+ * - To statical link or not the libc
+ * - The main classes
+ *
+ *
  */
 public class JkNativeCompilation {
 
