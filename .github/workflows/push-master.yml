@@ -47,7 +47,7 @@ jobs:
 
     - name: Deploy MkDocs
       if: github.ref == 'refs/heads/master'
-      uses: mhausenblas/mkdocs-deploy-gh-pages
+      uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REQUIREMENTS: .github/workflows/requirements.txt
