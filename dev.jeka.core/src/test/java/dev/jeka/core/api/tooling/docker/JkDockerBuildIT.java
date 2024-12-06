@@ -20,6 +20,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import org.junit.Test;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -37,12 +38,12 @@ public class JkDockerBuildIT {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
 
         // Add Root
-        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch();
+        dockerBuild.dockerfileTemplate.moveCursorBeforeUserNonRoot();
         dockerBuild.dockerfileTemplate.add("## Comment appended in root user section");
         dockerBuild.dockerfileTemplate.add("## 2nd Comment appended in root user section");
 
         // Add non root
-        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch().moveCursorNext();
+        dockerBuild.dockerfileTemplate.moveCursorBeforeUserNonRoot().moveCursorNext();
         dockerBuild.dockerfileTemplate.addCopy(extraFile, "/my_toto.txt", false);
         dockerBuild.dockerfileTemplate.add("ENTRYPOINT [\"echo\"]");
         dockerBuild.dockerfileTemplate.add("CMD [\"titi\"]");
@@ -68,6 +69,28 @@ public class JkDockerBuildIT {
     }
 
     @Test
+    public void javaFromScratch() throws URISyntaxException {
+        final Path certFile = Paths.get(JkDockerBuildIT.class.getResource("my-cert.jks").toURI());
+        final Path jarFile = Paths.get(JkDockerBuildIT.class.getResource("hello-jeka.jar").toURI());
+        JkLog.setDecorator(JkLog.Style.INDENT);
+
+        JkDockerBuild dockerBuild = JkDockerBuild.of()
+            .setBaseImage("eclipse-temurin:21-jdk-alpine")
+            .setExposedPorts(8080);
+        dockerBuild.dockerfileTemplate
+                .addCopy(jarFile, "/app/my-app.jar")
+                .add("WORKDIR /app")
+                .addEntrypoint("java", "-jar", "/app/my-app.jar")
+                .moveCursorBeforeUserNonRoot()
+                .addCopy(certFile, "/app/my-cert.jks")
+                .add("keytool -import -file /app/my-cert.jks -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit");
+        System.out.println(dockerBuild.renderDockerfile());
+        Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
+        dockerBuild.buildImage(contextDir, "my-demo-image");
+        System.out.println(contextDir);
+    }
+
+    @Test
     public void simple_nonroot() {
         if (!JkDocker.isPresent()) {
             return;
@@ -83,7 +106,7 @@ public class JkDockerBuildIT {
 
     private void simpleNonRootWithBaseImage(String baseImage) {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
-        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch().moveCursorNext();
+        dockerBuild.dockerfileTemplate.moveCursorBeforeUserNonRoot().moveCursorNext();
         dockerBuild.dockerfileTemplate.addEntrypoint("echo", "toto");
         dockerBuild.setBaseImage(baseImage);
         String imageName = "jk-test-simplenonroot-" + baseImage;

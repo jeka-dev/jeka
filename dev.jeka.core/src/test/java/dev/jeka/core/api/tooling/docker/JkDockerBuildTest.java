@@ -27,7 +27,7 @@ public class JkDockerBuildTest {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
 
         // Add Root
-        dockerBuild.dockerfileTemplate.moveCursorBeforeNonRootUserSwitch().moveCursorNext()
+        dockerBuild.dockerfileTemplate.moveCursorBeforeUserNonRoot().moveCursorNext()
             .add("## 1")
             .add("## 2")
             .add("## 3")

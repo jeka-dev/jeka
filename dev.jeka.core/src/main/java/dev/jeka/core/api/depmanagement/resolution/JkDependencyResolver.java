@@ -208,8 +208,8 @@ public final class JkDependencyResolver  {
      * Resolves the specified dependency by converting it
      * to JkCoordinateDependency and calling the resolve method with it.
      */
-    public JkResolveResult resolve(String dependencyDescription) {
-        return resolve(JkCoordinateDependency.of(dependencyDescription));
+    public JkResolveResult resolve(@JkDepSuggest String coordinate) {
+        return resolve(JkCoordinateDependency.of(coordinate));
     }
 
     /**
@@ -373,6 +373,13 @@ public final class JkDependencyResolver  {
      */
     public List<Path> resolveFiles(JkDependencySet dependencies) {
         return resolveFiles(dependencies, this.parameters);
+    }
+
+    /**
+     * Resolves the specified coordinate and returns a sequence of resolved files.
+     */
+    public List<Path> resolveFiles(String coordinate) {
+        return resolveFiles(JkDependencySet.of(coordinate), this.parameters);
     }
 
     /**

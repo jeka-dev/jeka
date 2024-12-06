@@ -17,7 +17,7 @@
 package dev.jeka.core.api.tooling.docker;
 
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.java.JkNativeImage;
+import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
@@ -52,12 +52,12 @@ public class JkDockerNativeBuild extends JkDockerBuild {
         }
     }
 
-    private final JkNativeImage nativeImage;
+    private final JkNativeCompilation nativeCompilation;
 
 
 
-    private JkDockerNativeBuild(JkNativeImage nativeImage) {
-        this.nativeImage = nativeImage;
+    private JkDockerNativeBuild(JkNativeCompilation nativeCompilation) {
+        this.nativeCompilation = nativeCompilation;
         this.setBaseImage(PopularBaseImage.UBUNTU.imageName);
 
         // Create build image
@@ -68,7 +68,7 @@ public class JkDockerNativeBuild extends JkDockerBuild {
 
         // Configure production image
         dockerfileTemplate
-            .moveCursorBeforeNonRootUserSwitch()  // we are now in the production image
+            .moveCursorBeforeUserNonRoot()  // we are now in the production image
             .add("COPY ${chownFlag} --from=build /my-app /app/myapp")
             .moveCursorNext()                    // move after 'USER nonroot'
             .add("WORKDIR /app")
@@ -78,7 +78,7 @@ public class JkDockerNativeBuild extends JkDockerBuild {
         this.addTokenResolver("chownFlag", this::chownFlag);
     }
 
-    public static JkDockerNativeBuild of(JkNativeImage nativeImage) {
+    public static JkDockerNativeBuild of(JkNativeCompilation nativeImage) {
         return new JkDockerNativeBuild(nativeImage);
     }
 
@@ -89,7 +89,7 @@ public class JkDockerNativeBuild extends JkDockerBuild {
     private void addBuildCopySteps() {
         String targetBase = "/root/cp";
         List<String> targetPaths = new ArrayList<>();
-        List<Path> reverseClasspath = new LinkedList<>(nativeImage.getClasspath());
+        List<Path> reverseClasspath = new LinkedList<>(nativeCompilation.getClasspath());
         Collections.reverse(reverseClasspath);
         for (Path entry : reverseClasspath)  {
             String candidateName = entry.getFileName().toString();
@@ -104,7 +104,7 @@ public class JkDockerNativeBuild extends JkDockerBuild {
         Collections.reverse(targetPaths);
         String classpathString = String.join(":", targetPaths);
         String myAppPath = "/my-app";
-        List<String> nativeImageArgs = nativeImage.getNativeImageParams(myAppPath, classpathString);
+        List<String> nativeImageArgs = nativeCompilation.getNativeImageParams(myAppPath, classpathString);
         if (JkUtilsSystem.IS_WINDOWS) {
             nativeImageArgs = nativeImageArgs.stream()
                     .map(arg -> arg.replace("\\", "/"))
@@ -112,7 +112,7 @@ public class JkDockerNativeBuild extends JkDockerBuild {
         }
         Path argFile = JkUtilsPath.createTempFile("jeka-native-image-arg-file-", ".txt");
         String argsAsString = String.join(" ", nativeImageArgs);
-        for (Path metadatarepoPath : nativeImage.getAotMetadataRepoPaths()) {
+        for (Path metadatarepoPath : nativeCompilation.getAotMetadataRepoPaths()) {
             String targetPath = targetBase + "/root/metadata-repo/" + metadatarepoPath.getParent().getFileName() + "/"
                     + metadatarepoPath.getFileName();
            dockerfileTemplate.addCopy(metadatarepoPath, targetPath);
@@ -124,7 +124,7 @@ public class JkDockerNativeBuild extends JkDockerBuild {
     }
 
     private String buildImage() {
-        if (JkNativeImage.StaticLink.MUSL == nativeImage.getStaticLinkage()) {
+        if (JkNativeCompilation.StaticLink.MUSL == nativeCompilation.getStaticLinkage()) {
             return "ghcr.io/graalvm/native-image-community:23-muslib";
         } else {
             return "ghcr.io/graalvm/native-image-community:23.0.0";

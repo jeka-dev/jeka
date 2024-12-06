@@ -50,12 +50,12 @@ public class JkDependencySet {
         this.versionProvider = explicitVersions;
     }
 
-    public static JkDependencySet of(String dependencyDesc) {
+    public static JkDependencySet of(String coordinateOrFile) {
         final JkDependency dependency;
-        if (JkCoordinate.isCoordinateDescription(dependencyDesc)) {
-            dependency = JkCoordinateDependency.of(dependencyDesc);
+        if (JkCoordinate.isCoordinateDescription(coordinateOrFile)) {
+            dependency = JkCoordinateDependency.of(coordinateOrFile);
         } else {
-            dependency = JkFileSystemDependency.of(Paths.get(dependencyDesc));
+            dependency = JkFileSystemDependency.of(Paths.get(coordinateOrFile));
         }
         return of(JkUtilsIterable.listOf(dependency));
     }

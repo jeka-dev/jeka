@@ -63,7 +63,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         // Create template
         this.setBaseImage(BASE_IMAGE);
         dockerfileTemplate
-                .moveCursorBeforeNonRootUserSwitch()
+                .moveCursorBeforeUserNonRoot()
                 .addNonRootMkDirs("/app", "/workdir")
                 .moveCursorNext()  // move after user switch
                 .add("COPY agents /app/agents")

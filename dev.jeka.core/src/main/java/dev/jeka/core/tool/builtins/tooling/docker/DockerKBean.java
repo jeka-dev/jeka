@@ -20,7 +20,7 @@ import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
-import dev.jeka.core.api.java.JkNativeImage;
+import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.*;
@@ -168,7 +168,7 @@ public final class DockerKBean extends KBean {
     private JkDockerNativeBuild nativeDockerBuild(JkBuildable buildable) {
         NativeKBean nativeKBean = this.load(NativeKBean.class);
         JkLog.verbose("Configure native Docker image for %s", buildable);
-        JkNativeImage nativeImage =  nativeKBean.nativeImage(buildable);
+        JkNativeCompilation nativeImage =  nativeKBean.nativeImage(buildable);
         JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeImage);
         dockerBuild.setBaseImage(nativeBaseImage);
         dockerBuild.setNonRootUserCreationMode(nativeNonRootUser);

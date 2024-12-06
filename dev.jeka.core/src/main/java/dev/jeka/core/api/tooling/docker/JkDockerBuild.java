@@ -643,7 +643,7 @@ public class JkDockerBuild {
          *
          * @see #moveCursorBefore(String)
          */
-        public DockerfileTemplate moveCursorBeforeNonRootUserSwitch() {
+        public DockerfileTemplate moveCursorBeforeUserNonRoot() {
             return moveCursorBefore(decorateToken(SWITCH_NON_ROOT_TOKEN));
         }
 

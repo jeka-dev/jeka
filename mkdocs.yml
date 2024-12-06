@@ -1,6 +1,7 @@
 site_name: JeKa Build Tool
 theme:
     name: material
+    highlight_theme: dracula
     logo: images/logo-plain-white.svg
     favicon: images/logo-plain-gradient.svg
     font:
@@ -24,9 +25,6 @@ theme:
         accent: 'purple'
         favicon: images/knight-color-logo.svg
 
-      
-
-
     features:
         - navigation.instant
         - navigation.tracking
@@ -35,6 +33,20 @@ extra:
     analytics:
         provider: google
         property: UA-103449580-2
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.highlight:
+      use_pygments: true
+      pygments_lang_class: true
+      line_spans: __span
+
+
 nav:
     - Installation: installation.md
     - Tutorials:
@@ -73,13 +85,6 @@ nav:
       - Faq: legacy/faq.md
 
 repo_url: https://github.com/jerkar/jeka
-markdown_extensions:
-    - admonition
-    - toc:
-        permalink: true
-    - pymdownx.superfences
-    - pymdownx.highlight:
-        anchor_linenums: true
-        
+
 extra_css:
   - stylesheets/extra.css

@@ -6,7 +6,7 @@ The **Jeka Project API** provides a high-level interface for building Java/JVM p
 
 The classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
 
-### **`JkProject` Class**
+### **`JkProject`**
 
 The `JkProject` class contains all the essential definitions for building a JVM project, including source locations, build output, testing, packaging (e.g., creating JAR files), compiler settings, dependencies, and more.
 
@@ -198,7 +198,7 @@ Different phases of the build can be invoked using the following methods:
 
 In the next section, we'll detail the classes involved in the entire build process.
 
-### JkProjectCompilation Class
+### JkProjectCompilation
 
 Handles the compilation tasks for a `JkProject`.  
 This class is used for both production and test code compilation.  

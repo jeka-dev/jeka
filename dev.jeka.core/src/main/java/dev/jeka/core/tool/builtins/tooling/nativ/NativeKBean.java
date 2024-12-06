@@ -18,13 +18,12 @@ package dev.jeka.core.tool.builtins.tooling.nativ;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
-import dev.jeka.core.api.java.JkNativeImage;
+import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,13 +44,13 @@ public class NativeKBean extends KBean {
     public String args;
 
     @JkDoc("Tell if the generated executable must by statically linked with native libs")
-    public JkNativeImage.StaticLink staticLink = JkNativeImage.StaticLink.NONE;
+    public JkNativeCompilation.StaticLink staticLink = JkNativeCompilation.StaticLink.NONE;
 
     @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
     public boolean useMetadataRepo = true;
 
     @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
-    public String metadataRepoVersion = JkNativeImage.ReachabilityMetadata.DEFAULT_REPO_VERSION;
+    public String metadataRepoVersion = JkNativeCompilation.DEFAULT_REPO_VERSION;
 
     @JkDoc("If false, the main class won't be specified in command line arguments. " +
             "This means that it is expected to be mentioned in aot config files.")
@@ -84,7 +83,7 @@ public class NativeKBean extends KBean {
     }
 
 
-    public JkNativeImage nativeImage(JkBuildable buildable) {
+    public JkNativeCompilation nativeImage(JkBuildable buildable) {
         List<Path> classpath = new LinkedList<>();
         classpath.add(buildable.getClassDir());
         final List<Path> depsAsFiles;
@@ -99,7 +98,7 @@ public class NativeKBean extends KBean {
         }
         classpath.addAll(depsAsFiles);
         classpath.addAll(0, this.aotAssetDirs.get());
-        JkNativeImage nativeImage = JkNativeImage.ofClasspath(classpath);
+        JkNativeCompilation nativeImage = JkNativeCompilation.ofClasspath(classpath);
         if (!JkUtilsString.isBlank(this.args)) {
             nativeImage.addExtraParams(JkUtilsString.parseCommandline(this.args));
         }
@@ -118,7 +117,7 @@ public class NativeKBean extends KBean {
     }
 
     private void build(JkBuildable buildable) {
-        JkNativeImage nativeImage = nativeImage(buildable);
+        JkNativeCompilation nativeImage = nativeImage(buildable);
         String pathString = buildable.getMainJarPath().toString();
         pathString = JkUtilsString.substringBeforeLast(pathString, ".jar");
         nativeImage.make(Paths.get(pathString.replace('\\', '/')));

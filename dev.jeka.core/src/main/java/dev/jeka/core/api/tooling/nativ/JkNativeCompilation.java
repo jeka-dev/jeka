@@ -14,13 +14,14 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.api.java;
+package dev.jeka.core.api.tooling.nativ;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsJdk;
@@ -39,9 +40,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JkNativeImage {
+/**
+ * Provides native compilation to produce executables from a list of JAR files.
+ *
+ * User provides a list of JARs and optionally some paraters, and this class generates
+ * an executable file.
+ *
+ * The nativce compilation flows as :
+ *
+ * 1. Fetch the AOT metadata repo containing extra information to provide to compiler.
+ *
+ * 2. Create the command line argument to pass to graalVM *nativeImage* program.
+ *
+ * 3. Download GravlVM if not already done.
+ *
+ * 4. Invoke GraalVM *nativeImage* program
+ *
+ */
+public class JkNativeCompilation {
 
     public static final String DEFAULT_GRAALVM_VERSION = "23";;
+
+    public static final String DEFAULT_REPO_VERSION =  "0.10.3";
 
     public enum StaticLink {
 
@@ -67,30 +87,30 @@ public class JkNativeImage {
 
     private boolean includesAllResources = false;
 
-    private JkNativeImage(List<Path> classpath) {
+    private JkNativeCompilation(List<Path> classpath) {
         this.classpath = classpath;
     }
 
-    public static JkNativeImage ofClasspath(List<Path> classpath) {
-        return new JkNativeImage(classpath);
+    public static JkNativeCompilation ofClasspath(List<Path> classpath) {
+        return new JkNativeCompilation(classpath);
     }
 
-    public JkNativeImage setStaticLinkage(StaticLink staticLink) {
+    public JkNativeCompilation setStaticLinkage(StaticLink staticLink) {
         this.staticLink = staticLink;
         return this;
     }
 
-    public JkNativeImage addExtraParams(String... params) {
+    public JkNativeCompilation addExtraParams(String... params) {
         this.extraParams.addAll(Arrays.asList(params));
         return this;
     }
 
-    public JkNativeImage setMainClass(String mainClass) {
+    public JkNativeCompilation setMainClass(String mainClass) {
         this.mainClass = mainClass;
         return this;
     }
 
-    public JkNativeImage setIncludesAllResources(boolean includesAllResources) {
+    public JkNativeCompilation setIncludesAllResources(boolean includesAllResources) {
         this.includesAllResources = includesAllResources;
         return this;
     }
@@ -104,8 +124,7 @@ public class JkNativeImage {
     }
 
     /**
-     * Generates a native image at the specified location
-     * @param target
+     * Generates a native image executable at the specified location
      */
     public void make(Path target) {
         JkLog.startTask("make-native-image");
@@ -217,19 +236,7 @@ public class JkNativeImage {
                 javaHome.resolve("bin/native-image");
     }
 
-    private static boolean isPresent() {
-        try {
-            return JkProcess.of(currentToolPath().toString(), "--version")
-                    .exec()
-                    .hasSucceed();
-        } catch (UncheckedIOException e) {
-            return false;
-        }
-    }
-
     public class ReachabilityMetadata {
-
-        public static final String DEFAULT_REPO_VERSION =  "0.10.3";
 
         private boolean useRepo = true;
 

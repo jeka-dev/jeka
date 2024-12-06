@@ -2,3 +2,13 @@
     background: linear-gradient(to right top, #e958a1, #e15aae, #d15ec7, #c561db, #bf63e5)
 }
 
+:root > * {
+    #--md-code-hl-variable-color: hsla(200, 18%, 26%, 1);
+    --md-code-hl-number-color: #cf6aa5;
+    --md-code-hl-string-color: #7ca65d;
+    --md-code-hl-comment-color: rgba(179, 182, 186, 0.87);
+
+
+
+}
+

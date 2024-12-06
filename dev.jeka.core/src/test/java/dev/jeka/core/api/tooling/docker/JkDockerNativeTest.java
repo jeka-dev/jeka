@@ -16,30 +16,40 @@
 
 package dev.jeka.core.api.tooling.docker;
 
-import dev.jeka.core.api.java.JkNativeImage;
+import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 
 public class JkDockerNativeTest {
 
     @Test
     public void runDefault() throws Exception {
-        List<Path> cp = JkUtilsIterable.listOf(Paths.get("lib-a"),
-                Paths.get("lib-b"), Paths.get("lib-c"),  Paths.get("/toto/lib-c"));
-        JkNativeImage nativeImage = JkNativeImage.ofClasspath(cp);
-        JkDockerNativeBuild dockerNative = JkDockerNativeBuild.of(nativeImage);
-        System.out.println(dockerNative.renderInfo());
+
+        List<Path> cp = new LinkedList<>();
+        cp.add( Paths.get(JkDockerBuildIT.class.getResource("hello-jeka.jar").toURI()) );
+        cp.addAll( JkDependencyResolver.of().resolveFiles("com.google.guava:guava:33.3.1-jre") );
+
+        JkNativeCompilation nativeBuild = JkNativeCompilation.ofClasspath(cp);
+        nativeBuild.setStaticLinkage(JkNativeCompilation.StaticLink.MUSL);
+
+        JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeBuild);
+        dockerBuild.setBaseImage(JkDockerNativeBuild.PopularBaseImage.DISTRO_LESS.imageName);
+
+        System.out.println(dockerBuild.renderInfo());
     }
 
     @Test
     public void distroless() throws Exception {
+
         List<Path> cp = JkUtilsIterable.listOf(Paths.get("lib-a"),
                 Paths.get("lib-b"), Paths.get("lib-c"),  Paths.get("/toto/lib-c"));
-        JkNativeImage nativeImage = JkNativeImage.ofClasspath(cp);
+        JkNativeCompilation nativeImage = JkNativeCompilation.ofClasspath(cp);
         JkDockerNativeBuild dockerNative = JkDockerNativeBuild.of(nativeImage);
         dockerNative.setBaseImage(JkDockerNativeBuild.PopularBaseImage.DISTRO_LESS.imageName);
         System.out.println(dockerNative.renderInfo());
