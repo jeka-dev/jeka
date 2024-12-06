@@ -45,14 +45,12 @@ jobs:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 
-    - name: Install mkdocs extension
-      run: pip install pymdown-extensions --force
-
     - name: Deploy MkDocs
       if: github.ref == 'refs/heads/master'
       uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REQUIREMENTS: .github/workflows/requirements.txt
         
     - name: Deploy distrib to Release
       if: github.event_name == 'create' && github.ref_type == 'tag'
