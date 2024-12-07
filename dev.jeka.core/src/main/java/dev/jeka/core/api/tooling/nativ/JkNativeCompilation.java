@@ -41,27 +41,31 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Provides native compilation to produce executables from a list of JAR files.
+ * Handles native compilation to produce executables from a list of JAR files.
+ * <p>
+ * This class allows users to provide a list of JAR files and optional parameters
+ * to generate a native executable.
+ * </p>
  *
- * User provides a list of JARs and optionally some paraters, and this class generates
- * an executable file.
+ * <h3>Native Compilation Flow</h3>
+ * <ol>
+ *   <li>Fetch the AOT (Ahead Of Time) metadata repository, which contains supplementary information for the compiler.</li>
+ *   <li>Construct the command-line arguments required for the GraalVM <code>nativeImage</code> program.</li>
+ *   <li>Download GraalVM if it is not already available on the system.</li>
+ *   <li>Invoke the GraalVM <code>nativeImage</code> program to produce the executable from the JAR files.</li>
+ * </ol>
  *
- * The nativce compilation flows as :
+ * <h3>Configuration Options</h3>
+ * <ul>
+ *   <li>Specify whether to statically link the libc library.</li>
+ *   <li>Define the main class to be executed in the generated executable.</li>
+ *   <li>Decide whether to include all resources within the executable.</li>
+ *   <li>Provide raw parameters to the <i>GraalVM nativeImage</i> for advanced configuration.</li>
+ * </ul>
  *
- * 1. Fetch the AOT metadata repo containing extra information to provide to compiler.
- *
- * 2. Create the command line argument to pass to graalVM *nativeImage* program.
- *
- * 3. Download GravlVM if not already done.
- *
- * 4. Invoke GraalVM *nativeImage* program
- *
- * The user creates a JkNativeCompilation by supplying a list of jar file to compile, then configure:
- *
- * - To statical link or not the libc
- * - The main classes
- *
- *
+ * <p>
+ * Once configured, users can execute the <code>make</code> method to initiate the compilation process.
+ * </p>
  */
 public class JkNativeCompilation {
 

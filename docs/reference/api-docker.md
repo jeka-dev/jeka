@@ -41,13 +41,13 @@ Key features include:
 
 ```java title="Example"
 JkDockerBuild dockerBuild = JkDockerBuild.of()
-        .setBaseImage("eclipse-temurin:21-jdk-alpine")
-        .setExposedPorts(8080);
+    .setBaseImage("eclipse-temurin:21-jdk-alpine")
+    .setExposedPorts(8080);
 
 dockerBuild.dockerfileTemplate
-        .addCopy(Paths.get("/users/me/jars/my-app.jar"), "/app/my-app.jar")
-        .add("WORKDIR /app")
-        .addEntrypoint("java", "-jar", "/app/my-app.jar");
+    .addCopy(Paths.get("/users/me/jars/my-app.jar"), "/app/my-app.jar")
+    .add("WORKDIR /app")
+    .addEntrypoint("java", "-jar", "/app/my-app.jar");
 
 dockerBuild.buildImageInTemp("my-image:latest");  // Create the Docker image in a random temp dir
 ```
@@ -119,11 +119,11 @@ This approach produces images with a minimal package set to reduce the attack su
 It requires building a native executable with static linking on `libc` (e.g., using MUSL).
 
 ```java title="Example"
-JkNativeCompilation nativeCompilation = getNativeCompilation(); 
-nativeCompilation.setStaticLinkage(MUSL);
+JkNativeCompilation nativeCompilation = getNativeCompilation()
+    .setStaticLinkage(MUSL);
 
-JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeCompilation);
-dockerBuild.setBaseImage("gcr.io/distroless/static-debian12:nonroot");
+JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeCompilation)
+    .setBaseImage("gcr.io/distroless/static-debian12:nonroot");
 
 dockerBuild.buildImageInTemp("my-jvm-image:latest");  // Create the Docker image in a random temp dir
 ```
