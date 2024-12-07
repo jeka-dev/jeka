@@ -51,6 +51,8 @@ public class CoreBuild extends KBean {
 
     private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
+    private static final JkArtifactId SDKMAN_FILE_ID = JkArtifactId.of("sdkman", "zip");
+
     // This method has to be run in dev.jeka.core (this module root) working directory
     public static void main(String[] args) {
         JkInit.kbean(CoreBuild.class, args).cleanPack();
@@ -75,7 +77,8 @@ public class CoreBuild extends KBean {
             .setModuleId("dev.jeka:jeka-core")
             //.packActions.set(this::doPackWithEmbeddedJar, this::doDistrib);
             .packActions.append("include-embedded-jar", this::doPackWithEmbeddedJar)
-                        .append("create-distrib", this::doDistrib);
+                        .append("create-distrib", this::doDistrib)
+                        .append("create-sdkman-distrib", this::doSdkmanDistrib);
         project
             .compilerToolChain
                 .setForkedWithDefaultProcess();
@@ -105,6 +108,7 @@ public class CoreBuild extends KBean {
         // Configure Maven publication
         load(MavenKBean.class).getMavenPublication()
                 .putArtifact(DISTRIB_FILE_ID)
+                .putArtifact(SDKMAN_FILE_ID)
                 .pomMetadata
                     .setProjectName("JeKa")
                     .addApache2License()
@@ -179,6 +183,17 @@ public class CoreBuild extends KBean {
         zipDistrib(distrib.getRoot(), distribFile);
         JkLog.info("Distribution zipped in " + distribFile);
         JkLog.endTask();
+    }
+
+    // We create a specific archive for sdkman to conform to the constraints
+    // that the zip must have a root entry having the same name than the archive.
+    private void doSdkmanDistrib() {
+        final JkPathTree distrib = JkPathTree.of(distribFolder());
+        Path sdkmanDistribDir = getOutputDir().resolve("sdkman-distrib");
+        JkUtilsPath.createDirectories(sdkmanDistribDir);
+        String entryName = "jeka-core-" + project.getVersion() + "-sdkman";
+        distrib.copyTo(sdkmanDistribDir.resolve(entryName));
+        JkPathTree.of(sdkmanDistribDir).zipTo(project.artifactLocator.getArtifactPath(SDKMAN_FILE_ID));
     }
 
     // see example here https://www.tabnine.com/code/java/methods/org.apache.commons.compress.archivers.zip.ZipArchiveEntry/setUnixMode
