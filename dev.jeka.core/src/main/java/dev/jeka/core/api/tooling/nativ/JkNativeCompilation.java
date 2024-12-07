@@ -134,14 +134,14 @@ public class JkNativeCompilation {
     }
 
     /**
-     * Generates a native image executable at the specified location
+     * Generates a native image at the specified file location.
      */
-    public void make(Path target) {
+    public void make(Path outputFile) {
         JkLog.startTask("make-native-image");
 
         String nativeImageExe = toolPath().toString();
         JkProcess process = JkProcess.of(nativeImageExe);
-        List<String> params = getNativeImageParams(target.toString(), JkPathSequence.of(classpath).toPath());
+        List<String> params = getNativeImageParams(outputFile.toString(), JkPathSequence.of(classpath).toPath());
         String paramsString = String.join( " ", params);
         if (paramsString.length() <= 2048) {  // error thrown when cmd line is too large
             process.addParams(params);
@@ -157,17 +157,17 @@ public class JkNativeCompilation {
         process = process
                 .addParams("--no-fallback")
                 .addParamsIf(!JkUtilsString.isBlank(mainClass), "-H:Class=" + mainClass)
-                .addParams("-o",  target.toString())
+                .addParams("-o",  outputFile.toString())
                 .setLogCommand(true)
                 .setInheritIO(true)
                 .setDestroyAtJvmShutdown(true);
 
         process.exec();
-        JkLog.info("Generated in %s", target);
+        JkLog.info("Generated in %s", outputFile);
         JkLog.endTask();
     }
 
-    public List<String> getNativeImageParams(String targetPath, String classpathAsString) {
+    public List<String> getNativeImageParams(String outputFile, String classpathAsString) {
         List<String> params = new LinkedList<>();
 
         if (!JkUtilsString.isBlank(classpathAsString)) {
@@ -189,7 +189,7 @@ public class JkNativeCompilation {
             params.add("-H:Class=" + mainClass);
         }
         params.add("-o");
-        params.add(targetPath);
+        params.add(outputFile);
 
         // Resource bundles
         boolean hasMessageBundle = false;

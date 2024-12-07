@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Wrapper for Git command line interface. This class assumes Git is installed on the host machine.
+ * A utility class for executing Git commands within a specific directory.
+ * This class extends JkAbstractProcess to facilitate the execution of process commands.
  */
 public final class JkGit extends JkAbstractProcess<JkGit> {
 
@@ -135,7 +136,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     /**
      * Returns a list of tags associated with the current commit.
      */
-    public List<String> getTagsOfCurrentCommit() {
+    public List<String> getTagsOnCurrentCommit() {
         return copy()
                 .setParams("tag", "-l", "--points-at", "HEAD")
                 .setLogWithJekaDecorator(false)
@@ -251,7 +252,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         List<String> tags;
         String branch;
         boolean dirty;
-        tags = getTagsOfCurrentCommit().stream()
+        tags = getTagsOnCurrentCommit().stream()
                 .filter(tag -> tag.startsWith(prefix))
                 .collect(Collectors.toList());
         branch = getCurrentBranch();

@@ -22,8 +22,6 @@ import org.junit.Test;
 
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
-
 public class JkGitTest {
 
     JkGit git = JkGit.of(Paths.get(""));
@@ -50,8 +48,8 @@ public class JkGitTest {
     }
 
     @Test
-    public void getTagsOfCurrentCommit() {
-        System.out.printf("--%s--%n", git.getTagsOfCurrentCommit());
+    public void getTagsOnCurrentCommit() {
+        System.out.printf("--%s--%n", git.getTagsOnCurrentCommit());
     }
 
     @Test

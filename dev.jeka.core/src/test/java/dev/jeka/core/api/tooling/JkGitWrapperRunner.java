@@ -14,7 +14,7 @@ public class JkGitWrapperRunner {
         //git.exec("rev-parse --abbrev-ref HEAD");
         System.out.println(git.isWorkspaceDirty());
         System.out.println(git.getCurrentCommit());
-        System.out.println(git.getTagsOfCurrentCommit());
+        System.out.println(git.getTagsOnCurrentCommit());
         System.out.println(git.getVersionFromTag());
         System.out.println(git.getLastCommitMessageMultiLine());
         System.out.println("***");

@@ -57,7 +57,9 @@ nav:
         - Properties: reference/properties.md
         - Build Library:
             - Project: reference/api-project.md
-            - Docker: reference/api-docker.md 
+            - Native: reference/api-native.md
+            - Docker: reference/api-docker.md
+            - Git: reference/api-git.md
     - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md
@@ -84,7 +86,6 @@ nav:
           - Getting Started: legacy/tutorials/gui-getting-started.md
           - Reuse Elements: legacy/tutorials/gui-reuse-elements.md
       - Faq: legacy/faq.md
-
 
 repo_url: https://github.com/jerkar/jeka
 
