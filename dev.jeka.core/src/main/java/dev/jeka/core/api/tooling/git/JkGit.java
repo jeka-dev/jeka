@@ -375,6 +375,19 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return new JkGit(this);
     }
 
+    /**
+     * Executes a given Git command line in the context of the current Git repository.
+     *
+     * @param commandLine the Git command line to execute. This parameter should be a string representing
+     *                    the Git command and its arguments.
+     * @return the current JkGit instance, enabling method chaining after executing the command.
+     */
+    public JkGit execCmdLine(String commandLine, String... tokens) {
+        String finalCommand = String.format(commandLine, (Object[]) tokens);
+        this.copy().addParams(JkUtilsString.parseCommandline(finalCommand)).run();
+        return this;
+    }
+
     private JkProcResult execAndCheck() {
         JkProcResult procResult = exec();
         if (procResult.getExitCode() != 0) {

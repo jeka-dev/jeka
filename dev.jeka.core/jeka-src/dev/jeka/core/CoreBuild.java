@@ -26,6 +26,8 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.api.tooling.git.JkGit;
+import dev.jeka.core.api.utils.JkUtilsFile;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
@@ -39,6 +41,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Run main method to create full distrib.
@@ -47,6 +50,18 @@ import java.nio.file.Path;
 public class CoreBuild extends KBean {
 
     private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
+
+    // This method has to be run in dev.jeka.core (this module root) working directory
+    public static void main(String[] args) {
+        JkInit.kbean(CoreBuild.class, args).cleanPack();
+    }
+
+    public static class RunBuildAndIT {
+        public static void main(String[] args) {
+            CoreBuild coreBuild = JkInit.kbean(CoreBuild.class, args, "-runIT");
+            coreBuild.project.pack();
+        }
+    }
 
     public final JkProject project = load(ProjectKBean.class).project;
 
@@ -96,6 +111,38 @@ public class CoreBuild extends KBean {
                     .setProjectDescription("Build and Run Java Code from Everywhere")
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
+
+    public void cleanPack() {
+        project.clean().pack();
+    }
+
+    public void pushJavadoc() {
+        String gitUrl = "https://github.com/jeka-dev/jeka.git";
+        String ghPageBranch = "gh-pages";
+
+        Path ghPageDir = project.getOutputDir().resolve("gh-pages");
+        JkPathTree.of(ghPageDir).deleteContent();
+        JkUtilsPath.createDirectories(ghPageDir);
+
+        Path javadocPath = getOutputDir().resolve("javadoc");
+        JkGit git = JkGit.of(ghPageDir).setFailOnError(true).setLogCommand(true);
+        git.execCmdLine("clone --depth 1 --branch %s %s .", ghPageBranch, gitUrl);
+        JkPathTree.of(ghPageDir.resolve("javadoc")).importDir(javadocPath, StandardCopyOption.REPLACE_EXISTING);
+        git
+                .execCmdLine("add .")
+                .execCmdLine("config user.name  jeka-bot")
+                .execCmdLine("config user.email jeka-bot@github-action.com")
+                .execCmdLine("commit -m update-javadoc --allow-empty")
+                .execCmdLine("push");
+    }
+
+    void testScaffolding()  {
+        JkLog.startTask("Run scaffold tests");
+        new ScaffoldTester().run();
+        JkLog.endTask();
+    }
+
+
 
     private Path distribFolder() {
         return project.getOutputDir().resolve("distrib");
@@ -163,12 +210,6 @@ public class CoreBuild extends KBean {
         }
     }
 
-    void testScaffolding()  {
-        JkLog.startTask("Run scaffold tests");
-        new ScaffoldTester().run();
-        JkLog.endTask();
-    }
-
     private void doPackWithEmbeddedJar() {
 
         Path targetJar = project.artifactLocator.getMainArtifactPath();
@@ -199,20 +240,6 @@ public class CoreBuild extends KBean {
         JkUtilsPath.deleteIfExists(embeddedJar);
     }
 
-    public void cleanPack() {
-        project.clean().pack();
-    }
 
-    // This method has to be run in dev.jeka.core (this module root) working directory
-    public static void main(String[] args) {
-        JkInit.kbean(CoreBuild.class, args).cleanPack();
-    }
-
-    public static class RunBuildAndIT {
-        public static void main(String[] args) {
-            CoreBuild coreBuild = JkInit.kbean(CoreBuild.class, args, "-runIT");
-            coreBuild.project.pack();
-        }
-    }
 
 }

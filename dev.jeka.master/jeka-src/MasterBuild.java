@@ -191,6 +191,9 @@ class MasterBuild extends KBean {
         }
 
 
+        JkLog.info("Deploy Javadoc on gh-pages");
+        coreBuild.pushJavadoc();;
+
     }
 
     private boolean shouldPublishOnMavenCentral() {
