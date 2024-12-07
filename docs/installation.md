@@ -6,6 +6,8 @@ For a pure IDE experience, you don't need to install CLI, just install the [Inte
 
 ## CLI for Windows
 
+The CLI lets you run remote apps/scripts and create new projects.
+
 Execute in PowerShell :
 ```shell
 iex "& { $(iwr -useb https://jeka.dev/install.ps1) } install check"
