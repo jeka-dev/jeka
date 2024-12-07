@@ -189,11 +189,6 @@ class MasterBuild extends KBean {
         if (getRunbase().getProperties().get("sonar.host.url") != null) {
             coreBuild.load(SonarqubeKBean.class).run();
         }
-
-
-        JkLog.info("Deploy Javadoc on gh-pages");
-        coreBuild.pushJavadoc();;
-
     }
 
     private boolean shouldPublishOnMavenCentral() {
