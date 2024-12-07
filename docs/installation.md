@@ -1,9 +1,5 @@
 # Installation
 
-You don’t need to install JeKa to run scripts locally written by others, as it is usually included with the scripts.
-
-The CLI installation allows you to run remote scripts and create JeKa projects from the command line.
-
 ## IntelliJ Plugin
 
 For a pure IDE experience, you don't need to install CLI, just install the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka).
