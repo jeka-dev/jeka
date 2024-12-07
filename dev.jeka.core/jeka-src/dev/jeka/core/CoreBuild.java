@@ -116,7 +116,7 @@ public class CoreBuild extends KBean {
         project.clean().pack();
     }
 
-    public void pushJavadoc() {
+    public void addJavadocToGhPages() {
         String gitUrl = "https://github.com/jeka-dev/jeka.git";
         String ghPageBranch = "gh-pages";
 
@@ -128,12 +128,16 @@ public class CoreBuild extends KBean {
         JkGit git = JkGit.of(ghPageDir).setFailOnError(true).setLogCommand(true);
         git.execCmdLine("clone --depth 1 --branch %s %s .", ghPageBranch, gitUrl);
         JkPathTree.of(ghPageDir.resolve("javadoc")).importDir(javadocPath, StandardCopyOption.REPLACE_EXISTING);
+
+        // commit-push will be done by a specific github actions
+        /*
         git
                 .execCmdLine("add .")
                 .execCmdLine("config user.name  jeka-bot")
                 .execCmdLine("config user.email jeka-bot@github-action.com")
                 .execCmdLine("commit -m update-javadoc --allow-empty")
                 .execCmdLine("push");
+                */
     }
 
     void testScaffolding()  {

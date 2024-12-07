@@ -51,6 +51,16 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REQUIREMENTS: .github/workflows/requirements.txt
+
+    - name: Add Javadoc to gh-pages
+      working-directory: dev.jeka.core
+      run: jeka-output/distrib/bin/jeka addJavadocToGhPages
+
+    - name: Deploy gh-pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: dev.jeka.core/jeka-output/gh-pages
         
     - name: Deploy distrib to Release
       if: github.event_name == 'create' && github.ref_type == 'tag'
