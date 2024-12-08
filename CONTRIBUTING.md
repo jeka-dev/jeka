@@ -24,9 +24,11 @@ Documentation is regenerated after each push or pull request.
 ### Modules
 
 - **dev.jeka.core**: Core JeKa code, including bundled KBeans (project, git, docker, etc.).
-- **plugins**: Plugins released with JeKa but not bundled (e.g., SpringBoot, Jacoco).
-- **samples**: Example projects for illustration and integration testing.
-- **master**: Aggregates all modules for testing and publishing.
+- **dev.jeka.plugins**: Plugins released with JeKa but not bundled (e.g., SpringBoot, Jacoco).
+- **dev.jela.samples**: Example projects for illustration and integration testing.
+- **dev.jeka.master**: Aggregates all modules for building, testing and publishing.
+
+See [details](https://jeka-dev.github.io/jeka/under-the-hood/) on  **dev.jeka.core**.
 
 ## Getting Started
 

@@ -12,17 +12,11 @@ The Jeka JAR is structured as follows:
 
 - `dev.jeka.core.tool.builtin` package: 
 
-     Contains *KBeans* bundled with JeKa. These KBeans are used for building classic or cloud-native Java app. 
-     Here are some example among other
-
-     - `ProjectKBean`: Build JVM projects.
-     - `DockerKBean`: Create JVM-based or native-based Docker images.
-     - `NativeKBean`: Create native executables from a project.
+     Contains *KBeans* bundled with JeKa, as `ProjectKBean`, `DockerKBean` or `NativeKBean`.
 
 - `dev.jeka.core.api` package:
 
-    Contains the libraries needed to build projects. These classes can be conveniently used outside of Jeka, embedded in your own product.
-    
+  Includes libraries for building projects. These classes can be easily used outside Jeka and embedded in your product.    
 
 ```mermaid
 graph TD
