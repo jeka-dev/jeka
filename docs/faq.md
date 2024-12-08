@@ -8,12 +8,9 @@ You can [configure Maven repositories](reference/properties/#repositories) in a 
 
 To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a URL file. This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
 
-!!! Note
-    In the future, JeKa distribution fetching will rely on the same mechanism as regular Maven dependencies, avoiding the need to specify the `jeka.distrib.location`. Create a GitHub issue if you need this feature.
-
 ### My organization prevents downloading JDKs. What can I do?
 
-YYou can specify a local location for each JDK version you are using as follows:
+You can specify a local location for each JDK version you are using as follows:
 ```properties
 jeka.jdk.11=/my/path/to/jdk11/home
 jeka.jdk.17=/my/path/to/jdk17/home
@@ -38,11 +35,11 @@ Nothing prevents using JeKa alongside Maven or Gradle in the same project, excep
 
 To avoid this, the `jeka-src` folder should exist in its own IntelliJ module. JeKa provides a simple way to accomplish this.
 
-#### Using IntelliJ Plugin:
+**Using IntelliJ Plugin:**
 
 Right-click on the `jeka-src` folder, and a menu entry will allow you to turn the `jeka-src` directory into a module.
 
-#### Using the Command Line:
+**Using the Command Line:**
 
 In your existing Maven/Gradle project, do the following:
 

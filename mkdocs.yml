@@ -45,7 +45,11 @@ markdown_extensions:
       use_pygments: true
       pygments_lang_class: true
       line_spans: __span
-
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 nav:
     - Installation: installation.md
@@ -64,6 +68,7 @@ nav:
     - FAQ: faq.md
     - Examples: examples.md
     - Javadoc: javadoc/
+    - Under The Hood: under-the-hood.md
     - Legacy (version  0.10.x) :
       - Migration Guide (0.10 -> 0.11): migration-guide.md
       - Reference Guide:

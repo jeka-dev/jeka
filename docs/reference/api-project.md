@@ -117,7 +117,7 @@ To import a *bill-of-materials* (BOM), declare a dependency as: `group:module::p
 Using the programatic api, you can also declare filesystem dependencies, meaning jar files located in 
 the project code base.
 
-
+<a href="#full-text-description"></a>
 **Dependency Description - Full Text**
 
 Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/dependencies.txt* file.
