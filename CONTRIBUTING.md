@@ -4,6 +4,8 @@ Welcome, and thank you for your interest in contributing to JeKa! Whether fixing
 
 JeKa thrives on community collaboration. This guide will help you get started and make an impact. Let’s shape the future of Java tooling together!
 
+Use [this discussion channel](https://github.com/orgs/jeka-dev/discussions/categories/contributing) to help us to make contributing easier.
+
 ## Repository Organization
 
 This repository is a _monorepo_ containing JeKa's core, plugins, automation samples, and [general documentation](https://jeka-dev.github.io/jeka/).
