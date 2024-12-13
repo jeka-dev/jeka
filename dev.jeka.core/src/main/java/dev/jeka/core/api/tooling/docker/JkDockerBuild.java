@@ -347,13 +347,14 @@ public class JkDockerBuild {
      * @param imageName the name of the image to build. It may include a tag name.
      */
     public void buildImage(Path buildContextDir, String imageName) {
-        JkDocker.assertPresent();
         this.generateContextDir(buildContextDir);
-        JkDocker.prepareExec("build", "-t", imageName, buildContextDir.toString())
+        JkDocker.of()
+                .assertPresent()
                 .setInheritIO(true)
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true)
                 .setInheritIO(false)
+                .addParams("build", "-t", imageName, buildContextDir.toString())
                 .exec();
 
         String portMapping = getPortMappingArgs();

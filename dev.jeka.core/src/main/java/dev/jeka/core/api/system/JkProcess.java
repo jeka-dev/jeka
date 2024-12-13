@@ -48,8 +48,8 @@ public class JkProcess extends JkAbstractProcess<JkProcess> {
      * Creates a <code>JkProcess</code> using the specified command and
      * parameters.
      */
-    public static JkProcess of(String command, String... parameters) {
-        return new JkProcess().setCommand(command).addParams(parameters);
+    public static JkProcess of(String... parameters) {
+        return new JkProcess().addParams(parameters);
     }
 
     /**
@@ -58,13 +58,10 @@ public class JkProcess extends JkAbstractProcess<JkProcess> {
      * @param commandLine The command line to be executed. The command line is a space separated string
      *                    that will be parsed in an array od arguments.
      */
-    public static JkProcess ofCmdLine(String commandLine) {
-        String[] items = JkUtilsString.parseCommandline(commandLine);
-        JkUtilsAssert.argument(items.length > 0, "Cannot accept empty command line.");
-        String cmd = items[0];
-        List<String> args = new LinkedList<>(Arrays.asList(items));
-        args.remove(0);
-        return of(cmd, args.toArray(new String[0]));
+    public static JkProcess ofCmdLine(String commandLine, String ...tokens) {
+        String[] params = JkUtilsString.parseCommandline(String.format(commandLine, (Object[]) tokens));
+        JkUtilsAssert.argument(params.length > 0, "Cannot accept empty command line.");
+        return of(params);
     }
 
     /**
@@ -77,7 +74,10 @@ public class JkProcess extends JkAbstractProcess<JkProcess> {
     public static JkProcess ofWinOrUx(String windowsCommand, String unixCommand,
             String... parameters) {
         final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
-        return of(cmd, parameters);
+        List<String> effectiveParams = new LinkedList<>();
+        effectiveParams.add(cmd);
+        effectiveParams.addAll(Arrays.asList(parameters));
+        return of(effectiveParams.toArray(new String[0]));
     }
 
     /**
@@ -96,7 +96,10 @@ public class JkProcess extends JkAbstractProcess<JkProcess> {
             }
         }
         final String command = candidate.toAbsolutePath().normalize().resolve(javaTool).toString();
-        return of(command, parameters);
+        List<String> effectiveParams = new LinkedList<>();
+        effectiveParams.add(command);
+        effectiveParams.addAll(Arrays.asList(parameters));
+        return of(effectiveParams.toArray(new String[0]));
     }
 
     private static boolean findTool(Path dir, String name) {

@@ -37,9 +37,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
 
     protected static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
 
-    private String command;
-
-    private List<String> parameters = new LinkedList<>();
+    // Parameters that form the command line to run the process.
+    private List<String> processParams = new LinkedList<>();
 
     private Map<String, String> env = new HashMap<>();
 
@@ -65,8 +64,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     protected JkAbstractProcess() {}
 
     protected JkAbstractProcess(JkAbstractProcess<?> other) {
-        this.command = other.command;
-        this.parameters = new LinkedList<>(other.parameters);
+        this.processParams = new LinkedList<>(other.processParams);
         this.env = new HashMap<>(other.env);
         this.failOnError = other.failOnError;
         this.logCommand = other.logCommand;
@@ -79,13 +77,16 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         this.collectStderr = other.collectStderr;
     }
 
-    protected abstract T copy();
+    protected T copy() {
+        return null;
+    }
 
     /**
      * Specify the command to execute
      */
-    public T setCommand(String command) {
-        this.command = command;
+    public T setParamAt(int index, String parameter) {
+        this.processParams.remove(index);
+        this.processParams.add(index, parameter);
         return (T) this;
     }
 
@@ -124,14 +125,6 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
-     * Sets the specified parameters to the command line.
-     */
-    public T setParams(String ...parameters) {
-        this.parameters = Arrays.asList(parameters);
-        return (T) this;
-    }
-
-    /**
      * Adds the specified parameters as a space separated args to the command line.
      * The string will be parsed in an array of parameters.
      *
@@ -154,7 +147,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * Removes specified parameter to the command line
      */
     public T removeParam(String parameter) {
-        parameters.remove(parameter);
+        processParams.remove(parameter);
         return (T) this;
     }
 
@@ -175,9 +168,9 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      */
     public T addParams(Collection<String> parameters) {
         List<String> sanitizedParams = sanitized(parameters);
-        List<String> params = new LinkedList<>(this.parameters);
+        List<String> params = new LinkedList<>(this.processParams);
         params.addAll(sanitizedParams);
-        this.parameters = params;
+        this.processParams = params;
         return (T) this;
     }
 
@@ -185,20 +178,20 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * Adds the specified parameters to the command line at the beginning of the list.
      * Any null values in the parameters collection will be removed before adding.
      */
-    public T addParamsFirst(Collection<String> parameters) {
+    public T addParamsAt(int index, Collection<String> parameters) {
         List<String> sanitizedParams = sanitized(parameters);
-        List<String> params = new LinkedList<>(sanitizedParams);
-        params.addAll(this.parameters);
-        this.parameters = params;
+        List<String> params = new LinkedList<>(this.processParams);
+        params.addAll(index, sanitizedParams);
+        this.processParams = params;
         return (T) this;
     }
 
     /**
      * Adds the specified parameters to the command line at the beginning of the list.
-     * @see #addParamsFirst(Collection)
+     * @see #addParamsAt(int, Collection)
      */
-    public T addParamsFirst(String ...parameters) {
-        return addParamsFirst(Arrays.asList(parameters));
+    public T addParamsAt(int index, String ...parameters) {
+        return addParamsAt(index, Arrays.asList(parameters));
     }
 
     /**
@@ -318,14 +311,14 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
-     * Returns the command launched by this process.
+     * Returns the command launched by  this process.
      */
-    public String getCommand() {
-        return this.command;
+    public String getParamAt(int index) {
+        return this.processParams.get(index);
     }
 
     public List<String> getParams() {
-        return Collections.unmodifiableList(parameters);
+        return Collections.unmodifiableList(processParams);
     }
 
     /**
@@ -340,10 +333,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     public String toString() {
         int maxLength = 150;
         if (JkLog.isVerbose()) {
-            return this.command + " " + JkUtilsString.readableCommandAgs("", parameters);
+            return JkUtilsString.readableCommandAgs("", processParams);
         }
         String shortCommand = shortenCommand();
-        return JkUtilsString.ellipse(shortCommand + " " + String.join(" ", parameters), maxLength);
+        return JkUtilsString.ellipse(shortCommand + " " + String.join(" ", processParams), maxLength);
     }
 
     /**
@@ -365,7 +358,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * current output.
      */
     public JkProcResult exec() {
-        final List<String> commands = computeEffectiveCommands();
+        customizeCommand();
         if (logCommand) {
             String cmd = shortenCommand() +  " " + shortenArgs(100);
             JkLog.startTask("start-program >" + cmd);
@@ -382,7 +375,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         ByteArrayOutputStream collectErrBaos = new ByteArrayOutputStream();
         final OutputStream collectStdoutStream = collectStdout ? collectOutBaos : JkUtilsIO.nopOutputStream();
         final OutputStream collectStderrStream = collectStderr ? collectErrBaos : JkUtilsIO.nopOutputStream();
-        int exitCode = runProcess(commands, collectStdoutStream, collectStderrStream);
+        int exitCode = runProcess(collectStdoutStream, collectStderrStream);
         if (logCommand) {
             JkLog.endTask();
         }
@@ -393,11 +386,32 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     /**
+     * Executes a command with the specified parameters and returns the current instance.
+     *
+     * This method uses a clone of the current instance's configuration to execute a command.
+     *
+     * @param commandParams The parameters to be added to the command being executed.
+     * @return The current instance after executing the command.
+     */
+    public T execCmd(String ...commandParams) {
+        this.copy().addParams(commandParams).exec();
+        return (T) this;
+    }
+
+    /**
+     * @see #execCmd(String...)
+     */
+    public T execCmdLine(String format, String... tokens) {
+        String cmdLne = String.format(format, (Object[]) tokens);
+        return execCmd(JkUtilsString.parseCommandline(cmdLne));
+    }
+
+    /**
      * Executes the process asynchronously and returns a {@link JkProcHandler} object
      * which can be used to interact with the running process.
      */
     public JkProcHandler execAsync() {
-        final List<String> commands = computeEffectiveCommands();
+        customizeCommand();
         if (logCommand) {
             String cmd = shortenCommand() +  " " + shortenArgs(100);
             JkLog.info("start-async-program >" + cmd);
@@ -409,7 +423,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             JkLog.getOutPrintStream().flush();
             JkLog.getErrPrintStream().flush();
         }
-        Process process = runProcessAsync(commands);
+        Process process = runProcessAsync();
 
         // Collect the output of sub-process if it has been required to.
         ByteArrayOutputStream baos = null;
@@ -421,17 +435,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         return new JkProcHandler(process, baos);
     }
 
-    private List<String> computeEffectiveCommands() {
-        JkUtilsAssert.state(!JkUtilsString.isBlank(command), "No command has been specified");
-        customizeCommand();
-        final List<String> commands = new LinkedList<>();
-        commands.add(command);
-        commands.addAll(parameters);
-        return commands;
-    }
-
-    private Process runProcessAsync(List<String> commands) {
-        final ProcessBuilder processBuilder = processBuilder(commands);
+    private Process runProcessAsync() {
+        final ProcessBuilder processBuilder = processBuilder(this.processParams);
         final Process process;
         try {
             process = processBuilder.start();
@@ -448,9 +453,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         return process;
     }
 
-    private int runProcess(List<String> commands, OutputStream collectStdoutStream,
-                           OutputStream collectStderrStream) {
-        final Process process = runProcessAsync(commands);
+    private int runProcess(OutputStream collectStdoutStream, OutputStream collectStderrStream) {
+        final Process process = runProcessAsync();
 
         // Initialize stream globber so output stream of subprocess does not bybass decorators 
         // set in place in JkLog
@@ -532,23 +536,23 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     private String fullCmdLine() {
-        return command + " " + String.join(" ", parameters);
+        return String.join(" ", processParams);
     }
 
     private String shortenArgs(int maxWidth) {
-        String singleLine = String.join(" ", parameters);
+        String singleLine = String.join(" ", processParams);
         return JkUtilsString.ellipse(singleLine, maxWidth);
     }
 
     private String shortenCommand() {
-        Path path = Paths.get(command);
+        Path path = Paths.get(processParams.get(0) );
         return path.getFileName().toString();
     }
 
     private void printContextualInfo() {
         String workingDirName = this.workingDir == null ? "." : workingDir.toString();
         JkLog.info("working dir   : %s", workingDirName);
-        JkLog.info("command path  : %s", command);
+        JkLog.info("command path  : %s", processParams.isEmpty() ? "" : processParams.get(0));
         final String cmdLine;
         if (JkLog.isDebug() ) {
             cmdLine = fullCmdLine();

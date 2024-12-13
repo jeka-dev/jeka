@@ -15,7 +15,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Run Self-App
         run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 base: pack -c");
-        if (JkDocker.isPresent()) {
+        if (JkDocker.of().isPresent()) {
             run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 docker: build -c");
         }
 

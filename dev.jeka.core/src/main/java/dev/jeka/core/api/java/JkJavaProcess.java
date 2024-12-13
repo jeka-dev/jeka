@@ -49,7 +49,7 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
 
     protected JkJavaProcess() {
         super();
-        this.setCommand(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
+        this.addParams(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
     }
 
     protected JkJavaProcess(JkJavaProcess other) {
@@ -94,7 +94,7 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
         if (agentOption != null) {
             arg = arg + "=" + agentOption;
         }
-        return addParamsFirst(arg);
+        return addParamsAt(1, arg);
     }
 
     /**
@@ -102,7 +102,7 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
      * Options are command line parameters prepending the Java class parameter.
      */
     public JkJavaProcess addJavaOptions(Collection<String> options) {
-        return addParamsFirst(options);
+        return addParamsAt(1, options);
     }
 
     /**
@@ -139,7 +139,7 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
      * Adds a system property to the command line parameters.
      */
     public JkJavaProcess addSystemProperty(String key, String value) {
-        addParamsFirst("-D" + key + "=" + value);
+        addParamsAt(1, "-D" + key + "=" + value);
         return this;
     }
 

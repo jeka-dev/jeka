@@ -28,7 +28,7 @@ public class JkDockerBuildIT {
 
     @Test
     public void simple() throws Exception {
-        if (!JkDocker.isPresent()) {
+        if (!JkDocker.of().isPresent()) {
             return;
         }
         JkLog.setDecorator(JkLog.Style.INDENT);
@@ -58,12 +58,12 @@ public class JkDockerBuildIT {
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
         System.out.println("Cereating buidcontext in " + contextDir);
         dockerBuild.buildImage(contextDir, imageName);
-        JkDocker.prepareExec("run", imageName)
+        JkDocker.of().addParams("run", imageName)
                 .setInheritIO(false)
                 .addParams("lulu")
                 .setLogWithJekaDecorator(true).
                 exec();
-        JkDocker.prepareExec("image", "rm", "--force", imageName)
+        JkDocker.of().addParams("image", "rm", "--force", imageName)
                 .setInheritIO(false).setLogWithJekaDecorator(true).exec();
         System.out.println("Generated in " + contextDir);
     }
@@ -92,7 +92,7 @@ public class JkDockerBuildIT {
 
     @Test
     public void simple_nonroot() {
-        if (!JkDocker.isPresent()) {
+        if (!JkDocker.of().isPresent()) {
             return;
         }
         JkLog.setDecorator(JkLog.Style.INDENT);
@@ -116,9 +116,9 @@ public class JkDockerBuildIT {
         System.out.println(dockerBuild.renderDockerfile());
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
         dockerBuild.buildImage(contextDir, imageName);
-        JkDocker.prepareExec("run", imageName)
+        JkDocker.of().addParams("run", imageName)
                 .setInheritIO(false).setLogWithJekaDecorator(true).exec();
-        JkDocker.prepareExec("image", "rm", "--force", imageName)
+        JkDocker.of().addParams("image", "rm", "--force", imageName)
                 .setInheritIO(false).setLogWithJekaDecorator(true).exec();
     }
 

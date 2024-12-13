@@ -58,7 +58,7 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
      * Creates a Maven command wrapper.
      */
     public static JkMvn of(Path workingDir) {
-        return new JkMvn(workingDir).setWorkingDir(workingDir).setCommand(mvnCmd(workingDir));
+        return new JkMvn(workingDir).setWorkingDir(workingDir).addParams(mvnCmd(workingDir));
     }
 
     /**

@@ -99,7 +99,7 @@ public abstract class JekaCommandLineExecutor {
                 .setEnv("jeka.distrib.location", jekaShellCmd.toAbsolutePath().getParent().normalize().toString());
 
         if (usePowerShell) {
-            process.addParamsFirst(baseDir.resolve("jeka.ps1").toString());
+            process.addParamsAt(1, baseDir.resolve("jeka.ps1").toString());
         }
 
         // Add jacoco agent for gathering test coverage info

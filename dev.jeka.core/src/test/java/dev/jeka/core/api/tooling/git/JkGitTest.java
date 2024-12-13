@@ -61,5 +61,16 @@ public class JkGitTest {
        Assert.assertTrue(fileList.hasFileStartingWith("docs/"));
     }
 
+    @Test
+    public void badCommand_throwException() {
+        Exception thrown = null;
+        try {
+            JkGit.of().execCmdLine("bad command");
+        } catch (Exception e) {
+            thrown = e;
+        }
+        Assert.assertNotNull(thrown);
+    }
+
 
 }

@@ -108,7 +108,7 @@ public final class JkTestProcessor {
     public final JkRunnables preActions = JkRunnables.of();
 
     /**
-     * Collection of <i>Eunnables</i> to be executed after the test processor has run.
+     * Collection of <i>Runnables</i> to be executed after the test processor has run.
      * <p>
      * It is typically used for generating reports after a test definition has run.
      * <p>
@@ -254,7 +254,7 @@ public final class JkTestProcessor {
         Path specificJdkHome = this.jvmHints.javaHome();
         if (specificJdkHome != null) {
             JkLog.verbose("Run tests on JVM %s", specificJdkHome);
-            clonedProcess.setCommand(specificJdkHome.resolve("bin/java").toString());
+            clonedProcess.setParamAt(0, specificJdkHome.resolve("bin/java").toString());
         }
         clonedProcess.exec();
 

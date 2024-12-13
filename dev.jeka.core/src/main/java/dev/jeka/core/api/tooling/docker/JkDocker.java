@@ -16,18 +16,12 @@
 
 package dev.jeka.core.api.tooling.docker;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcResult;
-import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,57 +29,46 @@ import java.util.stream.Collectors;
 /**
  * Class providing utility methods for executing Docker commands.
  */
-public class JkDocker {
+public class JkDocker extends JkAbstractProcess<JkDocker> {
 
-    /**
-     * Executes the specified Docker command with the given parameters and returns the result.
-     *
-     * @param dockerCommand The Docker command to execute as 'run', 'tag', 'version', ....
-     * @param params        The parameters to pass to the Docker command.
-     * @return The result of the command execution.
-     */
-    public static JkProcResult exec(String dockerCommand, String ...params) {
-        return prepareExec(dockerCommand, params).exec();
+    private JkDocker() {
+        this.addParams("docker");
+    }
+
+    private JkDocker(JkDocker other) {
+        super(other);
+    }
+
+    public static JkDocker of() {
+        return new JkDocker();
+    }
+
+    @Override
+    protected JkDocker copy() {
+        return new JkDocker(this);
     }
 
     /**
-     * Executes the specified Docker command with the given parameters expressed with
-     * a space separated string of arguments.
+     * Login to a Docker registry using the specified credentials.
      *
-     * @param dockerCommand The space separated String representing the arguments.
-     * @param cmdLineArgs       The parameters to pass to the Docker command as a space separated string (e.g. "-X -e run").
-     * @see JkDocker#exec(String, String...)
-     * @see JkProcess#addParamsAsCmdLine(String, Object...) (String)
+     * @param registry The URL or name of the Docker registry to log in to, i.e. $ACR_NAME.azurecr.io
+     * @param username The username for authentication with the registry.
+     * @param password The password for authentication with the registry.
      */
-    public static JkProcResult execCmdLine(String dockerCommand, String cmdLineArgs) {
-        return prepareExec(dockerCommand).addParamsAsCmdLine(cmdLineArgs).exec();
+    public JkDocker login(String registry, String username, String password) {
+        return execCmd("login", registry, "-u", username, "-p", password);
     }
 
-    /**
-     * Prepares a JkProcess object to execute a Docker command with the given parameters.
-     */
-    public static JkProcess prepareExec(String dockerCommand, String ...params) {
-        return JkProcess.of("docker")
-                .addParams(dockerCommand)
-                .addParams(params)
-                .setLogCommand(true)
-                .setInheritIO(true)
-                .setDestroyAtJvmShutdown(true)
-                .setFailOnError(true);  // By default, it is wise to fail when an error occurs
+    public JkDocker loginDockerHub(String username, String password) {
+        return login("docker.io", username, password);
     }
 
     /**
      * Checks if Docker is present on the system.
      */
-    public static boolean isPresent() {
+    public boolean isPresent() {
         try {
-            return prepareExec("version")
-                    .setLogCommand(JkLog.isVerbose())
-                    .setInheritIO(false)
-                    .setLogWithJekaDecorator(false)
-                    .setFailOnError(false)
-                    .exec()
-                        .hasSucceed();
+            return copy().addParams("version").exec().hasSucceed();
         } catch (UncheckedIOException e) {
             return false;
         }
@@ -96,15 +79,19 @@ public class JkDocker {
      *
      * @throws IllegalStateException if the Docker daemon is not running or unresponsive.
      */
-    public static void assertPresent() {
+    public JkDocker assertPresent() {
         JkUtilsAssert.state(isPresent(), "Operation halted. Docker client unresponsive. Is Docker daemon running?");
+        return this;
     }
 
     /**
-     * Prepares a JkProcess object to execute Jeka in a Docker container.
+     * Retrieves the names of Docker images available locally. The image names
+     * are formatted as "repository:tag".
+     *
+     * @return A set of strings representing the names of local Docker images, where each name is in the format "repository:tag".
      */
-    public static Set<String> getImageNames() {
-        List<String> rawResult = prepareExec("images", "--format", "{{.Repository}}:{{.Tag}}")
+    public  Set<String> getImageNames() {
+        List<String> rawResult = copy().addParams("images", "--format", "{{.Repository}}:{{.Tag}}")
                 .setCollectStdout(true)
                 .setInheritIO(false)
                 .exec().getStdoutAsMultiline();
@@ -124,8 +111,8 @@ public class JkDocker {
      *
      * @param jekaCommandArgs The argument to pass to JeKa
      */
-    public static JkProcess prepareExecJeka(Path workingDir, String... jekaCommandArgs) {
-        JkProcess process =  JkDocker.prepareExec("run" ,
+    public JkAbstractProcess<?> prepareExecJekaInDocker(Path workingDir, String... jekaCommandArgs) {
+        JkDocker process =  copy().addParams("run" ,
                 "-v", JkLocator.getCacheDir().getParent().resolve("cache4c").normalize() + ":/cache",
                 "-v", workingDir.toAbsolutePath() + ":/workdir",
                 "-t",
@@ -135,17 +122,17 @@ public class JkDocker {
         return process;
     }
 
-    public static JkProcess prepareExecJeka(String... jekaCommandArgs) {
-        return prepareExecJeka(Paths.get(""), jekaCommandArgs);
+    public JkAbstractProcess<?> prepareExecJekaInDocker(String... jekaCommandArgs) {
+        return prepareExecJekaInDocker(Paths.get(""), jekaCommandArgs);
     }
 
     /**
      * Executes Jeka in a docker container.
      *
-     * @see JkDocker#prepareExecJeka(Path, String...)
+     * @see JkDocker#prepareExecJekaInDocker(Path, String...)
      */
-    public static JkProcResult execJeka(String... jekaCommandArgs) {
-        return prepareExecJeka(Paths.get(""), jekaCommandArgs).exec();
+    public JkProcResult execJekaInDocker(String... jekaCommandArgs) {
+        return prepareExecJekaInDocker(Paths.get(""), jekaCommandArgs).exec();
     }
 
 }

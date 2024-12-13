@@ -37,7 +37,7 @@ class DockerTester extends JekaCommandLineExecutor  {
     private static final boolean NO_CACHE = false;
 
     void run() {
-        if (!JkDocker.isPresent()) {
+        if (!JkDocker.of().isPresent()) {
             JkLog.warn("Docker not present. Can't run Docker tests");
             return;
         }
@@ -50,8 +50,7 @@ class DockerTester extends JekaCommandLineExecutor  {
     }
 
     static void buildInstallImage() {
-
-        JkDocker.prepareExec("build")
+        JkDocker.of().addParams("build")
                 .addParamsIf(NO_CACHE, "--no-cache")
                 .addParamsAsCmdLine("--build-arg CACHEBUST=%s", Instant.now())
                 .addParamsAsCmdLine("--progress=plain -t %s .", IMAGE_NAME)
@@ -61,7 +60,7 @@ class DockerTester extends JekaCommandLineExecutor  {
     }
 
     static void runImage() {
-        JkDocker.prepareExec("run", "-rm", "-t", IMAGE_NAME)
+        JkDocker.of().addParams("run", "-rm", "-t", IMAGE_NAME)
                 .setWorkingDir(DOCKER_DIR)
                 .exec();
     }
@@ -93,7 +92,7 @@ class DockerTester extends JekaCommandLineExecutor  {
                 .exec();
          */
 
-        JkProcResult result = JkDocker.prepareExec("run",
+        JkProcResult result = JkDocker.of().addParams("run",
                 "--rm", "github.com_jeka-dev_demo-cowsay:0.0.6", "toto")
                 .setLogCommand(true)
                 .setInheritIO(false)

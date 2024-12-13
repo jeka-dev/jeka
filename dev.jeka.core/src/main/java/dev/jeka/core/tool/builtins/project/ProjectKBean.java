@@ -26,7 +26,9 @@ import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.scaffold.JkScaffold;
+import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -389,14 +391,16 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());
         if (tests.fork != null && tests.fork && testProcessor.getForkingProcess() == null) {
-            final JkJavaProcess javaProcess = JkJavaProcess.ofJava(JkTestProcessor.class.getName())
+            String className = JkTestProcessor.class.getName();
+
+            JkJavaProcess javaProcess = JkJavaProcess.ofJava(className)
                     .addJavaOptions(this.tests.jvmOptions);
             if (project.getJvmTargetVersion() != null &&
                     !JkJavaVersion.ofCurrent().equals(project.getJvmTargetVersion())) {
                 Path javaHome = jdks().getHome(project.getJvmTargetVersion());
                 if (javaHome != null) {
                     JkLog.verbose("Tests are configured to run using JDK %s", javaHome);
-                    javaProcess.setCommand(javaHome.resolve("bin/java").toString());
+                    javaProcess.setParamAt(0,javaHome.resolve("bin/java").toString());
                 }
             }
             testProcessor.setForkingProcess(javaProcess);

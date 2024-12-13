@@ -60,15 +60,18 @@ public class DockerImageMaker {
 
     public static void pushImage(String version, String password) {
         String imageNameWithVersion = IMAGE_NAME + ":" + version;
-        JkDocker.exec("image", "tag", IMAGE_NAME, imageNameWithVersion);
-        JkDocker.exec("login", "-u", GROUP, "-p", password);
-        JkDocker.exec("push", imageNameWithVersion);
+        JkDocker docker = JkDocker.of();
+        docker
+            .execCmd("image", "tag", IMAGE_NAME, imageNameWithVersion)
+            .loginDockerHub(GROUP, password)
+            .execCmd("push", imageNameWithVersion);
         if (!JkVersion.of(version).isSnapshot()) {
             String imageNameWithLatest= IMAGE_NAME + ":latest";
-            JkDocker.exec("image", "tag", IMAGE_NAME, imageNameWithLatest);
-            JkDocker.exec("push", imageNameWithLatest);
+            docker
+                .execCmd("image", "tag", IMAGE_NAME, imageNameWithLatest)
+                .execCmd("push", imageNameWithLatest);
         }
-        JkDocker.exec("logout");
+        docker.execCmd("logout");
     }
 
     public static void main(String[] args) {

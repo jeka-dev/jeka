@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public final class JkGit extends JkAbstractProcess<JkGit> {
 
     private JkGit() {
-        this.setCommand("git");
+        this.addParams("git");
     }
 
     private JkGit(JkGit other) {
@@ -50,7 +50,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Creates a new JkGit instance pointing on the specified working directory.
      */
     public static JkGit of(Path dir) {
-        return new JkGit().setWorkingDir(dir).setFailOnError(false);
+        return new JkGit().setWorkingDir(dir);
     }
 
     /**
@@ -97,8 +97,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Checks if the local branch is in sync with the remote branch.
      */
     public boolean isSyncWithRemote() {
-        String local = copy().setParams("rev-parse", "@").setCollectStdout(true).execAndCheck().getStdoutAsString();
-        String remote = copy().setParams("rev-parse", "@{u}").setCollectStdout(true).execAndCheck().getStdoutAsString();
+        String local = copy().addParams("rev-parse", "@").setCollectStdout(true).execAndCheck().getStdoutAsString();
+        String remote = copy().addParams("rev-parse", "@{u}").setCollectStdout(true).execAndCheck().getStdoutAsString();
         return local.equals(remote);
     }
 
@@ -110,7 +110,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public boolean isWorkspaceDirty() {
         return !copy()
-                .setParams("diff", "HEAD", "--stat")
+                .addParams("diff", "HEAD", "--stat")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
                 .execAndCheck()
@@ -124,7 +124,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public String getCurrentCommit() {
         String commit = copy()
-                .setParams("rev-parse", "HEAD")
+                .addParams("rev-parse", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
                 .execAndCheck()
@@ -138,7 +138,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public List<String> getTagsOnCurrentCommit() {
         return copy()
-                .setParams("tag", "-l", "--points-at", "HEAD")
+                .addParams("tag", "-l", "--points-at", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
                 .execAndCheck()
@@ -154,7 +154,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public List<String> getLastCommitMessageMultiLine() {
         return copy()
-                .setParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
+                .addParams("log", "--oneline", "--format=%B", "-n 1", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
                 .execAndCheck()
@@ -198,7 +198,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public JkGit tagAndPush(String name) {
         tag(name);
-        copy().setParams("push", "origin", name).execAndCheck();
+        copy().addParams("push", "origin", name).execAndCheck();
         return this;
     }
 
@@ -206,7 +206,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Adds a tag at the HEAD of the current branch.
      */
     public JkGit tag(String tagName) {
-        copy().setParams("tag", tagName).execAndCheck();
+        copy().addParams("tag", tagName).execAndCheck();
         return this;
     }
 
@@ -260,7 +260,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         if (branch == null) {   // detached Head
             JkLog.verbose("Git detached branch. Infer version from exact matching tag.");
             return this.copy()
-                    .setParams("describe", "--tags", "--exact-match")
+                    .addParams("describe", "--tags", "--exact-match")
                     .setCollectStdout(true)
                     .execAndCheck()
                     .getStdoutAsString()
@@ -298,7 +298,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         String latestTag = getLatestTag();
         JkUtilsAssert.state(latestTag != null, "Latest tag not found");
         List<String> rawResults = copy()
-                .setParams("log", "--oneline", getLatestTag() + "..HEAD")
+                .addParams("log", "--oneline", getLatestTag() + "..HEAD")
                 .setCollectStdout(true)
                 .execAndCheck()
                 .getStdoutAsMultiline();
@@ -317,7 +317,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Returns the latest tag in the Git repository.
      */
     public String getLatestTag() {
-        List<String> tags = copy().setParams("describe", "--tags", "--abbrev=0")
+        List<String> tags = copy().addParams("describe", "--tags", "--abbrev=0")
                 .setCollectStdout(true)
                 .execAndCheck()
                 .getStdoutAsMultiline();
@@ -341,7 +341,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public void tagRemote() {
         JkLog.info("Existing tags on origin :");
-        this.copy().setLogWithJekaDecorator(true).setParams("ls-remote", "--tag", "--sort=creatordate", "origin").execAndCheck();
+        this.copy().setLogWithJekaDecorator(true).addParams("ls-remote", "--tag", "--sort=creatordate", "origin").execAndCheck();
         if (this.isWorkspaceDirty()) {
             JkLog.info("Git workspace is dirty. Please clean your Git workspace and retry");
             return;
@@ -364,7 +364,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public FileList diiff(String commitFrom, String commitTo) {
         List<String> rawResults = copy()
-                .setParams("--no-pager", "diff", "--name-only", commitFrom, commitTo)
+                .addParams("--no-pager", "diff", "--name-only", commitFrom, commitTo)
                 .setCollectStdout(true)
                 .execAndCheck()
                 .getStdoutAsMultiline();
@@ -376,18 +376,6 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return new JkGit(this);
     }
 
-    /**
-     * Executes a given Git command line in the context of the current Git repository.
-     *
-     * @param commandLine the Git command line to execute. This parameter should be a string representing
-     *                    the Git command and its arguments.
-     * @return the current JkGit instance, enabling method chaining after executing the command.
-     */
-    public JkGit execCmdLine(String commandLine, String... tokens) {
-        String finalCommand = String.format(commandLine, (Object[]) tokens);
-        this.copy().addParams(JkUtilsString.parseCommandline(finalCommand)).run();
-        return this;
-    }
 
     private JkProcResult execAndCheck() {
         JkProcResult procResult = exec();

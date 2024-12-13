@@ -32,7 +32,7 @@ public class JkDockerJvmBuildIT {
     @Test
     @Ignore  // Fails in automated test cause no jeka-output/classes dir exist
     public void simple() {
-        if (!JkDocker.isPresent()) {
+        if (!JkDocker.of().isPresent()) {
             return;
         }
         JkLog.setDecorator(JkLog.Style.INDENT);
@@ -49,13 +49,13 @@ public class JkDockerJvmBuildIT {
         Path contextDir =JkUtilsPath.createTempDirectory("jk-test");
         System.out.println(contextDir);
         dockerJvmBuild.buildImage(contextDir, imageName);
-        JkDocker.prepareExec("run", imageName)
+        JkDocker.of().addParams("run", imageName)
                 .setLogCommand(true)
                 .addParams("--version")
                 .setInheritIO(false)
                 .setLogWithJekaDecorator(true)
                 .exec();
-        JkDocker.prepareExec("image", "rm", "--force", imageName);
+        JkDocker.of().addParams("image", "rm", "--force", imageName);
     }
 
     private JkProject project() {
