@@ -19,7 +19,8 @@ package dev.jeka.core.api.testing;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkException;
 
-import java.io.*;
+import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

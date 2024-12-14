@@ -16,7 +16,6 @@
 
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -267,7 +266,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      * <br/>
      * Initial value is <code>false</code>
      *
-     * @see  {@link ProcessBuilder#inheritIO()}.
+     * @see ProcessBuilder#inheritIO()
      */
     public T setInheritIO(boolean value) {
         if (value) {

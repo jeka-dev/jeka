@@ -160,6 +160,8 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         return this;
     }
 
+
+
     /**
      * Adds the specified agent to the running JVM
      * @param agentCoordinate The agent maven coordinate to download agent.
@@ -168,6 +170,14 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     public JkDockerJvmBuild addAgent(@JkDepSuggest String agentCoordinate, String agentOptions) {
         this.agents.put(new PathOrCoordinate(agentCoordinate), agentOptions);
         return this;
+    }
+
+    /**
+     * Adds the specified agent to the running JVM, without passing any option.
+     * @param agentCoordinate The agent maven coordinate to download agent.
+     */
+    public JkDockerJvmBuild addAgent(@JkDepSuggest String agentCoordinate) {
+        return addAgent(agentCoordinate, "");
     }
 
     /**

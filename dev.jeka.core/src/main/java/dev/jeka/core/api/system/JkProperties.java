@@ -16,7 +16,6 @@
 
 package dev.jeka.core.api.system;
 
-import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;

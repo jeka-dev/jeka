@@ -21,8 +21,6 @@ import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 @JkDoc("Provides project versioning by extracting Git information" + "\n" +
         "The version is inferred from git using following logic : "+ "\n" +

@@ -17,11 +17,9 @@
 package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 

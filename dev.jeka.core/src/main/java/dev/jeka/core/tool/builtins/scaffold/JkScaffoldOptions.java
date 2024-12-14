@@ -16,7 +16,6 @@
 
 package dev.jeka.core.tool.builtins.scaffold;
 
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.tool.JkDoc;
 

@@ -18,16 +18,17 @@ package dev.jeka.core.api.crypto.gpg.embedded.bc;
 
 import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsThrowable;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.*;
-import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.*;
-import org.bouncycastle.openpgp.operator.bc.*;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
 import java.io.*;

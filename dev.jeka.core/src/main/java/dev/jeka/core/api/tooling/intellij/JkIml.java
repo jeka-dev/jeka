@@ -20,7 +20,6 @@ import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

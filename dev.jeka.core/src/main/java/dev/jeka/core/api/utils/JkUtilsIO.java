@@ -16,10 +16,11 @@
 
 package dev.jeka.core.api.utils;
 
-import dev.jeka.core.api.system.JkLog;
-
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;

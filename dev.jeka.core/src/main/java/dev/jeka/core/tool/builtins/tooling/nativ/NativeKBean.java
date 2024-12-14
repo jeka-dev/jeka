@@ -18,12 +18,12 @@ package dev.jeka.core.tool.builtins.tooling.nativ;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.api.project.JkBuildable;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

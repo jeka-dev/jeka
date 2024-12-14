@@ -16,7 +16,6 @@
 
 package dev.jeka.core.api.tooling.docker;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;

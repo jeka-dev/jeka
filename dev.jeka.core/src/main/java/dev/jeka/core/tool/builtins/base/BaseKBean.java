@@ -27,6 +27,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
@@ -37,7 +38,6 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 

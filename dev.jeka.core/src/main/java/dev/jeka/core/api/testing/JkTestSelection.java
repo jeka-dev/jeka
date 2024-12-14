@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 /**
  * Mutable object to specify a set of test to run according class root dirs, file patterns and tags.<p>

@@ -18,8 +18,8 @@ package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkInternalChildFirstClassLoader;
 import dev.jeka.core.api.java.JkClassLoader;
+import dev.jeka.core.api.java.JkInternalChildFirstClassLoader;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 

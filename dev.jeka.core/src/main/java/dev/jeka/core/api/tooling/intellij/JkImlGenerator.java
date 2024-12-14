@@ -16,7 +16,6 @@
 
 package dev.jeka.core.api.tooling.intellij;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkCoordinateDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
@@ -37,7 +36,6 @@ import dev.jeka.core.tool.JkRunbase;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;

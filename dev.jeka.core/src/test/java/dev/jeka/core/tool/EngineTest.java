@@ -21,7 +21,6 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

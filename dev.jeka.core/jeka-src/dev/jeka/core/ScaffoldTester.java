@@ -24,7 +24,6 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * End-to-end tests about scaffolding.

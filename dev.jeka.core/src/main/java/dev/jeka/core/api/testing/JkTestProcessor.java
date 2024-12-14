@@ -221,9 +221,11 @@ public final class JkTestProcessor {
             result = launchInForkedProcess(extraTestClasspath, testSelection);
         }
         postActions.run();
-        JkLog.info("Result : " + result.getTestCount());
+        boolean success = result.getFailures().isEmpty();
+        String emoji = success ? "\u2705 " : "\u274C ";
+        JkLog.info("Result : " + emoji + result.getTestCount());
         List<JkTestResult.JkFailure> failures = result.getFailures();
-        if (!failures.isEmpty()) {
+        if (!success) {
             String message = failures.size() == 1 ? "%s failure found:" : "%s failures found. First failure detail:";
             JkLog.warn(message + " %n%s", failures.size(), failures.get(0).shortMessage(3));
         }
