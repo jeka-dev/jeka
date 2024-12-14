@@ -223,7 +223,7 @@ public final class JkTestProcessor {
         postActions.run();
         boolean success = result.getFailures().isEmpty();
         String emoji = success ? "\u2705 " : "\u274C ";
-        JkLog.info("Result : " + emoji + result.getTestCount());
+        JkLog.info("Result: " + emoji + result.getTestCount());
         List<JkTestResult.JkFailure> failures = result.getFailures();
         if (!success) {
             String message = failures.size() == 1 ? "%s failure found:" : "%s failures found. First failure detail:";

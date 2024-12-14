@@ -217,11 +217,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         /** Turn it on to skip tests. */
         @JkDoc("If true, tests are not run.")
         @JkInjectProperty("jeka.skip.tests")
-        public Boolean skip;
+        public boolean skip;
 
         /** Turn it on to run tests in a withForking process. */
         @JkDoc("If true, tests will be executed in a forked process.")
-        public Boolean fork;
+        public boolean fork = true;
 
         /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */
         @JkDoc("Argument passed to the JVM if tests are executed in a forked process (example -Xms2G -Xmx2G).")
@@ -288,7 +288,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         /** When true, sources are packed in a jar file.*/
         @JkDoc("If true, sources jar is added in the list of artifact to produce/publish.")
-        public Boolean sources = true;
+        public boolean sources = true;
 
     }
 
@@ -391,7 +391,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());
-        if (tests.fork != null && tests.fork && testProcessor.getForkingProcess() == null) {
+        if (tests.fork) {
             String className = JkTestProcessor.class.getName();
 
             JkJavaProcess javaProcess = JkJavaProcess.ofJava(className)
@@ -405,12 +405,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
                 }
             }
             testProcessor.setForkingProcess(javaProcess);
-        } else if (tests.fork != null && !tests.fork) {
+        } else {
             testProcessor.setForkingProcess(false);
         }
-        if (tests.skip != null) {
-            project.testing.setSkipped(tests.skip);
-        }
+        project.testing.setSkipped(tests.skip);
+
         // The style should not be forced by default as it is determined by the presence of a console,
         // and the log level
         if (tests.progressStyle != null) {

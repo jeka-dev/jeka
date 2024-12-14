@@ -40,7 +40,8 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     private static final String ERROR = JkExternalToolApi.ansiText("@|red ERROR: |@");
 
-    private static final String DURATION = "Duration: ";
+    //private static final String DURATION = "Duration: ";
+    private static final String DURATION = "\u23F1 ";
 
     static final byte LINE_SEPARATOR = 10;
 
