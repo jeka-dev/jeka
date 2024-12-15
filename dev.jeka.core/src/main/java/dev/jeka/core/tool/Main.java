@@ -100,7 +100,7 @@ public class Main {
                     downloadRepos, dependencies, logs, behavior);
 
             // Compile jeka-src and resolve the dependencies and kbeans
-            JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
+            JkConsoleSpinner.of("\uD83D\uDE80Booting JeKa...").run(engine::resolveKBeans);
             if (logs.runtimeInformation) {
                 logRuntimeInfoBase(engine, props);
             }
@@ -259,7 +259,7 @@ public class Main {
     }
 
     private static void displayDuration(long startTs) {
-        System.out.println("\nTotal Duration: " + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs));
+        System.out.println("\nTotal Duration \u23F1 " + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs));
     }
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {

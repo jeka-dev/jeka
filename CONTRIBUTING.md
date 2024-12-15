@@ -30,7 +30,7 @@ Documentation is regenerated after each push or pull request.
 - **dev.jela.samples**: Example projects for illustration and integration testing.
 - **dev.jeka.master**: Aggregates all modules for building, testing and publishing.
 
-See [details](https://jeka-dev.github.io/jeka/under-the-hood/) on  **dev.jeka.core**.
+See [internal design](https://jeka-dev.github.io/jeka/under-the-hood/) of  **dev.jeka.core**.
 
 ## Getting Started
 
