@@ -1,56 +1,51 @@
 # Spring-Boot Plugin for JeKa
 
-Plugin to build Spring-Boot applications with minimal effort. <br/>
+A plugin for building Spring Boot applications with minimal effort.  
 
-This plugin contains a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) and a library to handle the build of Spring-Boot applications, and specially 
-the creation of a bootable jar.
+This plugin provides a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) 
+and a library to simplify building Spring Boot applications, particularly bootable JARs.
 
-## Create a new Spring-Boot Project from Scratch
+**Command line documentation**: `jeka springboot: --doc`.
 
-To create a new project from scratch, execute :
+## Create a New Spring Boot Project from Scratch
 
+To create a new Spring Boot project from scratch, run the following command:
 ```shell
-jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#
-``` 
-This will download this plugin, and scaffold a Spring-Boot project for you in the working dir.
+jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
+```
+This command downloads the plugin and creates a Spring Boot project in the current working directory.
 
-It is possible to scaffold a project relying on properties only instead of build code.
-```shell
-jeka scaffold#run scaffold#wrapper @dev.jeka:springboot-plugin springboot#scaffoldKind=PROPS
-``` 
+## Configure Using KBeans
 
-> [!NOTE]
-> You need JeKa installed on your machine to execute these command lines.
-  Alternatively, Jeka Ide for IntelliJ does not required to have Jeka installed.
+The [SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) is designed to auto-configure
+*ProjectKBean*, *BaseKBean*, *DockerKBean*, and *NativeKBean* when any of these are present at init time.
 
+- **`ProjectKBean` or `BaseKBean`:**
+  - Adds the Spring Boot BOM (Bill of Materials) to the project dependencies (optional).
+  - Configures the project to produce a bootable JAR. WAR files and original artifacts can also be generated.
+  - Enhances scaffold operations.
 
-## Configure using KBeans 
+- **`NativeKBean`:**
+  - Pass profiles to activate in the compiled executable (via `aotProfiles` property)
 
-[SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) is designed to auto-configure
-*ProjectKBean*, *SelfAppKBean* and *ScaffoldKBean* when any of them is present in the runtime.
+- **`DockerKBean`:**
+  - Pass the port to expose in the generated Dockerfile (via `exposedPorts` property)
 
-It configures following KBeans when it is loaded in the runbase :
-- `ProjectKBean` : 
-  - Adds Spring-Boot bom to dependencies of the project.
-  - Instructs project to create bootable jar. War file and original artifacts can be generated as well
-  - Sets sensitive default as not producing javadoc or source artifacts.
-- `SelfAppKBean` : Instructs app to create bootable jar.
-- `ScaffoldKBean` : Creates specific build class and simple Spring-Boot app template code.
-
-As all KBean, this can be instantiated both using *property file* or *programmatically*.
-
+Like all KBeans, this can be instantiated using **property files** or programmatically.  
+Example of property file configuration:
 ```properties
 jeka.classpath.inject=dev.jeka:springboot-plugin
-
 @springboot=
-@springboot.springbootVersion=3.2.1
+
+@springboot.aotProfiles=stage,mock
+...
 ```
-Visit [source code](src/dev/jeka/plugins/springboot/SpringbootKBean.java) to see available options.
+For more details on available options, visit the [source code](src/dev/jeka/plugins/springboot/SpringbootKBean.java).
 
 ## Configure Programmatically
+For more control, you can configure a `JkProject` instance programmatically to build a Spring Boot project.
 
-For greater control, it is possible to configure any `JkProject` instance to be built as a Spring-Boot project.
-
+Example:
 ```java
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
@@ -71,43 +66,4 @@ class MyBuild extends KBean {
 
 }
 ```
-
-## Native Support (Experimental)
-
-### Generate Native Image Executable
-
-To create a native executable of your application for the current platform, run the following command:
-
-```shell
-jeka native: compile
-```
-
-It is possible to specify the Spring profiles to active at build time :
-
-```shell
-jeka native: compile springboot: nativeOps.aotProfiles=profile-a,profile-b
-```
-
-### Create Docker Image running the native executable
-
-To create a Docker Image of the native application, execute:
-
-```shell
-jeka docker: buildNative
-```
-This will create a docker image, running the springboot executable application with non-root user.
-
-Note:
-If your running on Windows or Macos, Jeka will run the native compilation into a Docker container, in order it is generated 
-for Linux.
-
-To see the content of the generated image, execute:
-
-```shell
-jeka docker: infoNative
-```
-
-Visit [source code](src/dev/jeka/plugins/springboot/JkSpringbootProject) to see available options.
-
-
 
