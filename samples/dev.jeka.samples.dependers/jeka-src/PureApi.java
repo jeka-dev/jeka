@@ -1,3 +1,4 @@
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.api.system.JkLog;
@@ -23,6 +24,6 @@ public class PureApi {
                 .add(coreProject.toDependency());
 
         dependerProject.pack();
-        JkProjectPublications.mavenPublication(dependerProject).publish();
+        JkMavenPublication.of(dependerProject.asBuildable()).publish();
     }
 }
