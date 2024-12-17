@@ -1,5 +1,6 @@
 package dev.jeka.core.samples.demo;
 
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.project.JkProjectPublications;
@@ -32,7 +33,7 @@ class ProjectApiSimple extends KBean {
 
     @JkDoc("Publish the built artifact (jar, sources and javadoc)")
     public void publish() {
-        JkProjectPublications.mavenPublication(project).publish();
+        JkMavenPublication.of(project.asBuildable()).publish();
     }
 
 }

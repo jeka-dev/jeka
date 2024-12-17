@@ -1,6 +1,7 @@
 package dev.jeka.core.samples;
 
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
@@ -45,7 +46,7 @@ public class SimpleWarKBean extends KBean {
 
     public void cleanPackRun() {
         project.clean().pack();
-        JkProjectPublications.mavenPublication(project).publishLocal();
+        JkMavenPublication.of(project.asBuildable()).publishLocal();
     }
 
     public void check() {
