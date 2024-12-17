@@ -136,7 +136,7 @@ final class SourceParser {
         }
 
         boolean isMatching() {
-            return line.startsWith("@" + annotationClass.getSimpleName());
+            return line.startsWith("@" + annotationClass.getSimpleName() + "(");
         }
 
         String readUniqueStringValue() {
