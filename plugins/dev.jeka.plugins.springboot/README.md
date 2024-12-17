@@ -1,51 +1,55 @@
-# Spring-Boot Plugin for JeKa
+# Spring Boot Plugin for JeKa
+A plugin designed to simplify building Spring Boot applications with minimal effort.  
+This plugin provides a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java)
+and a library that streamlines building Spring Boot applications, especially bootable JARs.
 
-A plugin for building Spring Boot applications with minimal effort.  
+**Command-line documentation:** `jeka springboot: --doc`.
 
-This plugin provides a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) 
-and a library to simplify building Spring Boot applications, particularly bootable JARs.
+**Source Code:** [Visit here](src/dev/jeka/plugins/springboot/SpringbootKBean.java).
 
-**Command line documentation**: `jeka springboot: --doc`.
+**Example:** [Simple app](https://github.com/jeka-dev/demo-springboot-simple)
 
-## Create a New Spring Boot Project from Scratch
+## Quick Start
 
-To create a new Spring Boot project from scratch, run the following command:
+Create a Spring-Boot project from scratch:
 ```shell
 jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
 ```
-This command downloads the plugin and creates a Spring Boot project in the current working directory.
+his command downloads the plugin and initializes a Spring Boot project in the current working directory.
+The scaffolded project contains workable code and configuration. 
 
-## Configure Using KBeans
-
-The [SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) is designed to auto-configure
-*ProjectKBean*, *BaseKBean*, *DockerKBean*, and *NativeKBean* when any of these are present at init time.
+## Actions on Initialization
+The [SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) automatically configures
+*ProjectKBean*, *BaseKBean*, *DockerKBean*, and *NativeKBean* when any of these are present during initialization.
 
 - **`ProjectKBean` or `BaseKBean`:**
   - Adds the Spring Boot BOM (Bill of Materials) to the project dependencies (optional).
   - Configures the project to produce a bootable JAR. WAR files and original artifacts can also be generated.
-  - Enhances scaffold operations.
+  - Enhances scaffolding operations.
 
 - **`NativeKBean`:**
-  - Pass profiles to activate in the compiled executable (via `aotProfiles` property)
+  - Allows profiles to be passed for activation in the compiled executable (via the `aotProfiles` property).
 
 - **`DockerKBean`:**
-  - Pass the port to expose in the generated Dockerfile (via `exposedPorts` property)
+  - Configures the ports to expose in the generated Dockerfile (via the `exposedPorts` property).
 
-Like all KBeans, this can be instantiated using **property files** or programmatically.  
-Example of property file configuration:
+Like all KBeans, these can be configured using **property files** or programmatically.
+
+## Configuration
+
+There's no required configuration. `jeka.properties` file allow to specify some settings as:
+
 ```properties
-jeka.classpath.inject=dev.jeka:springboot-plugin
-@springboot=
-
+@springboot.springRepos=MILESTONE
 @springboot.aotProfiles=stage,mock
-...
+@springboot.exposedPort=80
+@springboot.createWarFile=true
 ```
-For more details on available options, visit the [source code](src/dev/jeka/plugins/springboot/SpringbootKBean.java).
 
-## Configure Programmatically
-For more control, you can configure a `JkProject` instance programmatically to build a Spring Boot project.
+## Programmatic Configuration
 
-Example:
+We can also configure a `JkProject` instance programmatically for working with Spring-Boot.
+
 ```java
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
@@ -53,17 +57,15 @@ import dev.jeka.plugins.springboot.SpringbootKBean;
 
 @JkDep("dev.jeka:springboot-plugin")
 class MyBuild extends KBean {
+    JkProject project = JkProject.of();
 
-  JkProject project = JkProject.of();
-
-  @Override
-  protected void init() {
-    JkSpringbootProject.of(project)
-            .configure()
-            .includeParentBom("3.2.1");
-    // ... configure your JkProject instance as usual.
-  }
-
+    @Override
+    protected void init() {
+        JkSpringbootProject.of(project)
+                .configure()
+                .includeParentBom("3.2.1");
+        // ... configure your JkProject instance as needed.
+    }
 }
 ```
 
