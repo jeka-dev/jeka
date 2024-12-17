@@ -26,23 +26,6 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 public class JkProjectPublications {
 
     /**
-     * Creates a JkMavenPublication for the specified JkProject.
-     */
-    public static JkMavenPublication mavenPublication(JkProject project) {
-        return JkMavenPublication.of(project.artifactLocator)
-                .setModuleIdSupplier(project::getModuleId)
-                .setVersionSupplier(project::getVersion)
-                .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        project.compilation.dependencies.get(),
-                        project.packaging.runtimeDependencies.get(),
-                        project.getDuplicateConflictStrategy()))
-                .setBomResolutionRepos(project.dependencyResolver::getRepos)
-                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
-                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, project.packaging::createSourceJar)
-                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, project.packaging::createJavadocJar);
-    }
-
-    /**
      * Creates an Ivy publication from the specified
      */
     public static JkIvyPublication ivyPublication(JkProject project) {

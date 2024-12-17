@@ -24,7 +24,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 
-public class JkProtocSourceGenerator extends JkProjectSourceGenerator {
+public class JkProtocSourceGenerator implements JkProjectSourceGenerator {
 
     private final String protoFilePath;
 

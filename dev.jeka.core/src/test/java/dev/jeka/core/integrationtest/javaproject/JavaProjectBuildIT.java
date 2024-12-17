@@ -44,7 +44,7 @@ public class JavaProjectBuildIT {
                 .setModuleId("my:project").setVersion("MyVersion-snapshot")
                 .setVersion("1-SNAPSHOT");
         project.pack();
-        JkMavenPublication mavenPublication = JkProjectPublications.mavenPublication(project).publishLocal();
+        JkMavenPublication mavenPublication = JkMavenPublication.of(project.asBuildable()).publishLocal();
         mavenPublication.publishLocal();
         System.out.println(project.getInfo());
         Assert.assertEquals(JkTransitivity.COMPILE, mavenPublication.getDependencies()

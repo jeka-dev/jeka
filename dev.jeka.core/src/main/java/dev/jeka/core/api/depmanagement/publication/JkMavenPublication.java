@@ -21,6 +21,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.function.JkRunnables;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMvn;
@@ -84,6 +85,30 @@ public final class JkMavenPublication {
      */
     public static JkMavenPublication of(JkArtifactLocator artifactLocator) {
         return new JkMavenPublication(artifactLocator);
+    }
+
+    /**
+     * Creates a {@link JkMavenPublication} for a given buildable object, configuring it
+     * based on the specified buildable's properties such as artifacts, module information,
+     * version, dependencies, and repositories.
+     *
+     * @param buildable The buildable object used to configure the Maven publication.
+     *
+     * @return A configured {@link JkMavenPublication} instance based on the given buildable object.
+     */
+    public static JkMavenPublication of(JkBuildable buildable) {
+        JkArtifactLocator artifactLocator = buildable.getArtifactLocator();
+        return JkMavenPublication.of(artifactLocator)
+                .setModuleIdSupplier(buildable::getModuleId)
+                .setVersionSupplier(buildable::getVersion)
+                .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
+                        buildable.getCompiledDependencies(),
+                        buildable.getRuntimesDependencies(),
+                        buildable.getDependencyConflictStrategy()))
+                .setBomResolutionRepos(buildable.getDependencyResolver()::getRepos)
+                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID)
+                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, buildable::createSourceJar)
+                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, buildable::createJavadocJar);
     }
 
     /**
@@ -234,7 +259,7 @@ public final class JkMavenPublication {
 
     /**
      * Adds the specified artifact to the publication assuming the artifact file will exist when {@link #publish()}
-     * will be invoked . If the artifact file is not present, an exception will be raised.
+     * will be invoked. If the artifact file is not present, an exception will be raised.
      */
     public JkMavenPublication putArtifact(JkArtifactId artifactId) {
         return this.putArtifact(artifactId, null);

@@ -21,6 +21,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -710,6 +711,36 @@ public final class JkProject implements JkIdeSupportSupplier {
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
                 return JkProject.this.compilerToolChain.compile(compileSpec);
+            }
+
+            @Override
+            public JkDependencySet getCompiledDependencies() {
+                return JkProject.this.compilation.dependencies.get();
+            }
+
+            @Override
+            public JkDependencySet getRuntimesDependencies() {
+                return JkProject.this.compilation.dependencies.get();
+            }
+
+            @Override
+            public JkCoordinate.ConflictStrategy getDependencyConflictStrategy() {
+                return JkProject.this.getDuplicateConflictStrategy();
+            }
+
+            @Override
+            public void createSourceJar(Path targetFile) {
+                JkProject.this.packaging.createSourceJar(targetFile);
+            }
+
+            @Override
+            public void createJavadocJar(Path targetFile) {
+                JkProject.this.packaging.createJavadocJar(targetFile);
+            }
+
+            @Override
+            public JkArtifactLocator getArtifactLocator() {
+                return JkProject.this.artifactLocator;
             }
 
             @Override

@@ -211,6 +211,14 @@ It offers configuration methods for defining:
 - Additional `pre` and `post` actions tied to the compilation phase.
 - Interpolators for resource processing.
 
+### JkProjectSourceGenerator
+
+Implement this class to define a source generator.
+Register the generator in a project using:
+`JkProject.compilation.addSourceGenerator(JkProjectSourceGenerator sourceGenerator)`.
+
+Once registered, sources will be automatically generated during compilation or when explicitly calling:
+`JkProject.compilation.generateSources()`.
 
 
 

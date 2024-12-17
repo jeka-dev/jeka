@@ -16,9 +16,11 @@
 
 package dev.jeka.core.tool.builtins.base;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
@@ -408,6 +410,12 @@ public final class BaseKBean extends KBean {
         return new JkBuildable() {
 
             @Override
+            public JkArtifactLocator getArtifactLocator() {
+                return JkArtifactLocator.of(BaseKBean.this.getBaseDir(),
+                        BaseKBean.this.getJarPathBaseName());
+            }
+
+            @Override
             public Path getClassDir() {
                 Path tempDirClass = JkUtilsPath.createTempDirectory("jk-");
                 BaseKBean.this.getAppClasses().copyTo(tempDirClass);
@@ -420,6 +428,8 @@ public final class BaseKBean extends KBean {
                         .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
                 return getRunbase().getDependencyResolver().resolve(deps);
             }
+
+
 
             @Override
             public List<Path> getRuntimeDependenciesAsFiles() {
@@ -474,6 +484,31 @@ public final class BaseKBean extends KBean {
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
                 return JkJavaCompilerToolChain.of().compile(compileSpec);
+            }
+
+            @Override
+            public JkDependencySet getCompiledDependencies() {
+                return BaseKBean.this.getRunbase().getExportedDependencies();
+            }
+
+            @Override
+            public JkDependencySet getRuntimesDependencies() {
+                return BaseKBean.this.getRunbase().getExportedDependencies();
+            }
+
+            @Override
+            public JkCoordinate.ConflictStrategy getDependencyConflictStrategy() {
+                return JkCoordinate.ConflictStrategy.TAKE_FIRST;
+            }
+
+            @Override
+            public void createSourceJar(Path targetFile) {
+                BaseKBean.this.createSourceJar(targetFile);
+            }
+
+            @Override
+            public void createJavadocJar(Path targetFile) {
+                BaseKBean.this.createJavadocJar(targetFile);
             }
 
             public String toString() {

@@ -16,11 +16,16 @@
 
 package dev.jeka.core.api.project;
 
+import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
+import org.apache.ivy.ant.IvyMakePom;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -34,6 +39,11 @@ public interface JkBuildable {
     enum Adapted {
         PROJECT, BASE
     }
+
+    /**
+     * Files for artifacts to publish.
+     */
+    JkArtifactLocator getArtifactLocator();
 
     Path getClassDir();
 
@@ -61,5 +71,24 @@ public interface JkBuildable {
 
     boolean compile(JkJavaCompileSpec compileSpec);
 
+    /**
+     * Get the set of dependencies required for compilation.
+     */
+    JkDependencySet getCompiledDependencies();
+
+    /**
+     * Get the dependencies needed at runtime,
+     * typically including compile-time dependencies and those used only at runtime.
+     */
+    JkDependencySet getRuntimesDependencies();
+
+    /**
+     * Returns the strategy for resolving dependency conflicts.
+     */
+    JkCoordinate.ConflictStrategy getDependencyConflictStrategy();
+
+    void createSourceJar(Path targetFile);
+
+    void createJavadocJar(Path targetFile);
 
 }

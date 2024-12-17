@@ -21,19 +21,17 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.project.JkProjectPublications;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @JkDoc("Manages Maven publication for project and 'jeka-src'")
@@ -101,24 +99,10 @@ public final class MavenKBean extends KBean {
             return mavenPublication;
         }
         // Configure with ProjectKBean if present
-        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
-        if (optionalProjectKBean.isPresent()) {
-            mavenPublication = JkProjectPublications.mavenPublication(optionalProjectKBean.get().project);
-        }
-        optionalProjectKBean.ifPresent(
-                projectKBean -> mavenPublication = JkProjectPublications.mavenPublication(projectKBean.project));
-
-        // If ProjectKBean is absent, try to configure wih BaseKBean if present
-        if (!optionalProjectKBean.isPresent()) {
-            getRunbase().find(BaseKBean.class).ifPresent(selfAppKBean -> {
-                mavenPublication = createMavenPublication(selfAppKBean);
-            });
-        }
-
-        if (mavenPublication == null) {
-            throw new IllegalStateException("No ProjectKBean of BaseKBean found on runbase " + getBaseDir() + ". " +
-                    "The MavenPublication KBean can't be configurated.");
-        }
+        JkBuildable buildable = this.getRunbase().getBuildable();
+        JkUtilsAssert.state(buildable != null, "No buildable is found for runbase %s for publication.",
+                getRunbase().getBaseDir());
+        mavenPublication = JkMavenPublication.of(buildable);
 
         this.publication.metadata.applyTo(mavenPublication);
 
@@ -129,25 +113,6 @@ public final class MavenKBean extends KBean {
         publication.extraArtifacts().forEach(mavenPublication::putArtifact);
         
         return mavenPublication;
-    }
-
-    /**
-     * Creates a Maven Publication based on the specified BaseKBean.
-     */
-    public static JkMavenPublication createMavenPublication(BaseKBean baseKBean) {
-        JkArtifactLocator artifactLocator = JkArtifactLocator.of(baseKBean.getBaseDir(),
-                baseKBean.getJarPathBaseName());
-        return JkMavenPublication.of(artifactLocator)
-                .setModuleIdSupplier(baseKBean::getModuleId)
-                .setVersionSupplier(baseKBean::getVersion)
-                .customizeDependencies(deps -> JkMavenPublication.computeMavenPublishDependencies(
-                        baseKBean.getRunbase().getExportedDependencies(),
-                        baseKBean.getRunbase().getExportedDependencies(),
-                        JkCoordinate.ConflictStrategy.TAKE_FIRST))
-                .setBomResolutionRepos(baseKBean.getRunbase().getDependencyResolver()::getRepos)
-                .putArtifact(JkArtifactId.MAIN_JAR_ARTIFACT_ID, baseKBean::createMainJar)
-                .putArtifact(JkArtifactId.SOURCES_ARTIFACT_ID, baseKBean::createSourceJar)
-                .putArtifact(JkArtifactId.JAVADOC_ARTIFACT_ID, baseKBean::createJavadocJar);
     }
 
     private JkRepoSet getPublishReposFromProps() {
