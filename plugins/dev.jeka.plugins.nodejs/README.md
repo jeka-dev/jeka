@@ -7,9 +7,9 @@ This plugin is not intended to replace Node.js developer tools but is designed t
 Additionally, this plugin provides a utility class to install and invoke Node.js, npm, and npx directly from Java code.
 
 Resources:
-- **Command Line Documentation:** `jeka nodejs: --doc`
-- **KBean Source Code:** [View here](src/dev/jeka/plugins/nodejs/NodeJsKBean.java).
-- **Example Project:** [Spring Boot + Angular](https://github.com/jeka-dev/demo-project-springboot-angular/tree/master)
+- Command Line Documentation: `jeka nodejs: --doc`
+- KBean Source Code: [View here](src/dev/jeka/plugins/nodejs/NodeJsKBean.java).
+- Example Project: [Spring Boot + Angular](https://github.com/jeka-dev/demo-project-springboot-angular/tree/master)
 
 ## Initialization
 

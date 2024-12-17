@@ -15,6 +15,7 @@ Create a Spring-Boot project from scratch:
 ```shell
 jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
 ```
+
 This command downloads the plugin and initializes a Spring Boot project in the current working directory.
 The scaffolded project contains workable code and configuration.
 
