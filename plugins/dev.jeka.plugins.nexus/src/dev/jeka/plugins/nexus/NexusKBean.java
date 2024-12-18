@@ -32,6 +32,9 @@ public class NexusKBean extends KBean {
     @JkDoc("Comma separated filters for taking in account only repositories with specified profile names.")
     public String profileNamesFilter = "";
 
+    @JkDoc("Timeout in seconds, before the 'close' operation times out.")
+    public int closeTimeout = JkNexusRepos.DEFAULT_CLOSE_TIMEOUT_SECONDS;
+
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
     @Override
@@ -68,6 +71,7 @@ public class NexusKBean extends KBean {
 
     private void configureMavenPublication(JkMavenPublication mavenPublication) {
         JkNexusRepos nexusRepos  = getJkNexusRepos(mavenPublication);
+        nexusRepos.setCloseTimeout(closeTimeout);
         nexusRepos.autoReleaseAfterPublication(mavenPublication);
     }
 
@@ -76,7 +80,8 @@ public class NexusKBean extends KBean {
     }
 
     private JkNexusRepos getJkNexusRepos(JkMavenPublication mavenPublication) {
-        JkNexusRepos result = JkNexusRepos.ofPublishRepo(mavenPublication).setProfileNameFilters(profiles());
+        JkNexusRepos result = JkNexusRepos.ofPublishRepo(mavenPublication)
+                .setProfileNameFilters(profiles());
         this.nexusReposConfigurators.accept(result);
         return result;
     }

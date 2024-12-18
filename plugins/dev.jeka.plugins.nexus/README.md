@@ -2,22 +2,31 @@
 
 Plugin to auto-release when using [Nexus](https://www.sonatype.com/products/sonatype-nexus-repository) repo for publication.
 
-This plugin contains a [KBean](src/dev/jeka/plugins/jacoco/JacocoKBean.java) to auto-configure *MavenKBean*.
+It also contains utility classes to configure projects programmatically.
 
-It also contains utilities class to configure projects programmatically.
+Resources:
+  - Command-line documentation: `jeka nexus: --doc`.
+  - Source Code: [Visit here](src/dev/jeka/plugins/nexus/NexusKBean.java)
 
-## Configure using Kean
+## Initialization
+
+This plugin resisters a post-publication action in *MavenKBean*, if present.
+The action send *"close"* message to the repositories and waits until processed.
+
+## Configuration
+
+No configuration is required, nevertheless we can filter on specific profiles.
 
 ```properties
 jeka.inject.classpath=dev.jeka:nexus-plugin
-
-
-# Optional settings. Execute `jeka jacoco#help` to see available options.
 @nexus=
-@jacoco.jacocoVersion=0.8.7
+
+# Optional properties
+@nexus.profileNamesFilter=
+@nexus.closeTimeout=600
 ```
 
-## Use Programmatically
+## Programmatic Usage
 
 You can use directly `JkNexusRepos` class for lower-level access.
 

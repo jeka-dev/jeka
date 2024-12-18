@@ -1,4 +1,4 @@
-# Spring Boot Plugin for JeKa
+# Spring-Boot Plugin for JeKa
 A plugin designed to simplify building Spring Boot applications with minimal effort.  
 This plugin provides a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java)
 and a library that streamlines building Spring Boot applications, especially bootable JARs.
@@ -17,7 +17,7 @@ jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
 ```
 
 This command downloads the plugin and initializes a Spring Boot project in the current working directory.
-The scaffolded project contains workable code and configuration.
+The scaffolded project contains workable code and configuration based on the latest Spring-Boot version.
 
 ## Initialization
 
@@ -34,28 +34,27 @@ The [SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) auto
     Like all KBeans, these can be configured using **property files** or programmatically.
 
 ## Configuration
+
 There's no required configuration. `jeka.properties` file allow to specify some settings as:
+
 ```properties
+jeka.inject.classpath=dev.jeka:springboot-plugin
+@springboot=
+
+# Optional properties
 @springboot.springRepos=MILESTONE
 @springboot.aotProfiles=stage,mock
 @springboot.exposedPort=80
 @springboot.createWarFile=true
 ```
+
 ## Programmatic Configuration
+
 We can also configure a `JkProject` instance programmatically for working with Spring-Boot.
+
 ```java
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.plugins.springboot.JkSpringbootProject;
-import dev.jeka.plugins.springboot.SpringbootKBean;
-@JkDep("dev.jeka:springboot-plugin")
-class MyBuild extends KBean {
-    JkProject project = JkProject.of();
-    @Override
-    protected void init() {
-        JkSpringbootProject.of(project)
-                .configure()
-                .includeParentBom("3.2.1");
-        // ... configure your JkProject instance as needed.
-    }
-}
+JkProject project = myProject();
+JkSpringbootProject.of(project)
+        .configure()
+        .includeParentBom("3.2.1");
 ```

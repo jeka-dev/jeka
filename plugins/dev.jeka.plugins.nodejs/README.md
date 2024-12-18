@@ -7,7 +7,7 @@ This plugin is not intended to replace Node.js developer tools but is designed t
 Additionally, this plugin provides a utility class to install and invoke Node.js, npm, and npx directly from Java code.
 
 Resources:
-- Command Line Documentation: `jeka nodejs: --doc`
+- Command-line Documentation: `jeka nodejs: --doc`
 - KBean Source Code: [View here](src/dev/jeka/plugins/nodejs/NodeJsKBean.java).
 - Example Project: [Spring Boot + Angular](https://github.com/jeka-dev/demo-project-springboot-angular/tree/master)
 
@@ -26,7 +26,7 @@ jeka.classpath.inject=dev.jeka:nodejs-plugin
 
 # Optional configurations
 @nodeJs.version=18.18.0
-@nodeJs.autoConfigureProject=true
+@nodeJs.configureProject=true
 @nodeJs.distDir=dist/client/browser
 @nodeJs.targetResourceDir=static
 @nodeJs.testCmdLine=npm run test-headless
@@ -34,7 +34,7 @@ jeka.classpath.inject=dev.jeka:nodejs-plugin
 
 ### Configuration Properties
 
-- **`autoConfigureProject`**: If `false`, automatic project configuration will not be performed.
+- **`configureProject`**: If `false`, automatic project configuration will not be performed.
 - **`appDir`**: Specifies the location of the Node.js source application (default: `app-js`).
 - **`cmdLine`**: Comma-separated string of *npm* or *npx* commands that will build the Node.js application (e.g., `npm install, npm run build`).
 - **`testCmdLine`**: Comma-separated string of *npm* or  *npx* commands to run tests (optional).

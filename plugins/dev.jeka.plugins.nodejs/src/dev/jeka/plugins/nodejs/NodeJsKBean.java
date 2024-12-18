@@ -56,7 +56,7 @@ public class NodeJsKBean extends KBean {
     public String targetResourceDir;
 
     @JkDoc("If true, the project wrapped by ProjectKBean will be configured automatically to build the nodeJs project.")
-    public boolean autoConfigureProject = false;
+    public boolean configureProject = false;
 
     @JkDoc("Execute npm using the command line specified in 'cmdLine' property.")
     public void exec() {
@@ -70,7 +70,7 @@ public class NodeJsKBean extends KBean {
 
     @Override
     protected void init() {
-        if (autoConfigureProject) {
+        if (configureProject) {
             JkProject project = load(ProjectKBean.class).project;
             JkNodeJs.ofVersion(this.version)
                     .configure(project, appDir, distDir, targetResourceDir, commandLines(cmdLine),

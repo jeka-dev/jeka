@@ -123,8 +123,7 @@ public final class JkJacoco {
             this.addReportOptions("--html",
                     project.getOutputDir().resolve(OUTPUT_HTML_RELATIVE_PATH).toString());
         }
-        List<Path> sourceDirs = project.compilation
-                .layout.getSources().getRootDirsOrZipFiles().stream()
+        List<Path> sourceDirs = project.compilation.layout.getSources().getRootDirsOrZipFiles().stream()
                 .map(path -> path.isAbsolute() ? path : project.getBaseDir().resolve(path))
                 .collect(Collectors.toList());
         this.setSources(sourceDirs);

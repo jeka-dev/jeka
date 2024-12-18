@@ -43,9 +43,9 @@ import java.util.stream.Collectors;
  */
 public class JkNexusRepos {
 
-    private static final String TASK_NAME = "Closing and releasing repositories";
+    static final int DEFAULT_CLOSE_TIMEOUT_SECONDS = 15 * 60; // 15 minutes
 
-    private static final long CLOSE_TIMEOUT_MILLIS = 15 * 60 * 1000L;
+    private static final String TASK_NAME = "Closing and releasing repositories";
 
     private static final long CLOSE_WAIT_INTERVAL_MILLIS = 10_000L;
 
@@ -54,6 +54,8 @@ public class JkNexusRepos {
     private final String basicCredential;
 
     private int readTimeout;
+
+    private int closeTimeout = DEFAULT_CLOSE_TIMEOUT_SECONDS;
 
     /**
      * A filter to take in account only repositories having specified profile names. If empty, no filter applies.
@@ -107,10 +109,20 @@ public class JkNexusRepos {
     }
 
     /**
-     * Sets read timeout of the http connection. Default is zero which leads to infinite.
+     * Sets read timeout, in millis, of the http connection. Default is zero, that leads to infinite.
      */
     public JkNexusRepos setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
+        return this;
+    }
+
+    /**
+     * Sets the timeout duration, in seconds, for closing repositories.
+     *
+     * @param closeTimeout the timeout duration, in milliseconds, to be used for the closing operation.
+     */
+    public JkNexusRepos setCloseTimeout(int closeTimeout) {
+        this.closeTimeout = closeTimeout;
         return this;
     }
 
@@ -295,7 +307,7 @@ public class JkNexusRepos {
         long startMillis = System.currentTimeMillis();
         JkLog.startTask("Nexus: Waiting for repository " + repositoryId + " to be closed. It may take a while ...");
         while (true) {
-            if (System.currentTimeMillis() - startMillis > CLOSE_TIMEOUT_MILLIS) {
+            if (System.currentTimeMillis() - startMillis > (closeTimeout * 1000L)) {
                 throw new IllegalStateException("Nexus: Timeout waiting for repository close.");
             }
             JkUtilsSystem.sleep(CLOSE_WAIT_INTERVAL_MILLIS);

@@ -1,39 +1,46 @@
 # Jacoco Plugin for JeKa
 
-Plugin to use the [Jacoco](https://www.eclemma.org/jacoco) coverage tool with JeKa.
+A plugin to integrate the [Jacoco](https://www.eclemma.org/jacoco) coverage tool with JeKa.
 
-This plugin contains a [KBean](src/dev/jeka/plugins/jacoco/JacocoKBean.java) to auto-configure *ProjectKBean*.
+This plugin provides a [KBean](src/dev/jeka/plugins/jacoco/JacocoKBean.java) for automatically configuring the *ProjectKBean*.
+It also includes utility classes to programmatically configure projects.
 
-It also contains utilities class to configure projects programmatically.
+### Resources
 
-## Configure using Kean
+- Command-line documentation: `jeka jacoco: --doc`
+- Source code: [View the source](src/dev/jeka/plugins/jacoco/JacocoKBean.java)
+
+## Initialization
+
+The plugin automatically detects the presence of a *Project KBean* in the running context.
+If found, it configures the project to execute tests with the *Jacoco* agent.
+Test coverage reports are generated and stored in the `jeka-output/jacoco` directory.
+
+## Configuration
+
+No manual setup is necessary, as the plugin provides intuitive default settings.
+However, you can override certain properties as follows:
 
 ```properties
 jeka.inject.classpath=dev.jeka:jacoco-plugin
-
-
-# Optional settings. Execute `jeka jacoco#help` to see available options.
 @jacoco=
+# Optional properties
 @jacoco.jacocoVersion=0.8.7
+@jacoco.configureProject=true
+@jacoco.htmlReport=true
 ```
 
-## Configure Programmatically
+Refer to `java jacoco: --doc` for additional details.
 
-You can use directly `JkJacoco` in build code to achieve lower level actions.
+## Programmatic Usage
+
+Use the `JkJacoco` class to configure projects directly, as shown below:
 
 ```java
-@Override
-private void init() {
-    JkProject project = projectKBean.project;
-    JkJacoco.ofVersion("0.8.11")
-            .configureForAndApplyTo(project);
-}
+JkProject project = myProject();
+JkJacoco.ofVersion("0.8.11")
+   .configureForAndApplyTo(project);
 ```
 
-The [JkJacoco class](src/dev/jeka/plugins/jacoco/JkJacoco.java) also provides fine grained methods to deal with 
-various *Jacoco* use cases.
-
-### Example
-
-See example [here](../../samples/dev.jeka.samples.jacoco)
-
+Once configured, the project runs tests with the *Jacoco* agent.  
+To run tests programmatically, use: `JkProject.testing.run()` method.

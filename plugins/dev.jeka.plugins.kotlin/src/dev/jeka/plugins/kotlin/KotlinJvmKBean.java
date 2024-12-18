@@ -35,28 +35,28 @@ public class KotlinJvmKBean extends KBean {
 
     private static final String DEFAULT_VERSION = "1.8.0";
 
-    @JkDoc("The Kotlin version for compiling and running")
+    @JkDoc("Override the Kotlin version for compiling and running defined in 'jeka.kotlin.version' property.")
     private String kotlinVersion;
 
     @JkDoc("Location of Kotlin sources")
-    private String kotlinSourceDir = "src/main/kotlin";
+    private String sourceDir = "src/main/kotlin";
 
     @JkDoc("Location of Kotlin sources for tests")
-    private String kotlinTestSourceDir = "src/test/kotlin";
+    private String testSourceDir = "src/test/kotlin";
 
     @JkDoc("Include standard lib in for compiling")
-    private boolean addStdlib = true;
+    private boolean includeStdlib = true;
 
     @JkDoc("If true, the project KBean will be automatically configured to use Kotlin.")
-    private boolean autoConfigureProject = false;
+    private boolean configureProject = true;
 
     private JkKotlinJvm kotlinJvmProject;
 
     @Override
     protected void init() {
-        if (autoConfigureProject) {
+        if (configureProject) {
             JkProject project = load(ProjectKBean.class).project;
-            getKotlinJvm().configure(project, kotlinSourceDir, kotlinTestSourceDir);
+            getKotlinJvm().configure(project, sourceDir, testSourceDir);
         }
     }
 
@@ -73,7 +73,7 @@ public class KotlinJvmKBean extends KBean {
         }
         JkKotlinCompiler kotlinCompiler = JkKotlinCompiler.ofJvm(getRunbase().getDependencyResolver().getRepos(),
                 getKotlinVersion());
-        kotlinJvmProject = JkKotlinJvm.of(kotlinCompiler).setAddStdlib(this.addStdlib);
+        kotlinJvmProject = JkKotlinJvm.of(kotlinCompiler).setAddStdlib(this.includeStdlib);
         return kotlinJvmProject;
     }
 

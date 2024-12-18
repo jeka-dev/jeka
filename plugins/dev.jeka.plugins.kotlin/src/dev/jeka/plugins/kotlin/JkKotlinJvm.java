@@ -82,12 +82,6 @@ public class JkKotlinJvm {
      * Configures the specified project for Kotlin compilation and testing.
      */
     public void configure(JkProject project, String kotlinSourceDir, String kotlinTestSourceDir) {
-        if (!JkUtilsString.isBlank(kotlinSourceDir)) {
-            project.compilation.layout.setSources(kotlinTestSourceDir);
-        }
-        if (!JkUtilsString.isBlank(kotlinTestSourceDir)) {
-            project.testing.compilation.layout.setSources(kotlinTestSourceDir);
-        }
         JkProjectCompilation prodCompile = project.compilation;
         JkProjectCompilation testCompile = project.testing.compilation;
         prodCompile
