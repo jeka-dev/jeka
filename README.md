@@ -110,7 +110,7 @@ The following plugin is maintained in a separate repository:
 This project is supported by the OW2 Consortium.
 
 <a class="btn btn-link btn-neutral" href="https://projects.ow2.org/view/jeka">
-  <img src="docs/images/ow2.png" alt="OW2 Logo" height="60" width="60" />
+  <img src="docs/images/ow2.svg" alt="OW2 Logo" height="60" width="60" />
 </a>
 
 ## Versioning
