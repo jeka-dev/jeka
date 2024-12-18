@@ -100,7 +100,9 @@ public class Main {
                     downloadRepos, dependencies, logs, behavior);
 
             // Compile jeka-src and resolve the dependencies and kbeans
-            JkConsoleSpinner.of("\uD83D\uDE80Booting JeKa...").run(engine::resolveKBeans);
+            // Using rocket emoji cause issue cause it is caused on 2 char but when
+            // erasing line, there is one excessive back-delete.
+            JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
             if (logs.runtimeInformation) {
                 logRuntimeInfoBase(engine, props);
             }

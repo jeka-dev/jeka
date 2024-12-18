@@ -257,6 +257,10 @@ public class CoreBuild extends KBean {
         JkUtilsPath.deleteIfExists(embeddedJar);
     }
 
+    public void print() {
+        System.out.println("\uD83D\uDE800Booting JeKa...");
+    }
+
 
 
 }
