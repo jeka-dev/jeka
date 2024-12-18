@@ -6,7 +6,7 @@ A SonarScanner is actually passed on the code analysis and sent to a Sonar serve
 Resources:
   - Command-line documentation: `jeka sonarqube: --doc`
   - Source Code: [Visit here](src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java).
-  - SonarQube: [Vis-sit here](https://www.sonarsource.com/fr/products/sonarqube/).
+  - SonarQube: [Visit here](https://www.sonarsource.com/fr/products/sonarqube/).
   - Sonarqube properties: [Visit here](https://docs.sonarsource.com/sonarqube-server/10.6/analyzing-source-code/analysis-parameters/).
 
 ## Initialization
