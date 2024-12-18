@@ -10,7 +10,7 @@ You can find some examples in below to learn more about _Jeka_:
 - [Cow-Say Command-line App](https://github.com/jeka-dev/demo-cowsay)
 - [Calculator GUI App](https://github.com/djeang/Calculator-jeka)
 
-### Build and Create Pipelines
+### Builds and Pipelines
 
 - [Publish a Java Lib on Maven Central](https://github.com/djeang/vincer-dom)
 - [SpringBoot App](https://github.com/jeka-dev/demo-springboot-simple)
@@ -21,7 +21,7 @@ You can find some examples in below to learn more about _Jeka_:
 
 - [SpringBoot - ReactJs - built in 3 config lines](https://github.com/jeka-dev/demo-build-templates-consumer)
 
-### Combine with existing Build Tools
+### Combine with Legacy Build Tools
 
 - [JeKa wrapping Quarkus native app Maven built](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
 
