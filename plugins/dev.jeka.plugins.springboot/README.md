@@ -1,4 +1,5 @@
 # Spring-Boot Plugin for JeKa
+
 A plugin designed to simplify building Spring Boot applications with minimal effort.  
 This plugin provides a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java)
 and a library that streamlines building Spring Boot applications, especially bootable JARs.
@@ -21,8 +22,8 @@ The scaffolded project contains workable code and configuration based on the lat
 
 ## Initialization
 
-The [SpringbootKBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java) automatically configures
-*ProjectKBean*, *BaseKBean*, *DockerKBean*, and *NativeKBean* when any of these are present during initialization.
+The `SpringbootKBean` automatically configures *ProjectKBean*, *BaseKBean*, *DockerKBean*, and *NativeKBean* 
+when any of these are present during initialization.
 - **`ProjectKBean` or `BaseKBean`:**
   - Adds the Spring Boot BOM (Bill of Materials) to the project dependencies (optional).
   - Configures the project to produce a bootable JAR. WAR files and original artifacts can also be generated.
@@ -48,7 +49,7 @@ jeka.inject.classpath=dev.jeka:springboot-plugin
 @springboot.createWarFile=true
 ```
 
-## Programmatic Configuration
+## Programmatic Usage
 
 We can also configure a `JkProject` instance programmatically for working with Spring-Boot.
 
