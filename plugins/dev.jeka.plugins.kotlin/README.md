@@ -5,7 +5,7 @@ A plugin designed for building JVM projects containing Kotlin source code.
 This plugin provides a `KotlinJvmKBean` to automatically configure the *project KBean*.  
 It also includes the `JkKotlinJvm` utility for programmatic project setup.
 
-### Resources
+## Resources
 
 - Command-line documentation: `jeka kotlin: --doc`
 - Source code: [View Source](src/dev/jeka/plugins/kotlin/KotlinJvmKBean.java).

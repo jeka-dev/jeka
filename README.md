@@ -92,6 +92,7 @@ The following plugins are part of JeKa’s monorepo and are released together, s
 - [SonarQube Plugin](plugins/dev.jeka.plugins.sonarqube)
 - [JaCoCo Plugin](plugins/dev.jeka.plugins.jacoco)
 - [Node.js Plugin](plugins/dev.jeka.plugins.nodejs)
+- [Kotlin Plugin](plugins/dev.jeka.plugins.kotlin)
 - [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
 - [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
 
