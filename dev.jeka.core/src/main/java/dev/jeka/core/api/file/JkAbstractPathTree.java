@@ -381,7 +381,7 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
                 Path zipEntry = zipRoot.get().resolve(getRoot().relativize(path).toString());
                 if (!Files.exists(zipEntry) || !Files.isDirectory(zipEntry)) {
                     JkUtilsPath.createDirectories(zipEntry.getParent());
-                    JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING);
+                    JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
                 }
             });
         }

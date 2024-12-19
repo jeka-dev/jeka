@@ -24,9 +24,11 @@ import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -39,6 +41,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
@@ -76,7 +79,7 @@ public class CoreBuild extends KBean {
             //.packActions.set(this::doPackWithEmbeddedJar, this::doDistrib);
             .packActions.append("include-embedded-jar", this::doPackWithEmbeddedJar)
                         .append("create-distrib", this::doDistrib)
-                        .append("create-sdkman-distrib", this::doSdkmanDistrib);
+                        .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
         project
             .compilerToolChain
                 .setForkedWithDefaultProcess();
@@ -187,11 +190,16 @@ public class CoreBuild extends KBean {
     // that the zip must have a root entry having the same name than the archive.
     private void doSdkmanDistrib() {
         final JkPathTree distrib = JkPathTree.of(distribFolder());
-        Path sdkmanDistribDir = getOutputDir().resolve("sdkman-distrib");
-        JkUtilsPath.createDirectories(sdkmanDistribDir);
         String entryName = "jeka-core-" + project.getVersion() + "-sdkman";
-        distrib.copyTo(sdkmanDistribDir.resolve(entryName));
-        JkPathTree.of(sdkmanDistribDir).zipTo(project.artifactLocator.getArtifactPath(SDKMAN_FILE_ID));
+        Path sdkmanDistribDir = getOutputDir().resolve(entryName);
+        distrib.copyTo(sdkmanDistribDir);
+
+        // Zipping with Java does npt preserve permissions.
+        // We need to use native unix tool.
+        Path zipFile = project.artifactLocator.getArtifactPath("sdkman", "zip");
+        JkProcess.of("zip", "-r", zipFile.getFileName().toString(), entryName)
+                .setWorkingDir(getOutputDir())
+                .exec();
     }
 
     // see example here https://www.tabnine.com/code/java/methods/org.apache.commons.compress.archivers.zip.ZipArchiveEntry/setUnixMode
