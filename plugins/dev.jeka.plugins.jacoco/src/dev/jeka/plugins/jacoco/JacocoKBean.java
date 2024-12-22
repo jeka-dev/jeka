@@ -44,7 +44,7 @@ public class JacocoKBean extends KBean {
     @JkDoc("Version of Jacoco to use both for agent and report. The version will be resolved against coordinate " +
             "'org.jacoco:org.jacoco.agent'")
     @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent")
-    public String jacocoVersion = "0.8.7";
+    public String jacocoVersion = JkJacoco.DEFAULT_VERSION;
 
     @Override
     protected void init() {
