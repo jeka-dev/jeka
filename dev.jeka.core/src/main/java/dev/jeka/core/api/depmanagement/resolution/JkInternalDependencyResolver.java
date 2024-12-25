@@ -47,8 +47,10 @@ public interface JkInternalDependencyResolver {
      * @param  coordinate The coordinate of the module to be resolved. Only used for caching purpose. Can be <code>null</code>
      * @param parameters can be null.
      */
-    default JkResolveResult resolve(JkCoordinate coordinate, JkDependencySet deps,
+    default JkResolveResult resolve(JkCoordinate coordinate,
+                                    JkDependencySet deps,
                                     JkResolutionParameters parameters) {
+
         List<JkDependency> depList = deps.normalised(JkCoordinate.ConflictStrategy.FAIL)
                 .getVersionedDependencies();
         return resolve(coordinate, JkQualifiedDependencySet.ofDependencies(depList)
@@ -79,8 +81,6 @@ public interface JkInternalDependencyResolver {
 
          */
         factoryClass = JkClassLoader.of(InternalVvyClassloader.get()).load(factoryClassName);
-
-
         return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", repos);
     }
 
@@ -101,7 +101,6 @@ public interface JkInternalDependencyResolver {
             //IVY_CLASSLOADER = JkInternalEmbeddedClassloader.ofMainEmbeddedLibs(targetPath);
             return IVY_CLASSLOADER;
         }
-
     }
 
     static void downloadIvy(Path path) {
@@ -128,7 +127,6 @@ public interface JkInternalDependencyResolver {
                 if (checkDowloadOk(path)) {
                     return;
                 }
-
             } catch (UncheckedIOException e) {
                 JkLog.info("Failed to download ivy from " + fullUrl);
             }
@@ -147,7 +145,6 @@ public interface JkInternalDependencyResolver {
                     "such as $JEKA_REPOS_DOWNLOAD/" + IVY_URL_PATH + " pointing to an accessible jar file." );
             throw e;
         }
-
     }
 
 
@@ -164,7 +161,5 @@ public interface JkInternalDependencyResolver {
     static boolean ivyJarValid(Path path) {
         return JkUtilsPath.size(path) > 10000;
     }
-
-
 
 }

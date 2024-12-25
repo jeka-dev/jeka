@@ -108,7 +108,7 @@ public final class JkUtilsPath {
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } catch(ZipError e) {
+        } catch(Throwable e) {
             throw JkUtilsThrowable.unchecked(e, "Error while opening zip archive " + zipFile);
         }
         return new JkZipRoot(zipFile, fileSystem.getPath("/"));

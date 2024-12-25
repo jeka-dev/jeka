@@ -116,7 +116,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         project.clean();
     }
 
-    @JkDoc("Generate sources")
+    @JkDoc("Generates sources")
     public void generateSources() {
         project.compilation.generateSources();
     }
@@ -159,17 +159,17 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         JkLog.info("\nExecute 'project: depTree' to display details on dependencies.");
     }
 
-    @JkDoc("Run the generated jar.")
+    @JkDoc("Runs the generated jar.")
     public void runJar() {
         this.run.runJar();
     }
 
-    @JkDoc("Run the compiled classes.")
+    @JkDoc("Runs the compiled classes.")
     public void runMain() {
         this.run.runMain();
     }
     
-    @JkDoc("Scaffold a JeKa project skeleton in working directory.")
+    @JkDoc("Scaffolds a JeKa project skeleton in working directory.")
     public void scaffold() {
         projectScaffold.run();
     }

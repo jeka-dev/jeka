@@ -266,6 +266,17 @@ public final class JkMavenPublication {
     }
 
     /**
+     * Adds the specified artifact to the publication assuming the artifact file will exist when {@link #publish()}
+     * will be invoked. If the artifact file is not present, an exception will be raised.
+     */
+    public JkMavenPublication putArtifactIf(boolean condition, JkArtifactId artifactId) {
+        if (condition) {
+            return putArtifact(artifactId);
+        }
+        return this;
+    }
+
+    /**
      * Removes the specified artifact from this publication.
      */
     public JkMavenPublication removeArtifact(JkArtifactId artifactId) {

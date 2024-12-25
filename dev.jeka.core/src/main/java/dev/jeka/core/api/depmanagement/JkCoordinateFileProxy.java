@@ -41,13 +41,13 @@ public final class JkCoordinateFileProxy {
         return new JkCoordinateFileProxy(repoSet, coordinate);
     }
 
-    public static JkCoordinateFileProxy of(JkRepoSet repoSet, String dependencyDescription) {
-        return of(repoSet, JkCoordinate.of(dependencyDescription));
+    public static JkCoordinateFileProxy of(JkRepoSet repoSet, @JkDepSuggest String coordinate) {
+        return of(repoSet, JkCoordinate.of(coordinate));
     }
 
-    public static JkCoordinateFileProxy ofStandardRepos(JkProperties properties, String dependencyDescription) {
+    public static JkCoordinateFileProxy ofStandardRepos(JkProperties properties, @JkDepSuggest String coordinate) {
         JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();
-        return of(repos, dependencyDescription);
+        return of(repos, coordinate);
     }
 
     public Path get() {

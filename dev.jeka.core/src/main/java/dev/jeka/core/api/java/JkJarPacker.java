@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.java;
 
+import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -140,8 +142,15 @@ public final class JkJarPacker {
     }
 
     public static void makeShadeJar(Path originalJar, Iterable<Path> extraJars, Path outputJar) {
-        JkInternalJarShader.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties())
-                .shade(originalJar, JkUtilsIterable.setOf(extraJars), outputJar);
+        JkRepoSet repos = JkRepoProperties.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties()).getDownloadRepos();
+        makeShadeJar(repos, originalJar, extraJars, outputJar);
+    }
+
+    public static void makeShadeJar(JkRepoSet repos, Path originalJar, Iterable<Path> extraJars, Path outputJar) {
+        JkInternalJarShader jarShader = JkInternalJarShader.of(repos);
+        jarShader.shade(originalJar,
+                        JkUtilsIterable.setOf(JkUtilsPath.disambiguate(extraJars)),
+                        outputJar);
     }
 
 }

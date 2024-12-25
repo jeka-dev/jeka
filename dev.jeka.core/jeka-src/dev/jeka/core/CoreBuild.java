@@ -109,7 +109,7 @@ public class CoreBuild extends KBean {
         // Configure Maven publication
         load(MavenKBean.class).getMavenPublication()
                 .putArtifact(DISTRIB_FILE_ID)
-                .putArtifact(SDKMAN_FILE_ID)
+                .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID)
                 .pomMetadata
                     .setProjectName("JeKa")
                     .addApache2License()

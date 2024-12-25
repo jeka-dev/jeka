@@ -17,6 +17,7 @@
 package dev.jeka.core.api.java.embedded.shade;
 
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalJarShader;
 import dev.jeka.core.api.java.JkManifest;
 import dev.jeka.core.api.system.JkLog;
@@ -78,6 +79,9 @@ public class MavenJarShader implements JkInternalJarShader {
             throw new UncheckedIOException(e);
         } catch (MojoExecutionException e) {
             throw new RuntimeException(e);
+        } catch (NoClassDefFoundError error) {
+            System.err.println(JkClassLoader.of(this.getClass().getClassLoader()));
+            throw error;
         }
 
         modifyManifest(mainJar, outputJar);

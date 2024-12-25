@@ -1,6 +1,7 @@
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
@@ -25,7 +26,11 @@ class SonarqubeBuild extends KBean {
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .setMixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .dependencies.compile.add((JkLocator.getJekaJarPath()));
+                //.setMainArtifactJarType(JkProjectPackaging.JarType.SHADE)
+                .dependencies.compile
+                    .add(JkLocator.getJekaJarPath());
+        project.flatFacade.dependencies.runtime
+                        .remove(JkLocator.getJekaJarPath());
         load(MavenKBean.class).getMavenPublication()
                     .pomMetadata
                         .setProjectName("Jeka plugin for Sonarqube")

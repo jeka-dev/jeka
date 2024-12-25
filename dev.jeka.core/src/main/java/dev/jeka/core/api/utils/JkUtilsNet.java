@@ -21,6 +21,8 @@ import dev.jeka.core.api.system.JkLog;
 import java.io.*;
 import java.net.*;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JkUtilsNet {
 
@@ -155,28 +157,29 @@ public class JkUtilsNet {
      *
      * @param url    The URL to send the request to
      * @param method The HTTP method to use (e.g., "GET", "POST", etc.)
-     * @param params The parameters to include in the request body
+     * @param requestBody The parameters to include in the request body
      * @return The response from the server as a BasicHttpResponse object
      * @throws UncheckedIOException If an I/O error occurs while sending the request or receiving the response
      */
-    public static BasicHttpResponse sendHttpRequest(String url, String method, String params) {
+    public static BasicHttpResponse sendHttpRequest(String url, String method, Map<String, String> headers, String requestBody) {
         try {
             URL obj = new URL(url);
             HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
             httpURLConnection.setRequestMethod(method);
-            httpURLConnection.setDoOutput(params != null);
+            headers.forEach(httpURLConnection::setRequestProperty);
+            httpURLConnection.setDoOutput(requestBody != null);
 
             // Send POST request
-            if (params != null) {
+            if (requestBody != null) {
                 OutputStream os = httpURLConnection.getOutputStream();
-                os.write(params.getBytes());
+                os.write(requestBody.getBytes());
                 os.flush();
                 os.close();
             }
 
             // Get Response
             int responseCode = httpURLConnection.getResponseCode();
-/*
+
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     httpURLConnection.getInputStream()));
             String inputLine;
@@ -185,12 +188,16 @@ public class JkUtilsNet {
                 response.append(inputLine);
             }
             in.close();
-*/
-            return new BasicHttpResponse(responseCode, null);
+
+            return new BasicHttpResponse(responseCode, response.toString());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
+    }
+
+    public static BasicHttpResponse sendHttpRequest(String url, String method, String requestBody) {
+        return sendHttpRequest(url, method, new HashMap<>(), requestBody);
     }
 
     /**

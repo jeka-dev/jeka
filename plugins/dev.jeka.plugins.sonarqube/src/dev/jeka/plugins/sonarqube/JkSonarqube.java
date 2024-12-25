@@ -20,7 +20,6 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.java.JkInternalEmbeddedClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
@@ -33,7 +32,7 @@ import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkException;
 
-import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -94,11 +93,13 @@ public final class JkSonarqube {
 
     private boolean pingServer = true;
 
+    private Path projectBaseDir = Paths.get("");
+
     private JkSonarqube(JkRepoSet repos,
                         @JkDepSuggest(versionOnly = true, hint = "org.sonarsource.scanner.cli:sonar-scanner-cli:") String scannerVersion) {
         this.repos = repos;
         this.scannerVersion = scannerVersion;
-        params.put(WORKING_DIRECTORY, workDir(Paths.get("")));
+        params.put(WORKING_DIRECTORY, workDir(Paths.get("")).toString());
     }
 
     /**
@@ -210,7 +211,7 @@ public final class JkSonarqube {
      * Executes SonarQube analysis.
      */
     public void run() {
-        String hostUrl = Optional.ofNullable(params.get(HOST_URL)).orElse("http://localhost:9000");
+        String hostUrl = getHostUrl();
 
         JkLog.startTask("run-sonar-analysis");
         if (pingServer) {
@@ -218,14 +219,58 @@ public final class JkSonarqube {
                 throw new JkException("The Sonarqube url %s is not available.%nCheck server " +
                         "or disable this ping check (sonarqube: pingServer=false)", hostUrl);
             }
-            JkLog.info("Sonarqube server url : %s", hostUrl);
         }
-
-        JkConsoleSpinner.of("Running Sonarqube").run(this::runAndCheck);
+        JkConsoleSpinner.of("Running Sonarqube").run(this::runOrFail);
+        JkLog.info("SonarQube analysis available at %s/dashboard?id=%s",
+                this.getHostUrl(), this.getProperty(JkSonarqube.PROJECT_KEY) );
         JkLog.endTask();
     }
 
-    private void runAndCheck() {
+    public QualityGateResponse checkQualityGate() {
+        JkLog.startTask("sonar-check-quality-gates");
+        Path reportTask = JkSonarqube.workDir(projectBaseDir).resolve("report-task.txt");
+        JkUtilsAssert.state(Files.exists(reportTask), "No sonarqube report file %s found. " +
+                "Run analysis prior checking quality gates.", reportTask);
+        String taskId = JkProperties.ofFile(reportTask).get("ceTaskId");
+
+        // Query for analysisId
+        String host = getHostUrl();
+        if (!host.endsWith("/")) {
+            host =  host + "/";
+        }
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + getProperty(TOKEN));
+        String taskUrl = host + "api/ce/task?id=" + taskId;
+        JkLog.debug("Extracted taskId=%s from sonarqube report.", taskId);
+        boolean pending = true;
+        JkLog.debug("Querying for analysisId %s.", taskUrl);
+        JkUtilsNet.BasicHttpResponse response = null;
+        while (pending) {
+            response = JkUtilsNet.sendHttpRequest(taskUrl, "GET", headers, null);
+            response.asserOk();
+            String status = extractJsonValue(response.body, "status");
+            pending = "PENDING".equals(status) || "IN_PROGRESS".equals(status);
+            if (pending) {
+                JkLog.info("Waiting for the analysis to be ready for quality gates...");
+                JkUtilsSystem.sleep(2000);
+            }
+        }
+        String analysisId = extractJsonValue(response.body, "analysisId");
+        JkUtilsAssert.state(!JkUtilsString.isBlank(analysisId), "Field analysisId not found in %s.", response.body);
+        JkLog.verbose("Extract analysisId=%s from querying sonarqube server.", analysisId);
+
+        // Query for quality gate
+        String gatUrl = host + "api/qualitygates/project_status?analysisId=" + analysisId;
+        JkUtilsNet.BasicHttpResponse gateResponse = JkUtilsNet.sendHttpRequest(gatUrl, "GET", headers, null);
+        gateResponse.asserOk();
+        String status = extractJsonValue(gateResponse.body, "status");
+        boolean result = !status.equals("ERROR");
+        JkLog.info("Result: %s", result? "✅ Ok" : "❌ Fail");
+        JkLog.endTask();
+        return new QualityGateResponse(result, gateResponse.body);
+    }
+
+    private void runOrFail() {
         Path jar = getToolJar();
         JkProcResult procResult = javaProcess(jar)
                 .addParamsIf(JkLog.verbosity() == JkLog.Verbosity.DEBUG, "-X")
@@ -233,6 +278,14 @@ public final class JkSonarqube {
         if (!procResult.hasSucceed()) {
             throw new JkException("SonarScanner command failed. Use--verbose to get more details.");
         }
+    }
+
+    String getHostUrl() {
+        String result = Optional.ofNullable(params.get(HOST_URL)).orElse("http://localhost:9000").trim();
+        if (result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 
     /**
@@ -314,6 +367,7 @@ public final class JkSonarqube {
      * @param provideTestLibs If true, the list of test dependency files will be provided to sonarqube.
      */
     public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
+        this.projectBaseDir = project.getBaseDir();
         final JkCompileLayout prodLayout = project.compilation.layout;
         final JkCompileLayout testLayout = project.testing.compilation.layout;
         final Path baseDir = project.getBaseDir();
@@ -342,7 +396,7 @@ public final class JkSonarqube {
                 .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
                 .setPathProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .setPathProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(WORKING_DIRECTORY, workDir(baseDir))
+                .setProperty(WORKING_DIRECTORY, workDir(baseDir).toString())
                 .setProperty(JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .setProperty(SUREFIRE_REPORTS_PATH,
@@ -367,8 +421,15 @@ public final class JkSonarqube {
         return configureFor(project, true, false);
     }
 
-    private static String workDir(Path baseDir) {
-        return baseDir.resolve(JkConstants.JEKA_WORK_PATH + "/.sonarscannerworks").toString();
+    static Path workDir(Path baseDir) {
+        return baseDir.resolve(JkConstants.OUTPUT_PATH + "/sonarqube-scanner");
+    }
+
+    static String extractJsonValue(String json, String propertyName) {
+        String token = "\"" + propertyName + "\"";
+        String after = JkUtilsString.substringAfterFirst(json, token);
+        String afterFirstQuote = JkUtilsString.substringAfterFirst(after, "\"");
+        return JkUtilsString.substringBeforeFirst(afterFirstQuote, "\"");
     }
 
     private JkJavaProcess javaProcess(Path jar) {
@@ -444,5 +505,16 @@ public final class JkSonarqube {
     }
 
 
+    public static class QualityGateResponse {
+
+        public final boolean success;
+
+        public final String details;
+
+        public QualityGateResponse(boolean success, String details) {
+            this.success = success;
+            this.details = details;
+        }
+    }
 
 }

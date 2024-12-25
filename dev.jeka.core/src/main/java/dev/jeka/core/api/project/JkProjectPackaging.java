@@ -18,6 +18,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySetModifier;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathMatcher;
@@ -196,7 +197,8 @@ public class JkProjectPackaging {
         JkUtilsPath.deleteIfExists(mainJar);
         createBinJar(mainJar);
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
-        JkJarPacker.makeShadeJar(mainJar, classpath, target);
+        JkRepoSet repos = project.dependencyResolver.getRepos();
+        JkJarPacker.makeShadeJar(repos, mainJar, classpath, target);
         JkUtilsPath.deleteIfExists(mainJar);
         JkLog.endTask("Shade Jar created at " + friendlyPath(target));
     }

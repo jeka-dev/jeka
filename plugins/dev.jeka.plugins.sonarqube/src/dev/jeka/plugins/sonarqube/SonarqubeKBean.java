@@ -17,13 +17,24 @@
 package dev.jeka.plugins.sonarqube;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @JkDoc("Run SonarQube analysis.")
 public class SonarqubeKBean extends KBean {
+
+    private JkProject project;
 
     @JkDoc("If true, the list of production dependency files will be provided to sonarqube")
     public boolean provideProductionLibs = true;
@@ -50,10 +61,26 @@ public class SonarqubeKBean extends KBean {
             "Properties prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to sonarQube properties.")
     public void run() {
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
-            sonarqube.configureFor(projectKBean.project, provideProductionLibs, provideTestLibs);
-        });
+        JkUtilsAssert.state(project != null, "Np project to analyse found in %s", getBaseDir());
+        JkUtilsAssert.state(Files.exists(project.compilation.layout.resolveClassDir()),
+                "Project class directory not found. " +
+                "Please run compilation and tests prior running analysis.");
+        sonarqube.configureFor(project, provideProductionLibs, provideTestLibs);
         sonarqube.run();
+    }
+
+    @JkDoc("Checks if the analysed project passes its quality gates. " +
+            "The 'run' method is expected to have already been executed.")
+    public void check() {
+        JkUtilsAssert.state(project != null, "Np project to analyse found in %s", getBaseDir());
+        JkSonarqube.QualityGateResponse response = sonarqube.checkQualityGate();
+        if (response.success) {
+            JkLog.info("Sonarqube quality gate passed successfully.");
+        } else {
+            JkLog.error("Project does not meet quality gate criteria. See %s/dashboard?id=%s",
+                    sonarqube.getHostUrl(), sonarqube.getProperty(JkSonarqube.PROJECT_KEY) );
+            System.exit(1);
+        }
     }
 
     @Override
@@ -62,6 +89,9 @@ public class SonarqubeKBean extends KBean {
         sonarqube.setPingServer(pingServer);
         sonarqube.setLogOutput(logOutput);
         sonarqube.setProperties(getRunbase().getProperties());
+        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
+            project = projectKBean.project;
+        });
     }
 
     private String effectiveScannerVersion() {

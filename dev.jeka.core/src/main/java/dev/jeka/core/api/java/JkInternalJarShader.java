@@ -18,9 +18,8 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.nio.file.Path;
@@ -31,8 +30,8 @@ public interface JkInternalJarShader {
 
     void shade(Path mainJar, Set<Path> extraJars, Path outputJar);
 
-    static JkInternalJarShader of(JkProperties properties) {
-        return JkInternalJarShader.Cache.get(properties);
+    static JkInternalJarShader of(JkRepoSet repoSet) {
+        return JkInternalJarShader.Cache.get(repoSet);
     }
 
     class Cache {
@@ -41,18 +40,13 @@ public interface JkInternalJarShader {
 
         private final static String IMPL_CLASS = "dev.jeka.core.api.java.embedded.shade.MavenJarShader";
 
-        private static JkInternalJarShader get(JkProperties properties) {
+        private static JkInternalJarShader get(JkRepoSet repos) {
             if (CACHED_INSTANCE != null) {
                 return CACHED_INSTANCE;
             }
 
-            Class<JkInternalJarShader> clazz = JkClassLoader.ofCurrent().loadIfExist(IMPL_CLASS);
-            if (clazz != null) {
-                return JkUtilsReflect.invokeStaticMethod(clazz, "of");
-            }
-
             JkDependencyResolver dependencyResolver = JkDependencyResolver
-                    .of(JkRepoProperties.of(properties).getDownloadRepos())
+                    .of(repos)
                     .setUseFileSystemCache(true);
             JkDependencySet dependencies = JkDependencySet.of()
                     .and("org.slf4j:slf4j-simple:2.0.13")
@@ -61,11 +55,14 @@ public interface JkInternalJarShader {
                     .and("org.apache.maven:maven-plugin-api:3.9.8");
             List<Path> classpath = dependencyResolver.resolveFiles(dependencies);
 
-            ClassLoader classLoader = JkInternalChildFirstClassLoader.of(classpath, JkInternalGpgDoer.class.getClassLoader());
-            clazz = JkClassLoader.of(classLoader).load(IMPL_CLASS);
+            ClassLoader classLoader = JkInternalChildFirstClassLoader.of(classpath,
+                    JkInternalJarShader.class.getClassLoader());
+            Class<?> clazz = JkClassLoader.of(classLoader).load(IMPL_CLASS);
             CACHED_INSTANCE = JkUtilsReflect.invokeStaticMethod(clazz, "of");
             return CACHED_INSTANCE;
         }
-
     }
+
+    class MavenShaderClassLoader extends ClassLoader {}
+
 }
