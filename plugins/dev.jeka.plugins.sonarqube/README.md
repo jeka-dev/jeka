@@ -43,6 +43,11 @@ Properties:
 All properties in `jeka.properties` starting with `sonar.` are taken in account by the Sonar scanner.
 It is also possible to pass system props as `jeka sonatqube: run -Dsonar.token=Xxxxxxxx`.
 
+## Methods
+
+- Run a Sonarqube analysis: `jeka sonarqube: run`
+- Check quality gate: `jeka sonarqube: check`
+
 ## Programmatic Usage
 
 We can ru Sonar scanner programmatically as below:
@@ -61,9 +66,3 @@ JkSonarqube.ofVersion("5.0.1.3006")
 
 We might analysis projects containing both Java and Javascript code. 
 This is possible using the programmatic configuration, as used in [this example](https://github.com/jeka-dev/demo-build-templates/blob/b0b3940068bc96a02c9f4e2e46766355466b1df4/jeka-src/dev/jeka/demo/templates/SpringBootTemplateBuild.java#L109).
-
-
-
-
-
-
