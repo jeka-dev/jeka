@@ -3,6 +3,11 @@
 This plugin provides utility classes and KBean to perform a SonarQube code analysis.
 A SonarScanner is actually passed on the code analysis and sent to a Sonar server.
 
+Basic Usage: Run analysis and check quality gates.
+```shell
+jeka sonarqube: run check
+```
+
 Resources:
   - Command-line documentation: `jeka sonarqube: --doc`
   - Source Code: [Visit here](src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java).
@@ -19,7 +24,7 @@ As no post-action is registered, run a Sonar analysis by  executing `jeka sonarq
 
 ## Configuration
 
-No configuration is requires. Nevertheless, the plugin offers some settings via properties. 
+No configuration is required. Nevertheless, the plugin offers some settings via properties. 
 Sonar scanner properties can be passed using System properties or *jeka.properties* file.
 
 ```properties
