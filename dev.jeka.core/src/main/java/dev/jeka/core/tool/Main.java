@@ -116,7 +116,16 @@ public class Main {
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
-
+            // Handle 'jeka --doc'
+            String kbeanDoc = cmdArgs.kbeanDoc();
+            if (kbeanDoc != null && JkUtilsString.isBlank(kbeanDoc)) {
+                PicocliHelp.printCmdHelp(
+                        engine.resolveClassPaths().runClasspath,
+                        kBeanResolution,
+                        props,
+                        System.out);
+                System.exit(0);
+            }
 
             // Validate KBean properties
             if (!behavior.forceMode) {
@@ -139,16 +148,14 @@ public class Main {
             engine.initRunbase(actionContainer);
 
             // -- Handle doc ([kbean]: --doc)
-            String kbeanDoc = cmdArgs.kbeanDoc();
             if (kbeanDoc != null) {
-                boolean success = performDocKBean(engine, kbeanDoc, props);
+                boolean success = performDocKBean(engine, kbeanDoc);
                 System.exit(success ? 0 : 1);
             }
             if (logs.runtimeInformation) {
                 logRuntimeInfoRun(engine.getRunbase());
             }
             engine.run();
-
             logOutro(logs, startTime);
 
         } catch (CommandLine.ParameterException e) {
@@ -340,38 +347,32 @@ public class Main {
             if (propName.contains(".")) {
                 String fieldName = JkUtilsString.substringAfterFirst(propName, ".");
                 Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
-                if (!KBeanDescription.of(kbeanClass, false).isContainingField(fieldName)) {
+                if (!KBeanDescription.of(kbeanClass).isContainingField(fieldName)) {
                     throw new IllegalStateException("Property '@" + propName + "' does not match any field in "
                             + beanName + " KBean. Execute 'jeka " + beanName + ": --doc' to see available fields.");
                 }
 
             }
         }
-
     }
 
-   static boolean performDocKBean(Engine engine, String kbeanDoc, JkProperties props ) {
+   static boolean performDocKBean(Engine engine, String kbeanDoc) {
         Engine.KBeanResolution kBeanResolution = engine.getKbeanResolution();
         JkRunbase.setKBeanResolution(kBeanResolution);
         boolean isDefaultKBean = "-default-".equals(kbeanDoc) && kBeanResolution.defaultKbeanClassname != null;
         String kbean = isDefaultKBean ? kBeanResolution.defaultKbeanClassname : kbeanDoc;
-        if (JkUtilsString.isBlank(kbean) ) {
-            PicocliHelp.printCmdHelp(
-                    engine.resolveClassPaths().runClasspath,
-                    kBeanResolution,
-                    props,
-                    System.out);
-            return true;
-        }
         boolean found = PicocliHelp.printKBeanHelp(
                 engine.resolveClassPaths().runClasspath,
                 kBeanResolution.allKbeans,
                 kbean,
+                engine.getRunbase(),
                 System.out);
         if (!found) {
             System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanDoc);
         }
         return found;
     }
+
+
 
 }

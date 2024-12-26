@@ -146,7 +146,7 @@ public final class SpringbootKBean extends KBean {
             springbootProject.addSpringRepo(springRepo);
         }
 
-        // Configure native kKBan
+        // Configure native KBean
         NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
         nativeKBean.includeMainClassArg = false;
         nativeKBean.setAotAssetDirs(() ->

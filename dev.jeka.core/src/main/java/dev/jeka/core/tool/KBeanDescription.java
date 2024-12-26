@@ -64,7 +64,7 @@ final class KBeanDescription {
         this.includeDefaultValues = includeDefaultValues;
     }
 
-    static KBeanDescription of(Class<? extends KBean> kbeanClass, boolean computeDefaultValue) {
+    static KBeanDescription of(Class<? extends KBean> kbeanClass) {
         if (CACHE.containsKey(kbeanClass)) {
             return CACHE.get(kbeanClass);
         }
@@ -78,7 +78,45 @@ final class KBeanDescription {
         List<NameAndField> nameAndFields =  fields(kbeanClass, "", true, null);
         for (final NameAndField nameAndField : nameAndFields) {
             beanFields.add(BeanField.of(kbeanClass, nameAndField.field,
-                    nameAndField.name, nameAndField.rootClass, computeDefaultValue));
+                    nameAndField.name));
+        }
+        Collections.sort(beanFields);
+
+        // Grab header + description from content of @JkDoc
+        final JkDoc jkDoc = kbeanClass.getAnnotation(JkDoc.class);
+        final String header;
+        final String detail;
+        final String fullDesc = jkDoc == null ? "" : jkDoc.value();
+        String[] lines = fullDesc.split("\n");
+        if (lines.length == 0) {
+            header = "";
+            detail = "";
+        } else {
+            header = lines[0];
+            if (lines.length > 1) {
+                detail = JkUtilsString.substringAfterFirst(fullDesc, "\n");
+            } else {
+                detail = "";
+            }
+        }
+        return new KBeanDescription(kbeanClass, header, detail, methods, beanFields, false);
+    }
+
+    static KBeanDescription ofWithDefaultValues(Class<? extends KBean> kbeanClass, JkRunbase runbase) {
+        if (CACHE.containsKey(kbeanClass)) {
+            return CACHE.get(kbeanClass);
+        }
+
+        final List<BeanMethod> methods = new LinkedList<>();
+        for (final Method method : executableMethods(kbeanClass)) {
+            methods.add(BeanMethod.of(method));
+        }
+        Collections.sort(methods);
+        final List<BeanField> beanFields = new LinkedList<>();
+        List<NameAndField> nameAndFields =  fields(kbeanClass, "", true, null);
+        for (final NameAndField nameAndField : nameAndFields) {
+            beanFields.add(BeanField.ofWithDefaultValues(kbeanClass, nameAndField.field,
+                    nameAndField.name, runbase));
         }
         Collections.sort(beanFields);
 
@@ -100,10 +138,8 @@ final class KBeanDescription {
             }
         }
         KBeanDescription result = new KBeanDescription(kbeanClass, header, detail, methods, beanFields,
-                computeDefaultValue);
-        if (computeDefaultValue) {
-            CACHE.put(kbeanClass, result);
-        }
+                true);
+        CACHE.put(kbeanClass, result);
         return result;
     }
 
@@ -252,23 +288,47 @@ final class KBeanDescription {
             this.injectedPropertyName = injectedPropertyName;
         }
 
-        static BeanField of(
+        private static BeanField of(
                 Class<? extends KBean> beanClass,
                 Field field,
-                String name,
-                Class<?> rootDeclaringClass,
-                boolean computeDefaultValue) {
+                String name) {
 
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
+            final String descr = getDescr(jkDoc);
+            final Class<?> type = field.getType();
+            final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
+            final String propertyName = injectProperty != null ? injectProperty.value() : null;
+            return new BeanField(
+                    field,
+                    name,
+                    descr,
+                    null,
+                    null,
+                    type,
+                    propertyName);
+        }
+
+        private static String getDescr(JkDoc jkDoc) {
             final String descr;
             if (jkDoc != null) {
                 descr = String.join("\n", jkDoc.value());
             } else {
                 descr = null;
             }
+            return descr;
+        }
+
+        private static BeanField ofWithDefaultValues(
+                Class<? extends KBean> beanClass,
+                Field field,
+                String name,
+                JkRunbase runbase) {
+
+            final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
+            final String descr = getDescr(jkDoc);
             final Class<?> type = field.getType();
-            Object instance = computeDefaultValue ? JkUtilsReflect.newInstance(beanClass) : null;
-            Object defaultValue = computeDefaultValue ? value(instance, name) : null;
+            Object instance = runbase.load(beanClass);
+            Object defaultValue = value(instance, name);
             final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
             final String propertyName = injectProperty != null ? injectProperty.value() : null;
             return new BeanField(

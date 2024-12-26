@@ -19,19 +19,17 @@ package dev.jeka.plugins.sonarqube;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 
-@JkDoc("Run SonarQube analysis.")
+@JkDoc("Run Sonarqube analysis and check quality gates. \n" +
+        "The properties prefixed with 'sonar.', such as '-Dsonar.host.url=http://myserver/..', " +
+        "will be appended to the SonarQube configuration.")
 public class SonarqubeKBean extends KBean {
 
     private JkProject project;
@@ -57,9 +55,7 @@ public class SonarqubeKBean extends KBean {
     public final JkSonarqube sonarqube = JkSonarqube.ofVersion(getRunbase().getDependencyResolver().getRepos(),
             JkSonarqube.DEFAULT_SCANNER__VERSION);
 
-    @JkDoc("Runs sonarQube analysis based on properties defined in this plugin. " +
-            "Properties prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
-            "will be appended to sonarQube properties.")
+    @JkDoc("Runs a SonarQube analysis and sends the results to a Sonar server.")
     public void run() {
         JkUtilsAssert.state(project != null, "Np project to analyse found in %s", getBaseDir());
         JkUtilsAssert.state(Files.exists(project.compilation.layout.resolveClassDir()),

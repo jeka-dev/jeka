@@ -434,7 +434,7 @@ public final class JkRunbase {
 
         Class<? extends KBean> kbeanClass = kbean.getClass();
         List<KBeanAction> result = new LinkedList<>();
-        KBeanDescription desc = KBeanDescription.of(kbeanClass, true);
+        KBeanDescription desc = KBeanDescription.of(kbeanClass);
 
         CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc));
         commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, desc));
@@ -444,10 +444,11 @@ public final class JkRunbase {
         for (KBeanDescription.BeanField beanField : desc.beanFields) {
             CommandLine.Model.OptionSpec optionSpec = commandSpec.findOption(beanField.name);
             Object value = optionSpec.getValue();
-            if (!Objects.equals(beanField.defaultValue, value)) {
+            if (value != null) {  // cannot set "null" on non-primitive
                 setValue(kbean, beanField.name, value);
-                result.add(KBeanAction.ofSetValue(kbeanClass, beanField.name, value, "properties"));
             }
+            result.add(KBeanAction.ofSetValue(kbeanClass, beanField.name, value, "properties"));
+
         }
         return result;
     }
