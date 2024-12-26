@@ -22,14 +22,7 @@ import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 
-@JkDoc("Provides project versioning by extracting Git information" + "\n" +
-        "The version is inferred from git using following logic : "+ "\n" +
-        "  - If git workspace is dirty (different than last commit), version values [branch]-SNAPSHOT"+ "\n" +
-        "  - If last commit contains a message containing [commentKeyword]xxxxx, version values xxxxx"+ "\n" +
-        "  - If last commit is tagged, version values [last tag on last commit]"+ "\n" +
-        "The inferred version can be applied to project.publication.maven.version and project.publication.ivy.publication, " +
-                "programmatically using 'handleVersioning' method."
-)
+@JkDoc("Provides convenient operations for Git.")
 public final class GitKBean extends KBean {
 
     public final JkGit git = JkGit.of(getBaseDir());
@@ -38,11 +31,6 @@ public final class GitKBean extends KBean {
             " The user will be prompted to enter the tag name.")
     public void tagRemote() {
         git.tagRemote();
-    }
-
-    @JkDoc("Displays version supplied to the project.")
-    public void showVersion() {
-        JkLog.info(gerVersionFromGit().getVersion());
     }
 
     @JkDoc("Displays last git tag in current branch")
