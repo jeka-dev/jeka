@@ -12,6 +12,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="dev.jeka.core" exported="" scope="TEST" />
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
@@ -93,6 +94,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="dev.jeka.core" exported="" scope="TEST" />
   </component>
 </module>

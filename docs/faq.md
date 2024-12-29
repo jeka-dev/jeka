@@ -103,11 +103,17 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkDep("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class Build extends KBean {
-    
+
+    JkProject project = load(ProjectKBean.class).project;
     ...
     project.compilerToolChain.setCompileTool(new EclipseCompiler());
+    
+    // You may pass additional options to the compiler
+    project.compilation.addJavaCompilerOptions(...);
 }
 ```
+This works out-of-the-box when using Java 8. Using Java 11+ may require specific 
+options to pass to the compiler.
 
 ### How can I sync Eclipse/IntelliJ without using `ProjectKBean`?
 

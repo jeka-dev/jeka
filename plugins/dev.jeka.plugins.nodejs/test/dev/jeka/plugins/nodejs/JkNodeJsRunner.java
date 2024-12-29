@@ -24,8 +24,7 @@ import java.nio.file.Paths;
 public class JkNodeJsRunner {
 
     public static void main(String[] args) {
-        String nodeJsVersion = "22.12.0";
-        JkNodeJs.ofVersion(nodeJsVersion)
+        JkNodeJs.ofVersion("22.12.0")
                 .npx("cowsay Hello World !");
     }
 }
