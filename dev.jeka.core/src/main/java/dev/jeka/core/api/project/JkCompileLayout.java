@@ -119,10 +119,10 @@ public class JkCompileLayout {
     public JkCompileLayout setSourceSimpleStyle(Concern concern) {
         if (concern == Concern.PROD) {
             sources = JkPathTreeSet.ofRoots(Paths.get("src"));
-            resources = JkPathTreeSet.ofRoots(Paths.get("src")).andMatcher(JAVA_RESOURCE_MATCHER);
+            resources = JkPathTreeSet.ofRoots(Paths.get("res"));
         } else {
             this.sources = JkPathTreeSet.ofRoots(Paths.get("test"));
-            this.resources = JkPathTreeSet.ofRoots(Paths.get("test")).andMatcher(JAVA_RESOURCE_MATCHER);
+            this.resources = JkPathTreeSet.ofRoots(Paths.get("test-res"));
         }
         return this;
     }

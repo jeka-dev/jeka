@@ -55,6 +55,8 @@ public class JkNodeJs {
 
     private Path workingDir = Paths.get("");
 
+    private boolean useJekaLog = false;
+
     private JkNodeJs(Path installDir) {
         this.installDir = installDir;
     }
@@ -91,10 +93,21 @@ public class JkNodeJs {
     }
 
     /**
-     * Sets the working directory from where {@link #npm(String)} and {@link #npx(String)} should be run.
+     * Sets the working directory from where {@link #npm(String, Object...)} and {@link #npx(String, Object...)} should be run.
      */
     public JkNodeJs setWorkingDir(Path workingDir) {
         this.workingDir = workingDir;
+        return this;
+    }
+
+    /**
+     * Configures whether Jeka logging is used for Node.js operations.
+     *
+     * @param useJekaLog true to enable Jeka logging; false to disable it.
+     * @return The current JkNodeJs instance for method chaining.
+     */
+    public JkNodeJs setUseJekaLogging(boolean useJekaLog) {
+        this.useJekaLog = useJekaLog;
         return this;
     }
 
@@ -117,9 +130,9 @@ public class JkNodeJs {
      * @param commandLine Command line to be executed by <i>npm</i>. The 'npm' command should
      *                    not be included in the command line.
      */
-    public JkNodeJs npm(String commandLine) {
+    public JkNodeJs npm(String commandLine, Object... items) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "bin/npm";
-        String[] params = JkUtilsString.parseCommandline(commandLine);
+        String[] params = JkUtilsString.parseCommandline(String.format(commandLine, items));
         createProcess(workingDir, cmd).addParams(params).exec();
         return this;
     }
@@ -129,9 +142,9 @@ public class JkNodeJs {
      * @param commandLine Command line to be executed by <i>npx</i>. The 'npx' command should
      *                    not be included in the command line.
      */
-    public JkNodeJs npx(String commandLine) {
+    public JkNodeJs npx(String commandLine, Object... items) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npx.cmd" : "bin/npx";
-        String[] params = JkUtilsString.parseCommandline(commandLine);
+        String[] params = JkUtilsString.parseCommandline(String.format(commandLine, items));
         createProcess(workingDir, cmd).addParams(params).exec();
         return this;
     }
@@ -206,12 +219,17 @@ public class JkNodeJs {
         Path commandFile = installDir().resolve(cmdName);
         Path nodeDir = commandFile.getParent();
         String pathVar = nodeDir.toString() + File.pathSeparator + path;
-        return JkProcess.of(commandFile.toString())
+        JkProcess process = JkProcess.of(commandFile.toString())
                 .setWorkingDir(workingDir)
                 .setFailOnError(true)
-                .setEnv("PATH", pathVar)
-                .setLogCommand(true)
-                .setLogWithJekaDecorator(true);
+                .setEnv("PATH", pathVar);
+        if (useJekaLog) {
+            process.setLogCommand(true);
+            process.setLogWithJekaDecorator(true);
+        } else {
+            process.setInheritIO(true);
+        }
+        return process;
     }
 
     private static boolean isBinaryPresent(Path installDir) {

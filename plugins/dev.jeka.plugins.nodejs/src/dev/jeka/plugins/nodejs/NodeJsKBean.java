@@ -72,7 +72,7 @@ public class NodeJsKBean extends KBean {
     protected void init() {
         if (configureProject) {
             JkProject project = load(ProjectKBean.class).project;
-            JkNodeJs.ofVersion(this.version)
+            JkNodeJs.ofVersion(this.version).setUseJekaLogging(true)
                     .configure(project, appDir, distDir, targetResourceDir, commandLines(cmdLine),
                             commandLines(testCmdLine));
         }
@@ -97,11 +97,8 @@ public class NodeJsKBean extends KBean {
     }
 
     private JkNodeJs getJkNodeJs() {
-
-        return JkNodeJs.ofVersion(version).setWorkingDir(getWorkingDir());
+        return JkNodeJs.ofVersion(version).setWorkingDir(getWorkingDir()).setUseJekaLogging(true);
     }
-
-
 
    private static List<String> commandLines(String cmd) {
         if (cmd == null) {
@@ -111,6 +108,5 @@ public class NodeJsKBean extends KBean {
                 .map(String::trim)
                 .collect(Collectors.toList());
    }
-
 
 }
