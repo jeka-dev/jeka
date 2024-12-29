@@ -78,7 +78,7 @@ public class JkProjectScaffoldTest {
         assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));
         assertTrue(Files.isDirectory(baseDir.resolve("src")));
         assertTrue(Files.isDirectory(baseDir.resolve("test")));
-        assertFalse(Files.isDirectory(baseDir.resolve("res")));
+        assertTrue(Files.isDirectory(baseDir.resolve("res")));
 
         // Check property is here
         String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();

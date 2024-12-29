@@ -52,7 +52,7 @@ public class JkImlGeneratorTest {
         JkIml iml = imlGenerator.computeIml();
         iml.toDoc().print(System.out);
         List<JkIml.SourceFolder> sourceFolders = iml.component.getContent().getSourceFolders();
-        Assert.assertEquals(3, sourceFolders.size());
+        Assert.assertEquals(5, sourceFolders.size());
     }
 
     private JkDependencySet dependencies() {
