@@ -26,7 +26,17 @@ import java.lang.annotation.Target;
 public @interface JkDepSuggest {
 
     /**
-     * We can specify a query to narrow the search, as "com.google.guava:guava-".
+     * We can specify a query to narrow the search, such as "com.google.guava:guava-".
+     * <p>
+     * An arbitrary list can also be specified by using a comma-separated string,
+     * combined with {@code versionOnly=true}.
+     * <p>
+     * Example:
+     * <pre><code>
+     * @JkDepSuggest(versionOnly = true, hint = "choice 1,choice 2,choice 3")
+     * @JkDepSuggest(versionOnly = true, hint = "com.google.guava:guava-core:")
+     * @JkDepSuggest(hint = "com.google.guava:guava-core:")
+     * </code></pre>
      */
     String hint() default "";
 

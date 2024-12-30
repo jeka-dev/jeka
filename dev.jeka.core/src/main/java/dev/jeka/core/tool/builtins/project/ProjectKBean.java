@@ -16,6 +16,7 @@
 
 package dev.jeka.core.tool.builtins.project;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathFile;
@@ -109,8 +110,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     // ------------------------------- command line methods -----------------------------
 
-
-
     @JkDoc("Delete the content of jeka-output directory and might execute extra clean actions")
     public void clean() {
         project.clean();
@@ -199,6 +198,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("If not blank, the project will produce an extra shade jar having the specified classifier name.\n" +
                 "A shade Jar embeds classes coming from dependency jars. The dependency class packages are relocated to " +
                 "avoid potential collisions with other jar present in the classpath.")
+        @JkDepSuggest(versionOnly = true, hint = "uber,all")
         public String shadeJarClassifier;
 
         @JkDoc("Main class name to include in Manifest. Use 'auto' to automatic discovering.")
@@ -206,6 +206,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         @JkDoc("If true and no mainClass specified, it will be detected and added to the Manifest.")
         public boolean detectMainClass;
+
+
 
     }
 
