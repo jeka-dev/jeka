@@ -11,7 +11,7 @@ Resources:
 ## Initialization
 
 This plugin resisters a post-publication action in *MavenKBean*, if present.
-The action send *"close"* message to the repositories and waits until processed.
+The action sends a *"close"* message to the repositories and waits until it is processed.
 
 ## Configuration
 
