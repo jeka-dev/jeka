@@ -201,7 +201,7 @@ public final class MavenKBean extends KBean {
 
         @JkDoc("Coma separated string of artifact classifiers to publish, in format [classifier] or [classifier].[extension].\n" +
                "This assumes the artifact file be present in jeka-output dir.\n" +
-                "Example: 'alldeps', 'doc.zip'")
+                "Example: 'uber', 'doc.zip'")
         public String extraArtifacts;
 
         private JkPublication() {
