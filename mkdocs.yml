@@ -54,7 +54,7 @@ markdown_extensions:
 nav:
     - Installation: installation.md
     - Tutorials:
-        - Getting Started: tutorials/getting-started.md
+        - Basics: tutorials/basics.md
         - Build Projects: tutorials/build-projects.md
     - Reference:
         - KBeans: reference/kbeans.md

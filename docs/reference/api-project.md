@@ -16,48 +16,48 @@ To manage all of these concerns efficiently, the class is structured as follows:
 
 ```
 project
-+- baseDir
-+- outputDir
-+- artifactLocator (define where artifact files are supposed to be created)
-+- duplicateDependencyConflictStrategy
-+- jvmTargetVersion
-+- sourceEncoding
-+- javaCompileToolChain
-+- dependencyResolver
-+- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
-|  +- layout (where are located source and resource files)
-|  +- source generators (plugin mechanism for generating source files)
-|  +- dependencies   (stands for compile dependencies)
-|  +- preCompileActions (including resources processing)
-|  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
-|  +- postCompileActions
-|  +- methods : resolveDependencies(), run()
-+- testing
-|  +- testCompilation (same as above 'prodcCompilation' but for test sources)
-|  |  +- layout
-|  |  +- dependencies (stands for test dependencies)
-|  |  + ...
-|  +- breakOnFailure (true/false)
-|  +- skipped (true/false)
-|  +- testProcessor
-|  |  +- forkedProcess (configured the forked process who will run tests)
-|  |  +- preActions
-|  |  +- postActions
-|  |  +- engineBehavior
-|  |  |  +- testReportDir
-|  |  |  +- progressDisplayer
-|  |  |  +- launcherConfiguration (based on junit5 platform API)
-|  |  +- testSelection
-|  |  |  +- includePatterns
-|  |  |  +- includeTags
-|  +- method : run()
-+- packaging (produces javadoc and source jar and bin jars)
-|  +- javadocConfiguration
-|  +- runtimeDependencies
-|  +- manifest
-|  +- fatJar (customize produced fat/uber jar if any)
-|  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
-+ methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
+├─ baseDir
+├─ outputDir
+├─ artifactLocator (define where artifact files are supposed to be created)
+├─ duplicateDependencyConflictStrategy
+├─ jvmTargetVersion
+├─ sourceEncoding
+├─ javaCompileToolChain
+├─ dependencyResolver
+├─ compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
+│  ├─ layout (where are located source and resource files)
+│  ├─ source generators (plugin mechanism for generating source files)
+│  ├─ dependencies   (stands for compile dependencies)
+│  ├─ preCompileActions (including resources processing)
+│  ├─ compileActions (including java sources compilation. Compilation for other languages can be added here)
+│  ├─ postCompileActions
+│  └─ methods : resolveDependencies(), run()
+├─ testing
+│  ├─ testCompilation (same as above 'prodcCompilation' but for test sources)
+│  │  ├─ layout
+│  │  ├─ dependencies (stands for test dependencies)
+│  │  └─ ...
+│  ├─ breakOnFailure (true/false)
+│  ├─ skipped (true/false)
+│  ├─ testProcessor
+│  │  ├─ forkedProcess (configured the forked process who will run tests)
+│  │  ├─ preActions
+│  │  ├─ postActions
+│  │  ├─ engineBehavior
+│  │  │  ├─ testReportDir
+│  │  │  ├─ progressDisplayer
+│  │  │  └─ launcherConfiguration (based on junit5 platform API)
+│  │  └─ testSelection
+│  │     ├─ includePatterns
+│  │     └─ includeTags
+│  └─ method : run()
+├─ packaging (produces javadoc and source jar and bin jars)
+│  ├─ javadocConfiguration
+│  ├─ runtimeDependencies
+│  ├─ manifest
+│  ├─ fatJar (customize produced fat/uber jar if any)
+│  └─ methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
+└─ methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
 ```
 See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.project-api/jeka-src/JkProjectBuild.java).
 

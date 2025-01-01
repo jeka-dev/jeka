@@ -1,4 +1,4 @@
-# Getting Started
+# Getting Started - Basics
 
 Let's create some simple scripts to understand the basic concepts.
 

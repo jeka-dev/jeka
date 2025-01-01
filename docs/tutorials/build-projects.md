@@ -11,7 +11,7 @@ including separate classpaths for compile, runtime, test, and build.
 
 Run `jeka project: scaffold` to create a standard project structure, ready for you to start coding right away.
 
-
+You'll get a project structure as follow:
 ```
 .
 ├── src                  
@@ -33,19 +33,20 @@ Run `jeka project: scaffold` to create a standard project structure, ready for y
 
 The *jeka.ps* and *jeka* OS scripts are needed only if you want to build your project on a machine where Jeka is not installed.  
 *Build.java* can also be removed if you don't need advanced settings.  
-You can use a simpler code layout, similar to the standard Maven structure. To do this, add the following to the *jeka.properties* file:
-```properties
+
+You can choose a simpler code layout structure by setting the following properties:
+```properties title="jeka.properties"
 @project.layout.style=SIMPLE
 @project.layout.mixSourcesAndResources=true
 ```
-This defines the following layout:
+You'll end up with the following code layout:
 ```
 .
 ├── src       <- Contains both Java code and resooources    
 ├── test      <- Contains both Java code and resooources for testing
 ```
 
-You can also copy and paste JAR files into the following directory structure to automatically include them as dependencies:
+Additionally, you can copy-paste JAR files into the following directory structure to automatically include them as dependencies:
 ```
 .
 ├── libs                  
@@ -56,7 +57,8 @@ You can also copy and paste JAR files into the following directory structure to 
 ```
 
 ## Sync with IntelliJ
-Run: `jeka intellij: iml` to sync the project with IntelliJ.  
+
+Run: `jeka intellij: iml --force` to sync the project with IntelliJ.  
 If changes don't appear in IntelliJ, go to the project's root directory, then run: `jeka intellij: initProject`.
 
 ## Add Dependencies
@@ -65,48 +67,48 @@ Dependencies are listed in the *dependencies.txt* file as shown below:
 
 ```txt title="dependencies.txt"
 == COMPILE ==
+com.google.guava:guava:33.4.0-jre
 org.projectlombok:lombok:1.18.32
 
 == RUNTIME ==
+org.postgresql:postgresql:42.7.4
 -org.projectlombok:lombok  # indicate to not include lombok in runtime classpath.
 
 == TEST == 
 org.junit.jupiter:junit-jupiter:5.8.1
 ```
 
-For a *compile-only* dependency, add it to the `== COMPILE ==` section.  
-Remove it from the `== RUNTIME ==` section using the `-` symbol.
+For a *compile-only* dependency, add it to the `== COMPILE ==` section and remove it from the `== RUNTIME ==` section using the `-` symbol.
 
 ## Configure JAR Type
 By default, JeKa produces regular JAR files. 
 You can configure it to create a *fat JAR* (JAR that includes all dependencies) 
-or a *shaded JAR* (same as fat JAR but with relocated packages to avoid classpath collisions).
+or a *shade JAR* (same as fat JAR but with relocated packages to avoid classpath collisions).
 
 To configure, edit *jeka.properties* and add:
-```properties
+```properties title="jeka.properties"
 @project.pack.jarType=FAT
 ```
 This configures the project to create a single jar, also known as a *fat jar*.  
-This is ideal for bundling applications.
+This is ideal for bundling applications. This properties accepts `REGULAR`, `FAT`, and `SHADE` values.
 
-If you are bundling a library, you may prefer to create an additional *shade* jar.  
-A *shade* jar embeds dependency jars while relocating packages to avoid collisions in the consumer's classpath.
+If you are bundling a library, you may prefer to create an additional *shade* jar, in addition of the regular one, so consumers 
+can choose which one to pick.
 
 To do this, edit *jeka.properties* and add:
-```properties
-# Create an extra jar suffixed with 'all-deps*
+```properties title="jeka.properties"
+# Create an extra jar suffixed with 'all*
 @project.pack.shadeJarClassifier=all
 
 # Instruct Maven plugin to publish it as well.
 @maven.publication.extraArtifacts=all
 ```
-This way, the *shade* jar will be created in addition to the regular one, not as a replacement.
 
 ## Handle Versioning
 
 Setting a version or group/moduleId is optional.  
 To set a specific version, add `@project.version=1.0-SNAPSHOT` to *jeka.properties*.
-```properties
+```properties title="jeka.properties"
 @project.moduleId=org.mygroup:my-module-id
 @project.version=1.0.0-SNAPSHOT
 ```
@@ -115,7 +117,7 @@ You can override any property by passing a command-line argument, for example: `
 A better approach might be to infer the version from Git. The version will be set to *[TAG NAME]* if the workspace is on a tag, or *[BRANCH]-SNAPSHOT* if it is not.
 
 The Manifest file will also include Git information (commit, dirty, branch, etc.). To enable this, use the following property:
-```properties
+```properties title="jeka.properties"
 @project.gitVersioning.enable=true
 ```
 
@@ -127,7 +129,7 @@ The Manifest file will also include Git information (commit, dirty, branch, etc.
 --verbose (-v)    # Displays verbos traces
 ```
 
-``` title="Direct call"
+``` title="Run Code Directly"
 jeka --program arg0 arg1 ...  # Runs the first native executable or jar found in *jeka-output*, execute a build prior if nothing found.
 ```
 
@@ -156,7 +158,6 @@ jeka maven: publishLocal      # Publish artifacts in the local repository
 jeka maven: publish           # Publish in the defined Maven repository
 ```
 
-
 ## Perform static analysis using SonarQube and JaCoCo
 
 Jacoco and Sonarqube are not included in the Jeka distribution but are available as separate plugins.  
@@ -165,7 +166,7 @@ To use them, we need to add them to the classpath from Maven Central.
 !!! note
     We don't need to specify the plugin versions because Java can automatically select the correct one.
 
-```properties 
+```properties title="jeka.properties"
 jeka.inject.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
 @jacoco=
 
@@ -184,7 +185,8 @@ By configuring the project programmatically, you gain full control: adding logic
 The configuration can depend on any Java library by specifying its coordinates in a `@JkDep` annotation.
 
 !!! info
-Programmatic configuration complements, rather than replaces, property-based configuration.
+    Programmatic configuration complements properties-bases configuration, rather than replaces it. Properties configuration 
+    are still effective until it is overridden by programmatic configuration.
 
 ```java title="jeka-src/Build.java"
 @JkDep("org.apache.pdfbox:pdfbox:3.0.3")
@@ -224,4 +226,15 @@ class Build extends KBean {
 ```
 
 The `init()` method is designed for configuring the `JkProject` instance.
-The `JkProject` class represents everything needed to build a JVM project. It is a large object model that includes both configuration and methods to *build* the project. [See Reference](reference/api-project)
+
+The command `jeka extraAction includePdfDoc=true project: pack maven: publish` does:
+
+- Executes the `extraAction` method.
+- Create jar.
+- Publish *javadoc*, *sources*, *binary* jars along the *doc* zip file containing PDF docs.
+  The *javadoc* and *sources* artifacts are automatically generated before publishing, if not already present.  
+  The *doc* artifact is also created during publication, as it is explicitly registered.
+
+!!! note
+    The `JkProject` class represents everything needed to build a JVM project. It i does:s a large object model that includes both configuration and methods to *build* the project. [See Reference](/reference/api-project/)
+ 
