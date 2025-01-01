@@ -1,4 +1,4 @@
-# Building Projects
+# Build Projects
 
 You can build a new project using the *project* KBean.  
 The *project* KBean organizes your project with a structure similar to *Maven* and *Gradle*,
@@ -78,7 +78,11 @@ org.postgresql:postgresql:42.7.4
 org.junit.jupiter:junit-jupiter:5.8.1
 ```
 
-For a *compile-only* dependency, add it to the `== COMPILE ==` section and remove it from the `== RUNTIME ==` section using the `-` symbol.
+You can also reference a local JAR by specifying its relative path, such as `mylibs/libs.jar`, 
+instead of using Maven coordinates.
+
+!!! info
+    For a *compile-only* dependency, add it to the `== COMPILE ==` section and remove it from the `== RUNTIME ==` section using the `-` symbol.
 
 ## Configure JAR Type
 By default, JeKa produces regular JAR files. 
