@@ -3,7 +3,7 @@ You can find some examples in below to learn more about _Jeka_:
 ### Zero-Configuration Build and Run
 
 - [Java Project](https://github.com/jeka-dev/demo-zero-conf)
-- [Application in jeka-src](https://github.com/jeka-dev/demo-base-application)
+- [Java Projectless Codebase](https://github.com/jeka-dev/demo-base-application)
 
 ### Run from Git
 
