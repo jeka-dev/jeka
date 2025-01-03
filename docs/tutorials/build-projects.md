@@ -3,7 +3,7 @@
 In this tutorial, we'll use the `project` KBean to build a Java application or library. 
 This KBean provides build methods and a project layout similar to those of Maven and Gradle.
 
-**Prerequisite:** Jeka must be [installed](/installation).
+**Prerequisite:** Jeka must be [installed](../installation.md).
 
 !!! tip
     Run `jeka project: --doc` to see all available options.
@@ -240,5 +240,5 @@ The command `jeka extraAction includePdfDoc=true project: pack maven: publish` d
   The *doc* artifact is also created during publication, as it is explicitly registered.
 
 !!! note
-    The `JkProject` class represents everything needed to build a JVM project. It i does:s a large object model that includes both configuration and methods to *build* the project. [See Reference](/reference/api-project/)
+    The `JkProject` class represents everything needed to build a JVM project. It i does:s a large object model that includes both configuration and methods to *build* the project. [See Reference](../reference/api-project.md)
  

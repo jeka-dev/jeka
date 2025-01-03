@@ -1,6 +1,6 @@
 # Getting Started - Basics
 
-**Prerequisite:** You must have [Jeka installed](/installation).
+**Prerequisite:** Jeka must be [installed](../installation.md).
 
 Let's create some simple scripts to understand the basic concepts.
 

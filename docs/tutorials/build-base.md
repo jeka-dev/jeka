@@ -2,9 +2,9 @@
 
 In this tutorial, we'll use the `base` KBean to build a Java application or library. 
 
-This mode provides a layout between a single-file style like _JBang_ and a full _Maven/Gradle_ [project](/tutorials/build-projects).
+This mode provides a layout between a single-file style like _JBang_ and a full _Maven/Gradle_ [project](build-projects.md).
 
-**Prerequisite:** Jeka must be [installed](/installation).
+**Prerequisite:** Jeka must be [installed](../installation.md).
 
 !!! tip
     Run `jeka base: --doc` to see all available options.
@@ -55,7 +55,7 @@ public class App {
 }
 ```
 
-See [details on dependency notations](/reference/api-dependency-management/#string-notation).
+See [details on dependency notations](../reference/api-dependency-management.md#string-notation).
 
 Additionally, you can copy-paste JAR files into the following directory to automatically include them as dependencies:
 ```
@@ -144,14 +144,14 @@ See [here](/tutorials/build-projects/#pre-defined-build-commands) for extra comm
 If you want to write a library, instead of an application, you need to declare 
 both *moduleId* and versioning.
 
-The settings are similar to [project](/tutorials/build-projects/#handle-versioning).  
-Use 'base' instead of 'project', like this:
+The settings are similar for [project building](/tutorials/build-projects/#handle-versioning). Use 'base' instead of 'project', like this:
+
 ```property
 @base.moduleId=org.example:my-lib
 @base.version=1.0.0-SNAPSHOT
 ```
 
-You can now publish your library by executing:
+Now, you can publish your library by executing:
 ```shell
 jeka maven: publish
 ```
