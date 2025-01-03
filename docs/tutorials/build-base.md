@@ -4,6 +4,8 @@ In this tutorial, we'll use the `base` KBean to build a Java application or libr
 
 This mode provides a layout between a single-file style like _JBang_ and a full _Maven/Gradle_ [project](build-projects.md).
 
+Visit [this repository](https://github.com/jeka-dev/demo-base-application) to have a concrete example.
+
 **Prerequisite:** Jeka must be [installed](../installation.md).
 
 !!! tip

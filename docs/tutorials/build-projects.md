@@ -3,6 +3,8 @@
 In this tutorial, we'll use the `project` KBean to build a Java application or library. 
 This KBean provides build methods and a project layout similar to those of Maven and Gradle.
 
+If you prefer a lighter structure, you can go to [Build Base](build-base.md).
+
 **Prerequisite:** Jeka must be [installed](../installation.md).
 
 !!! tip
