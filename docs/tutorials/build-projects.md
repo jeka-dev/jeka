@@ -1,8 +1,9 @@
 # Build Projects
 
-You can build a new project using the *project* KBean.  
-The *project* KBean organizes your project with a structure similar to *Maven* and *Gradle*,
-including separate classpaths for compile, runtime, test, and build.
+In this tutorial, we'll use the `project` KBean to build a Java application or library. 
+This KBean provides build methods and a project layout similar to those of Maven and Gradle.
+
+**Prerequisite:** You must have [Jeka installed](/installation).
 
 !!! tip
     Run `jeka project: --doc` to see all available options.

@@ -1,5 +1,7 @@
 # Getting Started - Basics
 
+**Prerequisite:** You must have [Jeka installed](/installation).
+
 Let's create some simple scripts to understand the basic concepts.
 
 ## Create a basic script
