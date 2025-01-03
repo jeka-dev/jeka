@@ -156,6 +156,7 @@ public abstract class JkScaffold {
         createOrUpdateGitIgnore();  // Create .gitignore
         createShellScripts();   // Shell scripts
         fileEntries.forEach(extraEntry -> extraEntry.write(baseDir));
+        JkLog.info("Scaffold structure created.");
         JkLog.endTask();;
     }
 

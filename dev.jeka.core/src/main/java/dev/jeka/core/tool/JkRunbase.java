@@ -237,7 +237,8 @@ public final class JkRunbase {
      */
     public JkBuildable getBuildable() {
         return Optional.ofNullable(findBuildable()).orElseThrow(
-                () -> new JkException("Cannot find project or base KBean in this runbase " + this.getBaseDir())
+                () -> new JkException("Cannot find project or base KBean in this runbase " + this.getBaseDir()
+                        + ". May you need to declare '@base=' in jeka.property file.")
         );
     }
 

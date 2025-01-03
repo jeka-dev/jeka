@@ -55,6 +55,7 @@ nav:
     - Installation: installation.md
     - Tutorials:
         - Basics: tutorials/basics.md
+        - Build Base: tutorials/build-base.md
         - Build Projects: tutorials/build-projects.md
     - Reference:
         - KBeans: reference/kbeans.md
@@ -64,6 +65,7 @@ nav:
             - Native: reference/api-native.md
             - Docker: reference/api-docker.md
             - Git: reference/api-git.md
+            - Dependency Management: reference/api-dependency-management.md
     - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md
