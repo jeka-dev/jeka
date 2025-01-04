@@ -156,6 +156,9 @@ public final class JkRunbase {
         return importedBaseDirs;
     }
 
+
+
+
     /**
      * Instantiates the specified KBean into the current runbase, if it is not already present. <p>
      * Since KBeans are singletons within a runbase, calling this method has no effect if the bean is already loaded.
@@ -163,23 +166,9 @@ public final class JkRunbase {
      * @param beanClass The class of the KBean to load.
      *
      * @return This object for call chaining.
-     *
-     * @see JkRunbase#load(Class)
      */
     public <T extends KBean> T load(Class<T> beanClass) {
-        JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
-        T result = (T) beans.get(beanClass);
-        if (result == null) {
-            String relBaseDir = relBaseDir().toString();
-            String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
-            JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
-            Path previousBaseDir = BASE_DIR_CONTEXT.get();
-            BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
-            result = this.instantiateKBean(beanClass);
-            BASE_DIR_CONTEXT.set(previousBaseDir);
-            JkLog.debugEndTask();
-        }
-        return result;
+        return load(beanClass, false);
     }
 
     /**
@@ -268,7 +257,7 @@ public final class JkRunbase {
         return effectiveActions;
     }
 
-    void init(KBeanAction.Container cmdLineActionContainer) {
+    void init(KBeanAction.Container cmdLineActionContainer, boolean forceMode) {
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize JkRunbase with \n" + cmdLineActionContainer.toColumnText());
         }
@@ -287,7 +276,7 @@ public final class JkRunbase {
         // KBeans init from props
         kbeansToInit.addAll(this.kbeanInitDeclaredInProps);
 
-        kbeansToInit.stream().distinct().forEach(this::load);  // register kbeans
+        kbeansToInit.stream().distinct().forEach(beanClass -> load(beanClass, forceMode));  // register kbeans
 
         JkLog.debugEndTask();
 
@@ -373,7 +362,23 @@ public final class JkRunbase {
         return String.format("JkRunbase{ baseDir=%s, beans=%s }", relBaseDir(), beans.keySet());
     }
 
-    private <T extends KBean> T instantiateKBean(Class<T> beanClass) {
+    private <T extends KBean> T load(Class<T> beanClass, boolean forceMode) {
+        JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
+        T result = (T) beans.get(beanClass);
+        if (result == null) {
+            String relBaseDir = relBaseDir().toString();
+            String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
+            JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
+            Path previousBaseDir = BASE_DIR_CONTEXT.get();
+            BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
+            result = this.instantiateKBean(beanClass, forceMode);
+            BASE_DIR_CONTEXT.set(previousBaseDir);
+            JkLog.debugEndTask();
+        }
+        return result;
+    }
+
+    private <T extends KBean> T instantiateKBean(Class<T> beanClass, boolean forceMode) {
 
         this.effectiveActions.add(KBeanAction.ofInit(beanClass));
 
@@ -388,7 +393,14 @@ public final class JkRunbase {
         this.effectiveActions.addAll(injectDefaultsFromProps(bean));
         this.effectiveActions.addAll(injectValuesFromCmdLine(bean));
 
-        bean.init();
+        try {
+            bean.init();
+        } catch (RuntimeException e) {
+            if (!forceMode) {
+                throw e;
+            }
+            JkLog.warn("Can't instantiate bean %s due to %s.", beanClass.getName(), e.getMessage());
+        }
         return bean;
     }
 
