@@ -28,7 +28,9 @@ import java.util.Arrays;
 @JkDoc("Generates project skeletons (folder structure and basic build files).")
 public class JkScaffoldOptions {
 
-    @JkDoc("Set a specific jeka.version to include in jeka.properties.")
+    @JkDoc("Set a specific jeka.version to include in jeka.properties. " +
+            "UNDEFINE: no jeka.version specified, " +
+            "LATEST: last version found in Maven Central.")
     private String jekaVersion;
 
     @JkDoc("Set a specific jeka.distrib.location to include in jeka.properties.")

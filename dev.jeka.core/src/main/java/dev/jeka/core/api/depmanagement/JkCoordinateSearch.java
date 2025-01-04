@@ -85,11 +85,23 @@ public class JkCoordinateSearch {
         return this;
     }
 
+    /**
+     * Sets the timeout for the search operation.
+     *
+     * @param timeout the timeout duration in milliseconds
+     */
     public JkCoordinateSearch setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
 
+    /**
+     * Sets the group or name criteria for the search.
+     *
+     * @param groupOrNameCriteria the group or name pattern to be used as a search criterion.
+     *                            Example: 'org.springframework.boot:spring-boot-dependencies::'
+     * @return the current instance of {@code JkCoordinateSearch} for method chaining
+     */
     public JkCoordinateSearch setGroupOrNameCriteria(String groupOrNameCriteria) {
         this.groupOrNameCriteria = groupOrNameCriteria;
         return this;

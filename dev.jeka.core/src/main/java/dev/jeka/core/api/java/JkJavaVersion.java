@@ -60,6 +60,11 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
      */
     public static final JkJavaVersion V21 = JkJavaVersion.of("21");
 
+    /**
+     * Last LTS version at the time of releasing this JeKa version.
+     */
+    public static final JkJavaVersion LAST_LTS = V21;
+
     private final int value;
 
     private JkJavaVersion(int value) {

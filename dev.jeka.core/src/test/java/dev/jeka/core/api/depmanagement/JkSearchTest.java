@@ -1,10 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 public class JkSearchTest {
@@ -83,6 +85,22 @@ public class JkSearchTest {
                 .setGroupOrNameCriteria("org.springframework.boot:spring-boot-dependencies::")
                 .search();
         result.forEach(System.out::println);
+    }
+
+    @Test
+    @Ignore
+    public void testSJekaVersions()  {
+        JkLog.setDecorator(JkLog.Style.INDENT);
+        List<String> result = JkCoordinateSearch.of(JkRepo.ofMavenCentral())
+                .setTimeout(10000)
+                .setGroupOrNameCriteria("dev.jeka:jeka-core:")
+                .search();
+        JkVersion max = result.stream()
+                .map(s -> JkUtilsString.substringAfterLast(s, ":"))
+                .map(JkVersion::of)
+                .filter(JkVersion::isDigitsOnly)
+                .max(Comparator.naturalOrder()).orElse(null);
+        System.out.println(max);
     }
 
 

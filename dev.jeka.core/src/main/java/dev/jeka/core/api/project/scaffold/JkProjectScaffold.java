@@ -126,6 +126,7 @@ public final class JkProjectScaffold extends JkScaffold {
 
     @Override
     public void run() {
+        JkLog.startTask("scaffold-project");
         configureScaffold();
         customizers.accept(this);
         super.run();
@@ -135,6 +136,7 @@ public final class JkProjectScaffold extends JkScaffold {
             generateLibsFolders();
         }
         generateReadme();
+        JkLog.endTask("Project generated.");
     }
 
     /**
@@ -181,7 +183,6 @@ public final class JkProjectScaffold extends JkScaffold {
      * Generate the jeka-agnostic project skeleton (src dirs)
      */
     private void generateProjectStructure() {
-        JkLog.info("Create source directories");
         JkCompileLayout prodLayout = project.compilation.layout;
         prodLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
         prodLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);

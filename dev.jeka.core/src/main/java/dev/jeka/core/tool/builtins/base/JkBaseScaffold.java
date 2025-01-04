@@ -19,6 +19,7 @@ package dev.jeka.core.tool.builtins.base;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.scaffold.JkScaffold;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
@@ -58,7 +59,6 @@ public final class JkBaseScaffold extends JkScaffold {
     private JkBaseScaffold(Path baseDir, BaseKBean.BaseScaffoldOptions scaffoldOptions) {
         super(baseDir);
         this.baseScaffoldOption = scaffoldOptions;
-        this.addJekaPropValue("@base=");
         scaffoldOptions.applyTo(this);
     }
 
@@ -95,10 +95,12 @@ public final class JkBaseScaffold extends JkScaffold {
 
     @Override
     public void run() {
+        JkLog.startTask("scaffold-base");
         configureScaffold();
         customizers.accept(this);
         super.run();
         generateReadme();
+        JkLog.endTask("Base generated.");
     }
 
     /**
@@ -131,17 +133,21 @@ public final class JkBaseScaffold extends JkScaffold {
     }
 
     private void configureScaffold() {
+        this.addJekaPropValue("@base=");
+
         if (baseScaffoldOption.kind == Kind.APP) {
             addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", junitDeps(), devDeps));
             addFileEntry(TEST_CLASS_PATH, code("MyTest.snippet"));
             addFileEntry(APP_CLASS_PATH, code("App.snippet", deps));
+
         } else if (baseScaffoldOption.kind == Kind.JEKA_SCRIPT) {
             addFileEntry(SCRIPT_CLASS_PATH, code("Script.snippet", deps, devDeps));
+
         } else if (baseScaffoldOption.kind == Kind.PLUGIN) {
             addFileEntry(JkConstants.JEKA_SRC_DIR + "/org/example/MyPlugin.java", code("PluginKBean.snippet"));
             addFileEntry(BUILD_CLASS_PATH, code("BuildPlugin.snippet", junitDeps()));
-            addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/samples/Sample1.java",
-                    code("SamplePlugin.snippet"));
+            addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/samples/Sample1.java", code("SamplePlugin.snippet"));
+
         } else {
             throw new IllegalStateException("Not implemented");
         }

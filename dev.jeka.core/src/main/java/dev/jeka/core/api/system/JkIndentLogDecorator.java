@@ -88,13 +88,13 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             }
         }
         if (logType == JkLog.Type.END_TASK) {
-            if (JkLog.isShowTaskDuration()) {
-                JkUtilsIO.write(stream, MARGIN_UNIT);
-                stream.printf(DURATION +  "%s%n", JkUtilsTime.formatMillis(event.getDurationMs()));
-            }
             if (!JkUtilsString.isBlank(message)) {
                 JkUtilsIO.write(stream, MARGIN_UNIT);
                 stream.println(message);
+            }
+            if (JkLog.isShowTaskDuration()) {
+                JkUtilsIO.write(stream, MARGIN_UNIT);
+                stream.printf(DURATION +  "%s%n", JkUtilsTime.formatMillis(event.getDurationMs()));
             }
         } else if (logType== JkLog.Type.START_TASK) {
             marginErr.flush();

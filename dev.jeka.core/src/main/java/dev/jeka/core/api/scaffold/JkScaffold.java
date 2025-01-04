@@ -16,18 +16,14 @@
 
 package dev.jeka.core.api.scaffold;
 
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 
 import java.nio.charset.StandardCharsets;
@@ -88,7 +84,7 @@ public abstract class JkScaffold {
      * Adds a property to scaffolded jeka.properties by specifying a string with format "prop.name=prop.value".
      */
     public JkScaffold addJekaPropValue(String propValue) {
-        return  addJekaPropsContent("\n" + propValue.trim());
+        return addJekaPropsContent(propValue.trim() + "\n");
     }
 
     public JkScaffold setJekaVersion(String jekaVersion) {
@@ -144,9 +140,6 @@ public abstract class JkScaffold {
      * Runs the scaffolding, meaning folder structure, build class, props file and .gitignore
      */
     protected void run() {
-
-        JkLog.startTask("scaffold");
-
         // Create 'jeka-src' dir
         final Path jekaSrc = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         JkLog.verbose("Create %s", jekaSrc);
@@ -156,8 +149,6 @@ public abstract class JkScaffold {
         createOrUpdateGitIgnore();  // Create .gitignore
         createShellScripts();   // Shell scripts
         fileEntries.forEach(extraEntry -> extraEntry.write(baseDir));
-        JkLog.info("Scaffold structure created.");
-        JkLog.endTask();;
     }
 
     /**
@@ -248,16 +239,25 @@ public abstract class JkScaffold {
             fileContent = JkPathFile.of(rawJekaPropsPath).readAsString();
         } else {
             StringBuilder sb = new StringBuilder();
+            String propJekaVersion = this.jekaVersion;
+            if (JkUtilsString.isBlank(propJekaVersion)) {
+                propJekaVersion = this.getLastJekaVersionSafely();
+            }
+            if (!"UNSPECIFIED".equals(propJekaVersion) && !JkUtilsString.isBlank(propJekaVersion)) {
+                sb.append("jeka.version=").append(propJekaVersion).append("\n");
+            }
             if (!JkUtilsString.isBlank(jekaDistribLocation)) {
-                sb.append("jeka.distrib.location=" + jekaDistribLocation + "\n");
+                sb.append("jeka.distrib.location=").append(jekaDistribLocation).append("\n");
             }
 
             if (!JkUtilsString.isBlank(this.jekaDistribRepo)) {
-                sb.append("jeka.distrib.repo=" + jekaDistribRepo + "\n");
+                sb.append("jeka.distrib.repo=").append(jekaDistribRepo).append("\n");
             }
+            sb.append("jeka.java.version=").append(JkJavaVersion.LAST_LTS).append("\n");
+
             if (!JkUtilsString.isBlank(this.jekaPropsContent)) {
                 String content = jekaPropsContent.replace("\\n", "\n");
-                sb.append(content + "\n");
+                sb.append(content).append("\n");
             }
             String partialContent = sb.toString();
             fileContent = jekaPropCustomizer.apply(partialContent);
@@ -337,6 +337,44 @@ public abstract class JkScaffold {
         String newContent = originalContent.replace(wholeToken, latest.get().toString());
 
         return interpolateLastVersionOf(newContent, 0, repos);
+    }
+
+    private String getLastJekaVersionSafely() {
+        JkVersion version = getLastJekaVersionSafely(this.downloadRepos);
+        return version != null ? version.toString() : null;
+    }
+
+    private static JkVersion getLastJekaVersionSafely(JkRepoSet repoSet) {
+        JkVersion result = null;
+        for (JkRepo repo : repoSet.getRepos()) {
+            List<String> artifacts = Collections.emptyList();
+            try {
+                JkLog.info("Searching last Jeka version in repo %s ... ", repo.getUrl());
+                artifacts =JkCoordinateSearch.of(JkRepo.ofMavenCentral())
+                        .setTimeout(10000)
+                        .setGroupOrNameCriteria("dev.jeka:jeka-core:")
+                        .search();
+            } catch (RuntimeException e) {
+                JkLog.warn("Failed to get Jeka versions from repo %s : %s", repo, e.getMessage());
+                if (JkLog.isDebug()) {
+                    JkUtilsThrowable.printStackTrace(JkLog.getErrPrintStream(), e, 100);
+                }
+            }
+            Optional<JkVersion> candidate = artifacts.stream()
+                    .map(s -> JkUtilsString.substringAfterLast(s, ":"))
+                    .map(JkVersion::of)
+                    .filter(JkVersion::isDigitsOnly)
+                    .max(Comparator.naturalOrder());
+            if (candidate.isPresent()) {
+                if (result == null) {
+                    result = candidate.get();
+                } else if (result.compareTo(candidate.get()) < 0) {
+                    result = candidate.get();
+                }
+            }
+
+        }
+        return result;
     }
 
 
