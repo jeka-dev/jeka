@@ -29,9 +29,9 @@ or external DSL-based solutions for building their applications.
 
 ## Use Cases
 - **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
-- **Use Java for scripting:** Write scripts, DevOps pipelines or applications in Java, runnable directly from source code.
+- **Use Java for scripting:** Write scripts, devOps pipelines or applications in Java, runnable directly from source code.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
-- **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating tools.
+- **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating heavy tools.
 
 ## Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
