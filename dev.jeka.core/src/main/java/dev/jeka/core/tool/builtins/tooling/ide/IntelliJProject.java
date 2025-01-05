@@ -70,7 +70,10 @@ class IntelliJProject {
      * Finds all .iml files in the specified root directory and its subdirectories.
      */
     public List<Path> findImlFiles() {
-        return JkPathTree.of(rootDir).andMatching(true, "**.iml").andMatching(false, ".jeka-work/**/*").getFiles();
+        return JkPathTree.of(rootDir).andMatching(true, "**.iml")
+                .andMatching(false, ".jeka-work/**/*")
+                .andMatching(false, ".idea/output/**/*")
+                .getFiles();
     }
 
     /**
@@ -80,6 +83,7 @@ class IntelliJProject {
      */
     public IntelliJProject generateModulesXml(Iterable<Path> imlPaths) {
         try {
+            JkLog.startTask("generate-modules.xml");
             List<Path> imlFiles =JkUtilsPath.disambiguate(imlPaths);
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(baos, ENCODING);
@@ -114,9 +118,12 @@ class IntelliJProject {
             JkUtilsPath.deleteIfExists(outputFile);
             JkUtilsPath.createDirectories(outputFile.getParent());
             Files.write(outputFile, baos.toByteArray());
+            JkLog.info("File generated at : " + outputFile);
             return this;
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
+        } finally {
+            JkLog.endTask();
         }
     }
 

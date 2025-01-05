@@ -91,8 +91,10 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
     public void iml() {
+        JkLog.startTask("generate-iml");
         Path imlPath = getImlFile();
         generateIml(imlPath);
+        JkLog.endTask();
     }
 
     /**
@@ -103,7 +105,6 @@ public final class IntellijKBean extends KBean {
     public void modulesXml() {
         IntelliJProject intelliJProject = IntelliJProject.of(getBaseDir());
         intelliJProject.regenerateModulesXml();
-        JkLog.info("File generated at : " + intelliJProject.getModulesXmlPath());
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
@@ -152,12 +153,11 @@ public final class IntellijKBean extends KBean {
 
     }
 
-    @JkDoc("Re-init the project by deleting workspace.xml and touching iml file")
+    @JkDoc("Re-init the project by deleting workspace.xml and regenerating .idea/modules.xml")
     public void initProject() {
         iml();
         IntelliJProject.of(getBaseDir()).deleteWorkspaceXml();
         modulesXml();
-        iml();
     }
 
     /**
