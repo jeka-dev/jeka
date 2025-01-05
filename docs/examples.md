@@ -21,9 +21,10 @@ You can find some examples in below to learn more about _Jeka_:
 
 - [SpringBoot - ReactJs - built in 3 config lines](https://github.com/jeka-dev/demo-build-templates-consumer)
 
-### Combine with Legacy Build Tools
+### Combine with Maven
 
-- [JeKa wrapping Quarkus native app Maven built](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+- [Jeka wrapping a Quarkus native app Maven build](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+- [Jeka wrapping a Spring-Boot native Maven build](https://github.com/jeka-dev/demo-maven-springboot-native)
 
 ### Native and Docker Images
 
@@ -33,7 +34,6 @@ You can find some examples in below to learn more about _Jeka_:
 ### Kotlin and ReactJS
 - [Kotlin SpringBoot ReactJS App](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
 
-<br/>
 
 ### Others
 
