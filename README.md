@@ -17,7 +17,7 @@ It targets a generation of Java developers who prefer simple, Java-centric tools
 or external DSL-based solutions for building their applications.
 
 _____
-⭐ Support the Project ⭐
+**⭐ Support the Project ⭐**
 
    If you find this project useful, please consider giving it a ⭐ on GitHub! Your support helps the project grow and reach more developers. 😊
 _____
