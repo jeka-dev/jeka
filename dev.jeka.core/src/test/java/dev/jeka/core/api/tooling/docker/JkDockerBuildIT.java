@@ -98,7 +98,7 @@ public class JkDockerBuildIT {
         JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         simpleNonRootWithBaseImage("alpine:latest");
-        simpleNonRootWithBaseImage(JkDockerJvmBuild.BASE_IMAGE);
+        simpleNonRootWithBaseImage(JkDockerJvmBuild.DEFAULT_BASE_IMAGE);
         simpleNonRootWithBaseImage("ubuntu");
 
 

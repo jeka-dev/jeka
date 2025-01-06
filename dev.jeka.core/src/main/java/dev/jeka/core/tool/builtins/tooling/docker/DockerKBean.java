@@ -48,11 +48,11 @@ public final class DockerKBean extends KBean {
     public String nativeImageName;
 
     @JkDoc("Base image to construct the Docker image.")
-    public String jvmBaseImage = JkDockerJvmBuild.BASE_IMAGE;
+    public String jvmBaseImage = JkDockerJvmBuild.DEFAULT_BASE_IMAGE;
 
     @JkDoc("Base image for the native Docker image to build. " +
             "It can be replaced by a distro-less image as 'gcr.io/distroless/static-debian12:nonroot'")
-    public String nativeBaseImage = "ubuntu:latest";
+    public String nativeBaseImage = JkDockerNativeBuild.DEFAULT_BASE_IMAGE;
 
     @JkDoc("Specifies the policy for creating a non-root user in the native Docker image.")
     public JkDockerBuild.NonRootUserCreationMode nativeNonRootUser = JkDockerBuild.NonRootUserCreationMode.AUTO;

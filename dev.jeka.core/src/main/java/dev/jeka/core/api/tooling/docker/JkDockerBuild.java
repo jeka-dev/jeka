@@ -166,14 +166,13 @@ public class JkDockerBuild {
 
     public enum AddUserStatement {
 
-        TEMURIN("RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
-                "    adduser --uid ${UID} --gid ${GID} --disabled-password --gecos \"\" nonroot"),
+        // Present in Alpine and small distro
+        ADD_USER("RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
+                "    adduser --uid ${UID} -g ${GID} --disabled-password nonroot"),
 
-        UBUNTU("RUN groupadd --gid ${GID} nonrootgroup && \\\n" +
-                "    useradd --uid ${UID} --gid ${GID} --create-home nonroot && passwd -d nonroot"),
-
-        ALPINE("RUN addgroup --gid ${GID} nonrootgroup && \\\n" +
-                "    adduser --uid ${UID} -g ${GID} --disabled-password nonroot");
+        // Present in most of Linux Distibution (except Alpine and small ones)
+        USER_ADD("RUN groupadd --gid ${GID} nonrootgroup && \\\n" +
+                "    useradd --uid ${UID} --gid ${GID} --create-home nonroot");
 
         public final String statement;
 
@@ -234,7 +233,8 @@ public class JkDockerBuild {
         } else if (nonRootUserCreationMode == NonRootUserCreationMode.ALWAYS) {
             return true;
         }
-        return !this.baseImage.contains("nonroot");
+        return !(this.baseImage.contains("nonroot")
+                || this.baseImage.contains("paketobuildpacks"));
     }
 
     /**
@@ -470,22 +470,26 @@ public class JkDockerBuild {
         return template;
     }
 
-    private static String toString(List<String> statements) {
-        return statements.stream().reduce("", (init, step) -> init + step + "\n" );
-    }
-
     private String inferAddUserTemplate() {
         if (!JkUtilsString.isBlank(addUserStatement)) {
             return addUserStatement;
         }
-        if (baseImage.contains("alpine")) {    // should be tested first as 'alpine' may also appear in temurin based image.
-            return AddUserStatement.ALPINE.statement;
-        } else if (baseImage.contains("ubuntu")) {
-            return AddUserStatement.UBUNTU.statement;
-        } else if (baseImage.contains("temurin")) {
-            return AddUserStatement.TEMURIN.statement;
+        return containUserAdd(baseImage) ? AddUserStatement.USER_ADD.statement : AddUserStatement.ADD_USER.statement;
+    }
+
+    private static boolean containUserAdd(String imageName) {
+        if (imageName.contains("alpine")) {
+            return false;
         }
-        return AddUserStatement.UBUNTU.statement;
+        if (imageName.contains("docker.io/paketobuildpacks/run-jammy-tiny")) {
+            return false;
+        }
+        /*
+        if (imageName.contains("temurin") && imageName.contains("-minimal")) {
+            return false;
+        }
+         */
+        return true;
     }
 
     private String mkdirStatement(String dirPath) {

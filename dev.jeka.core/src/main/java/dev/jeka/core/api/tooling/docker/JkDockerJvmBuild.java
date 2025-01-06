@@ -41,7 +41,20 @@ import java.util.stream.Collectors;
  */
 public class JkDockerJvmBuild extends JkDockerBuild {
 
-    public static final String BASE_IMAGE = "eclipse-temurin:23-jdk-alpine";
+    public enum PopularBaseImage {
+
+        TEMURIN_JRE_MINIMAL_IMAGE ("eclipse-temurin:23-jre-ubi9-minimal"),
+
+        TEMURIN_JRE_ALPINE_IMAGE("eclipse-temurin:23-jre-alpine");
+
+        public final String imageName;
+
+        PopularBaseImage(String imageName) {
+            this.imageName = imageName;
+        }
+    }
+
+    public static final String DEFAULT_BASE_IMAGE = PopularBaseImage.TEMURIN_JRE_ALPINE_IMAGE.imageName;
 
     private static final Predicate<Path> CHANGING_LIB = path -> path.toString().endsWith("-SNAPSHOT.jar");
 
@@ -61,7 +74,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     private JkDockerJvmBuild() {
 
         // Create template
-        this.setBaseImage(BASE_IMAGE);
+        this.setBaseImage(DEFAULT_BASE_IMAGE);
         dockerfileTemplate
                 .moveCursorBeforeUserNonRoot()
                 .addNonRootMkDirs("/app", "/workdir")
@@ -324,43 +337,6 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         sanitizedLibs.forEach(path -> classpathValue.append(":/app/libs/" + path.getFileName()));
         return classpathValue.toString();
     }
-
-    private Map<Object, Path> copyAgents(Path contextDir) {
-        Map<Object, Path> result = new HashMap<>();
-        Path agentDir = contextDir.resolve("agents");
-        if (!agents.isEmpty()) {
-            JkUtilsPath.createDirectories(agentDir);
-        }
-        for (Object file : agents.keySet()) {
-            final Path agentJar;
-            if (file instanceof Path) {
-                agentJar = (Path) file;
-            } else {
-                JkCoordinate coordinate = JkCoordinate.of(file.toString());
-                JkCoordinateFileProxy fileProxy = JkCoordinateFileProxy.of(repos, coordinate);
-                agentJar = fileProxy.get();
-            }
-            Path dest = agentDir.resolve(agentJar.getFileName());
-            result.put(file, dest);
-            JkUtilsPath.copy(agentJar, dest, StandardCopyOption.REPLACE_EXISTING);
-        }
-        return result;
-    }
-
-
-
-    private String createAgentCopyInstruction(Map<Object, Path> buildDirMap) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<PathOrCoordinate, String> entry : this.computeAgentFileContainerPaths().entrySet()) {
-            Path buildDirFile = buildDirMap.get(entry.getKey());
-            String from =  "agents/" + buildDirFile.getFileName();
-            String to = "/app/agents/" + buildDirFile.getFileName();
-            sb.append("COPY " + from + " " + to + "\n");
-        }
-        return sb.toString();
-    }
-
-
 
     private class PathOrCoordinate {
 

@@ -41,9 +41,15 @@ public class JkDockerNativeBuild extends JkDockerBuild {
 
     public enum PopularBaseImage {
 
-        UBUNTU("ubuntu:latest"),
+        UBUNTU("ubuntu"),
 
-        DISTRO_LESS("gcr.io/distroless/static-debian12:nonroot");
+        PAKETO_JAMMY_TINY("docker.io/paketobuildpacks/run-jammy-tiny"),
+
+        // Need MUSL
+        DISTRO_LESS("gcr.io/distroless/static-debian12:nonroot"),
+
+        // NEED MUSL
+        ALPINE("alpine");
 
         public final String imageName;
 
@@ -52,13 +58,14 @@ public class JkDockerNativeBuild extends JkDockerBuild {
         }
     }
 
-    private final JkNativeCompilation nativeCompilation;
+    public static final String DEFAULT_BASE_IMAGE = PopularBaseImage.PAKETO_JAMMY_TINY.imageName;
 
+    private final JkNativeCompilation nativeCompilation;
 
 
     private JkDockerNativeBuild(JkNativeCompilation nativeCompilation) {
         this.nativeCompilation = nativeCompilation;
-        this.setBaseImage(PopularBaseImage.UBUNTU.imageName);
+        this.setBaseImage(DEFAULT_BASE_IMAGE);
 
         // Create build image
         dockerfileTemplate.moveCursorBefore("FROM ");
