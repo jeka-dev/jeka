@@ -6,7 +6,10 @@ Let's create some simple scripts to understand the basic concepts.
 
 ## Create a basic script
 
-Execute `jeka base: scaffold` to create a basic Jeka structure.
+To create a basic Jeka structure, execute:
+```
+jeka base: scaffold
+```
 
 This generates a *jeka-src/Script.java* file, which is an example of Java code invokable from command line.
 
@@ -63,7 +66,7 @@ We can select which JDK will run the script bu using [properties](reference/prop
 
 Edit *jeka.properties*:
 ```properties
-jeka.java.version=22
+jeka.java.version=23
 ```
 Executing `jeka hello` will trigger a download of JDK 22 (if not already present), prior executing 
 the script. JeKa caches the downloaded JDKs in *[USER HOME]/.jeka/cache/jdks*.
@@ -71,7 +74,7 @@ the script. JeKa caches the downloaded JDKs in *[USER HOME]/.jeka/cache/jdks*.
 This is possible to choose another distribution by using the following properties :
 ```properties
 jeka.java.version=21
-jeka.java.distrib=graalvm
+jeka.java.distrib=corretto
 ```
 If you don't want JeKa manage distribution for you, you can choose explicitly the SDK location:
 ```properties
@@ -89,7 +92,7 @@ Your script may depends of some unstable JeKa APIs. To make sure your script wil
 whatever JeKa version is installed at client/user side, mention the following properties in 
 *jeka.properties*, as :
 ```properties
-jeka.version=0.11.0
+jeka.version=0.11.12
 ```
 
 ## Add dependencies

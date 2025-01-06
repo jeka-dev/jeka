@@ -41,9 +41,15 @@ Installation via script may include a sanity check that triggers a JDK download 
 
 Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
 the application to run.
-However, you'll be able to upgrade your base install by executing `jeka-update` command.
+However, you'll be able to upgrade your base install by executing:
+```
+jeka-update
+```
 
-Open a new terminal session and execute `jeka --help` to access JeKa help.
+Open a new terminal session and execute the following command to access JeKa help:
+```
+jeka --help
+```
 
 ## Docker Image - Zero Install
 

@@ -626,7 +626,7 @@ public class JkDependencySet {
      * Returns the java codes that declare these dependencies.
      */
     public static String toJavaCode(int indentCount, List<JkDependency> dependencies, boolean and) {
-        String method = and ? "and" : "minus";
+        String method = and ? "add" : "minus";
         final String indent = JkUtilsString.repeat(" ", indentCount);
         final StringBuilder builder = new StringBuilder();
         for (final JkDependency dependency : dependencies) {

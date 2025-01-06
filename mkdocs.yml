@@ -53,6 +53,7 @@ markdown_extensions:
 
 nav:
     - Installation: installation.md
+    - Quick Start: quick-start.md
     - Tutorials:
         - Basics: tutorials/basics.md
         - Build Base: tutorials/build-base.md

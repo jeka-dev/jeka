@@ -85,17 +85,17 @@ public class JkMavenProject {
         //Path pomPath = getBaseDir().resolve("pom.xml");
         //JkUtilsAssert.state(Files.exists(pomPath), "No pom file found at " + pomPath);
         JkPom pom = JkPom.of(effectivePom);
-        sb.append("Compile\n");
+        sb.append("Compile:\n");
         sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(null,
                 COMPILE_SCOPE, PROVIDED_SCOPE), true));
 
-        sb.append("Runtime\n");
+        sb.append("Runtime:\n");
         sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
                 RUNTIME_SCOPE), true));
         sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
                 PROVIDED_SCOPE), false));
 
-        sb.append("Test\n");
+        sb.append("Test:\n");
         sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
                 TEST_SCOPE), true));
         return sb.toString();
