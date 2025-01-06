@@ -94,6 +94,7 @@ Note that:
   - You can have multiple script methods in `Script.java`: they must only be public, non-static, return void, have zero arguments.
   - `Script.java` can be renamed in with any name and be located in any package you like.
   - There can have multiple script classes. When invoking, we may specify the class name as `jeka script2: hi'.
+  - You can also [use classes bundled with JeKa](reference/api-intro.md) without explicit declaration.
 
 #### KBeans
 

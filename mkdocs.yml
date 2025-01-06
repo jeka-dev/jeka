@@ -62,11 +62,13 @@ nav:
         - KBeans: reference/kbeans.md
         - Properties: reference/properties.md
         - Build Library:
-            - Project: reference/api-project.md
+            - Intro : reference/api-intro.md
+            - Files : reference/api-files.md
             - Native: reference/api-native.md
             - Docker: reference/api-docker.md
             - Git: reference/api-git.md
             - Dependency Management: reference/api-dependency-management.md
+            - Project: reference/api-project.md
     - Cheat Sheet: cheat-sheet.md
     - FAQ: faq.md
     - Examples: examples.md

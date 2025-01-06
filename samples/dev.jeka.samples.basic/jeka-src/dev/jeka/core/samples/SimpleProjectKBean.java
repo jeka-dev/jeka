@@ -92,7 +92,7 @@ public class SimpleProjectKBean extends KBean {
 
     public void printMvn() {
         MavenKBean pluginPom = getRunbase().load(MavenKBean.class);
-        pluginPom.showPomDeps();
+        pluginPom.migrateDeps();
     }
 
     public void showDependencies() {
