@@ -13,8 +13,16 @@ This quick-start guide covers muliple use cases:
 - [Create scripts in Java](#create-scripts) and execute from command line.
 - [Create a Base Application or Library](#create-a-base-app-or-library).
 - [Create a Java Project](#create-a-java-project)
+- [Create a workable Spring-Boot Project](#create-a-spring-boot-project) in seconds
 
   
+!!! notes
+
+    If you are coding in IntelliJ IDEA, after scaffolding or modifying dependencies, execute the following command to synchronize:
+    ```
+    jeka intellij: iml
+    ```
+
 ## Create Scripts
 
 Create a directory to host the codebase. Navigate into it and execute:
@@ -170,9 +178,9 @@ In this mode, you can create a fully-fledged project similar to *Maven* or *Grad
 
 To create a new project structure, execute:
 ```
-jeka projec: scaffold
+jeka project: scaffold
 ```
-This generates a structure as:
+This generates a project structure as:
 ```
 .
 ├── src                  
@@ -193,4 +201,95 @@ This generates a structure as:
 ```
 
 Follow the [tutorial](tutorials/build-projects.md) for more details.
+
+## Create a Spring-Boot Project
+
+To create a new project Spring-Boot, execute:
+```
+jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
+```
+
+This generates the following project structure:
+```
+.
+├── src                  
+│   ├── main             
+│   │   ├── java
+│   │   │   └── app
+│   │   │       ├── Application.java.     <- Spring-Boot app class
+│   │   │       └── Controller.java.      <- REST controller
+│   │   └── resources    
+│   └── test             
+│       ├── java
+│       │   └── app
+│       │       └── ControllerIt.java     <- Integration Test for REST controller 
+│       └── resources 
+├── jeka-src             
+│   └── Build.java       <- Empty build class -in case of.
+├── jeka-output         
+├── dependencies.txt     <- Springboot and extra dependencies
+├── jeka.properties      <- Build configuration 
+├── jeka.ps              
+├── jeka                 
+└── README.md            <- Describes available build commands for building the project
+```
+This contains a minimal workable project with production and test code. 
+
+#### Modify Layout
+You can choose a simpler code layout structure by setting the following properties:
+```properties title="jeka.properties"
+@project.layout.style=SIMPLE
+@project.layout.mixSourcesAndResources=true
+```
+You'll end up with the following code layout:
+```
+.
+├── src       <- Contains both Java code and resooources    
+├── test      <- Contains both Java code and resooources for testing
+```
+
+#### Modify Dependencies
+The dependencies are generated with the latest Spring-Boot version:
+```ada title="dependencies.txt"
+== COMPILE ==
+org.springframework.boot:spring-boot-dependencies::pom:3.4.1
+org.springframework.boot:spring-boot-starter-web
+
+== RUNTIME ==
+
+== TEST ==
+org.springframework.boot:spring-boot-starter-test
+```
+You can start from here for modifying, adding code, tests and dependencies.
+
+#### Execute Commands
+
+These are the most useful commands for developping Spring-Boot applications.
+
+``` title="Common Commands"
+jeka project: pack       <- Compiles, tests and creates Bootable Jar
+jeka project: runJar     <- Run bootable jar
+jeka project: depTree    <- Displays dependency tree
+
+jeka docker: build       <- Creates Docker image containing the Spring-Boot application
+jeka docker: buildNative <- Creates Docker image containing the Spring-Boot application compiled to native.
+```
+
+#### Customize Docker File
+
+To reduce a Docker native image size, use a distroless base image. The native executable must be statically linked as libc is unavailable in such distributions. Configure it as follows:
+```properties title="jeka.properties"
+@native.staticLink=MUSL
+@docker.nativeBaseImage=gcr.io/distroless/static-debian12:nonroot
+```
+
+#### What Next?
+
+Now that you're here, you can explore the following resources to enhance your project.
+Learn how to include SonarQube analysis, add a ReactJS web client, perform end-to-end testing, or implement a delivery pipeline in Java:
+
+- [Example using SpringBoot + Angular + Sonarqube + Jacoco + Docker + end-to-end testing](https://github.com/jeka-dev/demo-project-springboot-angular)
+- [Exemple using Kotlin + StringBoot + ReactJS + Sonarqube/Jacoco](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
+- [Video on Jeka + Springboot + Docker + GraalVM](https://youtu.be/yfmaAwAjJ2w)
+- [Documentation](https://jeka-dev.github.io/jeka/)
 

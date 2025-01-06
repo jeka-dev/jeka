@@ -355,7 +355,7 @@ public abstract class JkScaffold {
                         .setGroupOrNameCriteria("dev.jeka:jeka-core:")
                         .search();
             } catch (RuntimeException e) {
-                JkLog.warn("Failed to get Jeka versions from repo %s : %s", repo, e.getMessage());
+                JkLog.warn("Failed to get Jeka versions from repo %s : %s", repo.getUrl(), e.getMessage());
                 if (JkLog.isDebug()) {
                     JkUtilsThrowable.printStackTrace(JkLog.getErrPrintStream(), e, 100);
                 }
