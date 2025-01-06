@@ -2,7 +2,7 @@
 
 This section explains how to get started quickly using the command-line mode.
 
-**Prerequisite:** Jeka must be [installed](installation.md).
+**Prerequisite:** Jeka CLI must be [installed](installation.md).
 
 !!! note
     Using the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka) is the fastest way to get started. 
@@ -91,17 +91,18 @@ This will display the following text on the console:
 ```
 Note that:
 
-  - You can have multiple script methods in `Script.java`: they must only be public, non-static, return void, have zero arguments.
-  - `Script.java` can be renamed in with any name and be located in any package you like.
-  - There can have multiple script classes. When invoking, we may specify the class name as `jeka script2: hi'.
-  - You can also [use classes bundled with JeKa](reference/api-intro.md) without explicit declaration.
+- You can define multiple script methods in `Script.java`. These methods must be public, non-static, have no arguments, and return void.
+- `Script.java` can be renamed to any name and placed in any package you prefer.
+- There can be multiple script classes. When invoking a specific script, you can specify the class name, for example: `jeka script2: hi`.
+- You can also [use the classes bundled with JeKa](reference/api-intro.md) without requiring explicit declarations.
 
 #### KBeans
 
 Every script should inherit from the `KBean` class. 
 
-KBeans can be present as source code (in *jeka-src* dir), or as compiled class present in classpath.
-Jeka is bundled with several standard KBeans, that you can list by executing:
+KBeans can either be provided as source code (located in the *jeka-src* directory) or as compiled classes available in the classpath.
+
+Jeka includes several standard KBeans, which you can list by running:
 ```
 jeka --doc
 ```
