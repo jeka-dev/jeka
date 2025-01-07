@@ -70,7 +70,7 @@ jeka.inject.classpath=dev.jeka:jacoco-plugin dev.jeka:sonarqube-plugin
 @jacoco.jacocoVersion=0.8.12
 ```
 
-**Configure using Java code**
+**Create specific tasks with Java code**
 
 ```java
 @JkDep("commons-net:commons-net:3.11.1")
@@ -131,8 +131,5 @@ JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 - Develop a dedicated plugin for Kubernetes.
 - Provide examples showcasing JeKa's use for provisioning cloud platforms via their SDKs.
 
-<p align="center">
-    <img src="docs/images/mascot.png" width='420' height='420' />
-</p>
 
  

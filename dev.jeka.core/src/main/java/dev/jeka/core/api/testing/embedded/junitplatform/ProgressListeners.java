@@ -19,7 +19,6 @@ package dev.jeka.core.api.testing.embedded.junitplatform;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -36,11 +35,11 @@ class ProgressListeners {
             return null;
         }
         switch (progressDisplayer) {
-            case BAR: return new ProgressBarExecutionListener();
+            case BAR: return new BarProgressExecutionListener();
             case TREE: return new ProgressListeners.TreeProgressExecutionListener();
             case PLAIN: return new ProgressListeners.ConsoleProgressExecutionListener();
             case STEP: return new StepProgressExecutionListener();
-            case SILENT: return new SilentProgressExecutionListener();
+            case MUTE: return new SilentProgressExecutionListener();
             default: return null;
         }
     }
@@ -64,6 +63,9 @@ class ProgressListeners {
 
     }
 
+    /*
+     * Displays only test containers
+     */
     static class TreeProgressExecutionListener implements TestExecutionListener {
 
         private final Silencer silencer = new Silencer();
@@ -72,28 +74,22 @@ class ProgressListeners {
 
         @Override
         public void testPlanExecutionFinished(TestPlan testPlan) {
-            System.out.println();
+            silencer.silent(false);
         }
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
-            System.out.print(JkUtilsString.repeat("  ", nestedLevel) + testIdentifier.getDisplayName());
             if (testIdentifier.getType().isContainer()) {
-                System.out.println();
-                nestedLevel ++;
-            }
-            if(testIdentifier.getType().isTest()) {
+                silencer.silent(false);
+                System.out.println(JkUtilsString.repeat("  ", nestedLevel) + testIdentifier.getDisplayName());
                 silencer.silent(true);
+                nestedLevel ++;
             }
         }
 
         @Override
         public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-            if (testIdentifier.getType().isTest()) {
-                silencer.silent(false);
-                System.out.println(" : " + testExecutionResult.getStatus());
-            }
-            if(testIdentifier.getType().isContainer()) {
+            if (testIdentifier.getType().isContainer()) {
                 nestedLevel --;
             }
         }
@@ -152,7 +148,7 @@ class ProgressListeners {
 
         @Override
         public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-            char symbol = statusSymbol(testExecutionResult.getStatus());
+            String symbol = statusSymbol(testExecutionResult.getStatus());
             if(testIdentifier.getType().isContainer()) {
                 silencer.silent(false);
                 System.out.print(symbol);
@@ -172,7 +168,7 @@ class ProgressListeners {
     /**
      * A progress bar that display the current executed test.
      */
-    static class ProgressBarExecutionListener implements TestExecutionListener {
+    static class BarProgressExecutionListener implements TestExecutionListener {
 
         private static final int BAR_LENGTH = 50;
 
@@ -251,10 +247,6 @@ class ProgressListeners {
             return "[" + JkUtilsString.repeat("=", count) + JkUtilsString.repeat(" ", spaceCount) + "]";
         }
 
-        private int testCountCharCount() {
-            return Long.toString(testContainerCount).length();
-        }
-
     }
 
     static class Silencer {
@@ -282,17 +274,14 @@ class ProgressListeners {
         System.out.print(JkUtilsString.repeat("\b", charCount));
     }
 
-    private static char statusSymbol(TestExecutionResult.Status status) {
-        if (JkUtilsSystem.CONSOLE == null) {
-            return '.';
-        }
+    private static String statusSymbol(TestExecutionResult.Status status) {
         if (status == TestExecutionResult.Status.ABORTED) {
-            return '-';
+            return "-";
         }
         if (status == TestExecutionResult.Status.FAILED) {
-            return '✗';
+            return "x";
         }
-        return '✓';
+        return "v"; // the check does not display on MacOS console
     }
 
     static String friendlyName(TestIdentifier testIdentifier) {

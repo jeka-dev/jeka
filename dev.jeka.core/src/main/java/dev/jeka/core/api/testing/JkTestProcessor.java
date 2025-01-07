@@ -56,24 +56,27 @@ public final class JkTestProcessor {
     public enum JkProgressOutputStyle implements Serializable {
 
         /**
-         * Print test names without silencing output
+         * Prints test names without silencing output
          */
         PLAIN,
 
+        /**
+         * Prints Test tree progression
+         */
         TREE,
 
         /**
-         * Print a test status at each unitary test execution.
+         * Prints a test status at each unitary test execution.
          */
         STEP,
 
         /**
-         * Don't print anything during whole test plan execution.
+         * Doesn't print anything during whole test plan execution.
          */
-        SILENT,
+        MUTE,
 
         /**
-         * Display a progress bar with the name of the test currently on execution.
+         * Displays a progress bar with the name of the test currently on execution.
          */
         BAR;
 

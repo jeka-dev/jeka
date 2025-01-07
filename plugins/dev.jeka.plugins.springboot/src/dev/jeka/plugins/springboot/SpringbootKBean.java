@@ -20,6 +20,7 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -146,7 +147,13 @@ public final class SpringbootKBean extends KBean {
             springbootProject.addSpringRepo(springRepo);
         }
 
-        // Configure native KBean
+        // Springboot IT test displays a warning message "OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes becaus...."
+        // disturbing "bar" progress. So we force to use TREE progress
+        if (projectKBean.tests.progressStyle == null) {
+            projectKBean.project.testing.testProcessor.engineBehavior
+                    .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
+        }
+
         NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
         nativeKBean.includeMainClassArg = false;
         nativeKBean.setAotAssetDirs(() ->

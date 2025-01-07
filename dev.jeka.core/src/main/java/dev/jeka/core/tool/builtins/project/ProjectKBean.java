@@ -75,8 +75,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     /**
      * Options for configuring testing tasks.
      */
+    // Made public so that extension as springboot can override default
     @JkDoc
-    private final JkTestOptions tests = new JkTestOptions();
+    public final JkTestOptions tests = new JkTestOptions();
 
     /**
      * Options for configuring scaffold.
@@ -230,6 +231,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public String jvmOptions;
 
         @JkDoc("The style to use to show test execution progress.")
+        // Should be default to null, has other kbean can check if
+        // the value has explicitly been set.
         public JkTestProcessor.JkProgressOutputStyle progressStyle;
 
     }
@@ -354,7 +357,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         project.setBaseDir(getBaseDir());
         if (!JkLog.isAnimationAccepted()) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
-                    JkTestProcessor.JkProgressOutputStyle.SILENT);
+                    JkTestProcessor.JkProgressOutputStyle.MUTE);
         }
         if (!JkUtilsString.isBlank(version)) {
             project.setVersion(version);
