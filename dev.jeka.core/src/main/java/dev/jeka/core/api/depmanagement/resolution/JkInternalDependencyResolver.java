@@ -39,9 +39,9 @@ import java.util.List;
  */
 public interface JkInternalDependencyResolver {
 
-    String IVY_URL_PATH = "org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar";
+    String IVY_URL_PATH = "org/apache/ivy/ivy/2.5.3/ivy-2.5.3.jar";
 
-    JkCoordinate IVY_COORDINATE = JkCoordinate.of("org.apache.ivy:ivy:2.5.0");
+    JkCoordinate IVY_COORDINATE = JkCoordinate.of("org.apache.ivy:ivy:2.5.3");
 
     /**
      * @param  coordinate The coordinate of the module to be resolved. Only used for caching purpose. Can be <code>null</code>

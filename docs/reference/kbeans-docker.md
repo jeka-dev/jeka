@@ -1,0 +1,39 @@
+# Docker KBean
+
+[`DockerKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/docker/DockerKBean.java) allows the creation of Docker images for both *project* and *base* KBeans. It supports generating JVM-based images as well as minimalist Docker images containing only the native executable.
+
+**Key Features:**
+
+- Efficiently create layered and secure Docker images for JVM applications
+- Generate secure, optimized Docker images for native applications
+- Infer image name/version from the project
+- Optionally switch to a non-root user (configurable)
+- Customize the generated image via Java API
+
+**Example Invocation:**
+- `jeka docker:buildNative`: Builds a native Docker image of your application.
+
+**Example Configuration:**
+```properties
+@docker.nativeBaseImage=gcr.io/distroless/static-debian12:nonroot
+```
+
+**Example For Image customization:**
+```java
+protected void init() {
+    load(DockerKBean.class).customizeJvmImage(dockerBuild -> dockerBuild
+            .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
+            .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
+            .nonRootSteps   // inserted after  USER nonroot
+                .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
+                .add("RUN chmod a+rw /release.md ")
+    );
+}
+```
+This KBean allows customizing the Docker image programmatically using the [Jeka libs for Docker](api-docker.md).
+
+It’s easy to see the customization result by executing `jeka docker: info`. 
+This will display details about the built image, including the generated Dockerfile. 
+You can also visit the generated Docker build directory, 
+which contains all the Docker context needed to build the image with a Docker client.
+

@@ -19,6 +19,7 @@ package dev.jeka.core.api.testing.embedded.junitplatform;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -144,6 +145,7 @@ class ProgressListeners {
         public void testPlanExecutionFinished(TestPlan testPlan) {
             silencer.silent(false);
             deleteLastChars(charCount);
+            System.out.println();
         }
 
         @Override
@@ -275,13 +277,16 @@ class ProgressListeners {
     }
 
     private static String statusSymbol(TestExecutionResult.Status status) {
+        if (JkUtilsSystem.CONSOLE == null) {
+            return ".";
+        }
         if (status == TestExecutionResult.Status.ABORTED) {
             return "-";
         }
         if (status == TestExecutionResult.Status.FAILED) {
-            return "x";
+            return "✗";
         }
-        return "v"; // the check does not display on MacOS console
+        return "✓";
     }
 
     static String friendlyName(TestIdentifier testIdentifier) {

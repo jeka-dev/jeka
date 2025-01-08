@@ -233,7 +233,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("The style to use to show test execution progress.")
         // Should be default to null, has other kbean can check if
         // the value has explicitly been set.
-        public JkTestProcessor.JkProgressOutputStyle progressStyle;
+        public JkTestProcessor.JkProgressOutputStyle progress;
 
     }
 
@@ -417,8 +417,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         // The style should not be forced by default as it is determined by the presence of a console,
         // and the log level
-        if (tests.progressStyle != null) {
-            project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progressStyle);
+        if (tests.progress != null) {
+            project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progress);
         }
         if (compilation.compilerOptions != null) {
             String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);

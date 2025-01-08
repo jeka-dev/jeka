@@ -1,4 +1,4 @@
-## Properties
+# Properties
 
 _Properties_ are pairs of String  _key-value_ that are used across Jeka system. They typically carry urls, local paths,
 tool versions, or credentials. 

@@ -61,6 +61,15 @@ nav:
     - Reference:
         - KBeans: reference/kbeans.md
         - Properties: reference/properties.md
+        - Bundled KBeans:
+            - base: reference/kbeans-base.md
+            - project: reference/kbeans-project.md
+            - intellij: reference/kbeans-intellij.md
+            - eclipse: reference/kbeans-eclipse.md
+            - native: reference/kbeans-native.md
+            - docker: reference/kbeans-docker.md
+            - git: reference/kbeans-git.md
+            - admin: reference/kbeans-admin.md
         - Build Library:
             - Intro : reference/api-intro.md
             - Files : reference/api-files.md

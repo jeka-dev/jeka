@@ -37,11 +37,11 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/compile-only/ivy-2.5.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/compile-only/ivy-2.5.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/libs/sources/ivy-2.5.0-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/sources/ivy-2.5.3-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

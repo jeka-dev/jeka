@@ -149,7 +149,7 @@ public final class SpringbootKBean extends KBean {
 
         // Springboot IT test displays a warning message "OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes becaus...."
         // disturbing "bar" progress. So we force to use TREE progress
-        if (projectKBean.tests.progressStyle == null) {
+        if (projectKBean.tests.progress == null) {
             projectKBean.project.testing.testProcessor.engineBehavior
                     .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
         }
