@@ -94,6 +94,25 @@ For this, we can use [cache action](https://github.com/actions/cache) as follow:
 
 ## Misc
 
+### How do I configure projects from code ?
+
+If you want to configure a project programmatically, either within the project itself or to create a plugin, you should access the `JkProject` instance directly instead of using the `ProjectKBean`.
+
+The `ProjectKBean` initializes the project and configures it with its own settings in its `init` method. After that, it should not be modified. If you change the `ProjectKBean` instance in your code, the underlying `JkProject` instance will already have been configured by the `ProjectKBean`, meaning your changes will have no effect.
+
+```java
+
+public class Build extends KBean {
+
+    JkProject project = load(ProjectKBean.class).project;
+    
+    void init() {
+        project.testing.testProcessor.engineBehavior.setProgressDisplayer(STEP);
+        ...
+    }
+}
+```
+
 ### How can I use Eclipse compiler in Jeka ?
 
 Jeka can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as :
