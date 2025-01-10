@@ -232,6 +232,20 @@ public final class JkUtilsString {
     }
 
     /**
+     * Checks if the given string starts with an uppercase letter.
+     *
+     * @param str the string to check; may be null or empty
+     * @return {@code true} if the string starts with an uppercase letter, {@code false} otherwise
+     */
+    public static boolean startsWithUpperCase(String str) {
+        if (str == null || str.isEmpty()) {
+            return false; // Return false if the string is null or empty
+        }
+        char firstChar = str.charAt(0);
+        return Character.isUpperCase(firstChar); // Check if the first character is uppercase
+    }
+
+    /**
      * Checks if a String is whitespace, empty ("") or null.
      */
     public static boolean isBlank(String string) {
@@ -510,6 +524,77 @@ public final class JkUtilsString {
             sb.deleteCharAt(sb.length() -1);
         }
         return sb.toString();
+    }
+
+    /**
+     * Shortens a fully qualified package name by abbreviating all segments except the last class name
+     * and appends the remaining part after the class, preserving the structure.
+     * For instance, it replaces "com.example.package.ClassName.method" with "c.e.package.ClassName.method".
+     *
+     * @param fullName The fully qualified package name including the class and optionally the method.
+     *                 If null or if the input does not contain any dot, it is returned as-is.
+     * @return A shortened version of the given package name with abbreviated segments,
+     *         or the original input for invalid cases.
+     */
+    public static String shortenPackageName(String fullName) {
+        if (fullName == null || !fullName.contains(".")) {
+            return fullName; // Return as-is for invalid input or no package
+        }
+
+        String[] parts = fullName.split("\\.");
+        boolean found = false;
+        List<String> resultParts = new ArrayList<>();
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                resultParts.add("");
+
+            } else if (found) {
+                resultParts.add(part);
+
+            } else if (startsWithUpperCase(part)) {
+                found = true;
+                resultParts.add(part);
+
+            } else {
+                resultParts.add(part.substring(0, 1));
+            }
+        }
+
+        return String.join(".", resultParts);
+    }
+
+    /**
+     * Removes the package prefix from a fully qualified name, leaving only the last class name
+     * and the subsequent part (e.g., method name or variable). This method shortens the package
+     * part by retaining only the class name preceding the final segment if it exists.
+     *
+     * @param fullName The fully qualified name from which the package prefix should be removed.
+     *                 If the input is null or does not contain a dot, it is returned as-is.
+     * @return The modified string with the package prefix removed, or the original string
+     *         if no prefix exists or the input is invalid.
+     */
+    public static String removePackagePrefix(String fullName) {
+        if (fullName == null || !fullName.contains(".")) {
+            return fullName; // Return as-is for invalid input or no package
+        }
+
+        String[] parts = fullName.split("\\.");
+        boolean found = false;
+        List<String> resultParts = new ArrayList<>();
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                resultParts.add("");
+
+            } else if (found) {
+                resultParts.add(part);
+
+            } else if (startsWithUpperCase(part)) {
+                found = true;
+                resultParts.add(part);
+            }
+        }
+
+        return String.join(".", resultParts);
     }
 
 }

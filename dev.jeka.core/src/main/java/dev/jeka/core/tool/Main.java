@@ -296,7 +296,7 @@ public class Main {
         JkBusyIndicator.stop();
         JkLog.restoreToInitialState();
         if (t.getMessage() != null) {
-            String txt = CommandLine.Help.Ansi.AUTO.string("@|red Error: |@" + t.getMessage());
+            String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + t.getMessage());
             System.err.println(txt);
         } else {
             String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");

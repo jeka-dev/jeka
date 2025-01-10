@@ -59,7 +59,7 @@ public class SimpleProjectKBean extends KBean {
                 .testProcessor
                     .setForkingProcess(false)
                     .engineBehavior
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
+                        .setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
 
         load(MavenKBean.class).getMavenPublication()
                .setModuleId("dev.jeka:sample-javaplugin")

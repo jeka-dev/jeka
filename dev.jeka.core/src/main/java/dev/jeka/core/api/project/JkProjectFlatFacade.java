@@ -259,7 +259,7 @@ public class JkProjectFlatFacade {
     /**
      * Sets the style for displaying test progress during test execution.
      */
-    public JkProjectFlatFacade setTestProgressStyle(JkTestProcessor.JkProgressOutputStyle style) {
+    public JkProjectFlatFacade setTestProgressStyle(JkTestProcessor.JkProgressStyle style) {
         project.testing.testProcessor.engineBehavior.setProgressDisplayer(style);
         return this;
     }

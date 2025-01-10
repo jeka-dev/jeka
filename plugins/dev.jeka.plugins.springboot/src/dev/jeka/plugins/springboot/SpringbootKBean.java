@@ -151,7 +151,7 @@ public final class SpringbootKBean extends KBean {
         // disturbing "bar" progress. So we force to use TREE progress
         if (projectKBean.tests.progress == null) {
             projectKBean.project.testing.testProcessor.engineBehavior
-                    .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
+                    .setProgressDisplayer(JkTestProcessor.JkProgressStyle.PLAIN);
         }
 
         NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);

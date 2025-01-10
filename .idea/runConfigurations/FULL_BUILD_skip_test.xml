@@ -4,7 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="MasterBuild" />
     <module name="dev.jeka.master" />
-    <option name="PROGRAM_PARAMETERS" value="-Djeka.skip.tests=true runSamples=false --inspect --stacktrace" />
+    <option name="PROGRAM_PARAMETERS" value="-Djeka.test.skip=true runSamples=false --inspect --stacktrace" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

@@ -17,6 +17,7 @@
 package dev.jeka.core.api.testing;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -28,6 +29,8 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkExternalToolApi;
 import org.junit.platform.launcher.core.LauncherConfig;
 
 import java.io.Serializable;
@@ -53,32 +56,34 @@ public final class JkTestProcessor {
     /**
      * Style of progress mark to display on console while the tests are running.
      */
-    public enum JkProgressOutputStyle implements Serializable {
+    public enum JkProgressStyle implements Serializable {
 
         /**
-         * Prints test names without silencing output
+         * Maven-like style progress.
+         */
+        FULL,
+
+        /**
+         * Maven-like progress, but skips test outputs.
          */
         PLAIN,
 
         /**
-         * Prints Test tree progression
-         */
-        TREE,
-
-        /**
-         * Prints a test status at each unitary test execution.
+         * Prints a '.' for each test executed. Supports parallel tests.
          */
         STEP,
 
         /**
-         * Doesn't print anything during whole test plan execution.
+         * No output during test execution.
          */
         MUTE,
 
         /**
-         * Displays a progress bar with the name of the test currently on execution.
+         * Shows a progress bar with the current test name.
          */
         BAR;
+
+        private static final long serialVersionUID = 154654647775L;
 
     }
 
@@ -120,6 +125,8 @@ public final class JkTestProcessor {
      */
     public final JkRunnables postActions = JkRunnables.of();
 
+    // Using the latest platform versions might break compatibility with older JUnit 5 versions.
+    @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons")
     private String junitPlatformVersion = "1.9.3";
 
     private JvmHints jvmHints = JvmHints.ofDefault();
@@ -170,7 +177,9 @@ public final class JkTestProcessor {
         return junitPlatformVersion;
     }
 
-    public JkTestProcessor setJunitPlatformVersion(String junitPlatformVersion) {
+
+    public JkTestProcessor setJunitPlatformVersion(
+            @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons") String junitPlatformVersion) {
         this.junitPlatformVersion = junitPlatformVersion;
         return this;
     }
@@ -178,32 +187,6 @@ public final class JkTestProcessor {
     public JkTestProcessor setRepoSetSupplier(Supplier<JkRepoSet> repoSetSupplier) {
         this.repoSetSupplier = repoSetSupplier;
         return this;
-    }
-
-    private List<Path> computeClasspath(JkPathSequence testClasspath) {
-        JkPathSequence result = testClasspath;
-        JkClassLoader classloader = JkClassLoader.ofCurrent();
-        result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
-        result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
-        result = addIfNeeded(result, classloader, ENGINE_SERVICE, JUNIT_PLATFORM_TEST_ENGINE_MODULE);
-        result = addIfNeeded(result, classloader, "org.junit.platform.commons.logging.LoggerFactory, ",
-                JUNIT_PLATFORM_COMMON_MODULE);
-        JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
-        ucl.toJkClassLoader().load(ENGINE_SERVICE);
-        return result.getEntries();
-    }
-
-    private JkPathSequence addIfNeeded(JkPathSequence classpath, JkClassLoader classloader,
-                                           String className, String moduleName) {
-        JkPathSequence result = classpath;
-        if (!classloader.isDefined(className)) {
-            if (result.findEntryContainingClass(className) == null) {
-                String dep = moduleName + ":" + this.junitPlatformVersion;
-                Path path = JkCoordinateFileProxy.of(this.repoSetSupplier.get(), dep).get();
-                result = result.and(path);
-            }
-        }
-        return result;
     }
 
     /**
@@ -218,6 +201,7 @@ public final class JkTestProcessor {
         final JkTestResult result;
         preActions.run();
         JkLog.startTask("execute-tests");
+        JkLog.info(testSelection.toString());
         if (forkingProcess == null) {
             result = launchInClassloader(extraTestClasspath, testSelection);
         } else {
@@ -225,19 +209,70 @@ public final class JkTestProcessor {
         }
         postActions.run();
         boolean success = result.getFailures().isEmpty();
-        List<JkTestResult.JkFailure> failures = result.getFailures();
         if (!success) {
-            String message = failures.size() == 1 ? "%s failure found:" : "%s failures found. First failure detail:";
-            JkLog.warn(message + " %n%s", failures.size(), failures.get(0).shortMessage(3));
+            printTestFailure(result);
         }
+        String summaryTitle = success ? JkExternalToolApi.ansiText("@|green ALL TESTS PASSED|@") : "Summary";
+        JkLog.info(summaryTitle + ": " + result.getTestCount().toReportString());
         JkLog.endTask();
-        String emoji = success ? "\u2705 " : "\u274C ";
-        JkLog.info("Result: " + emoji + result.getTestCount());
+
+        return result;
+    }
+
+    private List<Path> computeClasspath(JkPathSequence testClasspath) {
+        JkPathSequence result = testClasspath;
+        JkClassLoader classloader = JkClassLoader.ofCurrent();
+
+        result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
+        result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
+        result = addIfNeeded(result, classloader, ENGINE_SERVICE, JUNIT_PLATFORM_TEST_ENGINE_MODULE);
+
+        result = addIfNeeded(result, classloader, "org.junit.platform.commons.logging.LoggerFactory, ",
+                JUNIT_PLATFORM_COMMON_MODULE);
+
+        JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
+        ucl.toJkClassLoader().load(ENGINE_SERVICE);
+        return result.getEntries();
+    }
+
+    private void printTestFailure(JkTestResult testResult) {
+        List<JkTestResult.JkFailure> failures = testResult.getFailures();
+        String templateMsg = failures.size() == 1 ? "%s failure found." : "%s failures found.";
+        String msg = String.format(templateMsg, failures.size());
+        JkLog.error(msg);
+        for (JkTestResult.JkFailure failure : failures) {
+            String exceptionClass = failure.isAssertionFailure() ? "" : failure.getThrowableClassname() + ":";
+            String methodFgn = failure.getTestId().getDisplayName().replace("()", "");
+            String shortenMethodName = JkUtilsString.removePackagePrefix(methodFgn);
+            JkLog.info("    %s: %s %s",
+                    shortenMethodName,
+                    exceptionClass,
+                    failure.getThrowableMessage()
+                    );
+        }
+    }
+
+
+    private JkPathSequence addIfNeeded(JkPathSequence classpath, JkClassLoader classloader,
+                                       String className, String moduleName) {
+        JkPathSequence result = classpath;
+        if (!classloader.isDefined(className)) {
+            if (result.findEntryContainingClass(className) == null) {
+                String dep = moduleName + ":" + this.junitPlatformVersion;
+                Path path = JkCoordinateFileProxy.of(this.repoSetSupplier.get(), dep).get();
+                result = result.and(path);
+            }
+        }
         return result;
     }
 
     private JkTestResult launchInClassloader(JkPathSequence testClasspath, JkTestSelection testSelection) {
         List<Path> classpath = computeClasspath(testClasspath);
+        if (JkLog.isDebug()) {
+            JkLog.debug("------------ Test Classpath --------------");
+            classpath.forEach(path -> JkLog.debug(path.toString()));
+            JkLog.debug("------------------------------------------");
+        }
         return JkInternalJunitDoer.instance(classpath).launch(engineBehavior, testSelection);
     }
 
@@ -252,6 +287,11 @@ public final class JkTestProcessor {
         String arg = serializedArgPath.toAbsolutePath().toString();
         List<Path> classpath = JkClassLoader.ofCurrent().getClasspath()
                 .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
+        if (JkLog.isDebug()) {
+            JkLog.debug("------------ Test Classpath --------------");
+            classpath.forEach(path -> JkLog.debug(path.toString()));
+            JkLog.debug("------------------------------------------");
+        }
         JkJavaProcess clonedProcess = forkingProcess.copy()
                 .setLogCommand(JkLog.isVerbose())
                 .setClasspath(classpath)
@@ -276,7 +316,8 @@ public final class JkTestProcessor {
         Path argFile = Paths.get(args[0]);
         Args data = JkUtilsIO.deserialize(argFile);
         JkTestResult result =
-                JkInternalJunitDoer.instance(Collections.emptyList()).launch(data.engineBehavior, data.testSelection);
+                JkInternalJunitDoer.instance(Collections.emptyList())
+                        .launch(data.engineBehavior, data.testSelection);
         JkUtilsIO.serialize(result, Paths.get(data.resultFile));
         System.exit(0);  // Triggers shutdown hooks
     }
@@ -295,11 +336,11 @@ public final class JkTestProcessor {
 
     public static class JkEngineBehavior implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 123454355656443L;
 
         private String legacyReportDir; // Use String instead of Path for serialisation
 
-        private JkProgressOutputStyle progressDisplayer;
+        private JkProgressStyle progressDisplayer;
 
         private JkUnaryOperator<LauncherConfig.Builder> launcherConfigurer;
 
@@ -310,7 +351,7 @@ public final class JkTestProcessor {
             return legacyReportDir == null ? null : Paths.get(legacyReportDir);
         }
 
-        public JkProgressOutputStyle getProgressDisplayer() {
+        public JkProgressStyle getProgressStyle() {
             return progressDisplayer;
         }
 
@@ -331,7 +372,7 @@ public final class JkTestProcessor {
          * Sets the test progress type to display on the console.
          * If {@code null}, no progress will be displayed.
          */
-        public JkEngineBehavior setProgressDisplayer(JkProgressOutputStyle progressDisplayer) {
+        public JkEngineBehavior setProgressDisplayer(JkProgressStyle progressDisplayer) {
             this.progressDisplayer = progressDisplayer;
             return this;
         }

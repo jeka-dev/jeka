@@ -38,6 +38,7 @@ public @interface JkDepSuggest {
      * @JkDepSuggest(hint = "com.google.guava:guava-core:")
      * </code></pre>
      */
+    @JkDepSuggest
     String hint() default "";
 
     /**

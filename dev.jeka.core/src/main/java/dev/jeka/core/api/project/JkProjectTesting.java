@@ -89,8 +89,13 @@ public class JkProjectTesting {
         JkProjectCompilation prodCompilation = project.compilation;
         return JkPathSequence.of()
                 .and(compilation.initialLayout().resolveClassDir())
-                .and(compilation.resolveDependenciesAsFiles())
+
+                // The production classes must set be before test dependencies
+                // As if we get in trouble if a test dependencies grab a transitive
+                // dependency which is a previous version of the project we are building.
+                // This is the case for apache.commons.lang
                 .and(prodCompilation.layout.resolveClassDir())
+                .and(compilation.resolveDependenciesAsFiles())
                 .and(project.packaging.resolveRuntimeDependenciesAsFiles())
                 .withoutDuplicates();
     }
@@ -218,15 +223,15 @@ public class JkProjectTesting {
         }
     }
 
-    private static JkTestProcessor.JkProgressOutputStyle defaultProgressStyle() {
+    private static JkTestProcessor.JkProgressStyle defaultProgressStyle() {
         if (JkLog.isDebug()) {
-            return JkTestProcessor.JkProgressOutputStyle.PLAIN;
+            return JkTestProcessor.JkProgressStyle.FULL;
         }
         if (!JkLog.isAnimationAccepted()) {
-            return JkTestProcessor.JkProgressOutputStyle.STEP;
+            return JkTestProcessor.JkProgressStyle.STEP;
         }
-        return JkUtilsSystem.CONSOLE == null ? JkTestProcessor.JkProgressOutputStyle.STEP :
-                JkTestProcessor.JkProgressOutputStyle.BAR;
+        return JkUtilsSystem.CONSOLE == null ? JkTestProcessor.JkProgressStyle.STEP :
+                JkTestProcessor.JkProgressStyle.BAR;
     }
 
     private class JkProjectTestCompilation extends JkProjectCompilation {

@@ -17,8 +17,10 @@
 package dev.jeka.core.tool.builtins.tooling.nativ;
 
 import dev.jeka.core.api.depmanagement.JkCoordinate;
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.project.JkBuildable;
+import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
@@ -50,6 +52,7 @@ public class NativeKBean extends KBean {
     public boolean useMetadataRepo = true;
 
     @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
+    @JkDepSuggest(versionOnly = true, hint = "org.graalvm.buildtools:graalvm-reachability-metadata")
     public String metadataRepoVersion = JkNativeCompilation.DEFAULT_REPO_VERSION;
 
     @JkDoc("If false, the main class won't be specified in command line arguments. " +
@@ -69,7 +72,6 @@ public class NativeKBean extends KBean {
         } else {
             throw new JkException("No project found in Runbase. Native compilation not yet implemented for base kbean.");
         }
-
     }
 
     /**

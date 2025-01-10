@@ -156,6 +156,15 @@ public final class JkTestResult implements Serializable {
                     ", failed=" + failed +
                     '}';
         }
+
+        public String toReportString() {
+            return "Test Found: " + found +
+                    ", Run: " + started +
+                    ", Fail: " + failed +
+                    ", Success: " + succeeded +
+                    ", Skipped: " + skipped +
+                    ", Aborted: " + aborted;
+        }
     }
 
 
@@ -194,6 +203,14 @@ public final class JkTestResult implements Serializable {
             return testId;
         }
 
+        public String getThrowableClassname() {
+            return throwableClassName;
+        }
+
+        public boolean isAssertionFailure() {
+            return "org.opentest4j.AssertionFailedError".equals(throwableClassName);
+        }
+
         public String getThrowableMessage() {
             return throwableMessage;
         }
@@ -211,26 +228,7 @@ public final class JkTestResult implements Serializable {
                     '}';
         }
 
-        public String shortMessage(int stackTraceEl) {
-            StringBuilder result = new StringBuilder();
-            result.append(String.format("%s %n        %s",
-                    testId.displayName,
-                    JkUtilsString.wrapStringCharacterWise(throwableClassName + " : " + throwableMessage, 120)));
-            for (int i=0; i<= stackTraceEl && i < stackTraces.length; i++) {
-                result.append("\nat ").append(stackTraces[i]);
-            }
-            result.append("\n...");
-            result.append("\nFind more details in jeka-output/test-report or relaunch using --debug option.");
-            return JkUtilsString.withLeftMargin(result.toString(), "        ");
-        }
 
-        void print(PrintStream printStream) {
-            printStream.print(testId + System.lineSeparator() + "-> ");
-            printStream.println(throwableMessage);
-            for (final StackTraceElement element : getStackTraces()) {
-                printStream.println("  at " + element);
-            }
-        }
     }
 
     public static final class JkTestIdentifier implements Serializable {

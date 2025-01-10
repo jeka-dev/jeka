@@ -610,9 +610,9 @@ function Main {
     if (!$buildCmd) {
       $srcDir = $baseDir + "\src"
       if ([System.IO.Directory]::Exists($srcDir)) {
-        $buildCmd = "project: pack pack.jarType=FAT pack.detectMainClass=true -Djeka.skip.tests=true --stderr"
+        $buildCmd = "project: pack pack.jarType=FAT pack.detectMainClass=true -Djeka.test.skip=true --stderr"
       } else {
-        $buildCmd = "base: pack -Djeka.skip.tests=true --stderr"
+        $buildCmd = "base: pack -Djeka.test.skip=true --stderr"
       }
     }
     $buildArgs = [Props]::ParseCommandLine($buildCmd)

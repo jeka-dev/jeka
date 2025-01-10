@@ -39,6 +39,7 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import org.junit.platform.reporting.legacy.xml.LegacyXmlReportGeneratingListener;
 
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,23 +68,23 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
                     DiscoverySelectors.selectClasspathRoots(testSelection.getTestClassRoots().toSet())
             );
         if (testSelection.getDiscoveryConfigurer() != null) {
-            requestBuilder = (LauncherDiscoveryRequestBuilder) testSelection.getDiscoveryConfigurer().apply(requestBuilder);
+            requestBuilder = testSelection.getDiscoveryConfigurer().apply(requestBuilder);
         }
-        JkLog.info(testSelection.toString());
         TestPlan testPlan = launcher.discover(requestBuilder.build());
 
         // Setting forced listeners
         SummaryGeneratingListener summaryListener = new SummaryGeneratingListener();
         List<TestExecutionListener> listeners = new LinkedList<>();
         listeners.add(summaryListener);
-        TestExecutionListener progressListener = ProgressListeners.get(engineBehavior.getProgressDisplayer());
-        if (engineBehavior.getProgressDisplayer() != null) {
+        JkTestProcessor.JkProgressStyle progressStyle = engineBehavior.getProgressStyle();
+        if (progressStyle != null) {
+            TestExecutionListener progressListener = ProgressListeners.get(progressStyle);
             listeners.add(progressListener);
         }
-        if (engineBehavior.getLegacyReportDir() != null) {
+        Path legacyReportRir = engineBehavior.getLegacyReportDir();
+        if (legacyReportRir!= null) {
             LegacyXmlReportGeneratingListener reportGeneratingListener = new LegacyXmlReportGeneratingListener(
-                    engineBehavior.getLegacyReportDir(),
-                    new PrintWriter(JkUtilsIO.nopOutputStream()));
+                    legacyReportRir, new PrintWriter(JkUtilsIO.nopOutputStream()));
             listeners.add(reportGeneratingListener);
         }
         listeners.add(new RestoreJkLogListener());
@@ -127,7 +128,8 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
                 summary.getTestsSucceededCount(),
                 summary.getTestsFailedCount());
         List<JkTestResult.JkFailure> failures = summary.getFailures().stream()
-                .map(JunitPlatformDoer::toFailure).collect(Collectors.toList());
+                .map(JunitPlatformDoer::toFailure)
+                .collect(Collectors.toList());
         return JkTestResult.of(summary.getTimeStarted(), summary.getTimeFinished(),
                 containerCount, testCount, failures);
     }

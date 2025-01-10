@@ -922,9 +922,9 @@ execute_program_if_requested() {
   build_cmd=$(get_prop_value_from_base_dir "$BASE_DIR" "jeka.program.build")
   if [[ -z "$build_cmd" ]]; then
     if [ -d "$BASE_DIR/src" ]; then
-      build_cmd="project: pack pack.jarType=FAT pack.detectMainClass=true -Djeka.skip.tests=true --stderr"
+      build_cmd="project: pack pack.jarType=FAT pack.detectMainClass=true -Djeka.test.skip=true --stderr"
     else
-      build_cmd="base: pack -Djeka.skip.tests=true --stderr"
+      build_cmd="base: pack -Djeka.test.skip=true --stderr"
     fi
   fi
 

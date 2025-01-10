@@ -208,12 +208,22 @@ public final class JkTestSelection implements Serializable {
 
     @Override
     public String toString() {
-        return "testClassRoots=" + testClassRoots.relativizeFromWorkingDir() +
-                ", includePatterns=" + includePatterns +
-                ", excludePatterns=" + excludePatterns +
-                ", includeTags=" + includeTags +
-                ", excludeTags=" + excludeTags +
-                ", discoveryConfigurer=" + discoveryConfigurer;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Test Class Roots: " + testClassRoots.relativizeFromWorkingDir() +
+                ", Include Patterns: " + includePatterns);
+        if (!excludePatterns.isEmpty()) {
+            sb.append(", Exclude Patterns: " + excludePatterns);
+        }
+        if (!excludePatterns.isEmpty()) {
+            sb.append(", Include Tags: " + includeTags);
+        }
+        if (!excludeTags.isEmpty()) {
+            sb.append(", Exclude Tags: " + excludeTags);
+        }
+        if (!excludeTags.isEmpty()) {
+            sb.append(", Discovery Configurer: " + discoveryConfigurer);
+        }
+        return sb.toString();
     }
 
     boolean hasTestClasses() {

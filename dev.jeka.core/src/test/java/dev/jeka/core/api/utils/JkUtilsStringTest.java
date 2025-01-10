@@ -33,4 +33,16 @@ public class JkUtilsStringTest {
         System.out.print(JkUtilsString.withLeftMargin(paragraph, "  "));
         System.out.println("------");
     }
+
+    @Test
+    public void shortenPackageName() {
+        assertEquals("c.e.MyClass.myMethod", JkUtilsString.shortenPackageName("com.example.MyClass.myMethod"));
+        assertEquals("c.e.MyClass", JkUtilsString.shortenPackageName("com.example.MyClass"));
+    }
+
+    @Test
+    public void removePackagePrefix() {
+        assertEquals("MyClass.myMethod", JkUtilsString.removePackagePrefix("com.example.MyClass.myMethod"));
+        assertEquals("MyClass", JkUtilsString.removePackagePrefix("com.example.MyClass"));
+    }
 }

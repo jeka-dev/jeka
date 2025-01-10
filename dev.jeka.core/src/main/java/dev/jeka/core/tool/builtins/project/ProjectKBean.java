@@ -58,6 +58,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Module id of the project. Only needed if the project is published on a Maven repository.")
     public String moduleId;
 
+    @JkDoc("The encoding format used for handling source files within the project.")
+    public String sourceEncoding;
+
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
@@ -219,7 +222,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         /** Turn it on to skip tests. */
         @JkDoc("If true, tests are not run.")
-        @JkInjectProperty("jeka.skip.tests")
+        @JkInjectProperty("jeka.test.skip")
         public boolean skip;
 
         /** Turn it on to run tests in a withForking process. */
@@ -233,7 +236,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("The style to use to show test execution progress.")
         // Should be default to null, has other kbean can check if
         // the value has explicitly been set.
-        public JkTestProcessor.JkProgressOutputStyle progress;
+        public JkTestProcessor.JkProgressStyle progress;
+
+        @JkDoc("The junit-platform to use. If empty, the default version will be used (1.9.3).")
+        @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons")
+        public String platformVersion;
 
     }
 
@@ -357,7 +364,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         project.setBaseDir(getBaseDir());
         if (!JkLog.isAnimationAccepted()) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(
-                    JkTestProcessor.JkProgressOutputStyle.MUTE);
+                    JkTestProcessor.JkProgressStyle.MUTE);
         }
         if (!JkUtilsString.isBlank(version)) {
             project.setVersion(version);
@@ -367,6 +374,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         if (!JkUtilsString.isBlank(moduleId)) {
             project.setModuleId(moduleId);
+        }
+        if (!JkUtilsString.isBlank(sourceEncoding)) {
+            project.setSourceEncoding(sourceEncoding);
         }
         project.dependencyResolver.setFileSystemCacheDir(getBaseDir().resolve(JkConstants.JEKA_WORK_PATH)
                 .resolve("project-dep-resolution-cache"));
@@ -419,6 +429,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         // and the log level
         if (tests.progress != null) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progress);
+        }
+        if (!JkUtilsString.isBlank(tests.platformVersion)) {
+            project.testing.testProcessor.setJunitPlatformVersion(tests.platformVersion);
         }
         if (compilation.compilerOptions != null) {
             String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);

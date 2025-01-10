@@ -16,7 +16,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
  *  The {@link #run()} method, then can be invoked to orchestrate the whole execution of tests,
  *  managing de deployment and cleanup of application environment.
  */
-public abstract class ApplicationTester {
+public abstract class JkApplicationTester {
 
     protected int startTimeout = 15*1000;
 
@@ -65,7 +65,7 @@ public abstract class ApplicationTester {
     protected abstract void executeTests();
 
     /**
-     * This method is invoked when test are terminated, to undeploy the application and its environment.
+     * This method is invoked when tests are terminated, to undeploy the application and its environment.
      */
     protected void stopGracefully() {
     }

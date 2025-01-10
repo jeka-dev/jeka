@@ -14,7 +14,7 @@ jeka project: pack --clean
 
 Create jar skipping tests
 ```shell
-jeka project: pack "-Djeka.skip.tests=true"
+jeka project: pack "-Djeka.test.skip=true"
 ```
 
 Run jar
