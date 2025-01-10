@@ -239,7 +239,12 @@ public final class JkTestProcessor {
         List<JkTestResult.JkFailure> failures = testResult.getFailures();
         String templateMsg = failures.size() == 1 ? "%s failure found." : "%s failures found.";
         String msg = String.format(templateMsg, failures.size());
-        JkLog.error(msg);
+
+        // For an unknown reason, JkLog.error implies an unexpected right padding when test are
+        // run with the BAR progress style (not for the other)
+        // The workaround is to fake an error log using the JkLog.info
+        JkLog.info(JkExternalToolApi.ansiText("@|red ERROR: |@") + msg);
+
         for (JkTestResult.JkFailure failure : failures) {
             String exceptionClass = failure.isAssertionFailure() ? "" : failure.getThrowableClassname() + ":";
             String methodFgn = failure.getTestId().getDisplayName().replace("()", "");

@@ -60,6 +60,7 @@ class ProgressListeners {
 
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
+            printTestContainerCount(testPlan);
             silencer.silent(true);
         }
 
@@ -74,8 +75,6 @@ class ProgressListeners {
      * Print test under execution on console without silencing test output.
      */
     static class MavenLikeProgressExecutionListener implements TestExecutionListener {
-        
-        private final boolean brief;
 
         private final Silencer silencer;
 
@@ -87,9 +86,13 @@ class ProgressListeners {
 
         private int skippedCount;
 
-        MavenLikeProgressExecutionListener(boolean brief) {
-            this.brief = brief;
-            this.silencer = brief ? new Silencer() : Silencer.NO_OP;
+        MavenLikeProgressExecutionListener(boolean muteTestStdout) {
+            this.silencer = muteTestStdout ? new Silencer() : Silencer.NO_OP;
+        }
+
+        @Override
+        public void testPlanExecutionStarted(TestPlan testPlan) {
+            printTestContainerCount(testPlan);
         }
 
         @Override
@@ -114,7 +117,7 @@ class ProgressListeners {
         @Override
         public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
             if (mustShow(testIdentifier)) {
-                String status =failureCount > 0 ? "Fail" : "Success";
+                String status = failureCount > 0 ? "Fail" : "Success";
                 long duration = JkUtilsTime.durationInMillis(startTime);
                 String elapsed = JkUtilsTime.formatMillis(duration);
                 String message = String.format("%s, run: %s, Failure: %s, Skipped: %s, Time elapsed: %s -- in %s",
@@ -160,7 +163,12 @@ class ProgressListeners {
 
         private int bootingCharCount;
 
-        private volatile int dotInCurrentRowCount;
+        private int dotInCurrentRowCount;
+
+        @Override
+        public void testPlanExecutionStarted(TestPlan testPlan) {
+            printTestContainerCount(testPlan);
+        }
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
@@ -170,12 +178,6 @@ class ProgressListeners {
                     bootingCharCount = 0;
                 }
             }
-        }
-
-        @Override
-        public void testPlanExecutionFinished(TestPlan testPlan) {
-            silencer.silent(false);
-            System.out.println();
         }
 
         @Override
@@ -193,8 +195,14 @@ class ProgressListeners {
             }
         }
 
+        @Override
+        public void testPlanExecutionFinished(TestPlan testPlan) {
+            silencer.silent(false);
+            System.out.println();
+        }
+
         private static boolean mustShow(TestIdentifier testIdentifier) {
-            return isClassContainer(testIdentifier);
+            return testIdentifier.isContainer();
         }
     }
 
@@ -215,8 +223,7 @@ class ProgressListeners {
 
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
-            testContainerCount = testPlan.countTestIdentifiers(TestIdentifier::isContainer);
-            System.out.println("Found " + testContainerCount + " test containers ");
+            testContainerCount = printTestContainerCount(testPlan);
             String bootingLine = "Booting tests ...";
             System.out.print(bootingLine);
             charCount = bootingLine.length();
@@ -224,11 +231,6 @@ class ProgressListeners {
             silencer.silent(true);
         }
 
-        @Override
-        public void testPlanExecutionFinished(TestPlan testPlan) {
-            silencer.silent(false);
-            deleteLastChars(charCount);
-        }
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
@@ -254,6 +256,11 @@ class ProgressListeners {
             if (mustShow(testIdentifier)) {
                deleteCurrentLine();
             }
+        }
+
+        @Override
+        public void testPlanExecutionFinished(TestPlan testPlan) {
+            silencer.silent(false);
         }
 
         private void deleteCurrentLine() {
@@ -360,5 +367,11 @@ class ProgressListeners {
     // does not inherit io
     private static String friendlyStatus(TestExecutionResult.Status status) {
         return JkUtilsString.capitalize(status.toString().toLowerCase());
+    }
+
+    private static long printTestContainerCount(TestPlan testPlan) {
+        long count = testPlan.countTestIdentifiers(TestIdentifier::isContainer);
+        System.out.println("Found " + count + " test containers.");
+        return count;
     }
 }

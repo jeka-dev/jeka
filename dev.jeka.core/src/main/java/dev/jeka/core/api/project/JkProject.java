@@ -424,7 +424,15 @@ public final class JkProject implements JkIdeSupportSupplier {
         JkDependencySet testDependencies = testing.compilation.dependencies.get();
         StringBuilder builder = new StringBuilder();
 
-        String declaredMainClassName = packaging.getMainClass();
+        String declaredMainClassName;
+        String manifest;
+        try {
+            declaredMainClassName = packaging.getMainClass();
+            manifest = packaging.getManifest().asTrimedString();
+        } catch (IllegalStateException e) {
+            declaredMainClassName = "Cannot compute cause: " + e.getMessage();
+            manifest = declaredMainClassName;
+        }
 
         Jk2ColumnsText columnsText = Jk2ColumnsText.of(30, 200).setAdjustLeft(true)
                 .add("ModuleId", moduleId != null ? moduleId : "UNSPECIFIED")
@@ -447,7 +455,7 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
                 .add("Pack actions", this.packActions.getRunnableNames())
-                .add("Manifest Base", packaging.getManifest().asTrimedString()); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
+                .add("Manifest Base", manifest); // manifest ad extra '' queuing char, this causes a extra empty line when displaying
         builder.append(columnsText.toString());
 
         if (JkLog.isVerbose()) { // add declared dependencies
