@@ -438,6 +438,7 @@ public final class JkProject implements JkIdeSupportSupplier {
                 .add("ModuleId", moduleId != null ? moduleId : "UNSPECIFIED")
                 .add("Version", version != null ? version : "UNSPECIFIED (defaulted to " + getVersion() + ")")
                 .add("Java Version", jvmTargetVersion == null ? "UNSPECIFIED (inherit from JeKa: " + JkJavaVersion.ofCurrent() + ")" : jvmTargetVersion  )
+                .add("Fork Compilation", compilation.isCompilationForked())
                 .add("Base Dir", this.getBaseDir().toAbsolutePath().normalize())
                 .add("Main Class Name", Optional.ofNullable(declaredMainClassName).orElse("UNSPECIFIED"))
                 .add("Source Encoding", sourceEncoding + "\n")
@@ -449,7 +450,7 @@ public final class JkProject implements JkIdeSupportSupplier {
                         .count(Integer.MAX_VALUE, false))
                 .add("Test Class Dirs", testing.testSelection.getTestClassRoots())
                 .add("Test Inclusions", testing.testSelection.getIncludePatterns())
-                .add("Test Exclusion", testing.testSelection.getExcludePatterns())
+                .add("Test Exclusions", testing.testSelection.getExcludePatterns())
                 .add("Test Progress Style", testing.testProcessor.engineBehavior.getProgressStyle())
                 .add("Junit5 Platform Version", testing.testProcessor.getJunitPlatformVersion())
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
@@ -465,6 +466,8 @@ public final class JkProject implements JkIdeSupportSupplier {
             runtimeDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
             builder.append("Test Dependencies             : \n");
             testDependencies.getVersionedDependencies().forEach(dep -> builder.append("    " + dep + "\n"));
+        } else {
+            builder.append("\nUse the --verbose option to display declared dependencies.");
         }
         return builder.toString();
     }

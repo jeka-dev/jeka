@@ -53,12 +53,6 @@ class PicocliCommands {
         return new CommandLine(mainCommandSpec);
     }
 
-    static CommandLine stdHelp() {
-        CommandSpec commandSpec = CommandSpec.create()
-                .mixinStandardHelpOptions(true).helpCommand(true);
-        return new CommandLine(commandSpec);
-    }
-
     static CommandSpec fromKBeanDesc(KBeanDescription beanDesc) {
         CommandSpec spec = CommandSpec.create();
         beanDesc.beanFields.forEach(beanField -> {

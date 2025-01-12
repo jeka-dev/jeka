@@ -23,10 +23,12 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -347,18 +349,26 @@ public class JkDockerBuild {
      * @param imageName the name of the image to build. It may include a tag name.
      */
     public void buildImage(Path buildContextDir, String imageName) {
+        JkLog.startTask("generate-build-context-dir");
         this.generateContextDir(buildContextDir);
+        JkLog.endTask();
+        JkLog.startTask("execute-docker-build");
+        if (!JkLog.isVerbose()) {
+            JkLog.info("Some Docker images, especially native ones, can take a long time to build. Please be patient.");
+            JkLog.info("Use the `--verbose` option to show progress during the build. Build started at %s.", JkUtilsTime.now("HH:mm:ss"));
+        }
         JkDocker.of()
                 .assertPresent()
-                .setInheritIO(true)
-                .setLogCommand(true)
-                .setLogWithJekaDecorator(true)
+                .setLogCommand(JkLog.isDebug())
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setInheritIO(false)
                 .addParams("build", "-t", imageName, buildContextDir.toString())
                 .exec();
+        JkLog.endTask();
 
         String portMapping = getPortMappingArgs();
-        JkLog.info("Run docker image: docker run --rm %s%s", portMapping, imageName);
+        JkLog.info("Build context dir generated in: file://" + buildContextDir.toAbsolutePath());
+        JkLog.info("Run docker image by executing : docker run --rm %s%s", portMapping, imageName);
     }
 
     /**

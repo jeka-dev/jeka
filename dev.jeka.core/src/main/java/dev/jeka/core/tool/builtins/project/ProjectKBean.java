@@ -159,7 +159,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Displays information about the Java project to build.")
     public void info() {
         JkLog.info(this.project.getInfo());
-        JkLog.info("\nExecute 'project: depTree' to display details on dependencies.");
+        JkLog.info("Execute 'project: depTree' to display dependency resolution.");
     }
 
     @JkDoc("Runs the generated jar.")
@@ -211,14 +211,16 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         @JkDoc("If true and no mainClass specified, it will be detected and added to the Manifest.")
         public boolean detectMainClass;
 
-
-
     }
 
     /**
      * Options about tests
      */
     public static final class JkTestOptions {
+
+        @JkDoc("Space-separated string to filter the test class names to run. " +
+                "Use regex patterns like '.*', '.*Test', '.*IT', or 'ac.me.MyTest'.")
+        public String includePatterns = null;//".*";
 
         /** Turn it on to skip tests. */
         @JkDoc("If true, tests are not run.")
@@ -256,11 +258,15 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     public static class JkCompilationOptions {
 
+        @JkDoc("Specify whether to fork the compilation process.")
+        public boolean fork;
+
         @JkDoc("The target JVM version for compiled files.")
         @JkInjectProperty("jeka.java.version")
         public String javaVersion;
 
         @JkDoc("Extra arguments to be passed to the compiler (example -Xlint:unchecked).")
+        @JkDepSuggest(versionOnly = true, hint = "-Xlint,-Xlint:deprecation,-Xlint:unchecked")
         public String compilerOptions;
 
     }
@@ -268,6 +274,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
     public class JkRunOptions {
 
         @JkDoc("JVM options to use when running generated jar")
+        @JkDepSuggest(versionOnly = true, hint = "-Xms512m,-Xmx2g,-Xmn128m,-Xss1m,-Xlog:gc,-XX:+UseG1GC," +
+                "-XX:+PrintGCDetails,-XX:+HeapDumpOnOutOfMemoryError,-Xdiag,-XshowSettings,-Xlog:exceptions")
         public String jvmOptions = "";
 
         @JkDoc("Program arguments to use when running generated jar")
@@ -392,7 +400,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         JkJavaCompilerToolChain compilerToolChain = project.compilerToolChain;
         if (!compilerToolChain.isToolOrProcessSpecified()) {
-            compilerToolChain.setJdkHints(jdks(), true);
+            compilerToolChain.setJdkHints(jdks(), !compilation.fork);
         }
         if (pack.jarType != null) {
             project.flatFacade.setMainArtifactJarType(pack.jarType);
@@ -404,6 +412,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         if (!JkUtilsString.isBlank(pack.shadeJarClassifier)) {
             project.flatFacade.addShadeJarArtifact(pack.shadeJarClassifier);
         }
+
+        // Configure testing
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());
         if (tests.fork) {
@@ -425,8 +435,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         }
         project.testing.setSkipped(tests.skip);
 
-        // The style should not be forced by default as it is determined by the presence of a console,
-        // and the log level
+        // -- The style should not be forced by default as it is determined by the presence of a console, and the log level
         if (tests.progress != null) {
             project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progress);
         }
@@ -438,6 +447,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.compilation.addJavaCompilerOptions(options);
             project.testing.compilation.addJavaCompilerOptions(options);
         }
+        List<String> includePatterns = JkUtilsString.splitWhiteSpaces(tests.includePatterns);
+        project.testing.testSelection.addIncludePatterns(includePatterns);
 
         // Configure scaffold
         this.projectScaffold = JkProjectScaffold.of(project);

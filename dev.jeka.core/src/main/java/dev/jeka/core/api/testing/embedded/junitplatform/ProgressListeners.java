@@ -23,6 +23,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -168,13 +169,16 @@ class ProgressListeners {
         @Override
         public void testPlanExecutionStarted(TestPlan testPlan) {
             printTestContainerCount(testPlan);
+            silencer.silent(true);
         }
 
         @Override
         public void executionStarted(TestIdentifier testIdentifier) {
             if(mustShow(testIdentifier)) {
                 if (bootingCharCount > 0) {
+                    silencer.silent(false);
                     deleteLastChars(bootingCharCount);
+                    silencer.silent(true);
                     bootingCharCount = 0;
                 }
             }
@@ -370,7 +374,7 @@ class ProgressListeners {
     }
 
     private static long printTestContainerCount(TestPlan testPlan) {
-        long count = testPlan.countTestIdentifiers(TestIdentifier::isContainer);
+        long count = testPlan.countTestIdentifiers(ProgressListeners::isClassContainer);
         System.out.println("Found " + count + " test containers.");
         return count;
     }

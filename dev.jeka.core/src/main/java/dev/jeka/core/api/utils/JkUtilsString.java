@@ -20,6 +20,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -268,11 +269,12 @@ public final class JkUtilsString {
     }
 
     /**
-     * Extracts variable tokens from the given string.
-     * <p>
-     * Variable tokens are string embedded within <code>${}</code>.
+     * Extracts variable tokens enclosed in `${}` from the provided string.
+     * A variable token is a string contained between `${` and `}`.
      *
-     * @param string The input string.
+     * @param string the input string from which to extract variable tokens
+     * @return a list of variable tokens without the enclosing `${}`;
+     *         returns an empty list if no variable tokens are present
      */
     public static List<String> extractVariableToken(String string) {
         boolean onDollar = false;
@@ -300,12 +302,14 @@ public final class JkUtilsString {
     }
 
     /**
-     * Interpolates a string by replacing variable tokens with their corresponding values.
+     * Replaces variable tokens in the given string with the corresponding values
+     * provided by the replacer function. Variable tokens are enclosed in `${}`.
      *
-     * @param string   The string to interpolate.
-     * @param replacer The function used to retrieve the value for each variable token.
-     *
-     * @return The interpolated string.
+     * @param string the input string containing variable tokens to be replaced
+     * @param replacer a function that takes a variable token (without `${}`)
+     *                 and returns the replacement value for the token
+     * @return the resulting string after variable replacement
+     * @throws IllegalArgumentException if no replacement is defined for a token
      */
     public static String interpolate(String string, Function<String, String> replacer) {
         List<String> variableTokens = JkUtilsString.extractVariableToken(string);
@@ -596,5 +600,24 @@ public final class JkUtilsString {
 
         return String.join(".", resultParts);
     }
+
+    /**
+     * Splits the provided string into a list of substrings based on whitespace.
+     * Consecutive whitespaces are treated as a single delimiter. Each resulting substring is trimmed.
+     * If the input string is null, it is treated as an empty string.
+     *  <p>
+     *  Null or empty sting result in an empty list.
+     */
+    public static List<String> splitWhiteSpaces(String string) {
+        String sanitized = JkUtilsString.nullToEmpty(string).trim();
+        if (sanitized.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(JkUtilsString.nullToEmpty(string).trim().split(" "))
+                .map(String::trim)
+                .collect(Collectors.toList());
+    }
+
+
 
 }

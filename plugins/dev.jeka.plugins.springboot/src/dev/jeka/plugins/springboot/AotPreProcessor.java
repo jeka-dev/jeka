@@ -65,10 +65,12 @@ class AotPreProcessor {
     }
 
     void generate() {
+        JkLog.info("Invoking Spring AOT processor tool...");
         JkJavaProcess.ofJava("org.springframework.boot.SpringApplicationAotProcessor")
                 .setClasspath(classpath)
                 .addParams(getAotArguments())
-                .setLogCommand(JkLog.isVerbose())
+                .setLogCommand(JkLog.isDebug())
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setInheritIO(false)
                 .exec();
     }

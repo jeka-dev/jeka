@@ -257,7 +257,7 @@ public final class JkDependencyResolver  {
         AtomicReference<JkResolveResult> result = new AtomicReference<>();
         if (displaySpinner) {
             JkConsoleSpinner.of("Resolve dependencies")
-                    .setAlternativeMassage("Resolve dependencies ...")
+                    .setAlternativeMassage(JkLog.isVerbose() ? null : "Resolve dependencies ...")
                     .run(() -> result.set(doResolve(qualifiedDependencies, params)));
             return result.get();
         }
@@ -265,22 +265,37 @@ public final class JkDependencyResolver  {
     }
 
     private JkResolveResult doResolve(JkQualifiedDependencySet qualifiedDependencies, JkResolutionParameters params) {
+
+        // Resolve dependency versions against BOMs and version provider
         JkQualifiedDependencySet bomResolvedDependencies = replacePomDependencyByVersionProvider(qualifiedDependencies);
+
+        // Translate dependencies to qualified-dependencies
         List<JkDependency> allDependencies = bomResolvedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies
                 .withCoordinateDependenciesOnly()
                 .withResolvedBoms(effectiveRepos())
                 .assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
+
+        // Warn if no dependency is present
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();
         if (effectiveRepos().getRepos().isEmpty() && hasModule) {
             JkLog.warn("You are trying to resolve dependencies on zero repository. Won't be possible to resolve modules.");
         }
+
+        // // Log dependency resolution details in a clear and concise way
+        JkLog.verboseStartTask("resolve-dependencies");
+        int dependencyCount = bomResolvedDependencies.getDependencies().size();
+        if (dependencyCount == 1) {
+            JkLog.info("Unique dependency %s to resolve.", bomResolvedDependencies.getDependencies().get(0));
+        } else {
+            JkLog.info("%s dependencies to resolve:", dependencyCount);
+            bomResolvedDependencies.getEntries().forEach(
+                    dependency -> JkLog.info("   %s", dependency));;
+        }
+
+        // Actually resolve dependencies
         JkInternalDependencyResolver internalDepResolver = JkInternalDependencyResolver.of(effectiveRepos());
-        String message = bomResolvedDependencies.getEntries().size() == 1 ?
-                "Resolve " + bomResolvedDependencies.getDependencies().get(0).toString()
-                : "Resolve " + bomResolvedDependencies.getEntries().size() + " declared dependencies";
-        JkLog.verboseStartTask(message);
         JkResolveResult resolveResult;
         if (hasModule) {
             JkUtilsAssert.state(!effectiveRepos().getRepos().isEmpty(), "Cannot resolve module dependency cause no " +
@@ -293,12 +308,20 @@ public final class JkDependencyResolver  {
                 allDependencies);
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
 
+        // Logs result readably
         if (JkLog.isVerbose()) {
             int moduleCount = resolveResult.getInvolvedCoordinates().size();
             int fileCount = resolveResult.getFiles().getEntries().size();
-            JkLog.verbose("  " + pluralize(moduleCount, "coordinate") + " resolved to " + pluralize(fileCount, "file"));
-            resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
+            JkLog.info("->  Resolved to %s, resulting in %s.",
+                    pluralize(moduleCount, "coordinate"),
+                    pluralize(fileCount, "file"));
+
+            if (JkLog.isDebug()) {
+                resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
+            }
         }
+
+        // Handle resolution errors
         JkResolveResult.JkErrorReport report = resolveResult.getErrorReport();
         if (report.hasErrors()) {
             if (params.isFailOnDependencyResolutionError()) {
@@ -308,6 +331,8 @@ public final class JkDependencyResolver  {
             JkLog.warn(report.toString());
         }
         JkLog.verboseEndTask();
+
+        // Cache result in memory before returning
         if (useInMemoryCache) {
             this.cachedResults.put(bomResolvedDependencies, resolveResult);
         }
@@ -331,8 +356,8 @@ public final class JkDependencyResolver  {
         boolean nonExistingEntryOnFs = false;
         if (Files.exists(cacheFile)) {
             if (JkLog.isDebug()) {
-                JkLog.info("Resolving %n%s", qualifiedDependencies.toStringMultiline("  "));
-                JkLog.info("Found cached resolve-classpath file %s", cacheFile);
+                JkLog.debug("Resolving Dependencies:%n%s", qualifiedDependencies.toStringMultiline("  "));
+                JkLog.debug("Found cached resolve-classpath file %s", cacheFile);
             }
             JkPathSequence cachedPathSequence =
                     JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());

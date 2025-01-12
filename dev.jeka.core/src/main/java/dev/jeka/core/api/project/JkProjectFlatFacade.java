@@ -25,6 +25,7 @@ import dev.jeka.core.api.tooling.git.JkGit;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -250,9 +251,18 @@ public class JkProjectFlatFacade {
      *
      * @see #addTestIncludeFilterSuffixedBy(String, boolean)
      */
-    public JkProjectFlatFacade addTestIncludeFilterOnStandardNaming(boolean condition) {
+    public JkProjectFlatFacade addTestMavenIncludePattern(boolean condition) {
         project.testing.testSelection.addIncludePatternsIf(condition,
-                JkTestSelection.STANDARD_INCLUDE_PATTERN);
+                JkTestSelection.MAVEN_INCLUDE_PATTERN);
+        return this;
+    }
+
+    /**
+     * Removes all test include patterns, effectively clearing any previously set
+     * test class inclusion filters. This ensures that all class tests are included.
+     */
+    public JkProjectFlatFacade removeAllTestIncludePatterns() {
+        project.testing.testSelection.setIncludePatterns(Collections.emptySet());
         return this;
     }
 

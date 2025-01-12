@@ -81,13 +81,12 @@ public class CoreBuild extends KBean {
                         .append("create-distrib", this::doDistrib)
                         .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
         project
-            .compilerToolChain
-                .setForkedWithDefaultProcess();
-        project
             .compilation
                 .addJavaCompilerOptions("-Xlint:none","-g")
                 .layout
                     .mixResourcesAndSources();
+        project.compilerToolChain.setForkCompiler(true);
+
         project
             .testing
                 .compilation
@@ -96,8 +95,7 @@ public class CoreBuild extends KBean {
         project
             .testing
                 .testSelection
-                    .addIncludePatterns(JkTestSelection.STANDARD_INCLUDE_PATTERN)
-                    .addIncludePatternsIf(runIT, JkTestSelection.IT_INCLUDE_PATTERN);
+                    .addExcludePatternsIf(!runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
         project
             .packaging
@@ -150,8 +148,6 @@ public class CoreBuild extends KBean {
         new ScaffoldTester().run();
         JkLog.endTask();
     }
-
-
 
     private Path distribFolder() {
         return project.getOutputDir().resolve("distrib");

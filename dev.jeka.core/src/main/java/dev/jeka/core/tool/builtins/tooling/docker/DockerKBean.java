@@ -16,6 +16,7 @@
 
 package dev.jeka.core.tool.builtins.tooling.docker;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.file.JkPathTree;
@@ -50,6 +51,11 @@ public final class DockerKBean extends KBean {
     @JkDoc("Base image to construct the Docker image.")
     public String jvmBaseImage = JkDockerJvmBuild.DEFAULT_BASE_IMAGE;
 
+    @JkDoc("Space-separated list of additional JVM options to use when running the container's Java process.")
+    @JkDepSuggest(versionOnly = true, hint = "-Xms512m,-Xmx2g,-Xmn128m,-Xss1m,-Xlog:gc,-XX:+UseG1GC," +
+            "-XX:+PrintGCDetails,-XX:+HeapDumpOnOutOfMemoryError,-Xdiag,-XshowSettings,-Xlog:exceptions")
+    public String jvmOptions;
+
     @JkDoc("Base image for the native Docker image to build. " +
             "It can be replaced by a distro-less image as 'gcr.io/distroless/static-debian12:nonroot'")
     public String nativeBaseImage = JkDockerNativeBuild.DEFAULT_BASE_IMAGE;
@@ -82,7 +88,11 @@ public final class DockerKBean extends KBean {
         JkBuildable buildable = getBuildable(true);
         String imageName = resolveJvmImageName();
         String dirName = "docker-build-" + imageName.replace(':', '#');
-        jvmDockerBuild(buildable).buildImage(getOutputDir().resolve(dirName), imageName);
+        JkLog.startTask("build-jvm-docker-image");
+        JkLog.info("Image Name : " + imageName);
+        Path contextDir = getOutputDir().resolve(dirName);
+        jvmDockerBuild(buildable).buildImage(contextDir, imageName);
+        JkLog.endTask();
     }
 
     @JkDoc("Displays info about the Docker image.")
@@ -99,7 +109,11 @@ public final class DockerKBean extends KBean {
         JkBuildable buildable = getBuildable(true);
         String imageName = resolveNativeImageName();
         String dirName = "docker-build-" + imageName.replace(':', '#');
-        nativeDockerBuild(buildable).buildImage(getOutputDir().resolve(dirName), imageName);
+        JkLog.startTask("build-native-docker-image");
+        JkLog.info("Image Name : " + imageName);
+        Path contextDir = getOutputDir().resolve(dirName);
+        nativeDockerBuild(buildable).buildImage(contextDir, imageName);
+        JkLog.endTask();
     }
 
     @JkDoc("Displays info about the native Docker image.")
@@ -107,7 +121,9 @@ public final class DockerKBean extends KBean {
         String imageName = resolveNativeImageName();
         JkBuildable buildable = getRunbase().getBuildable();
         JkLog.info("Image Name        : " + imageName);
+        JkLog.startTask("prepare-native-compilation-data");
         String info = nativeDockerBuild(buildable).renderInfo(); // May trigger a compilation to find the main class
+        JkLog.endTask();
         JkLog.info(info);
     }
 
@@ -157,12 +173,11 @@ public final class DockerKBean extends KBean {
         return buildable;
     }
 
-
-
     private JkDockerJvmBuild jvmDockerBuild(JkBuildable buildable) {
         JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of();
         dockerBuild.setNonRootUserCreationMode(jvmNonRootUser);
         JkLog.verbose("Configure JVM Docker image for %s", buildable);
+        dockerBuild.addJvmOptions(JkUtilsString.splitWhiteSpaces(jvmOptions));
         dockerBuild.adaptTo(buildable);
         jvmImageCustomizer.accept(dockerBuild);
         return dockerBuild;
@@ -171,7 +186,7 @@ public final class DockerKBean extends KBean {
     private JkDockerNativeBuild nativeDockerBuild(JkBuildable buildable) {
         NativeKBean nativeKBean = this.load(NativeKBean.class);
         JkLog.verbose("Configure native Docker image for %s", buildable);
-        JkNativeCompilation nativeImage =  nativeKBean.nativeImage(buildable);
+        JkNativeCompilation nativeImage =  nativeKBean.createNativeCompilation(buildable);
         JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeImage);
         dockerBuild.setBaseImage(nativeBaseImage);
         dockerBuild.setNonRootUserCreationMode(nativeNonRootUser);

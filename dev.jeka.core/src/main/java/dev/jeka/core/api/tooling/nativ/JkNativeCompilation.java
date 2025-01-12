@@ -24,10 +24,7 @@ import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.utils.JkUtilsJdk;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 
 import java.io.IOException;
@@ -137,7 +134,7 @@ public class JkNativeCompilation {
      * Generates a native image at the specified file location.
      */
     public void make(Path outputFile) {
-        JkLog.startTask("make-native-image");
+        JkLog.startTask("compile-native-executable");
 
         String nativeImageExe = toolPath().toString();
         JkProcess process = JkProcess.of(nativeImageExe);
@@ -154,14 +151,18 @@ public class JkNativeCompilation {
             process.addParams("@" + tempArgFile);
         }
 
+        if (!JkLog.isVerbose()) {
+            JkLog.info("Invoking nativeImage tool. This can takes several minutes. Please be patient.");
+            JkLog.info("Use the `--verbose` option to show progress during the build. Build started at %s.", JkUtilsTime.now("HH:mm:ss"));
+        }
         process = process
                 .addParams("--no-fallback")
                 .addParamsIf(!JkUtilsString.isBlank(mainClass), "-H:Class=" + mainClass)
                 .addParams("-o",  outputFile.toString())
-                .setLogCommand(true)
-                .setInheritIO(true)
+                .setLogCommand(JkLog.isDebug())
+                .setInheritIO(false)
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setDestroyAtJvmShutdown(true);
-
         process.exec();
         JkLog.info("Generated in %s", outputFile);
         JkLog.endTask();
@@ -182,7 +183,7 @@ public class JkNativeCompilation {
             params.add("--static-nolibc");
         }
         params.add("--no-fallback");
-        if (JkLog.isVerbose()) {
+        if (JkLog.isDebug()) {
             params.add("--verbose");
         }
         if (!JkUtilsString.isBlank(mainClass)) {
@@ -375,7 +376,7 @@ public class JkNativeCompilation {
                     return artifactDir.resolve(coordinate.getVersion().getValue());
                 } else if(!versions.isEmpty()) {
                     JkVersion lastVersion = versions.get(versions.size() - 1);
-                    JkLog.warn("Reachability metadata could not find version for %s. Use latest version %s instead.",
+                    JkLog.verbose("Reachability metadata could not find version for %s. Use latest version %s instead.",
                             coordinate, lastVersion);
                     return artifactDir.resolve(lastVersion.getValue());
                 } else {

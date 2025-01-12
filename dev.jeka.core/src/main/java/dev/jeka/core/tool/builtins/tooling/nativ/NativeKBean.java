@@ -20,7 +20,7 @@ import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
@@ -84,8 +84,14 @@ public class NativeKBean extends KBean {
         return this;
     }
 
-
-    public JkNativeCompilation nativeImage(JkBuildable buildable) {
+    /**
+     * Creates a native compilation configuration for the specified buildable object. This method
+     * prepares the classpath, includes dependencies for metadata repo, optionally adds extra arguments,
+     * and configures static linkage and resource inclusion options for the native compilation process.
+     * <p>
+     * This method triggers dependency resolution if the metadata repository is used.
+     */
+    public JkNativeCompilation createNativeCompilation(JkBuildable buildable) {
         List<Path> classpath = new LinkedList<>();
         classpath.add(buildable.getClassDir());
         final List<Path> depsAsFiles;
@@ -119,10 +125,12 @@ public class NativeKBean extends KBean {
     }
 
     private void build(JkBuildable buildable) {
-        JkNativeCompilation nativeCompilation = nativeImage(buildable);
+        JkLog.startTask("compile-native");  // For proper log rendering, task must start before native compilation creation, as this has a sub-task
+        JkNativeCompilation nativeCompilation = createNativeCompilation(buildable);
         String pathString = buildable.getMainJarPath().toString();
         pathString = JkUtilsString.substringBeforeLast(pathString, ".jar");
         nativeCompilation.make(Paths.get(pathString.replace('\\', '/')));
+        JkLog.endTask();
     }
 
 }

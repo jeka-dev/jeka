@@ -117,8 +117,8 @@ public class Main {
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
             // Handle 'jeka --doc'
-            String kbeanDoc = cmdArgs.kbeanDoc();
-            if (kbeanDoc != null && JkUtilsString.isBlank(kbeanDoc)) {
+            String docKbeanName = cmdArgs.kbeanDoc();
+            if (docKbeanName != null && JkUtilsString.isBlank(docKbeanName)) {
                 PicocliHelp.printCmdHelp(
                         engine.resolveClassPaths().runClasspath,
                         kBeanResolution,
@@ -148,8 +148,8 @@ public class Main {
             engine.initRunbase(actionContainer);
 
             // -- Handle doc ([kbean]: --doc)
-            if (kbeanDoc != null) {
-                boolean success = performDocKBean(engine, kbeanDoc);
+            if (docKbeanName != null) {
+                boolean success = performDocKBean(engine, docKbeanName);
                 System.exit(success ? 0 : 1);
             }
             if (logs.runtimeInformation) {

@@ -171,6 +171,10 @@ public class JkProjectCompilation {
                 .collect(Collectors.toList());
     }
 
+    boolean isCompilationForked() {
+        return project.compilerToolChain.isCompilationForked(project.getJvmTargetVersion(), compileSpec());
+    }
+
     private void processResources() {
         this.resourceProcessor.generate(layout.resolveResources(), layout.resolveClassDir());
     }

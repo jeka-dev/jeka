@@ -62,6 +62,8 @@ public class JkDockerJvmBuild extends JkDockerBuild {
 
     private JkPathTree classes;
 
+    private final List<String> jvmOptions = new ArrayList<>();
+
     private List<Path> classpath = Collections.emptyList();
 
     private String mainClass;
@@ -116,9 +118,9 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     @Override
     public void buildImage(Path contextDir, String imageName) {
         super.buildImage(contextDir, imageName);
-        JkLog.info("- Pass additional JVM options using the '-e JAVA_TOOL_OPTIONS=...' option.");
-        JkLog.info("- Pass program arguments by appending them to the end of the command line.");
-        JkLog.info("- Map the host's current directory to the container's working directory using the '-v $PWD:/workdir' option.");
+        JkLog.info("    - Pass additional JVM options using the '-e JAVA_TOOL_OPTIONS=...' option.");
+        JkLog.info("    - Pass program arguments by appending them to the end of the command line.");
+        JkLog.info("    - Map the host's current directory to the container's working directory using the '-v $PWD:/workdir' option.");
 
     }
 
@@ -173,8 +175,6 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         return this;
     }
 
-
-
     /**
      * Adds the specified agent to the running JVM
      * @param agentCoordinate The agent maven coordinate to download agent.
@@ -191,6 +191,14 @@ public class JkDockerJvmBuild extends JkDockerBuild {
      */
     public JkDockerJvmBuild addAgent(@JkDepSuggest String agentCoordinate) {
         return addAgent(agentCoordinate, "");
+    }
+
+    /**
+     * Adds the specified JVM options to the Java process.
+     */
+    public JkDockerJvmBuild addJvmOptions(List<String> jvmOptions) {
+        this.jvmOptions.addAll(jvmOptions);
+        return this;
     }
 
     /**
@@ -235,6 +243,7 @@ public class JkDockerJvmBuild extends JkDockerBuild {
         List<String> cmdLine = new ArrayList<>();
         cmdLine.add("java");
         cmdLine.addAll(computeAgentArgumentsAsList());
+        cmdLine.addAll(jvmOptions);
         cmdLine.add("-cp");
         cmdLine.add("@/app/classpath.txt");
         cmdLine.add(mainClass);

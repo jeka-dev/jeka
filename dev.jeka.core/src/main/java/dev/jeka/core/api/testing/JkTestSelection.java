@@ -39,7 +39,7 @@ public final class JkTestSelection implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String STANDARD_INCLUDE_PATTERN = "^(Test.*|.+[.$]Test.*|.*Tests?)$";
+    public static final String MAVEN_INCLUDE_PATTERN = "^(Test.*|.+[.$]Test.*|.*Tests?)$";
 
     public static final String IT_INCLUDE_PATTERN = ".*IT";
 
@@ -107,8 +107,8 @@ public final class JkTestSelection implements Serializable {
         return this;
     }
 
-    public JkTestSelection addIncludeStandardPatterns() {
-        return addIncludePatterns(STANDARD_INCLUDE_PATTERN);
+    public JkTestSelection addIncludeMavenPatterns() {
+        return addIncludePatterns(MAVEN_INCLUDE_PATTERN);
     }
 
     public JkTestSelection addIncludePatterns(String ...patterns) {
@@ -134,9 +134,25 @@ public final class JkTestSelection implements Serializable {
         return this;
     }
 
+    /**
+     * Adds the specified exclude patterns to the current test selection.
+     * Exclude patterns are regular expressions used to filter test class names.
+     */
     public JkTestSelection addExcludePatterns(String ...patterns) {
         return addExcludePatterns(Arrays.asList(patterns));
     }
+
+    /**
+     * @see #addExcludePatterns
+     */
+    public JkTestSelection addExcludePatternsIf(boolean condition, String ...patterns) {
+        if (condition) {
+            addExcludePatterns(patterns);
+        }
+        return this;
+    }
+
+
 
     public Set<String> getIncludeTags() {
         return Collections.unmodifiableSet(includeTags);
@@ -177,6 +193,16 @@ public final class JkTestSelection implements Serializable {
         return this;
     }
 
+    /**
+     * Sets the include patterns for selecting test classes. Include patterns are
+     * regular expressions used to filter test class names. Only test classes
+     * whose names match at least one of the specified patterns will be included.
+     */
+    public JkTestSelection setIncludePatterns(Collection<String> includePatterns) {
+        this.includePatterns = new LinkedHashSet<>(includePatterns);
+        return this;
+    }
+
     public void resolveTestRootClasses() {
         testClassRoots = testClassRoots.resolvedTo(rootResolver.get());
     }
@@ -209,19 +235,18 @@ public final class JkTestSelection implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Test Class Roots: " + testClassRoots.relativizeFromWorkingDir() +
-                ", Include Patterns: " + includePatterns);
-        if (!excludePatterns.isEmpty()) {
-            sb.append(", Exclude Patterns: " + excludePatterns);
+        sb.append("Test Class Roots: ").append(testClassRoots.relativizeFromWorkingDir());
+        if (!includePatterns.isEmpty()) {
+            sb.append(", Include Patterns: ").append(includePatterns);
         }
         if (!excludePatterns.isEmpty()) {
-            sb.append(", Include Tags: " + includeTags);
+            sb.append(", Exclude Patterns: ").append(excludePatterns);
+        }
+        if (!includeTags.isEmpty()) {
+            sb.append(", Include Tags: ").append(includeTags);
         }
         if (!excludeTags.isEmpty()) {
-            sb.append(", Exclude Tags: " + excludeTags);
-        }
-        if (!excludeTags.isEmpty()) {
-            sb.append(", Discovery Configurer: " + discoveryConfigurer);
+            sb.append(", Exclude Tags: ").append(excludeTags);
         }
         return sb.toString();
     }

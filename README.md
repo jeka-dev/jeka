@@ -5,6 +5,12 @@
 
 <img src="./docs/images/logo-plain-gradient.svg" width="100" align="right" hspace="15"  />
 
+_____
+**⭐ Support the Project ⭐**
+
+If you find this project useful, please consider giving it a ⭐ on GitHub! Your support helps the project grow and reach more developers. 😊
+_____
+
 # JeKa
 
 **The Next-Gen Build Tool for Java & Co**
@@ -15,12 +21,6 @@ JeKa is a modern Java build tool designed for simplicity, combining ease of use 
 
 It targets a generation of Java developers who prefer simple, Java-centric tools over complex XML-based 
 or external DSL-based solutions for building their applications.
-
-_____
-**⭐ Support the Project ⭐**
-
-   If you find this project useful, please consider giving it a ⭐ on GitHub! Your support helps the project grow and reach more developers. 😊
-_____
 
 ## Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration required.

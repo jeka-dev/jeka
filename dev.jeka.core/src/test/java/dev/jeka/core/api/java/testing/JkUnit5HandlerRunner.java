@@ -16,15 +16,14 @@ public class JkUnit5HandlerRunner {
 
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.INDENT);
-        //JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = resolver.resolve(JkDependencySet.of().and("org.junit.vintage:junit-vintage-engine:jar:5.6.0"));
-        JkPathSequence pathSquence = resolveResult.getFiles();
-        Path path = Paths.get(".idea/output/test") ;
-        JkPathSequence classpath = JkPathSequence.of(path).and(pathSquence);
+        JkPathSequence pathSequence = resolveResult.getFiles();
+        Path path = Paths.get(".idea/output/test");
+        JkPathSequence classpath = JkPathSequence.of(path).and(pathSequence);
         JkTestProcessor tp = JkTestProcessor.of();
         tp.launch(classpath, JkTestSelection.of()
-                .addIncludeStandardPatterns()
+                .addIncludeMavenPatterns()
                 .addTestClassRoots(path));
     }
 }

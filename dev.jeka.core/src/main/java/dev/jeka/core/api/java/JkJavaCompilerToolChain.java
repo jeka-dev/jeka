@@ -53,8 +53,6 @@ public final class JkJavaCompilerToolChain {
 
     private ToolOrProcess toolOrProcess = new ToolOrProcess(null, null);
 
-    private String[] forkParams;
-
     private String[] toolParams = new String[0];
 
     private JdkHints jdkHints = JdkHints.ofDefault();
@@ -91,20 +89,129 @@ public final class JkJavaCompilerToolChain {
     }
 
     /**
-     * Invoking this method will make the compilation occurs in a forked process
-     * if no compileTool has been specified.<br/>
-     * The forked process will be a javac command taken from the running jdk or
-     * an extra-one according the source version.
+     * Sets the JDK hints to specify the available JDKs and whether to prefer in-process tool for compilation.
+     *
+     * @param jdks A {@link JkJdks} instance defining the JDKs to be considered during compilation.
+     * @param preferInProcess If true, the compiler tool is preferred over process-based compilation;
+     *                   otherwise, the process is preferred.
+     * @return The current instance of {@link JkJavaCompilerToolChain} with updated JDK hints.
      */
-    public JkJavaCompilerToolChain setForkedWithDefaultProcess(String... processParams) {
-        this.forkParams = processParams;
+    public JkJavaCompilerToolChain setJdkHints(JkJdks jdks, boolean preferInProcess) {
+        JdkHints jdkHints = new JdkHints(jdks, preferInProcess);
+        this.jdkHints = jdkHints;
         return this;
     }
 
-    public JkJavaCompilerToolChain setJdkHints(JkJdks jdks, boolean preferTool) {
-        JdkHints jdkHints = new JdkHints(jdks, preferTool);
-        this.jdkHints = jdkHints;
+    /**
+     * Configures whether the Java compilation process should be forked into
+     * an external process.
+     *
+     * @param forkCompiler If true, the compilation process will be forked into
+     *                     an external process. If false, the compilation will
+     *                     occur in-process.
+     * @return The current instance of {@link JkJavaCompilerToolChain} with the
+     *         updated fork configuration.
+     */
+    public JkJavaCompilerToolChain setForkCompiler(boolean forkCompiler) {
+        this.jdkHints = new JdkHints(this.jdkHints.jdks, !forkCompiler);
         return this;
+    }
+
+    public boolean isToolOrProcessSpecified() {
+        return toolOrProcess.isSpecified();
+    }
+
+    /**
+     * Actually compile the source files to the output directory. <br/>
+     * This toolchain will try to find the most suitable JDK for performing
+     * compilation.
+     *
+     * @param targetVersion Can be <code>null</code>. Provides the version of JDK
+     *                    to use for <i>javac</i>. If <code>null</code>, it will try
+     *                    to infer JDK version from #compileSpec.
+     * @param compileSpec Contains options to pass to the Java compiler. It includes sources,
+     *                    versions, and other options specified for the compiler.
+     *
+     * @return <code>false</code> if a compilation error occurred.
+     *
+     * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
+     */
+    public boolean compile(JkJavaVersion targetVersion, JkJavaCompileSpec compileSpec) {
+        final Path outputDir = compileSpec.getOutputDir();
+        List<String> options = compileSpec.getOptions();
+        if (outputDir == null) {
+            throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler." +
+                    " Specified options : " + JkUtilsString.readableCommandAgs("    ", options));
+        }
+        if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
+            JkLog.warn("No source files found in %s", compileSpec.getSources());
+            return true;
+        }
+        JkUtilsPath.createDirectories(outputDir);
+
+        if (JkLog.isVerbose()) {
+            JkLog.startTask("[VERBOSE] compile");
+            JkLog.verbose("sources      : " + compileSpec.getSources());
+            JkLog.verbose("class dir    : " + compileSpec.getOutputDir());
+            JkLog.verbose("source count : " + compileSpec.getSources().count(Integer.MAX_VALUE, false));
+        }
+        if (JkLog.isDebug()) {
+            JkLog.debug("with options : " );
+            JkLog.debug(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
+        }
+        JkJavaVersion effectiveJavaVersion = Optional.ofNullable(targetVersion)
+                .orElse(compileSpec.minJavaVersion());
+        final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
+        if (JkLog.isVerbose()) {
+            JkLog.endTask("Compilation " + (result ? "completed successfully" : "failed"));
+        }
+        return result;
+    }
+
+    /**
+     * @see #compile(JkJavaVersion, JkJavaCompileSpec)
+     */
+    public boolean compile(JkJavaCompileSpec compileSpec) {
+        return compile(null, compileSpec);
+    }
+
+    /**
+     * Determines if the Java compilation process is forked into an external process.
+     * @return true if the compilation process is forked into an external process, false otherwise.
+     */
+    public boolean isCompilationForked(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {
+        JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
+                .orElse(compileSpec.minJavaVersion());
+        ToolOrProcess toolOrProcess = guess(effectiveJavaVersion);
+        return toolOrProcess.isForkedInProcess();
+    }
+
+    // Visible for testing
+    static String runningJdkVersion(String fullVersion) {
+        String[] items = fullVersion.split("\\.");
+        if (items.length == 1 ) {
+            return fullVersion;
+        }
+        if ("1".equals(items[0])) {
+            return items[1];
+        }
+        return items[0];
+    }
+
+    private static JavaCompiler compileToolOrFail() {
+        JavaCompiler result = ToolProvider.getSystemJavaCompiler();
+        if (result == null) {
+            throw new IllegalArgumentException("The current running Java platform does not provide a compiler. " +
+                    "Please, run this program with a JDK and not a JRE");
+        }
+        return result;
+    }
+
+    private boolean runCompiler(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {
+        if (toolOrProcess.isSpecified()) {
+            return toolOrProcess.run(compileSpec);
+        }
+        return guess(javaVersion).run(compileSpec);
     }
 
     private ToolOrProcess guess(JkJavaVersion javaVersion) {
@@ -122,6 +229,12 @@ public final class JkJavaCompilerToolChain {
         }
         Path currentJavaHome = Paths.get(System.getProperty("java.home"));
         boolean hasJavac = Files.exists(currentJavaHome.resolve("bin/java"));
+
+        // It may be running on the jre home
+        if (!hasJavac) {
+            hasJavac = Files.exists(currentJavaHome.resolve("../bin/java"));
+        }
+
         boolean currentVersionMatch = javaVersion.equals(JkJavaVersion.ofCurrent());
         if (currentVersionMatch) {
             if (jdkHints.preferTool || !hasJavac) {
@@ -139,77 +252,6 @@ public final class JkJavaCompilerToolChain {
         return new ToolOrProcess(compileToolOrFail());
     }
 
-    public boolean isToolOrProcessSpecified() {
-        return toolOrProcess.isSpecified();
-    }
-
-    private static JavaCompiler compileToolOrFail() {
-        JavaCompiler result = ToolProvider.getSystemJavaCompiler();
-        if (result == null) {
-            throw new IllegalArgumentException("The current running Java platform does not provide a compiler. " +
-                    "Please, run this program with a JDK and not a JRE");
-        }
-        return result;
-    }
-
-    /**
-     * Actually compile the source files to the output directory. <br/>
-     * This toolchain will try to find the most suitable JDK for performing
-     * compilation.
-     *
-     * @param javaVersion Can be <code>null</code>. Provides the version of JDK
-     *                    to use for <i>javac</i>. If <code>null</code>, it will try
-     *                    to infer JDK version from #compileSpec.
-     * @param compileSpec Contains options to pass to the Java compiler. It includes sources,
-     *                    versions, and other options specified for the compiler.
-     *
-     * @return <code>false</code> if a compilation error occurred.
-     *
-     * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
-     */
-    public boolean compile(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {
-        final Path outputDir = compileSpec.getOutputDir();
-        List<String> options = compileSpec.getOptions();
-        if (outputDir == null) {
-            throw new IllegalArgumentException("Output dir option (-d) has not been specified on the compiler." +
-                    " Specified options : " + JkUtilsString.readableCommandAgs("    ", options));
-        }
-        if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
-            JkLog.warn("No source files found in %s", compileSpec.getSources());
-            return true;
-        }
-        JkUtilsPath.createDirectories(outputDir);
-
-        if (JkLog.isVerbose()) {
-            JkLog.startTask("compile");
-            JkLog.info("sources      : " + compileSpec.getSources());
-            JkLog.info("to           : " + compileSpec.getOutputDir());
-            JkLog.info("with options : " );
-            JkLog.info(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
-        }
-        JkJavaVersion effectiveJavaVersion = Optional.ofNullable(javaVersion)
-                .orElse(compileSpec.minJavaVersion());
-        final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
-        if (JkLog.isVerbose()) {
-            JkLog.endTask("Compilation " + (result ? "succeed" : "failed") + " in %d millis");
-        }
-        return result;
-    }
-
-    /**
-     * @see #compile(JkJavaVersion, JkJavaCompileSpec)
-     */
-    public boolean compile(JkJavaCompileSpec compileSpec) {
-        return compile(null, compileSpec);
-    }
-
-    private boolean runCompiler(JkJavaVersion javaVersion, JkJavaCompileSpec compileSpec) {
-        if (toolOrProcess.isSpecified()) {
-            return toolOrProcess.run(compileSpec);
-        }
-        return guess(javaVersion).run(compileSpec);
-    }
-
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         List<File> files = JkUtilsPath.toFiles(compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles());
@@ -219,11 +261,12 @@ public final class JkJavaCompilerToolChain {
         options.addAll(compileSpec.getOptions());
         CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutPrintStream()),
                 null, new JkDiagnosticListener(), options, null, javaFileObjects);
+        JkLog.verbose("Compile in-process using options : " + options);
         return task.call();
     }
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
-        JkLog.info("Compile using command " + process.getParamAt(0));
+        JkLog.info("Fork compile using command " + process.getParamAt(0));
         JkLog.info("Compile options: " + compileSpec.getOptions());
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
@@ -231,18 +274,6 @@ public final class JkJavaCompilerToolChain {
         process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
         JkLog.info(sourcePaths.size() + " files to compile.");
         return process.exec().hasSucceed();
-    }
-
-    // Visible for testing
-    static String runningJdkVersion(String fullVersion) {
-        String[] items = fullVersion.split("\\.");
-        if (items.length == 1 ) {
-            return fullVersion;
-        }
-        if ("1".equals(items[0])) {
-            return items[1];
-        }
-        return items[0];
     }
 
     @SuppressWarnings("rawtypes")
@@ -291,15 +322,15 @@ public final class JkJavaCompilerToolChain {
             this(null, compileProcess);
         }
 
-        ToolOrProcess(Path path) {
-            this(JkProcess.of(path.resolve("bin/javac").toString()));
+        ToolOrProcess(Path javaHome) {
+            this(JkProcess.of(findJavac(javaHome).toString()));
         }
 
         boolean isSpecified() {
             return compileTool != null || compileProcess != null;
         }
 
-         boolean run(JkJavaCompileSpec compileSpec) {
+        boolean run(JkJavaCompileSpec compileSpec) {
              if (compileTool != null) {
                  return runOnTool(compileSpec, compileTool, toolParams);
              } else if (compileProcess != null) {
@@ -307,7 +338,20 @@ public final class JkJavaCompilerToolChain {
              } else {
                  throw new IllegalStateException("Neither compilation tool or process has been specified.");
              }
-         }
+        }
+
+        boolean isForkedInProcess() {
+            return compileTool == null;
+        }
+
+    }
+
+    private static Path findJavac(Path javaHome) {
+        Path javac = javaHome.resolve("bin/javac");
+        if (!Files.exists(javac)) {
+            javac = javaHome.getParent().resolve("bin/javac");
+        }
+        return javac;
     }
 
     private static void loadOptionsIfNeeded(JkJavaCompileSpec compileSpec) {

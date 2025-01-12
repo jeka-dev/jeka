@@ -443,7 +443,7 @@ public class JkQualifiedDependencySet {
 
     public String toStringMultiline(String margin) {
         StringBuilder sb = new StringBuilder();
-        sb.append(margin).append("Dependencies    :\n");
+        sb.append(margin).append("Coordinates     :\n");
         entries.forEach(dep -> sb.append(margin + "  " + dep + "\n"));
         sb.append(margin).append("Exclusions      :\n");
         globalExclusions.forEach(exclusion -> sb.append(margin + "  " + exclusion + "\n"));

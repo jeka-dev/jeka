@@ -3,8 +3,10 @@ package dev.jeka.core.api.utils;
 import org.junit.Test;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JkUtilsStringTest {
 
@@ -44,5 +46,11 @@ public class JkUtilsStringTest {
     public void removePackagePrefix() {
         assertEquals("MyClass.myMethod", JkUtilsString.removePackagePrefix("com.example.MyClass.myMethod"));
         assertEquals("MyClass", JkUtilsString.removePackagePrefix("com.example.MyClass"));
+    }
+
+    @Test
+    public void testSplitWhiteSpaves() {
+        List<String> tokens = JkUtilsString.splitWhiteSpaces(null);
+        assertTrue(tokens.isEmpty());
     }
 }

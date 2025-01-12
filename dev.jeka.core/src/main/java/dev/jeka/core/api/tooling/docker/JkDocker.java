@@ -18,6 +18,7 @@ package dev.jeka.core.api.tooling.docker;
 
 import dev.jeka.core.api.system.JkAbstractProcess;
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
@@ -70,7 +71,11 @@ public class JkDocker extends JkAbstractProcess<JkDocker> {
      */
     public boolean isPresent() {
         try {
-            return copy().addParams("version").exec().hasSucceed();
+            return copy()
+                    .addParams("version")
+                    .setLogCommand(JkLog.isDebug())
+                    .setLogWithJekaDecorator(JkLog.isVerbose())
+                    .exec().hasSucceed();
         } catch (UncheckedIOException e) {
             return false;
         }
