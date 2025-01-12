@@ -121,19 +121,19 @@ public interface JkInternalDependencyResolver {
             }
             String fullUrl = url + IVY_URL_PATH;
             try {
-                JkLog.info("Trying to download ivy from (jeka.repos.download) " + fullUrl);
+                JkLog.verbose("Trying to download ivy from (jeka.repos.download) " + fullUrl);
                 JkUtilsPath.deleteIfExists(path);
                 JkUrlFileProxy.of(fullUrl, path).get();
                 if (checkDowloadOk(path)) {
                     return;
                 }
             } catch (UncheckedIOException e) {
-                JkLog.info("Failed to download ivy from " + fullUrl);
+                JkLog.verbose("Failed to download ivy from " + fullUrl);
             }
         }
         String fullUrl = "https://repo1.maven.org/maven2/" + IVY_URL_PATH;
         try {
-            JkLog.info("Trying to download ivy from " + fullUrl);
+            JkLog.verbose("Trying to download ivy from " + fullUrl);
             JkUtilsPath.deleteIfExists(path);
             JkUrlFileProxy.of(fullUrl, path).get();
             if (!checkDowloadOk(path)) {
@@ -153,7 +153,7 @@ public interface JkInternalDependencyResolver {
             JkLog.warn("Ivy download not completed.");
             return false;
         }
-        JkLog.info("Ivy downloaded with success.");
+        JkLog.verbose("Ivy downloaded successfully");
         return true;
     }
 

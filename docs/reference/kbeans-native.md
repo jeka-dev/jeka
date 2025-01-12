@@ -17,3 +17,5 @@
 ```
 
 Invocation: `jeka native: compile`
+
+See [native API](api-native.md).

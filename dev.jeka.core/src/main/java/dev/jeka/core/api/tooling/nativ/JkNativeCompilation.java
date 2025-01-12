@@ -39,29 +39,64 @@ import java.util.stream.Stream;
 
 /**
  * Handles native compilation to produce executables from a list of JAR files.
+ *
  * <p>
- * This class allows users to provide a list of JAR files and optional parameters
- * to generate a native executable.
+ * This class enables users to generate a native executable by providing:
+ * <ul>
+ *   <li>A list of JAR files</li>
+ *   <li>Optional configuration parameters</li>
+ * </ul>
  * </p>
  *
  * <h3>Native Compilation Flow</h3>
+ * <p>
+ * The process of generating a native executable involves several steps:
+ * </p>
  * <ol>
- *   <li>Fetch the AOT (Ahead Of Time) metadata repository, which contains supplementary information for the compiler.</li>
- *   <li>Construct the command-line arguments required for the GraalVM <code>nativeImage</code> program.</li>
- *   <li>Download GraalVM if it is not already available on the system.</li>
- *   <li>Invoke the GraalVM <code>nativeImage</code> program to produce the executable from the JAR files.</li>
+ *   <li>Fetch the AOT (Ahead Of Time) metadata repository.
+ *       This provides additional metadata to help the compiler.</li>
+ *   <li>Prepare the command-line arguments needed for the GraalVM
+ *       <code>nativeImage</code> program.</li>
+ *   <li>Verify the availability of GraalVM on the system.
+ *       Download it if not already present.</li>
+ *   <li>Use the GraalVM <code>nativeImage</code> program to compile
+ *       the JAR files into a native executable.</li>
  * </ol>
  *
  * <h3>Configuration Options</h3>
+ * <p>
+ * Users can configure the native compilation process via the following options:
+ * </p>
  * <ul>
- *   <li>Specify whether to statically link the libc library.</li>
- *   <li>Define the main class to be executed in the generated executable.</li>
- *   <li>Decide whether to include all resources within the executable.</li>
- *   <li>Provide raw parameters to the <i>GraalVM nativeImage</i> for advanced configuration.</li>
+ *   <li>Static linking of the <code>libc</code> library.
+ *       Levels: <code>NONE</code>, <code>MOSTLY</code>, and <code>MUSL</code>.</li>
+ *   <li>Main class: Specify the main class to be executed in the
+ *       resulting native executable.</li>
+ *   <li>Resource inclusion: Decide whether to bundle all runtime resources into the executable.</li>
+ *   <li>Raw parameters: Provide custom arguments to the GraalVM
+ *       <i>nativeImage</i> command for advanced setup.</li>
  * </ul>
  *
+ * <h3>GraalVM Setup</h3>
  * <p>
- * Once configured, users can execute the <code>make</code> method to initiate the compilation process.
+ * The GraalVM distribution used for native compilation is selected based on the following precedence:
+ * </p>
+ * <ul>
+ *   <li>If the <code>JEKA_GRAALVM_HOME</code> environment variable is defined, its value is used as the GraalVM path.</li>
+ *   <li>
+ *     If the environment variable starts with <code>DOWNLOAD_</code> (e.g., <code>DOWNLOAD_21</code>),
+ *     GraalVM is downloaded from the internet if it is not already present in the local Jeka cache.
+ *   </li>
+ *   <li>
+ *     If running on an existing GraalVM, that version is used automatically unless otherwise specified.
+ *   </li>
+ *   <li>If no other configuration is provided, a hardcoded GraalVM version is downloaded from the internet.</li>
+ * </ul>
+ *
+ * <h3>Using the Class</h3>
+ * <p>
+ * After configuring the input JARs and compilation options, use the <code>make</code> method
+ * to start the compilation process. The resulting executable will be produced in the output path.
  * </p>
  */
 public class JkNativeCompilation {
@@ -69,6 +104,10 @@ public class JkNativeCompilation {
     public static final String DEFAULT_GRAALVM_VERSION = "23";;
 
     public static final String DEFAULT_REPO_VERSION =  "0.10.3";
+
+    private static final String JEKA_GRAAALVM_HOME = "JEKA_GRAAALVM_HOME";
+
+    private static final String DOWNLOAD_ = "DOWNLOAD_";
 
     public enum StaticLink {
 
@@ -130,6 +169,10 @@ public class JkNativeCompilation {
         return staticLink;
     }
 
+    public List<Path> getAotMetadataRepoPaths() {
+        return reachabilityMetadata.repoDirsToInclude();
+    }
+
     /**
      * Generates a native image at the specified file location.
      */
@@ -137,6 +180,7 @@ public class JkNativeCompilation {
         JkLog.startTask("compile-native-executable");
 
         String nativeImageExe = toolPath().toString();
+        JkLog.verbose("Use native-image executable %s for compiling to native.", nativeImageExe);
         JkProcess process = JkProcess.of(nativeImageExe);
         List<String> params = getNativeImageParams(outputFile.toString(), JkPathSequence.of(classpath).toPath());
         String paramsString = String.join( " ", params);
@@ -153,7 +197,7 @@ public class JkNativeCompilation {
 
         if (!JkLog.isVerbose()) {
             JkLog.info("Invoking nativeImage tool. This can takes several minutes. Please be patient.");
-            JkLog.info("Use the `--verbose` option to show progress during the build. Build started at %s.", JkUtilsTime.now("HH:mm:ss"));
+            JkLog.info("Use the `--verbose` option to show progress during the build. Native compilation started at %s.", JkUtilsTime.now("HH:mm:ss"));
         }
         process = process
                 .addParams("--no-fallback")
@@ -164,7 +208,7 @@ public class JkNativeCompilation {
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setDestroyAtJvmShutdown(true);
         process.exec();
-        JkLog.info("Generated in %s", outputFile);
+        JkLog.info("Native executable generated at %s", outputFile);
         JkLog.endTask();
     }
 
@@ -224,27 +268,52 @@ public class JkNativeCompilation {
         return params;
     }
 
-    public List<Path> getAotMetadataRepoPaths() {
-        return reachabilityMetadata.repoDirsToInclude();
-    }
-
     private static Path toolPath() {
-        Path candidate = currentToolPath();
+        String envValue = System.getenv("JEKA_GRAALVM_HOME");
+
+        // Check if GraalVM home is explicitly specified
+        if (!JkUtilsString.isBlank(envValue)) {
+
+            // If defined as DOWNLOAD_XX, then download from internet
+            if (envValue.startsWith(DOWNLOAD_)) {
+                String version = envValue.substring(DOWNLOAD_.length());
+                Path graalvmHome = JkUtilsJdk.getJdk("graalvm", version);
+                JkLog.verbose("Honor environment variable %s=%s by downloading GraalVM from the internet, " +
+                                "if not present in cache.", JEKA_GRAAALVM_HOME, envValue);
+                return toolPath(graalvmHome);
+            }
+            Path result = toolPath(Paths.get(envValue));
+            JkUtilsAssert.state(Files.exists(result), "Can't find %s executable from %s. Fix the value of " +
+                    "%s environment variable.", result.getFileName(), envValue, JEKA_GRAAALVM_HOME);
+            JkLog.verbose("Honor environment variable %s=%s by using GraalVM home: %s.", JEKA_GRAAALVM_HOME, envValue,
+                    envValue);
+            return result;
+        }
+
+        // Check if current JDK is GRAALVM
+        Path candidate = currentJavaHomeToolPath();
         if (Files.exists(candidate)) {
+            JkLog.verbose("Use native-image tool present in the current java home.");
             return candidate;
         }
+
+        // Download from internet in last resort
         Path graalvmHome = JkUtilsJdk.getJdk("graalvm", DEFAULT_GRAALVM_VERSION);
+        JkLog.verbose("Download GraalVM default version %s, if nor already in cache.", DEFAULT_GRAALVM_VERSION);
         return toolPath(graalvmHome);
     }
 
-    private static Path currentToolPath() {
+    private static Path currentJavaHomeToolPath() {
         return toolPath(JkJavaProcess.CURRENT_JAVA_HOME);
     }
 
     private static Path toolPath(Path javaHome) {
-        return JkUtilsSystem.IS_WINDOWS ?
-                javaHome.resolve("bin/native-image.cmd") :
-                javaHome.resolve("bin/native-image");
+        String execName = JkUtilsSystem.IS_WINDOWS ? "native-image.cmd" : "native-image";
+        Path candidate = javaHome.resolve("bin").resolve(execName);
+        if (!Files.exists(candidate)) {
+            candidate = javaHome.getParent().resolve("bin").resolve(execName);
+        }
+        return candidate;
     }
 
     public class ReachabilityMetadata {

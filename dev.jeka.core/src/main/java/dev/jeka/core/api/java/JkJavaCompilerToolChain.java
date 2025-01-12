@@ -261,7 +261,14 @@ public final class JkJavaCompilerToolChain {
         options.addAll(compileSpec.getOptions());
         CompilationTask task = compiler.getTask(new PrintWriter(JkLog.getOutPrintStream()),
                 null, new JkDiagnosticListener(), options, null, javaFileObjects);
-        JkLog.verbose("Compile in-process using options : " + options);
+        if (JkLog.isVerbose()) {
+            JkLog.verbose("Compile in-process.");
+            if (JkLog.isDebug()) {
+                JkLog.debug("Compile options: %s", options);
+            } else {
+                JkLog.verbose("Compile options: %s", JkUtilsString.ellipse(options.toString(), 100));
+            }
+        }
         return task.call();
     }
 

@@ -355,7 +355,7 @@ public class JkDockerBuild {
         JkLog.startTask("execute-docker-build");
         if (!JkLog.isVerbose()) {
             JkLog.info("Some Docker images, especially native ones, can take a long time to build. Please be patient.");
-            JkLog.info("Use the `--verbose` option to show progress during the build. Build started at %s.", JkUtilsTime.now("HH:mm:ss"));
+            JkLog.info("Use the `--verbose` option to show progress during the build. Native compilation started at %s.", JkUtilsTime.now("HH:mm:ss"));
         }
         JkDocker.of()
                 .assertPresent()
