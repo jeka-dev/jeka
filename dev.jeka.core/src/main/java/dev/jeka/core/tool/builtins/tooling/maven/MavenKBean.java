@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@JkDoc("Manages Maven publication for project and 'jeka-src'")
+@JkDoc("Manages Maven publication for project and 'jeka-src'.")
 public final class MavenKBean extends KBean {
 
     private JkMavenPublication mavenPublication;

@@ -69,7 +69,7 @@ nav:
             - native: reference/kbeans-native.md
             - docker: reference/kbeans-docker.md
             - git: reference/kbeans-git.md
-            - admin: reference/kbeans-admin.md
+            - operations: reference/kbeans-operations.md
         - Build Library:
             - Intro : reference/api-intro.md
             - Files : reference/api-files.md

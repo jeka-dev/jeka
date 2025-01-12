@@ -20,6 +20,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkInfo;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -219,8 +220,14 @@ class PicocliHelp {
                                                                         List<String> kbeanClasses) {
         Map<String, Class<? extends KBean>> result = new LinkedHashMap<>();
         kbeanClasses.stream().forEach(className -> {
-            Class<? extends KBean> clazz = JkClassLoader.of(classLoader).load(className);
-            result.put(KBean.name(className), clazz);
+
+            // A class being in the .jeka-work cache might no longer exist.
+            try {
+                Class<? extends KBean>clazz = JkClassLoader.of(classLoader).load(className);
+                result.put(KBean.name(className), clazz);
+            } catch (Exception e) {
+                JkLog.warn("Class " + className + " could not be loaded.");
+            }
         });
         return result;
     }

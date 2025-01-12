@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-@JkDoc("Creates native images (experimental !)\n" +
+@JkDoc("Creates native executables.\n" +
         "A native images is an executable file created from Java bytecode.\n" +
         "This KBean allows to create native images from executable jars generated from the project.")
 public class NativeKBean extends KBean {

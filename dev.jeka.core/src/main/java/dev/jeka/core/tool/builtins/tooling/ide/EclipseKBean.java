@@ -34,7 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-@JkDoc("Manages Eclipse metadata files")
+@JkDoc("Manages Eclipse metadata files.")
 public final class EclipseKBean extends KBean {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
@@ -62,10 +62,18 @@ public final class EclipseKBean extends KBean {
     // ------------------------ plugin methods ----------------------
 
 
+    /**
+     * @deprecated Use {@link #sync()} instead.
+     */
+    @JkDoc(value = "Deprecated: use 'sync' instead.")
+    @Deprecated
+    public void files() {
+        sync();
+    }
 
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
             "dependencies and source layout.")
-    public void files() {
+    public void sync() {
         final Path dotProject = getBaseDir().resolve(".project");
         JkIdeSupport projectIde = IdeSupport.getProjectIde(getRunbase());
         if (projectIde != null) {

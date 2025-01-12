@@ -36,7 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-@JkDoc("Manages Intellij metadata files")
+@JkDoc("Manages Intellij metadata files.")
 public final class IntellijKBean extends KBean {
 
     // Flag for skipping modules.xml creation when testing.
@@ -88,9 +88,17 @@ public final class IntellijKBean extends KBean {
         }
     }
 
+    /**
+     * @deprecated Use {@link #sync()} instead.
+     */
+    @JkDoc(value = "Deprecated: Use 'sync' instead.")
+    @Deprecated
+    public void iml() {
+        sync();
+    }
 
     @JkDoc("Generates IntelliJ [my-module].iml file.")
-    public void iml() {
+    public void sync() {
         JkLog.startTask("generate-iml");
         Path imlPath = getImlFile();
         generateIml(imlPath);
@@ -107,16 +115,25 @@ public final class IntellijKBean extends KBean {
         intelliJProject.regenerateModulesXml();
     }
 
-    @JkDoc("Generates iml files on this folder and its descendant recursively.")
+    /**
+     * @deprecated Use {@link #syncAll()} instead.
+     */
+    @Deprecated
+    @JkDoc(value = "Deprecated: Use 'syncAll' instead.")
     public void allIml() {
+        syncAll();
+    }
+
+    @JkDoc("Generates iml files on this folder and its descendant recursively.")
+    public void syncAll() {
         JkPathTree.of(getBaseDir()).andMatching("**.iml").stream()
                 .map(path -> {
-                            if (path.getParent().getFileName().toString().equals(".idea")) {
-                                return path.getParent().getParent();
-                            } else {
-                                return path.getParent();
-                            }
-                        })
+                    if (path.getParent().getFileName().toString().equals(".idea")) {
+                        return path.getParent().getParent();
+                    } else {
+                        return path.getParent();
+                    }
+                })
                 .distinct()
                 .forEach(this::generateImlExec);
     }
