@@ -16,6 +16,7 @@
 
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -222,11 +223,16 @@ class KBeanAction implements Comparable<KBeanAction> {
                 }
                 String member = action.type == Action.INVOKE ? action.member + "()" : action.member + "=" + value;
                 member = action.type == BEAN_INIT ? "init" : member;
-                columnText.add(
-                        action.beanClass.getSimpleName(),
-                        JkUtilsString.nullToEmpty(member),
-                        JkUtilsString.nullToEmpty(action.valueSource)
-                );
+
+                // Don't show null assignment at log info level
+                boolean cancel = !JkLog.isVerbose() && (action.type == SET_FIELD_VALUE && action.value == null);
+                if (!cancel) {
+                    columnText.add(
+                            action.beanClass.getSimpleName(),
+                            JkUtilsString.nullToEmpty(member),
+                            JkUtilsString.nullToEmpty(action.valueSource)
+                    );
+                }
             }
             return columnText;
         }
