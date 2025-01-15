@@ -142,11 +142,11 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
         result
             .getProdLayout()
                 .emptySources()
-                .addSource(src);
+                .addSources(src);
         result
             .getTestLayout()
                 .emptySources()
-                .addSource(test);
+                .addSources(test);
         result
             .setDependencies(prodDependencies, prodDependencies, testDependencies)
             .setDependencyResolver(resolver);

@@ -24,13 +24,42 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 
 /**
- * A collection of PathMatcher commonly used each associated with a label for human recognising.
+ * A collection of pre-defined {@link PathMatcher}s, each associated with a label for human-readable identification.
+ * <p>
+ * <strong>Description:</strong>
+ * <ul>
+ *   <li>A {@link PathMatcher} is used to determine whether a {@code Path} matches a specific pattern.</li>
+ *   <li>These matchers are typically based on <a href="https://fossil-scm.org/home/doc/tip/www/globs.md">glob patterns</a>,
+ *       which define string-based rules for matching path components.</li>
+ *   <li>Each matcher is designed with a clear label to describe its behavior, making it easier to understand its purpose and usage.</li>
+ * </ul>
+ *
+ * <strong>Common Path Matchers:</strong>
+ * <ol>
+ *   <li><code>JkPathMatcher.of()</code>: Matches all entries (accepts any path).</li>
+ *   <li><code>JkPathMatcher.of(boolean positive, FileSystem fileSystem, Iterable&lt;String&gt; globPatterns)</code>:
+ *       Matches entries based on one or more glob patterns, with optional inclusion or exclusion behavior
+ *       (driven by the <code>positive</code> parameter).</li>
+ *   <li><code>JkPathMatcher.of(boolean positive, String... globPattern)</code>: A convenient overload of the method above,
+ *       using the default file system.</li>
+ * </ol>
+ *
+ * <strong>Example of Usage:</strong>
+ * <pre>{@code
+ * // Example: Creating a PathMatcher that accepts paths matching "*.java"
+ * JkPathMatcher matcher = JkPathMatcher.of(true, "*.java");
+ *
+ * // Example: Checking if a specific path matches
+ * boolean isMatched = matcher.matches(Paths.get("src/main/MyClass.java"));  // Returns true
+ * }</pre>
+ *
+ * <p>See individual method documentation for specific behavior and usage details.</p>
  */
 public final class JkPathMatcher implements PathMatcher {
 
     private static final String ALL_LABEL_PREFIX = "all && ";
 
-    static final JkPathMatcher ACCEPT_ALL = JkPathMatcher.of();
+    public static final JkPathMatcher ACCEPT_ALL = JkPathMatcher.of();
 
     // --------------------- Factory methods ------------------------------------------------
 

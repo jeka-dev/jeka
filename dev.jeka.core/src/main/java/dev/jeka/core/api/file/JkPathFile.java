@@ -32,8 +32,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.MessageDigest;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -282,6 +284,21 @@ public final class JkPathFile {
         return setPosixExecPermissions(true, true, true);
     }
 
+    /**
+     * Updates the last modified time of the underlying file to the current time.
+     * If the file does not exist, this method has no effect.
+     *
+     * @return The current {@link JkPathFile} instance, allowing method chaining.
+     */
+    public JkPathFile touch()  {
+        try {
+            Files.setLastModifiedTime(this.path, FileTime.from(Instant.now()));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return this;
+    }
+
     void updateDigest(MessageDigest messageDigest) {
         assertExist();
         try (final InputStream is = Files.newInputStream(path)) {
@@ -325,6 +342,8 @@ public final class JkPathFile {
         }
         return  filename.substring(index + 1);
     }
+
+
 
     public void dos2Unix(Path target) {
         try (Stream<String> lines = Files.lines(path);

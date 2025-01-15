@@ -47,8 +47,8 @@ public class JkImlGeneratorIT {
                 .testing
                     .compilation
                         .layout
-                            .emptySources().addSource("test")
-                            .emptyResources().addResource("res-test");
+                            .emptySources().addSources("test")
+                            .setEmptyResources().addResource("res-test");
         coreProject
                 .testing
                     .testProcessor
@@ -80,8 +80,8 @@ public class JkImlGeneratorIT {
         javaProject
                 .compilation
                     .layout
-                        .emptySources().addSource("src")
-                        .emptyResources().addResource("res");
+                        .emptySources().addSources("src")
+                        .setEmptyResources().addResource("res");
     }
 
     private void configureEmptyTestCompileLayout(JkProject javaProject) {
@@ -90,7 +90,7 @@ public class JkImlGeneratorIT {
                     .compilation
                         .layout
                             .emptySources()
-                            .emptyResources();
+                            .setEmptyResources();
     }
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {

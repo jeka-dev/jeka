@@ -82,6 +82,13 @@ public abstract class KBean {
     }
 
     /**
+     * Resolves the given relative path against the base directory of the project.
+     */
+    public Path getBasePath(String relativePath) {
+        return getBaseDir().resolve(relativePath);
+    }
+
+    /**
      * Returns the name of the folder which stands for the project base directory.
      */
     public String getBaseDirName() {

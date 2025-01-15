@@ -41,7 +41,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
@@ -84,14 +83,14 @@ public class CoreBuild extends KBean {
             .compilation
                 .addJavaCompilerOptions("-Xlint:none","-g")
                 .layout
-                    .mixResourcesAndSources();
+                    .setMixResourcesAndSources();
         project.compilerToolChain.setForkCompiler(true);
 
         project
             .testing
                 .compilation
                     .layout
-                        .mixResourcesAndSources();
+                        .setMixResourcesAndSources();
         project
             .testing
                 .testSelection

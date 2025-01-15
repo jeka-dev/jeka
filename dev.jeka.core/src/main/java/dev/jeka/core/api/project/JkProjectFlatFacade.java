@@ -135,8 +135,8 @@ public class JkProjectFlatFacade {
      * The resources will be located in same the dir than the sources.
      */
     public JkProjectFlatFacade setMixResourcesAndSources() {
-        project.compilation.layout.mixResourcesAndSources();
-        project.testing.compilation.layout.mixResourcesAndSources();
+        project.compilation.layout.setMixResourcesAndSources();
+        project.testing.compilation.layout.setMixResourcesAndSources();
         return this;
     }
 

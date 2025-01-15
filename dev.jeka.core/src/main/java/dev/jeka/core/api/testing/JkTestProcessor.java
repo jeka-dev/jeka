@@ -247,8 +247,9 @@ public final class JkTestProcessor {
 
         for (JkTestResult.JkFailure failure : failures) {
             String exceptionClass = failure.isAssertionFailure() ? "" : failure.getThrowableClassname() + ":";
-            String methodFgn = failure.getTestId().getDisplayName().replace("()", "");
-            String shortenMethodName = JkUtilsString.removePackagePrefix(methodFgn);
+
+            String methodFqn = failure.getTestId().getDisplayName().replace("()", "");
+            String shortenMethodName = JkUtilsString.removePackagePrefix(methodFqn);
             JkLog.info("    %s: %s %s",
                     shortenMethodName,
                     exceptionClass,

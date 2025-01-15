@@ -23,7 +23,6 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -187,16 +186,27 @@ class ProgressListeners {
         @Override
         public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
             if (mustShow(testIdentifier)) {
-                String symbol = statusSymbol(testExecutionResult.getStatus());
-                this.silencer.silent(false);
-                if (dotInCurrentRowCount >= DOT_COUNT_PER_LINE) {
-                    System.out.println();
-                    dotInCurrentRowCount = 0;
-                }
-                System.out.print(symbol);
-                dotInCurrentRowCount++;
-                this.silencer.silent(true);
+                printProgress(testExecutionResult.getStatus());
             }
+        }
+
+        @Override
+        public void executionSkipped(TestIdentifier testIdentifier, String reason) {
+            if(mustShow(testIdentifier)) {
+                printProgress(TestExecutionResult.Status.ABORTED);
+            }
+        }
+
+        private void printProgress(TestExecutionResult.Status status) {
+            String symbol = statusSymbol(status);
+            this.silencer.silent(false);
+            if (dotInCurrentRowCount >= DOT_COUNT_PER_LINE) {
+                System.out.println();
+                dotInCurrentRowCount = 0;
+            }
+            System.out.print(symbol);
+            dotInCurrentRowCount++;
+            this.silencer.silent(true);
         }
 
         @Override
@@ -206,7 +216,7 @@ class ProgressListeners {
         }
 
         private static boolean mustShow(TestIdentifier testIdentifier) {
-            return testIdentifier.isContainer();
+            return isClassContainer(testIdentifier);
         }
     }
 
@@ -334,6 +344,12 @@ class ProgressListeners {
 
     private static String statusSymbol(TestExecutionResult.Status status) {
         if (JkUtilsSystem.CONSOLE == null) {
+            if (status == TestExecutionResult.Status.ABORTED) {
+                return "o";
+            }
+            if (status == TestExecutionResult.Status.FAILED) {
+                return "x";
+            }
             return ".";
         }
         if (status == TestExecutionResult.Status.ABORTED) {
@@ -344,7 +360,6 @@ class ProgressListeners {
         }
         return "✓";
     }
-
 
     static String friendlyName(TestIdentifier testIdentifier) {
         Optional<UniqueId> parentUniqueId = testIdentifier.getParentIdObject();
@@ -378,4 +393,5 @@ class ProgressListeners {
         System.out.println("Found " + count + " test containers.");
         return count;
     }
+
 }

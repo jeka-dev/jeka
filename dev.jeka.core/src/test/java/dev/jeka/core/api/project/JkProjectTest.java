@@ -188,9 +188,9 @@ public class JkProjectTest {
         baseProject.flatFacade.dependencies.compile
                     .add(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.14"));
         baseProject.compilation.layout
-                .emptySources().addSource("src")
-                .emptyResources().addResource("res")
-                .mixResourcesAndSources();
+                .emptySources().addSources("src")
+                .setEmptyResources().addResource("res")
+                .setMixResourcesAndSources();
         baseProject.pack();
 
         final Path core = top.resolve("core");

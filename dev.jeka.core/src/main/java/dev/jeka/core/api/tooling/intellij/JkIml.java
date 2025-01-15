@@ -179,9 +179,9 @@ public final class JkIml {
                 .attr("name", "NewModuleRootManager")
                 .attr("inherit-compileRunner-output", "false")
                     .applyIf(output != null, el -> el.add("output")
-                            .attr("url", pathUrlResolver.ideaPath(moduleDir.resolve(output))))
+                            .attr("url", pathUrlResolver.ideaPath(false, moduleDir.resolve(output))))
                     .applyIf(outputTest != null, el -> el.add("output-test")
-                            .attr("url", pathUrlResolver.ideaPath(moduleDir.resolve(outputTest))))
+                            .attr("url", pathUrlResolver.ideaPath(false, moduleDir.resolve(outputTest))))
                     .applyIf(excludeOutput, el -> el.add("exclude-output"))
                     .apply(el -> content.append(el, pathUrlResolver))
                     .add("orderEntry")
@@ -208,6 +208,8 @@ public final class JkIml {
         public List<ExcludeFolder> getExcludeFolders() {
             return excludeFolders;
         }
+
+        public String excludePattern;
 
         public Content addSourceFolder(String path, boolean test, String type) {
             return addSourceFolder(moduleDir.resolve(path), test, type);
@@ -246,6 +248,9 @@ public final class JkIml {
             JkDomElement el = parent.add("content").attr("url", "file://$MODULE_DIR$");
             sourceFolders.forEach(sourceFolder -> sourceFolder.append(el, pathUrlResolver));
             excludeFolders.forEach(excludeFolder -> excludeFolder.append(el, pathUrlResolver));
+            if (!JkUtilsString.isBlank(excludePattern)) {
+                parent.add("excludePattern").attr("pattern", excludePattern);
+            }
         }
     }
 
@@ -285,7 +290,7 @@ public final class JkIml {
 
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
             JkDomElement el = parent.add("sourceFolder")
-                    .attr("url", pathUrlResolver.ideaPath(path))
+                    .attr("url", pathUrlResolver.ideaPath(true, path))
                     .attr("type", type);
             if (isTest) {
                 el.attr("isTestSource", "true");
@@ -306,7 +311,7 @@ public final class JkIml {
         }
 
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
-            JkDomElement el = parent.add("excludeFolder").attr("url", pathUrlResolver.ideaPath(path));
+            JkDomElement el = parent.add("excludeFolder").attr("url", pathUrlResolver.ideaPath(true, path));
         }
     }
 
@@ -409,14 +414,14 @@ public final class JkIml {
             el.attr("type", "module-library");
             el.add("library")
                     .add("CLASSES")
-                        .add("root").attr("url", pathUrlResolver.ideaPath(classes)).__.__
+                        .add("root").attr("url", pathUrlResolver.ideaPath(true, classes)).__.__
                     .add("JAVADOC")
                         .applyIf(javadoc != null, docEl -> docEl.add("root")
-                                .attr("url", pathUrlResolver.ideaPath(javadoc)))
+                                .attr("url", pathUrlResolver.ideaPath(true, javadoc)))
                     .__
                     .add("SOURCES")
                         .applyIf(sources != null, srcEl -> srcEl.add("root")
-                                .attr("url", pathUrlResolver.ideaPath(sources)));
+                                .attr("url", pathUrlResolver.ideaPath(true, sources)));
         }
 
         @Override
@@ -520,10 +525,10 @@ public final class JkIml {
             substitutes.put("JEKA_CACHE_DIR", jekaCacheDir);
         }
 
-        String ideaPath(Path file) {
+        String ideaPath(boolean takeJekaSrcInAccount, Path file) {
             boolean jarFile = file.getFileName().toString().toLowerCase().endsWith(".jar");
             String type = jarFile ? "jar" : "file";
-            String result = type + "://" + substitutedVarPath(file).toString()
+            String result = type + "://" + substitutedVarPath(takeJekaSrcInAccount, file).toString()
                     .replace('\\', '/');
             if (jarFile) {
                 result = result + "!/";
@@ -531,11 +536,11 @@ public final class JkIml {
             return result;
         }
 
-        private Path substitutedVarPath(Path original) {
+        private Path substitutedVarPath(boolean takeJekaSrcInAccount, Path original) {
             if (!original.isAbsolute()) {
                 Path moduleDirRelativePath = moduleDir.toAbsolutePath().normalize()
                         .relativize(original.toAbsolutePath().normalize());
-                String rootDirString = isForJekaSrc ? "$MODULE_DIR$/.." : "$MODULE_DIR$";
+                String rootDirString = (isForJekaSrc && takeJekaSrcInAccount) ? "$MODULE_DIR$/.." : "$MODULE_DIR$";
                 return Paths.get(rootDirString).resolve(moduleDirRelativePath);
             }
             Path normalized  = original.normalize();
@@ -545,7 +550,7 @@ public final class JkIml {
                     .findFirst()
                     .map(entry -> {
                         String entryKey = "$" + entry.getKey() + "$";
-                        if (isForJekaSrc && "MODULE_DIR".equals(entry.getKey())) {
+                        if (isForJekaSrc && takeJekaSrcInAccount && "MODULE_DIR".equals(entry.getKey())) {
                             entryKey = entryKey + "/..";
                         }
                         return Paths.get(entryKey)

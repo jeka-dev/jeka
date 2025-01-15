@@ -24,8 +24,11 @@ import dev.jeka.core.tool.JkConstants;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Folder layout for a project output.
@@ -154,24 +157,26 @@ public class JkCompileLayout {
         return this;
     }
 
-    public JkCompileLayout addSource(JkPathTree source) {
+    public JkCompileLayout addSources(JkPathTree source) {
         return setSources(sources.and(source));
     }
 
-    public JkCompileLayout addSource(JkPathTreeSet source) {
+    public JkCompileLayout addSources(JkPathTreeSet source) {
         return setSources(sources.and(source));
     }
 
-    public JkCompileLayout setSources(String dir) {
-        return setSources(JkPathTreeSet.ofRoots(Paths.get(dir)));
+    public JkCompileLayout setSources(String ...dir) {
+        List<Path> paths = Arrays.stream(dir).map(Paths::get).collect(Collectors.toList());
+        JkPathTreeSet treeSet = JkPathTreeSet.ofRoots(paths);
+        return setSources(treeSet);
     }
 
-    public JkCompileLayout addSource(Path dir) {
-        return addSource(JkPathTree.of(dir));
+    public JkCompileLayout addSources(Path dir) {
+        return addSources(JkPathTree.of(dir));
     }
 
-    public JkCompileLayout addSource(String path) {
-        return addSource(Paths.get(path));
+    public JkCompileLayout addSources(String path) {
+        return addSources(Paths.get(path));
     }
 
     public JkCompileLayout emptySources() {
@@ -195,14 +200,20 @@ public class JkCompileLayout {
         return addResource(Paths.get(relativeDir));
     }
 
-    public JkCompileLayout emptyResources() {
+    public JkCompileLayout setEmptyResources() {
         return setResources(JkPathTreeSet.ofEmpty());
+    }
+
+    public JkCompileLayout addSourceExclusionPatterns(String ...patterns) {
+        JkPathMatcher pathMatcher = JkPathMatcher.of(false, patterns);
+        this.sources = this.sources.andMatcher(pathMatcher);
+        return this;
     }
 
     /**
      * All non .java files located in a source directory will be considered as a resource (copied in classes file)
      */
-    public JkCompileLayout mixResourcesAndSources() {
+    public JkCompileLayout setMixResourcesAndSources() {
         return setResources(sources.withMatcher(JAVA_RESOURCE_MATCHER));
     }
 

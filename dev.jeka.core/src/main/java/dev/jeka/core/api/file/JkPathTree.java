@@ -27,6 +27,8 @@ import java.util.function.Supplier;
  * When speaking about files contained in a {@link JkPathTree}, we mean all
  * files contained in its root directory or subdirectories, matching positively
  * the filter defined on it.
+ * <p>
+ * Path matchers generally rely on <a href="https://fossil-scm.org/home/doc/tip/www/globs.md">glob patterns</a>.
  *
  * @author Jerome Angibaud
  */

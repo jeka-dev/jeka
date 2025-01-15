@@ -6,7 +6,6 @@ import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.JkProjectPublications;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -33,7 +32,7 @@ public class SimpleWarKBean extends KBean {
         project.setModuleId("dev.jeka.samples:war-project")
                 .setVersion("1.0-SNAPSHOT")
                 .setJvmTargetVersion(JkJavaVersion.V8)
-                .compilation.layout.emptySources().addSource("src/main/javaweb");
+                .compilation.layout.emptySources().addSources("src/main/javaweb");
         project.testing.setSkipped(true);
 
         project.flatFacade.dependencies.compile.modify(deps -> deps

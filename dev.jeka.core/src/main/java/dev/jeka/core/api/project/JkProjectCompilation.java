@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,6 @@ public class JkProjectCompilation {
 
     private boolean done;
 
-
     JkProjectCompilation(JkProject project) {
         this.project = project;
         resourceProcessor = JkResourceProcessor.of();
@@ -102,7 +102,7 @@ public class JkProjectCompilation {
 
     public void generateSources() {
         for (JkProjectSourceGenerator sourceGenerator : sourceGenerators) {
-            JkLog.startTask("Generate sources with " + sourceGenerator);
+            JkLog.startTask("generate-sources to " + sourceGenerator.getDirName());
             Path path = layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName());
             sourceGenerator.generate(this.project, path);
             JkLog.endTask();
@@ -155,9 +155,55 @@ public class JkProjectCompilation {
         return project.dependencyResolver.resolveFiles(dependencies.get());
     }
 
+    /**
+     * Adds a source generator responsible for generating source files to the project compilation process.
+     *
+     * @param sourceGenerator the {@link JkProjectSourceGenerator} instance used for generating sources
+     * @return the current instance of {@link JkProjectCompilation} to allow method chaining
+     */
     public JkProjectCompilation addSourceGenerator(JkProjectSourceGenerator sourceGenerator) {
         this.sourceGenerators.add(sourceGenerator);
         return this;
+    }
+
+    /**
+     * Adds a source generator responsible for generating source files to the project compilation process.
+     * The generator is defined by a name and a {@link BiConsumer} action that takes a {@link JkProject}
+     * and a {@link Path} representing the generated source directory.
+     *
+     * @param generatorName the name assigned to the source generator
+     * @param generator a {@link BiConsumer} defining the generation behavior by taking a {@link JkProject}
+     *                  instance and the directory where sources will be generated
+     * @return the current instance of {@link JkProjectCompilation} to allow method chaining
+     */
+    public JkProjectCompilation addSourceGenerator(String generatorName, BiConsumer<JkProject, Path> generator) {
+        return addSourceGenerator(new JkProjectSourceGenerator() {
+
+            @Override
+            public String getDirName() {
+                return generatorName;
+            }
+
+            @Override
+            public void generate(JkProject project, Path generatedSourceDir) {
+                generator.accept(project, generatedSourceDir);
+            }
+
+        });
+    }
+
+    /**
+     * Adds a source generator responsible for generating source files to the project compilation process.
+     * The generator is defined by a name and an action that takes a directory where sources will be generated.
+     *
+     * @param generatorName the name assigned to the source generator
+     * @param generator a {@link Consumer} defining the generation behavior by accepting the directory
+     *                  where sources will be generated
+     * @return the current instance of {@link JkProjectCompilation} to allow method chaining
+     */
+    public JkProjectCompilation addSourceGenerator(String generatorName, Consumer<Path> generator) {
+        return addSourceGenerator(generatorName, (project, generatedSourceDir)
+                -> generator.accept(generatedSourceDir));
     }
 
     public boolean isDone() {

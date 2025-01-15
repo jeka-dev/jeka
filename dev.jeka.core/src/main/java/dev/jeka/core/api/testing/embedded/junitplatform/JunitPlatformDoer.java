@@ -23,14 +23,14 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsString;
 import org.junit.platform.engine.Filter;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.TagFilter;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.TestPlan;
+import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.launcher.*;
 import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
@@ -151,15 +151,29 @@ class JunitPlatformDoer implements JkInternalJunitDoer {
                 type = JkTestResult.JkTestIdentifier.JkType.TEST;
                 break;
         }
-        String testId = failure.getTestIdentifier().getUniqueId();
-        String displayName = ProgressListeners.friendlyName(failure.getTestIdentifier());
+        TestIdentifier testIdentifier = failure.getTestIdentifier();
+        String testId = testIdentifier.getUniqueId();
+        String displayName = presentableName(testIdentifier);
         Set<String> tags = failure.getTestIdentifier().getTags().stream().map(TestTag::toString)
                 .collect(Collectors.toSet());
-        JkTestResult.JkTestIdentifier id = JkTestResult.JkTestIdentifier.of(type, testId, displayName, tags);
+        JkTestResult.JkTestIdentifier id = JkTestResult.JkTestIdentifier.of(type, testId,
+                displayName, tags);
         return JkTestResult.JkFailure.of(id,
                 failure.getException().getClass().getName(),
                 failure.getException().getMessage(),
                 failure.getException().getStackTrace());
+    }
+
+    private static String presentableName(TestIdentifier testIdentifier) {
+        TestSource testSource = testIdentifier.getSource().orElse(null);
+        if (testSource == null) {
+            return testIdentifier.getLegacyReportingName();
+        }
+        if (testSource instanceof MethodSource) {
+            String classname = ((MethodSource) testSource).getClassName();
+            return JkUtilsString.removePackagePrefix(classname) + "." + testIdentifier.getLegacyReportingName();
+        }
+        return testIdentifier.getLegacyReportingName();
     }
 
     private static class RestoreJkLogListener implements TestExecutionListener {

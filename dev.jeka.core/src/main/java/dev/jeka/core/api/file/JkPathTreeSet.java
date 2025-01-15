@@ -28,10 +28,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * See {@link JkPathTree#getRoot()}
+ * Immutable collection of {@link JkPathTree} instances representing multiple
+ * directory trees or zip file trees. Provides methods for creating, managing,
+ * and applying operations to the collection of path trees.
+ * <p>
+ * Path matchers generally rely on <a href="https://fossil-scm.org/home/doc/tip/www/globs.md">glob patterns</a>.
  */
 public final class JkPathTreeSet {
 

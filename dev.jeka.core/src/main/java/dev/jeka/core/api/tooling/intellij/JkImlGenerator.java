@@ -182,22 +182,21 @@ public final class JkImlGenerator {
         if (this.useVarPath) {
             iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir());
         }
-        iml.component
-                .getContent()
-                    .addJekaStandards();
+        JkIml.Content content =  iml.component.getContent();
+        content.addJekaStandards();
         if (ideSupport != null) {
             List<Path> sourcePaths = ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles();
             sourcePaths
-                    .forEach(path -> iml.component.getContent().addSourceFolder(path, false, null));
+                    .forEach(path -> content.addSourceFolder(path, false, null));
             ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles().stream()
                     .filter(path -> !sourcePaths.contains(path))
-                    .forEach(path -> iml.component.getContent().addSourceFolder(path, false, "java-resource"));
+                    .forEach(path -> content.addSourceFolder(path, false, "java-resource"));
             List<Path> testSourcePaths = ideSupport.getTestLayout().resolveSources().getRootDirsOrZipFiles();
             testSourcePaths
-                    .forEach(path -> iml.component.getContent().addSourceFolder(path, true, null));
+                    .forEach(path -> content.addSourceFolder(path, true, null));
             ideSupport.getTestLayout().resolveResources().getRootDirsOrZipFiles().stream()
                     .filter(path -> !testSourcePaths.contains(path))
-                    .forEach(path -> iml.component.getContent().addSourceFolder(path, false, "java-test-resource"));
+                    .forEach(path -> content.addSourceFolder(path, false, "java-test-resource"));
             JkDependencyResolver depResolver = ideSupport.getDependencyResolver();
             JkResolutionParameters resolutionParameters = depResolver.getDefaultParams().copy()
                     .setFailOnDependencyResolutionError(failOnDepsResolutionError);
@@ -211,8 +210,11 @@ public final class JkImlGenerator {
             JkLog.verbose("Dependencies resolved");
             iml.component.getOrderEntries().addAll(projectOrderEntries(tree));  // too slow
             for (Path path : ideSupport.getGeneratedSourceDirs()) {
-                iml.component.getContent().addSourceFolder(path, false, null);
+                content.addSourceFolder(path, false, null);
             }
+        }
+        if (isForJekaSrc) {
+            content.excludePattern =".idea";
         }
         iml.component.getOrderEntries().addAll(jekaSrcOrderEntries());
         imlConfigurer.accept(iml);

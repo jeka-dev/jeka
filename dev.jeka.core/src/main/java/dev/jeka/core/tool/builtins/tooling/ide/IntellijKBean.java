@@ -138,38 +138,6 @@ public final class IntellijKBean extends KBean {
                 .forEach(this::generateImlExec);
     }
 
-    @JkDoc("Make jeka-src dir an IntelliJ module")
-    public void jekaSrcAsModule() {
-
-        // remove current iml file if exist
-        if (isMavenOrGradlePresent()) {
-            Path currentImlFile = getImlFile();
-            JkUtilsPath.deleteIfExists(currentImlFile);
-        }
-
-        // Append the property to jeka.properties
-        Path newImlFile = imlFile == null ?
-                getBaseDir().resolve(JkConstants.JEKA_SRC_DIR).resolve(".idea").resolve("jeka-src.iml")
-                : getBaseDir().resolve(imlFile);
-        String relativePath = getBaseDir().relativize(newImlFile).toString()
-                .replace('\\', '/');
-        Path jekaPropertesPath = getBaseDir().resolve(JkConstants.PROPERTIES_FILE);
-        String property = "@intellij.imlFile=" + relativePath;
-        boolean alreadyPresent = JkUtilsPath.readAllLines(jekaPropertesPath).stream()
-                        .map(String::trim)
-                        .anyMatch(property::equals);
-        if (!alreadyPresent) {
-            JkUtilsPath.write(jekaPropertesPath, ("\n" + property).getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-            JkLog.info("Added %s to %s", property, JkConstants.PROPERTIES_FILE );
-        }
-
-        // generate iml
-        this.generateIml(newImlFile);
-        this.modulesXml();
-        JkLog.info("Please, close the project and re-open it to make changes effective.");
-
-    }
-
     @JkDoc("Re-init the project by deleting workspace.xml and regenerating .idea/modules.xml")
     public void initProject() {
         iml();
@@ -185,11 +153,9 @@ public final class IntellijKBean extends KBean {
         return this;
     }
 
-
-
     /**
-     * In multi-module project, Jeka dependency may be already hold by a module this one depends on.
-     * Calling this method prevents to add a direct Jeka dependency on this module.
+     * In a multi-module project, a module that this one depends on might already include the Jeka dependency.
+     * This method prevents adding the Jeka dependency directly to this module.
      */
     public IntellijKBean excludeJekaLib() {
         imlGenerator.setExcludeJekaLib(true);
@@ -236,7 +202,8 @@ public final class IntellijKBean extends KBean {
     private void generateIml(Path imlPath) {
         // Determine if we are trying to generate an iml for the 'jeka-src' submodule
         String extensionLessFileName = JkUtilsString.substringBeforeLast(imlPath.getFileName().toString(), ".");
-        boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName);
+        boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName) ||
+                extensionLessFileName.endsWith("-" + JkConstants.JEKA_SRC_DIR);
         JkIml iml = imlGenerator.computeIml(isForJekaSrcModule);
 
         JkPathFile.of(imlPath)

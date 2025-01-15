@@ -97,10 +97,25 @@ public final class JkResourceProcessor {
     }
 
     /**
+     * @see JkPathMatcher##addInterpolator(PathMatcher, Map)
+     */
+    public JkResourceProcessor addInterpolator(Map<String, String> keyValues) {
+        return addInterpolator(JkPathMatcher.ACCEPT_ALL,  keyValues);
+    }
+
+    /**
      * @see #addInterpolators(Iterable)
      */
     public JkResourceProcessor addInterpolator(String acceptPattern, String... keyValues) {
         return addInterpolator(acceptPattern, JkUtilsIterable.mapOfAny((Object[]) keyValues));
+    }
+
+    /**
+     * @see #addInterpolators(Iterable)
+     * @param keyValues a sequence of key-value as <code>key1, value1, ke2, value2</code>
+     */
+    public JkResourceProcessor addInterpolation(String... keyValues) {
+        return addInterpolator(JkPathMatcher.ACCEPT_ALL, JkUtilsIterable.mapOfAny((Object[]) keyValues));
     }
 
     /**
@@ -117,6 +132,13 @@ public final class JkResourceProcessor {
         JkUtilsAssert.argument(interpolationCharset != null, "interpolation charset cannot be null.");
         this.interpolationCharset = interpolationCharset;
         return this;
+    }
+
+    /**
+     * @see #generate(Path, Path)
+     */
+    public void generate(Path resourceDir, Path outputDir) {
+        generate(JkPathTreeSet.ofRoots(resourceDir), outputDir);
     }
 
     /**
