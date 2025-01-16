@@ -364,6 +364,16 @@ public class JkAbstractPathTree<T extends JkAbstractPathTree> {
         return (T) this;
     }
 
+    /**
+     * Deletes the root directory of the path tree. This method also deletes all the content inside the root directory.
+     */
+    public T deleteRootIfExist() {
+        if (Files.exists(getRoot())) {
+            deleteRoot();
+        }
+        return (T) this;
+    }
+
     // ----------------------- Write out ----------------------------------------------------------------
 
     /**

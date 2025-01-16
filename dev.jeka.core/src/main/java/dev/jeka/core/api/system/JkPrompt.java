@@ -25,8 +25,8 @@ public final class JkPrompt {
     private JkPrompt() {
     }
 
-    public static String ask(String prompt) {
-        System.out.print(prompt);
+    public static String ask(String prompt, Object... items) {
+        System.out.printf(prompt, items);
         System.out.flush();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
             return br.readLine();

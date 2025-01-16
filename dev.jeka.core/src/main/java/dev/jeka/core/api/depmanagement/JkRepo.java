@@ -19,10 +19,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsFile;
-import dev.jeka.core.api.utils.JkUtilsIterable;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -304,7 +301,7 @@ public final class JkRepo {
         } catch (final MalformedURLException e) {
             final File file = new File(urlOrDir);
             if (file.isAbsolute()) {
-                return JkUtilsFile.toUrl(file);
+                return JkUtilsPath.toUrl(file);
             } else {
                 throw new IllegalArgumentException("<Malformed url " + urlOrDir, e);
             }

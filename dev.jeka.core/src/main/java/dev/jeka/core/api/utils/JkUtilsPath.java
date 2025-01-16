@@ -123,6 +123,31 @@ public final class JkUtilsPath {
     }
 
     /**
+     * Returns the content of the specified property file as a
+     * {@link Properties} object.
+     */
+    public static Properties readPropertyFile(Path propertyFile) {
+        final Properties props = new Properties();
+        try (InputStream fileInputStream = Files.newInputStream(propertyFile)){
+            props.load(fileInputStream);
+        } catch (final Exception e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+        return props;
+    }
+
+    /**
+     * Get the url to the specified file.
+     */
+    public static URL toUrl(File file) {
+        try {
+            return file.toURI().toURL();
+        } catch (final MalformedURLException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
      *  A container object representing both a zip file and its content. The content is seen as a regular
      *  <code>Path</code> representing the content root.
      */
