@@ -179,12 +179,12 @@ public class OperationsKBean extends KBean {
         JkLog.info("Build application ...");
         boolean buildNative = find(NativeKBean.class).isPresent();
         String[] buildArgs = buildArgs(cacheDir, buildNative);
-        JkLog.verbose("Use commands: %s", Arrays.toString(buildArgs));
+        JkLog.verbose("Use commands: %s", String.join(" ", buildArgs));
         JkProcess.ofWinOrUx("jeka.bat", "jeka")
                 .setWorkingDir(cacheDir)
                 .addParams(buildArgs)
                 .addParamsIf(JkLog.isVerbose(),"--verbose")
-                .addParamsIf(JkLog.isDebug(),"--debug")
+                //.addParamsIf(JkLog.isDebug(),"--debug")
                 .setInheritIO(true)
                 .exec();
 
@@ -391,11 +391,16 @@ public class OperationsKBean extends KBean {
                 args.add("native:");
                 args.add("compile");
             } else {
-                String kbeanName = Files.exists(base.resolve("src")) ? "project:" : "base:";
-                args.add(kbeanName);
-                args.add("pack");
-                args.add("pack.jarType=FAT");
-                args.add("pack.detectMainClass=true");
+                if (Files.exists(base.resolve("src"))) {  // this is a project
+                    args.add("project:");
+                    args.add("pack");
+                    args.add("pack.jarType=FAT");
+                    args.add("pack.detectMainClass=true");
+                } else {
+                    args.add("base:");
+                    args.add("pack");
+                }
+
             }
         }
         args.add("-Djeka.test.skip=true");
