@@ -17,6 +17,7 @@
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -279,6 +280,25 @@ public final class JkUtilsPath {
             return Files.readAllBytes(path);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void deleteDir(Path path, boolean ignoreDeleteError) {
+        if (!Files.exists(path)) {
+            return;
+        }
+        if (Files.isDirectory(path)) {
+            listDirectChildren(path).forEach(sub -> deleteDir(sub, ignoreDeleteError));
+        }
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            if (ignoreDeleteError) {
+                JkLog.debug("Cannot delete " + path + ". Cause : " + e.getMessage());
+            } else {
+                throw new UncheckedIOException(e);
+            }
+
         }
     }
 

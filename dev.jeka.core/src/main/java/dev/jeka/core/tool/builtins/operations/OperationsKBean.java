@@ -29,8 +29,10 @@ import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.List;
@@ -98,8 +100,9 @@ public class OperationsKBean extends KBean {
         gitUrl = gitUrl.trim();
         String urlPath = urlToPathName(gitUrl);
         Path cacheDir = JkLocator.getCacheDir().resolve("git").resolve(urlPath);
-        JkPathTree.of(cacheDir).deleteRootIfExist();
+        JkUtilsPath.deleteDir(cacheDir, true);  // on windows some files in .git dir cannot be removed
         JkUtilsPath.createDirectories(cacheDir);
+
         String repo = gitUrl;
         String tag = "";
         if (gitUrl.contains("#")) {
@@ -118,16 +121,21 @@ public class OperationsKBean extends KBean {
         }
 
         // clone git repo
+        // -- cannot clone on an non-empty dir. On windows some files won't be deleted
+        // so we clone in a temp dir prior moving to target dir
+        JkLog.info("Cloning %s ...", repo);
+        Path tempDir = JkUtilsPath.createTempDirectory("jk-git-clone-");
         JkGit.of(cacheDir)
                 .addParams("clone", "--quiet", "-c",  "advice.detachedHead=false", "--depth", "1" )
                 .addParamsIf(!tag.isEmpty(), "--branch", tag)
-                .addParams(repo, cacheDir.toString())
+                .addParams(repo, tempDir.toString())
                 .exec();
+        JkUtilsPath.move(tempDir, cacheDir, StandardCopyOption.REPLACE_EXISTING);
 
         // build app
         JkLog.info("Build application ...");
         boolean buildNative = find(NativeKBean.class).isPresent();
-        JkProcess.of("jeka")
+        JkProcess.ofWinOrUx("jeka.bat", "jeka")
                 .setWorkingDir(cacheDir)
                 .addParams(buildArgs(cacheDir, buildNative))
                 .addParamsIf(JkLog.isVerbose(),"--verbose")
@@ -142,14 +150,16 @@ public class OperationsKBean extends KBean {
                 exec = JkUtilsPath.listDirectChildren(buildDir).stream()
                         .filter(path -> path.toString().endsWith(".exe"))
                         .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
+                JkUtilsPath.copy(exec, JkLocator.getJekaHomeDir().resolve(appName + ".exe"), StandardCopyOption.REPLACE_EXISTING);
             } else {
                 exec = JkUtilsPath.listDirectChildren(buildDir).stream()
                         .filter(path -> Files.isRegularFile(path))
                         .filter(path -> !path.toString().endsWith(".jar"))
                         .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
                 JkPathFile.of(exec).setPosixExecPermissions();
+                JkUtilsPath.copy(exec, JkLocator.getJekaHomeDir().resolve(appName), StandardCopyOption.REPLACE_EXISTING);
             }
-            JkUtilsPath.copy(exec, JkLocator.getJekaHomeDir().resolve(appName));
+
         } else {
             final StringBuilder shellContent = new StringBuilder();
             final String fileName;
