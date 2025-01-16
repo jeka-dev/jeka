@@ -17,9 +17,9 @@
 package dev.jeka.core.tool.builtins.operations;
 
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
@@ -29,7 +29,6 @@ import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.awt.*;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -42,8 +41,17 @@ import java.util.stream.Collectors;
 @JkDoc("Provides convenient methods to perform admin tasks.")
 public class OperationsKBean extends KBean {
 
-    @JkDoc("Argument for method 'addGlobalProp'.")
+    private static final Path GLOBAL_PROP_FILE = JkLocator.getGlobalPropertiesFile();
+
+    private static final String NATIVE_PROP_FLAG = ", native";
+
+    private static final String APP_PROP_PREFIX= "jeka.installed.app.";
+
+    @JkDoc("Argument for method 'addGlobalProp' and 'installApp.")
     public String content;
+
+    @JkDoc("Argument for method 'removeApp'.")
+    public String name;
 
     @JkDoc("Open a file explorer window on JeKA user home dir.")
     public void openHomeDir() throws IOException {
@@ -100,7 +108,7 @@ public class OperationsKBean extends KBean {
         gitUrl = gitUrl.trim();
         String urlPath = urlToPathName(gitUrl);
         Path cacheDir = JkLocator.getCacheDir().resolve("git").resolve(urlPath);
-        JkUtilsPath.deleteDir(cacheDir, true);  // on windows some files in .git dir cannot be removed
+        JkUtilsPath.deleteQuietly(cacheDir, true);  // on windows some files in .git dir cannot be removed
         JkUtilsPath.createDirectories(cacheDir);
 
         String repo = gitUrl;
@@ -115,9 +123,44 @@ public class OperationsKBean extends KBean {
         if (appName.endsWith(".git")) {
             appName = JkUtilsString.substringBeforeLast(appName, ".git");
         }
-        if (systemFiles().contains(appName)) {
-            JkLog.error("%s is a system application, ", appName);
-            return;
+        boolean nameOk = false;
+        boolean retry = false;
+        while(!nameOk) {
+            String response;
+            if (installedApplications().contains(appName)) {
+                if (!retry) {
+                    JkLog.info("An application named '%s' is already installed.", appName);
+                }
+                response = JkPrompt.ask("Choose a new name for tha application:").trim();
+            } else {
+                String suggestName = suggestName(appName);
+                response = JkPrompt.ask("Choose a name for tha application Press ENTER to select '%s':",
+                        suggestName).trim();
+                if (response.isEmpty()) {
+                    response = suggestName;
+                }
+            }
+            retry = true;
+            if (!isAppNameValid(response)) {
+                JkLog.info("Sorry, application name should only contain alphanumeric characters or '-'.");
+                continue;
+            }
+            if (response.length() > 32) {
+                JkLog.info("Sorry, application name should contain between 0 and 32 characters.");
+                continue;
+            }
+            if (systemFiles().contains(response)) {
+                JkLog.info("Sorry, application name should not be a jeka system name as %s.", systemFiles());
+                continue;
+            }
+            if (installedApplications().contains(response)) {
+                JkLog.info("Sorry, the application name `%s` is already used by another app", response);
+                JkLog.info("Installed programs are:");
+                installedApplications().forEach(JkLog::debug);
+                continue;
+            }
+            appName = response;
+            nameOk = true;
         }
 
         // clone git repo
@@ -135,21 +178,27 @@ public class OperationsKBean extends KBean {
         // build app
         JkLog.info("Build application ...");
         boolean buildNative = find(NativeKBean.class).isPresent();
+        String[] buildArgs = buildArgs(cacheDir, buildNative);
+        JkLog.verbose("Use commands: %s", Arrays.toString(buildArgs));
         JkProcess.ofWinOrUx("jeka.bat", "jeka")
                 .setWorkingDir(cacheDir)
-                .addParams(buildArgs(cacheDir, buildNative))
+                .addParams(buildArgs)
                 .addParamsIf(JkLog.isVerbose(),"--verbose")
                 .addParamsIf(JkLog.isDebug(),"--debug")
                 .setInheritIO(true)
                 .exec();
 
         Path buildDir = cacheDir.resolve("jeka-output");
+
         if (buildNative) {
             final Path exec;
             if (JkUtilsSystem.IS_WINDOWS) {
                 exec = JkUtilsPath.listDirectChildren(buildDir).stream()
                         .filter(path -> path.toString().endsWith(".exe"))
                         .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
+
+                // delete native version
+                JkUtilsPath.deleteQuietly(JkLocator.getJekaHomeDir().resolve(appName + ".bat"), false);
                 JkUtilsPath.copy(exec, JkLocator.getJekaHomeDir().resolve(appName + ".exe"), StandardCopyOption.REPLACE_EXISTING);
             } else {
                 exec = JkUtilsPath.listDirectChildren(buildDir).stream()
@@ -167,6 +216,9 @@ public class OperationsKBean extends KBean {
                 shellContent.append("@echo off").append("\n");
                 shellContent.append("jeka -r ").append(gitUrl).append(" -p %*\n");
                 fileName = appName + ".bat";
+
+                // delete native version
+                JkUtilsPath.deleteQuietly(JkLocator.getJekaHomeDir().resolve(appName), false);
             } else {
                 shellContent.append("#!/bin/sh").append("\n");
                 shellContent.append("jeka -r ").append(gitUrl).append(" -p $@\n");
@@ -180,15 +232,62 @@ public class OperationsKBean extends KBean {
                 cmdFile.setPosixExecPermissions();
             }
         }
+
+        // register
+        String propKey = appPropKey(appName);
+        deleteProperty(GLOBAL_PROP_FILE, propKey);
+        String propValue = repo + (buildNative ? NATIVE_PROP_FLAG : "");
+        insertProp(GLOBAL_PROP_FILE, propKey, propValue);
+
         JkLog.info("%s is installed.", appName);
     }
 
     @JkDoc("List the installed jeka commands in user PATH.")
     public void listApps() {
         JkLog.info("Installed commands:");
-        List<String> cmds = installedPrograms();
-        cmds.forEach(System.out::println);
+        List<String> cmds = installedApplications();
+        Jk2ColumnsText text = Jk2ColumnsText.of(30, 120);
+        JkProperties prpps = JkProperties.ofFile(JkLocator.getGlobalPropertiesFile());
+        for (String cmd : cmds) {
+            String key = appPropKey(cmd);
+            String value = prpps.get(key);
+            if (JkUtilsString.isBlank(value)) {
+                value = "Untracked";
+            } else if (value.trim().endsWith(NATIVE_PROP_FLAG)) {
+                value = JkUtilsString.substringBeforeLast(value, ",") + " (native)";
+            }
+            text.add(cmd,value);
+        }
+        System.out.println(text);
         JkLog.info("%s found.", JkUtilsString.pluralize(cmds.size(), "command"));
+    }
+
+    @JkDoc("Uninstall application from user PATH.")
+    public void removeApp() {
+        if (JkUtilsString.isBlank(name)) {
+            JkLog.info("You must specify the argument name=[applicationName].");
+        }
+        boolean found = false;
+        Path appPath = appPath(name);
+        if (Files.exists(appPath)) {
+            JkUtilsPath.deleteFile(appPath);
+            found = true;
+        }
+        if (JkUtilsSystem.IS_WINDOWS) {
+            appPath = appPath(name + "bat");
+            if (Files.exists(appPath)) {
+                JkUtilsPath.deleteFile(appPath);
+                found = true;
+            }
+        }
+        deleteProperty(JkLocator.getGlobalPropertiesFile(), appPropKey(name));
+        if (!found) {
+            JkLog.warn("No application %s found.", appPath);
+            JkLog.info("Installed applications are:");
+            installedApplications().forEach(JkLog::info);
+        } else {
+            JkLog.info("Application %s uninstalled.", name);
+        }
     }
 
     private static void insertProp(Path file, String propKey, String propValue) {
@@ -228,20 +327,39 @@ public class OperationsKBean extends KBean {
             }
             i++;
         }
-        for (int index=lastMatchingIndex; index < lines.size(); index++) {
-            String line = lines.get(index);
-            if (line.trim().endsWith("\\")) {
-                lastMatchingIndex++;
+
+        // No such prefix found
+        if (lastMatchingIndex == -1) {
+            lines.add(""); // cleaner
+            lines.add(lineToInsert);
+
+        } else {
+
+            // track line-breaks (\)
+            for (int index=lastMatchingIndex; index < lines.size(); index++) {
+                String line = lines.get(index);
+                if (line.trim().endsWith("\\")) {
+                    lastMatchingIndex++;
+                } else {
+                    break;
+                }
+            }
+            if (lastMatchingIndex + 1 > lines.size() ) {
+                lines.add(lineToInsert);
             } else {
-                break;
+                lines.add(lastMatchingIndex + 1, lineToInsert);
             }
         }
-        if (lastMatchingIndex == -1) {
-            lines.add(lineToInsert);
-        } else if (lastMatchingIndex + 1 > lines.size() ) {
-            lines.add(lineToInsert);
-        } else {
-            lines.add(lastMatchingIndex + 1, lineToInsert);
+        JkPathFile.of(file).write(java.lang.String.join( "\n",lines));
+    }
+
+    private static void deleteProperty(Path file, String propKey) {
+        List<String> lines = new LinkedList<>(JkUtilsPath.readAllLines(file));
+        for (ListIterator<String> iterator = lines.listIterator(); iterator.hasNext(); ) {
+            String line = iterator.next();
+            if (line.startsWith(propKey+"=")) {
+                iterator.remove();
+            }
         }
         JkPathFile.of(file).write(java.lang.String.join( "\n",lines));
     }
@@ -256,7 +374,7 @@ public class OperationsKBean extends KBean {
     }
 
     private static String[] buildArgs(Path base, boolean nativeCompile) {
-        Path jekaProperties = base.resolve("jeka.properties");
+        Path jekaProperties = base.resolve(JkConstants.PROPERTIES_FILE);
         List<String> args = new LinkedList<>();
         if (Files.exists(jekaProperties)) {
             String buildCmd = JkProperties.ofFile(jekaProperties).get("jeka.program.build");
@@ -284,7 +402,7 @@ public class OperationsKBean extends KBean {
         return args.toArray(new String[0]);
     }
 
-    private static List<String> installedPrograms() {
+    private static List<String> installedApplications() {
         Path home = JkLocator.getJekaHomeDir();
         return JkUtilsPath.listDirectChildren(home).stream()
                 .filter(Files::isRegularFile)
@@ -297,6 +415,48 @@ public class OperationsKBean extends KBean {
 
     private static List<String> systemFiles() {
         return  JkUtilsIterable.listOf("jeka", "jeka.bat", "jeka-update");
+    }
+
+    private static String suggestName(String originalName) {
+
+        String candidate = originalName;
+        if (systemFiles().contains(originalName)) {
+            candidate = randomName();
+        }
+        int i = 1;
+        while (installedApplications().contains(candidate)) {
+            if (candidate.contains(originalName)) {
+                candidate = randomName();
+            }
+            i++;
+            if (i > 30) {
+                candidate = randomName() + "-" + new Random().nextInt(999999999);
+                break;
+            }
+        }
+        return candidate;
+    }
+
+    private static boolean isAppNameValid(String name) {
+        return name.matches("[a-zA-Z0-9\\-]+");
+    }
+
+    private static String randomName() {
+        String[] randomName = {
+                "apollo", "nova", "eclipse", "atlas", "orion",
+                "zephyr", "aquila", "nimbus", "lumen", "horizon",
+                "solace", "phoenix", "cosmos", "aurora", "vortex",
+                "pulse", "echo", "galaxy", "falcon", "summit"
+        };
+        return randomName[new Random().nextInt(randomName.length -1)];
+    }
+
+    private static String appPropKey(String appName) {
+        return APP_PROP_PREFIX + appName;
+    }
+
+    private static Path appPath(String appName) {
+        return JkLocator.getJekaHomeDir().resolve(appName);
     }
 
 }

@@ -17,7 +17,6 @@
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcess;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -33,7 +32,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.ZipError;
 
 /**
  * Utility class providing convenient methods to deal with {@link java.nio.file.Path}.
@@ -283,12 +281,12 @@ public final class JkUtilsPath {
         }
     }
 
-    public static void deleteDir(Path path, boolean ignoreDeleteError) {
+    public static void deleteQuietly(Path path, boolean ignoreDeleteError) {
         if (!Files.exists(path)) {
             return;
         }
         if (Files.isDirectory(path)) {
-            listDirectChildren(path).forEach(sub -> deleteDir(sub, ignoreDeleteError));
+            listDirectChildren(path).forEach(sub -> deleteQuietly(sub, ignoreDeleteError));
         }
         try {
             Files.delete(path);
