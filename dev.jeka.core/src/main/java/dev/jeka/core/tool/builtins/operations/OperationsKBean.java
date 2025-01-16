@@ -109,8 +109,8 @@ public class OperationsKBean extends KBean {
 
         // check app name
         String appName = JkUtilsString.substringAfterLast(repo, "/").toLowerCase();
-        if (appName.contains(".")) {
-            appName = JkUtilsString.substringBeforeLast(appName, ".");
+        if (appName.endsWith(".git")) {
+            appName = JkUtilsString.substringBeforeLast(appName, ".git");
         }
         if (systemFiles().contains(appName)) {
             JkLog.error("%s is a system application, ", appName);
@@ -149,7 +149,7 @@ public class OperationsKBean extends KBean {
                         .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
                 JkPathFile.of(exec).setPosixExecPermissions();
             }
-            JkPathFile.of(exec).copyToDir(JkLocator.getJekaHomeDir());
+            JkUtilsPath.copy(exec, JkLocator.getJekaHomeDir().resolve(appName));
         } else {
             final StringBuilder shellContent = new StringBuilder();
             final String fileName;
