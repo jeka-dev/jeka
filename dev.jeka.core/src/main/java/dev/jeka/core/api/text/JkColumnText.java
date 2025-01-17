@@ -22,6 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Utility class for formatting text into columns.
@@ -111,7 +112,7 @@ public final class JkColumnText {
                 String[] row = rows.get(rowIndex);
                 for (int columnIndex = 0; columnIndex< numColumns; columnIndex++) {
                     int columnSize = computeColumnSize(columnIndex);
-                    String cellText = row[columnIndex];
+                    String cellText = Optional.ofNullable(row[columnIndex]).orElse("");
                     String ellipse = JkUtilsString.ellipse(cellText, columnSize);
                     String padded = JkUtilsString.padEnd(ellipse,  columnSize, ' ');
                     sb.append(padded).append(separator);
@@ -154,7 +155,7 @@ public final class JkColumnText {
     private int maxTextSize(int columnIndex) {
         return rows.stream()
                 .map(row -> row[columnIndex])
-                .map(String::length)
+                .map(row -> Optional.ofNullable(row).orElse("").length())
                 .max(Comparator.naturalOrder()).orElse(0);
     }
 

@@ -32,6 +32,7 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestResult;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -134,9 +135,12 @@ public final class BaseKBean extends KBean {
                     "to the classpath for testing.");
         }
         JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getAppClasses().getRoot());
-        JkTestProcessor.of()
+        JkTestResult testResult = JkTestProcessor.of()
                 .setForkingProcess(true)
                 .launch(JkClassLoader.ofCurrent().getClasspath(), testSelection);
+        if (!testResult.getFailures().isEmpty()) {
+            System.exit(1);
+        }
     }
 
     @JkDoc("Creates runnable fat jar and optional artifacts.")

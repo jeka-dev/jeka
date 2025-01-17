@@ -20,7 +20,8 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.CommandLine.Help.Visibility;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
-import dev.jeka.core.tool.builtins.operations.OperationsKBean;
+import dev.jeka.core.tool.builtins.operations.AppKBean;
+import dev.jeka.core.tool.builtins.operations.SetupKBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
@@ -36,7 +37,8 @@ import java.util.Objects;
 class PicocliCommands {
 
     static final List<Class<? extends KBean>> STANDARD_KBEAN_CLASSES = JkUtilsIterable.listOf(
-            OperationsKBean.class,
+            SetupKBean.class,
+            AppKBean.class,
             BaseKBean.class,
             ProjectKBean.class,
             MavenKBean.class,

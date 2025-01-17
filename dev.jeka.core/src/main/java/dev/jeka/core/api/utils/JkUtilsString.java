@@ -475,7 +475,7 @@ public final class JkUtilsString {
      * Wraps the given string character-wise to fit within the specified width.
      */
     public static String wrapStringCharacterWise(String input, int maxLineLength) {
-        StringBuilder stringBuilder = new StringBuilder(input);
+        StringBuilder stringBuilder = new StringBuilder(Optional.ofNullable(input).orElse(""));
         int index = 0;
         while(stringBuilder.length() > index + maxLineLength) {
             int lastLineReturn = stringBuilder.lastIndexOf("\n", index + maxLineLength);

@@ -72,5 +72,24 @@ public class JkGitTest {
         Assert.assertNotNull(thrown);
     }
 
+    @Test
+    public void testGetRemoteTag() {
+
+        // Test with null tag
+        String jekaRepo = "https://github.com/jeka-dev/jeka.git";
+        String currentCommit = JkGit.of().getRemoteTagCommit(jekaRepo, null);
+        Assert.assertFalse(currentCommit.contains(" "));
+        Assert.assertFalse(currentCommit.contains("\t"));
+        Assert.assertFalse(currentCommit.contains("HEAD"));
+
+
+        // test with existing tag
+        System.out.println();
+        currentCommit = JkGit.of().getRemoteTagCommit(jekaRepo, "0.11.11");
+        Assert.assertFalse(currentCommit.contains(" "));
+        Assert.assertFalse(currentCommit.contains("\t"));
+        Assert.assertFalse(currentCommit.contains("HEAD"));
+    }
+
 
 }

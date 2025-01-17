@@ -113,9 +113,12 @@ public final class JkUtilsPath {
         return new JkZipRoot(zipFile, fileSystem.getPath("/"));
     }
 
-    public static void move(Path jdkHome, Path jdkDir, StandardCopyOption ... options) {
+    /**
+     * @see Files#move(Path, Path, CopyOption...)
+     */
+    public static void move(Path from, Path to, StandardCopyOption ... options) {
         try {
-            Files.move(jdkHome, jdkDir, options);
+            Files.move(from, to, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

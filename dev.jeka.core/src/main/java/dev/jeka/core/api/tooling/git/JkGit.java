@@ -84,6 +84,18 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return branch;
     }
 
+    /**
+     * Retrieves the URL of the "origin" remote for the Git repository.
+     *
+     * @return The URL of the "origin" remote as a string.
+     */
+    public String getRemoteUrl() {
+        return this.copy()
+                .setCollectStdout(true)
+                .setLogWithJekaDecorator(false)
+                .addParams("remote", "get-url", "origin").exec().getStdoutAsMultiline().get(0);
+    }
+
     public boolean isOnGitRepo() {
         String result = this.copy()
                 .addParams("rev-parse ", "--is-inside-work-tree")
@@ -369,6 +381,39 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .execAndCheck()
                 .getStdoutAsMultiline();
         return new FileList(rawResults);
+    }
+
+    /**
+     * Retrieves the commit hash associated with a specified tag from a remote Git repository.
+     * If the tag is blank, the HEAD reference is used instead.
+     *
+     * @param tag The tag name whose associated commit is to be fetched.
+     *            If blank, the HEAD reference will be used.
+     * @return The commit hash associated with the given tag, or null if no commit is found.
+     */
+    public String getRemoteTagCommit(String repoUrl, String tag) {
+        String tagRef = JkUtilsString.isBlank(tag) ? "HEAD" : "refs/tags/" + tag;
+        String response = this.copy()
+                .setLogWithJekaDecorator(false)
+                .setCollectStdout(true)
+                .addParams("ls-remote", repoUrl, tagRef)
+                .exec().getStdoutAsString();
+        if (JkUtilsString.isBlank(response)) {
+            return null;
+        }
+
+        // Result contains tab !!!
+        return JkUtilsString.substringBeforeFirst(response.replace("\t", " "), " ");
+    }
+
+    /**
+     * Retrieves a list of tags from a remote Git repository.
+     */
+    public List<String> getRemoteTags(String repoUrl) {
+        return copy().addParams("ls-remote", "tags", repoUrl).exec().getStdoutAsMultiline().stream()
+                .map(line -> JkUtilsString.splitWhiteSpaces(line).get(1))
+                .map(ref -> JkUtilsString.substringBeforeLast(ref, "/refs/tags/"))
+                .collect(Collectors.toList());
     }
 
     @Override
