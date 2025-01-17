@@ -54,10 +54,11 @@ public final class GitKBean extends KBean {
                 .getStdoutAsMultiline().stream()
                     .anyMatch(line -> line.equals(tagName));
         if (found) {
+            git.execCmd("push", "origin", "--delete", tagName);
             git.copy().execCmd("tag", "-d", tagName);
-            git.execCmd("push", "origin", "--delete", "refs/tags/" + tagName);
+
         }
-        git.execCmd("tag", tagName);
+        git.execCmd("tag", "-f", tagName);
         git.execCmd("push", "origin", tagName, "-f");
     }
 
