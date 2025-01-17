@@ -216,6 +216,7 @@ public final class JkTestProcessor {
         JkLog.info(summaryTitle + ": " + result.getTestCount().toReportString());
         JkLog.endTask();
 
+
         return result;
     }
 
