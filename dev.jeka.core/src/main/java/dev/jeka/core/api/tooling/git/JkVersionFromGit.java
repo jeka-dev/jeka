@@ -17,6 +17,7 @@
 package dev.jeka.core.api.tooling.git;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
@@ -85,31 +86,27 @@ public class JkVersionFromGit  {
     }
 
     /**
-     * Configures the specified project to use git version for publishing and adds git info to the manifest.
+     * Configures the specified baseKBean to use git version for publishing and adds git info to the manifest.
      */
-    public void handleVersioning(JkProject project) {
-        if (project.getVersion().isUnspecified()) {
-            project.setVersionSupplier(this::getVersionAsJkVersion);
+    public void handleVersioning(JkBuildable.Supplier buildableSupplier) {
+        JkBuildable buildable = buildableSupplier.asBuildable();
+        if (buildable.getVersion().isUnspecified()) {
+            buildable.setVersionSupplier(this::getVersionAsJkVersion);
         }
-        JkGit git = JkGit.of(project.getBaseDir());
+        JkGit git = JkGit.of(buildable.getBaseDir());
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
-        project.packaging.manifestCustomizer.add(manifest -> manifest
+        buildable.getManifestCustomizers().add(manifest -> manifest
                 .addMainAttribute("Git-commit", commit)
                 .addMainAttribute("Git-branch", git.getCurrentBranch()));
     }
 
     /**
-     * Configures the specified baseKBean to use git version for publishing and adds git info to the manifest.
+     * Convenient static method for handling versioning of both project and base.
      */
-    public void handleVersioning(BaseKBean baseKBean) {
-        if (baseKBean.getVersion().isUnspecified()) {
-            baseKBean.setVersionSupplier(this::getVersionAsJkVersion);
-        }
-        JkGit git = JkGit.of(baseKBean.getBaseDir());
-        String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
-        baseKBean.manifestCustomizers.add(manifest -> manifest
-                .addMainAttribute("Git-commit", commit)
-                .addMainAttribute("Git-branch", git.getCurrentBranch()));
+    public static void handleVersioning(JkBuildable.Supplier buildableSupplier, String prefix) {
+        JkVersionFromGit.of(buildableSupplier.asBuildable().getBaseDir(), prefix)
+                .handleVersioning(buildableSupplier);;
+
     }
 
 

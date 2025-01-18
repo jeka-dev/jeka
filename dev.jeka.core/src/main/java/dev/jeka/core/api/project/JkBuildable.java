@@ -22,13 +22,14 @@ import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
-import org.apache.ivy.ant.IvyMakePom;
+import dev.jeka.core.api.java.JkManifest;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Adapter for both JkProject an BaseKBean that can be used as an abstraction
@@ -90,5 +91,13 @@ public interface JkBuildable {
     void createSourceJar(Path targetFile);
 
     void createJavadocJar(Path targetFile);
+
+    void setVersionSupplier(java.util.function.Supplier<JkVersion> versionSupplier);
+
+    JkConsumers<JkManifest> getManifestCustomizers();
+
+    interface Supplier {
+        JkBuildable asBuildable();
+    }
 
 }

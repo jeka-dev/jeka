@@ -26,11 +26,9 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
-import dev.jeka.core.api.java.JkJavaCompileSpec;
-import dev.jeka.core.api.java.JkJavaCompilerToolChain;
-import dev.jeka.core.api.java.JkJavaProcess;
-import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.text.Jk2ColumnsText;
@@ -114,7 +112,7 @@ import java.util.stream.Collectors;
  * + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()
  * </code></pre>
  */
-public final class JkProject implements JkIdeSupportSupplier {
+public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Supplier {
 
     /**
      * Flag to indicate if we need to include, or not, runtime dependencies in some scenario.
@@ -752,6 +750,16 @@ public final class JkProject implements JkIdeSupportSupplier {
             @Override
             public void createJavadocJar(Path targetFile) {
                 JkProject.this.packaging.createJavadocJar(targetFile);
+            }
+
+            @Override
+            public void setVersionSupplier(java.util.function.Supplier<JkVersion> versionSupplier) {
+                JkProject.this.setVersionSupplier(versionSupplier);
+            }
+
+            @Override
+            public JkConsumers<JkManifest> getManifestCustomizers() {
+                return JkProject.this.packaging.manifestCustomizer;
             }
 
             @Override

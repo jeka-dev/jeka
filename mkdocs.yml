@@ -85,7 +85,7 @@ nav:
     - Javadoc: javadoc/
     - Under The Hood: under-the-hood.md
 
-repo_url: https://github.com/jerkar/jeka
+repo_url: https://github.com/jeka-dev/jeka
 
 extra_css:
   - stylesheets/extra.css

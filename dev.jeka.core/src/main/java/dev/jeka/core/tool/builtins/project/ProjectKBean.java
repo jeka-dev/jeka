@@ -378,7 +378,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
             project.setVersion(version);
         }
         if (gitVersioning.enable) {
-            JkVersionFromGit.of(getBaseDir(), gitVersioning.tagPrefix).handleVersioning(project);
+            JkVersionFromGit.handleVersioning(project, gitVersioning.tagPrefix);
         }
         if (!JkUtilsString.isBlank(moduleId)) {
             project.setModuleId(moduleId);

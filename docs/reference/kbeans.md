@@ -67,8 +67,6 @@ For more details on field accepted types, see the `dev.jeka.core.tool.FieldInjec
 
 _KBean attributes_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
-
-
 ## Naming KBeans
 
 To be referenced conveniently, _KBeans_ can be identified by specific names. For any given _KBean_ class, the accepted names are:
@@ -140,6 +138,7 @@ _KBeans_ can interact with one another by declaring dependencies using the `KBea
 Alternatively, you can use the `KBean#find(MyKBean.class)` method, which returns an `Optional<KBean>` containing the instance only if it already exists in the context.
 
 When a _KBean_ depends on another, it is best practice to declare the dependency as an instance field in the dependent _KBean_. This approach has several benefits:
+
 - The dependency is explicitly documented in the auto-generated documentation.
 - It is visible in IDE tools, making the relationship clear.
 
@@ -153,7 +152,7 @@ In multi-project scenarios, it is common for a _KBean_ in one project to access 
 3. Run the command `jeka intellij: iml` or `jeka eclipse: files` to refresh project metadata.
 4. Change the declared field type from `KBean` to the concrete type of the imported _KBean_.
 5. The master _KBean_ can now access the imported _KBean_ in a type-safe manner.
-6. For an example, see [this implementation](https://github.com/jerkar/jeka/blob/master/dev.jeka.master/jeka/def/MasterBuild.java).
+6. For an example, see [this implementation](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.master/jeka-src/MasterBuild.java).
 
 !!! tip
     Ensure that the imported _KBean_ uses `KBean#getBaseDir` for handling file paths. This practice ensures safe execution from any working directory.

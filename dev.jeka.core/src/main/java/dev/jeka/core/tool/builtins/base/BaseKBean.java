@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."
 )
-public final class BaseKBean extends KBean {
+public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
     public static final String CREATE_JAR_ACTION = "create-jar";
 
@@ -513,6 +513,16 @@ public final class BaseKBean extends KBean {
             @Override
             public void createJavadocJar(Path targetFile) {
                 BaseKBean.this.createJavadocJar(targetFile);
+            }
+
+            @Override
+            public void setVersionSupplier(java.util.function.Supplier<JkVersion> versionSupplier) {
+                BaseKBean.this.setVersionSupplier(versionSupplier);
+            }
+
+            @Override
+            public JkConsumers<JkManifest> getManifestCustomizers() {
+                return BaseKBean.this.manifestCustomizers;
             }
 
             public String toString() {
