@@ -142,7 +142,7 @@ When a _KBean_ depends on another, it is best practice to declare the dependency
 - The dependency is explicitly documented in the auto-generated documentation.
 - It is visible in IDE tools, making the relationship clear.
 
-## Diagrams
+## Lifecycle
 
 This diagram shows how KBean instances are created or retrieved.
 ```mermaid
@@ -159,6 +159,7 @@ sequenceDiagram
     KB->>KB:  Setup current base directory
     KB-->>RB: 
     RB->>RB:  Register Singleton
+    RB->>RB:  Consume the singleton by the @JkPreInitKBean methods.
     RB->>KB:  Inject properties (e.g. -D@project.version=0.1 or @project.moduleId=ac.me:foo)
     RB->>KB:  Inject command-line values  (e.g. project: version=0.1)
     RB->>KB:  Invoke init() method

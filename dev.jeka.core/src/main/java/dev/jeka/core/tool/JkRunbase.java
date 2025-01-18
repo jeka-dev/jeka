@@ -94,6 +94,8 @@ public final class JkRunbase {
 
     private final Map<Class<? extends KBean>, KBean> beans = new LinkedHashMap<>();
 
+    private PreInitializer preInitializezr = PreInitializer.of(Collections.emptyList());
+
     private JkRunbase(Path baseDir) {
         this.baseDir = baseDir;
         this.properties = constructProperties(baseDir);
@@ -266,7 +268,7 @@ public final class JkRunbase {
         JkLog.debugStartTask("Register KBeans");
 
         // KBeans init from cmdline
-        List<Class<? extends KBean>> kbeansToInit = cmdLineActionContainer.toList().stream()
+        List<Class<? extends KBean>> kbeanClassesToInit = cmdLineActionContainer.toList().stream()
                 .map(kbeanAction -> kbeanAction.beanClass)
                 .distinct()
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -274,9 +276,11 @@ public final class JkRunbase {
         this.kbeanInitDeclaredInProps = kbeansToInitFromProps();
 
         // KBeans init from props
-        kbeansToInit.addAll(this.kbeanInitDeclaredInProps);
+        kbeanClassesToInit.addAll(this.kbeanInitDeclaredInProps);
 
-        kbeansToInit.stream().distinct().forEach(beanClass -> load(beanClass, forceMode));  // register kbeans
+        this.preInitializezr = PreInitializer.of(kbeanClassesToInit);
+
+        kbeanClassesToInit.stream().distinct().forEach(beanClass -> load(beanClass, forceMode));  // register kbeans
 
         JkLog.debugEndTask();
 
@@ -388,6 +392,9 @@ public final class JkRunbase {
         // This way KBeans are registered in the order they have been requested for instantiation,
         // and not the order they have finished to be instantiated.
         this.beans.put(beanClass, bean);
+
+        // Apply  the defaultProvider defined in method annotated with @JkDefaultProvider
+        this.preInitializezr.get(beanClass).accept(bean);
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.

@@ -426,6 +426,27 @@ public final class JkUtilsReflect {
     }
 
     /**
+     * Retrieves a list of methods declared in the specified class that are annotated
+     * with a given annotation.
+     *
+     * @param clazz the class to search for methods
+     * @param annotationClass the annotation type to look for on the methods
+     * @return a list of methods declared in the specified class that are annotated
+     *         with the provided annotation
+     */
+    public static List<Method> getDeclaredMethodsWithAnnotation(Class<?> clazz,
+                                                              Class<? extends Annotation> annotationClass) {
+        final List<Method> result = new LinkedList<>();
+        for (final Method method : clazz.getDeclaredMethods()) {
+            final Object annotation = method.getAnnotation(annotationClass);
+            if (annotation != null) {
+                result.add(method);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Returns all fields declared in the class passed as argument or and its super classes.
      */
     public static List<Field> getDeclaredFieldsWithAnnotation(Class<?> clazz, boolean includeSuperClass) {
