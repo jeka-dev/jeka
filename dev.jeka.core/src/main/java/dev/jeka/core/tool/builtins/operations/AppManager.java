@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 class AppManager {
 
-    private static final String APP_PROP_PREFIX= "jeka.installed.app.";
+    private static final String APP_PROP_PREFIX = "jeka.installed.app.";
 
     private static final String NATIVE_PROP_FLAG = ", native";
 
@@ -56,7 +56,7 @@ class AppManager {
         JkUtilsPath.createDirectories(repoDir);
         JkLog.info("Cloning %s...", repoDir);
         JkGit.of(repoDir)
-                .addParams("clone", "--quiet", "-c",  "advice.detachedHead=false", "--depth", "1" )
+                .addParams("clone", "--quiet", "-c", "advice.detachedHead=false", "--depth", "1")
                 .addParamsIf(repoAndTag.hasTag(), "--branch", repoAndTag.tag)
                 .addParams(repoAndTag.repoUrl, repoDir.toString())
                 .exec();
@@ -86,27 +86,28 @@ class AppManager {
         UpdateStatus outDatedStatus = updateRepoIfNeeded(appName, tag);
         if (outDatedStatus == UpdateStatus.OUTDATED) {
             boolean isNative = isNative(appFile);
+            JkLog.info("Re-building the app...");
             buildAndInstall(appName, isNative, repoDir);
         }
         return outDatedStatus;
     }
 
-    boolean remove(String appName) {
+    boolean uninstall(String appName) {
         Path appFile = findAppFile(appName);
         boolean found = false;
         if (!Files.exists(appFile)) {
-            JkLog.info("App %s not found. No executable to remove.", appFile);
+            JkLog.info("[INFO] App %s not found. No executable to remove.", appFile);
         } else {
-            JkLog.info("Delete app file %s.", appFile);
+            JkLog.verbose("Delete app file %s.", appFile);
             JkUtilsPath.deleteQuietly(appFile, false);
             found = true;
         }
         Path repoDir = repoDir(appName);
         if (!Files.exists(repoDir)) {
-            JkLog.info("APP repo %s not found. No repository to remove.", repoDir);
+            JkLog.verbose("APP repo %s not found. No repository to remove.", repoDir);
         } else {
             found = true;
-            JkLog.info("Delete repo directory %s.", repoDir);
+            JkLog.verbose("Delete repo directory %s.", repoDir);
             JkUtilsPath.deleteQuietly(repoDir, true);
         }
         return found;
@@ -133,19 +134,24 @@ class AppManager {
         Path repoDir = repoDir(appName);
         JkGit git = JkGit.of(repoDir);
         String remoteUrl = git.getRemoteUrl();
-        return git.getRemoteTags(remoteUrl);
+        return git.getRemoteTagAsStrings(remoteUrl);
+    }
+
+    TagBucket getRemteTagBucket(String remoteUrl) {
+        List<JkGit.Tag> tags = JkGit.of().getRemoteTags(remoteUrl);
+        return TagBucket.of(tags);
     }
 
     private void buildAndInstall(String appName, boolean isNative, Path repoDir) {
         Path artefact;
         try {
-            artefact =  AppBuilder.build(repoDir, isNative);
+            artefact = AppBuilder.build(repoDir, isNative);
         } catch (RuntimeException e) {
             JkGit git = JkGit.of(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
             String tag = getTag(repoDir);
-            String tagExpression = tag == null ? "HEAD" : "with tag " +tag;
-            JkLog.error("Error building '%s' app from repo %s %s.",  appName, remoteRepoUrl, tagExpression);
+            String tagExpression = tag == null ? "HEAD" : "with tag " + tag;
+            JkLog.error("Error building '%s' app from repo %s %s.", appName, remoteRepoUrl, tagExpression);
             JkLog.error("The version fetched may have errors. Try a different tag to install or update.");
             throw e;
         }
@@ -182,7 +188,7 @@ class AppManager {
         return UpdateStatus.OUTDATED;
     }
 
-   List<String> installedAppNames() {
+    List<String> installedAppNames() {
         return JkUtilsPath.listDirectChildren(appDir).stream()
                 .filter(Files::isRegularFile)
                 .filter(path -> !path.toString().endsWith(".jar"))
@@ -214,8 +220,13 @@ class AppManager {
         return candidate;
     }
 
+    String getRemoteDefaultBranch(String remoteUrl) {
+        return JkGit.of().getRemoteDefaultBranch(remoteUrl);
+    }
+
     private void updateRepo(Path repoDir, String tag) {
         JkGit git = JkGit.of(repoDir);
+        JkLog.startTask("update-git-repo");
         git.execCmd("fetch");
         if (tag != null) {
             JkLog.info("Checkout repo tag %s", tag);
@@ -225,12 +236,13 @@ class AppManager {
             JkLog.info("Checkout branch %s", branch);
             git.execCmd("checkout", branch);
         }
+        JkLog.endTask();
     }
 
     private String getTag(Path repoDir) {
         List<String> currentTags = JkGit.of(repoDir).getTagsOnCurrentCommit();
         if (currentTags.isEmpty()) {
-            JkLog.debug("No repo tags found on local repo %s.",  repoDir);
+            JkLog.debug("No repo tags found on local repo %s.", repoDir);
             return null;
         }
         return currentTags.get(0);
@@ -244,8 +256,6 @@ class AppManager {
         return repoCacheDir.resolve(appName);
     }
 
-
-
     private static String randomName() {
         String[] randomName = {
                 "apollo", "nova", "eclipse", "atlas", "orion",
@@ -253,11 +263,11 @@ class AppManager {
                 "solace", "phoenix", "cosmos", "aurora", "vortex",
                 "pulse", "echo", "galaxy", "falcon", "summit"
         };
-        return randomName[new Random().nextInt(randomName.length -1)];
+        return randomName[new Random().nextInt(randomName.length - 1)];
     }
 
     private static List<String> systemFiles() {
-        return  JkUtilsIterable.listOf("jeka", "jeka.bat", "jeka-update");
+        return JkUtilsIterable.listOf("jeka", "jeka.bat", "jeka-update");
     }
 
     private Path findAppFile(String appName) {
@@ -276,6 +286,7 @@ class AppManager {
             return appFile.toString().endsWith(".exe");
         }
         long size = JkUtilsPath.size(appFile);
+        JkLog.info("--------------------------App file size %s", size);
         if (size > 1024 * 10) { // if it's that large, it cannot be a shell script
             return true;
         }

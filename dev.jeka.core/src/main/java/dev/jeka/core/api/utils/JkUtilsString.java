@@ -410,6 +410,13 @@ public final class JkUtilsString {
     }
 
     /**
+     * @see #parseCommandline(String) 
+     */
+    public static List<String> parseCommandlineAsList(String commandline) {
+        return Arrays.asList(parseCommandline(commandline));
+    }
+
+    /**
      * Pads the given string with the specified pad character to ensure it reaches the minimum length.
      *
      * @param string The string to pad.

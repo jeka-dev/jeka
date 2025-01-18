@@ -33,6 +33,10 @@ import java.util.List;
 
 class AppBuilder {
 
+    private  static final String PROGRAM_BUILD_PROP = "jeka.program.build";
+
+    private  static final String PROGRAM_BUILD_NATIVE_PROP = "jeka.program.build.native";
+
     static final String SHE_BANG = "#!/bin/sh";
 
     static Path build(Path baseDir, boolean isNative) {
@@ -98,13 +102,9 @@ class AppBuilder {
         Path jekaProperties = base.resolve(JkConstants.PROPERTIES_FILE);
         List<String> args = new LinkedList<>();
         if (Files.exists(jekaProperties)) {
-            String buildCmd = JkProperties.ofFile(jekaProperties).get("jeka.program.build");
+            String buildCmd = chooseSpecificBuildCommand(JkProperties.ofFile(jekaProperties), nativeCompile);
             if (!JkUtilsString.isBlank(buildCmd)) {
-                args = Arrays.asList(JkUtilsString.parseCommandline(buildCmd));
-                if (nativeCompile && !args.contains("native:")) {
-                    args.add("native:");
-                    args.add("compile");
-                }
+                args.addAll(JkUtilsString.parseCommandlineAsList(buildCmd));
             }
         }
         if (args.isEmpty()) {
@@ -125,7 +125,30 @@ class AppBuilder {
             }
         }
         args.add("-Djeka.test.skip=true");
+        args.add("--clean");
+        args.add("--clean-work");
+        args.add("--duration");
         return args.toArray(new String[0]);
+    }
+
+    private static String chooseSpecificBuildCommand(JkProperties properties, boolean nativeCompile) {
+        if (nativeCompile) {
+            String buildNative = properties.get(PROGRAM_BUILD_NATIVE_PROP);
+            if (!JkUtilsString.isBlank(buildNative)) {
+                return buildNative;
+            } else {
+                String build = properties.get(PROGRAM_BUILD_PROP);
+                if (!JkUtilsString.isBlank(build)) {
+                    return build + " native: compile";
+                }
+            }
+        } else {
+            String build = properties.get(PROGRAM_BUILD_PROP);
+            if (!JkUtilsString.isBlank(build)) {
+                return build;
+            }
+        }
+        return null;
     }
 
 }

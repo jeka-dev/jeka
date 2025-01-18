@@ -21,6 +21,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.Paths;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class JkGitTest {
 
@@ -78,17 +81,42 @@ public class JkGitTest {
         // Test with null tag
         String jekaRepo = "https://github.com/jeka-dev/jeka.git";
         String currentCommit = JkGit.of().getRemoteTagCommit(jekaRepo, null);
-        Assert.assertFalse(currentCommit.contains(" "));
-        Assert.assertFalse(currentCommit.contains("\t"));
-        Assert.assertFalse(currentCommit.contains("HEAD"));
-
+        assertFalse(currentCommit.contains(" "));
+        assertFalse(currentCommit.contains("\t"));
+        assertFalse(currentCommit.contains("HEAD"));
 
         // test with existing tag
         System.out.println();
         currentCommit = JkGit.of().getRemoteTagCommit(jekaRepo, "0.11.11");
-        Assert.assertFalse(currentCommit.contains(" "));
-        Assert.assertFalse(currentCommit.contains("\t"));
-        Assert.assertFalse(currentCommit.contains("HEAD"));
+        assertFalse(currentCommit.contains(" "));
+        assertFalse(currentCommit.contains("\t"));
+        assertFalse(currentCommit.contains("HEAD"));
+    }
+
+    @Test
+    @Ignore
+    public void testGetRemoteTag_noTags_returnsEmpty() {
+        // This repo may have tags in the future, that's why test is disabled
+        String taglessRepo = "https://github.com/jeka-dev/demo-build-templates-consumer.git";
+        List<JkGit.Tag> tags =  JkGit.of().getRemoteTags(taglessRepo);
+        assertTrue(tags.isEmpty());
+    }
+
+    @Test
+    public void testGitTagParseCmdLineResponse() {
+        String cliResponse = "c7bff170c6d2657bef3198d6ee3cb3856728dca1        refs/tags/0.11.0-beta.7";
+        JkGit.Tag gitTag = JkGit.Tag.ofGitCmdlineResult(cliResponse);
+        System.out.println(gitTag);
+        assertEquals("c7bff170c6d2657bef3198d6ee3cb3856728dca1", gitTag.getCommitHash());
+        assertEquals("refs/tags/0.11.0-beta.7", gitTag.getRawName());
+        assertEquals("0.11.0-beta.7", gitTag.getPresentableName());
+    }
+
+    @Test
+    public void testGetRemoteTagCommit() {
+        String branch = JkGit.of().getRemoteDefaultBranch("https://github.com/jeka-dev/jeka");
+        assertNotNull(branch);
+        System.out.println(branch);
     }
 
 

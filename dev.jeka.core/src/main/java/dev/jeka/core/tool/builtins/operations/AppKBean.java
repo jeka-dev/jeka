@@ -20,7 +20,6 @@ import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkPrompt;
-import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -59,12 +58,57 @@ public class AppKBean extends KBean {
             JkLog.info("You must specify the git url using 'remote=[Git URL]'.");
             return;
         }
-        RepoAndTag repoAndTag = RepoAndTag.ofUrlRef(gitUrl.trim());
+        String remoteUrl = this.remote.trim();
 
-        String suggestedAppName = JkUtilsString.substringAfterLast(repoAndTag.repoUrl, "/").toLowerCase();
+        String suggestedAppName = JkUtilsString.substringAfterLast(remoteUrl, "/").toLowerCase();
         if (suggestedAppName.endsWith(".git")) {
             suggestedAppName = JkUtilsString.substringBeforeLast(suggestedAppName, ".git");
         }
+
+        // Ask for tag/version
+        JkBusyIndicator.start(JkLog.getOutPrintStream(), "Fetching info from Git");
+        String branch = appManager.getRemoteDefaultBranch(remoteUrl);
+        TagBucket tagBucket = appManager.getRemteTagBucket(remoteUrl);
+        JkBusyIndicator.stop();
+        final RepoAndTag repoAndTag;
+        if (tagBucket.tags.isEmpty()) {
+            JkLog.info("No tags found in remote Git repository. Last commit from branch %s will be installed.", branch);
+            repoAndTag = new RepoAndTag(remoteUrl, null);
+        } else if (tagBucket.tags.size() == 1) {
+            String tag = tagBucket.tags.get(0).getPresentableName();
+            JkLog.info("Found one tag '%s' in the remote Git repository.", tag);
+            String response = JkPrompt.ask("Do you want to install the tag '%s' (T) " +
+                    "or install the latest commit from branch %s [ENTER]?", tag, branch);
+            if ("T".equalsIgnoreCase(response)) {
+                JkLog.info("Version %s will be installed.", tag);
+                repoAndTag = new RepoAndTag(remoteUrl, tag);
+            } else {
+                JkLog.info("Last commit from branch %s will be installed.", branch);
+                repoAndTag = new RepoAndTag(remoteUrl, null);
+            }
+        } else {
+            JkLog.info("This is the list of available tags:");
+            tagBucket.tags.forEach(System.out::println);
+            String chooseTag = null; // empty mean choose last commit
+            while (chooseTag == null) {
+                String response = JkPrompt.ask("Enter the tag name to install," +
+                        " or press [ENTER] to install last commit from branch %s:", branch).trim();
+                if (JkUtilsString.isBlank(response)) {
+                    JkLog.info("Last commit from branch %s will be installed.", branch);
+                    chooseTag = "";
+                } else {
+                    if (tagBucket.hasTag(response)) {
+                        JkLog.info("Version %s will be installed.", response);
+                        chooseTag = response;
+                    } else {
+                        JkLog.info("The tag '%s' is not on the list. Please, choose one from the list.", response);
+                    }
+                }
+            }
+            repoAndTag = new RepoAndTag(remoteUrl, chooseTag);
+        }
+
+        // Ask for name
         boolean nameOk = false;
         boolean retry = false;
         while(!nameOk) {
@@ -116,14 +160,18 @@ public class AppKBean extends KBean {
     @JkDoc("Update an app from the given PATH.\n" +
             "Use `name=[app-name]` to specify the app.")
     public void update() {
+        final String appName;
         if (JkUtilsString.isBlank(name)) {
-            JkLog.info("You must specify the argument name=[applicationName].");
-            return;
+            list();
+            appName = JkPrompt.ask("Which app do you want to update?:").trim();
+        } else {
+            appName = name.trim();
         }
-        AppManager.UpdateStatus status = appManager.update(name);
+
+        AppManager.UpdateStatus status = appManager.update(appName);
         if (status == AppManager.UpdateStatus.FLAG_DELETED) {
-            JkLog.info("Existing tags are:", name);
-            appManager.getRemoteTags(name).forEach(JkLog::info);
+            JkLog.info("Existing tags are:", appName);
+            appManager.getRemoteTags(appName).forEach(JkLog::info);
             boolean ok = false;
             while (!ok) {
                 String userResponse = JkPrompt.ask("Do you want to abort (A), update on the default branch (D)," +
@@ -133,14 +181,14 @@ public class AppKBean extends KBean {
                     return;
                 }
                 if ("D".equals(userResponse)) {
-                    status = appManager.updateWithTag(name, null);
+                    status = appManager.updateWithTag(appName, null);
                     if (status != AppManager.UpdateStatus.FLAG_DELETED) {
                         ok = true;
                     }
                 }
                 if ("T".equals(userResponse)) {
                     String tag = JkPrompt.ask("Choose a tag from the list above:").trim();
-                    status = appManager.updateWithTag(name, tag);
+                    status = appManager.updateWithTag(appName, tag);
                     if (status != AppManager.UpdateStatus.FLAG_DELETED) {
                         ok = true;
                     }
@@ -148,33 +196,41 @@ public class AppKBean extends KBean {
             }
         }
         if (status == AppManager.UpdateStatus.OUTDATED) {
-            JkLog.info("Application %s has been updated.", name);
+            JkLog.info("Application %s has been updated.", appName);
         } else if (status == AppManager.UpdateStatus.UP_TO_DATE) {
-            JkLog.info("Application %s is already up-to-date.", name);
+            JkLog.info("Application %s is already up-to-date.", appName);
         }
     }
 
     @JkDoc("Uninstalls an app from the user's PATH.\n" +
             "Use `name=[app-name]` to specify the app.")
-    public void remove() {
+    public void uninstall() {
+        final String appName;
         if (JkUtilsString.isBlank(name)) {
-            JkLog.info("You must specify the argument name=[applicationName].");
-        }
-        boolean found = appManager.remove(name);
-        if (!found) {
-            JkLog.warn("No application '%s' found.", name);
-            JkLog.info("Installed applications are:");
-           appManager.installedAppNames().forEach(JkLog::info);
+            list();
+            appName = JkPrompt.ask("Which app do you want to uninstall?:").trim();
         } else {
-            JkLog.info("Application %s uninstalled.", name);
+            appName = name.trim();
+        }
+        boolean found = appManager.uninstall(appName);
+        if (!found) {
+            JkLog.warn("No application '%s' found.", appName);
+            JkLog.info("Installed applications are:");
+            appManager.installedAppNames().forEach(JkLog::info);
+        } else {
+            JkLog.info("Application %s uninstalled.", appName);
         }
     }
 
     @JkDoc("Lists installed Jeka commands in the user's PATH.")
     public void list() {
         List<String> installedAppNames = appManager.installedAppNames();
+        if (installedAppNames.isEmpty()) {
+            JkLog.info("No installed app found.");
+            return;
+        }
         JkColumnText text = JkColumnText.ofSingle(4, 25)  // appName
-                .addColumn(15, 50)  // repo url
+                .addColumn(15, 70)  // repo url
                 .addColumn(3, 10)   // tag
                 .addColumn(8, 14)       // update status
                 .addColumn(4, 8)       // native
@@ -191,7 +247,7 @@ public class AppKBean extends KBean {
         JkBusyIndicator.stop();
         JkLog.info("Installed app:");
         System.out.println(text);
-        JkLog.info("%s found.", JkUtilsString.pluralize(installedAppNames.size(), "app"));
+        //JkLog.info("%s found.", JkUtilsString.pluralize(installedAppNames.size(), "app"));
     }
 
     @JkDoc("Display some example on the console that you can play with.")
@@ -204,22 +260,24 @@ public class AppKBean extends KBean {
                 .setSeparator(" │ ");
         String nativ = "allow native";
         columnText
-                .add("https://github.com/djeang/demo-dir-checksum#latest", "CLI",
+                .add("https://github.com/djeang/demo-dir-checksum", "CLI",
                         "Computes folder checksums on your computer.", nativ)
                 .add("https://github.com/djeang/Calculator-jeka", "Swing GUI",
                         "Swing GUI providing a calculator", "")
                 .add("https://github.com/jeka-dev/demo-cowsay", "CLI",
                         "Java port or the Cowsay famous CLI.", nativ)
-                .add("https://github.com/jeka-dev/demo-build-templates-consumer.git", "Server GUI",
-                        "A pringboot app with reactJS front-end to manage coffee shops.", nativ)
-                .add("https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs",
-                        "Server GUI", "Same as previous but written in Kotlin and React Js.", nativ);
+            //    .add("https://github.com/jeka-dev/demo-build-templates-consumer.git", "Server GUI",
+              //          "A pringboot app with reactJS front-end to manage coffee shops.", nativ)
+                .add("https://github.com/jeka-dev/demo-project-springboot-angular",
+                        "Server UI", "Manage a list of users. Written in Springboot and ReactJs.", nativ)
+                .add("https://github.com/jeka-dev/demo-maven-jeka-quarkus.git",
+                        "Server UI", "Manage a basket of fruit. Written with Quarkus, built with Maven.", nativ);
+
         System.out.println(columnText);
         System.out.println();
-        System.out.println("To install an application: jeka app: install remote=https://github.com/jeka-dev/demo-cowsay");
+        System.out.println("To install an app: jeka app: install remote=https://github.com/jeka-dev/demo-cowsay");
+        System.out.println("To install as native app: jeka app: install remote=https://github.com/jeka-dev/demo-cowsay native:");
         System.out.println("To execute directly without installing: jeka -r https://github.com/djeang/Calculator-jeka --program");
-
-
     }
 
     private static List<String> systemFiles() {

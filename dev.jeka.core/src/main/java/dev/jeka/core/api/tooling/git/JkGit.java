@@ -28,6 +28,7 @@ import dev.jeka.core.tool.JkException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,10 @@ import java.util.stream.Collectors;
  * This class extends JkAbstractProcess to facilitate the execution of process commands.
  */
 public final class JkGit extends JkAbstractProcess<JkGit> {
+
+    private static final String REFS_TAGS = "refs/tags/";
+
+    private static final String REFS_HEADS= "refs/heads/";
 
     private JkGit() {
         this.addParams("git");
@@ -401,19 +406,52 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         if (JkUtilsString.isBlank(response)) {
             return null;
         }
-
-        // Result contains tab !!!
-        return JkUtilsString.substringBeforeFirst(response.replace("\t", " "), " ");
+        return Tag.ofGitCmdlineResult(response).commitHash;
     }
 
     /**
      * Retrieves a list of tags from a remote Git repository.
      */
-    public List<String> getRemoteTags(String repoUrl) {
-        return copy().addParams("ls-remote", "tags", repoUrl).exec().getStdoutAsMultiline().stream()
-                .map(line -> JkUtilsString.splitWhiteSpaces(line).get(1))
-                .map(ref -> JkUtilsString.substringBeforeLast(ref, "/refs/tags/"))
+    public List<String> getRemoteTagAsStrings(String repoUrl) {
+        return getRemoteTags(repoUrl).stream().map(Tag::getPresentableName).collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves a list of tags from a remote Git repository.
+     *
+     * @param repoUrl The URL of the remote Git repository to fetch tags from.
+     * @return A list of Tag objects representing the tags available in the remote Git repository.
+     */
+    public List<Tag> getRemoteTags(String repoUrl) {
+        List<Tag> result = copy()
+                .setCollectStdout(true)
+                .setLogWithJekaDecorator(false)
+                .addParams("ls-remote", "--tags", repoUrl).exec().getStdoutAsMultiline().stream()
+                .map(Tag::ofGitCmdlineResult)
                 .collect(Collectors.toList());
+        if (result.size() == 1 && JkUtilsString.isBlank(result.get(0).rawName)) {
+            return Collections.emptyList();
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves the default branch of a remote Git repository specified by its URL.
+     * This method uses the 'git ls-remote --symref' command to identify the default branch.
+     * If no default branch is found, or the repository URL is invalid, this method returns null.
+     */
+    public String getRemoteDefaultBranch(String repoUrl) {
+        List<String> lines = copy()
+                .setCollectStdout(true)
+                .setLogWithJekaDecorator(false)
+                .addParams("ls-remote", "--symref", repoUrl).exec().getStdoutAsMultiline();
+        if (lines.isEmpty() || !lines.get(0).contains(REFS_HEADS)) {
+            JkLog.debug("No default branch found in  %s. Returns null.", repoUrl);
+            return null;
+        }
+        String partial = JkUtilsString.substringAfterFirst(lines.get(0).replace("\t", " "), REFS_TAGS);
+        return JkUtilsString.substringBeforeFirst(partial, " ");
+
     }
 
     @Override
@@ -447,6 +485,67 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         public boolean hasFileStartingWith(String prefix) {
             return files.stream().anyMatch(file -> file.startsWith(prefix));
         }
+    }
+
+    public static class Tag {
+
+        private static final String REFS_TAGS_PREFIX = "refs/tags/";
+
+        private final String rawName;
+
+        private final String commitHash;
+
+        private Tag(String rawName, String commitHash) {
+            this.rawName = rawName;
+            this.commitHash = commitHash;
+        }
+
+        public static Tag of(String rawName, String commitHash) {
+            return new Tag(rawName, commitHash);
+        }
+
+        public static Tag ofGitCmdlineResult(String rawNResult) {
+            String withoutTab = rawNResult.replace("\t", " ").trim();
+            String commit = JkUtilsString.substringBeforeFirst(withoutTab, " ");
+            String rawTag = JkUtilsString.substringAfterLast(withoutTab, " ");
+            return new Tag(rawTag, commit);
+        }
+
+        /**
+         * Compares {@link Tag} objects by their version names.
+         * Extracts version names from tag's presentable names using {@link Tag#getPresentableName()},
+         * converts them to {@link JkVersion} with {@link JkVersion#of(String)},
+         * and compares using {@link JkVersion#compareTo(JkVersion)}.
+         */
+        public static final Comparator<Tag> VERSION_NAMING_COMPARATOR = new Comparator<Tag>() {
+
+            @Override
+            public int compare(Tag o1, Tag o2) {
+                return JkVersion.of(o1.getPresentableName()).compareTo(JkVersion.of(o2.getPresentableName()));
+            }
+        };
+
+
+        public String getRawName() {
+            return rawName;
+        }
+
+        public String getCommitHash() {
+            return commitHash;
+        }
+
+        public String getPresentableName() {
+            if (rawName.startsWith(REFS_TAGS_PREFIX)) {
+                return rawName.substring(REFS_TAGS_PREFIX.length());
+            }
+            return rawName;
+        }
+
+        @Override
+        public String toString() {
+            return getPresentableName();
+        }
+
     }
 
 }
