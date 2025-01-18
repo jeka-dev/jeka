@@ -142,6 +142,61 @@ When a _KBean_ depends on another, it is best practice to declare the dependency
 - The dependency is explicitly documented in the auto-generated documentation.
 - It is visible in IDE tools, making the relationship clear.
 
+## Diagrams
+
+This diagram shows how KBean instances are created or retrieved.
+```mermaid
+sequenceDiagram
+    participant EE as Execution Engine or user code
+    participant RB as Run Base
+    participant KB as KBean
+    participant OKB as Other KBeans
+
+    EE->>RB:  Load KBean
+    RB->>RB:  Find if singleton already exists
+    RB-->>EE: Return the singleton if found
+    RB->>KB:  new
+    KB->>KB:  Setup current base directory
+    KB-->>RB: 
+    RB->>RB:  Register Singleton
+    RB->>KB:  Inject properties (e.g. -D@project.version=0.1 or @project.moduleId=ac.me:foo)
+    RB->>KB:  Inject command-line values  (e.g. project: version=0.1)
+    RB->>KB:  Invoke init() method
+    KB->>KB:  Specific KBean initialisation code (e.g. may be nothing)
+    KB-->> OKB: May load or call other KBans
+    KB-->>RB: 
+    RB-->>EE: 
+ 
+```
+
+```mermaid
+classDiagram
+    class JkRunBase {
+        +Path baseDir
+        +KBean initKBean
+        +KBean defaultKBean
+        +JkProperties properties
+        +List dependencies
+  
+        +KBean load()
+        +KBean find()
+        +List getKBeans()
+        
+    }
+
+    class KBean {
+        +JkRunbase runbase
+    }
+
+    JkRunBase "1" <--> "0..*" KBean
+    JkRunBase --> "0..*" BaseDir: Imported Base Dirs (multi-modules)
+
+    note for JkRunBase "There is only one JkRunBase per base folder.<br/>The base folder is the project root.<br/>In multi-module projects, usually one JkRunBase exists per module."
+    note for BaseDir "This class doesn’t exist. It represents the base directory <br/>of another runbase in a multi-module project."
+
+```
+
+
 
 ## Multi-Project setup
 

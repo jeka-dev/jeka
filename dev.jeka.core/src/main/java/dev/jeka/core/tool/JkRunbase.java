@@ -380,6 +380,7 @@ public final class JkRunbase {
 
     private <T extends KBean> T instantiateKBean(Class<T> beanClass, boolean forceMode) {
 
+        // Record the instantiation to allow visual tracking of runtime activity.
         this.effectiveActions.add(KBeanAction.ofInit(beanClass));
 
         T bean = JkUtilsReflect.newInstance(beanClass);
