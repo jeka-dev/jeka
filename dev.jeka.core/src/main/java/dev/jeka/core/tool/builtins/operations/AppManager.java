@@ -156,7 +156,9 @@ class AppManager {
             throw e;
         }
 
-        String fileName = (JkUtilsSystem.IS_WINDOWS && !isNative) ? appName + ".bat" : appName;
+        String fileName = JkUtilsSystem.IS_WINDOWS ?
+                ( isNative ? appName + ".exe" : appName + ".bat")
+                : appName;
         JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -280,6 +282,8 @@ class AppManager {
         }
         return appDir.resolve(fileName);
     }
+
+
 
     private boolean isNative(Path appFile) {
         if (JkUtilsSystem.IS_WINDOWS) {
