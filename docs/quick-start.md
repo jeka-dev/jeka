@@ -76,7 +76,7 @@ class Script extends KBean {
 
     public void header() throws Exception {
         System.out.println(Strings.repeat("-", 80));
-        ystem.out.println(FigletFont.convertOneLine("Hello Ascii Art !"));
+        System.out.println(FigletFont.convertOneLine("Hello Ascii Art !"));
         System.out.println(Strings.repeat("-", 80));
     }
 }
