@@ -44,7 +44,7 @@ class AppManager {
         OUTDATED, UP_TO_DATE, FLAG_DELETED
     }
 
-    public AppManager(Path appDir, Path repoCacheDir, PropFile globalPropFile) {
+    AppManager(Path appDir, Path repoCacheDir, PropFile globalPropFile) {
         this.appDir = appDir;
         this.globalPropFile = globalPropFile;
         this.repoCacheDir = repoCacheDir;
@@ -286,7 +286,6 @@ class AppManager {
             return appFile.toString().endsWith(".exe");
         }
         long size = JkUtilsPath.size(appFile);
-        JkLog.info("--------------------------App file size %s", size);
         if (size > 1024 * 10) { // if it's that large, it cannot be a shell script
             return true;
         }
