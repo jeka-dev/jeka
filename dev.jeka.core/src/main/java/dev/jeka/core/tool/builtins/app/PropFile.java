@@ -29,11 +29,14 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class PropFile {
+
+    private static final String LINE_CONTINUATION_CHAR = "\\";
 
     final Path path;
 
@@ -55,7 +58,7 @@ class PropFile {
         // No such prefix found
         if (lastMatchingIndex == -1) {
             lines.add(""); // cleaner
-            lines.add(lineToInsert);
+            lines.add(lineToInsert + "\n");
 
         } else {
 
@@ -74,7 +77,7 @@ class PropFile {
                 lines.add(lastMatchingIndex + 1, lineToInsert);
             }
         }
-        JkPathFile.of(path).write(java.lang.String.join( "\n",lines));
+        JkPathFile.of(path).write(String.join( "\n",lines));
     }
 
     void insertProp(String propKey, String propValue) {
@@ -122,77 +125,25 @@ class PropFile {
         items.add(propValue);
         String finalValue = String.join(separator, items);
         replaceProp(propKey, finalValue);
-
-        /*
-        fullValue = String.join(separator, items) + separator + propValue;
-        String fullLine = propKey + "=" + fullValue;
-        if (fullLine.length() <= maxLength) {
-            replaceProp(propKey, fullValue);
-        } else {
-            items.add(propValue);
-            fullValue = String.join(separator + "\\\n  ", items);
-            replaceProp(propKey, fullValue);
-        }
-
-         */
     }
 
     // non-private for testing
     static String updateProperty(String propertiesContent, String key, String newValue) {
-        List<String> lines = new ArrayList<>();
-        boolean propertyUpdated = false;
-        boolean isMultiline = false;
-        StringBuilder multilineProperty = new StringBuilder();
-        String multilineKey = null;
-
-        try (BufferedReader reader = new BufferedReader(new StringReader(propertiesContent))) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                String trimmedLine = line.trim();
-
-                // Handle multiline declarations
-                if (isMultiline) {
-                    multilineProperty.append(trimmedLine);
-                    if (!trimmedLine.endsWith("\\")) {
-                        isMultiline = false;
-                        // Replace multiline property if it matches the key
-                        if (multilineKey.equals(key)) {
-                            lines.add(key + "=" + newValue);
-                            propertyUpdated = true;
-                        } else {
-                            lines.add(multilineProperty.toString());
-                        }
-                        multilineProperty.setLength(0); // Clear buffer
-                    }
-                    continue;
-                } else if (trimmedLine.endsWith("\\")) {
-                    isMultiline = true;
-                    multilineProperty.setLength(0); // Start a new multiline property
-                    multilineProperty.append(line);
-                    multilineKey = trimmedLine.split("=", 2)[0].trim();
-                    continue;
-                }
-
-                // Handle single-line properties
-                if (trimmedLine.startsWith(key + "=")) {
-                    lines.add(key + "=" + newValue);
-                    propertyUpdated = true;
-                } else {
-                    lines.add(line);
-                }
+        List<String> lines = new LinkedList<>(Arrays.asList(propertiesContent.split("\n")));
+        List<String> result = new LinkedList<>();;
+        boolean continuation = false;
+        for (String line : lines) {
+            if (!line.startsWith(key + "=") && !continuation) {
+                result.add(line);
+                continue;
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            continuation = true;
+            if (!line.trim().endsWith(LINE_CONTINUATION_CHAR)) {
+                continuation = false;
+                result.add(key + "=" + newValue);
+            }
         }
-
-        // If the property wasn't found, add it at the end
-        if (!propertyUpdated) {
-            lines.add(key + "=" + newValue);
-        }
-
-        // Rebuild the content with preserved formatting and order
-        return String.join("\n", lines) + "\n";
+        return String.join("\n", result);
     }
 
     @Override

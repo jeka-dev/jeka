@@ -58,18 +58,6 @@ class AppManager {
         buildAndInstall(appName, isNative, repoDir);
     }
 
-    void update(String appName) {
-        Path appFile = findAppFile(appName);
-        if (!Files.exists(appFile)) {
-            JkLog.info("App '%s' not found. Nothing to update.", appName);
-            JkLog.info("Execute 'jeka app: list' to see installed apps.", appName);
-            return;
-        }
-        Path repoDir = repoDir(appName);
-        String tag = getTag(repoDir);
-        updateWithTag(appName, tag);
-    }
-
     void updateWithTag(String appName, String tag) {
         Path appFile = findAppFile(appName);
         if (!Files.exists(appFile)) {
@@ -78,7 +66,8 @@ class AppManager {
         }
         Path repoDir = repoDir(appName);
         JkGit git = JkGit.of(repoDir);
-        git.execCmd("fetch");
+        git.execCmd("fetch", "--tags");
+        git.execCmd("pull");
         git.execCmd("checkout", tag);
 
         boolean isNative = isNative(appFile);
@@ -130,7 +119,7 @@ class AppManager {
                 } else if (updateStatus.equals(UpdateStatus.TAG_DELETED)) {
                     status = "Unknown: tag-deleted";
                 } else {
-                    status = "outdated: newer commits";
+                    status = "outdated: new-commits";
                 }
             }
         } catch (RuntimeException e) {
@@ -352,7 +341,5 @@ class AppManager {
             return appName + " " + version + (isNative ? "  native" : " jvm");
         }
     }
-
-
 
 }

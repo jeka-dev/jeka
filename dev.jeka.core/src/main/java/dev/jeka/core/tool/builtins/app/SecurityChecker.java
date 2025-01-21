@@ -26,7 +26,7 @@ import java.util.List;
 
 class SecurityChecker {
 
-    static final String GIT_URLS_APPROVED_PROP = "jeka.apps.url.approved";
+    static final String GIT_TRUSTED_URL_PREFIX_PROP = "jeka.apps.url.trusted";
 
     private static final String APPROVED_URL_PROP = "github.com/jeka-dev/";
 
@@ -40,7 +40,7 @@ class SecurityChecker {
             return true;
         }
         JkProperties props = JkProperties.ofFile(GLOBAL_PROP_FILE);
-        String approvedUrlString = props.get(GIT_URLS_APPROVED_PROP);
+        String approvedUrlString = props.get(GIT_TRUSTED_URL_PREFIX_PROP);
         if (JkUtilsString.isBlank(approvedUrlString)) {
             return false;
         }
@@ -52,8 +52,10 @@ class SecurityChecker {
 
     static void addAllowedUrl(String allowedUrl) {
         String sanitized = parseGitUrl(allowedUrl).trim();
-         new PropFile(GLOBAL_PROP_FILE).appendValueToMultiValuedProp(GIT_URLS_APPROVED_PROP,
-                 sanitized, URL_SEPARATOR, 120);
+        PropFile propFile = new PropFile(GLOBAL_PROP_FILE);
+        String existing = JkProperties.ofFile(GLOBAL_PROP_FILE).get(GIT_TRUSTED_URL_PREFIX_PROP);
+        String newValue = JkUtilsString.nullToEmpty(existing) + URL_SEPARATOR + sanitized;
+        propFile.appendValueToMultiValuedProp(GIT_TRUSTED_URL_PREFIX_PROP, newValue, URL_SEPARATOR, 120);
     }
 
     // non-private for testing

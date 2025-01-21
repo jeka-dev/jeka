@@ -62,7 +62,7 @@ public class AppKBean extends KBean {
         if (!installedAppsForRepo.isEmpty()) {
             JkLog.info("This repository has been already installed for following apps:");
             installedAppsForRepo.forEach(System.out::println);
-            String response = JkPrompt.ask("Do yu want to install another version? [N,y]:").trim();
+            String response = JkPrompt.ask("Do you want to install another version? [N,y]:").trim();
             if (!response.equalsIgnoreCase("y")) {
                 JkLog.info("Installation aborted by user.");
                 return;
@@ -98,7 +98,7 @@ public class AppKBean extends KBean {
             String tag = tagBucket.tags.get(0).getName();
             JkLog.info("Found one tag '%s' in the remote Git repository.", tag);
             String response = JkPrompt.ask("Do you want to install the tag '%s' or latest commit on branch %s:? " +
-                    "[@ = last commit, ENTER = %s]:", tag, branch, tag);
+                    "[@ = last commit, ENTER = '%s' tag]:", tag, branch, tag);
             if ("@".equals(response)) {
                 JkLog.info("Last commit from branch %s will be installed.", branch);
                 repoAndTag = new RepoAndTag(remoteUrl, null);
@@ -114,8 +114,8 @@ public class AppKBean extends KBean {
             String highest = tagBucket.getHighestVersion();
             String chooseTag = null; // empty mean choose last commit
             while (chooseTag == null) {
-                String response = JkPrompt.ask("Enter the version to install [@ = latest commit /" +
-                        " ENTER = %s]:", highest).trim();
+                String response = JkPrompt.ask("Enter the version to install [@ = last commit /" +
+                        " ENTER = '%s' tag]:", highest).trim();
                 if (JkUtilsString.isBlank(response)) {
                     JkLog.info("Version %s will be installed.", highest);
                     chooseTag = highest;
@@ -259,6 +259,13 @@ public class AppKBean extends KBean {
         //JkLog.info("%s found.", JkUtilsString.pluralize(installedAppNames.size(), "app"));
     }
 
+    @JkDoc("Add permanently the url to trusted list.\n" +
+            "The urls starting with the specified prefix will be automatically trusted.\n" +
+            "Use 'name=my.host/my.path/' to specify the prefix.")
+    public void trustUrl() {
+
+    }
+
     @JkDoc("Display some example on the console that you can play with.")
     public void examples() {
         JkColumnText columnText = JkColumnText
@@ -269,12 +276,12 @@ public class AppKBean extends KBean {
                 .setSeparator(" │ ");
         String nativ = "allow native";
         columnText
+                .add("https://github.com/jeka-dev/demo-cowsay", "CLI",
+                        "Java port or the Cowsay famous CLI.", nativ)
                 .add("https://github.com/djeang/demo-dir-checksum", "CLI",
                         "Computes folder checksums on your computer.", nativ)
                 .add("https://github.com/djeang/Calculator-jeka", "Swing GUI",
                         "Swing GUI providing a calculator", "")
-                .add("https://github.com/jeka-dev/demo-cowsay", "CLI",
-                        "Java port or the Cowsay famous CLI.", nativ)
             //    .add("https://github.com/jeka-dev/demo-build-templates-consumer.git", "Server GUI",
               //          "A pringboot app with reactJS front-end to manage coffee shops.", nativ)
                 .add("https://github.com/jeka-dev/demo-project-springboot-angular",
@@ -303,8 +310,8 @@ public class AppKBean extends KBean {
             urlPath += "/";
         }
 
-        JkLog.info("Host/path '%s' is not listed as allowed in %s file.", urlPath, GLOBAL_PROP_FILE);
-        String response = JkPrompt.ask("Register as allowed? [N,y]:").trim();
+        JkLog.info("Host/path '%s' is not in present in the trusted list.", urlPath, GLOBAL_PROP_FILE);
+        String response = JkPrompt.ask("Add? [N,y]:").trim();
         if ("y".equalsIgnoreCase(response)) {
             SecurityChecker.addAllowedUrl(gitUrl);
             return true;
@@ -342,6 +349,7 @@ public class AppKBean extends KBean {
             return false;
         }
         if (status == AppManager.UpdateStatus.OUTDATED) {
+            appManager.updateWithTag(appName, currentTag);
             JkLog.info("Updating tag %s content.", currentTag);
             return true;
         }
@@ -359,11 +367,11 @@ public class AppKBean extends KBean {
                 return false;
             } else {
                 JkLog.info("Updating version %s...", highestVersion);
-                appManager.updateWithTag(appName, currentTag);
+                appManager.updateWithTag(appName, highestVersion);
                 return true;
             }
         }
-        JkLog.info("No new version available.", currentTag);
+        JkLog.info("No new version available.");
         return false;
     }
 

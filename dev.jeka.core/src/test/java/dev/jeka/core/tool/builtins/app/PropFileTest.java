@@ -38,16 +38,6 @@ public class PropFileTest {
         System.out.println("---------- end -------------- ");
     }
 
-    @Test
-    public void testUpdateProperty_file() throws Exception {
-        String content = JkUtilsIO.read(PropFileTest.class.getResource("sample1.properties"));
-        String result = PropFile.updateProperty(content, SecurityChecker.GIT_URLS_APPROVED_PROP, "popo.sds/klk/sds.s");
-        System.out.println("-----------");
-        System.out.println(result);
-        System.out.println("-----------");
-        String result2 = PropFile.updateProperty(result, SecurityChecker.GIT_URLS_APPROVED_PROP, "aaa/bbb/cccc");
-        System.out.println(result2);
-        System.out.println("-----------");
-    }
+
 
 }
