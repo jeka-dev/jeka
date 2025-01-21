@@ -21,12 +21,14 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
@@ -39,6 +41,7 @@ import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 @JkDep("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
 @JkDep("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
@@ -46,6 +49,8 @@ import java.io.IOException;
 class MasterBuild extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
+
+    private static final String MKDOCS_OUTPUT_DIR= "master/jeke-output/mkdocs";
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;
@@ -189,6 +194,9 @@ class MasterBuild extends KBean {
         if (getRunbase().getProperties().get("sonar.host.url") != null) {
             coreBuild.load(SonarqubeKBean.class).run();
         }
+
+        // Copy dir to and augment documentation
+        this.copyDocsToWorkDir();
     }
 
     private boolean shouldPublishOnMavenCentral() {
@@ -308,6 +316,11 @@ class MasterBuild extends KBean {
     private void publishJekaDockerImage(String version) {
         DockerImageMaker.createImage();
         DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));
+    }
+
+    private void copyDocsToWorkDir() {
+        JkPathTree.of("docs").copyTo(Paths.get(MKDOCS_OUTPUT_DIR).resolve("docs"));
+        JkPathFile.of("mkdocs.yml").copyToDir(Paths.get(MKDOCS_OUTPUT_DIR));
     }
 
     /**

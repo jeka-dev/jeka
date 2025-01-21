@@ -49,6 +49,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
       uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
+        CONFIG_FILE: master/jeke-output/mkdocs
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REQUIREMENTS: .github/workflows/requirements.txt
 
