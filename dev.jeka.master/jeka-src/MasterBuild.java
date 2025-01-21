@@ -319,8 +319,8 @@ class MasterBuild extends KBean {
     }
 
     private void copyDocsToWorkDir() {
-        JkPathFile.of("mkdocs.yml").copyToDir(Paths.get(MKDOCS_OUTPUT_DIR));
         JkPathTree.of("docs").copyTo(Paths.get(MKDOCS_OUTPUT_DIR).resolve("docs"));
+        JkPathFile.of("mkdocs.yml").copyToDir(Paths.get(MKDOCS_OUTPUT_DIR));
     }
 
     /**
