@@ -220,6 +220,18 @@ public final class JkUtilsString {
     }
 
     /**
+     * Checks if the given string contains any of the specified candidate substrings.
+     */
+    public static boolean containsAny(String stringToMatch, String... candidates) {
+        for (final String candidate : candidates) {
+            if (stringToMatch.contains(candidate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns <code>true</code> if the specified string starts with any of the
      * candidates.
      */

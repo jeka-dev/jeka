@@ -14,18 +14,15 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.tooling.git.JkGit;
+import dev.jeka.core.api.utils.JkUtilsObject;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class TagBucket {
-
-    private static final String LATEST = "latest";
 
     final List<JkGit.Tag> tags;
 
@@ -40,19 +37,31 @@ class TagBucket {
        return new TagBucket(result);
     }
 
-    List<JkGit.Tag> getHighestVersions(int count) {
+    static TagBucket ofValues(List<String> tags) {
+        return of(tags.stream().map(item -> JkGit.Tag.of(item, "")).collect(Collectors.toList()));
+    }
+
+    String getHighestVersion() {
         return tags.stream()
+                .max(JkGit.Tag.VERSION_NAMING_COMPARATOR)
+                .map(JkGit.Tag::getName).orElse(null);
+    }
+
+    List<String> getHighestVersionsThan(String tagName) {
+        JkGit.Tag gitTag = JkGit.Tag.of(tagName, "");
+        return tags.stream()
+                .filter(tag -> JkGit.Tag.VERSION_NAMING_COMPARATOR.compare(tag, gitTag) > 0)
                 .sorted(JkGit.Tag.VERSION_NAMING_COMPARATOR)
-                .limit(count)
+                .map(JkGit.Tag::getName)
                 .collect(Collectors.toList());
     }
 
     boolean hasTag(String tagName) {
-        return tags.stream().map(JkGit.Tag::getPresentableName)
+        return tags.stream().map(JkGit.Tag::getName)
                 .anyMatch(name -> name.equals(tagName));
     }
 
-    boolean hasLatest() {
-        return tags.stream().anyMatch(tag -> tag.getPresentableName().equals(LATEST));
+    public boolean isLatestVersion(String tag) {
+        return JkUtilsObject.equals(tag, getHighestVersion());
     }
 }

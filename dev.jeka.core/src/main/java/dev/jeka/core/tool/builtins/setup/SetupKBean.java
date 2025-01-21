@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.setup;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.scaffold.JkScaffold;
@@ -73,7 +73,6 @@ public class SetupKBean extends KBean {
             String propName = "jeka.cmd." + name;
             GLOBAL_PROP_FILE.insertProp(propName, value);
         }
-
     }
 
     @JkDoc("Creates or updates jeka.ps1 and jeka bash scripts in the current directory.%n" +

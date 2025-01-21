@@ -14,12 +14,10 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.utils.JkUtilsString;
-
-import java.util.Locale;
 
 class GitTag implements Comparable<GitTag> {
 
@@ -37,7 +35,7 @@ class GitTag implements Comparable<GitTag> {
         return JkVersion.of(sanitize(value)).compareTo(JkVersion.of(sanitize(o.value)));
     }
 
-    boolean isLVersion(JkVersion version) {
+    boolean isLVersion() {
         String sanitized = value.startsWith("v") ? value.substring(1) : value;
         if (sanitized.isEmpty()) {
             return false;

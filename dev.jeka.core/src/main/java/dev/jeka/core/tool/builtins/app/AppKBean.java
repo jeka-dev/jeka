@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.system.JkBusyIndicator;
 import dev.jeka.core.api.system.JkLocator;
@@ -38,9 +38,7 @@ public class AppKBean extends KBean {
 
     private final AppManager appManager = new AppManager(
             JkLocator.getJekaHomeDir(),
-            JkLocator.getCacheDir().resolve("git").resolve("apps"),
-            GLOBAL_PROP_FILE);
-
+            JkLocator.getCacheDir().resolve("git").resolve("apps"));
 
     @JkDoc("Specifies the URL of the remote Git repository used to install the app." +
             "t can be written as `https://.../my-app#[tag-name]` to fetch a specific tag.")
@@ -60,6 +58,17 @@ public class AppKBean extends KBean {
         }
         String remoteUrl = this.remote.trim();
 
+        List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
+        if (!installedAppsForRepo.isEmpty()) {
+            JkLog.info("This repository has been already installed for following apps:");
+            installedAppsForRepo.forEach(System.out::println);
+            String response = JkPrompt.ask("Do yu want to install another version? [N,y]:").trim();
+            if (!response.equalsIgnoreCase("y")) {
+                JkLog.info("Installation aborted by user.");
+                return;
+            }
+        }
+
         String suggestedAppName = JkUtilsString.substringAfterLast(remoteUrl, "/").toLowerCase();
         if (suggestedAppName.endsWith(".git")) {
             suggestedAppName = JkUtilsString.substringBeforeLast(suggestedAppName, ".git");
@@ -68,32 +77,49 @@ public class AppKBean extends KBean {
         // Ask for tag/version
         JkBusyIndicator.start(JkLog.getOutPrintStream(), "Fetching info from Git");
         String branch = appManager.getRemoteDefaultBranch(remoteUrl);
-        TagBucket tagBucket = appManager.getRemteTagBucket(remoteUrl);
+        TagBucket tagBucket = appManager.getRemoteTagBucketFromGitUrl(remoteUrl);
         JkBusyIndicator.stop();
+
+        boolean allowed = checkSecurityFlow(gitUrl);
+        if (!allowed) {
+            JkLog.info("Installation aborted by user.");
+            return;
+        }
+
         final RepoAndTag repoAndTag;
+
+        // No tag available
         if (tagBucket.tags.isEmpty()) {
             JkLog.info("No tags found in remote Git repository. Last commit from branch %s will be installed.", branch);
             repoAndTag = new RepoAndTag(remoteUrl, null);
+
+            // 1 tag available
         } else if (tagBucket.tags.size() == 1) {
-            String tag = tagBucket.tags.get(0).getPresentableName();
+            String tag = tagBucket.tags.get(0).getName();
             JkLog.info("Found one tag '%s' in the remote Git repository.", tag);
-            String response = JkPrompt.ask("Do you want to install the tag '%s' (T) " +
-                    "or install the latest commit from branch %s [ENTER]?", tag, branch);
-            if ("T".equalsIgnoreCase(response)) {
-                JkLog.info("Version %s will be installed.", tag);
-                repoAndTag = new RepoAndTag(remoteUrl, tag);
-            } else {
+            String response = JkPrompt.ask("Do you want to install the tag '%s' or latest commit on branch %s:? " +
+                    "[@ = last commit, ENTER = %s]:", tag, branch, tag);
+            if ("@".equals(response)) {
                 JkLog.info("Last commit from branch %s will be installed.", branch);
                 repoAndTag = new RepoAndTag(remoteUrl, null);
+            } else {
+                JkLog.info("Version %s will be installed.", tag);
+                repoAndTag = new RepoAndTag(remoteUrl, tag);
             }
+
+            // many tags available
         } else {
-            JkLog.info("This is the list of available tags:");
+            JkLog.info("List of available tags:");
             tagBucket.tags.forEach(System.out::println);
+            String highest = tagBucket.getHighestVersion();
             String chooseTag = null; // empty mean choose last commit
             while (chooseTag == null) {
-                String response = JkPrompt.ask("Enter the tag name to install," +
-                        " or press [ENTER] to install last commit from branch %s:", branch).trim();
+                String response = JkPrompt.ask("Enter the version to install [@ = latest commit /" +
+                        " ENTER = %s]:", highest).trim();
                 if (JkUtilsString.isBlank(response)) {
+                    JkLog.info("Version %s will be installed.", highest);
+                    chooseTag = highest;
+                } else if (response.equalsIgnoreCase("@")) {
                     JkLog.info("Last commit from branch %s will be installed.", branch);
                     chooseTag = "";
                 } else {
@@ -167,38 +193,22 @@ public class AppKBean extends KBean {
         } else {
             appName = name.trim();
         }
-
-        AppManager.UpdateStatus status = appManager.update(appName);
-        if (status == AppManager.UpdateStatus.FLAG_DELETED) {
-            JkLog.info("Existing tags are:", appName);
-            appManager.getRemoteTags(appName).forEach(JkLog::info);
-            boolean ok = false;
-            while (!ok) {
-                String userResponse = JkPrompt.ask("Do you want to abort (A), update on the default branch (D)," +
-                        " or choose a tag (T)?").trim().toUpperCase();
-                if ("A".equals(userResponse)) {
-                    JkLog.info("Update aborted by user.");
-                    return;
-                }
-                if ("D".equals(userResponse)) {
-                    status = appManager.updateWithTag(appName, null);
-                    if (status != AppManager.UpdateStatus.FLAG_DELETED) {
-                        ok = true;
-                    }
-                }
-                if ("T".equals(userResponse)) {
-                    String tag = JkPrompt.ask("Choose a tag from the list above:").trim();
-                    status = appManager.updateWithTag(appName, tag);
-                    if (status != AppManager.UpdateStatus.FLAG_DELETED) {
-                        ok = true;
-                    }
-                }
-            }
+        if (!appManager.installedAppNames().contains(appName)) {
+            JkLog.info("No app named `%s` found.", appName);
+            return;
         }
-        if (status == AppManager.UpdateStatus.OUTDATED) {
-            JkLog.info("Application %s has been updated.", appName);
-        } else if (status == AppManager.UpdateStatus.UP_TO_DATE) {
-            JkLog.info("Application %s is already up-to-date.", appName);
+        String currentTag = appManager.getCurrentTag(appName);
+        boolean updated;
+
+        // Tag is not a version (as 'latest', 'dev',....)
+        // We keep the same tag, but update its content
+        if (new GitTag(currentTag).isLVersion()) {
+            updated = updateToNewerTag(appName, currentTag);
+        } else {
+            updated = updateTagContentWorkflow(appName, currentTag);
+        }
+        if (updated) {
+            JkLog.info("App %s has been updated.", appName);
         }
     }
 
@@ -232,15 +242,14 @@ public class AppKBean extends KBean {
         JkColumnText text = JkColumnText.ofSingle(4, 25)  // appName
                 .addColumn(15, 70)  // repo url
                 .addColumn(3, 10)   // tag
-                .addColumn(8, 14)       // update status
+                .addColumn(8, 32)       // update status
                 .addColumn(4, 8)       // native
                 .setSeparator(" │ ");
 
         JkBusyIndicator.start(JkLog.getOutPrintStream(),"Querying Git repos...");
         for (String appName : installedAppNames) {
             AppInfo appInfo = appManager.getAppInfo(appName);
-            String update = appInfo.updateStatus == AppManager.UpdateStatus.FLAG_DELETED ? "?" :
-                    appInfo.updateStatus.toString().toLowerCase().replace("_", "-");
+            String update = appInfo.updateInfo;
             text.add(appName, appInfo.repoAndTag.repoUrl, appInfo.repoAndTag.tag, update,
                     appInfo.isNative ? "native" : "jvm");
         }
@@ -282,6 +291,80 @@ public class AppKBean extends KBean {
 
     private static List<String> systemFiles() {
         return  JkUtilsIterable.listOf("jeka", "jeka.bat", "jeka-update");
+    }
+
+    private boolean checkSecurityFlow(String gitUrl) {
+        if (SecurityChecker.isAllowed(gitUrl)) {
+            return true;
+        }
+        String sanitizedUrl = SecurityChecker.parseGitUrl(gitUrl);
+        String urlPath = sanitizedUrl;
+        if (!sanitizedUrl.endsWith("/")) {
+            urlPath += "/";
+        }
+
+        JkLog.info("Host/path '%s' is not listed as allowed in %s file.", urlPath, GLOBAL_PROP_FILE);
+        String response = JkPrompt.ask("Register as allowed? [N,y]:").trim();
+        if ("y".equalsIgnoreCase(response)) {
+            SecurityChecker.addAllowedUrl(gitUrl);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean updateTagContentWorkflow(String appName, String currentTag) {
+        JkLog.info("Updating content of tag '%s'.", currentTag);
+        AppManager.UpdateStatus status = appManager.getTagCommitStatus(appName, currentTag);
+        if (status == AppManager.UpdateStatus.TAG_DELETED) {
+            JkLog.info("Remote tag `%s' has been delete. Existing tags are:", appName);
+            appManager.getRemoteTags(appName).forEach(JkLog::info);
+            boolean ok = false;
+            while (!ok) {
+                String userResponse = JkPrompt.ask("Do you want to abort (A), update on the last commit of default branch (D)," +
+                        " or choose a tag (T)?").trim().toUpperCase();
+                if ("A".equals(userResponse)) {
+                    JkLog.info("Update aborted by user.");
+                    return false;
+                }
+                if ("D".equals(userResponse)) {
+                    appManager.updateWithTag(appName, null);
+                    return true;
+                }
+                if ("T".equals(userResponse)) {
+                    String tag = JkPrompt.ask("Choose a tag from the list above:").trim();
+                    appManager.updateWithTag(appName, tag);
+                    return true;
+                }
+            }
+        }
+        if (status == AppManager.UpdateStatus.UP_TO_DATE) {
+            JkLog.info("Version %s is up-to-date. No action needed.");
+            return false;
+        }
+        if (status == AppManager.UpdateStatus.OUTDATED) {
+            JkLog.info("Updating tag %s content.", currentTag);
+            return true;
+        }
+        return true;
+    }
+
+    private boolean updateToNewerTag(String appName, String currentTag) {
+        TagBucket tagBucket = appManager.getRemoteTagBucketFromAppName(appName);
+        List<String> higherVersions = tagBucket.getHighestVersionsThan(currentTag);
+        if (!higherVersions.isEmpty()) {
+            String highestVersion = tagBucket.getHighestVersion();
+            String response = JkPrompt.ask("Found the latest version %s. Update now? [n/Y]", highestVersion).trim();
+            if (response.equalsIgnoreCase("n")) {
+                JkLog.info("Update aborted by user.", currentTag);
+                return false;
+            } else {
+                JkLog.info("Updating version %s...", highestVersion);
+                appManager.updateWithTag(appName, currentTag);
+                return true;
+            }
+        }
+        JkLog.info("No new version available.", currentTag);
+        return false;
     }
 
 }

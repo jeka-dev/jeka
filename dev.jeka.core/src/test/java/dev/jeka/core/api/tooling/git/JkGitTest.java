@@ -108,8 +108,7 @@ public class JkGitTest {
         JkGit.Tag gitTag = JkGit.Tag.ofGitCmdlineResult(cliResponse);
         System.out.println(gitTag);
         assertEquals("c7bff170c6d2657bef3198d6ee3cb3856728dca1", gitTag.getCommitHash());
-        assertEquals("refs/tags/0.11.0-beta.7", gitTag.getRawName());
-        assertEquals("0.11.0-beta.7", gitTag.getPresentableName());
+        assertEquals("0.11.0-beta.7", gitTag.getName());
     }
 
     @Test

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;

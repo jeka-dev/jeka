@@ -413,7 +413,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * Retrieves a list of tags from a remote Git repository.
      */
     public List<String> getRemoteTagAsStrings(String repoUrl) {
-        return getRemoteTags(repoUrl).stream().map(Tag::getPresentableName).collect(Collectors.toList());
+        return getRemoteTags(repoUrl).stream().map(Tag::getName).collect(Collectors.toList());
     }
 
     /**
@@ -429,7 +429,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .addParams("ls-remote", "--tags", repoUrl).exec().getStdoutAsMultiline().stream()
                 .map(Tag::ofGitCmdlineResult)
                 .collect(Collectors.toList());
-        if (result.size() == 1 && JkUtilsString.isBlank(result.get(0).rawName)) {
+        if (result.size() == 1 && JkUtilsString.isBlank(result.get(0).name)) {
             return Collections.emptyList();
         }
         return result;
@@ -489,15 +489,13 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
 
     public static class Tag {
 
-        private static final String REFS_TAGS_PREFIX = "refs/tags/";
-
-        private final String rawName;
-
         private final String commitHash;
 
-        private Tag(String rawName, String commitHash) {
-            this.rawName = rawName;
+        private final String name;
+
+        private Tag(String name, String commitHash) {
             this.commitHash = commitHash;
+            this.name = name;
         }
 
         public static Tag of(String rawName, String commitHash) {
@@ -508,12 +506,13 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
             String withoutTab = rawNResult.replace("\t", " ").trim();
             String commit = JkUtilsString.substringBeforeFirst(withoutTab, " ");
             String rawTag = JkUtilsString.substringAfterLast(withoutTab, " ");
-            return new Tag(rawTag, commit);
+            String name = JkUtilsString.substringAfterFirst(rawTag, REFS_TAGS);
+            return new Tag(name, commit);
         }
 
         /**
          * Compares {@link Tag} objects by their version names.
-         * Extracts version names from tag's presentable names using {@link Tag#getPresentableName()},
+         * Extracts version names from tag's presentable names using {@link Tag#getName()},
          * converts them to {@link JkVersion} with {@link JkVersion#of(String)},
          * and compares using {@link JkVersion#compareTo(JkVersion)}.
          */
@@ -521,29 +520,21 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
 
             @Override
             public int compare(Tag o1, Tag o2) {
-                return JkVersion.of(o1.getPresentableName()).compareTo(JkVersion.of(o2.getPresentableName()));
+                return JkVersion.of(o1.getName()).compareTo(JkVersion.of(o2.getName()));
             }
         };
-
-
-        public String getRawName() {
-            return rawName;
-        }
 
         public String getCommitHash() {
             return commitHash;
         }
 
-        public String getPresentableName() {
-            if (rawName.startsWith(REFS_TAGS_PREFIX)) {
-                return rawName.substring(REFS_TAGS_PREFIX.length());
-            }
-            return rawName;
+        public String getName() {
+            return name;
         }
 
         @Override
         public String toString() {
-            return getPresentableName();
+            return getName();
         }
 
     }

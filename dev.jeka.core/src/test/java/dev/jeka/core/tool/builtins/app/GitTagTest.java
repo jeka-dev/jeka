@@ -14,13 +14,12 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
+import dev.jeka.core.tool.builtins.app.GitTag;
 import org.junit.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.*;
 
 public class GitTagTest {
 

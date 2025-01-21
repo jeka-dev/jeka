@@ -14,23 +14,15 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 class RepoAndTag {
 
-    static RepoAndTag ofUrlRef(String repoUrlRef) {
-        if (repoUrlRef.contains("#")) {
-            String repoUrl = JkUtilsString.substringBeforeLast(repoUrlRef, "#");
-            String tag = JkUtilsString.substringAfterLast(repoUrlRef, "#");
-            tag = JkUtilsString.blankToNull(tag);
-            return new RepoAndTag(repoUrl, tag);
-        }
-        return new RepoAndTag(repoUrlRef, null);
-    }
-
     RepoAndTag(String repoUrl, String tag) {
+        JkUtilsAssert.argument(tag == null || isTagNameValid(tag), "Invalid '%s' tag name.", tag);
         this.repoUrl = repoUrl;
         this.tag = tag;
     }
@@ -40,11 +32,16 @@ class RepoAndTag {
     final String tag;
 
     boolean hasTag() {
-        return tag != null;
+        return !JkUtilsString.isBlank(this.tag);  // check on nullity fails
     }
 
     @Override
     public String toString() {
         return repoUrl + "#" + tag;
     }
+
+    private static boolean isTagNameValid(String tagName) {
+        return !JkUtilsString.endsWithAny(tagName, "\\", "?", "~", "^", ":", "*" , "[", "@", "//");
+    }
+
 }

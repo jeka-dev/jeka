@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
 class AppInfo {
 
@@ -24,13 +24,13 @@ class AppInfo {
 
     final boolean isNative;
 
-    final AppManager.UpdateStatus updateStatus;
+    final String updateInfo;
 
-    AppInfo(String name, RepoAndTag repoAndTag, boolean isNative, AppManager.UpdateStatus outDatedStatus) {
+    AppInfo(String name, RepoAndTag repoAndTag, boolean isNative, String outDatedStatus) {
         this.name = name;
         this.repoAndTag = repoAndTag;
         this.isNative = isNative;
-        this.updateStatus = outDatedStatus;
+        this.updateInfo = outDatedStatus;
     }
 
 

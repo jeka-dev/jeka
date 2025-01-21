@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;
@@ -24,29 +24,23 @@ import dev.jeka.core.api.utils.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 class AppManager {
 
-    private static final String APP_PROP_PREFIX = "jeka.installed.app.";
-
-    private static final String NATIVE_PROP_FLAG = ", native";
-
     private final Path appDir;
-
-    private final PropFile globalPropFile;
 
     private final Path repoCacheDir;
 
     enum UpdateStatus {
-        OUTDATED, UP_TO_DATE, FLAG_DELETED
+        OUTDATED, UP_TO_DATE, TAG_DELETED
     }
 
-    AppManager(Path appDir, Path repoCacheDir, PropFile globalPropFile) {
+    AppManager(Path appDir, Path repoCacheDir) {
         this.appDir = appDir;
-        this.globalPropFile = globalPropFile;
         this.repoCacheDir = repoCacheDir;
     }
 
@@ -54,7 +48,7 @@ class AppManager {
         Path repoDir = repoDir(appName);
         JkUtilsPath.deleteQuietly(repoDir, false);
         JkUtilsPath.createDirectories(repoDir);
-        JkLog.info("Cloning %s...", repoDir);
+        JkLog.info("Cloning to %s...", repoDir);
         JkGit.of(repoDir)
                 .addParams("clone", "--quiet", "-c", "advice.detachedHead=false", "--depth", "1")
                 .addParamsIf(repoAndTag.hasTag(), "--branch", repoAndTag.tag)
@@ -64,32 +58,32 @@ class AppManager {
         buildAndInstall(appName, isNative, repoDir);
     }
 
-    UpdateStatus update(String appName) {
+    void update(String appName) {
         Path appFile = findAppFile(appName);
         if (!Files.exists(appFile)) {
             JkLog.info("App '%s' not found. Nothing to update.", appName);
             JkLog.info("Execute 'jeka app: list' to see installed apps.", appName);
-            return null;
+            return;
         }
         Path repoDir = repoDir(appName);
         String tag = getTag(repoDir);
-        return updateWithTag(appName, tag);
+        updateWithTag(appName, tag);
     }
 
-    UpdateStatus updateWithTag(String appName, String tag) {
+    void updateWithTag(String appName, String tag) {
         Path appFile = findAppFile(appName);
         if (!Files.exists(appFile)) {
             JkLog.info("App %s not found. Nothing to update.", appFile);
-            return null;
+            return;
         }
         Path repoDir = repoDir(appName);
-        UpdateStatus outDatedStatus = updateRepoIfNeeded(appName, tag);
-        if (outDatedStatus == UpdateStatus.OUTDATED) {
-            boolean isNative = isNative(appFile);
-            JkLog.info("Re-building the app...");
-            buildAndInstall(appName, isNative, repoDir);
-        }
-        return outDatedStatus;
+        JkGit git = JkGit.of(repoDir);
+        git.execCmd("fetch");
+        git.execCmd("checkout", tag);
+
+        boolean isNative = isNative(appFile);
+        JkLog.info("Re-building the app...");
+        buildAndInstall(appName, isNative, repoDir);
     }
 
     boolean uninstall(String appName) {
@@ -119,15 +113,38 @@ class AppManager {
         String remoteRepoUrl = git.getRemoteUrl();
         String tag = getTag(repoDir);
         boolean isNative = isNative(findAppFile(appName));
-        UpdateStatus updateStatus = null;
+        boolean isVersion = new GitTag(tag).isLVersion();
+        String status;
         try {
-            updateStatus = getUpdateStatus(appName, tag);
+            if (isVersion) {
+                TagBucket tagBucket = getRemoteTagBucketFromGitUrl(remoteRepoUrl);
+                if (tagBucket.isLatestVersion(tag)) {
+                    status = "up-to-date";
+                } else {
+                    status = "outdated -> " + tagBucket.getHighestVersion();
+                }
+            } else {
+                UpdateStatus updateStatus = getTagCommitStatus(appName, tag);
+                if (updateStatus.equals(UpdateStatus.UP_TO_DATE)) {
+                    status = "up-to-date";
+                } else if (updateStatus.equals(UpdateStatus.TAG_DELETED)) {
+                    status = "Unknown: tag-deleted";
+                } else {
+                    status = "outdated: newer commits";
+                }
+            }
         } catch (RuntimeException e) {
             JkLog.warn("Failed to get info from remote repo %.", remoteRepoUrl);
+            status = "?";
         }
         String tagValue = tag == null ? "<" + git.getCurrentBranch() + ">" : tag;
         RepoAndTag repoAndTag = new RepoAndTag(remoteRepoUrl, tagValue);
-        return new AppInfo(appName, repoAndTag, isNative, updateStatus);
+        return new AppInfo(appName, repoAndTag, isNative, status);
+    }
+
+    String getCurrentTag(String appName) {
+        Path repoDir = repoDir(appName);
+        return getTag(repoDir);
     }
 
     List<String> getRemoteTags(String appName) {
@@ -137,55 +154,16 @@ class AppManager {
         return git.getRemoteTagAsStrings(remoteUrl);
     }
 
-    TagBucket getRemteTagBucket(String remoteUrl) {
+    TagBucket getRemoteTagBucketFromGitUrl(String remoteUrl) {
         List<JkGit.Tag> tags = JkGit.of().getRemoteTags(remoteUrl);
         return TagBucket.of(tags);
     }
 
-    private void buildAndInstall(String appName, boolean isNative, Path repoDir) {
-        Path artefact;
-        try {
-            artefact = AppBuilder.build(repoDir, isNative);
-        } catch (RuntimeException e) {
-            JkGit git = JkGit.of(repoDir);
-            String remoteRepoUrl = git.getRemoteUrl();
-            String tag = getTag(repoDir);
-            String tagExpression = tag == null ? "HEAD" : "with tag " + tag;
-            JkLog.error("Error building '%s' app from repo %s %s.", appName, remoteRepoUrl, tagExpression);
-            JkLog.error("The version fetched may have errors. Try a different tag to install or update.");
-            throw e;
-        }
-
-        String fileName = (JkUtilsSystem.IS_WINDOWS && !isNative) ? appName + ".bat" : appName;
-        JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    private UpdateStatus updateRepoIfNeeded(String appName, String tag) {
-        UpdateStatus updateStatus = getUpdateStatus(appName, tag);
-
-        // Update repo
-        if (updateStatus == UpdateStatus.OUTDATED) {
-            Path repoDir = repoDir(appName);
-            updateRepo(repoDir, tag);
-        }
-        return UpdateStatus.OUTDATED;
-    }
-
-    private UpdateStatus getUpdateStatus(String appName, String tag) {
+    TagBucket getRemoteTagBucketFromAppName(String appName) {
         Path repoDir = repoDir(appName);
         JkGit git = JkGit.of(repoDir);
-        String remoteRepo = git.getRemoteUrl();
-        String remoteTagCommit = git.getRemoteTagCommit(remoteRepo, tag);
-        if (tag != null && remoteTagCommit == null) {
-            JkLog.warn("Found tag %s on current commit of repo %s no longer exist in remote repo %s.",
-                    tag, repoDir, remoteRepo);
-            return UpdateStatus.FLAG_DELETED;
-        }
-        String localTagCommit = git.getCurrentCommit();
-        if (JkUtilsObject.equals(localTagCommit, remoteTagCommit)) {
-            return UpdateStatus.UP_TO_DATE;
-        }
-        return UpdateStatus.OUTDATED;
+        String remoteRepoUrl = git.getRemoteUrl();
+        return getRemoteTagBucketFromGitUrl(remoteRepoUrl);
     }
 
     List<String> installedAppNames() {
@@ -201,7 +179,6 @@ class AppManager {
     }
 
     String suggestName(String originalName) {
-
         String candidate = originalName;
         if (systemFiles().contains(originalName)) {
             candidate = randomName();
@@ -223,6 +200,73 @@ class AppManager {
     String getRemoteDefaultBranch(String remoteUrl) {
         return JkGit.of().getRemoteDefaultBranch(remoteUrl);
     }
+
+    List<AppVersion> getAppVersionsForRepo(String repoUrl) {
+        List<AppVersion> result = new ArrayList<>();
+        for (String appName : installedAppNames()) {
+            Path repoDir = repoDir(appName);
+            JkGit git = JkGit.of(repoDir);
+            String remoteRepoUrl = git.getRemoteUrl();
+            if (remoteRepoUrl.equals(repoUrl)) {
+                String tag = getTag(repoDir);
+                boolean isNative = isNative(findAppFile(appName));
+                result.add(new AppVersion(appName, tag, isNative));
+            }
+        }
+        return result;
+    }
+
+    UpdateStatus getTagCommitStatus(String appName, String tag) {
+        Path repoDir = repoDir(appName);
+        JkGit git = JkGit.of(repoDir);
+        String remoteRepo = git.getRemoteUrl();
+        String remoteTagCommit = git.getRemoteTagCommit(remoteRepo, tag);
+        if (tag != null && remoteTagCommit == null) {
+            JkLog.warn("Found tag %s on current commit of repo %s no longer exist in remote repo %s.",
+                    tag, repoDir, remoteRepo);
+            return UpdateStatus.TAG_DELETED;
+        }
+        String localTagCommit = git.getCurrentCommit();
+        if (JkUtilsObject.equals(localTagCommit, remoteTagCommit)) {
+            return UpdateStatus.UP_TO_DATE;
+        }
+        return UpdateStatus.OUTDATED;
+    }
+
+    static boolean isAppNameValid(String name) {
+        return name.matches("[a-zA-Z0-9\\-]+");
+    }
+
+    private void buildAndInstall(String appName, boolean isNative, Path repoDir) {
+        Path artefact;
+        try {
+            artefact = AppBuilder.build(repoDir, isNative);
+        } catch (RuntimeException e) {
+            JkGit git = JkGit.of(repoDir);
+            String remoteRepoUrl = git.getRemoteUrl();
+            String tag = getTag(repoDir);
+            String tagExpression = tag == null ? "HEAD" : "with tag " + tag;
+            JkLog.error("Error building '%s' app from repo %s %s.", appName, remoteRepoUrl, tagExpression);
+            JkLog.error("The version fetched may have errors. Try a different tag to install or update.");
+            throw e;
+        }
+
+        String fileName = (JkUtilsSystem.IS_WINDOWS && !isNative) ? appName + ".bat" : appName;
+        JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private UpdateStatus updateRepoIfNeeded(String appName, String tag, TagBucket tagBucket) {
+        UpdateStatus updateStatus = getTagCommitStatus(appName, tag);
+
+        // Update repo
+        if (updateStatus == UpdateStatus.OUTDATED) {
+            Path repoDir = repoDir(appName);
+            updateRepo(repoDir, tag);
+        }
+        return UpdateStatus.OUTDATED;
+    }
+
+
 
     private void updateRepo(Path repoDir, String tag) {
         JkGit git = JkGit.of(repoDir);
@@ -246,10 +290,6 @@ class AppManager {
             return null;
         }
         return currentTags.get(0);
-    }
-
-    static boolean isAppNameValid(String name) {
-        return name.matches("[a-zA-Z0-9\\-]+");
     }
 
     private Path repoDir(String appName) {
@@ -292,5 +332,27 @@ class AppManager {
         String content = JkPathFile.of(appFile).readAsString();
         return !content.trim().startsWith(AppBuilder.SHE_BANG);
     }
+
+    static class AppVersion {
+
+        final String appName;
+
+        final String version;
+
+        final boolean isNative;
+
+        public AppVersion(String appName, String version, boolean isNative) {
+            this.appName = appName;
+            this.version = version;
+            this.isNative = isNative;
+        }
+
+        @Override
+        public String toString() {
+            return appName + " " + version + (isNative ? "  native" : " jvm");
+        }
+    }
+
+
 
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package dev.jeka.core.tool.builtins.operations;
+package dev.jeka.core.tool.builtins.setup;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;
@@ -22,11 +22,14 @@ import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Properties;
 
 class PropFile {
@@ -37,16 +40,7 @@ class PropFile {
         this.path = path;
     }
 
-    public void deleteProperty(String propKey) {
-        List<String> lines = new LinkedList<>(JkUtilsPath.readAllLines(path));
-        for (ListIterator<String> iterator = lines.listIterator(); iterator.hasNext(); ) {
-            String line = iterator.next();
-            if (line.startsWith(propKey+"=")) {
-                iterator.remove();
-            }
-        }
-        JkPathFile.of(path).write(java.lang.String.join( "\n",lines));
-    }
+
 
     private void insertBeforeFirst(String prefix, String lineToInsert) {
         List<String> lines = new LinkedList<>(JkUtilsPath.readAllLines(path));
@@ -81,7 +75,7 @@ class PropFile {
                 lines.add(lastMatchingIndex + 1, lineToInsert);
             }
         }
-        JkPathFile.of(path).write(java.lang.String.join( "\n",lines));
+        JkPathFile.of(path).write(String.join( "\n",lines));
     }
 
     void insertProp(String propKey, String propValue) {
@@ -109,4 +103,72 @@ class PropFile {
         JkLog.info("Property %s=%s %s.", propKey, propValue, update ? "updated" : "added");
     }
 
+    void replaceProp(String propKey, String propRawValue) {
+        String content = JkPathFile.of(path).readAsString();
+        String newContent = updateProperty(content, propKey, propRawValue);
+        JkPathFile.of(path).write(newContent, StandardOpenOption.WRITE);
+    }
+
+    // non-private for testing
+    static String updateProperty(String propertiesContent, String key, String newValue) {
+        List<String> lines = new ArrayList<>();
+        boolean propertyUpdated = false;
+        boolean isMultiline = false;
+        StringBuilder multilineProperty = new StringBuilder();
+        String multilineKey = null;
+
+        try (BufferedReader reader = new BufferedReader(new StringReader(propertiesContent))) {
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                String trimmedLine = line.trim();
+
+                // Handle multiline declarations
+                if (isMultiline) {
+                    multilineProperty.append(trimmedLine);
+                    if (!trimmedLine.endsWith("\\")) {
+                        isMultiline = false;
+                        // Replace multiline property if it matches the key
+                        if (multilineKey.equals(key)) {
+                            lines.add(key + "=" + newValue);
+                            propertyUpdated = true;
+                        } else {
+                            lines.add(multilineProperty.toString());
+                        }
+                        multilineProperty.setLength(0); // Clear buffer
+                    }
+                    continue;
+                } else if (trimmedLine.endsWith("\\")) {
+                    isMultiline = true;
+                    multilineProperty.setLength(0); // Start a new multiline property
+                    multilineProperty.append(line);
+                    multilineKey = trimmedLine.split("=", 2)[0].trim();
+                    continue;
+                }
+
+                // Handle single-line properties
+                if (trimmedLine.startsWith(key + "=")) {
+                    lines.add(key + "=" + newValue);
+                    propertyUpdated = true;
+                } else {
+                    lines.add(line);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // If the property wasn't found, add it at the end
+        if (!propertyUpdated) {
+            lines.add(key + "=" + newValue);
+        }
+
+        // Rebuild the content with preserved formatting and order
+        return String.join("\n", lines) + "\n";
+    }
+
+    @Override
+    public String toString() {
+        return path.toString();
+    }
 }
