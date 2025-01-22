@@ -113,7 +113,7 @@ class PicocliHelp {
 
         // Add section for Standard KBeans
         Map<String, String> stdKBeans = new LinkedHashMap<>();
-        for (Class<? extends KBean> kbeanClass : PicocliCommands.STANDARD_KBEAN_CLASSES) {
+        for (Class<? extends KBean> kbeanClass : JkAllKBeans.STANDARD_KBEAN_CLASSES) {
             KBeanDescription description = KBeanDescription.of(kbeanClass);
             String name = KBean.name(kbeanClass);
             stdKBeans.put( String.format("@|yellow %s:|@", name), description.synopsisHeader);
@@ -131,7 +131,7 @@ class PicocliHelp {
 
         // Add section for other KBeans
         List<String> others = new LinkedList<>(kbeanResolution.allKbeans);
-        List<String> stdKbeanClassNames = PicocliCommands.STANDARD_KBEAN_CLASSES.stream()
+        List<String> stdKbeanClassNames = JkAllKBeans.STANDARD_KBEAN_CLASSES.stream()
                         .map(Class::getName).collect(Collectors.toList());
         others.removeAll(stdKbeanClassNames);
         others.remove(defaultKBeanClassName);

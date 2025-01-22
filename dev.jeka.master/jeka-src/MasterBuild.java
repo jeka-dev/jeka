@@ -41,6 +41,7 @@ import dev.jeka.plugins.sonarqube.SonarqubeKBean;
 import github.Github;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @JkDep("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
@@ -319,8 +320,12 @@ class MasterBuild extends KBean {
     }
 
     private void copyDocsToWorkDir() {
-        JkPathTree.of("docs").copyTo(Paths.get(MKDOCS_OUTPUT_DIR).resolve("docs"));
-        JkPathFile.of("mkdocs.yml").copyToDir(Paths.get(MKDOCS_OUTPUT_DIR));
+        String mkdocYmlFilename = "mkdocs.yml";
+        Path baseDir = JkPathFile.of(mkdocYmlFilename).exists() ? Paths.get(".") : Paths.get("..");
+        JkPathTree.of(baseDir.resolve("docs"))
+                .copyTo(baseDir.resolve(MKDOCS_OUTPUT_DIR).resolve("docs"));
+        JkPathFile.of(baseDir.resolve(mkdocYmlFilename))
+                .copyToDir(baseDir.resolve(MKDOCS_OUTPUT_DIR));
     }
 
     /**

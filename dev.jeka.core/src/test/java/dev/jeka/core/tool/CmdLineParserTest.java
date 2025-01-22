@@ -59,7 +59,7 @@ public class CmdLineParserTest {
     }
 
     private static Engine.KBeanResolution kBeanResolution() {
-        List<String> kbeanClasses = PicocliCommands.STANDARD_KBEAN_CLASSES.stream()
+        List<String> kbeanClasses = JkAllKBeans.STANDARD_KBEAN_CLASSES.stream()
                 .map(Class::getName).collect(Collectors.toList());
         return new Engine.KBeanResolution(
                 kbeanClasses,

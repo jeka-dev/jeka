@@ -36,19 +36,6 @@ import java.util.Objects;
 
 class PicocliCommands {
 
-    static final List<Class<? extends KBean>> STANDARD_KBEAN_CLASSES = JkUtilsIterable.listOf(
-            SetupKBean.class,
-            AppKBean.class,
-            BaseKBean.class,
-            ProjectKBean.class,
-            MavenKBean.class,
-            GitKBean.class,
-            DockerKBean.class,
-            NativeKBean.class,
-            IntellijKBean.class,
-            EclipseKBean.class
-    );
-
     static CommandLine mainCommandLine() {
         PicocliMainCommand mainCommand = new PicocliMainCommand();
         CommandSpec mainCommandSpec = CommandSpec.forAnnotatedObject(mainCommand);
