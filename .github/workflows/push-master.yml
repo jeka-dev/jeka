@@ -49,7 +49,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
       uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
-        CONFIG_FILE: dev.jeka.master/jeke-output/mkdocs/mkdocs.yml
+        CONFIG_FILE: dev.jeka.master/jeka-output/mkdocs/mkdocs.yml
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REQUIREMENTS: .github/workflows/requirements.txt
 
