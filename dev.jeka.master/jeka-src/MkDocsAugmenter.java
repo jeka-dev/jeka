@@ -18,14 +18,16 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBeanDescription;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.app.AppKBean;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 
 class MkDocsAugmenter {
 
-    private static final String PLACE_HOLDER = "<!-- autogen-doc -->";
+    private static final String PLACE_HOLDER = Matcher.quoteReplacement("<!-- autogen-doc -->");
 
     private final Path docDir;
 
@@ -47,25 +49,21 @@ class MkDocsAugmenter {
         String fileContent = docPathFile.readAsString();
 
         String genContent = mdContent(JkBeanDescription.of(clazz));
-        String newFileContent = fileContent.replaceAll(PLACE_HOLDER, genContent);
-        if (clazz.equals(AppKBean.class)) {
-            System.out.println(newFileContent);
-        }
+        String newFileContent = replace(fileContent, genContent);
 
         docPathFile.deleteIfExist().createIfNotExist().write(newFileContent);
     }
 
     private String mdContent(JkBeanDescription beanDescription) {
         StringBuilder sb = new StringBuilder();
-        sb.append("## Summary\n\n");
-        sb.append(beanDescription.synopsisHeader).append("\n\nn");
+        sb.append(beanDescription.synopsisHeader).append("\n\n");
         sb.append(beanDescription.synopsisDetail).append("\n\n");
         sb.append("|Field  |Description  |Type  |\n");
         sb.append("|-------|-------------|------|\n");
         beanDescription.beanFields.forEach(field -> sb.append(fieldContent(field)));
 
         sb.append("\n\n");
-        sb.append("|Mathod  |Description  |\n");
+        sb.append("|Method  |Description  |\n");
         sb.append("|--------|-------------|\n");
         beanDescription.beanMethods.forEach(method -> sb.append(methodContent(method)));
 
@@ -76,17 +74,29 @@ class MkDocsAugmenter {
         return String.format("|%s |%s |%s |%n",
                 beanField.name,
                 oneLiner(beanField.description),
-                beanField.type);
+                JkUtilsString.removePackagePrefix(beanField.type.getName()));
     }
 
     private String methodContent(JkBeanDescription.BeanMethod beanMethod) {
         return String.format("|%s |%s |%n",
-                "uiui",
-                "toto");
+                beanMethod.name,
+                oneLiner(beanMethod.description));
     }
 
     private static String oneLiner(String original) {
-         return "totot";
-         //return original.replace('\n', '\0');
+         return original.replaceAll("\\n", "<br/>").replaceAll("%n", "<br/>");
+    }
+
+    private static String replace(String original, String replacement) {
+        List<String> result = new LinkedList<>();
+        List<String> lines = Arrays.asList(original.split("\n"));
+        for (String line : lines) {
+            if (line.trim().equals(PLACE_HOLDER)) {
+                result.add(replacement);
+            } else {
+                result.add(line);
+            }
+        }
+        return String.join("\n", result);
     }
 }

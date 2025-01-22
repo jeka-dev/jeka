@@ -28,7 +28,6 @@ import dev.jeka.core.api.utils.JkUtilsTime;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -128,7 +127,7 @@ public class JkDockerBuild {
 
     private String baseImage = "ubuntu";
 
-    private NonRootUserCreationMode nonRootUserCreationMode = NonRootUserCreationMode.AUTO;
+    private NonRootMode nonRootUserCreationMode = NonRootMode.AUTO;
 
     private int userId = 1001;
 
@@ -151,7 +150,7 @@ public class JkDockerBuild {
     /**
      * Defines the modes for creating a nonroot user in a Docker image.<br/>
      */
-    public enum NonRootUserCreationMode {
+    public enum NonRootMode {
 
         /** Always create a nonroot user */
         ALWAYS,
@@ -219,7 +218,7 @@ public class JkDockerBuild {
         return baseImage;
     }
 
-    public final JkDockerBuild setNonRootUserCreationMode(NonRootUserCreationMode nonRootUserCreationMode) {
+    public final JkDockerBuild setNonRootUserCreationMode(NonRootMode nonRootUserCreationMode) {
         this.nonRootUserCreationMode = nonRootUserCreationMode;
         return this;
     }
@@ -230,9 +229,9 @@ public class JkDockerBuild {
      * @return true if a non-root user creation step is present, false otherwise.
      */
     public final boolean hasNonRootUserCreation() {
-        if (nonRootUserCreationMode == NonRootUserCreationMode.NEVER) {
+        if (nonRootUserCreationMode == NonRootMode.NEVER) {
             return false;
-        } else if (nonRootUserCreationMode == NonRootUserCreationMode.ALWAYS) {
+        } else if (nonRootUserCreationMode == NonRootMode.ALWAYS) {
             return true;
         }
         return !(this.baseImage.contains("nonroot")

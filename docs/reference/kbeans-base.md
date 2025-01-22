@@ -1,6 +1,8 @@
 # Base KBean
 
-[`BaseKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/base/BaseKBean.java), similar to `ProjectKBean`, facilitates building JVM-based code hosted entirely in the *jeka-src* folder with a simpler classpath organization.
+<!-- autogen-doc -->
+
+[`BaseKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/base/BaseKBean.java) is similar to `ProjectKBean`, but it facilitates building JVM-based code hosted entirely in the *jeka-src* folder with a simpler classpath organization.
 
 - **Single Classpath**: By default, there is a single classpath. However, if a `_dev` package exists in the code structure, its contents are excluded when creating JARs, native executables, or Docker images. Typically, build and test classes are placed in `_dev` for application builds.
 - **Dependency Declaration**: Dependencies are declared by annotating any class with the `@JkDep` annotation. Dependencies within the `_dev` package are excluded from production artifacts.

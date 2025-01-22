@@ -40,23 +40,22 @@ public class AppKBean extends KBean {
             JkLocator.getJekaHomeDir(),
             JkLocator.getCacheDir().resolve("git").resolve("apps"));
 
-    @JkDoc("Specifies the URL of the remote Git repository used to install the app." +
-            "t can be written as `https://.../my-app#[tag-name]` to fetch a specific tag.")
-    public String remote;
+    @JkDoc("Sets the URL of the remote Git repository to install the app.")
+    public String repo;
 
     @JkDoc("Specifies the app name.")
     public String name;
 
-    @JkDoc("Build and install the app to make it available in PATH. \n" +
-            "Use 'remote=[Git URL]' to set the source repository.\n" +
-            "Use 'native:' argument to install as a native app.")
+    @JkDoc("Build and install the app to make it available in PATH.\n" +
+            "Use `remote=[Git URL]` to set the source repository.\n" +
+            "Use `native:` argument to install as a native app.")
     public void install() {
-        String gitUrl = this.remote;
+        String gitUrl = this.repo;
         if (JkUtilsString.isBlank(gitUrl)) {
             JkLog.info("You must specify the git url using 'remote=[Git URL]'.");
             return;
         }
-        String remoteUrl = this.remote.trim();
+        String remoteUrl = this.repo.trim();
 
         List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
         if (!installedAppsForRepo.isEmpty()) {

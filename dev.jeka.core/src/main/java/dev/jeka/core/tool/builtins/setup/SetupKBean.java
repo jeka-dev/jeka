@@ -29,7 +29,8 @@ import dev.jeka.core.tool.KBean;
 import java.awt.*;
 import java.io.IOException;
 
-@JkDoc("Provides methods for setup tasks.")
+@JkDoc("Provides convenient methods to perform global configuration tasks as editing global.properties file " +
+        "or updating embedded jeka boot scripts.")
 public class SetupKBean extends KBean {
 
     private static final PropFile GLOBAL_PROP_FILE = new PropFile(JkLocator.getGlobalPropertiesFile());
@@ -61,9 +62,9 @@ public class SetupKBean extends KBean {
         }
     }
 
-    @JkDoc("Adds a shorthand to the global properties file. " +
-            "Provide it as 'content=[shorthand-name]=[shorthand content]', " +
-            "e.g., 'jeka operations: addShorthand content=build=project: pack sonarqube: run'.")
+    @JkDoc("Adds a shorthand to the global properties file.\n" +
+            "Provide it as 'content=[shorthand-name]=[shorthand content]\n" +
+            "E.g. 'jeka operations: addShorthand content=build=project: pack sonarqube: run'.")
     public void addShorthand() {
         if (JkUtilsString.isBlank(content) || !content.contains("=")) {
             JkLog.info("You must specify the shorthand using 'content=[shorthand-name]=[shorthand content].");
@@ -75,7 +76,7 @@ public class SetupKBean extends KBean {
         }
     }
 
-    @JkDoc("Creates or updates jeka.ps1 and jeka bash scripts in the current directory.%n" +
+    @JkDoc("Creates or updates jeka.ps1 and jeka bash scripts in the current directory.\n" +
             "Uses the running JeKa version to set the script version.")
     public void updateLocalScripts() {
         JkScaffold.createShellScripts(getBaseDir());

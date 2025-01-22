@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 
 @JkDoc(
         "Manages the build and execution of code located in 'jeka-src' directory.\n" +
-        "The application must contain a class with main method in order to : \n" +
+        "The application must contain a class with main method in order to:\n\n" +  // double \n needed to proper display in mkdocs
         "  - Run application\n" +
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."
@@ -70,7 +70,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
     @JkDoc("Space separated list of program arguments to pass to the command line running the program.")
     public String programArgs = "";
 
-    @JkDoc("module group and name used for publication. Formatted as 'groupId:nameId'")
+    @JkDoc("Group and name for publication, formatted as 'groupId:nameId'.")
     public String moduleId;
 
     public JkGitVersioning gitVersioning = JkGitVersioning.of();
@@ -153,7 +153,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         this.prepareRunJar().exec();
     }
 
-    @JkDoc("Displays info about this SelfApp")
+    @JkDoc("Displays info about this base KBean.")
     public void info() {
         StringBuilder sb = new StringBuilder();
         sb.append("Module Id    : " + this.module).append("\n");

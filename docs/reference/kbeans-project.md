@@ -1,5 +1,8 @@
 # Project KBean
 
+<!-- autogen-doc -->
+
+
 [`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
 acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
 This _KBean_ provides core methods for fundamental build tasks, including **compiling**, **testing**, and **packaging**.
@@ -7,6 +10,7 @@ This _KBean_ provides core methods for fundamental build tasks, including **comp
 To work effectively with this KBean, it's helpful to have an [overview](api-project.md) of the capabilities offered by the `JkProject` object.
 
 **Key Features**
+
 - Resolves dependencies, compiles code, and runs tests.
 - Creates various types of JAR files out-of-the-box, including regular, fat, shaded, source, and Javadoc JARs.
 - Infers project versions from Git metadata.

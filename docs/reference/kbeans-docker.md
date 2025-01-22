@@ -1,5 +1,8 @@
 # Docker KBean
 
+<!-- autogen-doc -->
+
+
 [`DockerKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/docker/DockerKBean.java) allows the creation of Docker images for both *project* and *base* KBeans. It supports generating JVM-based images as well as minimalist Docker images containing only the native executable.
 
 **Key Features:**

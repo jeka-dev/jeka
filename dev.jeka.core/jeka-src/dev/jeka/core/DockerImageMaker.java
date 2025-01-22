@@ -41,7 +41,7 @@ public class DockerImageMaker {
         if(!Files.exists(jekaDist)) {
             jekaDist = Paths.get("..").resolve(jekaDist).normalize();
         }
-        dockerBuild.setNonRootUserCreationMode(JkDockerBuild.NonRootUserCreationMode.NEVER);
+        dockerBuild.setNonRootUserCreationMode(JkDockerBuild.NonRootMode.NEVER);
         dockerBuild.dockerfileTemplate
                 .add("RUN apt update")
                 .add("RUN apt install -y curl unzip git gcc libz-dev")  // gcc and libz-dev is for graalvm

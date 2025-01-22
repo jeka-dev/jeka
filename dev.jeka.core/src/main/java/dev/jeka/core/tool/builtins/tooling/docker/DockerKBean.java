@@ -35,7 +35,7 @@ import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-@JkDoc("Builds and runs image based on project.%n" +
+@JkDoc("Builds and runs image based on project.\n" +
         "This KBean can build JVM and Native (AOT) images from an existing project."
 )
 public final class DockerKBean extends KBean {
@@ -61,10 +61,10 @@ public final class DockerKBean extends KBean {
     public String nativeBaseImage = JkDockerNativeBuild.DEFAULT_BASE_IMAGE;
 
     @JkDoc("Specifies the policy for creating a non-root user in the native Docker image.")
-    public JkDockerBuild.NonRootUserCreationMode nativeNonRootUser = JkDockerBuild.NonRootUserCreationMode.AUTO;
+    public JkDockerBuild.NonRootMode nativeNonRootUser = JkDockerBuild.NonRootMode.AUTO;
 
     @JkDoc("Specifies the policy for creating a non-root user in the JVM Docker image.")
-    public JkDockerBuild.NonRootUserCreationMode jvmNonRootUser = JkDockerBuild.NonRootUserCreationMode.AUTO;
+    public JkDockerBuild.NonRootMode jvmNonRootUser = JkDockerBuild.NonRootMode.AUTO;
 
     /*
      * Handler on the Docker build configuration for customizing built images.
