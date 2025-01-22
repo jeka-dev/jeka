@@ -15,13 +15,13 @@
  */
 
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkAllKBeans;
 import dev.jeka.core.tool.JkBeanDescription;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.app.AppKBean;
 
 import java.nio.file.Path;
+import java.util.regex.Matcher;
 
 class MkDocsAugmenter {
 
@@ -34,12 +34,13 @@ class MkDocsAugmenter {
     }
 
     void perform() {
-        JkAllKBeans.STANDARD_KBEAN_CLASSES.forEach(this::perform);
+        JkBeanDescription.STANDARD_KBEAN_CLASSES.forEach(this::perform);
     }
 
     private void perform(Class<? extends KBean> clazz) {
         String simpleClassName = clazz.getSimpleName();
         String beanName = JkUtilsString.substringBeforeLast(simpleClassName, "KBean");
+        beanName = JkUtilsString.uncapitalize(beanName);
         Path docFileName = docDir.resolve("reference/kbeans-" + beanName + ".md");
 
         JkPathFile docPathFile = JkPathFile.of(docFileName);
@@ -47,8 +48,11 @@ class MkDocsAugmenter {
 
         String genContent = mdContent(JkBeanDescription.of(clazz));
         String newFileContent = fileContent.replaceAll(PLACE_HOLDER, genContent);
+        if (clazz.equals(AppKBean.class)) {
+            System.out.println(newFileContent);
+        }
 
-        docPathFile.write(newFileContent);
+        docPathFile.deleteIfExist().createIfNotExist().write(newFileContent);
     }
 
     private String mdContent(JkBeanDescription beanDescription) {
@@ -69,10 +73,20 @@ class MkDocsAugmenter {
     }
 
     private String fieldContent(JkBeanDescription.BeanField beanField) {
-        return String.format("|%s|%s|%s|%n", beanField.name, beanField.description, beanField.type);
+        return String.format("|%s |%s |%s |%n",
+                beanField.name,
+                oneLiner(beanField.description),
+                beanField.type);
     }
 
     private String methodContent(JkBeanDescription.BeanMethod beanMethod) {
-        return String.format("|%s|%s|%n", beanMethod.name, beanMethod.description);
+        return String.format("|%s |%s |%n",
+                "uiui",
+                "toto");
+    }
+
+    private static String oneLiner(String original) {
+         return "totot";
+         //return original.replace('\n', '\0');
     }
 }

@@ -326,10 +326,9 @@ class MasterBuild extends KBean {
         Path baseDir = JkPathFile.of(mkdocYmlFilename).exists() ? Paths.get(".") : Paths.get("..");
         Path docBaseDir = baseDir.resolve("docs");
         Path generatedDocDir = baseDir.resolve(MKDOCS_OUTPUT_DIR).resolve("docs");
-        JkUtilsPath.deleteQuietly(generatedDocDir, false);
+
         JkPathTree.of(docBaseDir).copyTo(generatedDocDir);
-        JkPathFile.of(baseDir.resolve(mkdocYmlFilename))
-                .copyToDir(baseDir.resolve(MKDOCS_OUTPUT_DIR));
+        JkPathFile.of(baseDir.resolve(mkdocYmlFilename)).copyToDir(generatedDocDir.getParent());
         new MkDocsAugmenter(docBaseDir).perform();
 
     }

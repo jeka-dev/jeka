@@ -16,22 +16,10 @@
 
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.CommandLine.Help.Visibility;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
-import dev.jeka.core.tool.builtins.app.AppKBean;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.setup.SetupKBean;
-import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
-import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
-import dev.jeka.core.tool.builtins.tooling.ide.EclipseKBean;
-import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
-import java.util.List;
 import java.util.Objects;
 
 class PicocliCommands {
@@ -42,7 +30,7 @@ class PicocliCommands {
         return new CommandLine(mainCommandSpec);
     }
 
-    static CommandSpec fromKBeanDesc(KBeanDescription beanDesc) {
+    static CommandSpec fromKBeanDesc(JkBeanDescription beanDesc) {
         CommandSpec spec = CommandSpec.create();
         beanDesc.beanFields.forEach(beanField -> {
 
@@ -85,7 +73,7 @@ class PicocliCommands {
         return spec;
     }
 
-    private static CommandSpec fromKBeanMethod(KBeanDescription.BeanMethod beanMethod) {
+    private static CommandSpec fromKBeanMethod(JkBeanDescription.BeanMethod beanMethod) {
         CommandSpec spec = CommandSpec.create();
         spec.subcommandsRepeatable(true);
         String description = beanMethod.description == null ? "No Description" : beanMethod.description;

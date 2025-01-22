@@ -16,8 +16,19 @@
 
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.builtins.app.AppKBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.setup.SetupKBean;
+import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
+import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.EclipseKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,23 +42,35 @@ import java.util.stream.Collectors;
  *
  * @author Jerome Angibaud
  */
-final class KBeanDescription {
+public final class JkBeanDescription {
 
-    private static final Map<Class<? extends KBean>, KBeanDescription> CACHE = new HashMap<>();
+    public static final List<Class<? extends KBean>> STANDARD_KBEAN_CLASSES = JkUtilsIterable.listOf(
+            SetupKBean.class,
+            AppKBean.class,
+            BaseKBean.class,
+            ProjectKBean.class,
+            MavenKBean.class,
+            GitKBean.class,
+            DockerKBean.class,
+            NativeKBean.class,
+            IntellijKBean.class,
+            EclipseKBean.class
+    );
+    private static final Map<Class<? extends KBean>, JkBeanDescription> CACHE = new HashMap<>();
 
     final Class<? extends KBean> kbeanClass;
 
-    final String synopsisHeader;
+    public final String synopsisHeader;
 
-    final String synopsisDetail;
+    public final String synopsisDetail;
 
-    final List<BeanMethod> beanMethods;
+    public final List<BeanMethod> beanMethods;
 
-    final List<BeanField> beanFields;
+    public final List<BeanField> beanFields;
 
     final boolean includeDefaultValues;
 
-    private KBeanDescription(
+    private JkBeanDescription(
             Class<? extends KBean> kbeanClass,
             String synopsisHeader,
             String synopsisDetail,
@@ -64,7 +87,7 @@ final class KBeanDescription {
         this.includeDefaultValues = includeDefaultValues;
     }
 
-    static KBeanDescription of(Class<? extends KBean> kbeanClass) {
+    public static JkBeanDescription of(Class<? extends KBean> kbeanClass) {
         if (CACHE.containsKey(kbeanClass)) {
             return CACHE.get(kbeanClass);
         }
@@ -99,10 +122,10 @@ final class KBeanDescription {
                 detail = "";
             }
         }
-        return new KBeanDescription(kbeanClass, header, detail, methods, beanFields, false);
+        return new JkBeanDescription(kbeanClass, header, detail, methods, beanFields, false);
     }
 
-    static KBeanDescription ofWithDefaultValues(Class<? extends KBean> kbeanClass, JkRunbase runbase) {
+    static JkBeanDescription ofWithDefaultValues(Class<? extends KBean> kbeanClass, JkRunbase runbase) {
         if (CACHE.containsKey(kbeanClass)) {
             return CACHE.get(kbeanClass);
         }
@@ -137,7 +160,7 @@ final class KBeanDescription {
                 detail = "";
             }
         }
-        KBeanDescription result = new KBeanDescription(kbeanClass, header, detail, methods, beanFields,
+        JkBeanDescription result = new JkBeanDescription(kbeanClass, header, detail, methods, beanFields,
                 true);
         CACHE.put(kbeanClass, result);
         return result;
@@ -208,11 +231,11 @@ final class KBeanDescription {
      *
      * @author Jerome Angibaud
      */
-    static final class BeanMethod implements Comparable<BeanMethod> {
+    public static final class BeanMethod implements Comparable<BeanMethod> {
 
-        final String name;
+        public final String name;
 
-        final String description;
+        public final String description;
 
         private final Class<?> declaringClass;
 
@@ -253,19 +276,19 @@ final class KBeanDescription {
      *
      * @author Jerome Angibaud
      */
-    static final class BeanField implements Comparable<BeanField> {
+    public static final class BeanField implements Comparable<BeanField> {
 
         final Field field;
 
-        final String name;
+        public final String name;
 
-        final String description;
+        public final String description;
 
         private final Object bean;
 
         final Object defaultValue;
 
-        final Class<?> type;
+        public final Class<?> type;
 
         final String injectedPropertyName;
 

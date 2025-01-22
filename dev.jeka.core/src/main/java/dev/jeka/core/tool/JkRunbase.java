@@ -455,14 +455,14 @@ public final class JkRunbase {
 
         Class<? extends KBean> kbeanClass = kbean.getClass();
         List<KBeanAction> result = new LinkedList<>();
-        KBeanDescription desc = KBeanDescription.of(kbeanClass);
+        JkBeanDescription desc = JkBeanDescription.of(kbeanClass);
 
         CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc));
         commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, desc));
         commandLine.parseArgs();
         CommandLine.Model.CommandSpec commandSpec = commandLine.getCommandSpec();
 
-        for (KBeanDescription.BeanField beanField : desc.beanFields) {
+        for (JkBeanDescription.BeanField beanField : desc.beanFields) {
             CommandLine.Model.OptionSpec optionSpec = commandSpec.findOption(beanField.name);
             Object value = optionSpec.getValue();
             if (value != null) {  // cannot set "null" on non-primitive
@@ -474,9 +474,9 @@ public final class JkRunbase {
         return result;
     }
 
-    private String getDefaultFromProps(CommandLine.Model.ArgSpec argSpec, KBeanDescription desc) {
+    private String getDefaultFromProps(CommandLine.Model.ArgSpec argSpec, JkBeanDescription desc) {
         CommandLine.Model.OptionSpec optionSpec = (CommandLine.Model.OptionSpec) argSpec;
-        KBeanDescription.BeanField beanField = desc.beanFields.stream()
+        JkBeanDescription.BeanField beanField = desc.beanFields.stream()
                 .filter(beanField1 -> beanField1.name.equals(optionSpec.longestName()))
                 .findFirst().orElseThrow(
                         () -> new IllegalStateException("Cannot find field " + optionSpec.longestName()
