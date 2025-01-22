@@ -51,7 +51,7 @@ class MasterBuild extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
 
-    private static final String MKDOCS_OUTPUT_DIR= "master/jeke-output/mkdocs";
+    private static final String MKDOCS_OUTPUT_DIR= "dev.jeka.master/jeka-output/mkdocs";
 
     @JkInjectProperty("OSSRH_USER")
     public String ossrhUser;
@@ -197,7 +197,9 @@ class MasterBuild extends KBean {
         }
 
         // Copy dir to and augment documentation
+        JkLog.startTask("augment-mkdocs");
         this.copyDocsToWorkDir();
+        JkLog.endTask();
     }
 
     private boolean shouldPublishOnMavenCentral() {
@@ -322,10 +324,14 @@ class MasterBuild extends KBean {
     private void copyDocsToWorkDir() {
         String mkdocYmlFilename = "mkdocs.yml";
         Path baseDir = JkPathFile.of(mkdocYmlFilename).exists() ? Paths.get(".") : Paths.get("..");
-        JkPathTree.of(baseDir.resolve("docs"))
-                .copyTo(baseDir.resolve(MKDOCS_OUTPUT_DIR).resolve("docs"));
+        Path docBaseDir = baseDir.resolve("docs");
+        Path generatedDocDir = baseDir.resolve(MKDOCS_OUTPUT_DIR).resolve("docs");
+        JkUtilsPath.deleteQuietly(generatedDocDir, false);
+        JkPathTree.of(docBaseDir).copyTo(generatedDocDir);
         JkPathFile.of(baseDir.resolve(mkdocYmlFilename))
                 .copyToDir(baseDir.resolve(MKDOCS_OUTPUT_DIR));
+        new MkDocsAugmenter(docBaseDir).perform();
+
     }
 
     /**
