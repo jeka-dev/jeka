@@ -28,6 +28,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.File;
 import java.io.IOException;
@@ -183,8 +184,11 @@ public class JkNodeJs {
 
         project.compilation.postCompileActions.append("build-js", () -> {
             this.setWorkingDir(jsBaseDir);
-            JkConsoleSpinner.of("Building NodeJs application")
-                    .run(() -> buildCommands.forEach(this::exec));
+            if (!JkLog.isVerbose()) {
+                JkLog.info("Building JS project with Node.js. This may take some time. Please be patient.");
+                JkLog.info("Use the `--verbose` option to show progress. NodeJS build started at %s.", JkUtilsTime.now("HH:mm:ss"));
+            }
+            buildCommands.forEach(this::exec);
             JkLog.info("JS project built in %s", buildJsDir);
             if (!JkUtilsString.isBlank(copyToDir)) {
                 Path target = project.compilation.layout.resolveClassDir().resolve(copyToDir);
@@ -196,8 +200,11 @@ public class JkNodeJs {
         if (!testCommands.isEmpty()) {
             project.testing.postActions.append("test-js", () -> {
                 this.setWorkingDir(jsBaseDir);
-                JkConsoleSpinner.of("Testing NodeJs application")
-                        .run(() -> testCommands.forEach(this::exec));
+                if (!JkLog.isVerbose()) {
+                    JkLog.info("Building JS project with Node.js. This may take some time. Please be patient.");
+                    JkLog.info("Use the `--verbose` option to show progress. NodeJS build started at %s.", JkUtilsTime.now("HH:mm:ss"));
+                }
+                testCommands.forEach(this::exec);
                 JkLog.info("JS test successful");
             });
         }
@@ -222,6 +229,8 @@ public class JkNodeJs {
         JkProcess process = JkProcess.of(commandFile.toString())
                 .setWorkingDir(workingDir)
                 .setFailOnError(true)
+                .setLogCommand(JkLog.isDebug())
+                .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setEnv("PATH", pathVar);
         if (useJekaLog) {
             process.setLogCommand(true);

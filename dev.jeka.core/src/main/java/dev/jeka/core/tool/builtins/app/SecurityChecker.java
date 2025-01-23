@@ -50,7 +50,7 @@ class SecurityChecker {
                 .anyMatch(sanitized::startsWith);
     }
 
-    static void addAllowedUrl(String allowedUrl) {
+    static void addTrustedUrl(String allowedUrl) {
         String sanitized = parseGitUrl(allowedUrl).trim();
         PropFile propFile = new PropFile(GLOBAL_PROP_FILE);
         String existing = JkProperties.ofFile(GLOBAL_PROP_FILE).get(GIT_TRUSTED_URL_PREFIX_PROP);

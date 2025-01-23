@@ -40,14 +40,17 @@ public class AppKBean extends KBean {
             JkLocator.getJekaHomeDir(),
             JkLocator.getCacheDir().resolve("git").resolve("apps"));
 
-    @JkDoc("Sets the URL of the remote Git repository to install the app.")
+    @JkDoc("Git Remote repository URL of the app to install.")
     public String repo;
 
-    @JkDoc("Specifies the app name.")
+    @JkDoc("Specifies the name of the app to update/uninstall.")
     public String name;
 
-    @JkDoc("Build and install the app to make it available in PATH.\n" +
-            "Use `remote=[Git URL]` to set the source repository.\n" +
+    @JkDoc("Specifies the url to trust.")
+    public String url;
+
+    @JkDoc("Builds and installs the app to make it available in PATH.\n" +
+            "Use `repo=[Git URL]` to set the source repository.\n" +
             "Use `native:` argument to install as a native app.")
     public void install() {
         String gitUrl = this.repo;
@@ -182,7 +185,7 @@ public class AppKBean extends KBean {
         JkLog.info("%s is installed.", suggestedAppName);
     }
 
-    @JkDoc("Update an app from the given PATH.\n" +
+    @JkDoc("Updates an app from the given PATH.\n" +
             "Use `name=[app-name]` to specify the app.")
     public void update() {
         final String appName;
@@ -254,18 +257,17 @@ public class AppKBean extends KBean {
         }
         JkBusyIndicator.stop();
         JkLog.info("Installed app:");
-        System.out.println(text);
-        //JkLog.info("%s found.", JkUtilsString.pluralize(installedAppNames.size(), "app"));
+        JkLog.info(text.toString());
     }
 
-    @JkDoc("Add permanently the url to trusted list.\n" +
+    @JkDoc("Adds permanently the url to the trusted list.\n" +
             "The urls starting with the specified prefix will be automatically trusted.\n" +
-            "Use 'name=my.host/my.path/' to specify the prefix.")
+            "Use 'url=my.host/my.path/' to specify the prefix.")
     public void trustUrl() {
-
+        SecurityChecker.addTrustedUrl(url);
     }
 
-    @JkDoc("Display some example on the console that you can play with.")
+    @JkDoc("Displays some examples on the console that you can play with.")
     public void examples() {
         JkColumnText columnText = JkColumnText
                 .ofSingle(10, 110)   // repo url
@@ -312,7 +314,7 @@ public class AppKBean extends KBean {
         JkLog.info("Host/path '%s' is not in present in the trusted list.", urlPath, GLOBAL_PROP_FILE);
         String response = JkPrompt.ask("Add? [N,y]:").trim();
         if ("y".equalsIgnoreCase(response)) {
-            SecurityChecker.addAllowedUrl(gitUrl);
+            SecurityChecker.addTrustedUrl(gitUrl);
             return true;
         }
         return false;

@@ -55,7 +55,8 @@ import java.util.stream.Collectors;
 
 @JkDoc(
         "Manages the build and execution of code located in 'jeka-src' directory.\n" +
-        "The application must contain a class with main method in order to:\n\n" +  // double \n needed to proper display in mkdocs
+        "The code stands for neither an application nor a library.\n" +
+        "For applications, code should contain a class including a main method to:\n\n" +  // double \n needed to proper display in mkdocs
         "  - Run application\n" +
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."

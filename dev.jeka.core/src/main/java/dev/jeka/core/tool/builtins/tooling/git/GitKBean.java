@@ -44,7 +44,7 @@ public final class GitKBean extends KBean {
                 .getCommitMessagesSinceLastTag().forEach(msg -> System.out.println("- " + msg));
     }
 
-    @JkDoc("Move the 'latest' tag to the current commit and push it to origin.")
+    @JkDoc("Moves the 'latest' tag to the current commit and push it to origin.")
     public void moveLatest() {
         moveTagOnCurrentCommit("latest");
     }

@@ -62,8 +62,8 @@ public class NativeKBean extends KBean {
     @JkDoc("If true, all resources will be included in the native image.")
     public boolean includeAllResources;
 
-    @JkDoc("Creates an native image from the main artifact jar of the project.\n" +
-            "If no artifact found, a build is triggered by invoking 'JkProject.packaging.createFatJar(mainArtifactPath)'.")
+    @JkDoc("Creates a native image from the project's main artifact jar." +
+            "\nBuilds the artifact first if none exists.")
     public void compile() {
         JkBuildable buildable = getRunbase().findBuildable();
         if (buildable != null) {
