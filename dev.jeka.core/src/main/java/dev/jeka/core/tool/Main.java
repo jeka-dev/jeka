@@ -117,7 +117,7 @@ public class Main {
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
             // Handle 'jeka --doc'
-            String docKbeanName = cmdArgs.kbeanDoc();
+            String docKbeanName = cmdArgs.kbeanDoc("--doc");
             if (docKbeanName != null && JkUtilsString.isBlank(docKbeanName)) {
                 PicocliHelp.printCmdHelp(
                         engine.resolveClassPaths().runClasspath,
@@ -150,6 +150,12 @@ public class Main {
             // -- Handle doc ([kbean]: --doc)
             if (docKbeanName != null) {
                 boolean success = performDocKBean(engine, docKbeanName);
+                System.exit(success ? 0 : 1);
+            }
+            // Handle 'jeka kbean: --doc.md''
+            docKbeanName = cmdArgs.kbeanDoc("--doc-md");
+            if (!JkUtilsString.isBlank(docKbeanName)) {
+                boolean success = performDocMdKBean(engine, docKbeanName);
                 System.exit(success ? 0 : 1);
             }
             if (logs.runtimeInformation) {
@@ -371,6 +377,27 @@ public class Main {
             System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanDoc);
         }
         return found;
+    }
+
+    private static boolean performDocMdKBean(Engine engine, String kbeanName) {
+        if (JkUtilsString.isBlank(kbeanName)) {
+            System.err.println("You must specify a KBean name as in 'jeka project: --doc-md'.");
+            return false;
+        }
+        Engine.KBeanResolution kBeanResolution = engine.getKbeanResolution();
+        JkRunbase.setKBeanResolution(kBeanResolution);
+        String kbeanClassName = kBeanResolution.allKbeans.stream()
+                .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
+                .findFirst().orElse(null);
+        if (kbeanClassName == null) {
+            System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanName);
+            return true;
+        }
+        ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath).get();
+        Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
+        String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent();
+        System.out.println(mdDoc);
+        return true;
     }
 
 

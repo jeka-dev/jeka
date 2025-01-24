@@ -185,9 +185,9 @@ class CmdLineArgs {
         return effectiveCommandLineArgs.toArray(new String[0]);
     }
 
-    String kbeanDoc() {
+    String kbeanDoc(String docOption) {
         List<String> argList  = Arrays.asList(args);
-        int docIndex = argList.indexOf("--doc");
+        int docIndex = argList.indexOf(docOption);
         if (docIndex < 0) {
             return null;
         } else if (docIndex == 0) {

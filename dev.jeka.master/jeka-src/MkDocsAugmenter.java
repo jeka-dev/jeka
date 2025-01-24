@@ -48,43 +48,10 @@ class MkDocsAugmenter {
         JkPathFile docPathFile = JkPathFile.of(docFileName);
         String fileContent = docPathFile.readAsString();
 
-        String genContent = mdContent(JkBeanDescription.of(clazz));
+        String genContent = JkBeanDescription.of(clazz).toMdContent();
         String newFileContent = replace(fileContent, genContent);
 
         docPathFile.deleteIfExist().createIfNotExist().write(newFileContent);
-    }
-
-    private String mdContent(JkBeanDescription beanDescription) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(beanDescription.synopsisHeader).append("\n\n");
-        sb.append(beanDescription.synopsisDetail).append("\n\n");
-        sb.append("|Field  |Description  |Type  |\n");
-        sb.append("|-------|-------------|------|\n");
-        beanDescription.beanFields.forEach(field -> sb.append(fieldContent(field)));
-
-        sb.append("\n\n");
-        sb.append("|Method  |Description  |\n");
-        sb.append("|--------|-------------|\n");
-        beanDescription.beanMethods.forEach(method -> sb.append(methodContent(method)));
-
-        return sb.toString();
-    }
-
-    private String fieldContent(JkBeanDescription.BeanField beanField) {
-        return String.format("|%s |%s |%s |%n",
-                beanField.name,
-                oneLiner(beanField.description),
-                JkUtilsString.removePackagePrefix(beanField.type.getName()));
-    }
-
-    private String methodContent(JkBeanDescription.BeanMethod beanMethod) {
-        return String.format("|%s |%s |%n",
-                beanMethod.name,
-                oneLiner(beanMethod.description));
-    }
-
-    private static String oneLiner(String original) {
-         return original.replaceAll("\\n", "<br/>").replaceAll("%n", "<br/>");
     }
 
     private static String replace(String original, String replacement) {

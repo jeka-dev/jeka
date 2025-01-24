@@ -108,6 +108,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
     private JkProjectScaffold projectScaffold;
 
+    @JkDoc("Applies the specified configuration to the underlying `JkProject` instance.")
     @Override
     protected void init() {
         configureProject();

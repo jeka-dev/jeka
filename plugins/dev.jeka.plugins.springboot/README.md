@@ -1,8 +1,36 @@
 # Spring-Boot Plugin for JeKa
 
-A plugin designed to simplify building Spring Boot applications with minimal effort.  
-This plugin provides a [KBean](src/dev/jeka/plugins/springboot/SpringbootKBean.java)
-and a library that streamlines building Spring Boot applications, especially bootable JARs.
+Adapt `project` or `base` KBean for Spring-Boot:
+
+- Produce bootable jars
+- Customize .war file for projectKBean
+- Adapt scaffolding
+- Include Spring Maven repositories for resolution
+- Adapt Docker image generator to include port exposure
+
+|Field  |Description  |Type  |
+|-------|-------------|------|
+|createOriginalJar |If true, create original jar artifact for publication (jar without embedded dependencies |boolean |
+|createWarFile |If true, create a .war filed. |boolean |
+|springRepo |Specific Spring repo where to download spring artifacts. Not needed if you use official release. |JkSpringRepo |
+|aotProfiles |The springboot profiles that should be activated while processing AOT |String |
+|exposedPorts |Space separated string of ports to expose. This is likely to be used by external tool as Docker. |String |
+
+
+|Pre-initializer Method  |Description  |Pre-initialised KBean  |
+|-------|-------------|------|
+|initProjectKbean |Set test progress style to PLAIN to display JVM messages gracefully. |ProjectKBean |
+
+
+|KBean Initialisation  |
+|--------|
+|Initialise `ProjectKBean` (or `BaseKBean) in order to:<br/><br/>- Produce bootable JAR file.<br/>- Adapt scaffolding to generate basic springboot application.<br/>- Add Spring Maven repositories.<br/>- Customize Docker image generator to export 8080 port. |
+
+
+|Method  |Description  |
+|--------|-------------|
+|info |Provides info about this plugin configuration |
+
 
 Resources:
 

@@ -36,8 +36,8 @@ public class SpringbootSampleBuild extends KBean {
                 .add("com.h2database:h2");
 
         projectKBean.project.testing.compilation.dependencies
-
                 .add("org.springframework.boot:spring-boot-starter-test");
+
         projectKBean.project
                 .setModuleId("dev.jeka:samples-springboot")
                 .setVersion("0.0.1-SNAPSHOT");  // Snapshot is necessary otherwise it can not deploy twice in maven local repo

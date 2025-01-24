@@ -45,11 +45,12 @@ import java.util.Optional;
  *     - https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/main/java/org/springframework/boot/maven
  */
 @JkDoc(
-        "Adapt projectKBean or baseKBean for Spring-Boot.\n" +
+        "Adapt `project` or `base` KBean for Spring-Boot:\n" +
         "- Produce bootable jars\n" +
         "- Customize .war file for projectKBean\n" +
-        "- Adapt scaffold\n" +
-        "The project or the baseApp is automatically configured during this KBean initialization. "
+        "- Adapt scaffolding\n" +
+        "- Include Spring Maven repositories for resolution\n" +
+        "- Adapt Docker image generator to include port exposure"
 )
 public final class SpringbootKBean extends KBean {
 
@@ -72,6 +73,11 @@ public final class SpringbootKBean extends KBean {
     public String exposedPorts="8080";
 
 
+    @JkDoc("Initialise `ProjectKBean` (or `BaseKBean) in order to:\n\n" +
+            "- Produce bootable JAR file.%n" +
+            "- Adapt scaffolding to generate basic springboot application.%n" +
+            "- Add Spring Maven repositories.%n" +
+            "- Customize Docker image generator to export 8080 port.")
     @Override
     protected void init() {
         Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
@@ -102,7 +108,7 @@ public final class SpringbootKBean extends KBean {
         JkLog.info("Create .war file : " + this.createWarFile);
     }
 
-    // Experimental
+    @JkDoc("Set test progress style to PLAIN to display JVM messages gracefully.")
     @JkPreInitKBean
     public static void initProjectKbean(ProjectKBean projectKBean) {
         projectKBean.project.testing.testProcessor.engineBehavior
