@@ -19,6 +19,8 @@ package dev.jeka.plugins.nodejs;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
@@ -29,12 +31,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-@JkDoc("Auto-configure projects with nodeJs client.")
+@JkDoc("Handles building a Node.js project.\n\n" +
+        "This KBean expects the project to include a folder with a Node.js application. " +
+        "Simply specify the Node.js version and the commands to build or test the application. " +
+        "The KBean guides the `project KBean` to build and test it.\n" +
+        "Node.js is automatically downloaded and installed on first use, so no manual setup is required.")
 public class NodeJsKBean extends KBean {
 
     @JkDoc("The version of NodeJs to use")
-    @JkDepSuggest(versionOnly = true, hint = "20.10.0,18.19.0,16.20.2")
+    @JkDepSuggest(versionOnly = true, hint = "22.11.0,20.9.0,18.19.0,16.20.2")
     public String version = JkNodeJs.DEFAULT_NODE_VERSION;
+
+    @JkDoc("Command line to run when `exec` is called, e.g., 'npx cowsay'.")
+    public String cmdLine;
 
     @JkDoc("Comma separated, command lines to execute for building js application or in conjunction with #exec method. " +
             "This can be similar to something like 'npx ..., npm ...'")
@@ -57,6 +66,7 @@ public class NodeJsKBean extends KBean {
 
     private JkNodeJsProject nodeJsProject;
 
+    @JkDoc("Optionally configures the `project` KBean in order it includes building of a JS application.\n")
     @Override
     protected void init() {
         if (configureProject) {
@@ -71,6 +81,7 @@ public class NodeJsKBean extends KBean {
             throw new JkException("The project has been configured to build with NodeJs.");
         }
         nodeJsProject.build();
+        JkLog.info("Build generated in %s dir.", getBaseDir().relativize(nodeJsProject.getBuildDir()));
     }
 
     @JkDoc("Runs the test commands configured for the JS project.")
@@ -82,12 +93,38 @@ public class NodeJsKBean extends KBean {
     }
 
     @JkDoc("Packs the JS project as specified in project configuration. " +
-            "It generally leads to copy the build dir into the static resource dir of the webapp.")
+            "It usually leads to copy the build dir into the static resource dir of the webapp.")
     public void pack() {
         if (nodeJsProject == null) {
             throw new JkException("The project has been configured to build with NodeJs.");
         }
         nodeJsProject.pack();
+    }
+
+    @JkDoc("Executes the nodeJs command line mentioned in `cmdLine` field.")
+    public void exec() {
+        JkNodeJs.ofVersion(version).exec(cmdLine);
+    }
+
+    @JkDoc("Displays configuration info.")
+    public void info() {
+        String version = this.nodeJsProject == null ? this.version : nodeJsProject.getNodeJs().getVersion();
+        Jk2ColumnsText text =Jk2ColumnsText.of(18, 80)
+                .add("NodeJs Version", version);
+        if (nodeJsProject != null) {
+            text    .add("Build Commands", String.join(", ", nodeJsProject.getBuildCommands()))
+                    .add("Test Commands", String.join(", ", nodeJsProject.getTestCommands()))
+                    .add("Deploy action?", Boolean.toString(nodeJsProject.getPackAction() != null));
+        }
+        System.out.println(text);
+    }
+
+    @JkDoc("Deletes the build directory.")
+    public void clean() {
+        if (nodeJsProject != null) {
+            JkUtilsPath.deleteQuietly(nodeJsProject.getBuildDir(), false);
+        }
+        JkLog.info("Build dir %s deleted.", getBaseDir().relativize(nodeJsProject.getBuildDir()));
     }
 
     /**
@@ -107,6 +144,7 @@ public class NodeJsKBean extends KBean {
         if (!JkUtilsString.isBlank(targetResourceDir)) {
             this.nodeJsProject.setCopyToResourcesPackAction(project, targetResourceDir);
         }
+        this.nodeJsProject.registerIn(project);
         return this.nodeJsProject;
     }
 

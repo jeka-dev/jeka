@@ -1,7 +1,10 @@
 package dev.jeka.core.api.function;
 
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 public class JkRunnablesTest {
 
@@ -35,4 +38,23 @@ public class JkRunnablesTest {
         Assert.assertNotNull(runnables.getRunnableNames().get(0));
     }
 
+    @Test
+    public void insertBefore() {
+        Runnable a = () -> {
+            System.out.println("A");
+        };
+        Runnable b = () -> {
+            System.out.println("B");
+        };
+        Runnable c = () -> {
+            System.out.println("C");
+        };
+        JkRunnables runnables = JkRunnables.of()
+                .append("b",b)
+                .append("c", c)
+                .insertBefore("a", "b", a);
+        runnables.run();
+        List<String> names = runnables.getRunnableNames();
+        Assert.assertEquals(JkUtilsIterable.listOf("a", "b", "c"), names);
+    }
 }

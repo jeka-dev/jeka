@@ -16,10 +16,7 @@
 
 package dev.jeka.core.tool.builtins.base;
 
-import dev.jeka.core.api.depmanagement.JkCoordinate;
-import dev.jeka.core.api.depmanagement.JkDependencySet;
-import dev.jeka.core.api.depmanagement.JkModuleId;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -30,6 +27,8 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkBuildable;
+import dev.jeka.core.api.project.JkProjectFlatFacade;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
@@ -74,6 +73,9 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
     @JkDoc("Group and name for publication, formatted as 'groupId:nameId'.")
     public String moduleId;
 
+    @JkDoc("Type of jar to produce for the main artifact.")
+    public JkProjectPackaging.JarType jarType = JkProjectPackaging.JarType.FAT;
+
     public JkGitVersioning gitVersioning = JkGitVersioning.of();
 
     @JkDoc
@@ -109,6 +111,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         if (gitVersioning.enable) {
             JkVersionFromGit.of(getBaseDir(), gitVersioning.tagPrefix).handleVersioning(this);
         }
+        setMainArtifactJarType(jarType);
     }
 
     // We can not just run Application#main cause Spring-Boot seems
@@ -159,6 +162,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         StringBuilder sb = new StringBuilder();
         sb.append("Module Id    : " + this.module).append("\n");
         sb.append("Version      : " + this.getVersion()).append("\n");
+        sb.append("Jar Type     : " + this.jarType).append("\n");
         sb.append("Main Class   : " + this.getMainClass()).append("\n");
         sb.append("JVM Options  : " + jvmOptions).append("\n");
         sb.append("Program Args : " + programArgs).append("\n");
@@ -317,10 +321,6 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
                 .andMatching(false, "_*", "_*/**", ".*", "**/.*");
     }
 
-
-
-
-
     /**
      * Returns the {@link JkManifest} for the application.
      * The manifest includes the created by attribute,
@@ -386,6 +386,19 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
                 .addParams(JkUtilsString.parseCommandline(programArgs));
     }
 
+    public BaseKBean setMainArtifactJarType(JkProjectPackaging.JarType jarType) {
+        if (jarType == JkProjectPackaging.JarType.REGULAR) {
+            jarMaker = this::regularJar;
+        } else if (jarType == JkProjectPackaging.JarType.FAT) {
+           jarMaker = this::fatJar;
+        } else if (jarType == JkProjectPackaging.JarType.SHADE) {
+            jarMaker = this::shadeJar;
+        } else {
+            throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
+        }
+        return this;
+    }
+
     private String findMainClass() {
         JkUrlClassLoader ucl = JkUrlClassLoader.of(getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR));
         return ucl.toJkClassLoader().findClassesHavingMainMethod().stream()
@@ -399,8 +412,31 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         JkJarPacker.of(getAppClasses())
                 .withManifest(getManifest())
                 .makeFatJar(jarPath, getAppLibs(), JkPathMatcher.of());
-        JkLog.endTask();
         JkLog.info("Jar created at : " + jarPath);
+        JkLog.endTask();
+
+    }
+
+    private void regularJar(Path jarPath) {
+        JkLog.startTask("Making bin jar");
+        JkJarPacker.of(getAppClasses())
+                .withManifest(getManifest())
+                .makeJar(jarPath);
+        JkLog.info("Jar created at : " + jarPath);
+        JkLog.endTask();
+    }
+
+    private void shadeJar(Path jarPath) {
+        JkLog.startTask("Making shade jar");
+        Path mainJar = JkUtilsPath.createTempFile("jk_original-shade-", ".jar");
+        JkUtilsPath.deleteIfExists(mainJar);;
+        regularJar(mainJar);
+        Iterable<Path> classpath = getAppClasspath();
+        JkRepoSet repos = getRunbase().getDependencyResolver().getRepos();
+        JkJarPacker.makeShadeJar(repos, mainJar, classpath, jarPath);
+        JkUtilsPath.deleteIfExists(mainJar);;
+        JkLog.info("Jar created at : " + jarPath);
+        JkLog.endTask();
     }
 
     public static class BaseScaffoldOptions extends JkScaffoldOptions {

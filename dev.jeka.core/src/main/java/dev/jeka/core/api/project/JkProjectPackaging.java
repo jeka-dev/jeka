@@ -157,11 +157,10 @@ public class JkProjectPackaging {
             JkLog.warn("No class dir found : skip bin jar.");
             return;
         }
-        JkLog.startTask("create-bin-jar");
         JkJarPacker.of(classDir)
                 .withManifest(getManifest())
                 .makeJar(target);
-        JkLog.endTask("Jar created at " + friendlyPath(target));
+        JkLog.info("Jar created at " + friendlyPath(target));
     }
 
     /**
@@ -192,7 +191,6 @@ public class JkProjectPackaging {
      * order to not collide with dependencies in classpath.
      */
     public void createShadeJar(Path target) {
-        JkLog.startTask("create-shade-jar");
         Path mainJar = JkUtilsPath.createTempFile("jk_original-shade-", ".jar");
         JkUtilsPath.deleteIfExists(mainJar);
         createBinJar(mainJar);
@@ -200,7 +198,6 @@ public class JkProjectPackaging {
         JkRepoSet repos = project.dependencyResolver.getRepos();
         JkJarPacker.makeShadeJar(repos, mainJar, classpath, target);
         JkUtilsPath.deleteIfExists(mainJar);
-        JkLog.endTask("Shade Jar created at " + friendlyPath(target));
     }
 
     /**

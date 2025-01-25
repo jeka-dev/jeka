@@ -154,7 +154,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * by specifying the {@link #CREATE_JAR_ACTION} as action to insert before.
      * </p>
      */
-    public final JkRunnables packActions = JkRunnables.of();
+    public final JkRunnables packActions = JkRunnables.of().setLogTasks(true);
 
 
     /**

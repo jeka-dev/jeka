@@ -42,7 +42,7 @@ class ProgressListeners {
             return null;
         }
         switch (progressDisplayer) {
-            case BAR: return new BarProgressExecutionListener();
+            case BAR: return new ProgressBarExecutionListener();
             case FULL: return new MavenLikeProgressExecutionListener(false);
             case PLAIN: return new MavenLikeProgressExecutionListener(true);
             case STEP: return new StepProgressExecutionListener();
@@ -223,7 +223,7 @@ class ProgressListeners {
     /**
      * A progress bar that display the current executed test.
      */
-    static class BarProgressExecutionListener implements TestExecutionListener {
+    static class ProgressBarExecutionListener implements TestExecutionListener {
 
         private static final int BAR_LENGTH = 50;
 
@@ -322,6 +322,8 @@ class ProgressListeners {
                 System.setOut(JkUtilsIO.nopPrintStream());
                 System.setErr(JkUtilsIO.nopPrintStream());
             } else {
+                System.out.flush();  // before to recover from silence, we need to purge the stream
+                System.err.flush();
                 System.setOut(standardOutputStream);
                 System.setErr(standardErrStream);
             }

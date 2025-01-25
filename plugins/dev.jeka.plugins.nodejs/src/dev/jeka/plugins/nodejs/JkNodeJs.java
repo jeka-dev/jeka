@@ -39,7 +39,7 @@ import java.nio.file.StandardCopyOption;
  */
 public class JkNodeJs {
 
-    public static final String DEFAULT_NODE_VERSION = "20.10.0";
+    public static final String DEFAULT_NODE_VERSION = "22.11.0";
 
     private static final String DOWNLOAD_BASE_URL = "https://nodejs.org/dist/";
 

@@ -23,16 +23,14 @@ import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class JkNodeJsProject {
-
-    private static final String BUILD_TASK_NAME = "build-js";
 
     private static final String TEST_TASK_NAME = "test-js";
 
@@ -51,7 +49,6 @@ public class JkNodeJsProject {
 
     private Consumer<Path> packAction;
 
-
     private JkNodeJsProject(JkNodeJs nodeJs, Path baseJsDir, String buildDir, List<String> buildCommands) {
         this.nodeJs = nodeJs.setWorkingDir(baseJsDir);
         this.baseJsDir = baseJsDir;
@@ -65,6 +62,22 @@ public class JkNodeJsProject {
 
     public static JkNodeJsProject of(JkNodeJs nodeJs, Path baseJsDir, String buildDir) {
         return new JkNodeJsProject(nodeJs, baseJsDir, buildDir, Collections.emptyList());
+    }
+
+    public JkNodeJs getNodeJs() {
+        return nodeJs;
+    }
+
+    public List<String> getBuildCommands() {
+        return buildCommands;
+    }
+
+    public List<String> getTestCommands() {
+        return testCommands;
+    }
+
+    public Consumer<Path> getPackAction() {
+        return packAction;
     }
 
     /**
@@ -90,7 +103,8 @@ public class JkNodeJsProject {
      */
     public JkNodeJsProject test() {
         if (testCommands.isEmpty()) {
-            JkLog.verbose("No test commands defined for JS project. No test to run.");
+            JkLog.info("No test commands found for the JS project. Skipping tests.");
+            return this;
         }
         if (!JkLog.isVerbose()) {
             JkLog.info("Running JS project test with Node.js. This may take some time. Please be patient.");
@@ -157,10 +171,12 @@ public class JkNodeJsProject {
      * @return this JkNodeJsProject instance for further configurations
      */
     public JkNodeJsProject setCopyToResourcesPackAction(JkProject project, String relPath) {
-        Path target = project.compilation.layout.resolveClassDir().resolve(relPath);
-        JkPathTree.of(getBuildDir()).copyTo(target, StandardCopyOption.REPLACE_EXISTING);
-        JkLog.info("Build dir copied to %s", target);
-        return this;
+        Consumer<Path> action = buildDir -> {
+            Path target = project.compilation.layout.resolveClassDir().resolve(relPath);
+            JkPathTree.of(buildDir).copyTo(target, StandardCopyOption.REPLACE_EXISTING);
+            JkLog.info("%s dir copied to %s", Paths.get("").toAbsolutePath().relativize(buildDir), target);
+        };
+        return setPackAction(action);
     }
 
     /**
@@ -170,11 +186,16 @@ public class JkNodeJsProject {
      * @param project the JkProject instance to register this Node.js project in
      * @return this JkNodeJsProject instance for further configurations
      */
-    public JkNodeJsProject registerIn(JkProject project) {
-        project.compilation.postCompileActions.append(BUILD_TASK_NAME, this::build);
-        project.testing.postActions.append(TEST_TASK_NAME, this::test);
-        project.packActions.insertBefore(PACK_TASK_NAME, JkProject.CREATE_JAR_ACTION, this::pack);
-        return this;
+     JkNodeJsProject registerIn(JkProject project) {
+         project.testing.postActions.remove(TEST_TASK_NAME);
+         project.packActions.remove(PACK_TASK_NAME);
+
+         project.testing.postActions.append(TEST_TASK_NAME, this::test);
+         project.packActions.insertBefore(PACK_TASK_NAME, JkProject.CREATE_JAR_ACTION, () -> {
+             this.build();
+             this.pack();
+         });
+         return this;
     }
 
     /**

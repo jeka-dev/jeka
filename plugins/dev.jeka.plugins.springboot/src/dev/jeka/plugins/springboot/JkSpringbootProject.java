@@ -89,7 +89,7 @@ public final class JkSpringbootProject {
             JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             project.setJarMaker(this::createBootJar);
-            project.packActions.replaceOrAppend("make-bootable-jar", () -> createBootJar(artifactFile));
+            project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION, () -> createBootJar(artifactFile));
         }
         if (createWarFile) {
             JkArtifactId artifactId = JkArtifactId.ofMainArtifact("war");
@@ -174,12 +174,10 @@ public final class JkSpringbootProject {
             project.compilation.runIfNeeded();
             project.testing.runIfNeeded();
         }
-        JkLog.startTask("pack-bootable-jar");
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
         final List<Path> embeddedJars = project.packaging.resolveRuntimeDependenciesAsFiles();
         JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target,
                 project.packaging.getManifest());
-        JkLog.endTask();
     }
 
 }

@@ -158,7 +158,9 @@ public class JkRunnables implements Runnable {
      * Returns the name of the {@link Runnable}s, in the order of execution chain.
      */
     public List<String> getRunnableNames() {
-        return entries.stream().map(entry -> entry.name).collect(Collectors.toList());
+        return sort(entries).stream()
+                .map(entry -> entry.name)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -191,15 +193,16 @@ public class JkRunnables implements Runnable {
     @Override
     public void run() {
         final boolean doLog = log;
-        entries.forEach(entry -> {
-            if (doLog) {
-                JkLog.startTask(entry.name + taskSuffix);
-            }
-            entry.runnable.run();
-            if (doLog) {
-                JkLog.endTask();
-            }
-        });
+        sort(entries).stream()
+                .forEach(entry -> {
+                    if (doLog) {
+                        JkLog.startTask(entry.name + taskSuffix);
+                    }
+                    entry.runnable.run();
+                    if (doLog) {
+                        JkLog.endTask();
+                    }
+                });
     }
 
     private JkRunnables append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
@@ -268,6 +271,12 @@ public class JkRunnables implements Runnable {
                     && relativePlace.where.equals(other.relativePlace.where);
         }
 
+        Entry findRelationShip(List<Entry> entries) {
+            return entries.stream()
+                    .filter(e ->e.hasRelationWith(this))
+                    .findFirst().orElse(null);
+        }
+
         @Override
         public String toString() {
             return name + (relativePlace == null ? "" : " (" + relativePlace + ")");
@@ -305,6 +314,34 @@ public class JkRunnables implements Runnable {
             }
         }
 
+    }
+
+    private static List<Entry> sort(List<Entry> entries) {
+        List<Entry> sorted = new ArrayList<>();
+
+        // First add non relative entry
+        entries.stream()
+                .filter(entry -> entry.relativePlace == null)
+                .forEach(sorted::add);
+
+        for (Entry entry : entries) {
+            if (entry.relativePlace == null) {
+                continue;
+            }
+            Entry relativeExistingEntry = entry.findRelationShip(sorted);
+            if (relativeExistingEntry == null) {
+                sorted.add(entry);
+                continue;
+            }
+            int compare = entry.compareTo(relativeExistingEntry);
+            if (compare < 0) {
+                int index = sorted.indexOf(relativeExistingEntry);
+                sorted.add(index, entry);
+            } else {
+                sorted.add(entry);
+            }
+        }
+        return sorted;
     }
 
 }
