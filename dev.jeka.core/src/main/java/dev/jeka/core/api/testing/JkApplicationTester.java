@@ -26,22 +26,22 @@ public abstract class JkApplicationTester {
      * Deploy application environment, run tests and un-deploy the application gracefully.
      */
     public final void run() {
-        JkLog.startTask("Start application under test");
-        try {
-            startApp();
-            checkUntilReady();
-            JkLog.info("Application started");
-        } finally {
-            JkLog.endTask();
-        }
-        JkLog.startTask("Run tests against deployed application");
+        JkLog.startTask("test-deployable-application");
+
+        JkLog.info("Starting the application...");
+        startApp();
+        checkUntilReady();
+        JkLog.info("Application started");
+
+        JkLog.info("Running tests...");;
         try {
             executeTests();
         } finally {
-            JkLog.endTask();
-            JkLog.startTask("Stop application under test");
+            JkLog.info("Stopping the application...");
             stopGracefully();;
             JkLog.info("Application stopped");
+
+            JkLog.endTask();
         }
     }
 
@@ -86,7 +86,7 @@ public abstract class JkApplicationTester {
 
     private void checkUntilReady() {
         long start = System.currentTimeMillis();
-        JkLog.info("Waiting for application to be started...");
+        JkLog.info("Checking if the application is started...");
         while ( (System.currentTimeMillis() - start) < startTimeout ) {
             if (isApplicationReady()) {
                 return;

@@ -53,6 +53,21 @@ public class JkProcess extends JkAbstractProcess<JkProcess> {
     }
 
     /**
+     * Creates a new {@link JkProcess} object using the specified command path and parameters.
+     *
+     * @param commandPath The path to the command to be executed.
+     * @param parameters  The parameters to be passed to the command.
+     * @return A new {@link JkProcess} instance configured with the specified command and parameters.
+     */
+    public static JkProcess of(Path commandPath, String... parameters) {
+        return new JkProcess()
+                .addParams(commandPath.toString())
+                .addParams(parameters);
+    }
+
+
+
+    /**
      * Creates a new {@link JkProcess} object using the specified command line.
      *
      * @param commandLine The command line to be executed. The command line is a space separated string

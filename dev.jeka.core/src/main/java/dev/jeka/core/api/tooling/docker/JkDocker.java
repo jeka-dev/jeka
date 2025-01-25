@@ -74,7 +74,7 @@ public class JkDocker extends JkAbstractProcess<JkDocker> {
             return copy()
                     .addParams("version")
                     .setLogCommand(JkLog.isDebug())
-                    .setLogWithJekaDecorator(JkLog.isVerbose())
+                    .setLogWithJekaDecorator(JkLog.isDebug())
                     .exec().hasSucceed();
         } catch (UncheckedIOException e) {
             return false;
@@ -97,14 +97,15 @@ public class JkDocker extends JkAbstractProcess<JkDocker> {
      *
      * @return A set of strings representing the names of local Docker images, where each name is in the format "repository:tag".
      */
-    public  Set<String> getImageNames() {
+    public List<String> getLocalImages() {
         List<String> rawResult = copy().addParams("images", "--format", "{{.Repository}}:{{.Tag}}")
                 .setCollectStdout(true)
                 .setInheritIO(false)
                 .exec().getStdoutAsMultiline();
         return rawResult.stream()
                 .map(String::trim)
-                .collect(Collectors.toSet());
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**

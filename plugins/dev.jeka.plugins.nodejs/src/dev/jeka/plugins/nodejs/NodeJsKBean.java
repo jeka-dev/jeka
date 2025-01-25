@@ -21,14 +21,12 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @JkDoc("Auto-configure projects with nodeJs client.")
@@ -40,73 +38,85 @@ public class NodeJsKBean extends KBean {
 
     @JkDoc("Comma separated, command lines to execute for building js application or in conjunction with #exec method. " +
             "This can be similar to something like 'npx ..., npm ...'")
-    public String cmdLine;
+    public String buildCmd;
 
     @JkDoc("Comma separated, command lines to execute for testing when 'autoConfigureProject'=true")
-    public String testCmdLine;
+    public String testCmd;
 
     @JkDoc("Path of js project root. It is expected to be relative to the base directory.")
     public String appDir = "app-js";
 
-    @JkDoc("Path of the built application (Generally containing an index.html file). " +
-            "It is expected to be relative to the js app dir.")
-    public String distDir = "build";
+    @JkDoc("Path to the built app (usually contains an index.html file). Relative to the JS app directory.")
+    public String buildDir = "build";
 
-    @JkDoc("If not empty, the result of client build will be copied to this dir relative to the generated class dir (e.g. 'static')")
+    @JkDoc("If set, copies the client build output to this directory, relative to the generated class directory (e.g., 'static').")
     public String targetResourceDir;
 
     @JkDoc("If true, the project wrapped by ProjectKBean will be configured automatically to build the nodeJs project.")
     public boolean configureProject = false;
 
-    @JkDoc("Execute npm using the command line specified in 'cmdLine' property.")
-    public void exec() {
-        commandLines(cmdLine).forEach(getJkNodeJs()::exec);
-    }
-
-    @JkDoc("Execute the command line specified by 'testCmdLine'")
-    public void execTest() {
-        commandLines(testCmdLine).forEach(getJkNodeJs()::exec);
-    }
+    private JkNodeJsProject nodeJsProject;
 
     @Override
     protected void init() {
         if (configureProject) {
-            JkProject project = load(ProjectKBean.class).project;
-            JkNodeJs.ofVersion(this.version).setUseJekaLogging(true)
-                    .configure(project, appDir, distDir, targetResourceDir, commandLines(cmdLine),
-                            commandLines(testCmdLine));
+            configureProject();
         }
+    }
+
+    @JkDoc("Builds the JS project by running the specified build commands. " +
+            "This usually generates packaged JS resources in the project's build directory.")
+    public void build() {
+        if (nodeJsProject == null) {
+            throw new JkException("The project has been configured to build with NodeJs.");
+        }
+        nodeJsProject.build();
+    }
+
+    @JkDoc("Runs the test commands configured for the JS project.")
+    public void test() {
+        if (nodeJsProject == null) {
+            throw new JkException("The project has been configured to build with NodeJs.");
+        }
+        nodeJsProject.test();
+    }
+
+    @JkDoc("Packs the JS project as specified in project configuration. " +
+            "It generally leads to copy the build dir into the static resource dir of the webapp.")
+    public void pack() {
+        if (nodeJsProject == null) {
+            throw new JkException("The project has been configured to build with NodeJs.");
+        }
+        nodeJsProject.pack();
     }
 
     /**
-     * Returns the working directory for the NodeJsKBean. If the specified appDir does not exist,
-     * the base directory is returned.
+     * Configures the Node.js project by setting up the Node.js version,
+     * project paths, build commands, and test commands. Optionally sets
+     * the resource packing action if a target resource directory is specified.
      *
-     * @return The working directory as a Path object.
+     * @return the current instance of NodeJsKBean after configuring the project.
      */
-    public Path getWorkingDir() {
-        if (JkUtilsString.isBlank(appDir)) {
-            return getBaseDir();
+    public JkNodeJsProject configureProject() {
+        JkProject project = load(ProjectKBean.class).project;
+        JkNodeJs nodeJs = JkNodeJs.ofVersion(this.version);
+        Path baseJsDirPath = getBasePath(appDir);
+        this.nodeJsProject = JkNodeJsProject.of(nodeJs, baseJsDirPath, buildDir)
+                .setBuildCommands(commandLines(buildCmd))
+                .setTestCommands(commandLines(testCmd));
+        if (!JkUtilsString.isBlank(targetResourceDir)) {
+            this.nodeJsProject.setCopyToResourcesPackAction(project, targetResourceDir);
         }
-        Path result = getBaseDir().resolve(appDir);
-        if (!Files.exists(result)) {
-            JkLog.info("Directory not found %s, use base dir as working dir.", result);
-            return getBaseDir();
-        }
-        return result;
+        return this.nodeJsProject;
     }
 
-    private JkNodeJs getJkNodeJs() {
-        return JkNodeJs.ofVersion(version).setWorkingDir(getWorkingDir()).setUseJekaLogging(true);
-    }
-
-   private static List<String> commandLines(String cmd) {
+   private static String[] commandLines(String cmd) {
         if (cmd == null) {
-            return Collections.emptyList();
+            return new String[0];
         }
         return Stream.of(cmd.split(","))
                 .map(String::trim)
-                .collect(Collectors.toList());
+                .toArray(String[]::new);
    }
 
 }

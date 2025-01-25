@@ -126,6 +126,11 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
     }
 
+    /**
+     * Represents the identifier for an action to create a JAR file in the project lifecycle.
+     * Used within the context of project execution to trigger the corresponding task or operation
+     * that handles the creation of the Java Archive (JAR) artifact.
+     */
     public static final String CREATE_JAR_ACTION = "create-jar";
 
     public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
@@ -144,6 +149,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * By default, the build action creates a regular binary jar. It can be
      * replaced by an action creating other jars/artifacts or doing special
      * action as publishing a Docker image, for example.
+     * <p>
+     * To insert before the JAR action, use {@link JkRunnables#insertBefore(String, String, Runnable)}
+     * by specifying the {@link #CREATE_JAR_ACTION} as action to insert before.
+     * </p>
      */
     public final JkRunnables packActions = JkRunnables.of();
 

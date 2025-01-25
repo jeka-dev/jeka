@@ -18,17 +18,13 @@ package dev.jeka.plugins.nodejs;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.file.JkPathFile;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,8 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * This class represents a wrapper for executing commands and managing the Node.js distribution.
@@ -55,8 +49,6 @@ public class JkNodeJs {
     private String version = DEFAULT_NODE_VERSION;
 
     private Path workingDir = Paths.get("");
-
-    private boolean useJekaLog = false;
 
     private JkNodeJs(Path installDir) {
         this.installDir = installDir;
@@ -102,17 +94,6 @@ public class JkNodeJs {
     }
 
     /**
-     * Configures whether Jeka logging is used for Node.js operations.
-     *
-     * @param useJekaLog true to enable Jeka logging; false to disable it.
-     * @return The current JkNodeJs instance for method chaining.
-     */
-    public JkNodeJs setUseJekaLogging(boolean useJekaLog) {
-        this.useJekaLog = useJekaLog;
-        return this;
-    }
-
-    /**
      * Returns the working directory from where npm and npx commands should be run.
      */
     public Path getWorkingDir() {
@@ -134,7 +115,7 @@ public class JkNodeJs {
     public JkNodeJs npm(String commandLine, Object... items) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npm.cmd" : "bin/npm";
         String[] params = JkUtilsString.parseCommandline(String.format(commandLine, items));
-        createProcess(workingDir, cmd).addParams(params).exec();
+        createProcess(cmd).addParams(params).exec();
         return this;
     }
 
@@ -146,7 +127,7 @@ public class JkNodeJs {
     public JkNodeJs npx(String commandLine, Object... items) {
         String cmd = JkUtilsSystem.IS_WINDOWS ? "npx.cmd" : "bin/npx";
         String[] params = JkUtilsString.parseCommandline(String.format(commandLine, items));
-        createProcess(workingDir, cmd).addParams(params).exec();
+        createProcess(cmd).addParams(params).exec();
         return this;
     }
 
@@ -168,49 +149,6 @@ public class JkNodeJs {
         }
     }
 
-    /**
-     * Configures the specified project to include a Node.js build right after main compilation.
-     *
-     * @param project The project to configure
-     * @param jsAppBaseDir The path of the Node.js subproject (relative to the base dir).
-     * @param distDir The path, relative to <code>jsAppBaseDir</code> of the directory containing the build result.
-     * @param copyToDir If not empty, the result of the client  build will be copied to this directory in class dir (e.g. 'static').
-     * @param buildCommands The commands (npm o npx) to execute to build the Node.js project.
-     */
-    public JkNodeJs configure(JkProject project, String jsAppBaseDir, String distDir, String copyToDir,
-                              List<String> buildCommands, List<String> testCommands) {
-        Path jsBaseDir = project.getBaseDir().resolve(jsAppBaseDir);
-        Path buildJsDir = jsBaseDir.resolve(distDir);
-
-        project.compilation.postCompileActions.append("build-js", () -> {
-            this.setWorkingDir(jsBaseDir);
-            if (!JkLog.isVerbose()) {
-                JkLog.info("Building JS project with Node.js. This may take some time. Please be patient.");
-                JkLog.info("Use the `--verbose` option to show progress. NodeJS build started at %s.", JkUtilsTime.now("HH:mm:ss"));
-            }
-            buildCommands.forEach(this::exec);
-            JkLog.info("JS project built in %s", buildJsDir);
-            if (!JkUtilsString.isBlank(copyToDir)) {
-                Path target = project.compilation.layout.resolveClassDir().resolve(copyToDir);
-                JkPathTree.of(buildJsDir).copyTo(target, StandardCopyOption.REPLACE_EXISTING);
-                JkLog.info("Build copied to %s", target);
-            }
-
-        });
-        if (!testCommands.isEmpty()) {
-            project.testing.postActions.append("test-js", () -> {
-                this.setWorkingDir(jsBaseDir);
-                if (!JkLog.isVerbose()) {
-                    JkLog.info("Building JS project with Node.js. This may take some time. Please be patient.");
-                    JkLog.info("Use the `--verbose` option to show progress. NodeJS build started at %s.", JkUtilsTime.now("HH:mm:ss"));
-                }
-                testCommands.forEach(this::exec);
-                JkLog.info("JS test successful");
-            });
-        }
-        return this;
-    }
-
     private synchronized Path installDir() {
         if (installDir == null) {
             installDir = getDistribPath(version);
@@ -221,24 +159,18 @@ public class JkNodeJs {
         return installDir;
     }
 
-    private JkProcess createProcess(Path workingDir, String cmdName) {
+    private JkProcess createProcess(String cmdName) {
         String path = System.getenv("PATH");
         Path commandFile = installDir().resolve(cmdName);
         Path nodeDir = commandFile.getParent();
         String pathVar = nodeDir.toString() + File.pathSeparator + path;
-        JkProcess process = JkProcess.of(commandFile.toString())
+        return JkProcess.of(commandFile)
                 .setWorkingDir(workingDir)
                 .setFailOnError(true)
                 .setLogCommand(JkLog.isDebug())
+                .setInheritIO(false)
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setEnv("PATH", pathVar);
-        if (useJekaLog) {
-            process.setLogCommand(true);
-            process.setLogWithJekaDecorator(true);
-        } else {
-            process.setInheritIO(true);
-        }
-        return process;
     }
 
     private static boolean isBinaryPresent(Path installDir) {
