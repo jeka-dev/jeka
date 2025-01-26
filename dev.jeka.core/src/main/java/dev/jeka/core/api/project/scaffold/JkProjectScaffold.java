@@ -161,7 +161,7 @@ public final class JkProjectScaffold extends JkScaffold {
      */
     private void configureScaffold() {
 
-        addJekaPropValue("@project=");
+        addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=project");
         if (useSimpleStyle) {
             project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
             addJekaPropValue(SIMPLE_STYLE_PROP);

@@ -14,36 +14,113 @@ _KBean_ classes share the following characteristics:
 
 ## Simple Example
 
-The following KBeans expose the `cleanPublish` method, which delegates the creation of JAR files to the `project` KBean.  
-`ProjectKBean` is available on the Jeka classpath as it is part of the standard KBeans bundled in the JeKa distribution.
-
+The following KBeans expose the `hello` and `bye` methods. The rendering can be configured 
+through `nema` and `uppercase` attributes.
 
 ```Java
-import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkDoc;
 
-@JkDoc("A simple example to illustrate KBean concept.")
-public class SimpleJkBean extends KBean {
+@JkDoc("Displays greeting messages")
+public class Greeting extends KBean {
 
-    final ProjectKBean projectKBean = load(ProjectKBean.class);  // Instantiate KBean or return singleton instance.
+    public String name = "Bob";
 
-    @Override  
-    protected void init() {  // When init() is invoked, projectKBean field instances has already been injected.
-        projectKBean.project.flatFacade.compileDependencies
-                .add("com.google.guava:guava:30.0-jre")
-                .add("com.sun.jersey:jersey-server:1.19.4");
-        projectKBean.project.flatFacade.testDependencies
-                .add("org.junit.jupiter:junit-jupiter:5.8.1");
-    }
+    @JkDoc("If true, the message is shown in upper case.")
+    public boolean uppercase;
 
-    @JkDoc("Clean, compile, test, create jar files, and publish them.")
-    public void cleanPublish() {
-        projectKBean.cleanPack();
-        projectKBean.publishLocal();
+    @JkDoc("Prints a hello message.")
+    public void hello() {
+        System.out.println(formatMessage("Hello " + name + "!"));
     }
     
-}
+    public void bye() {
+        System.out.println(formatMessage("Goodbye " + name + "!"));
+    }
 
+    private String formatMessage(String message) {
+        return uppercase ? message.toUpperCase() : message;
+    }
+}
 ```
+To execute a method from the command line, run the following example:
+```bash
+jeka hello name=Alice uppercase=true
+```
+To show help for this KBean, run:
+```bash
+jeka greeting: --doc
+```
+This will display:
+```text
+Displays greeting messages.
+
+Fields
+      name=<String>   No description.
+                        Default: Bob
+      uppercase       If true, the message is shown in upper case.
+                        Default: false
+Methods
+  bye    No Description.
+  hello  Prints a hello message.
+```
+
+## Location
+
+KBeans can exists as source code in the local project *jeka-src* folder, at root or any package,  or 
+as class in the Jeka classpath.
+
+**Multiple KBeans in jeka-src**
+
+Many KBeans may coexist in a single *jeka-src* dir. In this case, use KBean names to precise on 
+which bean to invoke, as:
+
+```bash
+jeka greeting: hello bye other: foo
+```
+In the above example, three methods coming from 2 distinct KBean are invoked.
+
+**Classpath KBeans**
+
+Jeka bundles a collection of KBeans for building projects, creating Docker images, performing Git operations, and more.
+
+For example, running:
+```bash
+jeka project: compile
+```
+will compile the source code located in the *src/main/java* directory, using dependencies specified in the *dependencies.txt* file.
+
+To display the documentation for the `project` KBean, run:
+```bash
+jeka project: --doc
+```
+
+To list all available KBeans in the classpath, execute:
+```bash
+jeka --doc
+```
+
+KBeans can be added to the classpath like any third-party dependency.  
+This can be done by setting the `jeka.inject.classpath` property in the *jeka.properties* file as follows:
+```properties
+jeka.inject.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
+```
+
+KBeans can also be included directly in the source code using the `@JkDep` annotation:
+```java
+import dev.jeka.core.tool.JkDep;
+
+@JkDep("dev.jeka:springboot-plugin")
+@JkDep("dev.jeka:openapi-plugin:0.11.8-1")
+class Build extends KBean {
+...
+```
+
+Additionally, KBeans can be dynamically added from the command line like this:
+```bash
+jeka --classpath=dev.jeka:openapi-plugin:0.11.8-1 openapi:--doc
+```
+
+Jeka discovers KBeans automatically by scanning the classpath.
 
 ## KBean Methods
 
@@ -119,28 +196,60 @@ Invoking the `dev.jeka.core.tool.Main` method with arguments `project:` and `com
 
 
 ## Default KBean
-
 The _[kbeanName]_ prefix is optional and defaults to:
 
-- The KBean specified by the `jeka.kbean.default` property (if set).
-- Otherwise, the first KBean found in the _jeka-src_ directory, ordered alphabetically by fully qualified class name.
+- The KBean specified by the `jeka.kbean.default` property (if this property is set).
+- If the property is not set, it defaults to the first KBean found in the _jeka-src_ directory, sorted alphabetically by fully qualified class name.
 
-Example: `jeka doSomething aProperty=xxxx` invokes the `doSomething` method of the default KBean.
+### Example
+The following command:
+```
+jeka doSomething aProperty=xxxx
+```  
+executes the `doSomething` method of the default KBean.
 
-Use `:` to explicitly reference the default KBean and avoid ambiguity.  
-Example: `jeka : --doc` shows the default KBean's documentation, while `jeka --doc` displays overall documentation.
+To explicitly reference the default KBean and avoid ambiguity, use `:` as the prefix.
+
+### Examples
+- `jeka : --doc` displays the documentation of the default KBean.
+- `jeka --doc` displays the overall documentation.
 
 
 ## KBean Collaboration
 
-_KBeans_ can interact with one another by declaring dependencies using the `KBean#load(MyBean.class)` method, as shown in the [simple example](#simple-example).
+_KBeans_ can interact with each another by using the `KBean#load(MyBean.class)` method.
 
-Alternatively, you can use the `KBean#find(MyKBean.class)` method, which returns an `Optional<KBean>` containing the instance only if it already exists in the context.
+Alternatively, we can use the `KBean#find(MyKBean.class)` method, which returns an `Optional<KBean>` containing the instance only if it already exists in the context.
 
-When a _KBean_ depends on another, it is best practice to declare the dependency as an instance field in the dependent _KBean_. This approach has several benefits:
+When a _KBean_ is declared as a field, the IDE detects it and show it explicitly in the KBean tree.
 
-- The dependency is explicitly documented in the auto-generated documentation.
-- It is visible in IDE tools, making the relationship clear.
+```Java   title="A Kbean modifying and delagating to `ProjectKBean`"
+import dev.jeka.core.api.project.JkProject;
+
+@JkDoc("A simple example to illustrate KBean concept.")
+public class Build extends KBean {
+
+    final ProjectKBean projectKBean = load(ProjectKBean.class);  // Instantiate KBean or return singleton instance.
+
+    @Override  
+    protected void init() {  // When init() is invoked, projectKBean field instances has already been injected.
+        projectKBean.project.flatFacade.compileDependencies
+                .add("com.google.guava:guava:30.0-jre")
+                .add("com.sun.jersey:jersey-server:1.19.4");
+        projectKBean.project.flatFacade.testDependencies
+                .add("org.junit.jupiter:junit-jupiter:5.8.1");
+    }
+
+    @JkDoc("Clean, compile, test, create jar files, and publish them.")
+    public void packPublish() {
+        projectKBean.pack();
+        projectKBean.publishLocal();
+    }
+    
+}
+```
+In this example, `Build` KBean configures the undelying `JkProject` of the `ProjectKBean` isnstance, by defining dependencies.
+It provides a `packPublish` method that delegate to `ProjectKBean`.
 
 ## Lifecycle
 
