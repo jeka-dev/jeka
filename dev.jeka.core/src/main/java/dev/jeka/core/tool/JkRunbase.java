@@ -92,7 +92,10 @@ public final class JkRunbase {
 
     private final JkProperties properties;
 
-    private final Map<Class<? extends KBean>, KBean> beans = new LinkedHashMap<>();
+    // We use class name as key because using `Class` objects as key may lead
+    // in duplicate initialization in some circumstances where several class loader
+    // are present (this has happened when using "jeka aKbean: --doc)
+    private final Map<String, KBean> beans = new LinkedHashMap<>();
 
     private PreInitializer preInitializezr = PreInitializer.of(Collections.emptyList());
 
@@ -181,7 +184,7 @@ public final class JkRunbase {
                 this.kbeanInitDeclaredInProps.contains(beanClass)) {
             return Optional.of(load(beanClass));
         }
-        return (Optional<T>) Optional.ofNullable(beans.get(beanClass));
+        return (Optional<T>) Optional.ofNullable(beans.get(beanClass.getName()));
     }
 
     /**
@@ -368,7 +371,7 @@ public final class JkRunbase {
 
     private <T extends KBean> T load(Class<T> beanClass, boolean forceMode) {
         JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
-        T result = (T) beans.get(beanClass);
+        T result = (T) beans.get(beanClass.getName());
         if (result == null) {
             String relBaseDir = relBaseDir().toString();
             String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
@@ -391,7 +394,7 @@ public final class JkRunbase {
 
         // This way KBeans are registered in the order they have been requested for instantiation,
         // and not the order they have finished to be instantiated.
-        this.beans.put(beanClass, bean);
+        this.beans.put(beanClass.getName(), bean);
 
         // Apply  the defaultProvider defined in method annotated with @JkDefaultProvider
         this.preInitializezr.get(beanClass).accept(bean);

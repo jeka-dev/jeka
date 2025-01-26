@@ -17,6 +17,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
@@ -42,12 +43,14 @@ class PreInitializer {
         return new PreInitializer(map);
     }
 
-    JkConsumers get(Class<?> kbeanClass) {
-        JkConsumers result = map.getOrDefault(kbeanClass, JkConsumers.of());
+    JkConsumers get(Class<? extends KBean> kbeanClass) {
+        JkConsumers<? extends KBean> result = map.getOrDefault(kbeanClass, JkConsumers.of());
+        JkLog.debug("Pre-initialization of %s found %s.", kbeanClass.getName(), result);
         return result;
     }
 
     private static Map<Class<?>, JkConsumers<? extends KBean>> findMethods(Class<?> kbeanClass) {
+        JkLog.debug("Finding Pre-initialisation methods in class %s ", kbeanClass.getName());
         List<Method> methods = JkUtilsReflect.getDeclaredMethodsWithAnnotation(kbeanClass, JkPreInitKBean.class);
         Map<Class<?>, JkConsumers<? extends KBean>> result = new HashMap<>();
         for (Method method : methods) {
@@ -69,8 +72,9 @@ class PreInitializer {
                 JkUtilsReflect.invoke(null, method, kbean);
             };
             result.putIfAbsent(paramType, JkConsumers.of());
-            JkConsumers consumers = result.get(paramType);
-            consumers.add(kbeanConsumer);
+            JkConsumers<?> consumers = result.get(paramType);
+            JkLog.debug("Adding Pre-initialization method %s for KBean %s ", method, paramType.getName());
+            consumers.append(method.toString(), kbeanConsumer);
         }
         return result;
     }

@@ -320,7 +320,7 @@ public class JkDockerBuild {
      * @param fsOperation a {@link Consumer<Path>} that accepts the path to the build context directory.
      */
     public JkDockerBuild addFsOperation(Consumer<Path> fsOperation) {
-        fsOperations.add(fsOperation);
+        fsOperations.append(fsOperation);
         return this;
     }
 
@@ -579,7 +579,7 @@ public class JkDockerBuild {
          */
         public final DockerfileTemplate addCopy(Path fileOrDirToCopy, String containerPath, boolean chownNonroot, boolean optional) {
             String insidePath = computeImportedFileRelativePath(fileOrDirToCopy, "imported-files");
-            fsOperations.add(buildContextDir -> {
+            fsOperations.append(buildContextDir -> {
                 importFile(buildContextDir, insidePath, fileOrDirToCopy, false);
             });
             String ownArg = chownNonroot ? "--chown=nonroot:nonrootg " : "";

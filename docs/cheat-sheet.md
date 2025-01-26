@@ -22,7 +22,7 @@
 | jeka.repos.download   | local, mavenCentral                 | Comma separated string of repositories to fetch Maven dependencies. More details [here](reference-guide/execution-engine-properties/#repositories)                                     |
 | jeka.repos.publish    |                                     | Comma separated string of repository to publish Maven artifacts. More details [here](reference-guide/execution-engine-properties/#repositories)                                        |
 | jeka.program.build    | project: pack -Djeka.test.skip=true | Cmd line to execute to build project when exec files are absents                                                                                                                       |
-| jeka.default.kbean    |                                     | Name or class name of the KBean to use as default (when none is specified)                                                                                                             |
+| jeka.kbean.default    |                                     | Name or class name of the KBean to use as default (when none is specified)                                                                                                             |
 | jeka.test.skip        |                                     | Skip tests when building projects or code bases.                                                                                                                                       |
 
 ## Rules for selecting JDK 

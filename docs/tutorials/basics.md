@@ -219,9 +219,9 @@ and execute `jeka foo` to notice that this method is actually run.
     Hello World !
     ```
     
-5.  We can specify the *KBean* to use as default using `jeka.default.kbean=`property in *jeka.properties*.
+5.  We can specify the *KBean* to use as default using `jeka.kbean.default=`property in *jeka.properties*.
     ```properties
-    jeka.default.kbean=script
+    jeka.kbean.default=script
     ```
 
     You can check the actual default KBean, by executing `jeka --inspect` and check for the *Default KBean* entry.
@@ -250,10 +250,10 @@ Hello Everybody
 
 KBean mechanism plays a central role in JeKa ecosystem. In the following section, we will play around it to make you more familiar with.
 
-1. Set `jeka.default.kbean=script` property in the *jeka.properties* file and remove `@script.name=Everybody` 
+1. Set `jeka.kbean.default=script` property in the *jeka.properties* file and remove `@script.name=Everybody` 
    added in previous step.
    ```properties
-   jeka.default.kbean=script
+   jeka.kbean.default=script
    ```
    Also, make sure that *Script.java* and *Build.java*  are still present in *jeka-src* dir.
 

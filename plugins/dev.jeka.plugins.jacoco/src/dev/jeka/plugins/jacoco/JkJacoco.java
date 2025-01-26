@@ -62,6 +62,8 @@ public final class JkJacoco {
 
     public static final String DEFAULT_VERSION = "0.8.12";
 
+    public static final String JACOCO_AGENT_ACTION = "jacoco-agent";
+
     private final ToolProvider toolProvider;
 
     private Path execFile;
@@ -145,7 +147,7 @@ public final class JkJacoco {
      */
     public void applyTo(JkTestProcessor testProcessor) {
         JkUtilsAssert.state(execFile != null, "The exec file has not been specified.");
-        testProcessor.preActions.append("", () -> {
+        testProcessor.preActions.append(JACOCO_AGENT_ACTION, () -> {
             String agentOptions = agentOptions();
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));

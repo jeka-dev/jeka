@@ -39,8 +39,8 @@ project1
    It can be either Maven coordinates or file paths. If a file path is relative, it is resolved 
    upon project base dir (could be distinct from working dir).
    Example : `jeka.inject..classpath=dev.jeka:springboot-plugin  com.google.guava:guava:31.1-jre ../other-project/jeka/output/other-project.jar`
-* `jeka.default.kbean`: The KBean to use when omitting mentioning KBean prefix (or using `kb#` prefix) in command or field assignment.
-   Example: declaring `jeka.default.kbean=myBean`, makes the following expressions equivalent : `myBean#run`, `#run`, and `kb#run`.
+* `jeka.kbean.default`: The KBean to use when omitting mentioning KBean prefix (or using `kb#` prefix) in command or field assignment.
+   Example: declaring `jeka.kbean.default=myBean`, makes the following expressions equivalent : `myBean#run`, `#run`, and `kb#run`.
 
 ### Command shorthands
 

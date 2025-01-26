@@ -85,7 +85,7 @@ public class SpringbootScaffoldTest {
 
         // Check default KBean is present
         String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();
-        assertTrue(jekaContent.contains(JkConstants.DEFAULT_KBEAN_PROP + "=project"));
+        assertTrue(jekaContent.contains(JkConstants.KBEAN_DEFAULT_PROP + "=project"));
 
         // cleanup
         //Desktop.getDesktop().open(baseDir.toFile());

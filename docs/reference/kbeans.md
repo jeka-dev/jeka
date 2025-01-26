@@ -122,7 +122,7 @@ Invoking the `dev.jeka.core.tool.Main` method with arguments `project:` and `com
 
 The _[kbeanName]_ prefix is optional and defaults to:
 
-- The KBean specified by the `jeka.default.kbean` property (if set).
+- The KBean specified by the `jeka.kbean.default` property (if set).
 - Otherwise, the first KBean found in the _jeka-src_ directory, ordered alphabetically by fully qualified class name.
 
 Example: `jeka doSomething aProperty=xxxx` invokes the `doSomething` method of the default KBean.

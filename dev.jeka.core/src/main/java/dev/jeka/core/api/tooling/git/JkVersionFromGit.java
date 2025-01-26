@@ -18,9 +18,7 @@ package dev.jeka.core.api.tooling.git;
 
 import dev.jeka.core.api.depmanagement.JkVersion;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.tool.builtins.base.BaseKBean;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -95,7 +93,7 @@ public class JkVersionFromGit  {
         }
         JkGit git = JkGit.of(buildable.getBaseDir());
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
-        buildable.getManifestCustomizers().add(manifest -> manifest
+        buildable.getManifestCustomizers().append(manifest -> manifest
                 .addMainAttribute("Git-commit", commit)
                 .addMainAttribute("Git-branch", git.getCurrentBranch()));
     }

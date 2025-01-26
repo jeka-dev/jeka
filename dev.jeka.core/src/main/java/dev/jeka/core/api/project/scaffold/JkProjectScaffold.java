@@ -78,7 +78,7 @@ public final class JkProjectScaffold extends JkScaffold {
      * Registers for customizers that will be applied at #run execution.
      */
     public JkProjectScaffold addCustomizer(Consumer<JkProjectScaffold> customizer) {
-        this.customizers.add(customizer);
+        this.customizers.append(customizer);
         return this;
     }
 

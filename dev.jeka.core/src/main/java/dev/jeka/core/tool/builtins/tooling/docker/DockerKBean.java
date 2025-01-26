@@ -131,14 +131,14 @@ public final class DockerKBean extends KBean {
      * Adds a customizer function for customizing the Docker JVM image to build.
      */
     public void customizeJvmImage(Consumer<JkDockerJvmBuild> dockerBuildCustomizer) {
-        jvmImageCustomizer.add(dockerBuildCustomizer);
+        jvmImageCustomizer.append(dockerBuildCustomizer);
     }
 
     /**
      * Adds a customizer function for customizing the Dockerbuild that will generate the Native image.
      */
     public void customizeNativeImage(Consumer<JkDockerNativeBuild> dockerBuildCustomizer) {
-        nativeImageCustomizer.add(dockerBuildCustomizer);
+        nativeImageCustomizer.append(dockerBuildCustomizer);
     }
 
     /**

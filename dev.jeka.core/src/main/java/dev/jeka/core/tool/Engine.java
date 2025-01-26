@@ -350,7 +350,11 @@ class Engine {
 
         private DefaultAndInitKBean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
             String defaultKBeanName = behaviorSettings.kbeanName
-                    .orElse(properties.get(JkConstants.DEFAULT_KBEAN_PROP));
+                    .orElse(
+                            Optional.ofNullable(properties.get(JkConstants.KBEAN_DEFAULT_PROP))
+                                    .orElse(properties.get(JkConstants.DEFAULT_KBEAN_PROP))
+                    );
+
             JkLog.debug("Default KBean Name : " + defaultKBeanName);
             defaultKBeanClassName = firstMatchingClassname(kbeanClassNames, defaultKBeanName)
                     .orElse(localKbeanClassNames.stream().findFirst().orElse(null));

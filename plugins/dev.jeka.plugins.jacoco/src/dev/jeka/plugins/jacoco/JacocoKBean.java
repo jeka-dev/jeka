@@ -48,7 +48,7 @@ public class JacocoKBean extends KBean {
 
     @Override
     protected void init() {
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean ->
+        find(ProjectKBean.class).ifPresent(projectKBean ->
                 configureForDefaultProject(projectKBean.project));
     }
 

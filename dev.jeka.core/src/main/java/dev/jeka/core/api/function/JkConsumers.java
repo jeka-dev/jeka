@@ -16,7 +16,10 @@
 
 package dev.jeka.core.api.function;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * A mutable container for {@link Consumer}. From this object you can replace the underlying {@link Runnable} or
@@ -25,33 +28,30 @@ import java.util.function.Consumer;
  */
 public class JkConsumers<T> implements Consumer<T> {
 
-    private Consumer<T> consumer;
+    private final LinkedList<Entry<Consumer<T>>> entries = new LinkedList<>();
 
-    private JkConsumers(Consumer<T> consumer) {
-        this.consumer= consumer;
+    private JkConsumers() {
     }
 
     /**
      * Creates a {@link JkConsumers} delegating to the single specified {@link Consumer}.
      */
     public static <T> JkConsumers<T> of() {
-        return new JkConsumers<T>( o -> {});
+        return new JkConsumers<T>();
     }
 
     /**
-     * Set the specified {@link Consumer} as the unique underlying element for this container.
+     * Appends the specified consumer to the consumer chain.
      */
-    public JkConsumers<T> set(Consumer<T> consumer) {
-        this.consumer = consumer;
-        return this;
+    public JkConsumers<T> append(Consumer<T> consumer) {
+        return append(consumer.toString(), consumer);
     }
 
     /**
-     * Chains this underlying {@link Consumer} with the specified one. The specified element will
-     * be executed at the end.
+     * Appends the specified consumer, with the specified name, to the consumer chain.
      */
-    public JkConsumers<T> add(Consumer<T> appendedConsumer) {
-        consumer = consumer.andThen(appendedConsumer);
+    public JkConsumers<T> append(String name, Consumer<T> consumer) {
+        this.entries.add(new Entry<>(name, consumer, null));
         return this;
     }
 
@@ -59,14 +59,27 @@ public class JkConsumers<T> implements Consumer<T> {
      * Chains this underlying {@link Consumer} with the specified one. The specified element will
      * be executed at the beginning.
      */
-    public JkConsumers<T> prepend(Consumer<T> appendedConsumer) {
-        consumer = appendedConsumer.andThen(consumer);
+    public JkConsumers<T> prepend(Consumer<T> consumer) {
+        this.entries.add(0, new Entry<>(consumer.toString(), consumer, null));
         return this;
     }
 
+    /**
+     * Returns the name of the {@link Runnable}s, in the order of execution chain.
+     */
+    public List<String> getRunnableNames() {
+        return Entry.sort(entries).stream()
+                .map(entry -> entry.name)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public void accept(T t) {
-        consumer.accept(t);
+        entries.forEach(entry -> entry.runnable.accept(t));
+    }
+
+    @Override
+    public String toString() {
+        return getRunnableNames().toString();
     }
 }

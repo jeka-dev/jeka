@@ -65,7 +65,7 @@ public class NexusKBean extends KBean {
      * Adds a JkNexusRepos consumer that will be executed just in time.
      */
     public NexusKBean configureNexusRepo(Consumer<JkNexusRepos> nexusReposConfigurator) {
-        this.nexusReposConfigurators.add(nexusReposConfigurator);
+        this.nexusReposConfigurators.append(nexusReposConfigurator);
         return this;
     }
 

@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 public class JkRunnables implements Runnable {
 
-    private final LinkedList<Entry> entries = new LinkedList<>();
+    private final LinkedList<Entry<Runnable>> entries = new LinkedList<>();
 
     private boolean log;
 
@@ -120,7 +120,7 @@ public class JkRunnables implements Runnable {
      * @param runnableName The name of the runnable to remove.
      */
     public JkRunnables remove(String runnableName) {
-        for (Iterator<Entry> it = entries.iterator(); it.hasNext();) {
+        for (Iterator<Entry<Runnable>> it = entries.iterator(); it.hasNext();) {
             if (it.next().name.equals(runnableName)) {
                 it.remove();
             }
@@ -139,7 +139,7 @@ public class JkRunnables implements Runnable {
     public JkRunnables replaceOrAppend(String name, Runnable runnable) {
         JkUtilsAssert.argument(runnable != null, "Runnable can't be null.");
         boolean found = false;
-        for (ListIterator<Entry> it = this.entries.listIterator(); it.hasNext();) {
+        for (ListIterator<Entry<Runnable>> it = this.entries.listIterator(); it.hasNext();) {
             Entry entry = it.next();
             if (name.equals(entry.name)) {
                 it.remove();
@@ -158,7 +158,7 @@ public class JkRunnables implements Runnable {
      * Returns the name of the {@link Runnable}s, in the order of execution chain.
      */
     public List<String> getRunnableNames() {
-        return sort(entries).stream()
+        return Entry.sort(entries).stream()
                 .map(entry -> entry.name)
                 .collect(Collectors.toList());
     }
@@ -193,7 +193,7 @@ public class JkRunnables implements Runnable {
     @Override
     public void run() {
         final boolean doLog = log;
-        sort(entries).stream()
+        Entry.sort(entries).stream()
                 .forEach(entry -> {
                     if (doLog) {
                         JkLog.startTask(entry.name + taskSuffix);
@@ -212,136 +212,6 @@ public class JkRunnables implements Runnable {
         entries.add(entry);
         Collections.sort(entries);
         return this;
-    }
-
-    private static class Entry implements Comparable<Entry> {
-
-        final String name;
-
-        final Runnable runnable;
-
-        // Nullable
-        final RelativePlace relativePlace;
-
-        @Override
-        public int compareTo(Entry other) {
-            if (!hasRelationWith(other)) {
-                return 0;
-            }
-            if (hasRelationConflictWith(other)) {
-                throw new IllegalStateException("Entries " + this + " and " + other
-                        + " have relative position in conflict with each other.");
-            }
-            if (isRelativeTo(other.name)) {
-                return relativePlace.where == Where.BEFORE ? -1 : 1;
-            }
-            return other.relativePlace.where == Where.BEFORE ? 1 : -1;
-        }
-
-        enum Where {
-            BEFORE, AFTER
-        }
-
-        Entry(String name, Runnable runnable, RelativePlace relativePlace) {
-            JkUtilsAssert.argument(name != null, "runnable name cannot be null");
-            JkUtilsAssert.argument(runnable != null, "runnable cannot be null");
-            this.name = name;
-            this.runnable = runnable;
-            this.relativePlace = relativePlace;
-        }
-
-        Entry(Runnable runnable) {
-            this(runnable.toString(), runnable, null);
-        }
-
-        Entry withRunnable(Runnable runnable) {
-            return new Entry(this.name, runnable, this.relativePlace);
-        }
-
-        boolean isRelativeTo(String entryName) {
-            return relativePlace!= null && relativePlace.relativeEntryName.equals(entryName);
-        }
-
-        boolean hasRelationWith(Entry other) {
-            return isRelativeTo(other.name) || other.isRelativeTo(name);
-        }
-
-        boolean hasRelationConflictWith(Entry other) {
-            return isRelativeTo(other.name) && other.isRelativeTo(name)
-                    && relativePlace.where.equals(other.relativePlace.where);
-        }
-
-        Entry findRelationShip(List<Entry> entries) {
-            return entries.stream()
-                    .filter(e ->e.hasRelationWith(this))
-                    .findFirst().orElse(null);
-        }
-
-        @Override
-        public String toString() {
-            return name + (relativePlace == null ? "" : " (" + relativePlace + ")");
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Entry entry = (Entry) o;
-            return name.equals(entry.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name);
-        }
-
-        static class RelativePlace {
-
-            public RelativePlace(String name, Where where) {
-                JkUtilsAssert.argument(name != null, "relative runnable name cannot be null");
-                JkUtilsAssert.argument(where != null, "where position cannot be null");
-                this.relativeEntryName = name;
-                this.where = where;
-            }
-
-            final String relativeEntryName;
-
-            final Where where;
-
-            @Override
-            public String toString() {
-                return where + " " + relativeEntryName;
-            }
-        }
-
-    }
-
-    private static List<Entry> sort(List<Entry> entries) {
-        List<Entry> sorted = new ArrayList<>();
-
-        // First add non relative entry
-        entries.stream()
-                .filter(entry -> entry.relativePlace == null)
-                .forEach(sorted::add);
-
-        for (Entry entry : entries) {
-            if (entry.relativePlace == null) {
-                continue;
-            }
-            Entry relativeExistingEntry = entry.findRelationShip(sorted);
-            if (relativeExistingEntry == null) {
-                sorted.add(entry);
-                continue;
-            }
-            int compare = entry.compareTo(relativeExistingEntry);
-            if (compare < 0) {
-                int index = sorted.indexOf(relativeExistingEntry);
-                sorted.add(index, entry);
-            } else {
-                sorted.add(entry);
-            }
-        }
-        return sorted;
     }
 
 }

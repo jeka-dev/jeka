@@ -65,7 +65,14 @@ public final class JkConstants {
 
     public static final String CLASSPATH_INJECT_PROP = "jeka.inject.classpath";
 
+
+    /**
+     * @deprecated Use {@link #KBEAN_DEFAULT_PROP} instead.
+     */
+    @Deprecated
     public static final String DEFAULT_KBEAN_PROP = "jeka.default.kbean";
+
+    public static final String KBEAN_DEFAULT_PROP = "jeka.kbean.default";
 
     static final String CMD_APPEND_PROP = CMD_PREFIX_PROP + CMD_APPEND_SUFFIX_PROP;
 

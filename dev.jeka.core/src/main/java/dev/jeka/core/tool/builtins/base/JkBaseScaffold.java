@@ -66,7 +66,7 @@ public final class JkBaseScaffold extends JkScaffold {
      * Adds a customizer to this instance, that will be executed at {@link #run()} execution.
      */
     public JkBaseScaffold addCustomizer(Consumer<JkBaseScaffold> customizer) {
-        this.customizers.add(customizer);
+        this.customizers.append(customizer);
         return this;
     }
 
