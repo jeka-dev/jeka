@@ -19,6 +19,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLocator;
@@ -64,6 +65,8 @@ public final class JkRunbase {
 
     private static final Map<Path, JkRunbase> SUB_RUNTIMES = new LinkedHashMap<>();
 
+    private static BehaviorSettings behaviorSettings;
+
     private static Path masterBaseDir;
 
     private static Engine.KBeanResolution kbeanResolution;
@@ -91,6 +94,8 @@ public final class JkRunbase {
     private final KBeanAction.Container effectiveActions = new KBeanAction.Container();
 
     private final JkProperties properties;
+
+    private final JkRunnables cleanActions = JkRunnables.of().setLogTasks(JkLog.isDebug());
 
     // We use class name as key because using `Class` objects as key may lead
     // in duplicate initialization in some circumstances where several class loader
@@ -160,9 +165,6 @@ public final class JkRunbase {
     public JkPathSequence getImportBaseDirs() {
         return importedBaseDirs;
     }
-
-
-
 
     /**
      * Instantiates the specified KBean into the current runbase, if it is not already present. <p>
@@ -236,7 +238,23 @@ public final class JkRunbase {
         );
     }
 
+    /**
+     * Register extra file-system clean action to run when --clean option is specified.
+     * This is used for KBeans as nodeJS that needs to clean an extra folder that does not belong to jeka-output.
+     *
+     * Important: This method should be called inside the a KBean #init() method in order it
+     *            can be taken in account by the execution engine.
+     *
+     * @param name
+     * @param runnable
+     */
+    public void registerCLeanAction(String name, Runnable runnable) {
+        cleanActions.append(name, runnable);
+    }
 
+    List<Class<? extends KBean>> getKbeanInitDeclaredInProps() {
+        return kbeanInitDeclaredInProps;
+    }
 
     void setDependencyResolver(JkDependencyResolver resolverArg) {
         dependencyResolver = resolverArg;
@@ -283,6 +301,7 @@ public final class JkRunbase {
 
         this.preInitializezr = PreInitializer.of(kbeanClassesToInit);
 
+
         kbeanClassesToInit.stream().distinct().forEach(beanClass -> load(beanClass, forceMode));  // register kbeans
 
         JkLog.debugEndTask();
@@ -297,6 +316,12 @@ public final class JkRunbase {
     }
 
     void run(KBeanAction.Container actionContainer) {
+
+        if (cleanActions.getSize() > 0 && behaviorSettings.cleanOutput) {
+            JkLog.verbose("Run extra-clean actions");
+            cleanActions.run();
+        }
+
         for (KBeanAction kBeanAction : actionContainer.findInvokes()) {
             KBean bean = load(kBeanAction.beanClass);
             JkUtilsReflect.invoke(bean, kBeanAction.method());
@@ -321,6 +346,10 @@ public final class JkRunbase {
 
     static void setMasterBaseDir(Path baseDir) {
         masterBaseDir = baseDir;
+    }
+
+    static void setBehaviorSettings(BehaviorSettings behavior) {
+        behaviorSettings = behavior;
     }
 
     static void setKBeanResolution(Engine.KBeanResolution kbeanResolution) {

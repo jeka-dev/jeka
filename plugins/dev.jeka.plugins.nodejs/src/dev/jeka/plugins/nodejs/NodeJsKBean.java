@@ -38,6 +38,8 @@ import java.util.stream.Stream;
         "Node.js is automatically downloaded and installed on first use, so no manual setup is required.")
 public class NodeJsKBean extends KBean {
 
+    public static final String CLEAN_ACTION = "nodejs-clean";
+
     @JkDoc("The version of NodeJs to use")
     @JkDepSuggest(versionOnly = true, hint = "22.11.0,20.9.0,18.19.0,16.20.2")
     public String version = JkNodeJs.DEFAULT_NODE_VERSION;
@@ -72,6 +74,7 @@ public class NodeJsKBean extends KBean {
         if (configureProject) {
             configureProject();
         }
+        getRunbase().registerCLeanAction(CLEAN_ACTION, this::cleanBuildDir);
     }
 
     @JkDoc("Builds the JS project by running the specified build commands. " +
@@ -121,9 +124,7 @@ public class NodeJsKBean extends KBean {
 
     @JkDoc("Deletes the build directory.")
     public void clean() {
-        if (nodeJsProject != null) {
-            JkUtilsPath.deleteQuietly(nodeJsProject.getBuildDir(), false);
-        }
+        cleanBuildDir();
         JkLog.info("Build dir %s deleted.", getBaseDir().relativize(nodeJsProject.getBuildDir()));
     }
 
@@ -146,6 +147,12 @@ public class NodeJsKBean extends KBean {
         }
         this.nodeJsProject.registerIn(project);
         return this.nodeJsProject;
+    }
+
+    private void cleanBuildDir() {
+        if (nodeJsProject != null) {
+            JkUtilsPath.deleteQuietly(nodeJsProject.getBuildDir(), false);
+        }
     }
 
    private static String[] commandLines(String cmd) {

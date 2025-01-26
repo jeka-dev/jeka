@@ -188,6 +188,13 @@ public class JkRunnables implements Runnable {
     }
 
     /**
+     * Returns the total number of entries in the execution chain.
+     */
+    public int getSize() {
+        return this.entries.size();
+    }
+
+    /**
      * Executes the {@link Runnable}s, in the order of the execution chain.
      */
     @Override
