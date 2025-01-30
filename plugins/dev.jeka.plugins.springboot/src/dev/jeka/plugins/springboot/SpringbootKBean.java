@@ -25,7 +25,7 @@ import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkPreInitKBean;
+import dev.jeka.core.tool.JkPreInit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
@@ -109,7 +109,7 @@ public final class SpringbootKBean extends KBean {
     }
 
     @JkDoc("Set test progress style to PLAIN to display JVM messages gracefully.")
-    @JkPreInitKBean
+    @JkPreInit
     public static void initProjectKbean(ProjectKBean projectKBean) {
         projectKBean.project.testing.testProcessor.engineBehavior
                 .setProgressDisplayer(JkTestProcessor.JkProgressStyle.PLAIN);
@@ -161,18 +161,7 @@ public final class SpringbootKBean extends KBean {
             springbootProject.addSpringRepo(springRepo);
         }
 
-        // Springboot IT test displays a warning message "OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes becaus...."
-        // disturbing "bar" progress. So we force to use TREE progress
-        /*
-        if (projectKBean.tests.progress == null) {
-            projectKBean.project.testing.testProcessor.engineBehavior
-                    .setProgressDisplayer(JkTestProcessor.JkProgressStyle.PLAIN);
-        }
-
-         */
-
-
-        NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
+        NativeKBean nativeKBean = load(NativeKBean.class);
         nativeKBean.includeMainClassArg = false;
         nativeKBean.setAotAssetDirs(() ->
                 this.generateAotEnrichment(projectKBean.project.asBuildable()));

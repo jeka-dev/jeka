@@ -61,7 +61,7 @@ public class JkNodeJsProject {
     }
 
     public static JkNodeJsProject of(JkNodeJs nodeJs, Path baseJsDir, String buildDir) {
-        return new JkNodeJsProject(nodeJs, baseJsDir, buildDir, Collections.emptyList());
+        return of(nodeJs, baseJsDir, buildDir, Collections.emptyList());
     }
 
     public JkNodeJs getNodeJs() {

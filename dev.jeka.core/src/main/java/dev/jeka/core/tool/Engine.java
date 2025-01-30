@@ -364,11 +364,8 @@ class Engine {
             }
 
             // The first KBean to be initialized
-            if (localKbeanClassNames.contains(defaultKBeanClassName)) {
-                initKbeanClassName = defaultKBeanClassName;
-            } else {
-                initKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(defaultKBeanClassName);
-            }
+            initKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(null);
+
         }
     }
 
@@ -578,7 +575,8 @@ class Engine {
 
         Optional<String> findKbeanClassName(String kbeanName) {
             if (JkUtilsString.isBlank(kbeanName)) {
-                return Optional.of(Optional.ofNullable(defaultKbeanClassname).orElse(BaseKBean.class.getName()));
+
+                return Optional.empty();
             }
             return this.allKbeans.stream()
                     .filter(className -> KBean.nameMatches(className, kbeanName))

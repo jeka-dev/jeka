@@ -22,9 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 class PreInitializer {
@@ -37,7 +35,8 @@ class PreInitializer {
 
     static PreInitializer of(List<Class<? extends KBean>> kbeanClasses) {
         Map<Class<?>, JkConsumers<? extends KBean>> map = new HashMap<>();
-        for (Class<?> kbeanClass : kbeanClasses) {
+        List<Class<? extends KBean>> allPreInitializerClasses = findPreInitializerClasses(kbeanClasses);
+        for (Class<?> kbeanClass : allPreInitializerClasses) {
             map.putAll(findMethods(kbeanClass));
         }
         return new PreInitializer(map);
@@ -51,7 +50,7 @@ class PreInitializer {
 
     private static Map<Class<?>, JkConsumers<? extends KBean>> findMethods(Class<?> kbeanClass) {
         JkLog.debug("Finding Pre-initialisation methods in class %s ", kbeanClass.getName());
-        List<Method> methods = JkUtilsReflect.getDeclaredMethodsWithAnnotation(kbeanClass, JkPreInitKBean.class);
+        List<Method> methods = JkUtilsReflect.getDeclaredMethodsWithAnnotation(kbeanClass, JkPreInit.class);
         Map<Class<?>, JkConsumers<? extends KBean>> result = new HashMap<>();
         for (Method method : methods) {
             if (!Modifier.isStatic(method.getModifiers())) {
@@ -75,6 +74,28 @@ class PreInitializer {
             JkConsumers<?> consumers = result.get(paramType);
             JkLog.debug("Adding Pre-initialization method %s for KBean %s ", method, paramType.getName());
             consumers.append(method.toString(), kbeanConsumer);
+        }
+        return result;
+    }
+
+    private static List<Class<? extends KBean>> findPreInitializerClasses(
+            List<Class<? extends KBean>> initializerClasses) {
+
+        List<Class<? extends KBean>> result = new LinkedList<>(initializerClasses);
+        for (Class<? extends KBean> preInitializerClass : initializerClasses) {
+            JkPreInitKBeans preInitKBeans = preInitializerClass.getAnnotation(JkPreInitKBeans.class);
+            if (preInitKBeans != null) {
+                Arrays.stream(preInitKBeans.value()).forEach(extraInitializerClass -> {
+                    if (!result.contains(extraInitializerClass)) {
+                        JkLog.debug("Add pre-initializer class %s ", extraInitializerClass.getName());
+                        result.add(extraInitializerClass);
+                    }
+                });
+            }
+
+        }
+        if (result.size() != initializerClasses.size()) {
+            return findPreInitializerClasses(result);  // find the classes recursively
         }
         return result;
     }

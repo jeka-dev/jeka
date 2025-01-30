@@ -99,7 +99,7 @@ public class NodeJsKBean extends KBean {
             "It usually leads to copy the build dir into the static resource dir of the webapp.")
     public void pack() {
         if (nodeJsProject == null) {
-            throw new JkException("The project has been configured to build with NodeJs.");
+            throw new JkException("The project has not been configured to build with NodeJs.");
         }
         nodeJsProject.pack();
     }
@@ -147,6 +147,13 @@ public class NodeJsKBean extends KBean {
         }
         this.nodeJsProject.registerIn(project);
         return this.nodeJsProject;
+    }
+
+    /**
+     * Retrieves the Node.js project associated with this configuration.
+     */
+    public JkNodeJsProject getNodeJsProject() {
+        return nodeJsProject;
     }
 
     private void cleanBuildDir() {

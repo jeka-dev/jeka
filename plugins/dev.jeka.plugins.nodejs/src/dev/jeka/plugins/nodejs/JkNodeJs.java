@@ -144,8 +144,8 @@ public class JkNodeJs {
         } else if ("npx".equals(command)) {
             return npx(args);
         } else {
-            throw new IllegalArgumentException("For nodeJs, command line should start with either 'npm' nor 'npx'. Was "
-                    + commandLine);
+            throw new IllegalArgumentException("For nodeJs, command line should start with either 'npm' nor 'npx'. Was '"
+                    + commandLine + "'");
         }
     }
 

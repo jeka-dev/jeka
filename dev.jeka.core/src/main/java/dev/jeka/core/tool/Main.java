@@ -99,6 +99,7 @@ public class Main {
             engine = Engine.of(baseDir, behavior.skipCompile,
                     downloadRepos, dependencies, logs, behavior);
             JkRunbase.setBehaviorSettings(behavior);
+            JkRunbase.setLogSettings(logs);
 
             // Compile jeka-src and resolve the dependencies and kbeans
             // Using rocket emoji cause issue cause it is caused on 2 char but when

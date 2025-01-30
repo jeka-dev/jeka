@@ -156,7 +156,7 @@ public final class JkJacoco {
             if (JkLog.isVerbose()) {
                 message += " agent options : " + agentOptions;
             }
-            JkLog.info(message);
+            JkLog.verbose(message);
             testProcessor.setForkingProcess(process);
             testProcessor.postActions.append(this::generateExport);
         });

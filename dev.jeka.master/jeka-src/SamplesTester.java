@@ -20,7 +20,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         }
 
         // Run project app
-        run("dev.jeka.samples.project-app", "-Djeka.java.version=17 project: runJar run.programArgs=oo" +
+        run("dev.jeka.samples.project-app", "-Djeka.java.version=17 project: test runJar run.programArgs=oo" +
                 " -c");
 
         // Test also if the KBean hosted in jeka-src, is considered as the default KBean
@@ -31,8 +31,6 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         runWithDistribJekaShell(sampleBaseDir, "ok");
         runWithDistribJekaShell(sampleBaseDir, "ok");
-
-
 
 
         // Test with injecting dep via @JkDep(...)

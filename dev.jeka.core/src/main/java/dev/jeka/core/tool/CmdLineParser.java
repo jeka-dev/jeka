@@ -22,6 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,8 +52,11 @@ class CmdLineParser {
     private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, Engine.KBeanResolution resolution,
                                                           String source) {
 
+        if (args.isEmpty()) {
+            return Collections.emptyList();
+        }
         String kbeanName = args.findKbeanName();
-        String kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(null);
+        String kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(resolution.defaultKbeanClassname);
         final String[] methodOrFieldArgs = args.trunkKBeanRef().get();
 
         if (kbeanClassName == null) {

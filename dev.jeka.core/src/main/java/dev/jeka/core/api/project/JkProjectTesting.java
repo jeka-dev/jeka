@@ -156,25 +156,20 @@ public class JkProjectTesting {
      * </ul>
      */
     public void run() {
-        JkLog.startTask("process-tests");
         if (skipped) {
-            JkLog.info("Skipped");
-            JkLog.endTask();
+            JkLog.info("Tests Skipped");
             return;
         }
         if (!project.compilation.isDone()) {
-            JkLog.startTask("process-production-code");     // Make explicit task for clearer output
             this.project.compilation.runIfNeeded();
-            JkLog.endTask();
         }
         this.compilation.run();
         if (!JkPathTree.of(this.compilation.layout.resolveClassDir()).containFiles()) {
-            JkLog.endTask("No tests to execute.");
+            JkLog.info("No tests to run.");
             return;
         }
         executeWithTestProcessor();
         postActions.run();
-        JkLog.endTask();
     }
 
     /**

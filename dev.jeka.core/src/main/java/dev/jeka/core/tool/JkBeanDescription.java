@@ -516,7 +516,7 @@ public final class JkBeanDescription {
 
         static List<PreInitInfo> listOf(Class<?> declaringClass) {
             return Arrays.stream(declaringClass.getDeclaredMethods())
-                    .filter(method -> method.getAnnotation(JkPreInitKBean.class) != null)
+                    .filter(method -> method.getAnnotation(JkPreInit.class) != null)
                     .map(method -> {
                         Class<?>[] parameterTypes = method.getParameterTypes();
                         Class<?> kbeanClass = parameterTypes.length == 0 ? null : parameterTypes[0];

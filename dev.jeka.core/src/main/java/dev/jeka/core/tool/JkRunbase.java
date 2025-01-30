@@ -54,18 +54,15 @@ import java.util.stream.Collectors;
  */
 public final class JkRunbase {
 
-    // Experiment for invoking 'KBean#init()' method lately, once all KBean has been instantiated
-    // Note : Calling all KBeans init() methods in a later stage then inside 'load' methods
-    //        leads in difficult problems as the order the KBeans should be initialized.
-    ///private static final boolean LATE_INIT = false;
-
     private static final String PROP_KBEAN_PREFIX = "@";
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
     private static final Map<Path, JkRunbase> SUB_RUNTIMES = new LinkedHashMap<>();
 
-    private static BehaviorSettings behaviorSettings;
+    private static BehaviorSettings behaviorSettings = BehaviorSettings.ofDefault(); // default needed otherwise tests throw npe
+
+    private static LogSettings logSettings = LogSettings.ofDefault();
 
     private static Path masterBaseDir;
 
@@ -299,6 +296,14 @@ public final class JkRunbase {
         // KBeans init from props
         kbeanClassesToInit.addAll(this.kbeanInitDeclaredInProps);
 
+        if (logSettings.runtimeInformation) {
+            JkLog.info("Pre-initialisation KBeans:");
+            String classNames = kbeanClassesToInit.stream()
+                    .map(KBean::name)
+                    .collect(Collectors.joining(", "));
+            JkLog.info("    " + classNames);
+        }
+
         this.preInitializezr = PreInitializer.of(kbeanClassesToInit);
 
 
@@ -350,6 +355,10 @@ public final class JkRunbase {
 
     static void setBehaviorSettings(BehaviorSettings behavior) {
         behaviorSettings = behavior;
+    }
+
+    static void setLogSettings(LogSettings log) {
+        logSettings = log;
     }
 
     static void setKBeanResolution(Engine.KBeanResolution kbeanResolution) {
