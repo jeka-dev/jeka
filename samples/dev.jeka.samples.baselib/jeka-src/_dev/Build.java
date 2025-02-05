@@ -8,19 +8,22 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 @JkDep("org.junit.jupiter:junit-jupiter:5.10.2")
 class Build extends KBean {
 
-    @JkInjectProperty("PATH")
+    @JkPropValue("PATH")
     public String path;
 
     @Override
     protected void init() {
-        load(IntellijKBean.class)
-                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-        load(BaseKBean.class);
+        require(BaseKBean.class);
     }
 
     @JkDoc("Used by sample tests o check if this bean is considered as the default kbean")
     public void ok() {
         System.out.println("ok");
+    }
+
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
     }
 
     public void hello() {

@@ -22,6 +22,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -55,6 +56,19 @@ public class SonarqubeKBean extends KBean {
     public final JkSonarqube sonarqube = JkSonarqube.ofVersion(getRunbase().getDependencyResolver().getRepos(),
             JkSonarqube.DEFAULT_SCANNER__VERSION);
 
+    @Override
+    protected void init() {
+        sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), effectiveScannerVersion());
+        sonarqube.setPingServer(pingServer);
+        sonarqube.setLogOutput(logOutput);
+        sonarqube.setProperties(getRunbase().getProperties());;
+    }
+
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
+        project = projectKBean.project;
+    }
+
     @JkDoc("Runs a SonarQube analysis and sends the results to a Sonar server.")
     public void run() {
         JkUtilsAssert.state(project != null, "Np project to analyse found in %s", getBaseDir());
@@ -77,17 +91,6 @@ public class SonarqubeKBean extends KBean {
                     sonarqube.getHostUrl(), sonarqube.getProperty(JkSonarqube.PROJECT_KEY) );
             System.exit(1);
         }
-    }
-
-    @Override
-    protected void init() {
-        sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), effectiveScannerVersion());
-        sonarqube.setPingServer(pingServer);
-        sonarqube.setLogOutput(logOutput);
-        sonarqube.setProperties(getRunbase().getProperties());
-        getRunbase().find(ProjectKBean.class).ifPresent(projectKBean -> {
-            project = projectKBean.project;
-        });
     }
 
     private String effectiveScannerVersion() {

@@ -21,6 +21,9 @@ import dev.jeka.core.api.system.JkLog;
 // Log settings
 class LogSettings {
 
+    // Initialized for tests
+    static LogSettings INSTANCE = ofDefault();
+
     final boolean verbose;
 
     final boolean debug;

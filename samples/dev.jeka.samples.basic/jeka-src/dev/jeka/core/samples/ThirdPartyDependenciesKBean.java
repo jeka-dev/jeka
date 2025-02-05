@@ -2,10 +2,10 @@ package dev.jeka.core.samples;
 
 import com.google.common.base.MoreObjects;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkDep;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -23,19 +23,8 @@ import static dev.jeka.core.api.depmanagement.JkPopularLibs.*;
 @JkDep("com.google.guava:guava:21.0")
 public class ThirdPartyDependenciesKBean extends KBean {
 
-    ProjectKBean projectKBean = load(ProjectKBean.class);
-
-    @Override
-    protected void init() {
-        projectKBean.project.flatFacade.dependencies.compile
-                .add(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("3.1.0"))
-                .add(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"));
-        projectKBean.project.flatFacade.dependencies.runtime
-                .remove(JkPopularLibs.JAVAX_SERVLET_API.getDotNotation());
-        projectKBean.project.flatFacade.dependencies.test
-                .add(SimpleProjectKBean.JUNIT5)
-                .add(JkPopularLibs.MOCKITO_ALL.toCoordinate("1.10.19"));
-    }
+    @JkInject
+    private ProjectKBean projectKBean;
 
     @JkDoc("Performs some load test using http client")
     public void seleniumLoadTest() throws IOException {
@@ -46,9 +35,27 @@ public class ThirdPartyDependenciesKBean extends KBean {
         // ....
     }
 
+    @JkDoc("Cleans then packs the project")
     public void cleanPack() {
         cleanOutput();
         projectKBean.pack();
+    }
+
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
+        project.setModuleId("dev.jeka.samples:war-project")
+                .setVersion("1.0-SNAPSHOT")
+                .setJvmTargetVersion(JkJavaVersion.V8)
+                .compilation.layout.emptySources().addSources("src/main/javaweb");
+        project.testing.setSkipped(true);
+
+        project.flatFacade.dependencies.compile.modify(deps -> deps
+                .and("com.google.guava:guava:30.0-jre")
+                .and("javax.servlet:javax.servlet-api:4.0.1"));
+        project.flatFacade.dependencies.runtime
+                .remove("javax.servlet:javax.servlet-api");
+        JkJ2eWarProjectAdapter.of().configure(project);
     }
 
     public static void main(String[] args) {

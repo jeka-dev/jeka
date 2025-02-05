@@ -25,10 +25,8 @@ import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsReflect;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -54,19 +52,15 @@ import java.util.stream.Collectors;
  */
 public final class JkRunbase {
 
+    private static JkRunbase MASTER;
+
     private static final String PROP_KBEAN_PREFIX = "@";
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
-    private static final Map<Path, JkRunbase> SUB_RUNTIMES = new LinkedHashMap<>();
+    private static final Map<Path, JkRunbase> SUB_RUN_BASES = new LinkedHashMap<>();
 
-    private static BehaviorSettings behaviorSettings = BehaviorSettings.ofDefault(); // default needed otherwise tests throw npe
-
-    private static LogSettings logSettings = LogSettings.ofDefault();
-
-    private static Path masterBaseDir;
-
-    private static Engine.KBeanResolution kbeanResolution;
+    private KBeanResolution kbeanResolution;
 
     private final Path baseDir; // Relative Path
 
@@ -86,6 +80,7 @@ public final class JkRunbase {
     // they are not initialized with any KbeanActions.
     private KBeanAction.Container cmdLineActions = new KBeanAction.Container();
 
+    // TODO remove when load() will be prevented at initialisation time
     private List<Class<? extends KBean>> kbeanInitDeclaredInProps = new LinkedList<>();
 
     private final KBeanAction.Container effectiveActions = new KBeanAction.Container();
@@ -94,23 +89,46 @@ public final class JkRunbase {
 
     private final JkRunnables cleanActions = JkRunnables.of().setLogTasks(JkLog.isDebug());
 
+    private InitClassesResolver initClassesResolver;
+
     // We use class name as key because using `Class` objects as key may lead
     // in duplicate initialization in some circumstances where several class loader
     // are present (this has happened when using "jeka aKbean: --doc)
     private final Map<String, KBean> beans = new LinkedHashMap<>();
 
-    private PreInitializer preInitializezr = PreInitializer.of(Collections.emptyList());
+    private PreInitializer preInitializer = PreInitializer.of(Collections.emptyList());
+
+    private final PostInitializer postInitializer = PostInitializer.of();
+
+    private boolean initialized;
+
 
     private JkRunbase(Path baseDir) {
         this.baseDir = baseDir;
         this.properties = constructProperties(baseDir);
     }
 
+    static JkRunbase createMaster(Path baseDir) {
+        MASTER = new JkRunbase(baseDir);
+        return MASTER;
+    }
+
     /**
      * Returns the JkRunbase instance associated with the specified project base directory.
      */
     public static JkRunbase get(Path baseDir) {
-        return SUB_RUNTIMES.computeIfAbsent(baseDir, path -> new JkRunbase(path));
+        if (MASTER.baseDir.equals(baseDir)) {
+            return MASTER;
+        }
+        return SUB_RUN_BASES.computeIfAbsent(baseDir, path -> {
+            JkRunbase result = new JkRunbase(path);
+            result.kbeanResolution = MASTER.kbeanResolution.toSubRunbase(baseDir);
+            return result;
+        });
+    }
+
+    static JkRunbase getMaster() {
+        return MASTER;
     }
 
     /**
@@ -164,6 +182,19 @@ public final class JkRunbase {
     }
 
     /**
+     * Returns the KBean of the exact specified class, present in this runbase.
+     */
+    public <T extends KBean> Optional<T> find(Class<T> beanClass) {
+
+        // TODO remove when find() will be prevented at init time
+        if (cmdLineActions.findInvolvedKBeanClasses().contains(beanClass) ||
+                this.kbeanInitDeclaredInProps.contains(beanClass)) {
+            return Optional.of(load(beanClass));
+        }
+        return (Optional<T>) Optional.ofNullable(beans.get(beanClass.getName()));
+    }
+
+    /**
      * Instantiates the specified KBean into the current runbase, if it is not already present. <p>
      * Since KBeans are singletons within a runbase, calling this method has no effect if the bean is already loaded.
      *
@@ -172,18 +203,24 @@ public final class JkRunbase {
      * @return This object for call chaining.
      */
     public <T extends KBean> T load(Class<T> beanClass) {
-        return load(beanClass, false);
-    }
-
-    /**
-     * Returns the KBean of the exact specified class, present in this runbase.
-     */
-    public <T extends KBean> Optional<T> find(Class<T> beanClass) {
-        if (cmdLineActions.findInvolvedKBeanClasses().contains(beanClass) ||
-                this.kbeanInitDeclaredInProps.contains(beanClass)) {
-            return Optional.of(load(beanClass));
+        if (!initialized) {
+            JkLog.warn("Loading bean %s from Runbase %s during initialization.", beanClass.getName(), baseDir);
+            JkLog.warn("This action will be disallowed in future releases.");
+            JkLog.warn("Please, update your code to use @JkPostInit methods for KBean configuration.");
+            JkLog.warn("Run with --debug option to see stacktrace at the moment of initialization.");
+            if (JkLog.isDebug()) {
+                JkUtilsThrowable.printStackTrace(JkLog.getOutPrintStream(),
+                        Thread.currentThread().getStackTrace(), 100);
+            }
         }
-        return (Optional<T>) Optional.ofNullable(beans.get(beanClass.getName()));
+        T result = (T) beans.get(beanClass.getName());
+        if (result != null) {
+            return result;
+        }
+        result = loadInternal(beanClass);
+        this.postInitializer.addPostInitializerCandidate(result); // the postInit methods won't apply to already initialized beans
+        this.postInitializer.apply(result);
+        return result;
     }
 
     /**
@@ -207,32 +244,33 @@ public final class JkRunbase {
     }
 
     /**
-     * Finds either a ProjectKBean or a BaseKBean present in this runbase.
-     * The result is returned as a JkBuildable abstraction or <code>null</code>
-     * if no such structure is discovered in this runbase.
+     * Get either a ProjectKBean or a BaseKBean present in this runbase.
+     * The result is returned as a JkBuildable abstraction.<p>
+     * This methods never returns <code>null</code>, if no such KBean is present in the runbase
+     * a ProjectKBean is created if the presence of *src* dir is detected, otherwise it returns
+     * a BaseKBean instance.
      */
-    public JkBuildable findBuildable() {
-        Optional<ProjectKBean> optionalProjectKBean = this.find(ProjectKBean.class);
-        if (optionalProjectKBean.isPresent()) {
-            return optionalProjectKBean.get().project.asBuildable();
-        }
-        if (this.find(BaseKBean.class).isPresent()) {
-            return this.find(BaseKBean.class).get().asBuildable();
-        }
-        if (Files.isDirectory(this.getBaseDir().resolve("src"))) {
-            return this.load(ProjectKBean.class).project.asBuildable();
-        }
-        return null;
+    public JkBuildable getBuildable() {
+        Class<? extends KBean> clazz = getBuildableKBeanClass();
+        JkBuildable.Supplier buidableSupplier = (JkBuildable.Supplier) load(clazz);
+        return buidableSupplier.asBuildable();
     }
 
     /**
-     * @see #findBuildable()
+     *
+     * @return
      */
-    public JkBuildable getBuildable() {
-        return Optional.ofNullable(findBuildable()).orElseThrow(
-                () -> new JkException("Cannot find project or base KBean in this runbase " + this.getBaseDir()
-                        + ". May you need to declare '@base=' in jeka.property file.")
-        );
+    public Class<? extends KBean> getBuildableKBeanClass() {
+        if (isKBeanClassPresent(ProjectKBean.class)) {
+            return ProjectKBean.class;
+        }
+        if (isKBeanClassPresent(BaseKBean.class)) {
+            return BaseKBean.class;
+        }
+        if (Files.isDirectory(this.getBaseDir().resolve("src"))) {
+            return ProjectKBean.class;
+        }
+        return BaseKBean.class;
     }
 
     /**
@@ -249,16 +287,16 @@ public final class JkRunbase {
         cleanActions.append(name, runnable);
     }
 
-    List<Class<? extends KBean>> getKbeanInitDeclaredInProps() {
-        return kbeanInitDeclaredInProps;
-    }
-
     void setDependencyResolver(JkDependencyResolver resolverArg) {
         dependencyResolver = resolverArg;
     }
 
     void setClasspath(JkPathSequence pathSequence) {
         this.classpath = pathSequence;
+    }
+
+    void setKbeanResolution(KBeanResolution kbeanResolution) {
+        this.kbeanResolution = kbeanResolution;
     }
 
     void setExportedClassPath(JkPathSequence exportedClassPath) {
@@ -277,44 +315,84 @@ public final class JkRunbase {
         return effectiveActions;
     }
 
-    void init(KBeanAction.Container cmdLineActionContainer, boolean forceMode) {
+    void init(KBeanAction.Container cmdLineActionContainer) {
+
+        // Add initKBean
+        Class<? extends KBean> initKBeanClass = kbeanResolution.findInitBeanClass().orElse(null);
+        KBeanAction.Container actions = cmdLineActionContainer.withInitBean(initKBeanClass);
+
         if (JkLog.isDebug()) {
-            JkLog.debug("Initialize JkRunbase with \n" + cmdLineActionContainer.toColumnText());
+            JkLog.debug("Initialize JkRunbase with \n" + actions.toColumnText());
         }
-        this.cmdLineActions = cmdLineActionContainer;
+
+        // Needed for find() and inject values at instantiation time
+        this.cmdLineActions = actions;
 
         JkLog.debugStartTask("Register KBeans");
 
-        // KBeans init from cmdline
-        List<Class<? extends KBean>> kbeanClassesToInit = cmdLineActionContainer.toList().stream()
-                .map(kbeanAction -> kbeanAction.beanClass)
-                .distinct()
-                .collect(Collectors.toCollection(LinkedList::new));
+        // Discover classes to initialize
+        List<Class<? extends KBean>> initialClasses = actions.findInvolvedKBeanClasses();
+        this.kbeanInitDeclaredInProps = kbeansToInitFromProps();  // todo remove when find() prevented at init time
+        initialClasses.addAll(this.kbeanInitDeclaredInProps);
+        initialClasses = initialClasses.stream().distinct().collect(Collectors.toList());
+        this.initClassesResolver = InitClassesResolver.of(this, initialClasses);
+        List<Class<? extends KBean>> classesToInit = this.initClassesResolver.getClassesToInitialize();
 
-        this.kbeanInitDeclaredInProps = kbeansToInitFromProps();
-
-        // KBeans init from props
-        kbeanClassesToInit.addAll(this.kbeanInitDeclaredInProps);
-
-        if (logSettings.runtimeInformation) {
-            JkLog.info("Pre-initialisation KBeans:");
-            String classNames = kbeanClassesToInit.stream()
+        if (LogSettings.INSTANCE.runtimeInformation) {
+            String classNames = classesToInit.stream()
                     .map(KBean::name)
                     .collect(Collectors.joining(", "));
-            JkLog.info("    " + classNames);
+            JkLog.info("KBeans to initialize: " + classNames);
+
         }
 
-        this.preInitializezr = PreInitializer.of(kbeanClassesToInit);
+        // Register pre-initializers from classes to initialize
+        // KBeans will be pre-initialized at instantiation time
+        this.preInitializer = PreInitializer.of(classesToInit);
 
+        // Initialize KBeans then register their post-initializers
+        for (Class<? extends KBean> beanClass : classesToInit) {
+            KBean kbean = loadInternal(beanClass);
+            this.postInitializer.addPostInitializerCandidate(kbean);
+        }
 
-        kbeanClassesToInit.stream().distinct().forEach(beanClass -> load(beanClass, forceMode));  // register kbeans
+        List<KBean> preInitializedKBeans = preInitializer.getPreInitializedKbeans();
+        if (LogSettings.INSTANCE.runtimeInformation  && !preInitializedKBeans.isEmpty()) {
+            JkLog.info("Pre-initialisation KBeans:");
+            final Jk2ColumnsText preInitializeText = Jk2ColumnsText.of(18, 120);
+            for (KBean kbean : preInitializedKBeans) {
+                preInitializer.getInitializerNamesFor(kbean.getClass()).forEach(name -> {
+                    String kbeanName = KBean.name(kbean.getClass());
+                    preInitializeText.add("    " + kbeanName, name);
+                });
+            }
+            JkLog.info(preInitializeText.toString());
+        }
+
+        // Post-initialize KBeans
+        Jk2ColumnsText postInitializeText = null;
+        if (LogSettings.INSTANCE.runtimeInformation) {
+            JkLog.info("Post-initialisation KBeans:");
+            postInitializeText = Jk2ColumnsText.of(18, 120);
+        }
+        for (Class<? extends KBean> beanClass : initClassesResolver.getClassesToInitialize()) {
+            KBean kbean = beans.get(beanClass.getName());
+            List<String> initializerNames = postInitializer.apply(kbean);
+            if (LogSettings.INSTANCE.runtimeInformation) {
+                for (String initializerName : initializerNames) {
+                    postInitializeText.add("    "  + KBean.name(beanClass), initializerName);
+                }
+            }
+        }
+        if (LogSettings.INSTANCE.runtimeInformation) {
+            JkLog.info(postInitializeText.toString());
+        }
+        initialized = true;
 
         JkLog.debugEndTask();
-
-        // Once KBeans has been initialised, #postInit is invoked on each,
-        // so they can act upon final settings of other KBeans.
-        beans.values().forEach(KBean::postInit);
     }
+
+
 
     void assertValid() {
         JkUtilsAssert.state(dependencyResolver != null, "Dependency resolver can't be null.");
@@ -322,7 +400,7 @@ public final class JkRunbase {
 
     void run(KBeanAction.Container actionContainer) {
 
-        if (cleanActions.getSize() > 0 && behaviorSettings.cleanOutput) {
+        if (cleanActions.getSize() > 0 && BehaviorSettings.INSTANCE.cleanOutput) {
             JkLog.verbose("Run extra-clean actions");
             cleanActions.run();
         }
@@ -347,22 +425,6 @@ public final class JkRunbase {
     static void setBaseDirContext(Path baseDir) {
         JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Base dir " + baseDir + " not found.");
         BASE_DIR_CONTEXT.set(baseDir);
-    }
-
-    static void setMasterBaseDir(Path baseDir) {
-        masterBaseDir = baseDir;
-    }
-
-    static void setBehaviorSettings(BehaviorSettings behavior) {
-        behaviorSettings = behavior;
-    }
-
-    static void setLogSettings(LogSettings log) {
-        logSettings = log;
-    }
-
-    static void setKBeanResolution(Engine.KBeanResolution kbeanResolution) {
-        JkRunbase.kbeanResolution = kbeanResolution;
     }
 
     static JkProperties constructProperties(Path baseDir) {
@@ -407,23 +469,7 @@ public final class JkRunbase {
         return String.format("JkRunbase{ baseDir=%s, beans=%s }", relBaseDir(), beans.keySet());
     }
 
-    private <T extends KBean> T load(Class<T> beanClass, boolean forceMode) {
-        JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
-        T result = (T) beans.get(beanClass.getName());
-        if (result == null) {
-            String relBaseDir = relBaseDir().toString();
-            String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
-            JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
-            Path previousBaseDir = BASE_DIR_CONTEXT.get();
-            BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
-            result = this.instantiateKBean(beanClass, forceMode);
-            BASE_DIR_CONTEXT.set(previousBaseDir);
-            JkLog.debugEndTask();
-        }
-        return result;
-    }
-
-    private <T extends KBean> T instantiateKBean(Class<T> beanClass, boolean forceMode) {
+    private <T extends KBean> T instantiateKBean(Class<T> beanClass) {
 
         // Record the instantiation to allow visual tracking of runtime activity.
         this.effectiveActions.add(KBeanAction.ofInit(beanClass));
@@ -434,8 +480,11 @@ public final class JkRunbase {
         // and not the order they have finished to be instantiated.
         this.beans.put(beanClass.getName(), bean);
 
-        // Apply  the defaultProvider defined in method annotated with @JkDefaultProvider
-        this.preInitializezr.get(beanClass).accept(bean);
+        // Inject values annotated with raw @JkInject
+        Injects.injectLocalKBeans(bean);
+
+        // Apply the defaultProvider defined in method annotated with @JkDefaultProvider
+        this.preInitializer.accept(bean);
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
@@ -445,12 +494,39 @@ public final class JkRunbase {
         try {
             bean.init();
         } catch (RuntimeException e) {
-            if (!forceMode) {
+            if (!BehaviorSettings.INSTANCE.forceMode) {
                 throw e;
             }
             JkLog.warn("Can't instantiate bean %s due to %s.", beanClass.getName(), e.getMessage());
         }
+
         return bean;
+    }
+
+    private <T extends KBean> T loadInternal(Class<T> beanClass) {
+        JkUtilsAssert.argument(beanClass != null, "KBean class cannot be null.");
+        T result = (T) beans.get(beanClass.getName());
+        if (result == null) {
+            String relBaseDir = relBaseDir().toString();
+            String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
+            JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
+            Path previousBaseDir = BASE_DIR_CONTEXT.get();
+            BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
+            result = this.instantiateKBean(beanClass);
+            BASE_DIR_CONTEXT.set(previousBaseDir);
+            JkLog.debugEndTask();
+        }
+        return result;
+    }
+
+    private boolean isKBeanClassPresent(Class<? extends KBean> beanClass) {
+        if (cmdLineActions.findInvolvedKBeanClasses().contains(beanClass) ||
+                this.kbeanInitDeclaredInProps.contains(beanClass)) {
+            return true;
+        }
+        return beans.values().stream()
+                .map(Object::getClass)
+                .anyMatch(ProjectKBean.class::equals);
     }
 
     private static Path getBaseDirContext() {
@@ -461,8 +537,8 @@ public final class JkRunbase {
     }
 
     private Path relBaseDir() {
-        if (masterBaseDir != null && baseDir.isAbsolute()) {
-            return masterBaseDir.relativize(baseDir);
+        if (MASTER.baseDir != null && baseDir.isAbsolute()) {
+            return MASTER.baseDir.relativize(baseDir);
         }
         return baseDir;
     }
@@ -532,7 +608,7 @@ public final class JkRunbase {
 
         // from property names formatted as '@kbeanName.field.name='
         List<String> acceptedNames = new LinkedList<>(KBean.acceptedNames(desc.kbeanClass));
-        if (desc.kbeanClass.getName().equals(kbeanResolution.defaultKbeanClassname)) {
+        if (desc.kbeanClass.getName().equals(kbeanResolution.defaultKbeanClassName)) {
             acceptedNames.add("");
         }
         for (String acceptedName : acceptedNames) {

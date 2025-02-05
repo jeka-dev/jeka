@@ -227,7 +227,7 @@ public class JkProjectFlatFacade {
      *
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
-    public JkProjectFlatFacade addTestExcludeFilterSuffixedBy(String suffix, boolean condition) {
+    public JkProjectFlatFacade addTestExcludeSuffixIf(boolean condition, String suffix) {
         if (condition) {
             project.testing.testSelection.addExcludePatterns(".*" + suffix);
         }
@@ -240,7 +240,7 @@ public class JkProjectFlatFacade {
      *
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
-    public JkProjectFlatFacade addTestIncludeFilterSuffixedBy(String suffix, boolean condition) {
+    public JkProjectFlatFacade addTestIncludeSuffixIf(boolean condition, String suffix) {
         project.testing.testSelection.addIncludePatternsIf(condition, ".*" + suffix);
         return this;
     }
@@ -249,7 +249,7 @@ public class JkProjectFlatFacade {
      * Adds a test include filters for test classes named as <code>^(Test.*|.+[.$]Test.*|.*Tests?)$</code>.
      * This is a standard filter in many tools.
      *
-     * @see #addTestIncludeFilterSuffixedBy(String, boolean)
+     * @see #addTestIncludeSuffixIf(boolean, String)
      */
     public JkProjectFlatFacade addTestMavenIncludePattern(boolean condition) {
         project.testing.testSelection.addIncludePatternsIf(condition,

@@ -20,6 +20,7 @@ import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -46,13 +47,9 @@ public class JacocoKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent")
     public String jacocoVersion = JkJacoco.DEFAULT_VERSION;
 
-    @Override
-    protected void init() {
-        find(ProjectKBean.class).ifPresent(projectKBean ->
-                configureForDefaultProject(projectKBean.project));
-    }
-
-    private void configureForDefaultProject(JkProject project) {
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
         if (!configureProject) {
             return;
         }

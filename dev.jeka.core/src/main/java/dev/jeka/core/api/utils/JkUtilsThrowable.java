@@ -97,9 +97,7 @@ public final class JkUtilsThrowable {
         }
     }
 
-    public static void printStackTrace(PrintStream printStream, Throwable e, int maxElement) {
-        printStream.println(e.getClass().getName() + ": " + e.getMessage());
-        StackTraceElement[] stack = e.getStackTrace();
+    public static void printStackTrace(PrintStream printStream, StackTraceElement[] stack, int maxElement) {
         int count = 0;
         for (StackTraceElement element : stack) {
             count++;
@@ -112,6 +110,11 @@ public final class JkUtilsThrowable {
         if (count < stack.length) {
             printStream.println("    ...");
         }
+    }
+
+    public static void printStackTrace(PrintStream printStream, Throwable e, int maxElement) {
+        printStream.println(e.getClass().getName() + ": " + e.getMessage());
+        printStackTrace(printStream, e.getStackTrace(), maxElement);
         if (e.getCause() != null) {
             printStream.print("Caused by: ");
             printStackTrace(printStream, e.getCause(), maxElement);

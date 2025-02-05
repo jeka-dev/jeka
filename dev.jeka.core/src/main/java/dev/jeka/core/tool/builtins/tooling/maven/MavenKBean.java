@@ -19,19 +19,22 @@ package dev.jeka.core.tool.builtins.tooling.maven;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkRequire;
+import dev.jeka.core.tool.JkRunbase;
 import dev.jeka.core.tool.KBean;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @JkDoc("Manages Maven publication for project and 'jeka-src'.")
@@ -57,10 +60,22 @@ public final class MavenKBean extends KBean {
         OSSRH
     }
 
+    @JkRequire
+    private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
+        return runbase.getBuildableKBeanClass();
+    }
+
     @JkDoc("Indentation size for 'showPomDeps' output.")
     public int codeIndent = 4;
 
     public final JkPublication publication = new JkPublication();
+
+    /**
+     * A customizer that allows to apply modifications or adjustments to the
+     * Maven publication before it is actually published. This is typically used
+     * to define specific behaviors from other KBean postInit methods.
+     */
+    private final JkConsumers<JkMavenPublication> mavenPublicationCustomizer = JkConsumers.of();
 
     @JkDoc("Displays Maven publication information on the console.")
     public void info() {
@@ -115,11 +130,24 @@ public final class MavenKBean extends KBean {
         // Add Publish Repos from JKProperties
         mavenPublication.setRepos(getPublishReposFromProps());
 
+        this.mavenPublicationCustomizer.accept(mavenPublication);
+
         // Add artifacts declared in "publication.extraArtifacts"
         publication.extraArtifacts().forEach(mavenPublication::putArtifact);
+        ;
         
         return mavenPublication;
     }
+
+    public void customizePublication(Consumer<JkMavenPublication> publicationCustomizer) {
+        this.mavenPublicationCustomizer.append(publicationCustomizer);
+    }
+
+    public void customizePublication(String customizationName, Consumer<JkMavenPublication> publicationCustomizer) {
+        this.mavenPublicationCustomizer.append(customizationName, publicationCustomizer);
+    }
+
+
 
     private JkRepoSet getPublishReposFromProps() {
         JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
@@ -180,7 +208,7 @@ public final class MavenKBean extends KBean {
                             String[] licenseItems = item.split(":");
                             String licenseName = licenseItems[0];
                             String licenseUrl = licenseItems[1];
-                            publication.pomMetadata.addLicense(licenseName, projectScmUrl);
+                            publication.pomMetadata.addLicense(licenseName, licenseUrl);
                         }
                 );
             }

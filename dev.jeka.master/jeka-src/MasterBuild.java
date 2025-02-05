@@ -43,6 +43,7 @@ import github.Github;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @JkDep("../plugins/dev.jeka.plugins.sonarqube/jeka-output/classes")
 @JkDep("../plugins/dev.jeka.plugins.jacoco/jeka-output/classes")
@@ -53,13 +54,13 @@ class MasterBuild extends KBean {
 
     private static final String MKDOCS_OUTPUT_DIR= "dev.jeka.master/jeka-output/mkdocs";
 
-    @JkInjectProperty("OSSRH_USER")
+    @JkPropValue("OSSRH_USER")
     public String ossrhUser;
 
-    @JkInjectProperty("OSSRH_PWD")
+    @JkPropValue("OSSRH_PWD")
     public String ossrhPwd;
 
-    @JkInjectProperty("GITHUB_TOKEN")
+    @JkPropValue("GITHUB_TOKEN")
     public String githubToken;
 
     public boolean runSamples = true;
@@ -68,28 +69,28 @@ class MasterBuild extends KBean {
 
     // ------ Slave projects
 
-    @JkInjectRunbase("../dev.jeka.core")
+    @JkInject("../dev.jeka.core")
     CoreBuild coreBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.jacoco")
+    @JkInject("../plugins/dev.jeka.plugins.jacoco")
     JacocoBuild jacocoBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.sonarqube")
+    @JkInject("../plugins/dev.jeka.plugins.sonarqube")
     SonarqubeBuild sonarqubeBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.springboot")
+    @JkInject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.nodejs")
+    @JkInject("../plugins/dev.jeka.plugins.nodejs")
     NodeJsBuild nodeJsBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.kotlin")
+    @JkInject("../plugins/dev.jeka.plugins.kotlin")
     KotlinBuild kotlinBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.protobuf")
+    @JkInject("../plugins/dev.jeka.plugins.protobuf")
     ProtobufBuild protobufBuild;
 
-    @JkInjectRunbase("../plugins/dev.jeka.plugins.nexus")
+    @JkInject("../plugins/dev.jeka.plugins.nexus")
     NexusBuild nexusBuild;
 
     private JkJacoco jacocoForCore;
@@ -127,9 +128,9 @@ class MasterBuild extends KBean {
 
         // Build core project then plugins
         JkLog.startTask("build-core-and-plugins");
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(projectKBean -> {
+        List<ProjectKBean> importedProjectKBeans = getImportedKBeans().get(ProjectKBean.class, false);
+        importedProjectKBeans.forEach(projectKBean -> {
             JkLog.startTask("package %s", projectKBean);
-            JkLog.info(projectKBean.project.getInfo());
             projectKBean.clean();
             projectKBean.pack();
             JkLog.endTask();
@@ -171,7 +172,7 @@ class MasterBuild extends KBean {
         // Publish artifacts on maven central only if we are on 'master' branch
         if (shouldPublishOnMavenCentral()) {
             JkLog.startTask("Publishing artifacts to Maven Central");
-            getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publish);
+            getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
             closeAndReleaseRepo();
             JkLog.endTask();
@@ -202,24 +203,7 @@ class MasterBuild extends KBean {
         JkLog.endTask();
     }
 
-    private boolean shouldPublishOnMavenCentral() {
-        String branchOrTag = computeBranchName();
-        if (branchOrTag != null &&
-                (branchOrTag.startsWith("refs/tags/") || branchOrTag.equals("refs/heads/master"))
-                && ossrhUser != null) {
-            return true;
-        }
-        return false;
-    }
 
-    // For a few time ago, JkGit.of().getCurrentBranch() returns 'null' on githyb
-    private static String computeBranchName() {
-        String githubBranch = System.getenv("GITHUB_BRANCH");
-        if (githubBranch != null) {
-            return githubBranch;
-        }
-        return JkGit.of().getCurrentBranch();
-    }
 
     @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
     public void setPosixPermissions() {
@@ -246,7 +230,7 @@ class MasterBuild extends KBean {
 
     @JkDoc("publish-on-local-repo")
     public void publishLocal() {
-        getImportedKBeans().get(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
+        getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
         bomPublication().publishLocal();
     }
 
@@ -263,6 +247,25 @@ class MasterBuild extends KBean {
     @JkDoc("Run scaffold test")
     public void runScaffoldsWithPlugins() {
         new PluginScaffoldTester().run();
+    }
+
+    private boolean shouldPublishOnMavenCentral() {
+        String branchOrTag = computeBranchName();
+        if (branchOrTag != null &&
+                (branchOrTag.startsWith("refs/tags/") || branchOrTag.equals("refs/heads/master"))
+                && ossrhUser != null) {
+            return true;
+        }
+        return false;
+    }
+
+    // For a few time ago, JkGit.of().getCurrentBranch() returns 'null' on githyb
+    private static String computeBranchName() {
+        String githubBranch = System.getenv("GITHUB_BRANCH");
+        if (githubBranch != null) {
+            return githubBranch;
+        }
+        return JkGit.of().getCurrentBranch();
     }
 
     private void configureNexus(JkNexusRepos nexusRepos) {
@@ -287,7 +290,7 @@ class MasterBuild extends KBean {
     }
 
     private void applyToSlave(MavenKBean mavenKBean) {
-        adaptMavenConfig(mavenKBean.getMavenPublication());
+        mavenKBean.customizePublication(this::adaptMavenConfig);
     }
 
     private void adaptMavenConfig(JkMavenPublication mavenPublication) {

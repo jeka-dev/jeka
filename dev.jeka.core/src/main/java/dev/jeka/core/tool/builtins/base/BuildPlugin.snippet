@@ -4,16 +4,15 @@ import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.tool.JkJekaVersionRanges;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 
 // Declare non-prod dependencies here (build, tests, compile-only deps)
 ${inject}
 class Build extends KBean {
 
-    final BaseKBean baseKBean = load(BaseKBean.class);
-
-    @Override
-    protected void init() {
+    @JkPostInit
+    private void postInit(BaseKBean baseKBean) {
         baseKBean.setModuleId("my-group:my-artifactId");
         baseKBean.setVersion(JkInfo.getJekaVersion() + "-0");
 

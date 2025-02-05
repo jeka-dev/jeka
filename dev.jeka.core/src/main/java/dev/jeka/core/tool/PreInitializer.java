@@ -33,19 +33,52 @@ class PreInitializer {
         this.map = map;
     }
 
+    private final List<KBean> preInitializedKbeans = new LinkedList<>();
+
     static PreInitializer of(List<Class<? extends KBean>> kbeanClasses) {
-        Map<Class<?>, JkConsumers<? extends KBean>> map = new HashMap<>();
-        List<Class<? extends KBean>> allPreInitializerClasses = findPreInitializerClasses(kbeanClasses);
-        for (Class<?> kbeanClass : allPreInitializerClasses) {
+        Map<Class<?>, JkConsumers<? extends KBean>> map = new LinkedHashMap<>();
+        for (Class<?> kbeanClass : kbeanClasses) {
             map.putAll(findMethods(kbeanClass));
         }
         return new PreInitializer(map);
     }
 
+    // TODO remove
     JkConsumers get(Class<? extends KBean> kbeanClass) {
         JkConsumers<? extends KBean> result = map.getOrDefault(kbeanClass, JkConsumers.of());
         JkLog.debug("Pre-initialization of %s found %s.", kbeanClass.getName(), result);
         return result;
+    }
+
+    void accept(KBean kbean) {
+        JkConsumers<KBean> consumers = (JkConsumers<KBean>) map.getOrDefault(kbean.getClass(), JkConsumers.of());
+        JkLog.debug("Pre-initialization of %s found %s.", kbean.getClass().getName(), consumers);
+        if (!consumers.isEmpty()) {
+            preInitializedKbeans.add(kbean);
+        }
+        consumers.accept(kbean);
+    }
+
+    List<KBean> getPreInitializedKbeans() {
+        return Collections.unmodifiableList(preInitializedKbeans);
+    }
+
+    List<String> getInitializerNamesFor(Class<? extends KBean> kbeanClass) {
+        return map.getOrDefault(kbeanClass, JkConsumers.of()).getConsumerNames();
+    }
+
+    static void assertMethodDeclarationValid(Method method) {
+        if (!Modifier.isStatic(method.getModifiers())) {
+            String msg = String.format("@JkPreInit method '%s' should be static. " +
+                    "- **Please declare this method as static to resolve the issue**\n", method);
+            throw new IllegalStateException(msg);
+        }
+        Class[] paramTypes = method.getParameterTypes();
+        if (paramTypes.length != 1) {
+            String msg = String.format("@JkPreInit method '%s' must have exactly one parameter, which should be a subclass of KBean. " +
+                    "- **Please update the method declaration to fix this issue**\n", method);
+            throw new IllegalStateException(msg);
+        }
     }
 
     private static Map<Class<?>, JkConsumers<? extends KBean>> findMethods(Class<?> kbeanClass) {
@@ -53,17 +86,8 @@ class PreInitializer {
         List<Method> methods = JkUtilsReflect.getDeclaredMethodsWithAnnotation(kbeanClass, JkPreInit.class);
         Map<Class<?>, JkConsumers<? extends KBean>> result = new HashMap<>();
         for (Method method : methods) {
-            if (!Modifier.isStatic(method.getModifiers())) {
-                String msg = String.format("@JkDefaultProvider method '%s' should be static. " +
-                        "- **Please declare this method as static to resolve the issue**\n", method);
-                throw new IllegalStateException(msg);
-            }
+            assertMethodDeclarationValid(method);
             Class[] paramTypes = method.getParameterTypes();
-            if (paramTypes.length != 1) {
-                String msg = String.format("@JkDefaultProvider method '%s' must have exactly one parameter, which should be a subclass of KBean. " +
-                        "- **Please update the method declaration to fix this issue**\n", method);
-                throw new IllegalStateException(msg);
-            }
             Class paramType = paramTypes[0];
 
             Consumer kbeanConsumer = kbean -> {
@@ -72,32 +96,14 @@ class PreInitializer {
             };
             result.putIfAbsent(paramType, JkConsumers.of());
             JkConsumers<?> consumers = result.get(paramType);
-            JkLog.debug("Adding Pre-initialization method %s for KBean %s ", method, paramType.getName());
-            consumers.append(method.toString(), kbeanConsumer);
+            JkLog.debug("Adding pre-initialization method %s for KBean %s ", method, paramType.getName());
+            consumers.append(methodName(method), kbeanConsumer);
         }
         return result;
     }
 
-    private static List<Class<? extends KBean>> findPreInitializerClasses(
-            List<Class<? extends KBean>> initializerClasses) {
-
-        List<Class<? extends KBean>> result = new LinkedList<>(initializerClasses);
-        for (Class<? extends KBean> preInitializerClass : initializerClasses) {
-            JkPreInitKBeans preInitKBeans = preInitializerClass.getAnnotation(JkPreInitKBeans.class);
-            if (preInitKBeans != null) {
-                Arrays.stream(preInitKBeans.value()).forEach(extraInitializerClass -> {
-                    if (!result.contains(extraInitializerClass)) {
-                        JkLog.debug("Add pre-initializer class %s ", extraInitializerClass.getName());
-                        result.add(extraInitializerClass);
-                    }
-                });
-            }
-
-        }
-        if (result.size() != initializerClasses.size()) {
-            return findPreInitializerClasses(result);  // find the classes recursively
-        }
-        return result;
+    private static String methodName(Method method) {
+        return method.getDeclaringClass().getName() + "." + method.getName();
     }
 
 }

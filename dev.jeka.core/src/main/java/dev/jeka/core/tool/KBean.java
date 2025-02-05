@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -66,32 +67,25 @@ public abstract class KBean {
     }
 
     /**
-     * This method is called by JeKa engine, once all the KBeans present in the runbase has been initialised.
-     * Use this method if this KBean reads other KBean configurations.xx
-     */
-    protected void postInit() {
-    }
-
-    /**
      * Returns the base directory of the project. In single projects, base dir = working dir.
      * When working in multi-project (aka multi-module project), the base dir will be
      * the sub-project base directory.
      */
-    public Path getBaseDir() {
+    public final Path getBaseDir() {
         return runbase.getBaseDir();
     }
 
     /**
      * Resolves the given relative path against the base directory of the project.
      */
-    public Path getBasePath(String relativePath) {
+    public final Path getBasePath(String relativePath) {
         return getBaseDir().resolve(relativePath);
     }
 
     /**
      * Returns the name of the folder which stands for the project base directory.
      */
-    public String getBaseDirName() {
+    public final String getBaseDirName() {
         String result = getBaseDir().getFileName().toString();
         return result.isEmpty() ? getBaseDir().toAbsolutePath().getFileName().toString() : result;
     }
@@ -99,35 +93,35 @@ public abstract class KBean {
     /**
      * Returns the output directory where all the final and intermediate artifacts are generated.
      */
-    public Path getOutputDir() {
+    public final Path getOutputDir() {
         return getBaseDir().resolve(JkConstants.OUTPUT_PATH);
     }
 
     /**
      * Refer to the KBeans coming from other sub-runbase, that has been imported in this KBean.
      */
-    public JkImportedKBeans getImportedKBeans() {
+    public final JkImportedKBeans getImportedKBeans() {
         return importedKBeans;
     }
 
     /**
      * Returns the {@link JkRunbase} where this KBean has been instantiated.
      */
-    public JkRunbase getRunbase() {
+    public final JkRunbase getRunbase() {
         return runbase;
     }
 
     /**
      * @see JkRunbase#load(Class)
      */
-    public <T extends KBean> T load(Class<T> beanClass) {
+    public final <T extends KBean> T load(Class<T> beanClass) {
         return runbase.load(beanClass);
     }
 
     /**
      * @see JkRunbase#find(Class)
      */
-    public <T extends KBean> Optional<T> find(Class<T> beanClass){
+    public final <T extends KBean> Optional<T> find(Class<T> beanClass){
         return runbase.find(beanClass);
     }
 

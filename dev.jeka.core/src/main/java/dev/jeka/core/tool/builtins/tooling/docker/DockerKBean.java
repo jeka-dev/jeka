@@ -29,6 +29,8 @@ import dev.jeka.core.api.tooling.docker.JkDockerNativeBuild;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkRequire;
+import dev.jeka.core.tool.JkRunbase;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
@@ -73,14 +75,9 @@ public final class DockerKBean extends KBean {
 
     private final JkConsumers<JkDockerNativeBuild> nativeImageCustomizer = JkConsumers.of();
 
-    /**
-     * Computes the name of the Docker image based on the specified project.
-     *
-     * @param buildable The JkProject ok baseKbean instance containing the module ID, version, and base directory.
-     * @return The computed image name.
-     */
-    public static String computeImageName(JkBuildable buildable) {
-        return computeImageName(buildable.getModuleId(), buildable.getVersion(), buildable.getBaseDir());
+    @JkRequire
+    private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
+        return runbase.getBuildableKBeanClass();
     }
 
     @JkDoc("Builds Docker image in local registry.")
@@ -125,6 +122,16 @@ public final class DockerKBean extends KBean {
         String info = nativeDockerBuild(buildable).renderInfo(); // May trigger a compilation to find the main class
         JkLog.endTask();
         JkLog.info(info);
+    }
+
+    /**
+     * Computes the name of the Docker image based on the specified project.
+     *
+     * @param buildable The JkProject ok baseKbean instance containing the module ID, version, and base directory.
+     * @return The computed image name.
+     */
+    public static String computeImageName(JkBuildable buildable) {
+        return computeImageName(buildable.getModuleId(), buildable.getVersion(), buildable.getBaseDir());
     }
 
     /**

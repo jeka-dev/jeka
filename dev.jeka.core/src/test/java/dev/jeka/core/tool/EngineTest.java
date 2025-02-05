@@ -84,7 +84,7 @@ public class EngineTest {
         public static class Options {
             public String foo = "";
 
-            @JkInjectProperty("PATH")
+            @JkPropValue("PATH")
             public String path;
         }
 

@@ -109,6 +109,16 @@ final class SourceParser {
             return;
         }
 
+        // Handle JkInject
+        annotationParser = new AnnotationParser(line, JkInject.class);
+        if (annotationParser.isMatching()) {
+            String value = annotationParser.readUniqueStringValue();
+            if (!JkUtilsString.isBlank(value) && !".".equals(value)) {
+                info.importedBaseDirs.add(baseDir.resolve(value));
+            }
+            return;
+        }
+
         // Handle JkInjectCompileOption
         annotationParser = new AnnotationParser(line, JkInjectCompileOption.class);
         if (annotationParser.isMatching()) {

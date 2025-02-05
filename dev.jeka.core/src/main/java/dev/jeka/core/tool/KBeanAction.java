@@ -159,22 +159,12 @@ class KBeanAction implements Comparable<KBeanAction> {
         List<Class<? extends KBean>> findInvolvedKBeanClasses() {
             return kBeanActions.stream()
                     .map(action -> action.beanClass)
+                    .distinct()
                     .collect(Collectors.toList());
         }
 
         void addAll(List<KBeanAction> kBeanActions) {
             kBeanActions.forEach(this::add);
-        }
-
-        void addInitBean(Class<? extends KBean> inintKBeanClass) {
-            KBeanAction present = kBeanActions.stream()
-                            .filter(action -> action.type == BEAN_INIT)
-                            .filter(action -> action.beanClass.equals(inintKBeanClass))
-                            .findFirst().orElse(null);
-            if (present != null) {
-                kBeanActions.remove(present);
-            }
-            kBeanActions.add(0, KBeanAction.ofInit(inintKBeanClass));
         }
 
         void add(KBeanAction kBeanAction) {
@@ -235,6 +225,27 @@ class KBeanAction implements Comparable<KBeanAction> {
                 }
             }
             return columnText;
+        }
+
+        KBeanAction.Container withInitBean(Class<? extends KBean> inintKBeanClass) {
+            if (inintKBeanClass == null) {
+                return this;
+            }
+            KBeanAction.Container container = new KBeanAction.Container();
+            container.addAll(this.kBeanActions);
+            container.addInitBean(inintKBeanClass);
+            return container;
+        }
+
+        private void addInitBean(Class<? extends KBean> inintKBeanClass) {
+            KBeanAction present = kBeanActions.stream()
+                    .filter(action -> action.type == BEAN_INIT)
+                    .filter(action -> action.beanClass.equals(inintKBeanClass))
+                    .findFirst().orElse(null);
+            if (present != null) {
+                kBeanActions.remove(present);
+            }
+            kBeanActions.add(0, KBeanAction.ofInit(inintKBeanClass));
         }
 
 

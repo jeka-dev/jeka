@@ -34,6 +34,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -692,9 +693,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         JkLog.info("------------------------------------------------------------");
         JkLog.info(String.join("\n", tree.toStrings()));
         JkLog.info("");
-        JkLog.info("----------------------------------");
-        JkLog.info("Classpath for " + purpose + " : ");
-        JkLog.info("----------------------------------");
+        JkLog.info("");
+        String msg = "Classpath for " + purpose + " : ";
+        JkLog.info(msg);
+        JkLog.info(JkUtilsString.repeat("-", msg.length()));
         resolveResult.getFiles().getEntries().forEach(path -> JkLog.info(path.getFileName().toString()));
         JkLog.info("");
     }

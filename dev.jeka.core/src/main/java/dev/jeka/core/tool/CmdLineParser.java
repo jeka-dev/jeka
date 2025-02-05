@@ -34,13 +34,13 @@ class CmdLineParser {
      * The field injections declared after override ones declared before.
      * This means that command line overrides fields declared in jeka.properties
      */
-    public static KBeanAction.Container parse(CmdLineArgs args, Engine.KBeanResolution resolution) {
+    public static KBeanAction.Container parse(CmdLineArgs args, KBeanResolution resolution) {
         KBeanAction.Container container = new KBeanAction.Container();
         container.addAll(parseCmdLineArgs(args, resolution));
         return container;
     }
 
-    private static List<KBeanAction> parseCmdLineArgs(CmdLineArgs args, Engine.KBeanResolution resolution) {
+    private static List<KBeanAction> parseCmdLineArgs(CmdLineArgs args, KBeanResolution resolution) {
         return args.splitByKbeanContext().stream()
                 .flatMap(scopedArgs -> createFromScopedArgs(scopedArgs, resolution, "cmd line").stream())
                 .collect(Collectors.toList());
@@ -49,14 +49,14 @@ class CmdLineParser {
     /*
      * Scoped args contains only arguments scoped to a unique KBean
      */
-    private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, Engine.KBeanResolution resolution,
+    private static List<KBeanAction> createFromScopedArgs(CmdLineArgs args, KBeanResolution resolution,
                                                           String source) {
 
         if (args.isEmpty()) {
             return Collections.emptyList();
         }
         String kbeanName = args.findKbeanName();
-        String kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(resolution.defaultKbeanClassname);
+        String kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(resolution.defaultKbeanClassName);
         final String[] methodOrFieldArgs = args.trunkKBeanRef().get();
 
         if (kbeanClassName == null) {

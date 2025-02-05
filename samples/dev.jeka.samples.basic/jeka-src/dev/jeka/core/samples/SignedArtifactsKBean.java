@@ -8,9 +8,7 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectProperty;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
@@ -38,10 +36,10 @@ public class SignedArtifactsKBean extends KBean {
 
     JkMavenPublication mavenPublication;
 
-    @JkInjectProperty("OSSRH_USER")
+    @JkPropValue("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
 
-    @JkInjectProperty("OSSRH_PWD")
+    @JkPropValue("OSSRH_PWD")
     public String ossrhPwd;
 
     // A dummy local repository for repeatable run purpose
@@ -55,31 +53,31 @@ public class SignedArtifactsKBean extends KBean {
 
     public String secringPassword = "jeka-pwd";  // Normally injected from command line
 
-    protected void init() {
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.flatFacade.dependencies.compile
                 .add(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"));
         project.flatFacade.dependencies.test
                 .add(SimpleProjectKBean.JUNIT5);
+    }
 
-        mavenPublication = load(MavenKBean.class).getMavenPublication();
-        mavenPublication
-                .setModuleId("dev.jeka.core:samples-signedArtifacts")
-                .setVersion("1.3.1")
-                .setDefaultSigner(JkGpgSigner.ofSecretRing(secringPath, secringPassword, ""))
-                .pomMetadata
+    @JkPostInit
+    private void postInit(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(mavenPublication -> {
+            mavenPublication
+                    .setModuleId("dev.jeka.core:samples-signedArtifacts")
+                    .setVersion("1.3.1")
+                    .setDefaultSigner(JkGpgSigner.ofSecretRing(secringPath, secringPassword, ""))
+                    .pomMetadata
                         .setProjectName("my project")
                         .setProjectDescription("My description")
                         .setProjectUrl("https://github.com/jerkar/jeka/samples")
                         .setScmConnection("https://github.com/jerkar/sample.git")
                         .addApache2License()
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
-        configForLocalRepo(mavenPublication);
-    }
-
-    private void configForOssrh(JkMavenPublication publication) {
-        JkFileSigner signer = JkGpgSigner.ofSecretRing(secringPath, secringPassword, "");
-        publication.setRepos(JkRepoSet.ofOssrhSnapshotAndRelease(ossrhUser, ossrhPwd, signer));
+            configForLocalRepo(mavenPublication);
+        });
     }
 
     private void configForLocalRepo(JkMavenPublication publication) {

@@ -10,6 +10,7 @@ import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
@@ -26,15 +27,17 @@ import java.time.LocalDateTime;
 @JkDep("org.eclipse.jdt:ecj:3.25.0")  // Inject Eclipse compiler that we are using in this build
 class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
 
-    IntellijKBean intelliKBean = load(IntellijKBean.class)
-            .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
-            .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
-
     JkProject project = project();
 
     JkMavenPublication mavenPublication = mavenPublication(project);
 
     JkIvyPublication ivyPublication = ivyPublication(project);
+
+    @JkPostInit
+    private void postInt(IntellijKBean intellijKBean) {
+        intellijKBean.replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
+                .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    }
 
     @JkDoc("Clean output and create the bin jar for this project")
     public void cleanPack() {
@@ -100,8 +103,6 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
         project
             .testing
                 .testSelection
-                    .addIncludeStandardPatterns()
-                    // ...
                     .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN);
 
         // Control on test process
@@ -112,7 +113,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                     // ...
                     .engineBehavior
                         //...
-                        .setProgressDisplayer(JkTestProcessor.JkProgressOutputStyle.TREE);
+                        .setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
         project
             .packaging
                 .javadocProcessor.addOptions("--enable-preview");
@@ -127,7 +128,8 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
     }
 
     private JkMavenPublication mavenPublication(JkProject project) {
-        JkMavenPublication mavenPublication = JkProjectPublications.mavenPublication(project);
+
+        JkMavenPublication mavenPublication = JkMavenPublication.of(project.asBuildable());
         mavenPublication
                 .setModuleId("dev.jeka.examples:my-sample")
                 .setVersion("1.0.0")
@@ -154,17 +156,15 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
                 //... similar to Maven
     }
 
-
-
-    public static class MySourceGenerator extends JkProjectSourceGenerator {
+    public static class MySourceGenerator implements JkProjectSourceGenerator {
 
         @Override
-        protected String getDirName() {
+        public String getDirName() {
             return "my-generated-prop-resources";
         }
 
         @Override
-        protected void generate(JkProject project, Path generatedSourceDir) {
+        public void generate(JkProject project, Path generatedSourceDir) {
             Path resources = generatedSourceDir.resolve("org/example/my-resources.properties");
             JkUtilsPath.createDirectories(resources.getParent());
             JkUtilsPath.write(resources, (

@@ -24,6 +24,7 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkException;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -71,10 +72,14 @@ public class NodeJsKBean extends KBean {
     @JkDoc("Optionally configures the `project` KBean in order it includes building of a JS application.\n")
     @Override
     protected void init() {
-        if (configureProject) {
-            configureProject();
-        }
         getRunbase().registerCLeanAction(CLEAN_ACTION, this::cleanBuildDir);
+    }
+
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        if (configureProject) {
+            configureProject(projectKBean.project);
+        }
     }
 
     @JkDoc("Builds the JS project by running the specified build commands. " +
@@ -117,6 +122,7 @@ public class NodeJsKBean extends KBean {
         if (nodeJsProject != null) {
             text    .add("Build Commands", String.join(", ", nodeJsProject.getBuildCommands()))
                     .add("Test Commands", String.join(", ", nodeJsProject.getTestCommands()))
+                    .add("Build dir", this.getBaseDir().relativize(nodeJsProject.getBuildDir()))
                     .add("Deploy action?", Boolean.toString(nodeJsProject.getPackAction() != null));
         }
         System.out.println(text);
@@ -137,6 +143,17 @@ public class NodeJsKBean extends KBean {
      */
     public JkNodeJsProject configureProject() {
         JkProject project = load(ProjectKBean.class).project;
+        return configureProject(project);
+    }
+
+    /**
+     * Retrieves the Node.js project associated with this configuration.
+     */
+    public JkNodeJsProject getNodeJsProject() {
+        return nodeJsProject;
+    }
+
+    private JkNodeJsProject configureProject(JkProject project) {
         JkNodeJs nodeJs = JkNodeJs.ofVersion(this.version);
         Path baseJsDirPath = getBasePath(appDir);
         this.nodeJsProject = JkNodeJsProject.of(nodeJs, baseJsDirPath, buildDir)
@@ -147,13 +164,6 @@ public class NodeJsKBean extends KBean {
         }
         this.nodeJsProject.registerIn(project);
         return this.nodeJsProject;
-    }
-
-    /**
-     * Retrieves the Node.js project associated with this configuration.
-     */
-    public JkNodeJsProject getNodeJsProject() {
-        return nodeJsProject;
     }
 
     private void cleanBuildDir() {

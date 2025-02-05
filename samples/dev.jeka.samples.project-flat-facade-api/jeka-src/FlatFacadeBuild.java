@@ -21,6 +21,7 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.*;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
@@ -36,10 +37,21 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
     @JkDoc("Sets if the Integration Tests should be run.")
     public boolean runIT = true;
 
-    FlatFacadeBuild() {
-        load(IntellijKBean.class)
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean
                 .replaceLibByModule("dev.jeka.jacoco-plugin.jar", "dev.jeka.plugins.jacoco")
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    }
+
+    @JkDoc("Clean and pack")
+    public void cleanPack() {
+        project().clean().pack();
+    }
+
+    @Override
+    public JkIdeSupport getJavaIdeSupport() {
+        return project().getJavaIdeSupport();
     }
 
     private JkProject project() {
@@ -56,7 +68,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                 // Control on produced artifacts
                 .setMainArtifactJarType(JkProjectPackaging.JarType.FAT)
 
-                .addTestIncludeFilterSuffixedBy("IT", runIT)
+                .addTestIncludeSuffixIf(runIT, "IT")
 
                 // Control on published artifact and versions
                 .setModuleId("org.jerkar:examples-java-flat-facade")
@@ -66,7 +78,7 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
         project.flatFacade
                 .addCompileOnlyDeps("javax.servlet:javax.servlet-api:4.0.1");
-        project.flatFacade.compileDependencies
+        project.flatFacade.dependencies.compile
                     .add("com.google.code.gson:gson:2.10.1")
                     .add("log4j:log4j:1.2.17")
                     .addWithExclusions("com.google.guava:guava:22.0",
@@ -78,24 +90,16 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
                     .add("com.fasterxml.jackson:jackson-bom::pom:2.16.0")
                     .add("com.fasterxml.jackson.core:jackson-core", JkTransitivity.NONE)
                     .add("com.fasterxml.jackson.core:jackson-databind", JkTransitivity.RUNTIME);
-        project.flatFacade.runtimeDependencies
+        project.flatFacade.dependencies.runtime
                     .add(Hint.before("com.github.djeang:vincer-dom"),
                             "commons-codec:commons-codec:1.16.0")
                     .remove("org.projectlombok:lombok")
                     .move("com.fasterxml.jackson.core:jackson-databind", Hint.first());
-        project.flatFacade.testDependencies
+        project.flatFacade.dependencies.test
                     .add(JkPopularLibs.JUNIT_5.toCoordinate("5.8.1"));
         return project;
     }
 
-    @JkDoc("Clean and pack")
-    public void cleanPack() {
-        project().clean().pack();
-    }
 
-    @Override
-    public JkIdeSupport getJavaIdeSupport() {
-        return project().getJavaIdeSupport();
-    }
 }
 

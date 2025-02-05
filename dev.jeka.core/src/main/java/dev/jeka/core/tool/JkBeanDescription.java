@@ -403,8 +403,14 @@ public final class JkBeanDescription {
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
             final String descr = getDescr(jkDoc);
             final Class<?> type = field.getType();
-            final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
-            final String propertyName = injectProperty != null ? injectProperty.value() : null;
+            String propertyName = null;
+            final JkPropValue propValue = field.getAnnotation(JkPropValue.class);
+            if (propValue != null) {
+                propertyName = propValue.value();
+            } else {
+                final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
+                propertyName = injectProperty != null ? injectProperty.value() : null;
+            }
             return new BeanField(
                     field,
                     name,
@@ -436,8 +442,14 @@ public final class JkBeanDescription {
             final Class<?> type = field.getType();
             Object instance = runbase.load(beanClass);
             Object defaultValue = value(instance, name);
-            final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
-            final String propertyName = injectProperty != null ? injectProperty.value() : null;
+            String propertyName;
+            final JkPropValue propValue = field.getAnnotation(JkPropValue.class);
+            if (propValue != null) {
+                propertyName = propValue.value();
+            } else {
+                final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
+                propertyName = injectProperty != null ? injectProperty.value() : null;
+            }
             return new BeanField(
                     field,
                     name,

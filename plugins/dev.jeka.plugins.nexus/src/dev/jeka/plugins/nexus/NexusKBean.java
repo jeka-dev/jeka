@@ -21,6 +21,7 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
@@ -37,14 +38,13 @@ public class NexusKBean extends KBean {
 
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
-    @Override
-    protected void init() {
-        MavenKBean mavenKBean = getRunbase().find(MavenKBean.class).orElse(null);
-        if (mavenKBean == null) {
-            JkLog.verbose("Nexus KBean cannot find MavenPublication KBean in runbase. Can't configure any repo.");
-        } else {
-            configureMavenPublication(mavenKBean.getMavenPublication());
-        }
+    @JkPostInit
+    private void postInit(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(mavenPublication -> {
+            JkNexusRepos nexusRepos = getJkNexusRepos(mavenPublication);
+            nexusRepos.setCloseTimeout(closeTimeout);
+            nexusRepos.autoReleaseAfterPublication(mavenPublication);
+        });
     }
 
     @JkDoc("Closes and releases the nexus repositories used by project KBean to publish artifacts.")
@@ -67,12 +67,6 @@ public class NexusKBean extends KBean {
     public NexusKBean configureNexusRepo(Consumer<JkNexusRepos> nexusReposConfigurator) {
         this.nexusReposConfigurators.append(nexusReposConfigurator);
         return this;
-    }
-
-    private void configureMavenPublication(JkMavenPublication mavenPublication) {
-        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenPublication);
-        nexusRepos.setCloseTimeout(closeTimeout);
-        nexusRepos.autoReleaseAfterPublication(mavenPublication);
     }
 
     private String[] profiles() {

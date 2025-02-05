@@ -23,9 +23,7 @@ import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkException;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,16 +60,17 @@ public class NativeKBean extends KBean {
     @JkDoc("If true, all resources will be included in the native image.")
     public boolean includeAllResources;
 
+    @JkRequire
+    private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
+        return runbase.getBuildableKBeanClass();
+    }
+
     @JkDoc("Creates a native image from the project's main artifact jar." +
             "\nBuilds the artifact first if none exists.")
     public void compile() {
-        JkBuildable buildable = getRunbase().findBuildable();
-        if (buildable != null) {
-            buildable.compileIfNeeded();
-            build(buildable);
-        } else {
-            throw new JkException("No project found in Runbase. Native compilation not yet implemented for base kbean.");
-        }
+        JkBuildable buildable = getRunbase().getBuildable();
+        buildable.compileIfNeeded();
+        build(buildable);
     }
 
     /**

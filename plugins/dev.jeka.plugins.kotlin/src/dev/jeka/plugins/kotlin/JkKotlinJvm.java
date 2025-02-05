@@ -84,20 +84,25 @@ public class JkKotlinJvm {
     public void configure(JkProject project, String kotlinSourceDir, String kotlinTestSourceDir) {
         JkProjectCompilation prodCompile = project.compilation;
         JkProjectCompilation testCompile = project.testing.compilation;
-        prodCompile
-                .dependencies.addVersionProvider(kotlinVersionProvider());
-        prodCompile.preCompileActions
-                    .replaceOrInsertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileKotlinInSpinner(project, kotlinSourceDir));
-        testCompile
-                .preCompileActions
-                    .replaceOrInsertBefore(KOTLIN_JVM_SOURCES_COMPILE_ACTION, JAVA_SOURCES_COMPILE_ACTION,
-                        () -> compileTestKotlinInSpinner(project, kotlinTestSourceDir));
+
+        prodCompile.dependencies.addVersionProvider(kotlinVersionProvider());
+
+        prodCompile.preCompileActions.replaceOrInsertBefore(
+                    KOTLIN_JVM_SOURCES_COMPILE_ACTION,
+                    JAVA_SOURCES_COMPILE_ACTION,
+                    () -> compileKotlinInSpinner(project, kotlinSourceDir));
+
+        testCompile.preCompileActions.replaceOrInsertBefore(
+                KOTLIN_JVM_SOURCES_COMPILE_ACTION,
+                JAVA_SOURCES_COMPILE_ACTION,
+                () -> compileTestKotlinInSpinner(project, kotlinTestSourceDir));
 
         JkPathTree javaInKotlinDir = JkPathTree.of(project.getBaseDir().resolve(kotlinSourceDir));
         JkPathTree javaInKotlinTestDir = JkPathTree.of(project.getBaseDir().resolve(kotlinTestSourceDir));
+
         prodCompile.layout.setSources(javaInKotlinDir);
         testCompile.layout.setSources(javaInKotlinTestDir);
+
         if (addStdlib) {
             prodCompile.dependencies.modify(this::addStdLibsToProdDeps);
             testCompile.dependencies.modify(this::addStdLibsToTestDeps);

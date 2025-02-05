@@ -5,6 +5,7 @@ import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -12,15 +13,15 @@ import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 class SonarqubeBuild extends KBean {
 
-    private final ProjectKBean projectKBean = load(ProjectKBean.class);
-
-    SonarqubeBuild() {
-        load(IntellijKBean.class)
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
                 .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
     }
 
-    protected void init() {
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
                 .setModuleId("dev.jeka:sonarqube-plugin")
@@ -31,23 +32,15 @@ class SonarqubeBuild extends KBean {
                     .add(JkLocator.getJekaJarPath());
         project.flatFacade.dependencies.runtime
                         .remove(JkLocator.getJekaJarPath());
-        load(MavenKBean.class).getMavenPublication()
-                    .pomMetadata
-                        .setProjectName("Jeka plugin for Sonarqube")
-                        .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
-                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
-    public void cleanPack() {
-        projectKBean.clean();
-        projectKBean.pack();
+    @JkPostInit
+    private void postInit(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+                .pomMetadata
+                .setProjectName("Jeka plugin for Sonarqube")
+                .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
+                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
     }
-
-    public static void main(String[] args) {
-        SonarqubeBuild build = JkInit.kbean(SonarqubeBuild.class);
-        build.cleanPack();
-        build.load(MavenKBean.class).publishLocal();
-    }
-
 
 }

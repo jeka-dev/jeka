@@ -7,6 +7,8 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkInit;
+import dev.jeka.core.tool.JkInject;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -21,14 +23,34 @@ import java.nio.file.Path;
  */
 public class SimpleWarKBean extends KBean {
 
-    final JkProject project = load(ProjectKBean.class).project;
-
     public String port = "8080";
 
     public String jettyRunnerVersion = "9.4.28.v20200408";
 
-    @Override
-    protected void init() {
+    @JkInject
+    ProjectKBean projectKBean;
+
+    public void cleanPackRun() {
+        JkProject project = projectKBean.project;
+        project.clean().pack();
+        JkMavenPublication.of(project.asBuildable()).publishLocal();
+    }
+
+    public void check() {
+        runWarWithJetty();
+    }
+
+    public void runWarWithJetty() {
+        projectKBean.pack();
+        Path jettyRunner = JkRepoProperties.of(getRunbase().getProperties()).getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
+                + jettyRunnerVersion);
+        JkJavaProcess.ofJavaJar(jettyRunner, null)
+                .addParams(projectKBean.project.artifactLocator.getMainArtifactPath().toString(), "--port", port).exec();
+    }
+
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
         project.setModuleId("dev.jeka.samples:war-project")
                 .setVersion("1.0-SNAPSHOT")
                 .setJvmTargetVersion(JkJavaVersion.V8)
@@ -41,23 +63,6 @@ public class SimpleWarKBean extends KBean {
         project.flatFacade.dependencies.runtime
                 .remove("javax.servlet:javax.servlet-api");
         JkJ2eWarProjectAdapter.of().configure(project);
-    }
-
-    public void cleanPackRun() {
-        project.clean().pack();
-        JkMavenPublication.of(project.asBuildable()).publishLocal();
-    }
-
-    public void check() {
-        runWarWithJetty();
-    }
-
-    public void runWarWithJetty() {
-        project.pack();
-        Path jettyRunner = JkRepoProperties.of(getRunbase().getProperties()).getDownloadRepos().get("org.eclipse.jetty:jetty-runner:"
-                + jettyRunnerVersion);
-        JkJavaProcess.ofJavaJar(jettyRunner, null)
-                .addParams(project.artifactLocator.getMainArtifactPath().toString(), "--port", port).exec();
     }
     
     public static void main(String[] args) {

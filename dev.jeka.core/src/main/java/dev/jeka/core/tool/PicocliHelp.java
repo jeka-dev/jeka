@@ -52,7 +52,7 @@ class PicocliHelp {
     }
 
     static void printCmdHelp(JkPathSequence classpath,
-                             Engine.KBeanResolution kbeanResolution,
+                             KBeanResolution kbeanResolution,
                              JkProperties props,
                              PrintStream printStream) {
         cmdHelp(classpath, kbeanResolution, props)
@@ -75,10 +75,10 @@ class PicocliHelp {
 
     private static CommandLine cmdHelp(
             JkPathSequence classpath,
-            Engine.KBeanResolution kbeanResolution,
+            KBeanResolution kbeanResolution,
             JkProperties props) {
 
-        String defaultKBeanClassName = kbeanResolution.defaultKbeanClassname;
+        String defaultKBeanClassName = kbeanResolution.defaultKbeanClassName;
 
         ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
 

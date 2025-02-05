@@ -40,14 +40,12 @@ import java.lang.annotation.Target;
  *     ...
  * </code></pre>
  *
- * @deprecated Use @{@link JkInject} instead
- *
+ * 
  * @author Jerome Angibaud
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
-@Deprecated
-public @interface JkInjectRunbase {
+public @interface JkInject {
 
     /** Dependee project relative path */
     String value() default "";

@@ -16,8 +16,10 @@
 
 package dev.jeka.core.api.function;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -56,6 +58,15 @@ public class JkConsumers<T> implements Consumer<T> {
     }
 
     /**
+     * Appends the specified {@code JkConsumers} instance to the current chain of consumers.
+     * The consumers from the provided {@code other} instance are added to the end of the existing chain.
+     */
+    public JkConsumers<T> append(JkConsumers other) {
+        this.entries.addAll(other.entries);
+        return this;
+    }
+
+    /**
      * Chains this underlying {@link Consumer} with the specified one. The specified element will
      * be executed at the beginning.
      */
@@ -67,7 +78,7 @@ public class JkConsumers<T> implements Consumer<T> {
     /**
      * Returns the name of the {@link Runnable}s, in the order of execution chain.
      */
-    public List<String> getRunnableNames() {
+    public List<String> getConsumerNames() {
         return Entry.sort(entries).stream()
                 .map(entry -> entry.name)
                 .collect(Collectors.toList());
@@ -80,6 +91,18 @@ public class JkConsumers<T> implements Consumer<T> {
 
     @Override
     public String toString() {
-        return getRunnableNames().toString();
+        return getConsumerNames().toString();
+    }
+
+    public boolean isEmpty() {
+        return entries.isEmpty();
+    }
+
+    public Map<String, Consumer<T>> toMap() {
+        LinkedHashMap<String, Consumer<T>> map = new LinkedHashMap<>();
+        for (Entry<Consumer<T>> entry : entries) {
+            map.put(entry.name, entry.runnable);
+        }
+        return map;
     }
 }

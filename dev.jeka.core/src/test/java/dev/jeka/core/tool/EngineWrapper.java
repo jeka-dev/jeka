@@ -58,12 +58,11 @@ class EngineWrapper {
         PicocliMainCommand mainCommand = new PicocliMainCommand();
         CommandLine cmdLine = new CommandLine(mainCommand);
         cmdLine.parseArgs(cmdArgs.withOptionsOnly().get());
-        LogSettings logSettings = mainCommand.logSettings();
-        BehaviorSettings behaviorSettings = mainCommand.behaviorSettings();
+        LogSettings.INSTANCE = mainCommand.logSettings();
+        BehaviorSettings.INSTANCE = mainCommand.behaviorSettings();
 
-        engine = Engine.of(baseDir, false, JkRepoSet.ofLocal(),
-                JkDependencySet.of(), logSettings, behaviorSettings);
-        Engine.KBeanResolution kBeanResolution = kBeanResolution(engine, jekaSrcKBeanClasses);
+        engine = Engine.of(baseDir, JkRepoSet.ofLocal(), JkDependencySet.of());
+        KBeanResolution kBeanResolution = kBeanResolution(engine, jekaSrcKBeanClasses);
         run(engine, kBeanResolution, props, args);
         return this;
     }
@@ -81,7 +80,7 @@ class EngineWrapper {
         return engine.getRunbase().load(kbeanClass);
     }
 
-    private void run(Engine engine, Engine.KBeanResolution kBeanResolution, JkProperties props, String[] args) {
+    private void run(Engine engine, KBeanResolution kBeanResolution, JkProperties props, String[] args) {
         engine.resolveClassPaths();
         engine.setKBeanResolution(kBeanResolution);
         KBeanAction.Container cmdLineActions = parse(args, props, kBeanResolution);
@@ -95,8 +94,8 @@ class EngineWrapper {
     }
 
     @SafeVarargs
-    private static Engine.KBeanResolution kBeanResolution(Engine engine,
-                                                          Class<? extends KBean>... jekaSrcKBeanClasses) {
+    private static KBeanResolution kBeanResolution(Engine engine,
+                                                   Class<? extends KBean>... jekaSrcKBeanClasses) {
         List<Class<? extends KBean>> allKBeanClasses = new LinkedList<>();
         allKBeanClasses.add(BaseKBean.class);
         allKBeanClasses.add(ProjectKBean.class);
@@ -109,14 +108,14 @@ class EngineWrapper {
         List<String> allKBeans = allKBeanClasses.stream().map(Class::getName).collect(Collectors.toList());
         List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
 
-        Engine.DefaultAndInitKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
+        DefaultAndInitKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
 
-        return new Engine.KBeanResolution(
+        return new KBeanResolution(
                 allKBeans, jekaSrcKBeans, defaultAndInitKBean.initKbeanClassName,
                 defaultAndInitKBean.defaultKBeanClassName);
     }
 
-    private KBeanAction.Container parse(String[] args, JkProperties props, Engine.KBeanResolution kBeanResolution) {
+    private KBeanAction.Container parse(String[] args, JkProperties props, KBeanResolution kBeanResolution) {
         return CmdLineParser.parse(new CmdLineArgs(args), kBeanResolution);
     }
 }

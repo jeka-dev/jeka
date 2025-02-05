@@ -27,6 +27,7 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkBuildable;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkProjectFlatFacade;
 import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;

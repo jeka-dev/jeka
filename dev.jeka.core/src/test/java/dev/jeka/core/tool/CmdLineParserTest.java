@@ -58,10 +58,10 @@ public class CmdLineParserTest {
         return CmdLineParser.parse(cmdArgs, kBeanResolution());
     }
 
-    private static Engine.KBeanResolution kBeanResolution() {
+    private static KBeanResolution kBeanResolution() {
         List<String> kbeanClasses = JkBeanDescription.STANDARD_KBEAN_CLASSES.stream()
                 .map(Class::getName).collect(Collectors.toList());
-        return new Engine.KBeanResolution(
+        return new KBeanResolution(
                 kbeanClasses,
                 Collections.emptyList(),
                 null,

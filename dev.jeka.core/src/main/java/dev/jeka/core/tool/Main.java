@@ -74,43 +74,38 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = dev.jeka.core.tool.JkRunbase.constructProperties(baseDir);
+        JkProperties props = JkRunbase.constructProperties(baseDir);
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
-
-        LogSettings logs = LogSettings.ofDefault();
 
         Engine engine = null;
 
         try {
 
-            // first, parse only options
+            // first, parse options only
             PicocliMainCommand mainCommand = new PicocliMainCommand();
             CommandLine commandLine = new CommandLine(CommandSpec.forAnnotatedObject(mainCommand));
             commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
-            logs = mainCommand.logSettings();
-            BehaviorSettings behavior = mainCommand.behaviorSettings();
+            LogSettings.INSTANCE = mainCommand.logSettings();
+            BehaviorSettings.INSTANCE = mainCommand.behaviorSettings();
             JkDependencySet dependencies = mainCommand.dependencies();
 
             // setup logging
-            setupLogging(logs, baseDir, interpolatedArgs.get());
+            setupLogging(baseDir, interpolatedArgs.get());
 
             // Instantiate the Engine
             JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
-            engine = Engine.of(baseDir, behavior.skipCompile,
-                    downloadRepos, dependencies, logs, behavior);
-            JkRunbase.setBehaviorSettings(behavior);
-            JkRunbase.setLogSettings(logs);
+            engine = Engine.of(baseDir, downloadRepos, dependencies);
 
             // Compile jeka-src and resolve the dependencies and kbeans
-            // Using rocket emoji cause issue cause it is caused on 2 char but when
+            // Using rocket emoji cause issue because it is caused on 2 chars, but when
             // erasing line, there is one excessive back-delete.
             JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
-            if (logs.runtimeInformation) {
+            if (LogSettings.INSTANCE.runtimeInformation) {
                 logRuntimeInfoBase(engine, props);
             }
 
             // Resolve KBeans
-            Engine.KBeanResolution kBeanResolution = engine.getKbeanResolution();
+            KBeanResolution kBeanResolution = engine.getKbeanResolution();
             Engine.ClasspathSetupResult classpathSetupResult = engine.getClasspathSetupResult();
             JkLog.debug("Found KBeans : %s" , kBeanResolution.allKbeans);
 
@@ -130,7 +125,7 @@ public class Main {
             }
 
             // Validate KBean properties
-            if (!behavior.forceMode) {
+            if (!BehaviorSettings.INSTANCE.forceMode) {
                 validateKBeanProps(props, kBeanResolution.allKbeans);
             }
 
@@ -139,10 +134,7 @@ public class Main {
                     interpolatedArgs.withoutOptions(),
                     kBeanResolution);
 
-            // Prepend the init bean in action container
-            kBeanResolution.findInitBeanClass().ifPresent(actionContainer::addInitBean);
-
-            if (logs.runtimeInformation) {
+            if (LogSettings.INSTANCE.runtimeInformation) {
                 logRuntimeInfoEngineCommands(actionContainer);
             }
 
@@ -160,14 +152,14 @@ public class Main {
                 boolean success = performDocMdKBean(engine, docKbeanName);
                 System.exit(success ? 0 : 1);
             }
-            if (logs.runtimeInformation) {
+            if (LogSettings.INSTANCE.runtimeInformation) {
                 logRuntimeInfoRun(engine.getRunbase());
             }
 
             // Run
             engine.run();
 
-            logOutro(logs, startTime);
+            logOutro(startTime);
 
         } catch (CommandLine.ParameterException e) {
             JkBusyIndicator.stop();
@@ -180,12 +172,12 @@ public class Main {
                 suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka --help|@ to see available options");
             }
             commandLine.getErr().println(suggestTxt);
-            if (logs.stackTrace) {
+            if (LogSettings.INSTANCE.stackTrace) {
                 e.printStackTrace(commandLine.getErr());
             }
             System.exit(1);
         } catch (Throwable t) {
-            handleGenericThrowable(t, startTime, logs);
+            handleGenericThrowable(t, startTime);
             System.exit(1);
         }
         return engine.getRunbase();
@@ -235,7 +227,8 @@ public class Main {
 
     }
 
-    private static void setupLogging(LogSettings logSettings, Path baseDir, String[] cmdLine) {
+    private static void setupLogging(Path baseDir, String[] cmdLine) {
+        LogSettings logSettings = LogSettings.INSTANCE;
         JkLog.setLogOnlyOnStdErr(logSettings.logOnStderr);
         JkLog.setDecorator(logSettings.style);
 
@@ -268,7 +261,7 @@ public class Main {
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {
         JkLog.info(Jk2ColumnsText.of(18, 150)
                 .add("Init KBean", engine.resolveKBeans().initKBeanClassname)
-                .add("Default KBean", engine.resolveKBeans().defaultKbeanClassname)
+                .add("Default KBean", engine.resolveKBeans().defaultKbeanClassName)
                 .toString());
         JkLog.info("Properties         :");
         JkLog.info(props.toColumnText(30, 90, !JkLog.isVerbose())
@@ -297,13 +290,13 @@ public class Main {
         JkLog.info("");
     }
 
-    private static void logOutro(LogSettings logs, long start) {
-        if (logs.duration) {
+    private static void logOutro(long start) {
+        if (LogSettings.INSTANCE.duration) {
             displayDuration(start);
         }
     }
 
-    private static void handleGenericThrowable(Throwable t, long start, LogSettings logs) {
+    private static void handleGenericThrowable(Throwable t, long start) {
         JkBusyIndicator.stop();
         JkLog.restoreToInitialState();
         if (t.getMessage() != null) {
@@ -320,18 +313,18 @@ public class Main {
         System.err.println("If this originates from a bug, please report the issue at: " +
                 "https://github.com/jeka-dev/jeka/issues");
 
-        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails(logs)) {
-            printException(logs, t);
+        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails()) {
+            printException(t);
         }
     }
 
-    private static boolean shouldPrintExceptionDetails(LogSettings logs) {
-        return logs.verbose || logs.debug || logs.stackTrace;
+    private static boolean shouldPrintExceptionDetails() {
+        return LogSettings.INSTANCE.verbose || LogSettings.INSTANCE.debug || LogSettings.INSTANCE.stackTrace;
     }
 
-    private static void printException(LogSettings logs, Throwable e) {
+    private static void printException(Throwable e) {
         System.err.println();
-        if (logs.verbose || logs.stackTrace) {
+        if (LogSettings.INSTANCE.verbose || LogSettings.INSTANCE.stackTrace) {
             System.err.println("=============================== Stack Trace =============================================");
             e.printStackTrace(System.err);
             System.err.flush();
@@ -368,10 +361,10 @@ public class Main {
     }
 
    static boolean performDocKBean(Engine engine, String kbeanDoc) {
-        Engine.KBeanResolution kBeanResolution = engine.getKbeanResolution();
-        JkRunbase.setKBeanResolution(kBeanResolution);
-        boolean isDefaultKBean = "-default-".equals(kbeanDoc) && kBeanResolution.defaultKbeanClassname != null;
-        String kbean = isDefaultKBean ? kBeanResolution.defaultKbeanClassname : kbeanDoc;
+        KBeanResolution kBeanResolution = engine.getKbeanResolution();
+        engine.getRunbase().setKbeanResolution(kBeanResolution);
+        boolean isDefaultKBean = "-default-".equals(kbeanDoc) && kBeanResolution.defaultKbeanClassName != null;
+        String kbean = isDefaultKBean ? kBeanResolution.defaultKbeanClassName : kbeanDoc;
         boolean found = PicocliHelp.printKBeanHelp(
                 engine.resolveClassPaths().runClasspath,
                 kBeanResolution.allKbeans,
@@ -389,8 +382,8 @@ public class Main {
             System.err.println("You must specify a KBean name as in 'jeka project: --doc-md'.");
             return false;
         }
-        Engine.KBeanResolution kBeanResolution = engine.getKbeanResolution();
-        JkRunbase.setKBeanResolution(kBeanResolution);
+        KBeanResolution kBeanResolution = engine.getKbeanResolution();
+        engine.getRunbase().setKbeanResolution(kBeanResolution);
         String kbeanClassName = kBeanResolution.allKbeans.stream()
                 .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
                 .findFirst().orElse(null);

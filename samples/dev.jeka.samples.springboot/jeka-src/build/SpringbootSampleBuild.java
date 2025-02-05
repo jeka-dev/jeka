@@ -1,9 +1,7 @@
 package build;
 
 import dev.jeka.core.api.tooling.intellij.JkIml;
-import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkDep;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.JkSpringbootProject;
@@ -15,12 +13,15 @@ public class SpringbootSampleBuild extends KBean {
 
     public String aa;
 
-    ProjectKBean projectKBean = load(ProjectKBean.class);
+    @JkInjectRunbase
+    ProjectKBean projectKBean;
 
-    SpringbootKBean springbootKBean = load(SpringbootKBean.class);
+    @JkInjectRunbase
+    SpringbootKBean springbootKBean;
 
-    SpringbootSampleBuild() {
-        load(IntellijKBean.class)
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean
                 .replaceLibByModule("dev.jeka.springboot-plugin.jar", "dev.jeka.plugins.springboot")
                 .setModuleAttributes("dev.jeka.plugins.springboot", JkIml.Scope.COMPILE, null)
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
@@ -28,8 +29,8 @@ public class SpringbootSampleBuild extends KBean {
                 .setSuggestedJdk("17");
     }
 
-    @Override
-    protected void init() {
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
         projectKBean.project.compilation.dependencies
                 .add("org.springframework.boot:spring-boot-starter-web")
                 .add("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -45,7 +46,6 @@ public class SpringbootSampleBuild extends KBean {
                 .configure()
                 .includeParentBom("3.3.4");
     }
-
 
     public void cleanPack() {
         projectKBean.clean();

@@ -1,9 +1,7 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkDep;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -34,19 +32,17 @@ import java.nio.file.Path;
 @JkDep("org.junit.platform:junit-platform-launcher:1.8.2")
 class Junit5Build extends KBean {
 
-    final ProjectKBean projectKBean = load(ProjectKBean.class);
+    @JkInject
+    private ProjectKBean projectKBean;
 
-    Junit5Build() {
-        load(IntellijKBean.class)
+    @JkPostInit
+    protected void postInit(IntellijKBean intellijKBean) {
+        intellijKBean
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
     }
 
-    /*
-     * Configures plugins to be bound to this command class. When this method is called, option
-     * fields have already been injected from command line.
-     */
-    @Override
-    protected void init() {
+    @JkPostInit
+    protected void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project
             .testing

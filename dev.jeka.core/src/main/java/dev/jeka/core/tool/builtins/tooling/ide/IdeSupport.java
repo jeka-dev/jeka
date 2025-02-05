@@ -20,13 +20,16 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkRunbase;
+import dev.jeka.core.tool.KBean;
 
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;

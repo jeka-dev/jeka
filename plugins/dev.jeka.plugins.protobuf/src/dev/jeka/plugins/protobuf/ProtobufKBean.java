@@ -19,6 +19,7 @@ package dev.jeka.plugins.protobuf;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -40,14 +41,14 @@ public class ProtobufKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "com.google.protobuf:protobuf-java:")
     public String protobufVersion = "3.21.12";
 
-    protected void init() {
-        JkProject project = load(ProjectKBean.class).project;
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
         JkProtobuf.of()
                 .setProtoPath(this.protoPath)
                 .setExtraProtocOptions(this.extraProtocOptions)
                 .setProtocVersion(this.protocVersion)
                 .setProtobufVersion(this.protobufVersion)
-                .configure(project);
+                .configure(projectKBean.project);
     }
 
 }

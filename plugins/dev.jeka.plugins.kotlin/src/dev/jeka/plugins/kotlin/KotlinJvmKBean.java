@@ -19,6 +19,7 @@ package dev.jeka.plugins.kotlin;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -52,11 +53,10 @@ public class KotlinJvmKBean extends KBean {
 
     private JkKotlinJvm kotlinJvmProject;
 
-    @Override
-    protected void init() {
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
         if (configureProject) {
-            JkProject project = load(ProjectKBean.class).project;
-            getKotlinJvm().configure(project, sourceDir, testSourceDir);
+            getKotlinJvm().configure(projectKBean.project, sourceDir, testSourceDir);
         }
     }
 

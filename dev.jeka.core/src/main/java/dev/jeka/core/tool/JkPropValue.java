@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2025  the original author or authors.
+ * Copyright 2014-2024  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,16 @@
 package dev.jeka.core.tool;
 
 import java.lang.annotation.*;
-import java.util.Arrays;
 
+/**
+ * Injects the environment variable value if such a one exists and an option as not been already injected on.
+ */
 @Retention(RetentionPolicy.RUNTIME)
-@Target( ElementType.TYPE )
-public @interface JkPreInitKBeans {
+@Target({ ElementType.FIELD })
+@Inherited
+public @interface JkPropValue {
 
-    Class<? extends KBean>[] value();
+    String value() default "";
+
+
 }

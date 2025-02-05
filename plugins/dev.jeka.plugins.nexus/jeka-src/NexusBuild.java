@@ -19,6 +19,7 @@ import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
@@ -26,26 +27,28 @@ import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 class NexusBuild extends KBean {
 
-    final JkProject project = load(ProjectKBean.class).project;
-
-    /*
-     * Configures KBean project
-     * When this method is called, option fields have already been injected from command line.
-     */
-    @Override
-    protected void init() {
-        load(IntellijKBean.class)
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
                 .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
-        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
+    }
+
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        projectKBean.project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
                 .setModuleId("dev.jeka:nexus-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .dependencies.compile.add(JkLocator.getJekaJarPath());
-        load(MavenKBean.class).getMavenPublication()
+    }
+
+    @JkPostInit
+    private void postInit(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(mavenPublication -> mavenPublication
                 .pomMetadata
-                .setProjectName("Jeka plugin for Jacoco")
-                .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+                    .setProjectName("Jeka plugin for Jacoco")
+                    .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
     }
 
 }

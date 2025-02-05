@@ -20,6 +20,9 @@ import java.util.Optional;
 
 class BehaviorSettings {
 
+    // Initialized for tests
+    static BehaviorSettings INSTANCE = ofDefault();
+
     final Optional<String> kbeanName;
 
     final boolean cleanWork;

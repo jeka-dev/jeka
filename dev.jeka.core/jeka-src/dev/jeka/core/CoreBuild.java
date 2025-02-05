@@ -29,8 +29,7 @@ import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -61,68 +60,65 @@ public class CoreBuild extends KBean {
     public static class RunBuildAndIT {
         public static void main(String[] args) {
             CoreBuild coreBuild = JkInit.kbean(CoreBuild.class, args, "-runIT");
-            coreBuild.project.pack();
+            coreBuild.projectKBean.pack();
         }
     }
 
-    public final JkProject project = load(ProjectKBean.class).project;
+    @JkInject
+    private ProjectKBean projectKBean;
 
     public boolean runIT = false;
 
-    @Override
-    protected void init()  {
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
 
         project
-            .setJvmTargetVersion(JkJavaVersion.V8)
-            .setModuleId("dev.jeka:jeka-core")
-            //.packActions.set(this::doPackWithEmbeddedJar, this::doDistrib);
-            .packActions.append("include-embedded-jar", this::doPackWithEmbeddedJar)
-                        .append("create-distrib", this::doDistrib)
-                        .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
-        project
-            .compilation
-                .addJavaCompilerOptions("-Xlint:none","-g")
-                .layout
-                    .setMixResourcesAndSources();
+                .setJvmTargetVersion(JkJavaVersion.V8)
+                .setModuleId("dev.jeka:jeka-core")
+                .packActions
+                    .append("include-embedded-jar", this::doPackWithEmbeddedJar)
+                    .append("create-distrib", this::doDistrib)
+                    .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
+
         project.compilerToolChain.setForkCompiler(true);
-
-        project
-            .testing
-                .compilation
+        project.compilation
+                    .addJavaCompilerOptions("-Xlint:none", "-g")
                     .layout
                         .setMixResourcesAndSources();
-        project
-            .testing
-                .testSelection
-                    .addExcludePatternsIf(!runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
-        project
-            .packaging
+        project.testing.compilation.layout.setMixResourcesAndSources();
+        project.testing.testSelection.addExcludePatternsIf(!runIT, JkTestSelection.IT_INCLUDE_PATTERN);
+
+        project.packaging
                 .setMainClass("dev.jeka.core.tool.Main")
                 .javadocProcessor
                     .setDisplayOutput(false)
                     .addOptions("-notimestamp");
+    }
 
-        // Configure Maven publication
-        load(MavenKBean.class).getMavenPublication()
+    @JkPostInit
+    private void postInit(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication("coreBuild", mavenPublication ->
+                mavenPublication
                 .putArtifact(DISTRIB_FILE_ID)
                 .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID)
                 .pomMetadata
                     .setProjectName("JeKa")
                     .addApache2License()
                     .setProjectDescription("Build and Run Java Code from Everywhere")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
     }
 
     public void cleanPack() {
-        project.clean().pack();
+        projectKBean.project.clean().pack();
     }
 
     public void addJavadocToGhPages() {
         String gitUrl = "https://github.com/jeka-dev/jeka.git";
         String ghPageBranch = "gh-pages";
 
-        Path ghPageDir = project.getOutputDir().resolve("gh-pages");
+        Path ghPageDir = projectKBean.project.getOutputDir().resolve("gh-pages");
         JkPathTree.of(ghPageDir).deleteContent();
         JkUtilsPath.createDirectories(ghPageDir);
 
@@ -149,19 +145,22 @@ public class CoreBuild extends KBean {
     }
 
     private Path distribFolder() {
-        return project.getOutputDir().resolve("distrib");
+        return projectKBean.project.getOutputDir().resolve("distrib");
     }
 
     private void doDistrib() {
+        JkProject project = projectKBean.project;
         Path distribFile = project.artifactLocator.getArtifactPath(DISTRIB_FILE_ID);
         project.packaging.createSourceJar(); // Sources should be included in distrib
 
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
+
         distrib
             .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"));
         Path binDir = distribFolder().resolve("bin");
+
         JkPathTree.of(binDir)
             .importDir(getBaseDir().resolve("src/main/shell"))
             .importFiles(project.artifactLocator.getArtifactPath(JkArtifactId.MAIN_JAR_ARTIFACT_ID))
@@ -184,6 +183,7 @@ public class CoreBuild extends KBean {
     // We create a specific archive for sdkman to conform to the constraints
     // that the zip must have a root entry having the same name than the archive.
     private void doSdkmanDistrib() {
+        JkProject project = projectKBean.project;
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         String entryName = "jeka-core-" + project.getVersion() + "-sdkman";
         Path sdkmanDistribDir = getOutputDir().resolve(entryName);
@@ -231,7 +231,7 @@ public class CoreBuild extends KBean {
     }
 
     private void doPackWithEmbeddedJar() {
-
+        JkProject project = projectKBean.project;
         Path targetJar = project.artifactLocator.getMainArtifactPath();
 
         // Main jar

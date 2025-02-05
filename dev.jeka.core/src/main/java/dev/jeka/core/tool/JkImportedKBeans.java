@@ -41,17 +41,9 @@ public final class JkImportedKBeans {
 
     private List<KBean> transitives;
 
-    // The declared @JkInjectRunbase values, read at pre-compile time
-    private List<Path> importedBeanRoots = Collections.emptyList();
-
     JkImportedKBeans(KBean holder) {
         this.holder = holder;
         this.directs = computeDirects(holder);
-    }
-
-    JkImportedKBeans() {
-        this.holder = null;
-        this.directs = Collections.emptyList();
     }
 
     /**
@@ -64,7 +56,7 @@ public final class JkImportedKBeans {
     }
 
     /**
-     * Returns KBeans found in imported projects having the specified type.
+     * Returns KBeans found in imported runbases having the specified type.
      */
     public <T extends KBean> List<T> get(Class<T> beanClass, boolean includeTransitives) {
         return get(includeTransitives).stream()
@@ -75,8 +67,14 @@ public final class JkImportedKBeans {
                 .collect(Collectors.toList());
     }
 
-    void setImportedBeanRoots(Set<Path> roots) {
-        this.importedBeanRoots = new LinkedList<>(roots);
+    /**
+     * Loads and returns the KBeans of the specified type from the imported runbases.
+     */
+    public <T extends KBean> List<T> load(Class<T> beanClass, boolean includeTransitives) {
+        return get(includeTransitives).stream()
+                .map(KBean::getRunbase)
+                .map(runbase -> runbase.load(beanClass))
+                .collect(Collectors.toList());
     }
 
     private List<KBean> computeTransitives(Set<Path> files) {
@@ -95,14 +93,17 @@ public final class JkImportedKBeans {
     @SuppressWarnings("unchecked")
     private static List<KBean> computeDirects(KBean masterBean) {
         final List<KBean> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getDeclaredFieldsWithAnnotation(masterBean.getClass(), JkInjectRunbase.class);
+        final List<Field> fields = JkUtilsReflect.getDeclaredFieldsWithAnnotation(masterBean.getClass(), JkInject.class);
+        fields.addAll(JkUtilsReflect.getDeclaredFieldsWithAnnotation(masterBean.getClass(), JkInjectRunbase.class));
         if (!fields.isEmpty()) {
             JkLog.verbose("Projects imported by %s : %s", masterBean, fields);
         }
         for (final Field field : fields) {
-            final JkInjectRunbase jkInjectRunbase = field.getAnnotation(JkInjectRunbase.class);
-            String importedDir = jkInjectRunbase.value();
-            final KBean importedJkClass = createImportedJkBean(
+            String importedDir = Injects.getImportedDir(field);
+            if (importedDir == null) {
+                continue;  // THis means that's a local KBean that should be handled at Runbase init level
+            }
+            final KBean importedJkClass = createImportedKBean(
                     (Class<? extends KBean>) field.getType(), importedDir, masterBean.getBaseDir());
             try {
                 JkUtilsReflect.setFieldValue(masterBean, field, importedJkClass);
@@ -140,16 +141,24 @@ public final class JkImportedKBeans {
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends KBean> T createImportedJkBean(Class<T> importedBeanClass, String relativePath, Path holderBaseDir) {
+    private static <T extends KBean> T createImportedKBean(Class<T> importedBeanClass,
+                                                           String relativePath,
+                                                           Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
         JkLog.verboseStartTask("Import bean " + importedBeanClass.getName() + " from " + importedProjectDir);
 
-        // Not sure it is necessary. Is so, explain why.
-        JkRunbase.get(importedProjectDir);
-
+        // Not sure if it is necessary. Is so, explain why.
+        Path originalContextDir = JkRunbase.getCurrentContextBaseDir().getBaseDir();
         JkRunbase.setBaseDirContext(importedProjectDir);
-        final T result = JkRunbase.get(importedProjectDir).load(importedBeanClass);
-        JkRunbase.setBaseDirContext(Paths.get(""));
+        JkRunbase runbase = JkRunbase.get(importedProjectDir);
+
+        // initialize the runbase with empty cmd
+        JkLog.startTask("Initialize runbase " + JkRunbase.getMaster().getBaseDir().relativize(runbase.getBaseDir()));
+        runbase.init(new KBeanAction.Container());
+        JkLog.endTask();
+        final T result = runbase.load(importedBeanClass);
+        JkRunbase.setBaseDirContext(Optional.ofNullable(originalContextDir).orElse(Paths.get("")));
+
         JkLog.verboseEndTask();
         return result;
     }

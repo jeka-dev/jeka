@@ -24,10 +24,7 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkPreInit;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
@@ -37,7 +34,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 
 /*
@@ -72,40 +68,9 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Space separated string of ports to expose. This is likely to be used by external tool as Docker.")
     public String exposedPorts="8080";
 
-
-    @JkDoc("Initialise `ProjectKBean` (or `BaseKBean) in order to:\n\n" +
-            "- Produce bootable JAR file.%n" +
-            "- Adapt scaffolding to generate basic springboot application.%n" +
-            "- Add Spring Maven repositories.%n" +
-            "- Customize Docker image generator to export 8080 port.")
-    @Override
-    protected void init() {
-        Optional<ProjectKBean> optionalProjectKBean = getRunbase().find(ProjectKBean.class);
-        Optional<BaseKBean> optionalBaseKBean = getRunbase().find(BaseKBean.class);
-
-        // Use Project KBean if Project KBean is present or if BaseKBean is absent
-        if (optionalProjectKBean.isPresent() || !optionalBaseKBean.isPresent()) {
-            customizeProjectKBean(load(ProjectKBean.class));
-
-            // Otherwise, force to use BaseKBean
-        } else {
-            customizeBaseKBean(load(BaseKBean.class));
-        }
-
-        // Configure Docker KBean to add port mapping on run
-        Optional<DockerKBean> optionalDockerKBean = getRunbase().find(DockerKBean.class);
-        if (optionalDockerKBean.isPresent()) {
-            DockerKBean dockerKBean = optionalDockerKBean.get();
-            dockerKBean.customizeJvmImage(this::customizeDockerBuild);
-            dockerKBean.customizeNativeImage(this::customizeDockerBuild);
-        }
-    }
-
-    @JkDoc("Provides info about this plugin configuration")
-    public void info() {
-        JkLog.info("Create Bootable Jar : " + this.createBootJar);
-        JkLog.info("Create original Jar : " + this.createOriginalJar);
-        JkLog.info("Create .war file : " + this.createWarFile);
+    @JkRequire
+    private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
+        return runbase.getBuildableKBeanClass();
     }
 
     @JkDoc("Set test progress style to PLAIN to display JVM messages gracefully.")
@@ -113,6 +78,57 @@ public final class SpringbootKBean extends KBean {
     public static void initProjectKbean(ProjectKBean projectKBean) {
         projectKBean.project.testing.testProcessor.engineBehavior
                 .setProgressDisplayer(JkTestProcessor.JkProgressStyle.PLAIN);
+    }
+
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
+        projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::customize);
+
+        JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project)
+                .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
+        if (springRepo != null) {
+            springbootProject.addSpringRepo(springRepo);
+        }
+    }
+
+    @JkPostInit
+    private void postInit(BaseKBean baseKBean) {
+        if (find(ProjectKBean.class).isPresent()) {
+            return;
+        }
+        baseKBean.getBaseScaffold().addCustomizer(SpringbootScaffold::customize);
+
+        baseKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
+                getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
+
+        baseKBean.setJarMaker(path -> JkSpringbootJars.createBootJar(
+                baseKBean.getAppClasses(),
+                baseKBean.getAppLibs(),
+                getRunbase().getDependencyResolver().getRepos(),
+                path,
+                baseKBean.getManifest())
+        );
+    }
+
+    @JkPostInit
+    private void postInit(DockerKBean dockerKBean) {
+        dockerKBean.customizeJvmImage(this::customizeDockerBuild);
+        dockerKBean.customizeNativeImage(this::customizeDockerBuild);
+    }
+
+    @JkPostInit
+    private void postInit(NativeKBean nativeKBean) {
+        JkBuildable buildable = getRunbase().getBuildable();
+        nativeKBean.includeMainClassArg = false;
+        nativeKBean.setAotAssetDirs(() ->
+                this.generateAotEnrichment(buildable));
+    }
+
+    @JkDoc("Provides info about this plugin configuration")
+    public void info() {
+        JkLog.info("Create Bootable Jar : " + this.createBootJar);
+        JkLog.info("Create original Jar : " + this.createOriginalJar);
+        JkLog.info("Create .war file : " + this.createWarFile);
     }
 
     private List<Path> generateAotEnrichment(JkBuildable buildable) {
@@ -146,48 +162,6 @@ public final class SpringbootKBean extends KBean {
         if (dockerBuild.getExposedPorts().isEmpty()) {
             dockerBuild.setExposedPorts(exposedPortAsArray());
         }
-    }
-
-
-    private void customizeProjectKBean(ProjectKBean projectKBean) {
-
-        // Customize scaffold
-        projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::customize);
-
-        JkSpringbootProject springbootProject = JkSpringbootProject.of(projectKBean.project)
-                .configure(this.createBootJar, this.createWarFile, this.createOriginalJar);
-
-        if (springRepo != null) {
-            springbootProject.addSpringRepo(springRepo);
-        }
-
-        NativeKBean nativeKBean = load(NativeKBean.class);
-        nativeKBean.includeMainClassArg = false;
-        nativeKBean.setAotAssetDirs(() ->
-                this.generateAotEnrichment(projectKBean.project.asBuildable()));
-    }
-
-    private void customizeBaseKBean(BaseKBean baseKBean) {
-
-        // customize scaffold
-        baseKBean.getBaseScaffold().addCustomizer(SpringbootScaffold::customize);
-
-        baseKBean.setMainClassFinder(() -> JkSpringbootJars.findMainClassName(
-                getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)));
-
-        baseKBean.setJarMaker(path -> JkSpringbootJars.createBootJar(
-                baseKBean.getAppClasses(),
-                baseKBean.getAppLibs(),
-                getRunbase().getDependencyResolver().getRepos(),
-                path,
-                baseKBean.getManifest())
-        );
-
-        // Configure native kbean
-        NativeKBean nativeKBean = getRunbase().load(NativeKBean.class);
-        nativeKBean.includeMainClassArg = false;
-        nativeKBean.setAotAssetDirs(() ->
-                this.generateAotEnrichment(baseKBean.asBuildable()));
     }
 
     private boolean hasAotProfile() {

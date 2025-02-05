@@ -31,10 +31,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkInjectProperty;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 import org.w3c.dom.Document;
@@ -47,7 +44,7 @@ import java.util.List;
 
 @JkDoc("Manages the build and execution of a JVM projects.\n" +
         "It contains all information for resolving dependencies, compiling, testing and packaging as JARs")
-public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
+public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, JkBuildable.Supplier {
 
     // The underlying project managed by this KBean
     @JkDoc(hide = true)
@@ -66,7 +63,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
     @JkDoc
-    private final JkPackOptions pack = new JkPackOptions();
+    public final JkPackOptions pack = new JkPackOptions();
 
     /**
      * Options for run tasks
@@ -98,8 +95,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
      * Options for configuring compilation.
      */
     @JkDoc
-    @JkInjectProperty // some nested fields are prop-injectable
-    private final JkCompilationOptions compilation = new JkCompilationOptions();
+    @JkPropValue // some nested fields are prop-injectable
+    public final JkCompilationOptions compilation = new JkCompilationOptions();
 
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
@@ -191,6 +188,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         return projectScaffold;
     }
 
+    @Override
+    public JkBuildable asBuildable() {
+        return project.asBuildable();
+    }
+
     // ------- static classes for configuration
 
     /**
@@ -226,7 +228,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
 
         /** Turn it on to skip tests. */
         @JkDoc("If true, tests are not run.")
-        @JkInjectProperty("jeka.test.skip")
+        @JkPropValue("jeka.test.skip")
         public boolean skip;
 
         /** Turn it on to run tests in a withForking process. */
@@ -264,7 +266,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier {
         public boolean fork;
 
         @JkDoc("The target JVM version for compiled files.")
-        @JkInjectProperty("jeka.java.version")
+        @JkPropValue("jeka.java.version")
         public String javaVersion;
 
         @JkDoc("Extra arguments to be passed to the compiler (example -Xlint:unchecked).")

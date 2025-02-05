@@ -61,32 +61,9 @@ public final class IntellijKBean extends KBean {
     @JkDoc("If true, sources will be downloaded will resolving dependencies")
     private boolean downloadSources = false;
 
-    /**
-     * Underlying imlGenerator used to generate Iml. <p>
-     * Use this object to  configure finely generated iml.
-     */
-    @JkDoc(hide = true)
-    public final JkImlGenerator imlGenerator = JkImlGenerator.of();
+    private JkImlGenerator imlGeneratorCache ;
 
     private final LinkedHashSet<String> projectLibraries = new LinkedHashSet<>();
-
-    @Override
-    protected void init() {
-        imlGenerator
-                .setBaseDir(this.getBaseDir())
-                .setJekaSrcClasspath(this.getRunbase().getClasspath())
-                .setJekaSrcImportedProjects(this.getRunbase().getImportBaseDirs())
-                .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
-                .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
-                .setDownloadSources(this.downloadSources)
-                .setRunbaseDependencies(this.getRunbase().getFullDependencies())
-                .setUseVarPath(useVarPath);
-        if (!JkUtilsString.isBlank(jdkName)) {
-            imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
-        } else if (!JkUtilsString.isBlank(suggestedJdkName)) {
-            imlGenerator.configureIml(iml -> iml.component.setJdkName(suggestedJdkName));
-        }
-    }
 
     /**
      * @deprecated Use {@link #sync()} instead.
@@ -149,7 +126,7 @@ public final class IntellijKBean extends KBean {
      * Configures IML file that will be generated.
      */
     public IntellijKBean configureIml(Consumer<JkIml> imlConfigurator) {
-        this.imlGenerator.configureIml(imlConfigurator);
+        this.imlGenerator().configureIml(imlConfigurator);
         return this;
     }
 
@@ -158,7 +135,7 @@ public final class IntellijKBean extends KBean {
      * This method prevents adding the Jeka dependency directly to this module.
      */
     public IntellijKBean excludeJekaLib() {
-        imlGenerator.setExcludeJekaLib(true);
+        imlGenerator().setExcludeJekaLib(true);
         return this;
     }
 
@@ -199,12 +176,35 @@ public final class IntellijKBean extends KBean {
         return this;
     }
 
+    private JkImlGenerator imlGenerator() {
+        if (imlGeneratorCache != null) {
+            return imlGeneratorCache;
+        }
+        JkImlGenerator imlGenerator = JkImlGenerator.of();
+        imlGenerator
+                .setBaseDir(this.getBaseDir())
+                .setJekaSrcClasspath(this.getRunbase().getClasspath())
+                .setJekaSrcImportedProjects(this.getRunbase().getImportBaseDirs())
+                .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
+                .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
+                .setDownloadSources(this.downloadSources)
+                .setRunbaseDependencies(this.getRunbase().getFullDependencies())
+                .setUseVarPath(useVarPath);
+        if (!JkUtilsString.isBlank(jdkName)) {
+            imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
+        } else if (!JkUtilsString.isBlank(suggestedJdkName)) {
+            imlGenerator.configureIml(iml -> iml.component.setJdkName(suggestedJdkName));
+        }
+        this.imlGeneratorCache = imlGenerator;
+        return imlGenerator;
+    }
+
     private void generateIml(Path imlPath) {
         // Determine if we are trying to generate an iml for the 'jeka-src' submodule
         String extensionLessFileName = JkUtilsString.substringBeforeLast(imlPath.getFileName().toString(), ".");
         boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName) ||
                 extensionLessFileName.endsWith("-" + JkConstants.JEKA_SRC_DIR);
-        JkIml iml = imlGenerator.computeIml(isForJekaSrcModule);
+        JkIml iml = imlGenerator().computeIml(isForJekaSrcModule);
 
         JkPathFile.of(imlPath)
                 .deleteIfExist()

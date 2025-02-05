@@ -16,12 +16,8 @@
                 <CLASSES>
                     <root url="jar:///Users/jerome/IdeaProjects/jeka/plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar!/"/>
                 </CLASSES>
-                <JAVADOC>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/plugins/dev.jeka.plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin-sources.jar!/"/>
-                </SOURCES>
+                <JAVADOC/>
+                <SOURCES/>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">
