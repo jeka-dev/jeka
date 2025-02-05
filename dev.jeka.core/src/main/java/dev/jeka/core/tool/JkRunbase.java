@@ -311,10 +311,6 @@ public final class JkRunbase {
         this.fullDependencies = fullDependencies;
     }
 
-    KBeanAction.Container getEffectiveActions() {
-        return effectiveActions;
-    }
-
     void init(KBeanAction.Container cmdLineActionContainer) {
 
         // Add initKBean
@@ -342,7 +338,8 @@ public final class JkRunbase {
             String classNames = classesToInit.stream()
                     .map(KBean::name)
                     .collect(Collectors.joining(", "));
-            JkLog.info("KBeans to initialize: " + classNames);
+            JkLog.info("KBeans to initialize: ");
+            JkLog.info("    " + classNames);
 
         }
 
@@ -356,9 +353,10 @@ public final class JkRunbase {
             this.postInitializer.addPostInitializerCandidate(kbean);
         }
 
+        // Log KBean Pre-initialization
         List<KBean> preInitializedKBeans = preInitializer.getPreInitializedKbeans();
         if (LogSettings.INSTANCE.runtimeInformation  && !preInitializedKBeans.isEmpty()) {
-            JkLog.info("Pre-initialisation KBeans:");
+            JkLog.info("KBeans pre-initialisation:");
             final Jk2ColumnsText preInitializeText = Jk2ColumnsText.of(18, 120);
             for (KBean kbean : preInitializedKBeans) {
                 preInitializer.getInitializerNamesFor(kbean.getClass()).forEach(name -> {
@@ -369,10 +367,19 @@ public final class JkRunbase {
             JkLog.info(preInitializeText.toString());
         }
 
+        // Log KBean initialization
+        if (LogSettings.INSTANCE.runtimeInformation) {
+            JkLog.info("KBeans Initialization    :");
+            JkLog.info(this.effectiveActions.toColumnText()
+                    .setSeparator(" | ")
+                    .setMarginLeft("   | ")
+                    .toString());
+        }
+
         // Post-initialize KBeans
         Jk2ColumnsText postInitializeText = null;
         if (LogSettings.INSTANCE.runtimeInformation) {
-            JkLog.info("Post-initialisation KBeans:");
+            JkLog.info("KBeans post-initialisation:");
             postInitializeText = Jk2ColumnsText.of(18, 120);
         }
         for (Class<? extends KBean> beanClass : initClassesResolver.getClassesToInitialize()) {

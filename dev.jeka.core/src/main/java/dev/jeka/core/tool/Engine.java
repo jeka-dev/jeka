@@ -262,13 +262,6 @@ class Engine {
 
         // initialise runbase with resolved commands
         runbase.init(this.actionContainer);
-        if (LogSettings.INSTANCE.runtimeInformation) {
-            JkLog.info("KBeans Init        :");
-            JkLog.info(runbase.getEffectiveActions().toColumnText()
-                    .setSeparator(" | ")
-                    .setMarginLeft("   | ")
-                    .toString());
-        }
         return runbase;
     }
 

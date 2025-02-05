@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 
 class PreInitializer {
 
+    // key is pre-initialized Kbean class
     private final Map<Class<?>, JkConsumers<? extends KBean>> map;
 
     private PreInitializer(Map<Class<?>, JkConsumers<? extends KBean>> map) {
@@ -35,19 +36,12 @@ class PreInitializer {
 
     private final List<KBean> preInitializedKbeans = new LinkedList<>();
 
-    static PreInitializer of(List<Class<? extends KBean>> kbeanClasses) {
+    static PreInitializer of(List<Class<? extends KBean>> preInitializerClasses) {
         Map<Class<?>, JkConsumers<? extends KBean>> map = new LinkedHashMap<>();
-        for (Class<?> kbeanClass : kbeanClasses) {
-            map.putAll(findMethods(kbeanClass));
+        for (Class<?> preInitialierClass : preInitializerClasses) {
+            findMethods(map, preInitialierClass);
         }
         return new PreInitializer(map);
-    }
-
-    // TODO remove
-    JkConsumers get(Class<? extends KBean> kbeanClass) {
-        JkConsumers<? extends KBean> result = map.getOrDefault(kbeanClass, JkConsumers.of());
-        JkLog.debug("Pre-initialization of %s found %s.", kbeanClass.getName(), result);
-        return result;
     }
 
     void accept(KBean kbean) {
@@ -81,10 +75,12 @@ class PreInitializer {
         }
     }
 
-    private static Map<Class<?>, JkConsumers<? extends KBean>> findMethods(Class<?> kbeanClass) {
+    private static void findMethods(
+            Map<Class<?>, JkConsumers<? extends KBean>> result,
+            Class<?> kbeanClass) {
+
         JkLog.debug("Finding Pre-initialisation methods in class %s ", kbeanClass.getName());
         List<Method> methods = JkUtilsReflect.getDeclaredMethodsWithAnnotation(kbeanClass, JkPreInit.class);
-        Map<Class<?>, JkConsumers<? extends KBean>> result = new HashMap<>();
         for (Method method : methods) {
             assertMethodDeclarationValid(method);
             Class[] paramTypes = method.getParameterTypes();
@@ -99,7 +95,6 @@ class PreInitializer {
             JkLog.debug("Adding pre-initialization method %s for KBean %s ", method, paramType.getName());
             consumers.append(methodName(method), kbeanConsumer);
         }
-        return result;
     }
 
     private static String methodName(Method method) {
