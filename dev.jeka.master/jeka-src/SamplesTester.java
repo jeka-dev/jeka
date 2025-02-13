@@ -53,14 +53,14 @@ class SamplesTester extends JekaCommandLineExecutor {
                 "project: pack : checkGeneratedReport");
 
         // No Jeka deps test samples
-        run("dev.jeka.samples.basic", "-kb=simpleProject cleanPackPublish checkedValue=A checkValueIsA");
-        run("dev.jeka.samples.basic", "-kb=signedArtifacts cleanPackPublish");
-        run("dev.jeka.samples.basic", "-kb=thirdPartyDependencies cleanPack");
-        run("dev.jeka.samples.basic", "-kb=antStyle cleanPackPublish");
+        run("dev.jeka.samples.basic", "cleanPackPublish checkedValue=A checkValueIsA");
+        run("dev.jeka.samples.basic", "-Djeka.kbean.local=signedArtifacts cleanPackPublish");
+        run("dev.jeka.samples.basic", "-Djeka.kbean.local=thirdPartyDependencies cleanPack");
+        run("dev.jeka.samples.basic", "-Djeka.kbean.local=antStyle cleanPackPublish");
 
         // Test with @JkInjectBaserun
-        run("dev.jeka.samples.dependers", "-kb=fatJar -c project: pack");
-        run("dev.jeka.samples.dependers", "-kb=normalJar -c project: pack");
+        run("dev.jeka.samples.dependers", "-Djeka.kbean.local=fatJar -c project: pack");
+        run("dev.jeka.samples.dependers", "-Djeka.kbean.local=normalJar -c project: pack");
 
         // Test with junit5
         run("dev.jeka.samples.junit5", "-la=false -c project: pack");

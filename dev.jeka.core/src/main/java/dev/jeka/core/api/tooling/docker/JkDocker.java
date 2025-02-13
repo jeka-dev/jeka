@@ -75,6 +75,7 @@ public class JkDocker extends JkAbstractProcess<JkDocker> {
                     .addParams("version")
                     .setLogCommand(JkLog.isDebug())
                     .setLogWithJekaDecorator(JkLog.isDebug())
+                    .setFailOnError(false)
                     .exec().hasSucceed();
         } catch (UncheckedIOException e) {
             return false;

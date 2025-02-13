@@ -83,7 +83,7 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.hibernate/hibernate-entitymanager/jars/hibernate-entitymanager-5.6.15.Final.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.sun.jersey/jersey-server/jars/jersey-server-1.19.4.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -92,7 +92,7 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.jboss.logging/jboss-logging/jars/jboss-logging-3.4.3.Final.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.sun.jersey/jersey-core/jars/jersey-core-1.19.4.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -101,133 +101,7 @@
         <orderEntry exported="" scope="COMPILE" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.hibernate/hibernate-core/jars/hibernate-core-5.6.15.Final.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.hibernate.common/hibernate-commons-annotations/jars/hibernate-commons-annotations-5.1.2.Final.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/javax.persistence/javax.persistence-api/jars/javax.persistence-api-2.2.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/net.bytebuddy/byte-buddy/jars/byte-buddy-1.12.18.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.jboss.spec.javax.transaction/jboss-transaction-api_1.2_spec/jars/jboss-transaction-api_1.2_spec-1.1.1.Final.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/antlr/antlr/jars/antlr-2.7.7.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.jboss/jandex/bundles/jandex-2.4.2.Final.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.fasterxml/classmate/bundles/classmate-1.5.1.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/javax.activation/javax.activation-api/jars/javax.activation-api-1.2.0.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/javax.xml.bind/jaxb-api/jars/jaxb-api-2.3.1.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.glassfish.jaxb/jaxb-runtime/jars/jaxb-runtime-2.3.1.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.glassfish.jaxb/txw2/jars/txw2-2.3.1.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.sun.istack/istack-commons-runtime/jars/istack-commons-runtime-3.0.7.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.jvnet.staxex/stax-ex/jars/stax-ex-1.8.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.sun.xml.fastinfoset/FastInfoset/jars/FastInfoset-1.2.15.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/javax.ws.rs/jsr311-api/jars/jsr311-api-1.1.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -236,7 +110,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter/jars/junit-jupiter-5.8.1.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter/jars/junit-jupiter-5.10.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -245,7 +119,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.8.1.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter-api/jars/junit-jupiter-api-5.10.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -254,18 +128,18 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.3.0.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.2.0-sources.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.opentest4j/opentest4j/jars/opentest4j-1.3.0-sources.jar!/"/>
                 </SOURCES>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.8.1.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.platform/junit-platform-commons/jars/junit-platform-commons-1.10.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -285,7 +159,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter-params/jars/junit-jupiter-params-5.8.1.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter-params/jars/junit-jupiter-params-5.10.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -294,7 +168,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.8.1.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.jupiter/junit-jupiter-engine/jars/junit-jupiter-engine-5.10.1.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -303,7 +177,16 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.8.1.jar!/"/>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.junit.platform/junit-platform-engine/jars/junit-platform-engine-1.10.1.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
+        <orderEntry exported="" scope="RUNTIME" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.github.djeang/vincer-dom/jars/vincer-dom-1.2.0.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -391,6 +274,16 @@
                 </SOURCES>
             </library>
         </orderEntry>
-        <orderEntry module-name="dev.jeka.core" scope="COMPILE" type="module"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="jar:///Users/jerome/IdeaProjects/jeka/dev.jeka.core/jeka-output/distrib/bin/dev.jeka.jeka-core.jar!/"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES>
+                    <root url="jar:///Users/jerome/IdeaProjects/jeka/dev.jeka.core/jeka-output/distrib/bin/dev.jeka.jeka-core-sources.jar!/"/>
+                </SOURCES>
+            </library>
+        </orderEntry>
     </component>
 </module>

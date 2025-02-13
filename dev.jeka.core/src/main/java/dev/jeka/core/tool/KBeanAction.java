@@ -237,15 +237,15 @@ class KBeanAction implements Comparable<KBeanAction> {
             return container;
         }
 
-        private void addInitBean(Class<? extends KBean> inintKBeanClass) {
+        private void addInitBean(Class<? extends KBean> initKBeanClass) {
             KBeanAction present = kBeanActions.stream()
                     .filter(action -> action.type == BEAN_INIT)
-                    .filter(action -> action.beanClass.equals(inintKBeanClass))
+                    .filter(action -> action.beanClass.equals(initKBeanClass))
                     .findFirst().orElse(null);
             if (present != null) {
                 kBeanActions.remove(present);
             }
-            kBeanActions.add(0, KBeanAction.ofInit(inintKBeanClass));
+            kBeanActions.add(0, KBeanAction.ofInit(initKBeanClass));
         }
 
 

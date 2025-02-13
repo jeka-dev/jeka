@@ -60,7 +60,7 @@ public class AntStyleKBean extends KBean implements JkIdeSupportSupplier {
             .and("com.google.guava:guava:30.0-jre")
             .and("org.hibernate:hibernate-entitymanager:5.6.15.Final");
     JkDependencySet testDependencies = JkDependencySet.of()
-            .and(SimpleProjectKBean.JUNIT5);
+            .and(SignedArtifactsKBean.JUNIT5);
     List<Path> depFiles = baseTree.andMatching(true,"libs/**/*.jar").getFiles();
     JkPathSequence prodClasspath = resolver.resolve(prodDependencies).getFiles();
     JkPathSequence testClasspath = resolver.resolve(testDependencies.and(prodDependencies)).getFiles();

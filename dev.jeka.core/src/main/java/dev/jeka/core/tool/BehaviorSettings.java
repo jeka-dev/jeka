@@ -23,7 +23,7 @@ class BehaviorSettings {
     // Initialized for tests
     static BehaviorSettings INSTANCE = ofDefault();
 
-    final Optional<String> kbeanName;
+    final Optional<String> defaultKbeanName;
 
     final boolean cleanWork;
 
@@ -34,9 +34,9 @@ class BehaviorSettings {
     final boolean skipCompile;
 
 
-    BehaviorSettings(String kbeanName, boolean cleanWork, boolean cleanOutput, boolean forceMode,
+    BehaviorSettings(String defaultKbeanName, boolean cleanWork, boolean cleanOutput, boolean forceMode,
                      boolean skipCompile) {
-        this.kbeanName = Optional.ofNullable(kbeanName);
+        this.defaultKbeanName = Optional.ofNullable(defaultKbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
         this.forceMode = forceMode;

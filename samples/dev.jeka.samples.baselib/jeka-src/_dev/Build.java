@@ -11,19 +11,18 @@ class Build extends KBean {
     @JkPropValue("PATH")
     public String path;
 
-    @Override
-    protected void init() {
-        require(BaseKBean.class);
-    }
-
-    @JkDoc("Used by sample tests o check if this bean is considered as the default kbean")
-    public void ok() {
-        System.out.println("ok");
+    @JkPostInit(required = true)
+    private void postInit(BaseKBean baseKBean) {
     }
 
     @JkPostInit
     private void postInit(IntellijKBean intellijKBean) {
         intellijKBean.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core");
+    }
+
+    @JkDoc("Used by sample tests o check if this bean is considered as the default kbean")
+    public void ok() {
+        System.out.println("ok");
     }
 
     public void hello() {

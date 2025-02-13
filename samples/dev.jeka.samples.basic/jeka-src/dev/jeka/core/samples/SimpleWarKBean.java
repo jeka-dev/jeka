@@ -30,6 +30,23 @@ public class SimpleWarKBean extends KBean {
     @JkInject
     ProjectKBean projectKBean;
 
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
+        project.setModuleId("dev.jeka.samples:war-project")
+                .setVersion("1.0-SNAPSHOT")
+                .setJvmTargetVersion(JkJavaVersion.V8)
+                .compilation.layout.emptySources().addSources("src/main/javaweb");
+        project.testing.setSkipped(true);
+
+        project.flatFacade.dependencies.compile.modify(deps -> deps
+                .and("com.google.guava:guava:30.0-jre")
+                .and("javax.servlet:javax.servlet-api:4.0.1"));
+        project.flatFacade.dependencies.runtime
+                .remove("javax.servlet:javax.servlet-api");
+        JkJ2eWarProjectAdapter.of().configure(project);
+    }
+
     public void cleanPackRun() {
         JkProject project = projectKBean.project;
         project.clean().pack();
@@ -48,26 +65,8 @@ public class SimpleWarKBean extends KBean {
                 .addParams(projectKBean.project.artifactLocator.getMainArtifactPath().toString(), "--port", port).exec();
     }
 
-    @JkPostInit
-    private void postInit(ProjectKBean projectKBean) {
-        JkProject project = projectKBean.project;
-        project.setModuleId("dev.jeka.samples:war-project")
-                .setVersion("1.0-SNAPSHOT")
-                .setJvmTargetVersion(JkJavaVersion.V8)
-                .compilation.layout.emptySources().addSources("src/main/javaweb");
-        project.testing.setSkipped(true);
-
-        project.flatFacade.dependencies.compile.modify(deps -> deps
-                .and("com.google.guava:guava:30.0-jre")
-                .and("javax.servlet:javax.servlet-api:4.0.1"));
-        project.flatFacade.dependencies.runtime
-                .remove("javax.servlet:javax.servlet-api");
-        JkJ2eWarProjectAdapter.of().configure(project);
-    }
-    
     public static void main(String[] args) {
 	    JkInit.kbean(SimpleWarKBean.class, args, "-LS=DEBUG").cleanPackRun();
     }
-
 
 }

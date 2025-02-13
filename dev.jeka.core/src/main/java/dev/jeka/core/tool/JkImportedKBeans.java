@@ -103,10 +103,11 @@ public final class JkImportedKBeans {
             if (importedDir == null) {
                 continue;  // THis means that's a local KBean that should be handled at Runbase init level
             }
-            final KBean importedJkClass = createImportedKBean(
-                    (Class<? extends KBean>) field.getType(), importedDir, masterBean.getBaseDir());
+            Class<?> fieldType = field.getType();
+            final Object importedObject = createImportedKBean(
+                   fieldType, importedDir, masterBean.getBaseDir());
             try {
-                JkUtilsReflect.setFieldValue(masterBean, field, importedJkClass);
+                JkUtilsReflect.setFieldValue(masterBean, field, importedObject);
             } catch (final RuntimeException e) {
                 Path currentClassBaseDir = Paths.get(masterBean.getClass().getProtectionDomain()
                         .getCodeSource().getLocation().getPath());
@@ -115,13 +116,13 @@ public final class JkImportedKBeans {
                 }
                 if (!Files.exists(currentClassBaseDir)) {
                     throw new IllegalStateException("Can't inject imported run instance of type "
-                            + importedJkClass.getClass().getSimpleName()
+                            + importedObject.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
                             + "#" + field.getName() + " from directory " + masterBean.getBaseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
                 throw new IllegalStateException("Can't inject imported run instance of type "
-                        + importedJkClass.getClass().getSimpleName()
+                        + importedObject.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + masterBean.getBaseDir()
                         + "\nJeka class is located in " + currentClassBaseDir
@@ -129,7 +130,9 @@ public final class JkImportedKBeans {
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
             if (!JkUtilsString.isBlank(importedDir) && !".".equals(importedDir)) {
-                result.add(importedJkClass);
+                if (importedObject instanceof KBean) {
+                    result.add((KBean) importedObject);
+                }
             }
         }
         return result;
@@ -140,25 +143,17 @@ public final class JkImportedKBeans {
      * Jeka class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.
      */
-    @SuppressWarnings("unchecked")
-    private static <T extends KBean> T createImportedKBean(Class<T> importedBeanClass,
+    private static Object createImportedKBean(Class importedBeanClass,
                                                            String relativePath,
                                                            Path holderBaseDir) {
         final Path importedProjectDir = holderBaseDir.resolve(relativePath).normalize();
+
         JkLog.verboseStartTask("Import bean " + importedBeanClass.getName() + " from " + importedProjectDir);
-
-        // Not sure if it is necessary. Is so, explain why.
-        Path originalContextDir = JkRunbase.getCurrentContextBaseDir().getBaseDir();
-        JkRunbase.setBaseDirContext(importedProjectDir);
         JkRunbase runbase = JkRunbase.get(importedProjectDir);
-
-        // initialize the runbase with empty cmd
-        JkLog.startTask("Initialize runbase " + JkRunbase.getMaster().getBaseDir().relativize(runbase.getBaseDir()));
-        runbase.init(new KBeanAction.Container());
-        JkLog.endTask();
-        final T result = runbase.load(importedBeanClass);
-        JkRunbase.setBaseDirContext(Optional.ofNullable(originalContextDir).orElse(Paths.get("")));
-
+        Object result = runbase;
+        if (KBean.class.isAssignableFrom(importedBeanClass)) {
+            result = runbase.load(importedBeanClass);
+        }
         JkLog.verboseEndTask();
         return result;
     }

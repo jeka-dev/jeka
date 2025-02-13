@@ -121,7 +121,7 @@ public final class JkBaseScaffold extends JkScaffold {
             return Collections.emptyList();
         }
         String moduleId = "org.junit.jupiter:junit-jupiter";
-        String lastVersion = findLatestVersion(moduleId, "5.9.1");
+        String lastVersion = findLatestStableVersion(moduleId, "5.9.1");
         return Collections.singletonList(moduleId + ":" + lastVersion);
     }
 

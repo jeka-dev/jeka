@@ -130,7 +130,7 @@ class PicocliHelp {
         commandLine.setHelpSectionKeys(keys);
 
         // Add section for other KBeans
-        List<String> others = new LinkedList<>(kbeanResolution.allKbeans);
+        List<String> others = new LinkedList<>(kbeanResolution.allKbeanClassNames);
         List<String> stdKbeanClassNames = JkBeanDescription.STANDARD_KBEAN_CLASSES.stream()
                         .map(Class::getName).collect(Collectors.toList());
         others.removeAll(stdKbeanClassNames);

@@ -34,6 +34,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
+import dev.jeka.plugins.jacoco.JacocoKBean;
 import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
@@ -72,11 +73,11 @@ class MasterBuild extends KBean {
     @JkInject("../dev.jeka.core")
     CoreBuild coreBuild;
 
-    @JkInject("../plugins/dev.jeka.plugins.jacoco")
-    JacocoBuild jacocoBuild;
-
     @JkInject("../plugins/dev.jeka.plugins.sonarqube")
     SonarqubeBuild sonarqubeBuild;
+
+    @JkInject("../plugins/dev.jeka.plugins.jacoco")
+    JacocoBuild jacocoBuild;
 
     @JkInject("../plugins/dev.jeka.plugins.springboot")
     SpringbootBuild springbootBuild;

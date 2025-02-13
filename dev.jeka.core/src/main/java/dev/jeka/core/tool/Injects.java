@@ -64,7 +64,12 @@ class Injects {
                     throw new RuntimeException(msg);
                 }
                 JkRunbase runbase = kbeanUnderInitialization.getRunbase();
-                KBean injectedValue = runbase.load((Class<? extends KBean>) type);
+                KBean injectedValue;
+                if (runbase.isInitialized()) {
+                    injectedValue = runbase.load((Class<? extends KBean>) type);
+                } else {
+                    injectedValue = runbase.getBean(type);
+                }
                 JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, injectedValue);
             }
         }
@@ -93,7 +98,7 @@ class Injects {
         String orRunbase = local? "" : " or JkRunbase";
         return String.format("Field %s is annotated with @%s but does is not of a KBean type%s. " +
                 "%nPlease make the field declare a KBean or remove the annotation.",
-                field.getName(),
+                field,
                 JkInject.class.getSimpleName(),
                 orRunbase);
     }

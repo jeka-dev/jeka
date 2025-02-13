@@ -60,14 +60,14 @@ class CmdLineParser {
         final String[] methodOrFieldArgs = args.trunkKBeanRef().get();
 
         if (kbeanClassName == null) {
-            CommandLine cmdLine = allKBeanCommandLine(resolution.allKbeans, source);
+            CommandLine cmdLine = allKBeanCommandLine(resolution.allKbeanClassNames, source);
             String origin = source.isEmpty() ? "." : " (from " + source + ").";
             String firstArg = args.isEmpty() ? "" : args.get()[0];
             String msg = JkUtilsString.isBlank(kbeanName)  ?
                     "No default KBean defined. You need to precise on which kbean apply '" + firstArg + "'"
                     : "No KBean found for name '" + kbeanName + "'";
             if (JkLog.isVerbose()) {
-                msg = msg + ". Available KBeans : \n    " + String.join("\n    ", resolution.allKbeans);
+                msg = msg + ". Available KBeans : \n    " + String.join("\n    ", resolution.allKbeanClassNames);
             }
             throw new CommandLine.ParameterException(cmdLine, msg + origin);
         }

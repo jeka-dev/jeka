@@ -1,9 +1,6 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPackaging;
-import dev.jeka.core.samples.SimpleProjectKBean;
-import dev.jeka.core.tool.JkInit;
-import dev.jeka.core.tool.JkInjectRunbase;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 /**
@@ -18,24 +15,25 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
  * 
  * @formatter:off
  */
-public class NormalJarKBean extends KBean {
+class NormalJarKBean extends KBean {
 
-    ProjectKBean projectKBean = load(ProjectKBean.class);
+    @JkInject
+    private ProjectKBean projectKBean;
 
     /*
      *  Creates a sample build instance of the 'dev.jeka.samples' project.
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two projects are supposed to lie in the same folder.
      */
-    @JkInjectRunbase("../dev.jeka.samples.basic")
-    private SimpleProjectKBean sampleBuild;
+    @JkInject("../dev.jeka.samples.basic")
+    private JkRunbase basicRunbase;
 
-    @Override
-    protected void init() {
+    @JkPostInit
+    private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.flatFacade.setMainArtifactJarType(JkProjectPackaging.JarType.FAT);
         project.compilation.dependencies
-                .add(sampleBuild.projectKBean.project.toDependency());
+                .add(basicRunbase.load(ProjectKBean.class).project.toDependency());
     }
 
     public void cleanPack() {

@@ -121,8 +121,14 @@ public final class JkRunbase {
             return MASTER;
         }
         return SUB_RUN_BASES.computeIfAbsent(baseDir, path -> {
-            JkRunbase result = new JkRunbase(path);
-            result.kbeanResolution = MASTER.kbeanResolution.toSubRunbase(baseDir);
+            JkLog.startTask("Initializing Runbase " + path);
+            Engine engine = Engines.get(path);
+            engine.resolveKBeans();
+            JkRunbase result = engine.initRunbase(new KBeanAction.Container());
+            JkLog.endTask();
+            //JkRunbase result = new JkRunbase(path);
+            //result.classpath = MASTER.classpath;  // todo need to narrow
+            //result.kbeanResolution = MASTER.kbeanResolution.toSubRunbase(baseDir);
             return result;
         });
     }
@@ -207,6 +213,7 @@ public final class JkRunbase {
             JkLog.warn("Loading bean %s from Runbase %s during initialization.", beanClass.getName(), baseDir);
             JkLog.warn("This action will be disallowed in future releases.");
             JkLog.warn("Please, update your code to use @JkPostInit methods for KBean configuration.");
+            JkLog.warn("Kbeans under initialization was: " + beans.keySet());
             JkLog.warn("Run with --debug option to see stacktrace at the moment of initialization.");
             if (JkLog.isDebug()) {
                 JkUtilsThrowable.printStackTrace(JkLog.getOutPrintStream(),
@@ -314,11 +321,15 @@ public final class JkRunbase {
     void init(KBeanAction.Container cmdLineActionContainer) {
 
         // Add initKBean
-        Class<? extends KBean> initKBeanClass = kbeanResolution.findInitBeanClass().orElse(null);
-        KBeanAction.Container actions = cmdLineActionContainer.withInitBean(initKBeanClass);
+        Class<? extends KBean> localKBeanClass = kbeanResolution.findLocalKBeanClass().orElse(null);
+        KBeanAction.Container actions = cmdLineActionContainer.withInitBean(localKBeanClass);
 
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize JkRunbase with \n" + actions.toColumnText());
+            JkLog.debug("Local KBean class name: " + kbeanResolution.localKBeanClassName);
+            JkLog.debug("Local KBean class: " + localKBeanClass);
+            JkLog.debug("All KBean classes: " + kbeanResolution.allKbeanClassNames);
+            JkLog.debug("All local KBean classes: " + kbeanResolution.localKBeanClassNames);
         }
 
         // Needed for find() and inject values at instantiation time
@@ -334,13 +345,12 @@ public final class JkRunbase {
         this.initClassesResolver = InitClassesResolver.of(this, initialClasses);
         List<Class<? extends KBean>> classesToInit = this.initClassesResolver.getClassesToInitialize();
 
-        if (LogSettings.INSTANCE.runtimeInformation) {
+        if (LogSettings.INSTANCE.inspect) {
             String classNames = classesToInit.stream()
                     .map(KBean::name)
                     .collect(Collectors.joining(", "));
             JkLog.info("KBeans to initialize: ");
             JkLog.info("    " + classNames);
-
         }
 
         // Register pre-initializers from classes to initialize
@@ -355,7 +365,7 @@ public final class JkRunbase {
 
         // Log KBean Pre-initialization
         List<KBean> preInitializedKBeans = preInitializer.getPreInitializedKbeans();
-        if (LogSettings.INSTANCE.runtimeInformation  && !preInitializedKBeans.isEmpty()) {
+        if (LogSettings.INSTANCE.inspect && !preInitializedKBeans.isEmpty()) {
             JkLog.info("KBeans pre-initialisation:");
             final Jk2ColumnsText preInitializeText = Jk2ColumnsText.of(18, 120);
             for (KBean kbean : preInitializedKBeans) {
@@ -368,7 +378,7 @@ public final class JkRunbase {
         }
 
         // Log KBean initialization
-        if (LogSettings.INSTANCE.runtimeInformation) {
+        if (LogSettings.INSTANCE.inspect) {
             JkLog.info("KBeans Initialization    :");
             JkLog.info(this.effectiveActions.toColumnText()
                     .setSeparator(" | ")
@@ -378,20 +388,20 @@ public final class JkRunbase {
 
         // Post-initialize KBeans
         Jk2ColumnsText postInitializeText = null;
-        if (LogSettings.INSTANCE.runtimeInformation) {
+        if (LogSettings.INSTANCE.inspect) {
             JkLog.info("KBeans post-initialisation:");
             postInitializeText = Jk2ColumnsText.of(18, 120);
         }
         for (Class<? extends KBean> beanClass : initClassesResolver.getClassesToInitialize()) {
             KBean kbean = beans.get(beanClass.getName());
             List<String> initializerNames = postInitializer.apply(kbean);
-            if (LogSettings.INSTANCE.runtimeInformation) {
+            if (LogSettings.INSTANCE.inspect) {
                 for (String initializerName : initializerNames) {
                     postInitializeText.add("    "  + KBean.name(beanClass), initializerName);
                 }
             }
         }
-        if (LogSettings.INSTANCE.runtimeInformation) {
+        if (LogSettings.INSTANCE.inspect) {
             JkLog.info(postInitializeText.toString());
         }
         initialized = true;
@@ -423,6 +433,14 @@ public final class JkRunbase {
         List<KBeanAction> actions = this.cmdLineActions.findSetValues(bean.getClass());
         actions.forEach(action -> setValue(bean, action.member, action.value));
         return actions;
+    }
+
+    boolean isInitialized() {
+        return initialized;
+    }
+
+    KBean getBean(Class<?> kbeanClass) {
+        return beans.get(kbeanClass.getName());
     }
 
     static JkRunbase getCurrentContextBaseDir() {
@@ -500,7 +518,7 @@ public final class JkRunbase {
 
         try {
             bean.init();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | IllegalAccessError e) {
             if (!BehaviorSettings.INSTANCE.forceMode) {
                 throw e;
             }

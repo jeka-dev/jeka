@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
  */
 public abstract class JkScaffold {
 
+    public static final String UNSPECIFIED_JEKA_VERSION = "NO";
+
     private static final String JEKA_WORK_IGNORE = "/.jeka-work";
 
     private static final String JEKA_OUTPUT_IGNORE = "/jeka-output";
@@ -122,11 +124,12 @@ public abstract class JkScaffold {
      * @param moduleCoordinate the coordinate of the module for which to find the latest version
      * @param defaultVersion the default version to be returned if the latest version cannot be found
      */
-    public String findLatestVersion(String moduleCoordinate, String defaultVersion) {
+    public String findLatestStableVersion(String moduleCoordinate, String defaultVersion) {
         try {
-            List<String> springbootVersions = JkDependencyResolver.of(downloadRepos)
+            List<String> versions = JkDependencyResolver.of(downloadRepos)
                     .searchVersions(moduleCoordinate);
-            return springbootVersions.stream()
+            return versions.stream()
+                    .filter(version -> !version.contains("-"))
                     .sorted(JkVersion.VERSION_COMPARATOR.reversed())
                     .findFirst().get();
         } catch (Exception e) {
@@ -243,7 +246,7 @@ public abstract class JkScaffold {
             if (JkUtilsString.isBlank(propJekaVersion)) {
                 propJekaVersion = this.getLastJekaVersionSafely();
             }
-            if (!"UNSPECIFIED".equals(propJekaVersion) && !JkUtilsString.isBlank(propJekaVersion)) {
+            if (!UNSPECIFIED_JEKA_VERSION.equals(propJekaVersion) && !JkUtilsString.isBlank(propJekaVersion)) {
                 sb.append("jeka.version=").append(propJekaVersion).append("\n");
             }
             if (!JkUtilsString.isBlank(jekaDistribLocation)) {

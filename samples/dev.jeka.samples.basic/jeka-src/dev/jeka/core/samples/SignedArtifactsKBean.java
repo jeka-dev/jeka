@@ -1,10 +1,8 @@
 package dev.jeka.core.samples;
 
-import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
@@ -30,11 +28,15 @@ import java.nio.file.Path;
  *
  * @author Jerome Angibaud
  */
-public class SignedArtifactsKBean extends KBean {
+class SignedArtifactsKBean extends KBean {
 
-    ProjectKBean projectKBean = load(ProjectKBean.class);
+    public static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
 
-    JkMavenPublication mavenPublication;
+    @JkInject
+    private ProjectKBean projectKBean;
+
+    @JkInject
+    private MavenKBean mavenKBean;
 
     @JkPropValue("OSSRH_USER")
     public String ossrhUser;  // OSSRH user and password will be injected from environment variables
@@ -59,7 +61,7 @@ public class SignedArtifactsKBean extends KBean {
         project.flatFacade.dependencies.compile
                 .add(JkPopularLibs.GUAVA.toCoordinate("30.0-jre"));
         project.flatFacade.dependencies.test
-                .add(SimpleProjectKBean.JUNIT5);
+                .add(JUNIT5);
     }
 
     @JkPostInit
@@ -92,7 +94,7 @@ public class SignedArtifactsKBean extends KBean {
         JkPathTree.of(dummyRepoPath).createIfNotExist().deleteRoot();  // start from an empty repo
         projectKBean.clean();
         projectKBean.pack();
-        mavenPublication.publish();
+        mavenKBean.getMavenPublication().publish();
     }
 
     public static void main(String[] args) {

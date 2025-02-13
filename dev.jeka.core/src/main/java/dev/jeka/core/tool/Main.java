@@ -34,6 +34,7 @@ import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -94,20 +95,25 @@ public class Main {
 
             // Instantiate the Engine
             JkRepoSet downloadRepos = JkRepoProperties.of(props).getDownloadRepos();
-            engine = Engine.of(baseDir, downloadRepos, dependencies);
+            engine = Engine.of(true, baseDir, downloadRepos, dependencies);
 
             // Compile jeka-src and resolve the dependencies and kbeans
             // Using rocket emoji cause issue because it is caused on 2 chars, but when
             // erasing line, there is one excessive back-delete.
             JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
-            if (LogSettings.INSTANCE.runtimeInformation) {
+            if (LogSettings.INSTANCE.inspect) {
+                engine.resolveKBeans();
                 logRuntimeInfoBase(engine, props);
             }
 
             // Resolve KBeans
             KBeanResolution kBeanResolution = engine.getKbeanResolution();
             Engine.ClasspathSetupResult classpathSetupResult = engine.getClasspathSetupResult();
-            JkLog.debug("Found KBeans : %s" , kBeanResolution.allKbeans);
+            Engines.registerMaster(engine, classpathSetupResult.subEngines);
+            JkLog.debug("Found KBeans : %s" , kBeanResolution.allKbeanClassNames);
+
+            // log-debug engine classpath resolutions
+            logAllEnginesClasspath(engine);
 
             // Augment current classloader with resolved deps and compiled classes
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
@@ -126,7 +132,7 @@ public class Main {
 
             // Validate KBean properties
             if (!BehaviorSettings.INSTANCE.forceMode) {
-                validateKBeanProps(props, kBeanResolution.allKbeans);
+                validateKBeanProps(props, kBeanResolution.allKbeanClassNames);
             }
 
             // Parse command line to get action beans
@@ -134,7 +140,7 @@ public class Main {
                     interpolatedArgs.withoutOptions(),
                     kBeanResolution);
 
-            if (LogSettings.INSTANCE.runtimeInformation) {
+            if (LogSettings.INSTANCE.inspect) {
                 logRuntimeInfoEngineCommands(actionContainer);
             }
 
@@ -151,9 +157,6 @@ public class Main {
             if (!JkUtilsString.isBlank(docKbeanName)) {
                 boolean success = performDocMdKBean(engine, docKbeanName);
                 System.exit(success ? 0 : 1);
-            }
-            if (LogSettings.INSTANCE.runtimeInformation) {
-                logRuntimeInfoRun(engine.getRunbase());
             }
 
             // Run
@@ -232,7 +235,7 @@ public class Main {
         JkLog.setLogOnlyOnStdErr(logSettings.logOnStderr);
         JkLog.setDecorator(logSettings.style);
 
-        if (logSettings.runtimeInformation) {
+        if (logSettings.inspect) {
             displayRuntimeInfo(baseDir, cmdLine);
         }
         if (logSettings.quiet) {
@@ -260,7 +263,7 @@ public class Main {
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {
         JkLog.info(Jk2ColumnsText.of(18, 150)
-                .add("Init KBean", engine.resolveKBeans().initKBeanClassname)
+                .add("Local KBean", engine.resolveKBeans().localKBeanClassName)
                 .add("Default KBean", engine.resolveKBeans().defaultKbeanClassName)
                 .toString());
         JkLog.info("Properties         :");
@@ -278,16 +281,6 @@ public class Main {
                 .setSeparator(" | ")
                 .setMarginLeft("   | ")
                 .toString());
-    }
-
-    private static void logRuntimeInfoRun(JkRunbase runbase) {
-        List<String> beanNames = runbase.getBeans().stream()
-                .map(Object::getClass)
-                .map(KBean::name)
-                .collect(Collectors.toList());
-        JkLog.info("Involved KBeans    :", beanNames);
-        JkLog.info("    " + String.join(", ", beanNames));
-        JkLog.info("");
     }
 
     private static void logOutro(long start) {
@@ -367,7 +360,7 @@ public class Main {
         String kbean = isDefaultKBean ? kBeanResolution.defaultKbeanClassName : kbeanDoc;
         boolean found = PicocliHelp.printKBeanHelp(
                 engine.resolveClassPaths().runClasspath,
-                kBeanResolution.allKbeans,
+                kBeanResolution.allKbeanClassNames,
                 kbean,
                 engine.getRunbase(),
                 System.out);
@@ -384,7 +377,7 @@ public class Main {
         }
         KBeanResolution kBeanResolution = engine.getKbeanResolution();
         engine.getRunbase().setKbeanResolution(kBeanResolution);
-        String kbeanClassName = kBeanResolution.allKbeans.stream()
+        String kbeanClassName = kBeanResolution.allKbeanClassNames.stream()
                 .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
                 .findFirst().orElse(null);
         if (kbeanClassName == null) {
@@ -396,6 +389,22 @@ public class Main {
         String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent();
         System.out.println(mdDoc);
         return true;
+    }
+
+    private static void logAllEnginesClasspath(Engine engine) {
+        if (LogSettings.INSTANCE.debug) {
+            List<Engine> engines = new ArrayList<>();
+            engines.add(engine);
+            engines.addAll(engine.getClasspathSetupResult().subEngines);
+            for (Engine subEngine : engines) {
+                JkLog.debug("Engine " + subEngine.baseDir);
+                JkLog.debug("Run classpath:");
+                JkLog.info(subEngine.getClasspathSetupResult().runClasspath.toPathMultiLine("       "));
+                JkLog.debug("KBean classpath:");
+                JkLog.info(subEngine.getClasspathSetupResult().kbeanClasspath.toPathMultiLine("       "));
+                JkLog.info("");
+            }
+        }
     }
 
 

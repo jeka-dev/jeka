@@ -34,7 +34,7 @@ class SpringbootScaffold {
         // Remove the default build class defined for project
         projectScaffold.removeFileEntry(JkProjectScaffold.BUILD_CLASS_PATH);
 
-        String lastSpringbootVersion = projectScaffold.findLatestVersion(
+        String lastSpringbootVersion = projectScaffold.findLatestStableVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
                 DEFAULT_SPRINGBOOT_VERSION);
 
@@ -75,7 +75,7 @@ class SpringbootScaffold {
         // Remove build class defined by default
         baseScaffold.removeFileEntriesStartingWith(Paths.get(JkConstants.JEKA_SRC_DIR));
 
-        String lastSpringbootVersion = baseScaffold.findLatestVersion(
+        String lastSpringbootVersion = baseScaffold.findLatestStableVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
                 DEFAULT_SPRINGBOOT_VERSION);
 

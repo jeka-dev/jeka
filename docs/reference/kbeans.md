@@ -232,13 +232,13 @@ import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import dev.jeka.core.tool.JkInject;
 
 @JkDoc("A simple example to illustrate KBean concept.")
-public class Build extends KBean {
+class Build extends KBean {
 
     @JkInject
-    ProjectKBean projectKBean;
+    private ProjectKBean projectKBean;
     
     @JkInject
-    MavenKBean mavenKBean;
+    private MavenKBean mavenKBean;
 
     @JkDoc("Clean, compile, test, create jar files, and publish them.")
     public void packPublish() {
@@ -249,83 +249,7 @@ public class Build extends KBean {
 
 }
 ```
-Both `ProjectKBean` and `MavenKBean` are created and injected into the `Build` KBean during initialization.  
-
-For multi-module projects, use `JkInject` to access sub-module KBeans.
-
-```java
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.JkInject;
-
-import java.util.List;
-
-@JkDoc("A simple example to illustrate KBean concept.")
-public class MasterBuild extends KBean {
-
-    @JkInject("./foo")
-    ProjectKBean fooProject;
-
-    @JkInject("./bar")
-    ProjectKBean barProject;
-
-    @JkDoc("For all sub-modules: clean, compile, test, create jar files, and publish them.")
-    public void buildAll() {
-        List.of(fooProject, barProject).forEach(projectKbean -> {
-            projectKbean.clean();
-            projectKbean.pack();
-            MavenKBean mavenKBean = projectKbean.load(MavenKBean.class);
-            mavenKBean.publishLocal();
-        });
-    }
-}
-```
-In this example, JeKa initializes KBeans from the sub-modules *./foo* and *./bar*, then injects them into the `MasterBuild` KBean.
-
-We can create or load a KBean on the fly using the `KBean#load` method. 
-This means we only need to declare one KBean per sub-module. 
-
-Another option is to inject `JkRunbase` and make all calls through it:
-
-```java
-import dev.jeka.core.tool.JkRunbase;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.JkInject;
-
-import java.util.List;
-
-@JkDoc("A simple example to illustrate KBean concept.")
-public class MasterBuild extends KBean {
-
-    @JkInject("./foo")
-    JkRunbase foo;
-
-    @JkInject("./bar")
-    JkRunbase bar;
-
-    @JkDoc("For all sun-modules: clean, compile, test, create jar files, and publish them.")
-    public void buildAll() {
-        List.of(foo, bar).forEach(runbase -> {
-            ProjectKBean projectKBean = runbase.load(ProjectKBean.class);
-            projectKbean.clean();
-            projectKbean.pack();
-            MavenKBean mavenKBean = runbase.load(MavenKBean.class);
-            mavenKBean.publishLocal();
-        });
-    }
-}
-```
-
-For larger sub-project structures, use `KBean#getImportedKBeans()` to list all sub-modules, either recursively or not.
-
-```java
-@JkDoc("For all sub-modules: compile, test, create jar files, and publish them.")
-public void buildAll() {
-    this.getImportedKBeans().get(ProjectKBean.class, true).forEach(ProjectKBean::pack);
-    this.getImportedKBeans().get(MavenKBean.class, true).forEach(MavenKBean::publish);
-}
-```
+Both `ProjectKBean` and `MavenKBean` are created and injected into the `Build` KBean during initialization.
 
 #### Using #load and #find methods
 
@@ -334,6 +258,7 @@ This method forces the initialization of the `KBean` if it is not already presen
 It is useful when you need a specific `KBean` only within certain methods.
 
 ```java
+@JkDoc("Compiles application to native executable")
 public void createNativeExec() {
     load(NativeKBean.class).compile();
 }
@@ -354,7 +279,7 @@ public void cleanup() {
 }
 ```
 
-### Configure Kbean from another one.
+### Configure a Kbean from another KBean.
 
 Wether t-you want to create a JeKa extension or just configure a build, the technic is 
 the same: create a KBean and configure an existing one.
@@ -366,7 +291,7 @@ class Build extends KBean {
 
     public boolean skipIT;
 
-    @JkPostInit
+    @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.flatFacade.dependencies.compile
@@ -393,26 +318,14 @@ class Build extends KBean {
 This KBean defines a `Build` class that customizes the `project` and `maven` KBeans.  
 The `postInit` methods are invoked only if their respective KBean is present.
 
+The `required = true` attribute, means that the KBean project must be instantiated by JeKa, if not already setup.
+
 For example, when executing `jeka project: pack`, the `ProjectKBean` will be initialized with the settings provided by 
 command-line arguments and `@project...=` properties defined in the *jeka.properties* file. 
 The instance will then be passed to the `postInit` method before invoking the `pack` method.
 
 When executing `jeka maven: publish`, the `project` KBean will be implicitly loaded and configured, 
 followed by the same process for the `maven` KBean, before invoking the `publish` method.
-
-The reason the `maven` KBean implicitly loads the `project` KBean is that this behavior
-is declared in `MavenKBean#init` method as:
-
-```java
-public class MavenKBean extends KBean {
-    
-    @Override
-    protected void init() {
-        requireBuildable();  //  load `project` or `base` kbean if not present
-    }
-    
-}
-```
 
 ## Lifecycle
 
@@ -421,102 +334,49 @@ Before Kbean methods are executed, Kbeans are configured as described in the det
 ```mermaid
 sequenceDiagram
     participant RB as Run Base
-    participant IN as Initializer
-    participant CI as KBean classes to init
+    participant IN as Init class resolver
+    participant IT as Instantiater
+    participant KB as KBean
     participant PR as Pre-initializer
     participant PO as Post-initializer
-    participant KB as KBean
     participant RK as Registered KBeans
 
-    RB->>CI:  Add initializer KBean
-    RB->>CI:  Add KBean classes declared in properties and cmd-line
-    RB->>CI:  Add classes declared via @JkInject 
-    RB->>IN:  Register pre-init methods
-    IN->>CI:  Get class to init
-    IN->>PR:  For each class to init
-    PR->>PR:  Discover transitive pre-initializer classes
-    PR->>PR:  Register Pre-initializer methods
-    PR-->IN:  
-    IN-->RB:  
-    RB->>IN:  For each class to init
-    IN->>IN:  Setup current base directory
-    IN->>KB:  new
-    KB->>KB:  Capture the current base dir
-    KB->>KB:  Load KBeans imported from other Runbase via @JkInject('./...')
-    IN->>RK:  Register the kbean singleton
-    IN->>PR:  Pre-initialize the singleton
-    IN->>KB:  Inject properties (e.g. @project.version=0.1)
-    IN->>KB:  Inject command-line values  (e.g. project: version=0.1)
-    IN->>KB:  Invoke init()
-    KB->>KB:  Specific KBean initialisation code (as declaring required classes)
-    KB->>CI:  Register required classes
-    KB->>PO:  Register required classes
-    KB-->>IN:  
-    IN->>PO:  Register initialized class
-    IN-->RB: 
-    RB->>IN:  Post initialize
-    IN->>RK:  Get all registered KBeans
-    IN->>PO:  Post initialize each registered KBean
-    PO->>PO:  Apply registered methods to provided KBean
-    PO-->IN:  
-    IN-->RB:  
+    RB->>IN:  Discover classes to init
+    RB->>PR:  Register pre-init methods
+    RB->>IT:  Instantiate classes to init
+    IT->>KB:  New
+    IT->>RK:  Register Kbean instance
+    IT->>PR:  Pre-initialise KBean
+    IT->>KB:  Inject fields annotated with @JkInject
+    IT->>KB:  Inject values from properties
+    IT->>KB:  Inject values from Command-line
+    IT->>KB:  Init()
+    IT->>PO:  Register KBean post-init methods
+    RB->>PO:  Post-initialize all initialized KBeans
 ```
-The sequence is split in 3 main phases:
-
-### Discover
-
-Determine which Kbean classes to initialize, according to KBean presents in *jeka-src*, command-line and properties.
-
-If some KBean classes declare fields annotated with `@JkInject` (without referencing another basr dir),  
-the field classes are included in the classes to init.
-
-Once identified, classes are inspected to find declared *pre-init* methods. Collected methods are 
-registered for a later usage.
-
-### Initialisation
-
-Classes to initialise are instantiated the initialized one by one, as follow:
-
-- KBean class is instantiated. KBean parent constructor captures the current 
-  base directory in its internal context for later usage. 
-  Fields annotated with `@JkInject("./...")` are injected.
-- The newly created instance is passed as argument of all *pre-init* methods collected in the previous phase.
-- Values coming from *properties* are injected in the KBean fields.
-- Values coming from the command-line are injected in the KBean fields.
-- Field annotated with raw `@JkInject` are injected
-- The `init()` method is invoked. This method is mainly used to declare require KBeans, or do initial setup.
-  If `require(Class)` is invoked during the `init`method, those classes 
-  are added to the initialization loop, and their post-initializer methods are registered.
-- The kbean post-initializer methods are registered. Note that they are registered after the required classes.
 
 ### Post initialisation.
 
-One all the KBean has been initialized, they maybe 
-
+One all the KBean has been initialized, bean already initialized or extra one can be invoked from the KBean methods.
 
 ```mermaid
 sequenceDiagram
-    participant EE as Execution Engine or user code
+    participant AK as A KBean
     participant RB as Run Base
+    participant IT as Instantiater
     participant KB as KBean
-    participant OKB as Other KBeans
+    participant PR as Pre-initializer
+    participant PO as Post-initializer
+    participant RK as Registered KBeans
 
-    EE->>RB:  Load KBean
-    RB->>RB:  Find if singleton already exists
-    RB-->>EE: Return the singleton if found
-    RB->>KB:  new
-    KB->>KB:  Setup current base directory
-    KB-->>RB: 
-    RB->>RB:  Register Singleton
-    RB->>RB:  Consume the singleton by the @JkPreInitKBean methods.
-    RB->>KB:  Inject properties (e.g. -D@project.version=0.1 or @project.moduleId=ac.me:foo)
-    RB->>KB:  Inject command-line values  (e.g. project: version=0.1)
-    RB->>KB:  Invoke init() method
-    KB->>KB:  Specific KBean initialisation code (e.g. may be nothing)
-    KB-->> OKB: May load or call other KBans
-    KB-->>RB: 
-    RB-->>EE: 
-
+    AK->>RB:  Load a KBean 
+    RB->>RK:  Find if KBean is already instantiated
+    RB-->>AK:  Returns Kbean instance if found
+    RB->>IT:  Initialise KBean
+    IT->>RK:  Register KBean
+    RB->>PO:  Register KBean post-init methods
+    RB->>PO:  Post-initialize all initialized KBeans
+    RB-->>AK:  
 ```
 
 ```mermaid
@@ -562,3 +422,78 @@ In multi-project scenarios, it is common for a _KBean_ in one project to access 
 !!! tip
     Ensure that the imported _KBean_ uses `KBean#getBaseDir` for handling file paths. This practice ensures safe execution from any working directory.
 
+For multi-module projects, use `JkInject` to access sub-module KBeans.
+
+```java
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+import dev.jeka.core.tool.JkInject;
+
+import java.util.List;
+
+@JkDoc("A simple example to illustrate KBean concept.")
+public class MasterBuild extends KBean {
+
+    @JkInject("./foo")
+    ProjectKBean fooProject;
+
+    @JkInject("./bar")
+    ProjectKBean barProject;
+
+    @JkDoc("For all sub-modules: clean, compile, test, create jar files, and publish them.")
+    public void buildAll() {
+        List.of(fooProject, barProject).forEach(projectKbean -> {
+            projectKbean.clean();
+            projectKbean.pack();
+            MavenKBean mavenKBean = projectKbean.load(MavenKBean.class);
+            mavenKBean.publishLocal();
+        });
+    }
+}
+```
+In this example, JeKa initializes KBeans from the sub-modules *./foo* and *./bar*, then injects them into the `MasterBuild` KBean.
+
+We can create or load a KBean on the fly using the `KBean#load` method.
+This means we only need to declare one KBean per sub-module.
+
+Another option is to inject `JkRunbase` and make all calls through it:
+
+```java
+import dev.jeka.core.tool.JkRunbase;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+import dev.jeka.core.tool.JkInject;
+
+import java.util.List;
+
+@JkDoc("A simple example to illustrate KBean concept.")
+public class MasterBuild extends KBean {
+
+    @JkInject("./foo")
+    JkRunbase foo;
+
+    @JkInject("./bar")
+    JkRunbase bar;
+
+    @JkDoc("For all sun-modules: clean, compile, test, create jar files, and publish them.")
+    public void buildAll() {
+        List.of(foo, bar).forEach(runbase -> {
+            ProjectKBean projectKBean = runbase.load(ProjectKBean.class);
+            projectKbean.clean();
+            projectKbean.pack();
+            MavenKBean mavenKBean = runbase.load(MavenKBean.class);
+            mavenKBean.publishLocal();
+        });
+    }
+}
+```
+
+For larger sub-project structures, use `KBean#getImportedKBeans()` to list all sub-modules, either recursively or not.
+
+```java
+@JkDoc("For all sub-modules: compile, test, create jar files, and publish them.")
+public void buildAll() {
+    this.getImportedKBeans().get(ProjectKBean.class, true).forEach(ProjectKBean::pack);
+    this.getImportedKBeans().get(MavenKBean.class, true).forEach(MavenKBean::publish);
+}
+```

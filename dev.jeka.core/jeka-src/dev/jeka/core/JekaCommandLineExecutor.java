@@ -83,7 +83,7 @@ public abstract class JekaCommandLineExecutor {
         JkProcess process = JkProcess.of(cmd.toString())
                 .setWorkingDir(baseDir)
                 .setDestroyAtJvmShutdown(true)
-                .setLogCommand(true)
+                .setLogCommand(false)
                 .setLogWithJekaDecorator(showOutput)
                 .setCollectStdout(!showOutput)
                 .setCollectStderr(!showOutput)
@@ -111,7 +111,9 @@ public abstract class JekaCommandLineExecutor {
     }
 
     protected void runJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
+        JkLog.startTask("Run in [%s]: jeka %s", baseDir, cmdLine);
         prepareJeka(useBaseDirJeka, baseDir, cmdLine).exec();
+        JkLog.endTask();
     }
 
     private static String scriptName() {

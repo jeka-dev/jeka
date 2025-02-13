@@ -32,7 +32,7 @@ class LogSettings {
 
     final boolean stackTrace;
 
-    final boolean runtimeInformation;
+    final boolean inspect;
 
     final boolean duration;
 
@@ -48,7 +48,7 @@ class LogSettings {
                 boolean debug,
                 boolean quiet,
                 boolean stackTrace,
-                boolean runtimeInformation,
+                boolean inspect,
                 boolean duration,
                 JkLog.Style style,
                 Boolean animation,
@@ -59,7 +59,7 @@ class LogSettings {
         this.debug = debug;
         this.quiet = quiet;
         this.stackTrace = stackTrace;
-        this.runtimeInformation = runtimeInformation;
+        this.inspect = inspect;
         this.duration = duration;
         this.style = style;
         this.animation = animation;

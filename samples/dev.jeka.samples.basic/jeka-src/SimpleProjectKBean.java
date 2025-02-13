@@ -1,8 +1,21 @@
-package dev.jeka.core.samples;
+/*
+ * Copyright 2014-2025  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkTransitivity;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
@@ -12,7 +25,6 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-
 
 /**
  * This builds a Java library and publish it on a maven repo using Project plugin. A Java library means a jar that
@@ -25,24 +37,19 @@ public class SimpleProjectKBean extends KBean {
     @JkDoc("If true, skip execution of Integration tests.")
     public boolean skipIT;
 
-    static final String JUNIT5 = "org.junit.jupiter:junit-jupiter:5.8.1";
-
     public String checkedValue;
 
     @JkInject
-    ProjectKBean projectKBean;
+    private ProjectKBean projectKBean;
 
-    @Override
-    protected void init() {
-        require(ProjectKBean.class, MavenKBean.class);
-    }
-
-    @JkPostInit
+    @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean)  {
         JkProject project = projectKBean.project;
         project.flatFacade.dependencies.compile
                 .add("com.google.guava:guava:30.0-jre")
                 .add( "com.sun.jersey:jersey-server:1.19.4");
+        project.flatFacade.dependencies.runtime
+                .add("com.github.djeang:vincer-dom:1.2.0");
         project.flatFacade.dependencies.test
                 .add("org.junit.jupiter:junit-jupiter:5.10.1");
         project.flatFacade
@@ -51,23 +58,19 @@ public class SimpleProjectKBean extends KBean {
                 .setJvmTargetVersion(JkJavaVersion.V8);
         project
                 .dependencyResolver
-                .getDefaultParams()
-                .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
-        project
-                .packaging
-                .runtimeDependencies
-                .add("com.github.djeang:vincer-dom:1.2.0");
+                    .getDefaultParams()
+                        .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
         project
                 .testing
-                .testProcessor
-                .setForkingProcess(false)
-                .engineBehavior
-                .setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
+                    .testProcessor
+                        .setForkingProcess(false)
+                    .engineBehavior
+                        .setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
     }
 
-    @JkPostInit
+    @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.mavenPublicationCustomizer.append(mavenPublication ->
+        mavenKBean.customizePublication(mavenPublication ->
             mavenPublication
                 .setModuleId("dev.jeka:sample-javaplugin")
                 .setVersion("1.0-SNAPSHOT")
@@ -77,6 +80,10 @@ public class SimpleProjectKBean extends KBean {
                 // Here jersey-server is not supposed to be part of the API but only needed at runtime.
                 .customizeDependencies(deps -> deps
                         .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME)));
+    }
+
+    public JkProject getProject() {
+        return projectKBean.project;
     }
 
     public void cleanPackPublish() {
@@ -112,8 +119,5 @@ public class SimpleProjectKBean extends KBean {
         bean.cleanPackPublish();
         bean.checkValueIsA();
     }
-
-
-
 
 }

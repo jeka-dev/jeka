@@ -551,16 +551,15 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     private void printContextualInfo() {
         String workingDirName = this.workingDir == null ? "." : workingDir.toString();
         JkLog.info("working dir   : %s", workingDirName);
-        JkLog.info("command path  : %s", processParams.isEmpty() ? "" : processParams.get(0));
-        final String cmdLine;
-        if (JkLog.isDebug() ) {
-            cmdLine = fullCmdLine();
-        } else if (JkLog.isVerbose()) {
-            cmdLine = JkUtilsString.ellipse(fullCmdLine(), 480);
-        } else {
-            cmdLine = JkUtilsString.ellipse(fullCmdLine(), 120);
+        String cmdPath = processParams.isEmpty() ? "" : processParams.get(0);
+        String cmdArgs = JkUtilsString.substringAfterFirst(fullCmdLine(), cmdPath).trim();
+        JkLog.info("command path  : %s", cmdPath);
+        if (JkLog.isVerbose()) {
+            cmdArgs = JkUtilsString.ellipse(cmdArgs, 480);
+        } else if (!JkLog.isDebug()) {
+            cmdArgs = JkUtilsString.ellipse(cmdArgs, 120);
         }
-        JkLog.info("cmd line      : %s", cmdLine);
+        JkLog.info("command args  : %s", cmdArgs);
         JkLog.getOutPrintStream().flush();
     }
 

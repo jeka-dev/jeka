@@ -61,7 +61,7 @@ class EngineWrapper {
         LogSettings.INSTANCE = mainCommand.logSettings();
         BehaviorSettings.INSTANCE = mainCommand.behaviorSettings();
 
-        engine = Engine.of(baseDir, JkRepoSet.ofLocal(), JkDependencySet.of());
+        engine = Engine.of(true, baseDir, JkRepoSet.ofLocal(), JkDependencySet.of());
         KBeanResolution kBeanResolution = kBeanResolution(engine, jekaSrcKBeanClasses);
         run(engine, kBeanResolution, props, args);
         return this;
@@ -108,10 +108,10 @@ class EngineWrapper {
         List<String> allKBeans = allKBeanClasses.stream().map(Class::getName).collect(Collectors.toList());
         List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
 
-        DefaultAndInitKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
+        DefaultAndLocalKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
 
         return new KBeanResolution(
-                allKBeans, jekaSrcKBeans, defaultAndInitKBean.initKbeanClassName,
+                allKBeans, jekaSrcKBeans, defaultAndInitKBean.localKbeanClassName,
                 defaultAndInitKBean.defaultKBeanClassName);
     }
 

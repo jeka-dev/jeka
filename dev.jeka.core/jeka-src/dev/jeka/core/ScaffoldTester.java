@@ -37,13 +37,13 @@ class ScaffoldTester extends JekaCommandLineExecutor {
         Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
         runWithDistribJekaShell(path, "--version");
         runWithDistribJekaShell(path, "--help");
-        scaffoldAndCheckInTemp("base: scaffold", "hello base: info -v -Djeka.java.version=17", true);
-        scaffoldAndCheckInTemp("base: scaffold scaffold.kind=APP -vi", "base: test runMain", true);
-        scaffoldAndCheckInTemp("project: scaffold scaffold.kind=REGULAR", ": --help", true);
+        scaffoldAndCheckInTemp("base: scaffold scaffold.jekaVersion=NO", "hello base: info -v -Djeka.java.version=17", true);
+        scaffoldAndCheckInTemp("base: scaffold scaffold.kind=APP scaffold.jekaVersion=NO -vi", "base: test runMain", true);
+        scaffoldAndCheckInTemp("project: scaffold scaffold.kind=REGULAR scaffold.jekaVersion=NO", ": --help", true);
 
         // Scaffold template=PROPS + layout=SIMPLE
         Path tempDir = scaffoldAndCheckInTemp(
-                "project: scaffold.kind=REGULAR layout.style=SIMPLE scaffold",
+                "project: scaffold.kind=REGULAR scaffold.jekaVersion=NO layout.style=SIMPLE scaffold",
                 "project: pack -v", false);
         JkUtilsAssert.state(Files.exists(tempDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
                 "dependencies.txt has not been generated");
@@ -51,12 +51,12 @@ class ScaffoldTester extends JekaCommandLineExecutor {
 
         // Scaffold for Jeka  plugin
         scaffoldAndCheckInTemp(
-                "project: scaffold scaffold.kind=PLUGIN",
+                "project: scaffold scaffold.kind=PLUGIN scaffold.jekaVersion=NO",
                 "project: pack", true);
 
         // Check IntelliJ + Eclipse metadata
         Path workingDir = scaffoldAndCheckInTemp(
-                "project: scaffold",
+                "project: scaffold scaffold.jekaVersion=NO",
                 "project: clean pack", false);
 
 
