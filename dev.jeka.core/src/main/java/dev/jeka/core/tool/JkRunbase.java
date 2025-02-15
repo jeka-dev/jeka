@@ -33,7 +33,6 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,13 +51,14 @@ import java.util.stream.Collectors;
  */
 public final class JkRunbase {
 
+    // Trick for passing the runbase to the KBean default constructor
+    static final ThreadLocal<JkRunbase> CURRENT = new ThreadLocal<>();
+
     private static JkRunbase MASTER;
 
-    private static final String PROP_KBEAN_PREFIX = "@";
-
-    private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
-
     private static final Map<Path, JkRunbase> SUB_RUN_BASES = new LinkedHashMap<>();
+
+    private static final String PROP_KBEAN_PREFIX = "@";
 
     private KBeanResolution kbeanResolution;
 
@@ -89,8 +89,6 @@ public final class JkRunbase {
 
     private final JkRunnables cleanActions = JkRunnables.of().setLogTasks(JkLog.isDebug());
 
-    private InitClassesResolver initClassesResolver;
-
     // We use class name as key because using `Class` objects as key may lead
     // in duplicate initialization in some circumstances where several class loader
     // are present (this has happened when using "jeka aKbean: --doc)
@@ -101,7 +99,6 @@ public final class JkRunbase {
     private final PostInitializer postInitializer = PostInitializer.of();
 
     private boolean initialized;
-
 
     private JkRunbase(Path baseDir) {
         this.baseDir = baseDir;
@@ -342,8 +339,8 @@ public final class JkRunbase {
         this.kbeanInitDeclaredInProps = kbeansToInitFromProps();  // todo remove when find() prevented at init time
         initialClasses.addAll(this.kbeanInitDeclaredInProps);
         initialClasses = initialClasses.stream().distinct().collect(Collectors.toList());
-        this.initClassesResolver = InitClassesResolver.of(this, initialClasses);
-        List<Class<? extends KBean>> classesToInit = this.initClassesResolver.getClassesToInitialize();
+        InitClassesResolver initClassesResolver = InitClassesResolver.of(this, initialClasses);
+        List<Class<? extends KBean>> classesToInit = initClassesResolver.getClassesToInitialize();
 
         if (LogSettings.INSTANCE.inspect) {
             String classNames = classesToInit.stream()
@@ -443,15 +440,6 @@ public final class JkRunbase {
         return beans.get(kbeanClass.getName());
     }
 
-    static JkRunbase getCurrentContextBaseDir() {
-        return get(getBaseDirContext());
-    }
-
-    static void setBaseDirContext(Path baseDir) {
-        JkUtilsAssert.argument(baseDir == null || Files.exists(baseDir),"Base dir " + baseDir + " not found.");
-        BASE_DIR_CONTEXT.set(baseDir);
-    }
-
     static JkProperties constructProperties(Path baseDir) {
         JkProperties result = JkProperties.ofSysPropsThenEnv()
                     .withFallback(readBasePropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir)));
@@ -496,10 +484,12 @@ public final class JkRunbase {
 
     private <T extends KBean> T instantiateKBean(Class<T> beanClass) {
 
-        // Record the instantiation to allow visual tracking of runtime activity.
+        // Record the instantiation to allow visual tracking of initialization activity.
         this.effectiveActions.add(KBeanAction.ofInit(beanClass));
 
+        CURRENT.set(this);
         T bean = JkUtilsReflect.newInstance(beanClass);
+        CURRENT.remove();
 
         // This way KBeans are registered in the order they have been requested for instantiation,
         // and not the order they have finished to be instantiated.
@@ -535,10 +525,7 @@ public final class JkRunbase {
             String relBaseDir = relBaseDir().toString();
             String subBaseLabel = relBaseDir.isEmpty() ? "" : "[" + relBaseDir + "]";
             JkLog.debugStartTask("Instantiate KBean %s %s", beanClass.getName(), subBaseLabel);
-            Path previousBaseDir = BASE_DIR_CONTEXT.get();
-            BASE_DIR_CONTEXT.set(baseDir);  // without this, projects nested with more than 1 level failed to get proper base dir
             result = this.instantiateKBean(beanClass);
-            BASE_DIR_CONTEXT.set(previousBaseDir);
             JkLog.debugEndTask();
         }
         return result;
@@ -552,13 +539,6 @@ public final class JkRunbase {
         return beans.values().stream()
                 .map(Object::getClass)
                 .anyMatch(ProjectKBean.class::equals);
-    }
-
-    private static Path getBaseDirContext() {
-        return Optional.ofNullable(BASE_DIR_CONTEXT.get()).orElseGet(() -> {
-            setBaseDirContext(Paths.get(""));
-            return BASE_DIR_CONTEXT.get();
-        });
     }
 
     private Path relBaseDir() {

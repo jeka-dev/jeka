@@ -53,11 +53,12 @@ public class SonarqubeKBean extends KBean {
     @JkDoc("Ping the sonarqube server prior running analysis")
     public boolean pingServer = true;
 
-    public final JkSonarqube sonarqube = JkSonarqube.ofVersion(getRunbase().getDependencyResolver().getRepos(),
-            JkSonarqube.DEFAULT_SCANNER__VERSION);
+    private JkSonarqube sonarqube;
 
     @Override
     protected void init() {
+        sonarqube = JkSonarqube.ofVersion(getRunbase().getDependencyResolver().getRepos(),
+                JkSonarqube.DEFAULT_SCANNER__VERSION);
         sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), effectiveScannerVersion());
         sonarqube.setPingServer(pingServer);
         sonarqube.setLogOutput(logOutput);
@@ -91,6 +92,10 @@ public class SonarqubeKBean extends KBean {
                     sonarqube.getHostUrl(), sonarqube.getProperty(JkSonarqube.PROJECT_KEY) );
             System.exit(1);
         }
+    }
+
+    public JkSonarqube getSonarqube() {
+        return sonarqube;
     }
 
     private String effectiveScannerVersion() {

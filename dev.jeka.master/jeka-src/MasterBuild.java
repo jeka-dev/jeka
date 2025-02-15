@@ -121,7 +121,6 @@ class MasterBuild extends KBean {
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
         jacocoForCore.configureAndApplyTo(coreBuild.load(ProjectKBean.class).project);
 
-        load(NexusKBean.class).configureNexusRepo(this::configureNexus);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -204,8 +203,6 @@ class MasterBuild extends KBean {
         JkLog.endTask();
     }
 
-
-
     @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
     public void setPosixPermissions() {
         JkPathTree.of("../samples").andMatching("*/jeka", "**/jeka").getFiles().forEach(path -> {
@@ -250,6 +247,12 @@ class MasterBuild extends KBean {
         new PluginScaffoldTester().run();
     }
 
+    @JkPostInit(required = true)
+    private void postInit(NexusKBean nexusKBean) {
+        nexusKBean.configureNexusRepo(nexusRepo ->
+                nexusRepo.setReadTimeout(60*1000));
+    }
+
     private boolean shouldPublishOnMavenCentral() {
         String branchOrTag = computeBranchName();
         if (branchOrTag != null &&
@@ -269,9 +272,7 @@ class MasterBuild extends KBean {
         return JkGit.of().getCurrentBranch();
     }
 
-    private void configureNexus(JkNexusRepos nexusRepos) {
-        nexusRepos.setReadTimeout(60*1000);
-    }
+
 
     private JkRepoSet publishRepo() {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);

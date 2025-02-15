@@ -25,7 +25,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -44,19 +43,19 @@ public abstract class KBean {
 
     private final JkImportedKBeans importedKBeans;  // KBeans from other projects
 
+    /**
+     * Use {@link #init()} instead!
+     * <p>
+     * Code added here won't work as expected since public fields (such as those from command-line properties,
+     * basedir, and imported KBeans) are not yet initialized.
+     */
+    protected KBean() {
+        this(JkRunbase.CURRENT.get());
+    }
+
     private KBean(JkRunbase runbase) {
         this.runbase = runbase;
         this.importedKBeans = new JkImportedKBeans(this);
-    }
-
-    /**
-     * Use {@link #init()} instead !!
-     *
-     * If you put some code here, the public instance fields are not yet injected with values from command-line or
-     * properties <p>
-     */
-    protected KBean() {
-        this(JkRunbase.getCurrentContextBaseDir());
     }
 
     /**
@@ -144,10 +143,6 @@ public abstract class KBean {
         return false;
     }
 
-    final String shortName() {
-        return name(this.getClass());
-    }
-
     @Override
     public String toString() {
         return "KBean '" + shortName() + "' [from project '" + JkUtilsPath.friendlyName(this.runbase.getBaseDir()) + "']";
@@ -163,6 +158,10 @@ public abstract class KBean {
             JkPathTree.of(output).deleteContent();
         }
         return this;
+    }
+
+    final String shortName() {
+        return name(this.getClass());
     }
 
     static String name(String fullyQualifiedClassName) {
