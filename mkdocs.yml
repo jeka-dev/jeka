@@ -60,7 +60,6 @@ nav:
         - Build Projects: tutorials/build-projects.md
     - Reference:
         - KBeans: reference/kbeans.md
-        - Properties: reference/properties.md
         - Bundled KBeans:
             - base: reference/kbeans-base.md
             - project: reference/kbeans-project.md
@@ -71,6 +70,7 @@ nav:
             - git: reference/kbeans-git.md
             - app: reference/kbeans-app.md
             - setup: reference/kbeans-setup.md
+        - Properties: reference/properties.md
         - Build Library:
             - Intro : reference/api-intro.md
             - Files : reference/api-files.md

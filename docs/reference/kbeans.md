@@ -159,7 +159,9 @@ To be referenced conveniently, _KBeans_ can be identified by specific names. For
 
 _KBean_ classes, methods, and attributes can be annotated with the `@JkDoc` annotation to provide self-documentation.  
 The text provided in these annotations is displayed when running the command:  
-`jeka <kbeanName>: --doc`
+```shell
+jeka <kbeanName>: --doc
+```
 
 ## Invoke KBeans
 
@@ -167,9 +169,14 @@ The text provided in these annotations is displayed when running the command:
 
 _KBean_ methods can be executed directly from the command line using the syntax:
 
-`jeka <kbeanName>: [methodName...] [attributeName=xxx...]`
+```shell
+jeka <kbeanName>: [methodName...] [attributeName=xxx...]
+```
 
-**Example:** `jeka project: info pack tests.fork=false pack.jarType=FAT jacoco: sonarqube: run`
+**Example:** 
+```shell
+jeka project: info pack tests.fork=false pack.jarType=FAT sonarqube: run
+```
 
 You can call multiple methods and set multiple attributes in a single command.
     
@@ -281,7 +288,7 @@ public void cleanup() {
 
 ### Configure a Kbean from another KBean.
 
-Wether t-you want to create a JeKa extension or just configure a build, the technic is 
+Wether you want to create a JeKa extension or just configure a build, the technic is 
 the same: create a KBean and configure an existing one.
 
 For example, to configure a build, you can create a Build class as:
@@ -290,6 +297,11 @@ For example, to configure a build, you can create a Build class as:
 class Build extends KBean {
 
     public boolean skipIT;
+
+    @JkPreInit
+    private static void preInit(ProjectKBean projectKBean) {
+        projectKBean.tests.progress = JkTestProcessor.JkProgressStyle.PLAIN;
+    }
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
@@ -305,7 +317,7 @@ class Build extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        
+
         // Customize the published pom dependencies
         mavenKBean.getMavenPublication().customizeDependencies(deps -> deps
                 .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
@@ -316,7 +328,20 @@ class Build extends KBean {
 }
 ```
 This KBean defines a `Build` class that customizes the `project` and `maven` KBeans.  
-The `postInit` methods are invoked only if their respective KBean is present.
+
+#### Pre-initialize KBeans
+
+The `preInit` methods are invoked before the KBean is instantiated; therefore, they must be declared as `static`.  
+These methods are applied to the target KBean immediately after it is instantiated but before it is initialized.  
+This means they are executed prior to the injection of properties or command-line values.
+
+The sole purpose of `preInit` methods is to provide default values, which can later be overridden by properties or command-line arguments.  
+They should not perform further configuration, as the target KBean has not yet been fully initialized when these methods are invoked.
+
+#### Post-initialize KBeans
+
+The `postInit` methods are invoked only if their respective `KBean` is fully initialized. 
+This occurs after its properties and command-line values have been injected, and its `init()` method has been executed.
 
 The `required = true` attribute, means that the KBean project must be instantiated by JeKa, if not already setup.
 

@@ -156,10 +156,10 @@ There is 2 way of adding local file system dependencies :
 
 ### Define dependencies with properties
 
-Dependencies can also be mentioned using the `jeka.inject.classpath=` property in *jeka.properties* file.
+Dependencies can also be mentioned using the `jeka.classpath=` property in *jeka.properties* file.
 
 ```
-jeka.inject.classpath=\
+jeka.classpath=\
   com.google.cloud:libraries-bom::pom:5.0.0 \
   com.google.cloud:google-cloud-storage \
   com.google.cloud:oogle-cloud-bigquery
@@ -174,7 +174,7 @@ with `@JkInjectCompileOption()`.
 
 For example we can turn off some warning messages using 
 ```java
-@JkInjectCompileOption("-Xlint:-options")
+@JkCompileOption("-Xlint:-options")
 ```
 
 ## Multi-file scripts
@@ -300,9 +300,9 @@ For example, you can execute `jeka admin: openHomeDir` to open your*Jeka Home di
 
 Adding KBeans to classpath just consists in adding a dependency that contains a KBean class. 
 
-You can use `jeka.inject.classpath` properties as :
+You can use `jeka.classpath` properties as :
 ```properties
-jeka.inject.classpath=\
+jeka.classpath=\
   dev.jeka:springboot-plugin  \
   dev.jeka:sonarqube-plugin \
   dev.jeka:openapi-plugin:0.11.0.1

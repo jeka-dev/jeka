@@ -173,7 +173,7 @@ To use them, we need to add them to the classpath from Maven Central.
     We don't need to specify the plugin versions because Java can automatically select the correct one.
 
 ```properties title="jeka.properties"
-jeka.inject.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
+jeka.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
 @jacoco=
 
 jeka.cmd.pack-quality=project: pack sonarqube: run
@@ -200,24 +200,27 @@ class Build extends KBean {
 
     @JkDoc("If true, the generated doc will include PDF documents")
     public boolean includePdfDoc;
-    
+
     @JkDoc("If true, the produced jar will include a JDBC driver")
     public boolean includeJdbcDriver;
 
-    private final JkProject project = load(ProjectKBean.class).project;
-
-    @Override
-    protected void init() {
-        var publication = load(MavenKBean.class).getMavenPublication();
-        publication.putArtifact(JkArtifactId.of("doc", "zip"), this::generateDoc);
-        if (includeJdbcDriver){
-            project.packaging.runtimeDependencies.add("org.postgresql:postgresql:42.7.4");
-        }
-    }
+    @JkInject
+    private ProjectKBean projectKBean;
 
     @JkDoc("Performs...")
     public void extraAction() {
         // Perform an arbitrary action
+    }
+
+    // Configure MavenKbean to publish a 'doc' artifact and modify published dependencies
+    @JkPostInit
+    private void postInit(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(publication -> {
+            publication.putArtifact(JkArtifactId.of("doc", "zip"), this::generateDoc);
+            if (includeJdbcDriver) {
+                projectKBean.project.packaging.runtimeDependencies.add("org.postgresql:postgresql:42.7.4");
+            }
+        });
     }
 
     private void generateDoc(File targetZipFile) {
@@ -227,7 +230,7 @@ class Build extends KBean {
         }
         JkPathTree.of(docDir).zipTo(targetZipFile);
     }
-    
+
 }
 ```
 
