@@ -178,7 +178,10 @@ class Engine {
                 .reduce(JkPathSequence.of(), JkPathSequence::and);
 
         // compute classpath to look in for finding KBeans
-        String classpathProp = properties.get(JkConstants.CLASSPATH_INJECT_PROP, "");
+        String classpathProp = properties.get(JkConstants.CLASSPATH_PROP, "");
+        if (JkUtilsString.isBlank(classpathProp)) {
+            classpathProp = properties.get(JkConstants.CLASSPATH_INJECT_PROP, "");
+        }
         List<JkDependency> jekaPropsDeps = Arrays.stream(classpathProp.split(" "))
                 .flatMap(desc -> Arrays.stream(desc.split(",")))     // handle ' ' or ',' separators
                 .map(String::trim)

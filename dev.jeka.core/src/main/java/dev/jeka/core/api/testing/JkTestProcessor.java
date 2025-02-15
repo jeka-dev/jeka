@@ -201,7 +201,7 @@ public final class JkTestProcessor {
         final JkTestResult result;
         preActions.run();
         JkLog.startTask("execute-tests");
-        JkLog.info(testSelection.toString());
+        JkLog.verbose(testSelection.toString());
         if (forkingProcess == null) {
             result = launchInClassloader(extraTestClasspath, testSelection);
         } else {

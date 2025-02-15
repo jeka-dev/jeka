@@ -18,7 +18,7 @@ The action sends a *"close"* message to the repositories and waits until it is p
 No configuration is required, nevertheless we can filter on specific profiles.
 
 ```properties
-jeka.inject.classpath=dev.jeka:nexus-plugin
+jeka.classpath=dev.jeka:nexus-plugin
 @nexus=
 
 # Optional properties

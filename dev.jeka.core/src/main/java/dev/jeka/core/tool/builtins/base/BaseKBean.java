@@ -428,7 +428,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
     }
 
     private void shadeJar(Path jarPath) {
-        JkLog.startTask("Making shade jar");
+        JkLog.startTask("create-shade-jar");
         Path mainJar = JkUtilsPath.createTempFile("jk_original-shade-", ".jar");
         JkUtilsPath.deleteIfExists(mainJar);;
         regularJar(mainJar);
@@ -436,7 +436,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         JkRepoSet repos = getRunbase().getDependencyResolver().getRepos();
         JkJarPacker.makeShadeJar(repos, mainJar, classpath, jarPath);
         JkUtilsPath.deleteIfExists(mainJar);;
-        JkLog.info("Jar created at : " + jarPath);
+        JkLog.info("Shade jar created at: " + jarPath);
         JkLog.endTask();
     }
 

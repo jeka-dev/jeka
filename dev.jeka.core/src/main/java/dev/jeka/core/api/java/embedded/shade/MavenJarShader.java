@@ -44,6 +44,15 @@ import java.util.stream.Collectors;
 public class MavenJarShader implements JkInternalJarShader {
 
     private MavenJarShader() {
+        String logLevel = "error";
+        if (JkLog.isVerbose()) {
+            logLevel = "info";
+        }
+        if (JkLog.isDebug()) {
+            logLevel = "debug";
+        }
+        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", logLevel);
+
     }
 
     static MavenJarShader of() {
@@ -72,7 +81,6 @@ public class MavenJarShader implements JkInternalJarShader {
 
         JkUtilsPath.deleteIfExists(outputJar);
         shadeRequest.setUberJar(outputJar.toFile());
-        JkLog.startTask("creating shade jar: " + outputJar);
         try {
             new DefaultShader().shade(shadeRequest);
         } catch (IOException e) {
@@ -83,9 +91,7 @@ public class MavenJarShader implements JkInternalJarShader {
             System.err.println(JkClassLoader.of(this.getClass().getClassLoader()));
             throw error;
         }
-
         modifyManifest(mainJar, outputJar);
-        JkLog.endTask();
     }
 
 
@@ -103,7 +109,6 @@ public class MavenJarShader implements JkInternalJarShader {
 
     private String rootPackage(Path jarFile) {
         try (JkZipTree tree = JkZipTree.of(jarFile)) {
-            System.out.println(tree.getFiles());
             return tree.streamBreathFirst()
                     .filter(path -> path.toString().endsWith(".class"))
                     .map(path -> path.getParent().toString())

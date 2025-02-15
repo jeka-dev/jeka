@@ -86,7 +86,8 @@ public class JkProjectFlatFacade {
     public JkProjectFlatFacade addShadeJarArtifact(String classifier) {
         JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
         Path path = project.artifactLocator.getArtifactPath(artifactId);
-        project.packActions.append(() -> project.packaging.createShadeJar(path));
+        project.packActions.append("create-shade-jar",
+                () -> project.packaging.createShadeJar(path));
         return this;
     }
 

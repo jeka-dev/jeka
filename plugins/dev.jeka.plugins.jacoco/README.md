@@ -22,7 +22,7 @@ No manual setup is necessary, as the plugin provides intuitive default settings.
 However, you can override certain properties as follows:
 
 ```properties
-jeka.inject.classpath=dev.jeka:jacoco-plugin
+jeka.classpath=dev.jeka:jacoco-plugin
 @jacoco=
 # Optional properties
 @jacoco.jacocoVersion=0.8.7

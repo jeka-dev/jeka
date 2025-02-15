@@ -151,16 +151,8 @@ public class JkProjectPackaging {
      * Creates a binary jar (without dependencies) at the specified location.
      */
     public void createBinJar(Path target) {
-        project.compilation.runIfNeeded();
-        Path classDir = project.compilation.layout.resolveClassDir();
-        if (!Files.exists(classDir)) {
-            JkLog.warn("No class dir found : skip bin jar.");
-            return;
-        }
-        JkJarPacker.of(classDir)
-                .withManifest(getManifest())
-                .makeJar(target);
-        JkLog.info("Jar created at " + friendlyPath(target));
+        createBinJarQuiet(target);
+        JkLog.info("Jar created at: " + friendlyPath(target));
     }
 
     /**
@@ -178,12 +170,11 @@ public class JkProjectPackaging {
     public void createFatJar(Path target) {
         project.compilation.runIfNeeded();
         List<Path> classpath = resolveRuntimeDependenciesAsFiles();
-        JkLog.startTask("create-fat-jar");
         JkJarPacker.of(project.compilation.layout.resolveClassDir())
                 .withManifest(getManifest())
                 .withExtraFiles(getFatJarExtraContent())
                 .makeFatJar(target, classpath, this.fatJarFilter);
-        JkLog.endTask("Fat Jar created at " + friendlyPath(target));
+        JkLog.info("Fat Jar created at: " + friendlyPath(target));
     }
 
     /**
@@ -193,11 +184,12 @@ public class JkProjectPackaging {
     public void createShadeJar(Path target) {
         Path mainJar = JkUtilsPath.createTempFile("jk_original-shade-", ".jar");
         JkUtilsPath.deleteIfExists(mainJar);
-        createBinJar(mainJar);
+        createBinJarQuiet(mainJar);
         Iterable<Path> classpath = resolveRuntimeDependenciesAsFiles();
         JkRepoSet repos = project.dependencyResolver.getRepos();
         JkJarPacker.makeShadeJar(repos, mainJar, classpath, target);
         JkUtilsPath.deleteIfExists(mainJar);
+        JkLog.info("Shade jar created at: " + friendlyPath(target));
     }
 
     /**
@@ -214,6 +206,18 @@ public class JkProjectPackaging {
             return path.toAbsolutePath().normalize();
         }
         return path;
+    }
+
+    private void createBinJarQuiet(Path target) {
+        project.compilation.runIfNeeded();
+        Path classDir = project.compilation.layout.resolveClassDir();
+        if (!Files.exists(classDir)) {
+            JkLog.warn("No class dir found : skip bin jar.");
+            return;
+        }
+        JkJarPacker.of(classDir)
+                .withManifest(getManifest())
+                .makeJar(target);
     }
 
     /**

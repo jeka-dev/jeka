@@ -63,8 +63,10 @@ public final class JkConstants {
 
     static final String CMD_APPEND_SUFFIX_PROP =  "_append";
 
+    @Deprecated
     public static final String CLASSPATH_INJECT_PROP = "jeka.inject.classpath";
 
+    public static final String CLASSPATH_PROP = "jeka.classpath";
 
     /**
      * @deprecated Use {@link #KBEAN_DEFAULT_PROP} instead.

@@ -26,7 +26,7 @@ The version of Kotlin used is specified in the `jeka.kotlin.version` property, w
 No additional configuration is necessary by default. However, the following options can be used to customize settings:
 
 ```properties
-jeka.inject.classpath=dev.jeka:kotlin-plugin
+jeka.classpath=dev.jeka:kotlin-plugin
 @kotlin=
 # Optional properties
 @kotlin.sourceDir=src

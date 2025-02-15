@@ -128,7 +128,7 @@ class SpringbootPacker {
                 classpathIdxContent.getBytes(StandardCharsets.UTF_8)));
         jarWriter.close();
         jarWriter.setExecutableFilePermission(target);
-        JkLog.info("Bootable jar created at " + target);
+        JkLog.info("Bootable jar created at: " + target);
     }
 
     private void writeClasses(JkPathTree classTree, SpringbootJarWriter jarWriter) {

@@ -67,7 +67,7 @@ when any of these are present during initialization.
 There's no required configuration. `jeka.properties` file allow to specify some settings as:
 
 ```properties
-jeka.inject.classpath=dev.jeka:springboot-plugin
+jeka.classpath=dev.jeka:springboot-plugin
 @springboot=
 
 # Optional properties
