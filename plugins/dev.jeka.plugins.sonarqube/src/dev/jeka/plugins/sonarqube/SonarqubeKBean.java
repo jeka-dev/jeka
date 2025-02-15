@@ -33,8 +33,6 @@ import java.nio.file.Files;
         "will be appended to the SonarQube configuration.")
 public class SonarqubeKBean extends KBean {
 
-    private JkProject project;
-
     @JkDoc("If true, the list of production dependency files will be provided to sonarqube")
     public boolean provideProductionLibs = true;
 
@@ -65,14 +63,9 @@ public class SonarqubeKBean extends KBean {
         sonarqube.setProperties(getRunbase().getProperties());;
     }
 
-    @JkPostInit
-    private void postInit(ProjectKBean projectKBean) {
-        project = projectKBean.project;
-    }
-
     @JkDoc("Runs a SonarQube analysis and sends the results to a Sonar server.")
     public void run() {
-        JkUtilsAssert.state(project != null, "Np project to analyse found in %s", getBaseDir());
+        JkProject project = load(ProjectKBean.class).project;
         JkUtilsAssert.state(Files.exists(project.compilation.layout.resolveClassDir()),
                 "Project class directory not found. " +
                 "Please run compilation and tests prior running analysis.");
@@ -83,7 +76,6 @@ public class SonarqubeKBean extends KBean {
     @JkDoc("Checks if the analysed project passes its quality gates. " +
             "The 'run' method is expected to have already been executed.")
     public void check() {
-        JkUtilsAssert.state(project != null, "Np project to analyse found in %s", getBaseDir());
         JkSonarqube.QualityGateResponse response = sonarqube.checkQualityGate();
         if (response.success) {
             JkLog.info("Sonarqube quality gate passed successfully.");

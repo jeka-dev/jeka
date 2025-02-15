@@ -135,6 +135,19 @@ class Engine {
         return of(false, baseDir, this.dependencyResolver.getRepos(), this.commandLineDependencies);
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof Engine)) return false;
+
+        Engine engine = (Engine) o;
+        return baseDir.equals(engine.baseDir);
+    }
+
+    @Override
+    public int hashCode() {
+        return baseDir.hashCode();
+    }
+
     /*
      * Resolves dependencies and compiles and sources classes contained in jeka-src.
      * It returns a path sequence containing the resolved dependencies and result of compilation.

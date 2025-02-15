@@ -144,7 +144,7 @@ public final class JkJavaCompilerToolChain {
                     " Specified options : " + JkUtilsString.readableCommandAgs("    ", options));
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
-            JkLog.warn("No source files found in %s", compileSpec.getSources());
+            JkLog.warn("No Java source files found in %s", compileSpec.getSources());
             return true;
         }
         JkUtilsPath.createDirectories(outputDir);

@@ -18,8 +18,6 @@ The following KBeans expose the `hello` and `bye` methods. The rendering can be 
 through `nema` and `uppercase` attributes.
 
 ```Java
-import dev.jeka.core.tool.JkDoc;
-
 @JkDoc("Displays greeting messages")
 public class Greeting extends KBean {
 

@@ -151,6 +151,17 @@ public final class IntellijKBean extends KBean {
     }
 
     /**
+     * Adds a module dependency to the IntelliJ project configuration with the specified scope.
+     *
+     * @param moduleName The name of the module to be added as a dependency.
+     * @param scope      The scope of the module dependency, defined by {@link JkIml.Scope}.
+     * @return The current instance of {@link IntellijKBean} for method chaining.
+     */
+    public IntellijKBean addModule(String moduleName, JkIml.Scope scope) {
+        return configureIml(iml -> iml.component.addModuleOrderEntry(moduleName, scope));
+    }
+
+    /**
      * Sets the <i>scope</i> and <i>exported</i> attribute to the specified module.
      *
      * @see JkIml.Component#setModuleAttributes(String, JkIml.Scope, Boolean)

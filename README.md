@@ -73,17 +73,21 @@ jeka.inject.classpath=dev.jeka:jacoco-plugin dev.jeka:sonarqube-plugin
 **Create specific tasks with Java code**
 
 ```java
+import dev.jeka.core.tool.JkInject;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
 @JkDep("commons-net:commons-net:3.11.1")
 class Build extends KBean {
 
-  final JkProject project = load(ProjectKBean.class).project;
+    @JkInject
+    final ProjectKBean projectKBean;
 
-  @JkDoc("Deploy Spring-Boot application on remote server")
-  public void deploy() {
-    Path jar = project.artifactLocator.getMainArtifactPath();
-    this.sendThroughFtp(jar);
-    this.sendRestartCommand();
-  }
+    @JkDoc("Deploy Spring-Boot application on remote server")
+    public void deploy() {
+        Path jar = projectKBean.project.artifactLocator.getMainArtifactPath();
+        this.sendThroughFtp(jar);
+        this.sendRestartCommand();
+    }
   ...
 ```
 

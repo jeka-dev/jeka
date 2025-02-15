@@ -117,17 +117,20 @@ public final class JkRunbase {
         if (MASTER.baseDir.equals(baseDir)) {
             return MASTER;
         }
-        return SUB_RUN_BASES.computeIfAbsent(baseDir, path -> {
-            JkLog.startTask("Initializing Runbase " + path);
-            Engine engine = Engines.get(path);
+        // Map#computeIsAbsent may throw ConcurrentModificationException
+        JkRunbase result = SUB_RUN_BASES.get(baseDir);
+        if (result == null) {
+            JkLog.startTask("Initializing Runbase " + baseDir);
+            Engine engine = Engines.get(baseDir);
             engine.resolveKBeans();
-            JkRunbase result = engine.initRunbase(new KBeanAction.Container());
+            result = engine.initRunbase(new KBeanAction.Container());
             JkLog.endTask();
             //JkRunbase result = new JkRunbase(path);
             //result.classpath = MASTER.classpath;  // todo need to narrow
             //result.kbeanResolution = MASTER.kbeanResolution.toSubRunbase(baseDir);
-            return result;
-        });
+            SUB_RUN_BASES.put(baseDir, result);
+        }
+        return result;
     }
 
     static JkRunbase getMaster() {

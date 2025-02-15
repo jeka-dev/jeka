@@ -104,8 +104,20 @@ public final class JkImportedKBeans {
                 continue;  // THis means that's a local KBean that should be handled at Runbase init level
             }
             Class<?> fieldType = field.getType();
-            final Object importedObject = createImportedKBean(
-                   fieldType, importedDir, masterBean.getBaseDir());
+            final Object importedObject;
+            try {
+                importedObject = createImportedKBean(
+                        fieldType, importedDir, masterBean.getBaseDir());
+            } catch (final RuntimeException e) {
+                if (BehaviorSettings.INSTANCE.forceMode) {
+                    JkLog.warn("Can not initialise runbase %s.", importedDir);
+                    continue;
+                } else {
+                    throw e;
+                }
+            }
+
+
             try {
                 JkUtilsReflect.setFieldValue(masterBean, field, importedObject);
             } catch (final RuntimeException e) {

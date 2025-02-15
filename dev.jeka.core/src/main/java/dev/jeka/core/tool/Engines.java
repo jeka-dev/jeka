@@ -16,6 +16,8 @@
 
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.system.JkLog;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,21 +25,35 @@ import java.util.stream.Collectors;
 
 class Engines {
 
-    private static List<Engine> subs;
+    private static List<Engine> all;
 
-    static void registerMaster(Engine master, List<Engine> subs) {
-        List<Engine> engines = new ArrayList<>(subs);
+    static void registerMaster(Engine master) {
+        List<Engine> engines = new ArrayList<>();
         engines.add(master);
-        Engines.subs = engines;
+        engines.addAll(findSubs(master));
+        JkLog.debug("Registering master engines:");
+        engines.forEach(engine -> JkLog.debug("  " + engine.baseDir.toString()));
+        Engines.all = engines;
     }
 
     static Engine get(Path path) {
         final Path enginePath = path.toAbsolutePath();
-        return Engines.subs.stream()
+        return Engines.all.stream()
                 .filter(engine -> engine.baseDir.equals(enginePath))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No engine found at: " + path + " registered engines are: "
-                        + subs.stream().map(e -> e.baseDir).collect(Collectors.toList())));
+                        + all.stream().map(e -> e.baseDir).collect(Collectors.toList())));
+    }
+
+    private static List<Engine> findSubs(Engine engine) {
+        List<Engine> subEngines = engine.getClasspathSetupResult().subEngines;
+        List<Engine> result = new ArrayList<>(subEngines);
+        for (Engine subEngine : subEngines) {
+            result.addAll(findSubs(subEngine));
+        }
+        return result.stream().distinct().collect(Collectors.toList());
+
+
     }
 
 }
