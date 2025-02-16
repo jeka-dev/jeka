@@ -8,9 +8,9 @@ The content of an _iml_ file is computed according the `JkBuildable` object foun
 This _KBean_ proposes methods to customize generated *iml* file.
 
 ```java title="Configuration in a Build.java class"
-@Override
-protected void init() {
-    load(IntellijKBean.class)
+@JkPostInit
+private void postInit(IntellijKBean intellijKBean) {
+    intellijKBean
             .replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
             .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, null);
 

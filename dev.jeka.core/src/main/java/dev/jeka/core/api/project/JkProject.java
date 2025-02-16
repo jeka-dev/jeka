@@ -118,7 +118,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     /**
      * Flag to indicate if we need to include, or not, runtime dependencies in some scenario.
      */
-    public  enum RuntimeDeps {
+    public enum RuntimeDeps {
 
         INCLUDE, EXCLUDE;
 
@@ -761,6 +761,11 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
             @Override
             public JkConsumers<JkManifest> getManifestCustomizers() {
                 return JkProject.this.packaging.manifestCustomizer;
+            }
+
+            @Override
+            public JkJavaProcess prepareRunJar() {
+                return JkProject.this.prepareRunJar(RuntimeDeps.EXCLUDE);
             }
 
             @Override

@@ -563,6 +563,11 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
                 return BaseKBean.this.manifestCustomizers;
             }
 
+            @Override
+            public JkJavaProcess prepareRunJar() {
+                return BaseKBean.this.prepareRunJar();
+            }
+
             public String toString() {
                 return BaseKBean.this.toString();
             }

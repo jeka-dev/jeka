@@ -22,14 +22,16 @@
 ```
 
 **Example For Image customization:**
+
 ```java
-protected void init() {
-    load(DockerKBean.class).customizeJvmImage(dockerBuild -> dockerBuild
+@JkPostInit
+private void postInit(DockerKBean dockerKBean) {
+    dockerKBean.customizeJvmImage(dockerBuild -> dockerBuild
             .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
             .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
             .nonRootSteps   // inserted after  USER nonroot
-                .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
-                .add("RUN chmod a+rw /release.md ")
+            .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
+            .add("RUN chmod a+rw /release.md ")
     );
 }
 ```

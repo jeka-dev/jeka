@@ -25,7 +25,9 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.system.JkProcess;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -99,5 +101,7 @@ public interface JkBuildable {
     interface Supplier {
         JkBuildable asBuildable();
     }
+
+    JkJavaProcess prepareRunJar();
 
 }

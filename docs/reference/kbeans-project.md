@@ -21,20 +21,17 @@ To work effectively with this KBean, it's helpful to have an [overview](api-proj
 Additionally, `ProjectKBean` serves as a central point of interaction for other KBeans, enabling them to access project details and extend or enhance the build process.
 
 **Example for getting information about source files:**
-```Java
-import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
+```Java
 class MyBuild extends KBean {
 
-    final JkProject project = load(ProjectKBean.class).project;
-    
-    private List<Path> allSourceFiles;
-    
-    protected void init() {
-        allSourceFiles = project.compilation.layout.resolveSources().getFiles();
-        ...
-    }
+  private List<Path> allSourceFiles;
+
+  @JkPostInit
+  private void postInit(ProjectKBean projectKBean) {
+      allSourceFiles = projectKBean.project.compilation.layout.resolveSources().getFiles();
+      ...
+  }
 }
 ```
 

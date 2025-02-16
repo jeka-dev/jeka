@@ -23,6 +23,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.docker.JkDockerAppTester;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
 import dev.jeka.core.api.tooling.docker.JkDockerNativeBuild;
@@ -169,6 +170,17 @@ public final class DockerKBean extends KBean {
                 ? resolvePlaceHolder(nativeImageName, buildable)
                 : "native-" + computeImageName(buildable);
     }
+
+
+    public JkDockerAppTester createJvmAppTester(Consumer<String> tester) {
+        JkDockerBuild dockerBuild = jvmDockerBuild(this.getBuildable(true));
+        String imageName = resolveJvmImageName() + "-e2e-test";
+        String dirName = "docker-build-" + imageName.replace(':', '#');
+        return JkDockerAppTester.of(dockerBuild, tester)
+                .setImageName(resolveJvmImageName() + "-e2e-test")
+                .setContextPath(getOutputDir().resolve(dirName));
+    }
+
 
     private JkBuildable getBuildable(boolean ensureClassesAreCompiled) {
 
