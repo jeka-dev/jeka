@@ -61,7 +61,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 
 **Configure using properties**
 ```properties
-jeka.inject.classpath=dev.jeka:jacoco-plugin dev.jeka:sonarqube-plugin
+jeka.classpath=dev.jeka:jacoco-plugin   dev.jeka:sonarqube-plugin
 
 @project.moduleId=my-org:my-lib
 @project.gitVersioning.enable=true
@@ -79,12 +79,9 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 @JkDep("commons-net:commons-net:3.11.1")
 class Build extends KBean {
 
-    @JkInject
-    final ProjectKBean projectKBean;
-
     @JkDoc("Deploy Spring-Boot application on remote server")
     public void deploy() {
-        Path jar = projectKBean.project.artifactLocator.getMainArtifactPath();
+        Path jar = load(ProjectKBean.class).project.artifactLocator.getMainArtifactPath();
         this.sendThroughFtp(jar);
         this.sendRestartCommand();
     }

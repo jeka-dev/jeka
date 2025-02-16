@@ -40,8 +40,6 @@ import java.util.stream.Collectors;
 @JkDoc("Manages Maven publication for project and 'jeka-src'.")
 public final class MavenKBean extends KBean {
 
-    private JkMavenPublication mavenPublication;
-
     public enum PredefinedRepo {
 
         /**
@@ -60,21 +58,13 @@ public final class MavenKBean extends KBean {
         OSSRH
     }
 
-    @JkRequire
-    private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
-        return runbase.getBuildableKBeanClass();
-    }
-
     @JkDoc("Indentation size for 'showPomDeps' output.")
     public int codeIndent = 4;
 
-    public final JkPublication publication = new JkPublication();
+    public final JkPublicationOptions publication = new JkPublicationOptions();
 
-    /**
-     * A customizer that allows to apply modifications or adjustments to the
-     * Maven publication before it is actually published. This is typically used
-     * to define specific behaviors from other KBean postInit methods.
-     */
+    private JkMavenPublication mavenPublication;
+
     private final JkConsumers<JkMavenPublication> mavenPublicationCustomizer = JkConsumers.of();
 
     @JkDoc("Displays Maven publication information on the console.")
@@ -109,6 +99,11 @@ public final class MavenKBean extends KBean {
         JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
     }
 
+    @JkRequire
+    private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
+        return runbase.getBuildableKBeanClass();
+    }
+
     /**
      * Returns the Maven Publication associated with this KBean
      */
@@ -134,20 +129,28 @@ public final class MavenKBean extends KBean {
 
         // Add artifacts declared in "publication.extraArtifacts"
         publication.extraArtifacts().forEach(mavenPublication::putArtifact);
-        ;
         
         return mavenPublication;
     }
 
+    /**
+     * @see #customizePublication(String, Consumer)
+     */
     public void customizePublication(Consumer<JkMavenPublication> publicationCustomizer) {
-        this.mavenPublicationCustomizer.append(publicationCustomizer);
+        this.customizePublication(publicationCustomizer.toString(), publicationCustomizer);
     }
 
+    /**
+     * Customizes the Maven publication by appending a custom action to the publication customization process.
+     *
+     * @param customizationName The name of the customization for identification purposes.
+     * @param publicationCustomizer A Consumer that applies custom configurations to the Maven publication.
+     */
     public void customizePublication(String customizationName, Consumer<JkMavenPublication> publicationCustomizer) {
+        JkUtilsAssert.state(mavenPublication == null, "Maven publication has already been initialized, " +
+                "the customization can not be taken in account.");
         this.mavenPublicationCustomizer.append(customizationName, publicationCustomizer);
     }
-
-
 
     private JkRepoSet getPublishReposFromProps() {
         JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
@@ -225,7 +228,7 @@ public final class MavenKBean extends KBean {
         }
     }
 
-    public static class JkPublication {
+    public static class JkPublicationOptions {
 
         @JkDoc("POM metadata to publish. Mainly useful for publishing to Maven Central")
         public final JkPomMetadata metadata = new JkPomMetadata();
@@ -238,7 +241,7 @@ public final class MavenKBean extends KBean {
                 "Example: 'uber', 'doc.zip'")
         public String extraArtifacts;
 
-        private JkPublication() {
+        private JkPublicationOptions() {
         }
 
         private List<JkArtifactId> extraArtifacts() {
@@ -247,7 +250,7 @@ public final class MavenKBean extends KBean {
             }
             return Arrays.stream(extraArtifacts.split(","))
                     .map(String::trim)
-                    .map(JkPublication::parse)
+                    .map(JkPublicationOptions::parse)
                     .collect(Collectors.toList());
         }
 

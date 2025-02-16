@@ -28,13 +28,11 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-import dev.jeka.plugins.jacoco.JacocoKBean;
 import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
@@ -114,8 +112,9 @@ class MasterBuild extends KBean {
         System.out.println("==============================================");
 
         coreBuild.runIT = true;
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(this::applyToSlave);
-        getImportedKBeans().get(MavenKBean.class, false).forEach(this::applyToSlave);
+        getImportedKBeans().load(ProjectKBean.class, false).forEach(this::applyToSlave);
+        getImportedKBeans().load(MavenKBean.class, false).forEach(
+                mavenKBean -> mavenKBean.customizePublication(this::customize));
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
@@ -139,26 +138,7 @@ class MasterBuild extends KBean {
 
         // Run tests on sample projects if required
         if (runSamples) {
-            JkLog.startTask("run-samples");
-            SamplesTester samplesTester = new SamplesTester();
-            PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
-
-            // Instrument core with Jacoco when running sample tests
-            if (jacocoForCore != null) {
-                samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
-                pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
-            }
-
-            // run sample including springboot scaffolding project
-            pluginScaffoldTester.run();
-
-            // run samples
-            samplesTester.run();
-
-            if (jacocoForCore != null) {
-                jacocoForCore.generateExport();
-            }
-            JkLog.endTask();
+            doRunSamples();
         }
 
         // Share same versioning for all sub-projects
@@ -171,11 +151,12 @@ class MasterBuild extends KBean {
 
         // Publish artifacts on maven central only if we are on 'master' branch
         if (shouldPublishOnMavenCentral()) {
-            JkLog.startTask("Publishing artifacts to Maven Central");
+            JkLog.startTask("publish-artifacts");
             getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
             closeAndReleaseRepo();
             JkLog.endTask();
+
             JkLog.startTask("create-github-release");
             Github github = new Github();
             github.ghToken = githubToken;
@@ -253,6 +234,29 @@ class MasterBuild extends KBean {
                 nexusRepo.setReadTimeout(60*1000));
     }
 
+    private void doRunSamples() {
+        JkLog.startTask("run-samples");
+        SamplesTester samplesTester = new SamplesTester();
+        PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
+
+        // Instrument core with Jacoco when running sample tests
+        if (jacocoForCore != null) {
+            samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
+            pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
+        }
+
+        // run sample including springboot scaffolding project
+        pluginScaffoldTester.run();
+
+        // run samples
+        samplesTester.run();
+
+        if (jacocoForCore != null) {
+            jacocoForCore.generateExport();
+        }
+        JkLog.endTask();
+    }
+
     private boolean shouldPublishOnMavenCentral() {
         String branchOrTag = computeBranchName();
         if (branchOrTag != null &&
@@ -272,8 +276,6 @@ class MasterBuild extends KBean {
         return JkGit.of().getCurrentBranch();
     }
 
-
-
     private JkRepoSet publishRepo() {
         JkRepo snapshotRepo = JkRepo.ofMavenOssrhDownloadAndDeploySnapshot(ossrhUser, ossrhPwd);
         JkGpgSigner gpg = JkGpgSigner.ofStandardProperties();
@@ -291,11 +293,7 @@ class MasterBuild extends KBean {
         project.compilation.addJavaCompilerOptions("-g");
     }
 
-    private void applyToSlave(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(this::adaptMavenConfig);
-    }
-
-    private void adaptMavenConfig(JkMavenPublication mavenPublication) {
+    private void customize(JkMavenPublication mavenPublication) {
         mavenPublication
                 .setRepos(this.publishRepo())
                 .pomMetadata
@@ -317,7 +315,7 @@ class MasterBuild extends KBean {
             JkProject project = projectKBean.project;
             result.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
         });
-        adaptMavenConfig(result);
+        customize(result);
         return result;
     }
 
