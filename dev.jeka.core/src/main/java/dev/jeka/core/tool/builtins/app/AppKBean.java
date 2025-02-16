@@ -292,9 +292,17 @@ public class AppKBean extends KBean {
 
         System.out.println(columnText);
         System.out.println();
-        System.out.println("To install an app: jeka app: install remote=https://github.com/jeka-dev/demo-cowsay");
-        System.out.println("To install as native app: jeka app: install remote=https://github.com/jeka-dev/demo-cowsay native:");
-        System.out.println("To execute directly without installing: jeka -r https://github.com/djeang/Calculator-jeka --program");
+        columnText = JkColumnText
+                        .ofSingle(10, 40)
+                        .addColumn(10, 80)
+                        .setSeparator("    ");
+        columnText.add("To install an app",
+                "jeka app: install repo=https://github.com/jeka-dev/demo-cowsay");
+        columnText.add("To install a native app",
+                "jeka app: install repo=https://github.com/jeka-dev/demo-cowsay native:");
+        columnText.add("To execute directly without installing",
+                "jeka -r https://github.com/djeang/Calculator-jeka --program");
+        System.out.println(columnText);
     }
 
     private static List<String> systemFiles() {

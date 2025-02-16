@@ -539,7 +539,10 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     }
 
     private String shortenArgs(int maxWidth) {
-        String singleLine = String.join(" ", processParams);
+        if (processParams.size() == 1) {
+            return "";
+        }
+        String singleLine = String.join(" ", processParams.subList(1, processParams.size()));
         return JkUtilsString.ellipse(singleLine, maxWidth);
     }
 
