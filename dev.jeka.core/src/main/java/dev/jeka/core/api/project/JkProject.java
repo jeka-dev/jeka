@@ -376,11 +376,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * @param runtimeDepInclusion If <code>INCLUDE</code>, the runtime dependencies will be added to the classpath. This should
      *                           values <code>EXCLUDE</code> in case of <i>fat</i> jar.
      */
-    public JkJavaProcess prepareRunJar(String artifactClassifier, RuntimeDeps runtimeDepInclusion) {
-        JkArtifactId artifactId = JkArtifactId.of(artifactClassifier, "jar");
-        Path artifactPath = artifactLocator.getArtifactPath(artifactId);
+    public JkJavaProcess prepareRunJar(RuntimeDeps runtimeDepInclusion) {
+        Path artifactPath = artifactLocator.getMainArtifactPath();
         if (!Files.exists(artifactPath)) {
-            jarMaker.accept(artifactPath);
+            packActions.run();
         }
         JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
                 .setDestroyAtJvmShutdown(true)
@@ -390,15 +389,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
             javaProcess.setClasspath(packaging.resolveRuntimeDependenciesAsFiles());
         }
         return javaProcess;
-    }
-
-    /**
-     * Same as {@link #prepareRunJar(String, RuntimeDeps)} but specific for the main artefact.
-     *
-     * @see #prepareRunJar(String, RuntimeDeps)
-     */
-    public JkJavaProcess prepareRunJar(RuntimeDeps runtimeDepInclusion) {
-        return prepareRunJar(JkArtifactId.MAIN_ARTIFACT_CLASSIFIER, runtimeDepInclusion);
     }
 
     // -------------------------- Other -------------------------
