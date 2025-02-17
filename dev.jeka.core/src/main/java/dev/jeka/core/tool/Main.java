@@ -317,12 +317,10 @@ public class Main {
 
     private static void printException(Throwable e) {
         System.err.println();
-        if (LogSettings.INSTANCE.verbose || LogSettings.INSTANCE.stackTrace) {
-            System.err.println("=============================== Stack Trace =============================================");
-            e.printStackTrace(System.err);
-            System.err.flush();
-            System.err.println("=========================================================================================");
-        }
+        System.err.println("=============================== Stack Trace =============================================");
+        e.printStackTrace(System.err);
+        System.err.flush();
+        System.err.println("=========================================================================================");
     }
 
     private static void validateKBeanProps(JkProperties props, List<String> allKbeanClassNames) {

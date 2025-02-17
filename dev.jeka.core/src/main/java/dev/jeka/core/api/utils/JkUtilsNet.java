@@ -60,8 +60,14 @@ public class JkUtilsNet {
                 HttpURLConnection connection = (HttpURLConnection) actualUrl.openConnection();
                 connection.setRequestMethod("GET");
                 connection.connect();
+                connection.setConnectTimeout(500);
+                connection.setReadTimeout(500);
 
-                statusCode = connection.getResponseCode();
+                try {
+                    statusCode = connection.getResponseCode();
+                } catch (SocketTimeoutException e) {
+                    statusCode = -1;
+                }
                 JkLog.debug("Pinging %s returned %s%n", url, statusCode);
                 if (isOK(statusCode)) {
                     JkLog.verbose("Check ping on %s returned success code : %s", url, statusCode);
@@ -102,6 +108,8 @@ public class JkUtilsNet {
            return false;  // can't connect may mean no server listen
         } catch (ProtocolException | MalformedURLException e) {
             throw new RuntimeException(e);
+        } catch (SocketTimeoutException e) {
+            return false;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
