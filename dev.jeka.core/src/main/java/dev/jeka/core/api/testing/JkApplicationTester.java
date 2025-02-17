@@ -16,7 +16,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
  *  The {@link #run()} method, then can be invoked to orchestrate the whole execution of tests,
  *  managing de deployment and cleanup of application environment.
  */
-public abstract class JkApplicationTester implements Runnable{
+public abstract class JkApplicationTester implements Runnable {
 
     protected int startTimeout = 15*1000;
 
@@ -27,9 +27,11 @@ public abstract class JkApplicationTester implements Runnable{
      */
     public final void run() {
         JkLog.startTask("test-deployable-application");
-
+        init();
         JkLog.info("Starting the application...");
-        startApp();
+        Thread thread = new Thread(this::startApp);
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
         checkUntilReady();
         JkLog.info("Application started");
 
@@ -45,9 +47,17 @@ public abstract class JkApplicationTester implements Runnable{
     }
 
     /**
+     * Prepares the variables required to start and stop the application,
+     * including the base URL and port configuration.
+     */
+    protected void init() {
+
+    }
+
+    /**
      * Starts the application and its environment.
-     * This method should be non-blocking. <p>
-     * If the application consists in a java application for example, this should be launched in a specific thread.
+     * This method should be invoked in a separate thread and is expected to block execution.
+     * The application should be terminated using the stopXXX methods.
      */
     protected abstract void startApp();
 
@@ -70,13 +80,6 @@ public abstract class JkApplicationTester implements Runnable{
     }
 
     /**
-     * This method is invoked when, the application did not start until defined timeout.
-     */
-    protected void stopForcefully() {
-        stopGracefully();
-    }
-
-    /**
      * Retiurn the first free port detected in the dynamic port range.
      */
     protected final int findFreePort() {
@@ -91,9 +94,12 @@ public abstract class JkApplicationTester implements Runnable{
             if (isApplicationReady()) {
                 return;
             }
+            Thread.yield();
             JkLog.verbose("Not yet ready.");
             JkUtilsSystem.sleep(reAttemptDelay);
         }
+
+        // The application did not start on time
         try {
             stopForcefully();
         } catch (RuntimeException e) {

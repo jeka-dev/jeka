@@ -56,17 +56,20 @@ public class JkSpringbootAppTester extends JkApplicationTester {
     }
 
     @Override
-    public void startApp() {
-        startTimeout = 30*1000;
+    protected void init() {
         port = port == null ? findFreePort() : port;
-        baseUrlAndPort = baseUrl + ":" + port;
+        baseUrlAndPort = baseUrl + ":" + port; super.init();
+    }
+
+    @Override
+    public void startApp() {
         buildable.prepareRunJar()
                 .addJavaOptions("-Dserver.port=" + port)
                 .addJavaOptions("-Dmanagement.endpoint.shutdown.enabled=true")
                 .addJavaOptions(JkUtilsString.parseCommandline(extraJavaOptions))
                 .setInheritIO(showAppLogs)
                 .setLogWithJekaDecorator(false)
-                .execAsync();
+                .exec();
     }
 
     @Override

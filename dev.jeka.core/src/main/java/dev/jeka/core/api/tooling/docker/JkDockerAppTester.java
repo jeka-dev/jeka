@@ -44,6 +44,8 @@ public class JkDockerAppTester extends JkApplicationTester {
 
     private String containerName;
 
+    private String effectiveImageName;
+
     private JkDockerAppTester(JkDockerBuild dockerBuild, Consumer<String> tester) {
         this.dockerBuild = dockerBuild;
         this.tester = tester;
@@ -55,29 +57,33 @@ public class JkDockerAppTester extends JkApplicationTester {
     }
 
     @Override
-    protected void startApp() {
-        startTimeout = 30*1000;
+    protected void init() {
         port = port == null ? findFreePort() : port;
         baseUrlAndPort = baseUrl + ":" + port;
-        String effectiveImageName =  JkUtilsString.isBlank(imageName) ? "jeka-docker-tester-" + port
+        effectiveImageName =  JkUtilsString.isBlank(imageName) ? "jeka-docker-tester-" + port
                 : imageName;
-        containerName = effectiveImageName + "-container";
+        containerName = (effectiveImageName + "-container").replace(":", "_");
         if (contextPath == null) {
             dockerBuild.buildImageInTemp(effectiveImageName);
         } else {
             dockerBuild.buildImage(contextPath, effectiveImageName);
         }
+    }
 
+    @Override
+    protected void startApp() {
         JkDocker.of().addParams("run", "-d", "-p", String.format("%s:8080", port), "--name",
                         containerName, effectiveImageName)
                 .setInheritIO(showAppLogs)
+                .setLogCommand(JkLog.isVerbose())
                 .setLogWithJekaDecorator(false)
+                .setInheritIO(JkLog.isVerbose())
                 .exec();
     }
 
     @Override
     protected boolean isApplicationReady() {
-        return JkUtilsNet.isAvailableAndOk(baseUrl, JkLog.isDebug());
+        return JkUtilsNet.isAvailableAndOk(baseUrlAndPort, JkLog.isDebug());
     }
 
     @Override
@@ -90,6 +96,11 @@ public class JkDockerAppTester extends JkApplicationTester {
         JkDocker.of().addParams("rm", "-f", containerName)
                 .setInheritIO(false).setLogWithJekaDecorator(true)
                 .exec();
+    }
+
+    @Override
+    protected void stopForcefully() {
+        super.stopForcefully();
     }
 
     /**
