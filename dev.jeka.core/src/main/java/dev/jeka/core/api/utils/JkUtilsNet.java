@@ -87,6 +87,8 @@ public class JkUtilsNet {
             URL actualUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) actualUrl.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(500);
+            connection.setReadTimeout(500);
             if (log) {
                 System.out.printf("Pinging %s ...%n", url);
             }
