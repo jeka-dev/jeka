@@ -83,14 +83,12 @@ class DockerTester extends JekaCommandLineExecutor  {
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
 
-        /*
-        JkProcResult result = JkProcess.of(jekaShellPath.toString(), "-r", ShellRemoteTester.COW_SAY_URL, "docker:",
-                        "run", "run.programArgs=toto", "--quiet")
+        // Build image native
+        JkProcess.of(jekaShellPath.toString(), "-ru", ShellRemoteTester.COW_SAY_URL, "docker:", "buildNative", "--stacktrace")
                 .setLogCommand(true)
-                .setCollectStdout(true)
+                .setInheritIO(true)
                 .setEnv("jeka.distrib.location", jekaShellPath.getParent().toString())
                 .exec();
-         */
 
         JkProcResult result = JkDocker.of().addParams("run",
                 "--rm", "github.com_jeka-dev_demo-cowsay:0.0.6", "toto")
@@ -99,6 +97,9 @@ class DockerTester extends JekaCommandLineExecutor  {
                 .setLogWithJekaDecorator(true)
                 .setCollectStdout(true)
                 .exec();
+
+
+
 
         String output = result.getStdoutAsString();
         JkUtilsAssert.state(output.contains("toto"), "Command output was '%s', " +

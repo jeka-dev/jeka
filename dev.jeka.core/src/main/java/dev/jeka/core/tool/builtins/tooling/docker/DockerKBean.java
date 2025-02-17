@@ -177,7 +177,16 @@ public final class DockerKBean extends KBean {
         String imageName = resolveJvmImageName() + "-e2e-test";
         String dirName = "docker-build-" + imageName.replace(':', '#');
         return JkDockerAppTester.of(dockerBuild, tester)
-                .setImageName(resolveJvmImageName() + "-e2e-test")
+                .setImageName(imageName)
+                .setContextPath(getOutputDir().resolve(dirName));
+    }
+
+    public JkDockerAppTester createNativeAppTester(Consumer<String> tester) {
+        JkDockerBuild dockerBuild = nativeDockerBuild(this.getBuildable(true));
+        String imageName = resolveNativeImageName() + "-e2e-test";
+        String dirName = "docker-build-" + imageName.replace(':', '#');
+        return JkDockerAppTester.of(dockerBuild, tester)
+                .setImageName(imageName)
                 .setContextPath(getOutputDir().resolve(dirName));
     }
 

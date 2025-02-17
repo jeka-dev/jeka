@@ -16,7 +16,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
  *  The {@link #run()} method, then can be invoked to orchestrate the whole execution of tests,
  *  managing de deployment and cleanup of application environment.
  */
-public abstract class JkApplicationTester {
+public abstract class JkApplicationTester implements Runnable{
 
     protected int startTimeout = 15*1000;
 
@@ -40,7 +40,6 @@ public abstract class JkApplicationTester {
             JkLog.info("Stopping the application...");
             stopGracefully();;
             JkLog.info("Application stopped");
-
             JkLog.endTask();
         }
     }
@@ -88,9 +87,11 @@ public abstract class JkApplicationTester {
         long start = System.currentTimeMillis();
         JkLog.info("Checking if the application is started...");
         while ( (System.currentTimeMillis() - start) < startTimeout ) {
+            JkLog.verbose("Pinging application...");
             if (isApplicationReady()) {
                 return;
             }
+            JkLog.verbose("Not yet ready.");
             JkUtilsSystem.sleep(reAttemptDelay);
         }
         try {
