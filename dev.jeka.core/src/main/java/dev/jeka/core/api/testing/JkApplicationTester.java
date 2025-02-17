@@ -80,6 +80,13 @@ public abstract class JkApplicationTester implements Runnable {
     }
 
     /**
+     * This method is invoked when, the application did not start until defined timeout.
+     */
+    protected void stopForcefully() {
+        stopGracefully();
+    }
+
+    /**
      * Retiurn the first free port detected in the dynamic port range.
      */
     protected final int findFreePort() {
