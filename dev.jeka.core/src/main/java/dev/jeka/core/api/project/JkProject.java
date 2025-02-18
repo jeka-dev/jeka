@@ -36,6 +36,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkRunbase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -222,6 +223,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     private LocalAndTxtDependencies cachedTextAndLocalDeps;
 
     private URL dependencyTxtUrl;
+
+    private final JkRunnables e2eTesters = JkRunnables.of().setLogTasks(true);
 
     private JkProject() {
         artifactLocator = artifactLocator();
@@ -639,6 +642,35 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         return this;
     }
 
+    /**
+     * Registers an end-to-end tester to this project.
+     *
+     * @param testerName The name of the tester to be added. This name is mainly used
+     *                   to be displayed on console output when the tester runs.
+     * @param runnable   The runnable implementation of the tester to be executed.
+     */
+    public JkProject addE2eTester(String testerName, Runnable runnable) {
+        this.e2eTesters.append(testerName, runnable);
+        return this;
+    }
+
+    /**
+     * Executes all registered end-to-end testers for this project in the order of their execution chain.
+     * Each tester is represented by a {@link Runnable} and executed sequentially.
+     */
+    public void e2eTest() {
+        JkLog.startTask("e2e-test");
+        if (e2eTesters.getSize() == 0) {
+            JkLog.info("No registered end-to-end testers found.");
+        } else if (e2eTesters.getSize() == 1) {
+            JkLog.info(e2eTesters.getRunnableNames().get(0));
+            e2eTesters.getRunnable(0).run();
+        } else {
+            e2eTesters.run();
+        }
+        JkLog.endTask();
+    }
+
     LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
             return cachedTextAndLocalDeps;
@@ -652,6 +684,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
     }
+
+
 
     JkProject setDependencyTxtUrl(URL url) {
         this.dependencyTxtUrl = url;

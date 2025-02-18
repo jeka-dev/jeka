@@ -98,6 +98,7 @@ public class JkUtilsNet {
             if (log) {
                 System.out.printf("Pinging %s ...%n", url);
             }
+            Thread.yield();
             connection.connect();
             int statusCode = connection.getResponseCode();
             if (log) {

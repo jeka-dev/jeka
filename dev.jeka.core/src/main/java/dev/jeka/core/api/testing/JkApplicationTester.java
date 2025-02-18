@@ -3,6 +3,7 @@ package dev.jeka.core.api.testing;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.tool.JkException;
 
 /**
  * Template class for performing actions on application to be deployed and undeployed.
@@ -22,27 +23,26 @@ public abstract class JkApplicationTester implements Runnable {
 
     protected int reAttemptDelay = 1000;
 
+    private volatile Throwable appStartFailure;
+
     /**
      * Deploy application environment, run tests and un-deploy the application gracefully.
      */
     public final void run() {
-        JkLog.startTask("test-deployable-application");
         init();
         JkLog.info("Starting the application...");
-        Thread thread = new Thread(this::startApp);
+        Thread thread = new Thread(this::doStart);
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.start();
         checkUntilReady();
         JkLog.info("Application started");
 
-        JkLog.info("Running tests...");;
         try {
             executeTests();
         } finally {
-            JkLog.info("Stopping the application...");
+            JkLog.verbose("Stopping the application...");
             stopGracefully();;
             JkLog.info("Application stopped");
-            JkLog.endTask();
         }
     }
 
@@ -93,10 +93,21 @@ public abstract class JkApplicationTester implements Runnable {
         return JkUtilsNet.findFreePort(49152, 65535);
     }
 
+    private void doStart() {
+        try {
+            startApp();
+        } catch (Throwable t) {
+            this.appStartFailure = t;
+        }
+    }
+
     private void checkUntilReady() {
         long start = System.currentTimeMillis();
-        JkLog.info("Checking if the application is started...");
+        JkLog.verbose("Checking if the application is started...");
         while ( (System.currentTimeMillis() - start) < startTimeout ) {
+            if (appStartFailure != null) {
+                throw new JkException("Application start failed: " + appStartFailure.getMessage());
+            }
             JkLog.verbose("Pinging application...");
             if (isApplicationReady()) {
                 return;

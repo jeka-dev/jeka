@@ -195,6 +195,13 @@ public class JkRunnables implements Runnable {
     }
 
     /**
+     * Retrieves the {@link Runnable} stored at the specified index in the execution chain.
+     */
+    public Runnable getRunnable(int index) {
+        return this.entries.get(index).runnable;
+    }
+
+    /**
      * Executes the {@link Runnable}s, in the order of the execution chain.
      */
     @Override

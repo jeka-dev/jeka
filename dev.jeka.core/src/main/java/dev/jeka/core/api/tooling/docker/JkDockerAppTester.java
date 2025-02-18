@@ -22,6 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class JkDockerAppTester extends JkApplicationTester {
@@ -62,7 +63,7 @@ public class JkDockerAppTester extends JkApplicationTester {
         baseUrlAndPort = baseUrl + ":" + port;
         effectiveImageName =  JkUtilsString.isBlank(imageName) ? "jeka-docker-tester-" + port
                 : imageName;
-        containerName = (effectiveImageName + "-container").replace(":", "_");
+        containerName = (effectiveImageName + "-" + UUID.randomUUID().toString().substring(0,8)).replace(":", "_");
         if (contextPath == null) {
             dockerBuild.buildImageInTemp(effectiveImageName);
         } else {
@@ -72,12 +73,11 @@ public class JkDockerAppTester extends JkApplicationTester {
 
     @Override
     protected void startApp() {
-        JkDocker.of().addParams("run", "-d", "-p", String.format("%s:8080", port), "--name",
+        JkDocker.of().addParams("run", "-p", String.format("%s:8080", port), "--name",
                         containerName, effectiveImageName)
-                .setInheritIO(showAppLogs)
                 .setLogCommand(JkLog.isVerbose())
                 .setLogWithJekaDecorator(false)
-                .setInheritIO(JkLog.isVerbose())
+                .setInheritIO(JkLog.isVerbose() || showAppLogs)
                 .exec();
     }
 

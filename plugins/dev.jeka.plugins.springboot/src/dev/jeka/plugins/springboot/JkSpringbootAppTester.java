@@ -67,6 +67,7 @@ public class JkSpringbootAppTester extends JkApplicationTester {
                 .addJavaOptions("-Dserver.port=" + port)
                 .addJavaOptions("-Dmanagement.endpoint.shutdown.enabled=true")
                 .addJavaOptions(JkUtilsString.parseCommandline(extraJavaOptions))
+                .setLogCommand(JkLog.isVerbose())
                 .setInheritIO(showAppLogs)
                 .setLogWithJekaDecorator(false)
                 .exec();
@@ -85,7 +86,7 @@ public class JkSpringbootAppTester extends JkApplicationTester {
     @Override
     public void stopGracefully() {
         String shutdownUrl = baseUrlAndPort + "/actuator/shutdown";
-        JkLog.info("Invoke %s", shutdownUrl);
+        JkLog.verbose("Invoke %s", shutdownUrl);
         JkUtilsNet.sendHttpRequest(shutdownUrl, "POST", null).asserOk();
     }
 

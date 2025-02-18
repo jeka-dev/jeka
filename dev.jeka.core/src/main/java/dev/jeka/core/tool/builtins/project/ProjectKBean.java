@@ -176,6 +176,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         projectScaffold.run();
     }
 
+    @JkDoc("Runs the registered end-to-end tests")
+    public void e2eTest() {
+        this.project.e2eTest();
+    }
+
     @Override
     public JkIdeSupport getJavaIdeSupport() {
         return project.getJavaIdeSupport();
