@@ -226,6 +226,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
     private final JkRunnables e2eTesters = JkRunnables.of().setLogTasks(true);
 
+    private final JkRunnables qualityCheckers = JkRunnables.of().setLogTasks(true);
+
     private JkProject() {
         artifactLocator = artifactLocator();
         compilerToolChain = JkJavaCompilerToolChain.of();
@@ -667,6 +669,35 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
             e2eTesters.getRunnable(0).run();
         } else {
             e2eTesters.run();
+        }
+        JkLog.endTask();
+    }
+
+    /**
+     * Registers a quality checker to this project.
+     *
+     * @param checkerName The name of the quality checker to be added. This name is mainly used
+     *                   to be displayed on console output when the qulity check runs.
+     * @param runnable   The runnable implementation of the quality-checker to be executed.
+     */
+    public JkProject addQualityChecker(String checkerName, Runnable runnable) {
+        this.qualityCheckers.append(checkerName, runnable);
+        return this;
+    }
+
+    /**
+     * Executes all registered quality-checkers for this project in the order of their execution chain.
+     * Each checker is represented by a {@link Runnable} and executed sequentially.
+     */
+    public void checkQuality() {
+        JkLog.startTask("quality-check");
+        if (qualityCheckers.getSize() == 0) {
+            JkLog.info("No registered quality-checkers found.");
+        } else if (qualityCheckers.getSize() == 1) {
+            JkLog.info(qualityCheckers.getRunnableNames().get(0));
+            qualityCheckers.getRunnable(0).run();
+        } else {
+            qualityCheckers.run();
         }
         JkLog.endTask();
     }

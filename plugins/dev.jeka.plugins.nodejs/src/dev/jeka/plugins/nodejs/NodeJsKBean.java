@@ -75,13 +75,6 @@ public class NodeJsKBean extends KBean {
         getRunbase().registerCLeanAction(CLEAN_ACTION, this::cleanBuildDir);
     }
 
-    @JkPostInit(required = true)
-    private void postInit(ProjectKBean projectKBean) {
-        if (configureProject) {
-            configureProject(projectKBean.project);
-        }
-    }
-
     @JkDoc("Builds the JS project by running the specified build commands. " +
             "This usually generates packaged JS resources in the project's build directory.")
     public void build() {
@@ -132,6 +125,15 @@ public class NodeJsKBean extends KBean {
     public void clean() {
         cleanBuildDir();
         JkLog.info("Build dir %s deleted.", getBaseDir().relativize(nodeJsProject.getBuildDir()));
+    }
+
+    @JkDoc("- Prepends nodeJs build to `pack` actions in order to embed js build in JAR\n" +
+            "- Appends js tests to `test`actions")
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        if (configureProject) {
+            configureProject(projectKBean.project);
+        }
     }
 
     /**

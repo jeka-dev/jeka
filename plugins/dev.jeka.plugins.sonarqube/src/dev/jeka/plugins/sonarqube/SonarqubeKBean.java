@@ -51,6 +51,9 @@ public class SonarqubeKBean extends KBean {
     @JkDoc("Ping the sonarqube server prior running analysis")
     public boolean pingServer = true;
 
+    @JkDoc("If true, the quality gate will be registered alongside analysis in project quality checkers.")
+    public boolean gate;
+
     private JkSonarqube sonarqube;
 
     @Override
@@ -60,7 +63,7 @@ public class SonarqubeKBean extends KBean {
         sonarqube.setVersion(getRunbase().getDependencyResolver().getRepos(), effectiveScannerVersion());
         sonarqube.setPingServer(pingServer);
         sonarqube.setLogOutput(logOutput);
-        sonarqube.setProperties(getRunbase().getProperties());;
+        sonarqube.setProperties(getRunbase().getProperties());
     }
 
     @JkDoc("Runs a SonarQube analysis and sends the results to a Sonar server.")
@@ -84,6 +87,17 @@ public class SonarqubeKBean extends KBean {
                     sonarqube.getHostUrl(), sonarqube.getProperty(JkSonarqube.PROJECT_KEY) );
             System.exit(1);
         }
+    }
+
+    @JkDoc("Adds Sonarqube analysis to quality checkers")
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        projectKBean.project.addQualityChecker("sonarqube", () -> {
+            run();
+            if (gate) {
+                check();
+            }
+        });
     }
 
     public JkSonarqube getSonarqube() {

@@ -20,9 +20,11 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
 
 @JkDoc("Provides convenient operations for Git.")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-git/")
 public final class GitKBean extends KBean {
 
     public final JkGit git = JkGit.of(getBaseDir());

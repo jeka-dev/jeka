@@ -24,10 +24,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGenerator;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseProjectGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.Main;
+import dev.jeka.core.tool.*;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,6 +32,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 @JkDoc("Manages Eclipse metadata files.")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-eclipse/")
 public final class EclipseKBean extends KBean {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")

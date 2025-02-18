@@ -47,6 +47,7 @@ public class JacocoKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "org.jacoco:org.jacoco.agent")
     public String jacocoVersion = JkJacoco.DEFAULT_VERSION;
 
+    @JkDoc("Appends a Jacoco agent to the process running tests")
     @JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;

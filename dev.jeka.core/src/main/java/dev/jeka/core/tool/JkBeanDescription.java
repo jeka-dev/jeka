@@ -56,6 +56,7 @@ public final class JkBeanDescription {
             IntellijKBean.class,
             EclipseKBean.class
     );
+
     private static final Map<Class<? extends KBean>, JkBeanDescription> CACHE = new HashMap<>();
 
     final Class<? extends KBean> kbeanClass;
@@ -72,7 +73,11 @@ public final class JkBeanDescription {
 
     final boolean includeDefaultValues;
 
-    final List<PreInitInfo> preInitInfos;
+    final List<InitMethodInfo> preInitInfos;
+
+    final List<InitMethodInfo> postInitInfos;
+
+    final String docUlr;
 
     private JkBeanDescription(
             Class<? extends KBean> kbeanClass,
@@ -82,7 +87,9 @@ public final class JkBeanDescription {
             List<BeanField> beanFields,
             String initDescription,
             boolean includeDefaultValues,
-            List<PreInitInfo> preInitInfos) {
+            List<InitMethodInfo> preInitInfos,
+            List<InitMethodInfo> postInitInfos,
+            String docUlr) {
 
         super();
         this.kbeanClass = kbeanClass;
@@ -93,6 +100,8 @@ public final class JkBeanDescription {
         this.initDescription = initDescription;
         this.includeDefaultValues = includeDefaultValues;
         this.preInitInfos = Collections.unmodifiableList(preInitInfos);
+        this.postInitInfos = Collections.unmodifiableList(postInitInfos);
+        this.docUlr = docUlr;
     }
 
     public static JkBeanDescription of(Class<? extends KBean> kbeanClass) {
@@ -131,10 +140,14 @@ public final class JkBeanDescription {
                 detail = "";
             }
         }
-        List<PreInitInfo> preInitInfos = PreInitInfo.listOf(kbeanClass);
+        List<InitMethodInfo> preInitInfos = InitMethodInfo.preInitMethodsOf(kbeanClass);
+        List<InitMethodInfo> postInitInfos = InitMethodInfo.postInitMethodsOf(kbeanClass);
+
+        JkDocUrl jkDocUrl = kbeanClass.getAnnotation(JkDocUrl.class);
+        String docUlr = jkDocUrl == null ? null : jkDocUrl.value();
 
         return new JkBeanDescription(kbeanClass, header, detail, methods, beanFields, initDescription, false,
-                preInitInfos);
+                preInitInfos, postInitInfos, docUlr);
     }
 
     /**
@@ -147,15 +160,12 @@ public final class JkBeanDescription {
     public String toMdContent() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.synopsisHeader).append("\n\n");
-        sb.append(this.synopsisDetail).append("\n\n");
-        sb.append("|Field  |Description  |Type  |\n");
-        sb.append("|-------|-------------|------|\n");
-        this.beanFields.forEach(field -> sb.append(fieldContent(field)));
+        sb.append(this.synopsisDetail).append("\n");
 
         if (!preInitInfos.isEmpty()) {
             sb.append("\n\n");
-            sb.append("|Pre-initializer Method  |Description  |Pre-initialised KBean  |\n");
-            sb.append("|-------|-------------|------|\n");
+            sb.append("|Pre-initialized KBean  |Description  |\n");
+            sb.append("|-------|-------------|\n");
             this.preInitInfos.forEach(info -> sb.append(preInitContent(info)));
         }
 
@@ -165,6 +175,18 @@ public final class JkBeanDescription {
             sb.append("|--------|\n");
             sb.append(String.format("|%s |%n", oneLiner(this.initDescription)));
         }
+
+        if (!postInitInfos.isEmpty()) {
+            sb.append("\n\n");
+            sb.append("|Post-initialised KBean   |Description  |\n");
+            sb.append("|-------|-------------|\n");
+            this.postInitInfos.forEach(info -> sb.append(preInitContent(info)));
+        }
+
+        sb.append("\n\n");
+        sb.append("|Field  |Description  |Type  |\n");
+        sb.append("|-------|-------------|------|\n");
+        this.beanFields.forEach(field -> sb.append(fieldContent(field)));
 
         sb.append("\n\n");
         sb.append("|Method  |Description  |\n");
@@ -186,11 +208,10 @@ public final class JkBeanDescription {
                 oneLiner(beanMethod.description));
     }
 
-    private static String preInitContent(JkBeanDescription.PreInitInfo preInitInfo) {
-        return String.format("|%s |%s |%s |%n",
-                preInitInfo.declaringMethod.getName(),
-                preInitInfo.description == null ? "Undocumented" : oneLiner(preInitInfo.description),
-                preInitInfo.targetKBean.getSimpleName());
+    private static String preInitContent(InitMethodInfo preInitInfo) {
+        return String.format("|%s |%s |%n",
+                preInitInfo.targetKBean.getSimpleName(),
+                preInitInfo.description == null ? "Undocumented" : oneLiner(preInitInfo.description));
     }
 
     private static String oneLiner(String original) {
@@ -236,9 +257,13 @@ public final class JkBeanDescription {
                 detail = "";
             }
         }
-        List<PreInitInfo> preInitInfos = PreInitInfo.listOf(kbeanClass);
+        List<InitMethodInfo> preInitInfos = InitMethodInfo.preInitMethodsOf(kbeanClass);
+        List<InitMethodInfo> postInitInfos = InitMethodInfo.preInitMethodsOf(kbeanClass);
+        JkDocUrl jkDocUrl = kbeanClass.getAnnotation(JkDocUrl.class);
+        String docUlr = jkDocUrl == null ? null : jkDocUrl.value();
+
         JkBeanDescription result = new JkBeanDescription(kbeanClass, header, detail, methods, beanFields,
-                initDescription, true, preInitInfos);
+                initDescription, true, preInitInfos, postInitInfos, docUlr);
         CACHE.put(kbeanClass, result);
         return result;
     }
@@ -511,7 +536,7 @@ public final class JkBeanDescription {
 
     }
 
-    public static class PreInitInfo {
+    public static class InitMethodInfo {
 
         public final Method declaringMethod;
 
@@ -519,14 +544,14 @@ public final class JkBeanDescription {
 
         public final String description;
 
-        private PreInitInfo(Method method, Class<?> targetKBean, String description) {
+        private InitMethodInfo(Method method, Class<?> targetKBean, String description) {
             super();
             this.declaringMethod = method;
             this.targetKBean = targetKBean;
             this.description = description;
         }
 
-        static List<PreInitInfo> listOf(Class<?> declaringClass) {
+        static List<InitMethodInfo> preInitMethodsOf(Class<?> declaringClass) {
             return Arrays.stream(declaringClass.getDeclaredMethods())
                     .filter(method -> method.getAnnotation(JkPreInit.class) != null)
                     .map(method -> {
@@ -534,7 +559,20 @@ public final class JkBeanDescription {
                         Class<?> kbeanClass = parameterTypes.length == 0 ? null : parameterTypes[0];
                         JkDoc jkDoc = method.getAnnotation(JkDoc.class);
                         String description = jkDoc != null ? jkDoc.value() : null;
-                        return new PreInitInfo(method, kbeanClass, description);
+                        return new InitMethodInfo(method, kbeanClass, description);
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        static List<InitMethodInfo> postInitMethodsOf(Class<?> declaringClass) {
+            return Arrays.stream(declaringClass.getDeclaredMethods())
+                    .filter(method -> method.getAnnotation(JkPostInit.class) != null)
+                    .map(method -> {
+                        Class<?>[] parameterTypes = method.getParameterTypes();
+                        Class<?> kbeanClass = parameterTypes.length == 0 ? null : parameterTypes[0];
+                        JkDoc jkDoc = method.getAnnotation(JkDoc.class);
+                        String description = jkDoc != null ? jkDoc.value() : null;
+                        return new InitMethodInfo(method, kbeanClass, description);
                     })
                     .collect(Collectors.toList());
         }

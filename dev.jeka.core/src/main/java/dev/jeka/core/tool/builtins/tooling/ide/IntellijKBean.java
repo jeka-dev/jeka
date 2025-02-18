@@ -23,10 +23,7 @@ import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.Main;
+import dev.jeka.core.tool.*;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -37,6 +34,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 @JkDoc("Manages Intellij metadata files.")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-intellij/")
 public final class IntellijKBean extends KBean {
 
     // Flag for skipping modules.xml creation when testing.

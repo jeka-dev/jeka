@@ -29,10 +29,7 @@ import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
 import dev.jeka.core.api.tooling.docker.JkDockerNativeBuild;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkRequire;
-import dev.jeka.core.tool.JkRunbase;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.nio.file.Path;
@@ -41,6 +38,7 @@ import java.util.function.Consumer;
 @JkDoc("Builds and runs image based on project.\n" +
         "This KBean can build JVM and Native (AOT) images from an existing project."
 )
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-docker/")
 public final class DockerKBean extends KBean {
 
     @JkDoc("Explicit full name of the JVM image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"

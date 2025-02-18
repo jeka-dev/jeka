@@ -48,6 +48,7 @@ import java.util.List;
         "- Include Spring Maven repositories for resolution\n" +
         "- Adapt Docker image generator to include port exposure"
 )
+@JkDocUrl("https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.springboot/README.md")
 public final class SpringbootKBean extends KBean {
 
     @JkDoc("If true, create a bootable jar artifact.")
@@ -68,18 +69,29 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Space separated string of ports to expose. This is likely to be used by external tool as Docker.")
     public String exposedPorts="8080";
 
+    @JkDoc("Provides info about this plugin configuration")
+    public void info() {
+        JkLog.info("Create Bootable Jar : " + this.createBootJar);
+        JkLog.info("Create original Jar : " + this.createOriginalJar);
+        JkLog.info("Create .war file : " + this.createWarFile);
+    }
+
     @JkRequire
     private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
         return runbase.getBuildableKBeanClass();
     }
 
-    @JkDoc("Set test progress style to PLAIN to display JVM messages gracefully.")
+    @JkDoc("Sets test progress style to PLAIN to display JVM messages gracefully.")
     @JkPreInit
-    public static void initProjectKbean(ProjectKBean projectKBean) {
+    private static void initProjectKbean(ProjectKBean projectKBean) {
         projectKBean.project.testing.testProcessor.engineBehavior
                 .setProgressDisplayer(JkTestProcessor.JkProgressStyle.PLAIN);
     }
 
+    @JkDoc("Adapts project: " +
+            "creates Bootable JAR on #pack, " +
+            "adds Springboot Maven repositories to dependency resolutions, " +
+            "forces tests to run in separated process")
     @JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::customize);
@@ -91,6 +103,10 @@ public final class SpringbootKBean extends KBean {
         }
     }
 
+    @JkDoc("Adapts base KBean: " +
+            "creates Bootable JAR on #pack, " +
+            "adds Springboot Maven repositories to dependency resolutions, " +
+            "forces tests to run in separated process")
     @JkPostInit
     private void postInit(BaseKBean baseKBean) {
         if (find(ProjectKBean.class).isPresent()) {
@@ -110,25 +126,20 @@ public final class SpringbootKBean extends KBean {
         );
     }
 
+    @JkDoc("Adds exposed ports to the built images")
     @JkPostInit
     private void postInit(DockerKBean dockerKBean) {
         dockerKBean.customizeJvmImage(this::customizeDockerBuild);
         dockerKBean.customizeNativeImage(this::customizeDockerBuild);
     }
 
+    @JkDoc("Adds Springboot AOT step when building native executable")
     @JkPostInit
     private void postInit(NativeKBean nativeKBean) {
         JkBuildable buildable = getRunbase().getBuildable();
         nativeKBean.includeMainClassArg = false;
         nativeKBean.setAotAssetDirs(() ->
                 this.generateAotEnrichment(buildable));
-    }
-
-    @JkDoc("Provides info about this plugin configuration")
-    public void info() {
-        JkLog.info("Create Bootable Jar : " + this.createBootJar);
-        JkLog.info("Create original Jar : " + this.createOriginalJar);
-        JkLog.info("Create .war file : " + this.createWarFile);
     }
 
     private List<Path> generateAotEnrichment(JkBuildable buildable) {

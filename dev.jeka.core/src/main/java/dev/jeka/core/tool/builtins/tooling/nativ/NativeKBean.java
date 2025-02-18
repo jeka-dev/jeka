@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 @JkDoc("Creates native executables.\n" +
         "A native images is an executable file created from Java bytecode.\n" +
         "This KBean allows to create native images from executable jars generated from the project.")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-eclipse/")
 public class NativeKBean extends KBean {
 
     private Supplier<List<Path>> aotAssetDirs = Collections::emptyList;

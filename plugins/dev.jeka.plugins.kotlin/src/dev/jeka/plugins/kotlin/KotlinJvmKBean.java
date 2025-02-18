@@ -53,6 +53,8 @@ public class KotlinJvmKBean extends KBean {
 
     private JkKotlinJvm kotlinJvmProject;
 
+    @JkDoc("- Adds Kotlin source compilation\n" +
+            "- Adds Kotlin standard library to dependencies")
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         if (configureProject) {

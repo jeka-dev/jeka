@@ -8,29 +8,32 @@ Adapt `project` or `base` KBean for Spring-Boot:
 - Include Spring Maven repositories for resolution
 - Adapt Docker image generator to include port exposure
 
-|Field  |Description  |Type  |
-|-------|-------------|------|
-|createOriginalJar |If true, create original jar artifact for publication (jar without embedded dependencies |boolean |
-|createWarFile |If true, create a .war filed. |boolean |
-|springRepo |Specific Spring repo where to download spring artifacts. Not needed if you use official release. |JkSpringRepo |
-|aotProfiles |The springboot profiles that should be activated while processing AOT |String |
-|exposedPorts |Space separated string of ports to expose. This is likely to be used by external tool as Docker. |String |
+
+| Pre-initialized KBean | Description                                                           |
+|-----------------------|-----------------------------------------------------------------------|
+| ProjectKBean          | Sets test progress style to PLAIN to display JVM messages gracefully. |
 
 
-|Pre-initializer Method  |Description  |Pre-initialised KBean  |
-|-------|-------------|------|
-|initProjectKbean |Set test progress style to PLAIN to display JVM messages gracefully. |ProjectKBean |
+| Post-initialised KBean | Description                                                                                                                                              |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| BaseKBean              | Adapts base KBean: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process |
+| DockerKBean            | Adds exposed ports to the built images                                                                                                                   |
+| NativeKBean            | Adds Springboot AOT step when building native executable                                                                                                 |
+| ProjectKBean           | Adapts project: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process    |
 
 
-|KBean Initialisation  |
-|--------|
-|Initialise `ProjectKBean` (or `BaseKBean) in order to:<br/><br/>- Produce bootable JAR file.<br/>- Adapt scaffolding to generate basic springboot application.<br/>- Add Spring Maven repositories.<br/>- Customize Docker image generator to export 8080 port. |
+| Field             | Description                                                                                      | Type         |
+|-------------------|--------------------------------------------------------------------------------------------------|--------------|
+| createOriginalJar | If true, create original jar artifact for publication (jar without embedded dependencies         | boolean      |
+| createWarFile     | If true, create a .war filed.                                                                    | boolean      |
+| springRepo        | Specific Spring repo where to download spring artifacts. Not needed if you use official release. | JkSpringRepo |
+| aotProfiles       | The springboot profiles that should be activated while processing AOT                            | String       |
+| exposedPorts      | Space separated string of ports to expose. This is likely to be used by external tool as Docker. | String       |
 
 
-|Method  |Description  |
-|--------|-------------|
-|info |Provides info about this plugin configuration |
-
+| Method    | Description                                   |
+|-----------|-----------------------------------------------|
+| info      | Provides info about this plugin configuration |
 
 Resources:
 

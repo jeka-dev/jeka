@@ -20,6 +20,18 @@ To work effectively with this KBean, it's helpful to have an [overview](api-proj
 
 Additionally, `ProjectKBean` serves as a central point of interaction for other KBeans, enabling them to access project details and extend or enhance the build process.
 
+It offers standardized methods that cover the whole build life-cycle:
+
+- `scaffold`: Creates new project structure from scratch
+- `generateSources`: Generates source code
+- `compile`: Compiles source code
+- `test`: Compiles and run test code
+- `pack`: Creates packaged artifacts as JAR files
+- `checkQuality`: Runs quality checkers and quality gates
+- `e2eTest`: Runs end-to-end test on a deployed version of the application
+
+The `JkProject` instance offers methods to customize or extend behavior, allowing seamless integration of third-party extensions.
+
 **Example for getting information about source files:**
 
 ```Java

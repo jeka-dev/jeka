@@ -44,6 +44,7 @@ import java.util.List;
 
 @JkDoc("Manages the build and execution of a JVM projects.\n" +
         "It contains all information for resolving dependencies, compiling, testing and packaging as JARs")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-project/")
 public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, JkBuildable.Supplier {
 
     // The underlying project managed by this KBean
@@ -179,6 +180,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     @JkDoc("Runs the registered end-to-end tests")
     public void e2eTest() {
         this.project.e2eTest();
+    }
+
+    @JkDoc("Runs the quality checkers")
+    public void checkQuality() {
+        this.project.checkQuality();
     }
 
     @Override

@@ -37,10 +37,7 @@ import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkException;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.scaffold.JkScaffoldOptions;
 import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 
@@ -61,6 +58,7 @@ import java.util.stream.Collectors;
         "  - Create bootable jar\n" +
         "  - Create bootable fat jar, and create Docker images."
 )
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-base/")
 public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
     public static final String CREATE_JAR_ACTION = "create-jar";

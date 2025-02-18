@@ -24,6 +24,7 @@ import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
@@ -32,6 +33,7 @@ import java.util.List;
 @JkDoc("Provides a way to install, update, or remove applications from the user PATH.\n" +
         "Applications are installed from a Git repository and built by the client before installation.\n" +
         "Applications can be installed as executable JARs or native apps.")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-app/")
 public class AppKBean extends KBean {
 
     private static final PropFile GLOBAL_PROP_FILE = new PropFile(JkLocator.getGlobalPropertiesFile());

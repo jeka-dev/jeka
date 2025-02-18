@@ -65,11 +65,15 @@ class PicocliHelp {
                                  String kbeanName,
                                  JkRunbase runbase,
                                  PrintStream printStream) {
-        CommandLine commandLine = kbeanHelp(classpath, kbeanClassNames, kbeanName, runbase);
-        if (commandLine == null) {
+        JkBeanDescription beanDescription = kbeanDescription(classpath, kbeanClassNames, kbeanName, runbase);
+        if (beanDescription == null) {
             return false;
         }
+        CommandLine commandLine = kbeanHelp(beanDescription);
         commandLine.usage(printStream, colorScheme());
+        if (!JkUtilsString.isBlank(beanDescription.docUlr)) {
+            printStream.println("\nSee: " + beanDescription.docUlr);
+        }
         return true;
     }
 
@@ -174,28 +178,17 @@ class PicocliHelp {
     }
 
     private static CommandLine kbeanHelp(
-            JkPathSequence classpath,
-            List<String> kbeanClassNames,
-            String kbeanName,
-            JkRunbase runbase) {
+            JkBeanDescription beanDescription) {
 
-        String kbeanClassName = kbeanClassNames.stream()
-                .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
-                .findFirst().orElse(null);
-        if (kbeanClassName == null) {
-            return null;
-        }
-
-        ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
-        Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
-        JkBeanDescription beanDescription = JkBeanDescription.ofWithDefaultValues(defaultKBeanClass, runbase);
         CommandLine.Model.CommandSpec main = PicocliCommands.fromKBeanDesc(beanDescription);
 
         // Configure Usage
         main.usageMessage().synopsisHeading("");
         List<String> synopsis = new LinkedList<>();
+        String kbeanClassName = beanDescription.kbeanClass.getName();
+        String shortName = KBean.name(kbeanClassName);
         synopsis.add(String.format("KBean @|yellow %s:|@ (%s)",
-                    KBean.name(kbeanName), kbeanClassName));
+                    KBean.name(shortName), beanDescription.kbeanClass.getName()));
         synopsis.add("");
         if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
             String header = beanDescription.synopsisHeader.trim();
@@ -211,8 +204,22 @@ class PicocliHelp {
                 .autoWidth(true)
                 .customSynopsis(synopsis.toArray(new String[0]))
                 .commandListHeading("Methods\n");
-
         return new CommandLine(main).setUsageHelpAutoWidth(true);
+    }
+
+    private static JkBeanDescription kbeanDescription(JkPathSequence classpath,
+                                                      List<String> kbeanClassNames,
+                                                      String kbeanName,
+                                                      JkRunbase runbase) {
+        String kbeanClassName = kbeanClassNames.stream()
+                .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
+                .findFirst().orElse(null);
+        if (kbeanClassName == null) {
+            return null;
+        }
+        ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
+        Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
+        return JkBeanDescription.ofWithDefaultValues(defaultKBeanClass, runbase);
     }
 
 

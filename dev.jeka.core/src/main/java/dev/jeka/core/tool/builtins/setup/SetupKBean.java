@@ -24,6 +24,7 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
 
 import java.awt.*;
@@ -31,6 +32,7 @@ import java.io.IOException;
 
 @JkDoc("Provides convenient methods to perform global configuration tasks as editing global.properties file " +
         "or updating embedded jeka boot scripts.")
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-setup/")
 public class SetupKBean extends KBean {
 
     private static final PropFile GLOBAL_PROP_FILE = new PropFile(JkLocator.getGlobalPropertiesFile());

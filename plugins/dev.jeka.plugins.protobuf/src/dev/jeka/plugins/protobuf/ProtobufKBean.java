@@ -41,6 +41,7 @@ public class ProtobufKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "com.google.protobuf:protobuf-java:")
     public String protobufVersion = "3.21.12";
 
+    @JkDoc("Adds Protobuf source generator")
     @JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         JkProtobuf.of()

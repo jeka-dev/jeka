@@ -38,6 +38,7 @@ public class NexusKBean extends KBean {
 
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
+    @JkDoc("Wraps Maven publish repo with Nexus autoclose trigger")
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
         mavenKBean.customizePublication(mavenPublication -> {
