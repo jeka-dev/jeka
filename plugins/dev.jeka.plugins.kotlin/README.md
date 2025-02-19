@@ -1,9 +1,24 @@
 # Kotlin JVM Plugin for JeKa
 
-A plugin designed for building JVM projects containing Kotlin source code.  
+Add Kotlin compilation capability to `project` KBean.
 
-This plugin provides a `KotlinJvmKBean` to automatically configure the *project KBean*.  
-It also includes the `JkKotlinJvm` utility for programmatic project setup.
+**This KBean post-initializes the following KBeans:**
+
+| Post-initialised KBean | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| ProjectKBean           | Adds Kotlin source compilation and Kotlin standard library to dependencies. |
+
+
+**This KBean exposes the following fields:**
+
+| Field                      | Description                                                                                       |
+|----------------------------|---------------------------------------------------------------------------------------------------|
+| kotlinVersion [String]     | Overrides the Kotlin version for compiling and running defined in 'jeka.kotlin.version' property. |
+| sourceDir [String]         | Location of Kotlin sources.                                                                       |
+| testSourceDir [String]     | Location of Kotlin sources for tests.                                                             |
+| includeStdlib [boolean]    | If true, includes standard lib for compiling.                                                     |
+| configureProject [boolean] | If true, the project KBean will be automatically configured to use Kotlin.                        |
+
 
 ## Resources
 

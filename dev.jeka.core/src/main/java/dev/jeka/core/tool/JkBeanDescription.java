@@ -223,14 +223,18 @@ public final class JkBeanDescription {
     private static String preInitContent(InitMethodInfo preInitInfo) {
         return String.format("|%s |%s |%n",
                 preInitInfo.targetKBean.getSimpleName(),
-                preInitInfo.description == null ? "Undocumented" : oneLiner(preInitInfo.description));
+                preInitInfo.description == null ? "Undocumented." : oneLiner(preInitInfo.description));
     }
 
     private static String oneLiner(String original) {
         if (original == null) {
             return "";
         }
-        return original.replaceAll("\\n", "<br/>").replaceAll("%n", "<br/>");
+        String result = original.replaceAll("\\n", "<br/>").replaceAll("%n", "<br/>");
+        if (!result.endsWith(".")) {
+            result = result + ".";
+        }
+        return result;
     }
 
     static JkBeanDescription ofWithDefaultValues(Class<? extends KBean> kbeanClass, JkRunbase runbase) {

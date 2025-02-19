@@ -19,24 +19,20 @@ package dev.jeka.plugins.kotlin;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.util.Optional;
 
-/**
- * Provides options for configuring the compiler, setting the Kotlin version,
- * specifying the locations of Kotlin sources and test sources,
- * and including the standard library in the compilation process.
- */
-@JkDoc("Explain here what your plugin is doing.\n" +
-    "No need to list methods or options here has you are supposed to annotate them directly.")
+@JkDoc("Add Kotlin compilation capability to `project` KBean.")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.kotlin")
 public class KotlinJvmKBean extends KBean {
 
     private static final String DEFAULT_VERSION = "1.8.0";
 
-    @JkDoc("Override the Kotlin version for compiling and running defined in 'jeka.kotlin.version' property.")
+    @JkDoc("Overrides the Kotlin version for compiling and running defined in 'jeka.kotlin.version' property.")
     private String kotlinVersion;
 
     @JkDoc("Location of Kotlin sources")
@@ -45,7 +41,7 @@ public class KotlinJvmKBean extends KBean {
     @JkDoc("Location of Kotlin sources for tests")
     private String testSourceDir = "src/test/kotlin";
 
-    @JkDoc("Include standard lib in for compiling")
+    @JkDoc("If true, includes standard lib for compiling")
     private boolean includeStdlib = true;
 
     @JkDoc("If true, the project KBean will be automatically configured to use Kotlin.")
@@ -53,8 +49,7 @@ public class KotlinJvmKBean extends KBean {
 
     private JkKotlinJvm kotlinJvmProject;
 
-    @JkDoc("- Adds Kotlin source compilation\n" +
-            "- Adds Kotlin standard library to dependencies")
+    @JkDoc("Adds Kotlin source compilation and Kotlin standard library to dependencies")
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         if (configureProject) {
