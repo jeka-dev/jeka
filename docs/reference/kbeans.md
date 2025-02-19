@@ -155,11 +155,25 @@ To be referenced conveniently, _KBeans_ can be identified by specific names. For
 
 ## Document KBeans
 
-_KBean_ classes, methods, and attributes can be annotated with the `@JkDoc` annotation to provide self-documentation.  
-The text provided in these annotations is displayed when running the command:  
+_KBean_ classes, methods, and attributes can include the `@JkDoc` annotation to provide self-documentation.  
+The text from these annotations is displayed when running the command:
 ```shell
 jeka <kbeanName>: --doc
 ```
+To display documentation for the default KBean, simply run:
+```shell
+jeka --doc
+```
+
+Use the `@JkDocUrl` annotation to indicate that a KBean has online documentation.
+This URL will be displayed in the output of the `--doc` command.
+
+To document your KBean, you can use the following command:
+```shell
+jeka <kbeanName>: --doc-md
+```
+This command generates a markdown-formatted document of the specified KBean.
+You can copy and paste the output directly into your online documentation.
 
 ## Invoke KBeans
 
