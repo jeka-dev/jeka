@@ -28,7 +28,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Files;
 
-@JkDoc("Run Sonarqube analysis and check quality gates. \n" +
+@JkDoc("Runs Sonarqube analysis and checks quality gates. \n" +
         "The properties prefixed with 'sonar.', such as '-Dsonar.host.url=http://myserver/..', " +
         "will be appended to the SonarQube configuration.")
 public class SonarqubeKBean extends KBean {

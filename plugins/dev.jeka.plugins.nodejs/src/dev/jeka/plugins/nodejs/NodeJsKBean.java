@@ -45,14 +45,14 @@ public class NodeJsKBean extends KBean {
     @JkDepSuggest(versionOnly = true, hint = "22.11.0,20.9.0,18.19.0,16.20.2")
     public String version = JkNodeJs.DEFAULT_NODE_VERSION;
 
-    @JkDoc("Command line to run when `exec` is called, e.g., 'npx cowsay'.")
+    @JkDoc("Command-line to run when `exec` is called, e.g., 'npx cowsay'.")
     public String cmdLine;
 
-    @JkDoc("Comma separated, command lines to execute for building js application or in conjunction with #exec method. " +
+    @JkDoc("Comma separated, command-lines to execute for building js application or in conjunction with #exec method. " +
             "This can be similar to something like 'npx ..., npm ...'")
     public String buildCmd;
 
-    @JkDoc("Comma separated, command lines to execute for testing when 'autoConfigureProject'=true")
+    @JkDoc("Comma separated, command-lines to execute for testing when 'autoConfigureProject'=true")
     public String testCmd;
 
     @JkDoc("Path of js project root. It is expected to be relative to the base directory.")
@@ -127,8 +127,8 @@ public class NodeJsKBean extends KBean {
         JkLog.info("Build dir %s deleted.", getBaseDir().relativize(nodeJsProject.getBuildDir()));
     }
 
-    @JkDoc("- Prepends nodeJs build to `pack` actions in order to embed js build in JAR\n" +
-            "- Appends js tests to `test`actions")
+    @JkDoc("Prepends nodeJs build to `pack` actions in order to embed js build in JAR," +
+            " and appends js tests to `test` actions")
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         if (configureProject) {

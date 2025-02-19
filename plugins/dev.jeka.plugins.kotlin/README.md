@@ -26,19 +26,7 @@ Add Kotlin compilation capability to `project` KBean.
 - Source code: [View Source](src/dev/jeka/plugins/kotlin/KotlinJvmKBean.java).
 - Example project: [SpringBoot Kotlin ReactJS Example](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs).
 
-## Initialization
-
-The plugin customizes the *project KBean* found in the runbase for the following:
-- Sets `src/main/kotlin` and `src/test/kotlin` as the directories for project source and test source respectively.
-- Adds a compile pre-action to compile Kotlin source code.
-- Adds the Kotlin Stdlib to the project dependencies.
-
-Java code can coexist with Kotlin code in the `src/main/kotlin` directory, but Java code in the `src/main/java` directory will be ignored.
-
-The version of Kotlin used is specified in the `jeka.kotlin.version` property, which is also applied when compiling code in the *jeka-src* directory.
-
-## Configuration
-No additional configuration is necessary by default. However, the following options can be used to customize settings:
+## Configuration Example
 
 ```properties
 jeka.classpath=dev.jeka:kotlin-plugin

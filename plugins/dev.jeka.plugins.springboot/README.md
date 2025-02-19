@@ -8,7 +8,6 @@ Adapt `project` or `base` KBean for Spring-Boot:
 - Include Spring Maven repositories for resolution
 - Adapt Docker image generator to include port exposure
 
-
 **This KBean pre-initializes the following KBeans:**
 
 | Pre-initialized KBean |Description  |
@@ -60,23 +59,9 @@ jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
 This command downloads the plugin and initializes a Spring Boot project in the current working directory.
 The scaffolded project contains workable code and configuration based on the latest Spring-Boot version.
 
-## Initialization
 
-The `SpringbootKBean` automatically configures *ProjectKBean*, *BaseKBean*, *DockerKBean*, and *NativeKBean* 
-when any of these are present during initialization.
-- **`ProjectKBean` or `BaseKBean`:**
-  - Adds the Spring Boot BOM (Bill of Materials) to the project dependencies (optional).
-  - Configures the project to produce a bootable JAR. WAR files and original artifacts can also be generated.
-  - Enhances scaffolding operations.
-- **`NativeKBean`:**
-  - Allows profiles to be passed for activation in the compiled executable (via the `aotProfiles` property).
-- **`DockerKBean`:**
-  - Configures the ports to expose in the generated Dockerfile (via the `exposedPorts` property).
-    Like all KBeans, these can be configured using **property files** or programmatically.
 
-## Configuration
-
-There's no required configuration. `jeka.properties` file allow to specify some settings as:
+## Configuration example
 
 ```properties
 jeka.classpath=dev.jeka:springboot-plugin

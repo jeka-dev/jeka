@@ -1,12 +1,28 @@
 # Nexus (repo) Plugin for JeKa
 
-Plugin to auto-release when using [Nexus](https://www.sonatype.com/products/sonatype-nexus-repository) repo for publication.
+**This KBean post-initializes the following KBeans:**
 
-It also contains utility classes to configure projects programmatically.
+|Post-initialised KBean   |Description  |
+|-------|-------------|
+|MavenKBean |Wraps Maven publish repo with Nexus autoclose trigger. |
 
-Resources:
-  - Command-line documentation: `jeka nexus: --doc`.
-  - Source Code: [Visit here](src/dev/jeka/plugins/nexus/NexusKBean.java)
+
+**This KBean exposes the following fields:**
+
+|Field  |Description  |
+|-------|-------------|
+|profileNamesFilter [String] |Comma separated filters for taking in account only repositories with specified profile names. |
+|closeTimeout [int] |Timeout in seconds, before the 'close' operation times out. |
+
+
+**This KBean exposes the following methods:**
+
+|Method  |Description  |
+|--------|-------------|
+|closeAndRelease |Closes and releases the nexus repositories used by project KBean to publish artifacts. |
+
+
+Source Code: [Visit here](src/dev/jeka/plugins/nexus/NexusKBean.java)
 
 ## Initialization
 
