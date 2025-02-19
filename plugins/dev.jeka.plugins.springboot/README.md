@@ -26,7 +26,7 @@ Adapt `project` or `base` KBean for Spring-Boot:
 | ProjectKBean           | Adapts project: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process    |
 
 
-**This KBeans exposes the following fields:**
+**This KBean exposes the following fields:**
 
 | Field                          | Description                                                                                      |
 |--------------------------------|--------------------------------------------------------------------------------------------------|
@@ -37,7 +37,7 @@ Adapt `project` or `base` KBean for Spring-Boot:
 | exposedPorts [String]          | Space separated string of ports to expose. This is likely to be used by external tool as Docker. |
 
 
-**This KBeans exposes the following methods:**
+**This KBean exposes the following methods:**
 
 | Method    | Description                                   |
 |-----------|-----------------------------------------------|

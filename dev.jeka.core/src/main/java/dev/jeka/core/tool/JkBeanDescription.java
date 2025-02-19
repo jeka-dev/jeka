@@ -187,7 +187,7 @@ public final class JkBeanDescription {
 
         if (!beanFields.isEmpty()) {
             sb.append("\n\n");
-            sb.append("**This KBeans exposes the following fields:**\n\n");
+            sb.append("**This KBean exposes the following fields:**\n\n");
             sb.append("|Field  |Description  |\n");
             sb.append("|-------|-------------|\n");
             this.beanFields.forEach(field -> sb.append(fieldContent(field)));
@@ -195,7 +195,7 @@ public final class JkBeanDescription {
 
         if (!beanMethods.isEmpty()) {
             sb.append("\n\n");
-            sb.append("**This KBeans exposes the following methods:**\n\n");
+            sb.append("**This KBean exposes the following methods:**\n\n");
             sb.append("|Method  |Description  |\n");
             sb.append("|--------|-------------|\n");
             this.beanMethods.forEach(method -> sb.append(methodContent(method)));
