@@ -169,7 +169,12 @@ public final class DockerKBean extends KBean {
                 : "native-" + computeImageName(buildable);
     }
 
-
+    /**
+     * Creates a {@link JkDockerAppTester} instance configured for testing a JVM-based Docker application.
+     *
+     * @param tester A consumer function that defines the tests to execute against the application,
+     *               consuming the base URL and port of the running application.
+     */
     public JkDockerAppTester createJvmAppTester(Consumer<String> tester) {
         JkDockerBuild dockerBuild = jvmDockerBuild(this.getBuildable(true));
         String imageName = resolveJvmImageName() + "-e2e-test";
@@ -179,6 +184,12 @@ public final class DockerKBean extends KBean {
                 .setContextPath(getOutputDir().resolve(dirName));
     }
 
+    /**
+     * Creates a {@link JkDockerAppTester} instance configured for testing a native Docker application.
+     *
+     * @param tester A consumer function that defines the tests to execute against the application,
+     *               consuming the base URL and port of the running application.
+     */
     public JkDockerAppTester createNativeAppTester(Consumer<String> tester) {
         JkDockerBuild dockerBuild = nativeDockerBuild(this.getBuildable(true));
         String imageName = resolveNativeImageName() + "-e2e-test";
@@ -187,7 +198,6 @@ public final class DockerKBean extends KBean {
                 .setImageName(imageName)
                 .setContextPath(getOutputDir().resolve(dirName));
     }
-
 
     private JkBuildable getBuildable(boolean ensureClassesAreCompiled) {
 
