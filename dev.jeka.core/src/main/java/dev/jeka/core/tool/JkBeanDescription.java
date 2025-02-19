@@ -164,6 +164,7 @@ public final class JkBeanDescription {
 
         if (!preInitInfos.isEmpty()) {
             sb.append("\n\n");
+            sb.append("**This KBeans pre-initializes the following KBeans:**\n\n");
             sb.append("|Pre-initialized KBean  |Description  |\n");
             sb.append("|-------|-------------|\n");
             this.preInitInfos.forEach(info -> sb.append(preInitContent(info)));
@@ -178,20 +179,27 @@ public final class JkBeanDescription {
 
         if (!postInitInfos.isEmpty()) {
             sb.append("\n\n");
+            sb.append("**This KBeans post-initializes the following KBeans:**\n\n");
             sb.append("|Post-initialised KBean   |Description  |\n");
             sb.append("|-------|-------------|\n");
             this.postInitInfos.forEach(info -> sb.append(preInitContent(info)));
         }
 
-        sb.append("\n\n");
-        sb.append("|Field  |Description  |\n");
-        sb.append("|-------|-------------|\n");
-        this.beanFields.forEach(field -> sb.append(fieldContent(field)));
+        if (!beanFields.isEmpty()) {
+            sb.append("\n\n");
+            sb.append("**This KBeans exposes the following fields:**\n\n");
+            sb.append("|Field  |Description  |\n");
+            sb.append("|-------|-------------|\n");
+            this.beanFields.forEach(field -> sb.append(fieldContent(field)));
+        }
 
-        sb.append("\n\n");
-        sb.append("|Method  |Description  |\n");
-        sb.append("|--------|-------------|\n");
-        this.beanMethods.forEach(method -> sb.append(methodContent(method)));
+        if (!beanMethods.isEmpty()) {
+            sb.append("\n\n");
+            sb.append("**This KBeans exposes the following methods:**\n\n");
+            sb.append("|Method  |Description  |\n");
+            sb.append("|--------|-------------|\n");
+            this.beanMethods.forEach(method -> sb.append(methodContent(method)));
+        }
         return sb.toString();
     }
 

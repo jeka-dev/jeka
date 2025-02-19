@@ -9,31 +9,39 @@ Adapt `project` or `base` KBean for Spring-Boot:
 - Adapt Docker image generator to include port exposure
 
 
-| Pre-initialized KBean | Description                                                           |
-|-----------------------|-----------------------------------------------------------------------|
-| ProjectKBean          | Sets test progress style to PLAIN to display JVM messages gracefully. |
+**This KBeans pre-initializes the following KBeans:**
 
+| Pre-initialized KBean |Description  |
+|-----------------------|-------------|
+| ProjectKBean          |Sets test progress style to PLAIN to display JVM messages gracefully. |
+
+
+**This KBeans post-initializes the following KBeans:**
 
 | Post-initialised KBean | Description                                                                                                                                              |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| DockerKBean            | Adds exposed ports to the built images                                                                                                                   |
 | BaseKBean              | Adapts base KBean: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process |
+| DockerKBean            | Adds exposed ports to the built images                                                                                                                   |
 | NativeKBean            | Adds Springboot AOT step when building native executable                                                                                                 |
 | ProjectKBean           | Adapts project: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process    |
 
 
-| Field                           | Description                                                                                      |
-|---------------------------------|--------------------------------------------------------------------------------------------------|
-| createOriginalJar [boolean]     | If true, create original jar artifact for publication (jar without embedded dependencies         |
-| createWarFile [boolean]         | If true, create a .war filed.                                                                    |
-| springRepo [enum:JkSpringRepo]  | Specific Spring repo where to download spring artifacts. Not needed if you use official release. |
-| aotProfiles [String]            | The springboot profiles that should be activated while processing AOT                            |
-| exposedPorts [String]           | Space separated string of ports to expose. This is likely to be used by external tool as Docker. |
+**This KBeans exposes the following fields:**
+
+| Field                          | Description                                                                                      |
+|--------------------------------|--------------------------------------------------------------------------------------------------|
+| createOriginalJar [boolean]    | If true, create original jar artifact for publication (jar without embedded dependencies         |
+| createWarFile [boolean]        | If true, create a .war filed.                                                                    |
+| springRepo [enum:JkSpringRepo] | Specific Spring repo where to download spring artifacts. Not needed if you use official release. |
+| aotProfiles [String]           | The springboot profiles that should be activated while processing AOT                            |
+| exposedPorts [String]          | Space separated string of ports to expose. This is likely to be used by external tool as Docker. |
 
 
-| Method | Description                                   |
-|--------|-----------------------------------------------|
-| info   | Displays info about this plugin configuration |
+**This KBeans exposes the following methods:**
+
+| Method    | Description                                   |
+|-----------|-----------------------------------------------|
+| info      | Provides info about this plugin configuration |
 
 
 Resources:
