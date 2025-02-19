@@ -306,7 +306,7 @@ public class Main {
         System.err.println("If this originates from a bug, please report the issue at: " +
                 "https://github.com/jeka-dev/jeka/issues");
 
-        if ( (!(t instanceof JkException)) || shouldPrintExceptionDetails()) {
+        if ( shouldPrintExceptionDetails() && !(t instanceof JkException)) {
             printException(t);
         }
     }

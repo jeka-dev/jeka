@@ -41,8 +41,16 @@ public abstract class JkApplicationTester implements Runnable {
             executeTests();
         } finally {
             JkLog.verbose("Stopping the application...");
-            stopGracefully();;
-            JkLog.info("Application stopped");
+            try {
+                stopGracefully();
+                JkLog.info("Application stopped");
+            } catch (Exception e) {
+                JkLog.warn("Error while stopping the application:", e.getMessage());
+                if (JkLog.isVerbose()) {
+                    e.printStackTrace(JkLog.getErrPrintStream());
+                }
+            }
+
         }
     }
 

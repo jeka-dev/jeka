@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /*
@@ -141,6 +142,22 @@ public final class SpringbootKBean extends KBean {
             JkBuildable buildable = getRunbase().getBuildable();
             return this.generateAotEnrichment(buildable);
         });
+    }
+
+    /**
+     * Creates a {@link JkSpringbootAppTester} instance for testing a Spring Boot application.
+     * The tester is configured with a specified consumer that executes testing logic
+     * against the application once it is started.
+     * <p>
+     * To run properly, the actuator needs to be in classpath.
+     * </p>
+     *
+     * @param tester a {@link Consumer} of {@link String} that contains the logic for testing
+     *               the application. The consumer receives the base URL and port of the
+     *               running application.
+     */
+    public JkSpringbootAppTester createE2eAppTester(Consumer<String> tester) {
+        return JkSpringbootAppTester.of(() -> this.getRunbase().getBuildable(), tester);
     }
 
     private List<Path> generateAotEnrichment(JkBuildable buildable) {

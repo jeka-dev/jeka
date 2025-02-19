@@ -37,7 +37,20 @@ import java.util.stream.Stream;
 @JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.nodejs")
 public class NodeJsKBean extends KBean {
 
+    /**
+     * Represents the action identifier for cleaning the build directory of a Node.js project.
+     * This constant is used to trigger or identify the clean operation within the context
+     * of the NodeJsKBean framework, typically removing generated artifacts in the build directory.
+     */
     public static final String CLEAN_ACTION = "nodejs-clean";
+
+    /**
+     * Holds the default directory name, "app-js", which is expected to contain
+     * JavaScript application-specific files in the project structure.
+     * This constant serves as a predefined value to standardize the default
+     * location of JavaScript resources within Node.js project configurations.
+     */
+    public static final String DEFAULT_APP_JS_DIR= "app-js";
 
     @JkDoc("The version of NodeJs to use")
     @JkDepSuggest(versionOnly = true, hint = "22.11.0,20.9.0,18.19.0,16.20.2")
@@ -54,7 +67,7 @@ public class NodeJsKBean extends KBean {
     public String testCmd;
 
     @JkDoc("Path of js project root. It is expected to be relative to the base directory.")
-    public String appDir = "app-js";
+    public String appDir = DEFAULT_APP_JS_DIR;
 
     @JkDoc("Path to the built app (usually contains an index.html file). Relative to the JS app directory.")
     public String buildDir = "build";

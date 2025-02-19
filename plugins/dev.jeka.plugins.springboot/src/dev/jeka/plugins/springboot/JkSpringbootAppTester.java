@@ -66,6 +66,7 @@ public class JkSpringbootAppTester extends JkApplicationTester {
         buildable.prepareRunJar()
                 .addJavaOptions("-Dserver.port=" + port)
                 .addJavaOptions("-Dmanagement.endpoint.shutdown.enabled=true")
+                .addJavaOptions("-Dmanagement.endpoints.web.exposure.include=*")
                 .addJavaOptions(JkUtilsString.parseCommandline(extraJavaOptions))
                 .setLogCommand(JkLog.isVerbose())
                 .setInheritIO(showAppLogs)

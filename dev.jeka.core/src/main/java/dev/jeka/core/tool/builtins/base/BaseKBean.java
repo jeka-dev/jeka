@@ -407,7 +407,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
     }
 
     private void fatJar(Path jarPath) {
-        JkLog.startTask("Making fat jar. It may takes a while");
+        JkLog.startTask("create-fat-jar");
         JkJarPacker.of(getAppClasses())
                 .withManifest(getManifest())
                 .makeFatJar(jarPath, getAppLibs(), JkPathMatcher.of());
@@ -417,7 +417,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
     }
 
     private void regularJar(Path jarPath) {
-        JkLog.startTask("Making bin jar");
+        JkLog.startTask("create-bin-jar");
         JkJarPacker.of(getAppClasses())
                 .withManifest(getManifest())
                 .makeJar(jarPath);
