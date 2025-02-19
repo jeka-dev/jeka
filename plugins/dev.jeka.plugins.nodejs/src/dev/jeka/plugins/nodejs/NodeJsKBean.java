@@ -22,10 +22,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkException;
-import dev.jeka.core.tool.JkPostInit;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.file.Files;
@@ -37,6 +34,7 @@ import java.util.stream.Stream;
         "Simply specify the Node.js version and the commands to build or test the application. " +
         "The KBean guides the `project KBean` to build and test it.\n" +
         "Node.js is automatically downloaded and installed on first use, so no manual setup is required.")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.nodejs")
 public class NodeJsKBean extends KBean {
 
     public static final String CLEAN_ACTION = "nodejs-clean";

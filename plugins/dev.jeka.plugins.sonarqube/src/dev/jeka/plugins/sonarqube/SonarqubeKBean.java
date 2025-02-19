@@ -22,6 +22,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -31,6 +32,7 @@ import java.nio.file.Files;
 @JkDoc("Runs Sonarqube analysis and checks quality gates. \n" +
         "The properties prefixed with 'sonar.', such as '-Dsonar.host.url=http://myserver/..', " +
         "will be appended to the SonarQube configuration.")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.sonarqube")
 public class SonarqubeKBean extends KBean {
 
     @JkDoc("If true, the list of production dependency files will be provided to sonarqube")

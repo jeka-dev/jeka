@@ -20,11 +20,13 @@ import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.jacoco")
 public class JacocoKBean extends KBean {
 
     @JkDoc("If true, project from ProjectJkBean will be configured with Jacoco automatically.")
