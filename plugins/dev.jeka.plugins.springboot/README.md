@@ -9,31 +9,32 @@ Adapt `project` or `base` KBean for Spring-Boot:
 - Adapt Docker image generator to include port exposure
 
 
-| Pre-initialized KBean | Description                                                           |
-|-----------------------|-----------------------------------------------------------------------|
-| ProjectKBean          | Sets test progress style to PLAIN to display JVM messages gracefully. |
+| Pre-initialized KBean |Description  |
+|-----------------------|-------------|
+| ProjectKBean          |Sets test progress style to PLAIN to display JVM messages gracefully. |
 
 
 | Post-initialised KBean | Description                                                                                                                                              |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| BaseKBean              | Adapts base KBean: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process |
 | DockerKBean            | Adds exposed ports to the built images                                                                                                                   |
+| BaseKBean              | Adapts base KBean: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process |
 | NativeKBean            | Adds Springboot AOT step when building native executable                                                                                                 |
 | ProjectKBean           | Adapts project: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process    |
 
 
-| Field             | Description                                                                                      | Type         |
-|-------------------|--------------------------------------------------------------------------------------------------|--------------|
-| createOriginalJar | If true, create original jar artifact for publication (jar without embedded dependencies         | boolean      |
-| createWarFile     | If true, create a .war filed.                                                                    | boolean      |
-| springRepo        | Specific Spring repo where to download spring artifacts. Not needed if you use official release. | JkSpringRepo |
-| aotProfiles       | The springboot profiles that should be activated while processing AOT                            | String       |
-| exposedPorts      | Space separated string of ports to expose. This is likely to be used by external tool as Docker. | String       |
+| Field                           | Description                                                                                      |
+|---------------------------------|--------------------------------------------------------------------------------------------------|
+| createOriginalJar [boolean]     | If true, create original jar artifact for publication (jar without embedded dependencies         |
+| createWarFile [boolean]         | If true, create a .war filed.                                                                    |
+| springRepo [enum:JkSpringRepo]  | Specific Spring repo where to download spring artifacts. Not needed if you use official release. |
+| aotProfiles [String]            | The springboot profiles that should be activated while processing AOT                            |
+| exposedPorts [String]           | Space separated string of ports to expose. This is likely to be used by external tool as Docker. |
 
 
-| Method    | Description                                   |
-|-----------|-----------------------------------------------|
-| info      | Provides info about this plugin configuration |
+| Method | Description                                   |
+|--------|-----------------------------------------------|
+| info   | Displays info about this plugin configuration |
+
 
 Resources:
 

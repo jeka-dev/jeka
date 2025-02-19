@@ -184,8 +184,8 @@ public final class JkBeanDescription {
         }
 
         sb.append("\n\n");
-        sb.append("|Field  |Description  |Type  |\n");
-        sb.append("|-------|-------------|------|\n");
+        sb.append("|Field  |Description  |\n");
+        sb.append("|-------|-------------|\n");
         this.beanFields.forEach(field -> sb.append(fieldContent(field)));
 
         sb.append("\n\n");
@@ -196,10 +196,14 @@ public final class JkBeanDescription {
     }
 
     private static String fieldContent(JkBeanDescription.BeanField beanField) {
-        return String.format("|%s |%s |%s |%n",
-                beanField.name,
-                oneLiner(beanField.description),
-                JkUtilsString.removePackagePrefix(beanField.type.getName()));
+        String typeName = JkUtilsString.removePackagePrefix(beanField.type.getName());
+        if (beanField.type.isEnum()) {
+            typeName = "enum:" + typeName;
+        }
+        return String.format("|%s [%s] |%s |%n",
+                beanField.name ,
+                typeName,
+                oneLiner(beanField.description));
     }
 
     private static String methodContent(JkBeanDescription.BeanMethod beanMethod) {
