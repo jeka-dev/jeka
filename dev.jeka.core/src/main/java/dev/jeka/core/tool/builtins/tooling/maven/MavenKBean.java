@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @JkDoc("Manages Maven publication for project and 'jeka-src'.")
@@ -150,6 +151,16 @@ public final class MavenKBean extends KBean {
         JkUtilsAssert.state(mavenPublication == null, "Maven publication has already been initialized, " +
                 "the customization can not be taken in account.");
         this.mavenPublicationCustomizer.append(customizationName, publicationCustomizer);
+    }
+
+    /**
+     * Customizes the Maven dependencies by applying a modifier function to the dependency set.
+     * This allows for dynamic alterations to the dependencies before the Maven publication process.
+     */
+    public void customizePublishedDeps(Function<JkDependencySet, JkDependencySet> modifier) {
+        this.mavenPublicationCustomizer.append(mavenPublication -> {
+            mavenPublication.customizeDependencies(modifier);
+        });
     }
 
     private JkRepoSet getPublishReposFromProps() {
