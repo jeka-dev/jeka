@@ -213,7 +213,8 @@ public final class JkRunbase {
             JkLog.warn("Loading bean %s from Runbase %s during initialization.", beanClass.getName(), baseDir);
             JkLog.warn("This action will be disallowed in future releases.");
             JkLog.warn("Please, update your code to use @JkPostInit methods for KBean configuration.");
-            JkLog.warn("Kbeans under initialization was: " + beans.keySet());
+            JkLog.warn("Kbeans under initialization was: "
+                    + beans.keySet().stream().map(KBean::name).collect(Collectors.joining(", ")));
             JkLog.warn("Run with --debug option to see stacktrace at the moment of initialization.");
             if (JkLog.isDebug()) {
                 JkUtilsThrowable.printStackTrace(JkLog.getOutPrintStream(),

@@ -136,10 +136,11 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Adds Springboot AOT step when building native executable")
     @JkPostInit
     private void postInit(NativeKBean nativeKBean) {
-        JkBuildable buildable = getRunbase().getBuildable();
         nativeKBean.includeMainClassArg = false;
-        nativeKBean.setAotAssetDirs(() ->
-                this.generateAotEnrichment(buildable));
+        nativeKBean.setAotAssetDirs(() -> {
+            JkBuildable buildable = getRunbase().getBuildable();
+            return this.generateAotEnrichment(buildable);
+        });
     }
 
     private List<Path> generateAotEnrichment(JkBuildable buildable) {
