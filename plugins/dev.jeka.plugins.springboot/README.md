@@ -9,14 +9,14 @@ Adapt `project` or `base` KBean for Spring-Boot:
 - Adapt Docker image generator to include port exposure
 
 
-**This KBeans pre-initializes the following KBeans:**
+**This KBean pre-initializes the following KBeans:**
 
 | Pre-initialized KBean |Description  |
 |-----------------------|-------------|
 | ProjectKBean          |Sets test progress style to PLAIN to display JVM messages gracefully. |
 
 
-**This KBeans post-initializes the following KBeans:**
+**This KBean post-initializes the following KBeans:**
 
 | Post-initialised KBean | Description                                                                                                                                              |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
