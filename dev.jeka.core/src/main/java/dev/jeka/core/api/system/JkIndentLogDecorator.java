@@ -34,7 +34,8 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    private static final String TASK = JkExternalToolApi.ansiText("@|blue Task: |@");
+    //private static final String TASK = JkExternalToolApi.ansiText("@|blue Task: |@");
+    private static final String TASK = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Task: ").reset().toString();
 
     private static final String WARN = JkExternalToolApi.ansiText("@|yellow WARN: |@");
 

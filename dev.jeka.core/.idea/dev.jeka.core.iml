@@ -190,7 +190,9 @@
           <root url="jar://$MODULE_DIR$/libs/compile-only/jansi-2.4.1.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ideaLibSources/jansi-2.4.1-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

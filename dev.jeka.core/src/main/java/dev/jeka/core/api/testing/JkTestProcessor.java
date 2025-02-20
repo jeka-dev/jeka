@@ -132,7 +132,7 @@ public final class JkTestProcessor {
     private JvmHints jvmHints = JvmHints.ofDefault();
 
     private Supplier<JkRepoSet> repoSetSupplier = () ->
-            JkRepoProperties.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties()).getDownloadRepos();
+            JkRepoProperties.of(JkProperties.ofStandardProperties()).getDownloadRepos();
 
     private JkTestProcessor() {
         engineBehavior = new JkEngineBehavior();

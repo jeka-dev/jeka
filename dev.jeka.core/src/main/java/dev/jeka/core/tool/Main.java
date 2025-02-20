@@ -25,6 +25,7 @@ import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
+import dev.jeka.core.api.system.JkAnsiConsole;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -61,16 +62,23 @@ public class Main {
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
+        JkAnsiConsole.of().systemInstall();
+
+        String totoansi = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("toto").reset().toString();
+        System.out.println(totoansi);
+
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
         if (cmdArgs.isUsageHelpRequested()) {
             PicocliHelp.printUsageHelp(System.out);
+            JkAnsiConsole.of().systemUninstall();
             System.exit(0);
         }
 
         // Handle --version
         if (cmdArgs.isVersionHelpRequested()) {
             PicocliHelp.printVersionHelp(System.out);
+            JkAnsiConsole.of().systemUninstall();
             System.exit(0);
         }
 
@@ -127,6 +135,7 @@ public class Main {
                         kBeanResolution,
                         props,
                         System.out);
+                JkAnsiConsole.of().systemUninstall();
                 System.exit(0);
             }
 
@@ -150,6 +159,7 @@ public class Main {
             // -- Handle doc ([kbean]: --doc)
             if (docKbeanName != null) {
                 boolean success = performDocKBean(engine, docKbeanName);
+                JkAnsiConsole.of().systemUninstall();
                 System.exit(success ? 0 : 1);
             }
             // Handle 'jeka kbean: --doc.md''
@@ -182,6 +192,9 @@ public class Main {
         } catch (Throwable t) {
             handleGenericThrowable(t, startTime);
             System.exit(1);
+        } finally {
+            System.out.println("u===============================uninstall jansi");
+            JkAnsiConsole.of().systemUninstall();
         }
         return engine.getRunbase();
     }

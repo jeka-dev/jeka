@@ -32,7 +32,7 @@ import java.util.function.Predicate;
 public interface JkInternalClasspathScanner {
 
     static JkInternalClasspathScanner of() {
-        return Cache.get(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
+        return Cache.get(JkProperties.ofStandardProperties());
     }
 
     List<String> findClassesWithMainMethod(ClassLoader extraClassLoader);

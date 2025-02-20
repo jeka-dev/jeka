@@ -139,7 +139,7 @@ public final class JkExternalToolApi {
      * Returns the global properties.
      */
     public static JkProperties getGlobalProperties() {
-        return JkProperties.ofSysPropsThenEnvThenGlobalProperties();
+        return JkProperties.ofStandardProperties();
     }
 
     /**

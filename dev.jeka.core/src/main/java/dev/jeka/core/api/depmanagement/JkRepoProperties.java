@@ -85,7 +85,7 @@ public class JkRepoProperties {
      * Creates a new JkRepoProperties based on global configuration.
      */
     public static JkRepoProperties ofGlobalProperties() {
-        return of(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
+        return of(JkProperties.ofStandardProperties());
     }
 
     /**

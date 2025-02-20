@@ -162,7 +162,7 @@ public final class JkKotlinCompiler {
      * @param repos The repository set to download the Kotlin compiler from.
      */
     public static JkKotlinCompiler ofJvm(JkRepoSet repos) {
-        JkProperties props = JkProperties.ofSysPropsThenEnvThenGlobalProperties();
+        JkProperties props = JkProperties.ofStandardProperties();
         String version = props.get(KOTLIN_VERSION_OPTION);
         if (version == null) {
             JkLog.info("No jeka.kotlin.version specified, try to resolce Kotlin compiler on local machine");

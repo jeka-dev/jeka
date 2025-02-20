@@ -21,7 +21,6 @@ import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -143,7 +142,7 @@ public final class JkJarPacker {
     }
 
     public static void makeShadeJar(Path originalJar, Iterable<Path> extraJars, Path outputJar) {
-        JkRepoSet repos = JkRepoProperties.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties()).getDownloadRepos();
+        JkRepoSet repos = JkRepoProperties.of(JkProperties.ofStandardProperties()).getDownloadRepos();
         makeShadeJar(repos, originalJar, extraJars, outputJar);
     }
 

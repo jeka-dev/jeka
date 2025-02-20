@@ -28,10 +28,6 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,7 +54,7 @@ public interface SpringbootJarWriter {
     void close() throws IOException;
 
     static SpringbootJarWriter of(Path path) {
-        JkProperties properties = JkProperties.ofSysPropsThenEnvThenGlobalProperties();
+        JkProperties properties = JkProperties.ofStandardProperties();
         JkRepoSet downloadRepos = JkRepoProperties.of(properties).getDownloadRepos();
         Path commonsIoJar = JkCoordinateFileProxy.of(downloadRepos, COMMONS_IO).get();
         Path commonsCompressJar = JkCoordinateFileProxy.of(downloadRepos, COMMONS_COMPRESS).get();

@@ -100,7 +100,7 @@ public final class JkProperties {
      * Returns an instance of JkProperties from system properties and environment variables,
      * with fallback to global.properties if they exist.
      */
-    public static JkProperties ofSysPropsThenEnvThenGlobalProperties() {
+    public static JkProperties ofStandardProperties() {
         Path globalPropsFile = JkLocator.getGlobalPropertiesFile();
         if (Files.exists(globalPropsFile)) {
             return ofSysPropsThenEnv().withFallback(ofFile(globalPropsFile));

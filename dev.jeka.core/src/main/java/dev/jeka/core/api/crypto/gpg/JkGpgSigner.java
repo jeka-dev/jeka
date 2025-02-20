@@ -40,7 +40,7 @@ public final class JkGpgSigner implements JkSigner {
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
     private static final JkInternalGpgDoer INTERNAL_GPG_DOER =
-            JkInternalGpgDoer.of(JkProperties.ofSysPropsThenEnvThenGlobalProperties());
+            JkInternalGpgDoer.of(JkProperties.ofStandardProperties());
 
     private final Path secretRingPath;  // if the key is contained in a file
 
