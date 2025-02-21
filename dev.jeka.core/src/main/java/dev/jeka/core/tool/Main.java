@@ -31,7 +31,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
-import org.fusesource.jansi.Ansi;
+
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +63,9 @@ public class Main {
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
-        JkAnsiConsole.of().systemInstall();
+        //JkAnsiConsole.of().systemInstall();
+        System.setProperty("jansi.passthrough", "true");
+        System.setProperty("jansi.strip", "false");
 
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath

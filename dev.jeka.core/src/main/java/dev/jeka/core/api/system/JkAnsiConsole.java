@@ -24,7 +24,8 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 public interface JkAnsiConsole {
 
     static JkAnsiConsole of() {
-        return Cache.get(JkProperties.ofStandardProperties());
+        //return Cache.get(JkProperties.ofStandardProperties());
+        return new Noop();
     }
 
     void systemInstall();
@@ -58,5 +59,23 @@ public interface JkAnsiConsole {
             return CACHED_INSTANCE;
         }
 
+    }
+
+    class Noop implements JkAnsiConsole {
+
+        @Override
+        public void systemInstall() {
+
+        }
+
+        @Override
+        public void systemUninstall() {
+
+        }
+
+        @Override
+        public JkAnsi ansi() {
+            return null;
+        }
     }
 }
