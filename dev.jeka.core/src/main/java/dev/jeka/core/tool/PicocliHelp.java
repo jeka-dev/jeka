@@ -19,6 +19,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkInfo;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
@@ -169,9 +170,14 @@ class PicocliHelp {
             commandLine.setHelpSectionKeys(keys);
         }
 
+        String msg = JkAnsi.of()
+                .a("Execute ")
+                .fg(JkAnsi.Color.YELLOW).a("jeka <kbean>: --doc").reset()
+                .a(" (as ")
+                .a(JkAnsi.Attribute.ITALIC).a("jeka docker: --doc").reset()
+                .a(") to get details on specific KBean.").toString();
         main.usageMessage()
-                .footer("", "Execute @|yellow jeka <kbean>: --doc|@ (as @|italic jeka docker: --doc|@) " +
-                        "to get details on specific KBean.");
+                .footer("", msg);
 
         return commandLine;
 

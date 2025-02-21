@@ -37,9 +37,9 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
     //private static final String TASK = JkExternalToolApi.ansiText("@|blue Task: |@");
     private static final String TASK = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Task: ").reset().toString();
 
-    private static final String WARN = JkExternalToolApi.ansiText("@|yellow WARN: |@");
+    private static final String WARN = JkAnsi.of().fg(JkAnsi.Color.YELLOW).a("WARN: ").reset().toString();
 
-    private static final String ERROR = JkExternalToolApi.ansiText("@|red ERROR: |@");
+    private static final String ERROR = JkAnsi.of().fg(JkAnsi.Color.RED).a("Error: ").reset().toString();
 
     //private static final String DURATION = "Duration: ";
     private static final String DURATION = "⏱ ";

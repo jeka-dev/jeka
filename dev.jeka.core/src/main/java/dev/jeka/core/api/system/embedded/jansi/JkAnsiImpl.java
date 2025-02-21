@@ -19,6 +19,8 @@ package dev.jeka.core.api.system.embedded.jansi;
 import dev.jeka.core.api.system.JkAnsi;
 import org.fusesource.jansi.Ansi;
 
+import java.util.Arrays;
+
 class JkAnsiImpl implements JkAnsi {
 
     private final Ansi ansi;
@@ -37,6 +39,12 @@ class JkAnsiImpl implements JkAnsi {
     @Override
     public JkAnsi a(String text) {
         ansi.a(text);
+        return this;
+    }
+
+    @Override
+    public JkAnsi a(Attribute attribute) {
+        ansi.a(jansiAttribute(attribute));
         return this;
     }
 
@@ -62,4 +70,13 @@ class JkAnsiImpl implements JkAnsi {
     public String toString() {
         return ansi.toString();
     }
+
+    private static Ansi.Attribute jansiAttribute(Attribute attribute) {
+        return Arrays.stream(Ansi.Attribute.values())
+                .filter(ansiAtt -> ansiAtt.value() == attribute.value())
+                .map(ansiAttr -> Enum.valueOf(Ansi.Attribute.class, ansiAttr.name()))
+                .findFirst().orElseThrow(
+                        () -> new IllegalStateException("Cannot retrieve ANSI attribute " + attribute.name()));
+    }
+
 }

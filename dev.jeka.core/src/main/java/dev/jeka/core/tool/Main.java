@@ -193,7 +193,6 @@ public class Main {
             handleGenericThrowable(t, startTime);
             System.exit(1);
         } finally {
-            System.out.println("u===============================uninstall jansi");
             JkAnsiConsole.of().systemUninstall();
         }
         return engine.getRunbase();

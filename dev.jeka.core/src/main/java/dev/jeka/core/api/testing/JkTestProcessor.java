@@ -24,6 +24,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -86,6 +87,12 @@ public final class JkTestProcessor {
         private static final long serialVersionUID = 154654647775L;
 
     }
+
+    private static final String ALL_TEST_PASSED = JkAnsi.of().fg(JkAnsi.Color.GREEN).a("ALL TESTS PASSED").reset()
+            .toString();
+
+    private static final String ERROR = JkAnsi.of().fg(JkAnsi.Color.RED).a("ERROR ").reset()
+            .toString();
 
     private static final String ENGINE_SERVICE = "org.junit.platform.engine.TestEngine";
 
@@ -212,7 +219,7 @@ public final class JkTestProcessor {
         if (!success) {
             printTestFailure(result);
         }
-        String summaryTitle = success ? JkExternalToolApi.ansiText("@|green ALL TESTS PASSED|@") : "Summary";
+        String summaryTitle = success ? ALL_TEST_PASSED: "Summary";
         JkLog.info(summaryTitle + ": " + result.getTestCount().toReportString());
         JkLog.endTask();
 
@@ -244,7 +251,7 @@ public final class JkTestProcessor {
         // For an unknown reason, JkLog.error implies an unexpected right padding when test are
         // run with the BAR progress style (not for the other)
         // The workaround is to fake an error log using the JkLog.info
-        JkLog.info(JkExternalToolApi.ansiText("@|red ERROR: |@") + msg);
+        JkLog.info(ERROR + msg);
 
         for (JkTestResult.JkFailure failure : failures) {
             String exceptionClass = failure.isAssertionFailure() ? "" : failure.getThrowableClassname() + ":";
