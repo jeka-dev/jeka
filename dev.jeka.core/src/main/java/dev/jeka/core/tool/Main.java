@@ -64,9 +64,6 @@ public class Main {
 
         JkAnsiConsole.of().systemInstall();
 
-        String totoansi = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("toto").reset().toString();
-        System.out.println(totoansi);
-
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
         if (cmdArgs.isUsageHelpRequested()) {
