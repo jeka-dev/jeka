@@ -174,7 +174,7 @@ public class Main {
 
         } catch (CommandLine.ParameterException e) {
             JkBusyIndicator.stop();
-            String errorTxt = JkAnsi.of().fg(JkAnsi.Color.RED).a("ERROR :").reset().toString();
+            String errorTxt = JkAnsi.of().fg(JkAnsi.Color.RED).a("ERROR: ").reset().toString();
             CommandLine commandLine = e.getCommandLine();
             commandLine.getErr().println(errorTxt + e.getMessage());
 
