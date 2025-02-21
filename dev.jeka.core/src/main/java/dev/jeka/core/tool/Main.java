@@ -31,6 +31,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
+import org.fusesource.jansi.Ansi;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -173,13 +174,19 @@ public class Main {
 
         } catch (CommandLine.ParameterException e) {
             JkBusyIndicator.stop();
-            String errorTxt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@");
+            String errorTxt = JkAnsi.of().fg(JkAnsi.Color.RED).a("ERROR :").reset().toString();
             CommandLine commandLine = e.getCommandLine();
             commandLine.getErr().println(errorTxt + e.getMessage());
 
-            String suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka --doc|@ to see available commands and parameters");
+            String suggestTxt = JkAnsi.of().a("Try ")
+                    .fg(JkAnsi.Color.YELLOW).a("jeka --doc ").reset()
+                    .a("to see available commands and parameters")
+                    .toString();
             if (e.getMessage().startsWith("Unknown option")) {
-                suggestTxt = CommandLine.Help.Ansi.AUTO.string("Try @|yellow jeka --help|@ to see available options");
+                suggestTxt = JkAnsi.of().a("Try ")
+                        .fg(JkAnsi.Color.YELLOW).a("jeka --help ").reset()
+                        .a("to see available options")
+                        .toString();
             }
             commandLine.getErr().println(suggestTxt);
             if (LogSettings.INSTANCE.stackTrace) {
