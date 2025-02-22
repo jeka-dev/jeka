@@ -343,7 +343,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
     // ------------------------- Run ---------------------------
 
-
     /**
      * Sets a {@link Runnable} to create the JAR used by {@link #prepareRunJar(RuntimeDeps)}
      */
@@ -374,9 +373,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     /**
      * Creates {@link JkJavaProcess} to execute the jar having the specified artifact name.
      * The jar is created on the fly if it is not already present.
-     *
-     * @param artifactClassifier  The classifier of the artifact to run. In a project producing a side 'fat' jar, you can use
-     *                           'fat'. If you want to run the main artifact, just use ''.
+
      * @param runtimeDepInclusion If <code>INCLUDE</code>, the runtime dependencies will be added to the classpath. This should
      *                           values <code>EXCLUDE</code> in case of <i>fat</i> jar.
      */
