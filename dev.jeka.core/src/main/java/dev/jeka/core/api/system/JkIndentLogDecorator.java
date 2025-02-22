@@ -34,14 +34,13 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    //private static final String TASK = JkExternalToolApi.ansiText("@|blue Task: |@");
     private static final String TASK = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Task: ").reset().toString();
+
+    private static final String TASK_VERBOSE = JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).fg(JkAnsi.Color.BLUE).a("Task: ").reset().toString();
 
     private static final String WARN = JkAnsi.of().fg(JkAnsi.Color.YELLOW).a("WARN: ").reset().toString();
 
     private static final String ERROR = JkAnsi.of().fg(JkAnsi.Color.RED).a("Error: ").reset().toString();
-
-    private static final String VERBOSE = JkAnsi.of().fgBright(JkAnsi.Color.BLACK).a("[VERBOSE] ").reset().toString();
 
     //private static final String DURATION = "Duration: ";
     private static final String DURATION = "⏱ ";
@@ -87,7 +86,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             } else if (event.getType() == JkLog.Type.ERROR) {
                 message = ERROR + message;
             } else {
-                message = event.getType() + ": " + message;
+                //message = event.getType() + ": " + message;
                 if (event.getType() == JkLog.Type.VERBOSE) {
                     message = JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(message).reset().toString();
                 } else if (event.getType() == JkLog.Type.DEBUG) {
@@ -108,6 +107,12 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
         } else if (logType== JkLog.Type.START_TASK) {
             marginErr.flush();
             out.println(TASK + message);
+            marginOut.notifyStart();
+            marginErr.notifyStart();
+            marginErr.mustPrintMargin = true;
+        } else if (logType== JkLog.Type.START_TASK_VERBOSE) {
+            marginErr.flush();
+            out.println(TASK_VERBOSE + JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(message).reset().toString());
             marginOut.notifyStart();
             marginErr.notifyStart();
             marginErr.mustPrintMargin = true;

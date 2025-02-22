@@ -45,6 +45,12 @@ public abstract class JkScaffold {
 
     private static final String LAST_VERSION_OF_TOKEN = "${lastVersionOf:";
 
+    @JkDepSuggest(versionOnly = true, hint = "org.junit.jupiter:junit-jupiter")
+    private static final String JUPITER_VERSION = "5.12.0";
+
+    @JkDepSuggest(versionOnly = true, hint = "org.junit.platform:junit-platform-launcher")
+    private static final String JUNIT_PLATFORM_LAUNCHER_VERSION = "1.12.0";
+
     protected final Path baseDir;
 
     private final JkRepoSet downloadRepos;
@@ -141,11 +147,11 @@ public abstract class JkScaffold {
 
     protected List<String> getJUnitDeps() {
         String jupiterModuleId = "org.junit.jupiter:junit-jupiter";
-        String jupiterLastVersion = findLatestStableVersion(jupiterModuleId, "5.12.0");
+        String jupiterLastVersion = findLatestStableVersion(jupiterModuleId, JUPITER_VERSION);
         String jupiterDep = jupiterModuleId + ":" + jupiterLastVersion;
 
         String launcherModuleId = "org.junit.platform:junit-platform-launcher";
-        String launcherLastVersion = findLatestStableVersion(launcherModuleId, "1.12.0");
+        String launcherLastVersion = findLatestStableVersion(launcherModuleId, JUNIT_PLATFORM_LAUNCHER_VERSION);
         String launcherDep = launcherModuleId + ":" + launcherLastVersion;
 
         return Arrays.asList(jupiterDep, launcherDep);

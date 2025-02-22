@@ -43,7 +43,7 @@ public final class JkLog implements Serializable {
      * Type of events emitted by logs.
      */
     public enum Type {
-        ERROR, WARN, INFO, VERBOSE, DEBUG, PROGRESS, START_TASK, END_TASK;
+        ERROR, WARN, INFO, VERBOSE, DEBUG, PROGRESS, START_TASK, END_TASK, START_TASK_VERBOSE;
 
         public boolean isMessageType() {
             return this == VERBOSE || this == WARN || this == ERROR || this == DEBUG;
@@ -244,11 +244,7 @@ public final class JkLog implements Serializable {
      * Logs the start of the current task. Subsequent logs will be nested in this task log until #endTask is invoked.
      */
     public static void startTask(String message, Object ... params) {
-        consume(JkLogEvent.ofRegular(Type.START_TASK, String.format(message, params)));
-        if (shouldPrint(Type.START_TASK)) {
-            currentNestedTaskLevel.incrementAndGet();
-            getStartTimes().addLast(System.nanoTime());
-        }
+        doStartTask(Type.START_TASK, message, params);
     }
 
     /**
@@ -256,7 +252,7 @@ public final class JkLog implements Serializable {
      */
     public static void verboseStartTask(String message, Object ... params) {
         if (verbosity.isVerbose()) {
-            startTask(message, params);
+            doStartTask(Type.START_TASK_VERBOSE, message, params);
         }
     }
 
@@ -265,7 +261,7 @@ public final class JkLog implements Serializable {
      */
     public static void debugStartTask(String message, Object ... params) {
         if (verbosity == Verbosity.DEBUG) {
-            startTask(message, params);
+            doStartTask(Type.START_TASK_VERBOSE, message, params);
         }
     }
 
@@ -323,6 +319,14 @@ public final class JkLog implements Serializable {
 
     public static boolean isDebug() {
         return  verbosity == Verbosity.DEBUG;
+    }
+
+    private static void doStartTask(Type type, String message, Object... params)  {
+        consume(JkLogEvent.ofRegular(type, String.format(message, params)));
+        if (shouldPrint(type)) {
+            currentNestedTaskLevel.incrementAndGet();
+            getStartTimes().addLast(System.nanoTime());
+        }
     }
 
     private static void consume(JkLogEvent event) {

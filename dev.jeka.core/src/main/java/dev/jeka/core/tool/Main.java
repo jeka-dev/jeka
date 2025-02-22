@@ -413,10 +413,10 @@ public class Main {
             for (Engine subEngine : engines) {
                 JkLog.debug("Engine " + subEngine.baseDir);
                 JkLog.debug("Run classpath:");
-                JkLog.info(subEngine.getClasspathSetupResult().runClasspath.toPathMultiLine("       "));
+                JkLog.debug(subEngine.getClasspathSetupResult().runClasspath.toPathMultiLine("       "));
                 JkLog.debug("KBean classpath:");
-                JkLog.info(subEngine.getClasspathSetupResult().kbeanClasspath.toPathMultiLine("       "));
-                JkLog.info("");
+                JkLog.debug(subEngine.getClasspathSetupResult().kbeanClasspath.toPathMultiLine("       "));
+                JkLog.debug("");
             }
         }
     }
