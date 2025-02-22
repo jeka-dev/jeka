@@ -540,7 +540,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      */
     public void pack() {
         this.compilation.runIfNeeded();  // Better to launch it first explicitly for log clarity
-        this.testing.runIfNeeded();
         this.packActions.run();
     }
 

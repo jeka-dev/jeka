@@ -14,7 +14,7 @@ class SamplesTester extends JekaCommandLineExecutor {
     void run() {
 
         // Run Self-App
-        run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 base: pack -c");
+        run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 base: test pack -c");
         if (JkDocker.of().isPresent()) {
             run("dev.jeka.samples.baseapp", "-Djeka.java.version=17 docker: build -c");
         }
@@ -45,7 +45,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         // Protobuf seems failed on last macos ship
         if (!(JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64())) {
             // Test with injecting plugin dep via jeka.properties file
-            run("dev.jeka.samples.protobuf", "-ivc project: pack");
+            run("dev.jeka.samples.protobuf", "-ivc project: test pack");
         }
 
         // Test with injecting dep via @JkDep(...)
@@ -64,7 +64,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Test with junit5
         run("dev.jeka.samples.junit5", "-la=false -c project: pack");
-        run("dev.jeka.samples.junit5", "-c project: pack : checkReportGenerated project: test.fork=true");
+        run("dev.jeka.samples.junit5", "-c project: test pack : checkReportGenerated project: test.fork=true");
     }
 
     private void run(String sampleDir, String cmdLine) {
