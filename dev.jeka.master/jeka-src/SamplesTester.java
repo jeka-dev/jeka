@@ -49,7 +49,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         }
 
         // Test with injecting dep via @JkDep(...)
-        run("dev.jeka.samples.jacoco", "-la=false -cp=../../plugins/dev.jeka.plugins.jacoco " +
+        run("dev.jeka.samples.jacoco", "-c -la=false -cp=../../plugins/dev.jeka.plugins.jacoco " +
                 "project: test pack : checkGeneratedReport");
 
         // No Jeka deps test samples

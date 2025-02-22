@@ -17,6 +17,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -262,23 +263,32 @@ public class JkResolvedDependencyNode {
      */
     public List<String> toStrings() {
         if (this.isModuleNode()) {
-            return this.toStrings(false, -1, new HashSet<>());
+            return this.toStrings(false, -1, new HashSet<>(), new HashSet<>());
         }
         return Collections.singletonList(this.getModuleInfo().toString());
     }
 
-    private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> extendedModules) {
+    private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> extendedModules,
+                                   Set<JkModuleId> selectedModules) {
         final List<String> result = new LinkedList<>();
         if (showRoot) {
-            final String label = nodeInfo.toString();
+            String label = nodeInfo.asString();
+            if (selectedModules.contains(getModuleId())) {
+                label = JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(label).reset().toString();
+            }
             result.add(JkUtilsString.repeat(INDENT, indentLevel) + label);
+        }
+        if (isModuleNode() && nodeInfo != null) {
+            if (!getModuleInfo().isUnselected()) {
+                selectedModules.add(getModuleInfo().getModuleId());
+            }
         }
         if (this.nodeInfo == null || (this.isModuleNode() && !extendedModules.contains(this.getModuleId()))) {
             if (this.nodeInfo != null) {
                 extendedModules.add(this.getModuleId());
             }
             for (final JkResolvedDependencyNode child : children) {
-                result.addAll(child.toStrings(true, indentLevel+1, extendedModules));
+                result.addAll(child.toStrings(true, indentLevel+1, extendedModules, selectedModules));
             }
         }
         return result;
@@ -333,6 +343,8 @@ public class JkResolvedDependencyNode {
         List<Path> getFiles();
 
         Set<String> getDeclaredConfigurations();
+
+        String asString();
 
     }
 
@@ -412,21 +424,32 @@ public class JkResolvedDependencyNode {
             return resolvedVersion;
         }
 
+        public boolean isUnselected() {
+            return resolvedVersion == null || !resolvedVersion.equals(declaredVersion);
+        }
+
         @Override
-        public String toString() {
+        public String asString() {
             if (treeRoot) {
                 return "Root";
             }
             final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.getValue();
-            final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName) ? "" : " as " + getDeclaredVersion();
+            final String declaredVersionLabel = getDeclaredVersion().getValue().equals(resolvedVersionName)
+                    ? "" : " (declared as " + getDeclaredVersion() + ")";
             String module = jkModuleId + ":" + resolvedVersion;
             if (!declaredConfigurations.equals(Collections.singleton("default"))) {
-                module = module + " (declared " + declaredVersionLabel  + declaredConfigurations + ")";
+                module = module + declaredVersionLabel;
+            }
+            if (isUnselected()) {
+                module = JkAnsi.of().fgBright(JkAnsi.Color.BLACK).a(module).reset().toString();
             }
             return module;
         }
 
-
+        @Override
+        public String toString() {
+            return asString();
+        }
 
         public boolean isEvicted() {
             return resolvedVersion == null;
@@ -438,8 +461,6 @@ public class JkResolvedDependencyNode {
         }
 
     }
-
-
 
     private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, JkModuleId to) {
         final List<JkDependency> result = new LinkedList<>();
@@ -527,6 +548,10 @@ public class JkResolvedDependencyNode {
 
         @Override
         public String toString() {
+            return asString();
+        }
+
+        public String asString() {
             return files + (isComputed() ? " (computed)" : "");
         }
     }
