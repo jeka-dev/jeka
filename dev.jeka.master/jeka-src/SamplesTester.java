@@ -64,7 +64,7 @@ class SamplesTester extends JekaCommandLineExecutor {
 
         // Test with junit5
         run("dev.jeka.samples.junit5", "-la=false -c project: pack");
-        run("dev.jeka.samples.junit5", "-c project: pack : checkReportGenerated project: tests.fork=true");
+        run("dev.jeka.samples.junit5", "-c project: pack : checkReportGenerated project: test.fork=true");
     }
 
     private void run(String sampleDir, String cmdLine) {

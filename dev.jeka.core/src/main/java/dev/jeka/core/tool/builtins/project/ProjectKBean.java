@@ -79,7 +79,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
      */
     // Made public so that extension as springboot can override default
     @JkDoc
-    public final JkTestOptions tests = new JkTestOptions();
+    public final JkTestOptions test = new JkTestOptions();
 
     /**
      * Options for configuring scaffold.
@@ -255,10 +255,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         // the value has explicitly been set.
         public JkTestProcessor.JkProgressStyle progress;
 
-        @JkDoc("The junit-platform to use. If empty, the default version will be used (1.9.3).")
-        @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons")
-        public String platformVersion;
-
     }
 
     public static class JkLayoutOptions {
@@ -431,11 +427,11 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         // Configure testing
         JkTestProcessor testProcessor = project.testing.testProcessor;
         testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());
-        if (tests.fork) {
+        if (test.fork) {
             String className = JkTestProcessor.class.getName();
 
             JkJavaProcess javaProcess = JkJavaProcess.ofJava(className)
-                    .addJavaOptions(this.tests.jvmOptions);
+                    .addJavaOptions(this.test.jvmOptions);
             if (project.getJvmTargetVersion() != null &&
                     !JkJavaVersion.ofCurrent().equals(project.getJvmTargetVersion())) {
                 Path javaHome = jdks().getHome(project.getJvmTargetVersion());
@@ -448,21 +444,18 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         } else {
             testProcessor.setForkingProcess(false);
         }
-        project.testing.setSkipped(tests.skip);
+        project.testing.setSkipped(test.skip);
 
         // -- The style should not be forced by default as it is determined by the presence of a console, and the log level
-        if (tests.progress != null) {
-            project.testing.testProcessor.engineBehavior.setProgressDisplayer(tests.progress);
-        }
-        if (!JkUtilsString.isBlank(tests.platformVersion)) {
-            project.testing.testProcessor.setJunitPlatformVersion(tests.platformVersion);
+        if (test.progress != null) {
+            project.testing.testProcessor.engineBehavior.setProgressDisplayer(test.progress);
         }
         if (compilation.compilerOptions != null) {
             String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);
             project.compilation.addJavaCompilerOptions(options);
             project.testing.compilation.addJavaCompilerOptions(options);
         }
-        List<String> includePatterns = JkUtilsString.splitWhiteSpaces(tests.includePatterns);
+        List<String> includePatterns = JkUtilsString.splitWhiteSpaces(test.includePatterns);
         project.testing.testSelection.addIncludePatterns(includePatterns);
 
         // Configure scaffold

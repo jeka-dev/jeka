@@ -29,7 +29,7 @@ public class EngineTest {
 
     @Test
     public void defaultKBeanAsName_ok() {
-        JkProject project = new EngineWrapper().run("project:", "tests.skip=true", "layout.style=SIMPLE")
+        JkProject project = new EngineWrapper().run("project:", "test.skip=true", "layout.style=SIMPLE")
                 .load(ProjectKBean.class).project;
         assertTrue(project.testing.isSkipped());
         assertEquals("src", project.compilation.layout.getSources().toList().get(0).getRoot().toString());
