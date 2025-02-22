@@ -16,13 +16,11 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.api.system.JkBusyIndicator;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkPrompt;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
@@ -41,6 +39,8 @@ public class AppKBean extends KBean {
     private final AppManager appManager = new AppManager(
             JkLocator.getJekaHomeDir(),
             JkLocator.getCacheDir().resolve("git").resolve("apps"));
+
+    private static final String COLUMN_SEPARATOR = JkUtilsSystem.IS_WINDOWS ? " | " : " │ ";
 
     @JkDoc("Git Remote repository URL of the app to install.")
     public String repo;
@@ -248,7 +248,7 @@ public class AppKBean extends KBean {
                 .addColumn(3, 10)   // tag
                 .addColumn(8, 32)       // update status
                 .addColumn(4, 8)       // native
-                .setSeparator(" │ ");
+                .setSeparator(COLUMN_SEPARATOR);
 
         JkBusyIndicator.start(JkLog.getOutPrintStream(),"Querying Git repos...");
         for (String appName : installedAppNames) {
@@ -276,7 +276,7 @@ public class AppKBean extends KBean {
                 .addColumn(5, 15)    // app type
                 .addColumn(5, 88)    // desc
                 .addColumn(3, 80)
-                .setSeparator(" │ ");
+                .setSeparator(COLUMN_SEPARATOR);
         String nativ = "allow native";
         columnText
                 .add("https://github.com/jeka-dev/demo-cowsay", "CLI",

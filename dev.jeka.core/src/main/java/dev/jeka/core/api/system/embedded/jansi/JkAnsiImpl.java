@@ -49,6 +49,12 @@ class JkAnsiImpl implements JkAnsi {
     }
 
     @Override
+    public JkAnsi render(String text) {
+        ansi.render(text);
+        return this;
+    }
+
+    @Override
     public JkAnsi a(Attribute attribute) {
         ansi.a(jansiAttribute(attribute));
         return this;

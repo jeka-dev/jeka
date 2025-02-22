@@ -28,6 +28,8 @@ public interface JkAnsi {
 
     JkAnsi a(String text);
 
+    JkAnsi render(String text);
+
     JkAnsi a(Attribute attribute);
 
     JkAnsi reset();
