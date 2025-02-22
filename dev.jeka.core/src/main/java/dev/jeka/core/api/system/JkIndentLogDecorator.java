@@ -41,6 +41,8 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
 
     private static final String ERROR = JkAnsi.of().fg(JkAnsi.Color.RED).a("Error: ").reset().toString();
 
+    private static final String VERBOSE = JkAnsi.of().fgBright(JkAnsi.Color.BLACK).a("[VERBOSE] ").reset().toString();
+
     //private static final String DURATION = "Duration: ";
     private static final String DURATION = "⏱ ";
 
@@ -86,6 +88,12 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
                 message = ERROR + message;
             } else {
                 message = "[" + event.getType() + "] " + message;
+                if (event.getType() == JkLog.Type.VERBOSE) {
+                    message = JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(message).reset().toString();
+                } else if (event.getType() == JkLog.Type.DEBUG) {
+                    message = JkAnsi.of().fgBright(JkAnsi.Color.BLACK).a(message).reset().toString();
+                }
+
             }
         }
         if (logType == JkLog.Type.END_TASK) {

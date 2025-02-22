@@ -24,6 +24,7 @@ import dev.jeka.core.api.testing.JkTestResult;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.engine.Filter;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.TestTag;

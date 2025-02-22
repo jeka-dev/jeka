@@ -344,7 +344,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             super.applyTo(scaffold);
             // Scaffold project structure including build class
             JkProjectScaffold projectScaffold = (JkProjectScaffold) scaffold;
-            projectScaffold.setTemplate(kind);
+            projectScaffold.setKind(kind);
             projectScaffold.setUseSimpleStyle(ProjectKBean.this.layout.style == JkCompileLayout.Style.SIMPLE);
 
             // Create 'project-dependencies.txt' file if needed

@@ -139,6 +139,18 @@ public abstract class JkScaffold {
         }
     }
 
+    protected List<String> getJUnitDeps() {
+        String jupiterModuleId = "org.junit.jupiter:junit-jupiter";
+        String jupiterLastVersion = findLatestStableVersion(jupiterModuleId, "5.12.0");
+        String jupiterDep = jupiterModuleId + ":" + jupiterLastVersion;
+
+        String launcherModuleId = "org.junit.platform:junit-platform-launcher";
+        String launcherLastVersion = findLatestStableVersion(launcherModuleId, "1.12.0");
+        String launcherDep = launcherModuleId + ":" + launcherLastVersion;
+
+        return Arrays.asList(jupiterDep, launcherDep);
+    }
+
     /**
      * Runs the scaffolding, meaning folder structure, build class, props file and .gitignore
      */

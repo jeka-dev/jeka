@@ -19,12 +19,13 @@ package dev.jeka.core.api.system;
 public interface JkAnsi {
 
     static JkAnsi of() {
-        //return JkAnsiConsole.of().ansi();
-        return new Noop();
+        return JkAnsiConsole.of().ansi();
     }
     
     JkAnsi fg(Color color);
-    
+
+    JkAnsi fgBright(Color color);
+
     JkAnsi a(String text);
 
     JkAnsi a(Attribute attribute);
@@ -118,44 +119,5 @@ public interface JkAnsi {
         }
     }
 
-    class Noop implements JkAnsi {
 
-        private StringBuilder sb = new StringBuilder();
-
-        @Override
-        public JkAnsi fg(Color color) {
-            return this;
-        }
-
-        @Override
-        public JkAnsi a(String text) {
-            sb.append(text);
-            return this;
-        }
-
-        @Override
-        public JkAnsi a(Attribute attribute) {
-            return this;
-        }
-
-        @Override
-        public JkAnsi reset() {
-            return this;
-        }
-
-        @Override
-        public JkAnsi cursorUp(int i) {
-            return this;
-        }
-
-        @Override
-        public JkAnsi eraseLine() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return sb.toString();
-        }
-    }
 }

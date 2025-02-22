@@ -46,7 +46,7 @@ public final class JkProjectScaffold extends JkScaffold {
     public static final String SIMPLE_STYLE_PROP = "@project.layout.style=SIMPLE";
 
     public enum Kind {
-        REGULAR, PLUGIN
+        REGULAR, PLUGIN, EMPTY
     }
 
     protected final JkProject project;
@@ -92,7 +92,7 @@ public final class JkProjectScaffold extends JkScaffold {
     /**
      * Sets the template for this scaffold.
      */
-    public JkProjectScaffold setTemplate(Kind kind) {
+    public JkProjectScaffold setKind(Kind kind) {
         this.kind = kind;
         return this;
     }
@@ -190,18 +190,33 @@ public final class JkProjectScaffold extends JkScaffold {
         testLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
         testLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
 
+        Path sourceDir =
+                project.compilation.layout.getSources().toList().get(0).getRoot();
+        Path testSourceDir =
+                project.testing.compilation.layout.getSources().toList().get(0).getRoot();
+
         // This is special scaffolding for plugin projects
         if (kind == Kind.PLUGIN) {
             Path breakingChangeFile = project.getBaseDir().resolve("breaking_versions.txt");
             String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
             JkPathFile.of(breakingChangeFile).write(text);
-            Path sourceDir =
-                    project.compilation.layout.getSources().toList().get(0).getRoot();
+
             String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("pluginclass.snippet"));
             JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxKBean.java"))
                     .createIfNotExist()
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));
+
+        } else if (kind == Kind.REGULAR) {
+            String mainClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("mainClass.snippet"));
+            JkPathFile.of(sourceDir.resolve("app/Main.java"))
+                    .createIfNotExist()
+                    .write(mainClass.getBytes(StandardCharsets.UTF_8));
+
+            String testClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("testClass.snippet"));
+            JkPathFile.of(testSourceDir.resolve("app/MainTest.java"))
+                    .createIfNotExist()
+                    .write(testClass.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -231,8 +246,12 @@ public final class JkProjectScaffold extends JkScaffold {
             if (line.startsWith("== RUNTIME") && !runtimeDeps.isEmpty()) {
                 runtimeDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
             }
-            if (line.startsWith("== TEST") && !testDeps.isEmpty()) {
-                testDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
+            List<String> effectiveTestDeps = new LinkedList<>(testDeps);
+            if (effectiveTestDeps.isEmpty()) {
+                effectiveTestDeps.addAll(getJUnitDeps());
+            }
+            if (line.startsWith("== TEST")) {
+                effectiveTestDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
             }
         }
         String content = sb.toString();

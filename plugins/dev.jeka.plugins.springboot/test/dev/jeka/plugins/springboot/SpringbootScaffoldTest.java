@@ -44,7 +44,7 @@ public class SpringbootScaffoldTest {
         projectScaffold.compileDeps.add("toto:titi:0.0.1");
         projectScaffold.runtimeDeps.add("foo:bar");
         projectScaffold
-                .setTemplate(JkProjectScaffold.Kind.REGULAR)
+                .setKind(JkProjectScaffold.Kind.REGULAR)
                 .addCustomizer(SpringbootScaffold::customize)
                 .run();
 
@@ -73,7 +73,7 @@ public class SpringbootScaffoldTest {
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         JkProjectScaffold.of(project)
-                .setTemplate(JkProjectScaffold.Kind.REGULAR)
+                .setKind(JkProjectScaffold.Kind.REGULAR)
                 .setUseSimpleStyle(true)
                 .addCustomizer(SpringbootScaffold::customize)
                 .run();

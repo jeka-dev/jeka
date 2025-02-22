@@ -26,6 +26,7 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDep;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,10 +121,10 @@ public final class JkBaseScaffold extends JkScaffold {
         if (!includeJunit) {
             return Collections.emptyList();
         }
-        String moduleId = "org.junit.jupiter:junit-jupiter";
-        String lastVersion = findLatestStableVersion(moduleId, "5.9.1");
-        return Collections.singletonList(moduleId + ":" + lastVersion);
+        return getJUnitDeps();
     }
+
+
 
     private String code(String snippetName, List<String> ...deps) {
         String baseCode = readResource(JkBaseScaffold.class, snippetName);

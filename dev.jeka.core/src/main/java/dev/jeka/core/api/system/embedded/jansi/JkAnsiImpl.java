@@ -37,6 +37,12 @@ class JkAnsiImpl implements JkAnsi {
     }
 
     @Override
+    public JkAnsi fgBright(Color color) {
+        ansi.fgBright(jansiColor(color));
+        return this;
+    }
+
+    @Override
     public JkAnsi a(String text) {
         ansi.a(text);
         return this;
@@ -74,9 +80,15 @@ class JkAnsiImpl implements JkAnsi {
     private static Ansi.Attribute jansiAttribute(Attribute attribute) {
         return Arrays.stream(Ansi.Attribute.values())
                 .filter(ansiAtt -> ansiAtt.value() == attribute.value())
-                .map(ansiAttr -> Enum.valueOf(Ansi.Attribute.class, ansiAttr.name()))
                 .findFirst().orElseThrow(
                         () -> new IllegalStateException("Cannot retrieve ANSI attribute " + attribute.name()));
+    }
+
+    private static Ansi.Color jansiColor(Color color) {
+        return Arrays.stream(Ansi.Color.values())
+                .filter(ansiColor -> ansiColor.value() == color.value())
+                .findFirst().orElseThrow(
+                        () -> new IllegalStateException("Cannot retrieve ANSI color " + color.name()));
     }
 
 }

@@ -16,6 +16,7 @@
 
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
@@ -27,9 +28,12 @@ import java.util.List;
 
 class SpringbootScaffold {
 
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.2.5";
+    @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.4.2";
 
     public static void customize(JkProjectScaffold projectScaffold) {
+
+        projectScaffold.setKind(JkProjectScaffold.Kind.EMPTY);
 
         // Remove the default build class defined for project
         projectScaffold.removeFileEntry(JkProjectScaffold.BUILD_CLASS_PATH);

@@ -42,7 +42,7 @@ public class JkProjectScaffoldTest {
         projectScaffold.compileDeps.add("toto:titi:0.0.1");
         projectScaffold.runtimeDeps.add("foo:bar");
         projectScaffold
-                .setTemplate(JkProjectScaffold.Kind.REGULAR)
+                .setKind(JkProjectScaffold.Kind.REGULAR)
                 .run();
 
         // check .gitIgnore

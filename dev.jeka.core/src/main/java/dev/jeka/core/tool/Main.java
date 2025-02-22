@@ -63,9 +63,7 @@ public class Main {
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
-        //JkAnsiConsole.of().systemInstall();
-        System.setProperty("jansi.passthrough", "true");
-        System.setProperty("jansi.strip", "false");
+        JkAnsiConsole.of().systemInstall();
 
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
