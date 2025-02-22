@@ -3,9 +3,9 @@
 | Command                 | Description                                                    |
 |-------------------------|----------------------------------------------------------------|
 | `--doc`                 | Displays available methods, options and KBeans                 |
-| `intellij: iml -f`      | Generates iml file for Intellij.                               |
+| `intellij: sync -f`     | Generates iml file for Intellij.                               |
 | `intellij: initProject` | Initializes Intellij Project                                   |
-| `eclipse: files`        | Same purpose as above to generate metadata files for Eclipse.  |
+| `eclipse: sync`         | Same purpose as above to generate metadata files for Eclipse.  |
 | `project: scaffold`     | Generates files to create a basic _Jeka_ project from scratch. |
 | `project: pack`         | Build jars and others optional artifacts from a project        |
 | `base: scaffold`        | Creates files a base workspace without project.                |

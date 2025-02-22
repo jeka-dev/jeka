@@ -20,10 +20,12 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 /**
@@ -80,6 +82,12 @@ public class SimpleProjectKBean extends KBean {
                 // Here jersey-server is not supposed to be part of the API but only needed at runtime.
                 .customizeDependencies(deps -> deps
                         .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME)));
+    }
+
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean.replaceLibByModule("dev.jeka.jeka-core.jar", "dev.jeka.core")
+                .setModuleAttributes("dev.jeka.core", JkIml.Scope.COMPILE, false );
     }
 
     public JkProject getProject() {

@@ -24,6 +24,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
 import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -212,8 +213,7 @@ public final class JkTestProcessor {
             printTestFailure(result);
         }
 
-        //String greenMsg = JkAnsi.of().fg(JkAnsi.Color.GREEN).a("ALL TESTS PASSED").reset().toString();
-        String greenMsg = "ALL TEST PASSED";
+        String greenMsg = JkAnsi.of().fg(JkAnsi.Color.GREEN).a("ALL TESTS PASSED").reset().toString();
 
         String summaryTitle = success ? greenMsg: "Summary";
         JkLog.info(summaryTitle + ": " + result.getTestCount().toReportString());
@@ -248,8 +248,7 @@ public final class JkTestProcessor {
         // run with the BAR progress style (not for the other)
         // The workaround is to fake an error log using the JkLog.info
 
-        //String redMsg = JkAnsi.of().fg(JkAnsi.Color.RED).a("ERROR ").reset().toString();
-        String redMsg = "ERROR: ";
+        String redMsg = JkAnsi.of().fg(JkAnsi.Color.RED).a("ERROR ").reset().toString();
         JkLog.info(redMsg + msg);
 
         for (JkTestResult.JkFailure failure : failures) {
