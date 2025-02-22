@@ -158,7 +158,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      */
     public final JkRunnables packActions = JkRunnables.of().setLogTasks(true);
 
-
     /**
      * Object responsible for resolving dependencies.
      */

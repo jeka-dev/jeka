@@ -134,8 +134,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         project.testing.run();
     }
 
-    @JkDoc("Generates from scratch artifacts defined through 'pack' options if not yet generated. " +
-            "Use #cleanPack to force re-generation.")
+    @JkDoc("Generates artifacts based on 'pack' options. Creates a single JAR by default.")
     public void pack() {   //NOSONAR
         project.pack();
     }

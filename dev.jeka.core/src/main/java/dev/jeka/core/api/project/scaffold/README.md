@@ -2,19 +2,19 @@
 
 ## JeKa commands
 
-Create jar
+Create jar:
 ```shell
 jeka project: pack
 ```
 
-Clean and Create jar
+Clean and create jar:
 ```shell
 jeka project: pack --clean
 ```
 
-Create jar skipping tests
+Run test and create jar:
 ```shell
-jeka project: pack "-Djeka.test.skip=true"
+jeka project:test pack 
 ```
 
 Run jar
@@ -24,7 +24,7 @@ jeka project: runJar run.programArgs="" run.jvmOptions=""
 
 Synchronize IntelliJ
 ```shell
-jeka intellij: iml
+jeka intellij: sync
 ```
 
 ### Docker
