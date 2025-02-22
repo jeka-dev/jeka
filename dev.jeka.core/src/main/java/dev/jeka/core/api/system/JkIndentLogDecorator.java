@@ -87,7 +87,7 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             } else if (event.getType() == JkLog.Type.ERROR) {
                 message = ERROR + message;
             } else {
-                message = "[" + event.getType() + "] " + message;
+                message = event.getType() + ": " + message;
                 if (event.getType() == JkLog.Type.VERBOSE) {
                     message = JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(message).reset().toString();
                 } else if (event.getType() == JkLog.Type.DEBUG) {
