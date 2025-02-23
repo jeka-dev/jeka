@@ -1,0 +1,1839 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../images/logo-plain-gradient.svg">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
+    
+    
+      
+        <title>The Build Library - JeKa Build Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.bcfcd587.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CFire+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Fire Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function n(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],n("js",new Date),n("config","UA-103449580-2"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){this.value&&n("event","search",{search_term:this.value})}),document$.subscribe(function(){var a=document.forms.feedback;if(void 0!==a)for(var e of a.querySelectorAll("[type=submit]"))e.addEventListener("click",function(e){e.preventDefault();var t=document.location.pathname,e=this.getAttribute("data-md-value");n("event","feedback",{page:t,data:e}),a.firstElementChild.disabled=!0;e=a.querySelector(".md-feedback__note [data-md-value='"+e+"']");e&&(e.hidden=!1)}),a.hidden=!1}),location$.subscribe(function(e){n("config","UA-103449580-2",{page_path:e.pathname})})});var e=document.createElement("script");e.async=!0,e.src="https://www.googletagmanager.com/gtag/js?id=UA-103449580-2",document.getElementById("__analytics").insertAdjacentElement("afterEnd",e)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-build-library" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="JeKa Build Tool" class="md-header__button md-logo" aria-label="JeKa Build Tool" data-md-component="logo">
+      
+  <img src="../../../images/logo-plain-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JeKa Build Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              The Build Library
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jeka-dev/jeka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="JeKa Build Tool" class="md-nav__button md-logo" aria-label="JeKa Build Tool" data-md-component="logo">
+      
+  <img src="../../../images/logo-plain-white.svg" alt="logo">
+
+    </a>
+    JeKa Build Tool
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jeka-dev/jeka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/build-base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Build Base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/build-projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Build Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    KBeans
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Bundled KBeans
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Bundled KBeans
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-intellij/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    intellij
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-eclipse/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    eclipse
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    native
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    git
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-app/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/kbeans-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/properties/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Properties
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Build Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            Build Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-intro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Native
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-dependency-management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependency Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/api-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cheat-sheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cheat Sheet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../external-resources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    External Resources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../javadoc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Javadoc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../under-the-hood/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Under The Hood
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#api-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Style
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domains-covered-by-the-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Domains Covered by the API
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Files
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system" class="md-nav__link">
+    <span class="md-ellipsis">
+      System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependency Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dependency Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concepts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependencyset" class="md-nav__link">
+    <span class="md-ellipsis">
+      DependencySet
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transiitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transiitivity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolve-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolve Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publication
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Publication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#publish-to-a-maven-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publish to a Maven repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publish-to-a-ivy-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publish to a Ivy repository
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-building" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Building
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Project Building">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#java-tool-base-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java Tool Base API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#third-party-tool-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Third Party Tool Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Third Party Tool Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eclipse" class="md-nav__link">
+    <span class="md-ellipsis">
+      Eclipse
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intellij" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intellij
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#git" class="md-nav__link">
+    <span class="md-ellipsis">
+      Git
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maven" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maven
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="the-build-library">The Build Library<a class="headerlink" href="#the-build-library" title="Permanent link">&para;</a></h1>
+<p>Jeka contains a library for all regular things you need to build/test/publish projects..
+The library does not depend on the execution engine and has zero dependency. </p>
+<h2 id="api-style">API Style<a class="headerlink" href="#api-style" title="Permanent link">&para;</a></h2>
+<p><em>Jeka</em> tries to stick with a consistent API design style.</p>
+<ul>
+<li>All Jeka public classes/interfaces start with <code>Jk</code>. The reason is for easing distinction, in IDE, between classes supposed be used
+  in production or test and the ones used for building. It also helps to explore Jeka API.</li>
+<li>As a rule of thumb <em>Jeka</em> favors immutable objects for shallow structures and
+<a href="https://github.com/djeang/parent-chaining/blob/master/readme.md">parent-chaining trees</a> for deeper ones.
+Both provide a fluent interface when possible.</li>
+<li>All objects are instantiated using static factory methods. Every factory method names start with <code>of</code>.</li>
+<li>All accessor method names (methods returning a result without requiring IO, only computation) starts with <code>get</code>.</li>
+<li>To create a subtly different object from another immutable one, <em>Jeka</em> provides :</li>
+<li>Methods starting with <code>with</code> when a property is to be replaced by another.</li>
+<li>Methods starting with <code>and</code> when a collection property is to be replaced by the same one plus an extra element.</li>
+<li>Methods starting with <code>minus</code> when a collection property is to be replaced by the same one minus a specified element.</li>
+<li>To modify a mutable object, <em>Jeka</em> provides :</li>
+<li>Methods starting with <code>set</code> to replace a single property value by another.</li>
+<li>Methods starting with <code>add</code> to add a value to a collection property.
+  Those methods return the object itself for chaining.</li>
+</ul>
+<h2 id="domains-covered-by-the-api">Domains Covered by the API<a class="headerlink" href="#domains-covered-by-the-api" title="Permanent link">&para;</a></h2>
+<p>The previous example demonstrates how the Java/project API can be used to build and publish Java projects. This API
+relies on other lower level ones provided by <em>Jeka</em>. In a glance these are the domains covered by the <em>Jeka</em> APIs :</p>
+<ul>
+<li><strong>Files :</strong> File trees, filters, zip, path sequence</li>
+<li><strong>System :</strong> Launching external process, Logging, Meta-info</li>
+<li><strong>Cryptography :</strong> PGP signer</li>
+<li><strong>Dependency management :</strong> Dependency management, publishing on repositories</li>
+<li><strong>Java :</strong> Compilation, javadoc, resource processor, manifest, packager, classloader, classpath, launching</li>
+<li><strong>Testing :</strong> Launching tests and get reports</li>
+<li><strong>Project :</strong> Project structure to build</li>
+<li><strong>Tooling :</strong> Eclipse integration, intellij integration, Maven interaction, Git</li>
+<li><strong>Support :</strong> Set of utility class with static methods to handle low-level concerns</li>
+</ul>
+<h2 id="files">Files<a class="headerlink" href="#files" title="Permanent link">&para;</a></h2>
+<p>File manipulation is a central part for building software.
+Jeka embraces JDK7 <em>java.nio.file</em> API by adding some concepts around, to provide a powerful fluent style API performing
+recurrent tasks with minimal effort.</p>
+<p>The following classes lie in <code>dev.jeka.core.api.file</code> package:</p>
+<ul>
+<li>
+<p><code>JkPathFile</code> A simple wrapper for files (not folders). It provides copying, interpolation, checksum, deletion and creation methods.</p>
+</li>
+<li>
+<p><code>JkPathSequence</code> An Immutable sequence of <code>java.nio.file.Path</code> providing methods for filtering or appending.</p>
+</li>
+<li>
+<p><code>JkPathMatcher</code> An immutable <code>java.nio.file.PathMatcher</code> based on <code>java.nio.file</code> glob pattern or regerxp.
+  Used by <code>JkPathTree</code> to filter in/out files according name patterns.</p>
+</li>
+<li>
+<p><code>JkPathTree</code> An Immutable root folder (or a zip file) along a <code>PathMatcher</code> providing operations to copy, navigate, zip or iterate.
+  This is a central class in Jeka API.</p>
+</li>
+<li>
+<p><code>JkPathTreeSet</code> An Immutable set of <code>JkPathTree</code>. Helpful to define set of sources/resources and create jar/zip files.</p>
+</li>
+<li>
+<p><code>JkResourceProcessor</code> A mutable processor for copying a set of files, preserving the structure and
+  replacing some text by other text. Typically, used for replacing token as <code>${server.ip}</code> by an actual value.</p>
+</li>
+</ul>
+<p>Examples</p>
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-0-1"><span class="c1">// creates a file and writes the content of the specified url.</span>
+</span><span id="__span-0-2"><span class="n">JkPathFile</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;config/my-config.xml&quot;</span><span class="p">).</span><span class="na">createIfNotExist</span><span class="p">().</span><span class="na">replaceContentBy</span><span class="p">(</span><span class="s">&quot;http://myserver/conf/central.xml&quot;</span><span class="p">);</span>
+</span><span id="__span-0-3">
+</span><span id="__span-0-4"><span class="c1">// copies all non java source files to another directory preserving structure</span>
+</span><span id="__span-0-5"><span class="n">JkPathTree</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">).</span><span class="na">andMatching</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;**/*.java&quot;</span><span class="p">).</span><span class="na">copyTo</span><span class="p">(</span><span class="s">&quot;build/classes&quot;</span><span class="p">);</span>
+</span><span id="__span-0-6">
+</span><span id="__span-0-7"><span class="c1">// One liner to zip an entire directory</span>
+</span><span id="__span-0-8"><span class="n">JkPathTree</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;build/classes&quot;</span><span class="p">).</span><span class="na">zipTo</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;mylib.jar&quot;</span><span class="p">));</span>
+</span></code></pre></div>
+<h2 id="system">System<a class="headerlink" href="#system" title="Permanent link">&para;</a></h2>
+<p>The <code>dev.jeka.core.api.system</code> package provides system level functions :</p>
+<ul>
+<li>
+<p><code>JkInfo</code> Provides meta information as the running version of Jeka.</p>
+</li>
+<li>
+<p><code>JkLocator</code> Provides information about where is located repository cache or Jeka user home.</p>
+</li>
+<li>
+<p><code>JkLog</code> Provides API to log Jeka event. It supports hierarchical logs through <code>#startTask</code>
+  and <code>#endtask</code> methods.</p>
+</li>
+<li>
+<p><code>JkProcess</code> Launcher for external process.</p>
+</li>
+<li>
+<p><code>JkPrompt</code> One-liner to ask user input.</p>
+</li>
+</ul>
+<h2 id="dependency-management">Dependency Management<a class="headerlink" href="#dependency-management" title="Permanent link">&para;</a></h2>
+<p>Dependency management API let define, fetch and publish dependencies. Api classes belong to <code>dev.jeka.core.api.depmanagement</code> <a href="https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement">package</a></p>
+<h3 id="concepts">Concepts<a class="headerlink" href="#concepts" title="Permanent link">&para;</a></h3>
+<h4 id="dependency">Dependency<a class="headerlink" href="#dependency" title="Permanent link">&para;</a></h4>
+<p>For Jeka, a <em>dependency</em> is something that can be resolved to a set of files by a <code>JkDependencyResolver</code>.
+Generally a dependency resolves to 1 file (or folder) but it can be 0 or many.</p>
+<p>A dependency is always an instance of <code>JkDependency</code>.</p>
+<p>Jeka distinguishes mainly 3 types of dependency :</p>
+<ul>
+<li><strong>Arbitrary files</strong> located on the file system (represented by <code>JkFileSystemDependency</code> class). These files are assumed to be present on the file system when the build is running.</li>
+<li><strong>Files produced by a computation</strong> (represented by <code>JkComputedDependency</code> class). These files may be present on file system or not. If they are not present, the computation is run in order to produce the missing files. Generally the computation stands for the build of an external project.</li>
+<li><strong>Reference to module</strong> (represented by <code>JkModuleDependency</code>) hosted in a binary repository (Ivy or Maven for instance) : Jeka can consume and resolve transitively any artifact located in a repository as you would do with Maven, Ivy or Gradle.</li>
+</ul>
+<p>For the last, Jeka is using <em>Ivy 2.5.0</em> under the hood.
+Jeka jar embeds Ivy and executes it in a dedicated classloader to be hidden for client code.</p>
+<p><img alt="image" src="../images/JkDependency.png" /></p>
+<p><strong>JkModuleDependencies (dependency on module through coordinates)</strong></p>
+<p>This is for declaring a dependency on module hosted in <em>Maven</em> or <em>Ivy</em> repository. Basically you instantiate a <code>JkModuleDepency</code> from it's group, name and version.</p>
+<p><div class="language-Java highlight"><pre><span></span><code><span id="__span-1-1"><span class="w">    </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-1-2"><span class="w">        </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">JkPopularModule</span><span class="p">.</span><span class="na">GUAVA</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;18.0&quot;</span><span class="p">)</span>
+</span><span id="__span-1-3"><span class="w">        </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[&quot;</span><span class="p">)</span>
+</span><span id="__span-1-4"><span class="w">        </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;mygroup:mymodule:myclassifier:0.2-SNAPSHOT&quot;</span><span class="p">);</span>
+</span></code></pre></div>
+There is many way to indicate a module dependency, see Javadoc for browsing possibilities.</p>
+<p>Note that :</p>
+<ul>
+<li>A version ending by <code>-SNAPSHOT</code> has a special meaning : Jeka will consider it <em>"changing"</em>. This means that it won't cache it locally and will download the latest version from repository.</li>
+<li>As Jeka relies on Ivy under the hood, it accepts dynamic versions as mentioned <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html">here</a>.</li>
+<li>Dependency files are downloaded in <em>[USER HOME]</em>/.jeka/cache/repo</li>
+</ul>
+<p><strong>JkFileSystemSependency (dependency on local files)</strong></p>
+<p>Just mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.</p>
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-2-1"><span class="w">    </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">().</span><span class="na">andFiles</span><span class="p">(</span><span class="s">&quot;libs/my.jar&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;libs/my.testingtool.jar&quot;</span><span class="p">);</span>
+</span></code></pre></div>
+<p><strong>JkComputedDependenciy (dependency on files produced by computation)</strong></p>
+<p>It is typically used for <em>multi-modules</em> or <em>multi-techno</em> projects.</p>
+<p>The principle is that if the specified files are not present, the computation is run in order to generate the missing files.
+If some files still missing after the computation has run, the build fails.</p>
+<p>This mechanism is quite simple yet powerful as it addresses following use cases :</p>
+<ul>
+<li>Dependencies on files produced by an artifact producer (<code>JkArtifactProducer</code>). A <code>JkProject</code> is an artifact producer.</li>
+<li>Dependencies on files produced by external build tool (Ant, Maven, Gradle, SBT, Android SDK, Make, npm ...).</li>
+<li>... In other words, files produced by any means.</li>
+</ul>
+<p>The generic way is to construct this kind of dependency using a <code>java.lang.Runnable</code>.</p>
+<p>The following snippet constructs a set of dependencies on two external projects : one is built with Maven, the other with
+<em>Jeka</em>.
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-3-1"><span class="n">Path</span><span class="w"> </span><span class="n">mavenProject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;../a-maven-project&quot;</span><span class="p">);</span>
+</span><span id="__span-3-2"><span class="n">JkProcess</span><span class="w"> </span><span class="n">mavenBuild</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkProcess</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;mvn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clean&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;install&quot;</span><span class="p">).</span><span class="na">withWorkingDir</span><span class="p">(</span><span class="n">mavenProject</span><span class="p">);</span>
+</span><span id="__span-3-3"><span class="n">Path</span><span class="w"> </span><span class="n">mavenProjectJar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mavenProject</span><span class="p">.</span><span class="na">resolve</span><span class="p">(</span><span class="s">&quot;target/maven-project.jar&quot;</span><span class="p">);</span>
+</span><span id="__span-3-4"><span class="n">JkJavaProject</span><span class="w"> </span><span class="n">externalProject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkJavaProject</span><span class="p">.</span><span class="na">ofSimple</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;../a-jeka-project&quot;</span><span class="p">));</span><span class="w"> </span>
+</span><span id="__span-3-5"><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-3-6"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">JkComputedDependency</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">mavenBuild</span><span class="p">,</span><span class="w"> </span><span class="n">mavenProjectJar</span><span class="p">))</span>
+</span><span id="__span-3-7"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">externalProject</span><span class="p">);</span>
+</span></code></pre></div></p>
+<h4 id="dependencyset">DependencySet<a class="headerlink" href="#dependencyset" title="Permanent link">&para;</a></h4>
+<p>A <em>dependencySet</em> (<code>JkDependencySet</code>) is an ordered bunch of dependencies used for a given purpose (compilation,
+war packaging, testing, ...). It can contain any kind of <code>JkDependency</code>. See <a href="https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java">here</a></p>
+<p><em>dependencySet</em> also defines :</p>
+<ul>
+<li>A <strong>version provider</strong> to define which version of a module we should use in case it is not explicitly mentioned. It is possible to populate a version provider by passing a <em>BOM</em> coordinate.</li>
+<li>A set of transitive dependency exclusion rules.</li>
+</ul>
+<p>It is designed as an immutable object where we can apply set theory operations for adding, removing or
+merging with other dependencies and <em>dependencySet</em>.</p>
+<details>
+ <summary>Example of dependency set</summary>
+
+
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-4-1"><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-4-2"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.google.guava&quot;</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-4-3"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.slf4j:slf4j-simple&quot;</span><span class="p">)</span>
+</span><span id="__span-4-4"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.orientechnologies:orientdb-client:2.0.8&quot;</span><span class="p">)</span>
+</span><span id="__span-4-5"><span class="w">    </span><span class="p">.</span><span class="na">andFile</span><span class="p">(</span><span class="s">&quot;../libs.myjar&quot;</span><span class="p">)</span>
+</span><span id="__span-4-6"><span class="w">    </span><span class="p">.</span><span class="na">withVersionProvider</span><span class="p">(</span><span class="n">myVersionProvider</span><span class="p">);</span>
+</span></code></pre></div>
+ </details>
+
+<p>Note that :</p>
+<ul>
+<li>Module version and scopes can be omitted when declaring dependencies. Versions can be provided by a <code>JkVersionProvider</code>.</li>
+<li>Instances of <code>JkDependencySet</code> can be combined together in order to construct large <em>dependencySet</em> from smaller ones.</li>
+<li><code>JkDependencySet#ofTextDescription</code> provides a mean to instantiate a dependency set from a simple text.</li>
+</ul>
+<details>
+ <summary>Example of text describing dependencies</summary>
+
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1">- COMPILE+RUNTIME
+</span><span id="__span-5-2">org.springframework.boot:spring-boot-starter-thymeleaf
+</span><span id="__span-5-3">org.springframework.boot:spring-boot-starter-data-jpa
+</span><span id="__span-5-4">
+</span><span id="__span-5-5">- RUNTIME
+</span><span id="__span-5-6">com.h2database:h2
+</span><span id="__span-5-7">org.liquibase:liquibase-core
+</span><span id="__span-5-8">com.oracle:ojdbc6:12.1.0
+</span><span id="__span-5-9">
+</span><span id="__span-5-10">- TEST
+</span><span id="__span-5-11">org.springframework.boot:spring-boot-starter-test
+</span><span id="__span-5-12">org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
+</span><span id="__span-5-13">org.fluentlenium:fluentlenium-assertj:3.2.0
+</span><span id="__span-5-14">org.fluentlenium:fluentlenium-junit:3.2.0
+</span><span id="__span-5-15">
+</span><span id="__span-5-16">- COMPILE
+</span><span id="__span-5-17">org.projectlombok:lombok:1.16.16
+</span></code></pre></div>
+ </details>
+
+</details>
+<h4 id="transiitivity">Transiitivity<a class="headerlink" href="#transiitivity" title="Permanent link">&para;</a></h4>
+<p>Mainstream build tools use a single concept ('scope' or 'configuration') to determine both :</p>
+<ol>
+<li>Which part of the build needs the dependency</li>
+<li>Which transitive dependencies to fetch along the dependency. </li>
+<li>If the dependency must be part of the transitive dependencies according a configuration. </li>
+</ol>
+<p>This confusion leads in dependency management systems that are bloated, difficult to reason about and not quite flexible.
+Gradle comes with a proliferation of 'configurations' to cover most use case combinations,
+while Maven narrows 'scopes' to a fewer but with limitations and not-so-clear transitivity/publish rules.</p>
+<p>In the opposite, Jeka distinguishes clearly the three purposes :</p>
+<ol>
+<li>Jeka uses distinct <em>dependencySet</em> instances for each part of the build (compile, runtime, test,...). Each can be
+   defined relatively to another using set theory operations.</li>
+<li>For each dependency, we can decide its transitivity, that is, the transitive dependencies fetched along the dependency.</li>
+<li>For publishing, we can optionally re-define a specific <em>dependencySet</em>, exposing exactly what we want.</li>
+</ol>
+<p>Jeka defines by default, 3 levels of transitivity :</p>
+<ul>
+<li>NONE : Not transitive</li>
+<li>COMPILE : Also fetch transitive dependencies declared with scope 'compile' in the dependency published pom.</li>
+<li>RUNTIME : Also fetch transitive dependencies declared with any scope in the dependency published pom.</li>
+</ul>
+<p>Reminder : on Maven repositories, published poms can declare only two scopes for transitive dependencies : 'compile'
+and 'runtime'.</p>
+<p>For Ivy repositories, it is possible to declare a specific transitivity that maps to a slave 'configuration'.</p>
+<p>The below example shows a JkJavaProject declaration using explicit transitivity.</p>
+<p><div class="language-Java highlight"><pre><span></span><code><span id="__span-6-1"><span class="n">JkJavaProject</span><span class="p">.</span><span class="na">of</span><span class="p">().</span><span class="na">simpleFacade</span><span class="p">()</span>
+</span><span id="__span-6-2"><span class="w">    </span><span class="p">.</span><span class="na">configureCompileDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-6-3"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava:23.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">JkTransitivity</span><span class="p">.</span><span class="na">NONE</span><span class="p">)</span>
+</span><span id="__span-6-4"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;javax.servlet:javax.servlet-api:4.0.1&quot;</span><span class="p">))</span>
+</span><span id="__span-6-5"><span class="w">    </span><span class="p">.</span><span class="na">configureRuntimeDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-6-6"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.postgresql:postgresql:42.2.19&quot;</span><span class="p">)</span>
+</span><span id="__span-6-7"><span class="w">            </span><span class="p">.</span><span class="na">withTransitivity</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">JkTransitivity</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+</span><span id="__span-6-8"><span class="w">            </span><span class="p">.</span><span class="na">minus</span><span class="p">(</span><span class="s">&quot;javax.servlet:javax.servlet-api&quot;</span><span class="p">))</span>
+</span><span id="__span-6-9"><span class="w">    </span><span class="p">.</span><span class="na">configureTestDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-6-10"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">Hint</span><span class="p">.</span><span class="na">first</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;org.mockito:mockito-core:2.10.0&quot;</span><span class="p">)</span>
+</span><span id="__span-6-11"><span class="w">    </span><span class="p">)</span>
+</span></code></pre></div>
+It results in :
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1">Declared Compile Dependencies : 2 elements.
+</span><span id="__span-7-2">  com.google.guava:guava:23.0 transitivity:NONE
+</span><span id="__span-7-3">  javax.servlet:javax.servlet-api:4.0.1
+</span><span id="__span-7-4">
+</span><span id="__span-7-5">Declared Runtime Dependencies : 2 elements.
+</span><span id="__span-7-6">  com.google.guava:guava:23.0 transitivity:RUNTIME
+</span><span id="__span-7-7">  org.postgresql:postgresql:42.2.19
+</span><span id="__span-7-8">
+</span><span id="__span-7-9">Declared Test Dependencies : 4 elements.
+</span><span id="__span-7-10">  org.mockito:mockito-core:2.10.0
+</span><span id="__span-7-11">  com.google.guava:guava:23.0 transitivity:RUNTIME
+</span><span id="__span-7-12">  org.postgresql:postgresql:42.2.19
+</span><span id="__span-7-13">  javax.servlet:javax.servlet-api:4.0.1
+</span></code></pre></div>
+Dependencies without any transitivity specified on, will take default transitivity for
+their purpose, namely COMPILE for compile dependencies, and RUNTIME for runtime and test dependencies.</p>
+<p>The API allows to redefine the transitivity declared in a upper dependency set.</p>
+<p>Note that transitivity can only apply to <code>JkModuleDependency</code> (like <i>com.google.guava:guava:23.0</i>)
+and <code>JkLocalProjectDependency</code>.</p>
+<h3 id="resolve-dependencies">Resolve Dependencies<a class="headerlink" href="#resolve-dependencies" title="Permanent link">&para;</a></h3>
+<p>The <code>JkDependencyResolver</code> class is responsible JkDependencyResolver.of(JkRepo.ofMavenCentral());to resolve dependencies by returning <code>JkResolveResult</code> from a
+<code>JkdependencySet</code>.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-8-1"><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span>
+</span><span id="__span-8-2"><span class="w">                            </span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;org.apache.httpcomponents:httpclient:4.5.3&quot;</span><span class="p">)</span>
+</span><span id="__span-8-3"><span class="w">                            </span><span class="p">.</span><span class="na">andFile</span><span class="p">(</span><span class="s">&quot;libs/my.jar&quot;</span><span class="p">);</span>
+</span><span id="__span-8-4">
+</span><span id="__span-8-5"><span class="c1">// Here, module dependencies are fetched from Maven central repo</span>
+</span><span id="__span-8-6"><span class="n">JkDependencyResolver</span><span class="w"> </span><span class="n">resolver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencyResolver</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">JkRepo</span><span class="p">.</span><span class="na">ofMavenCentral</span><span class="p">());</span><span class="w">  </span>
+</span><span id="__span-8-7"><span class="n">JkResolveResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resolver</span><span class="p">().</span><span class="na">resolve</span><span class="p">(</span><span class="n">deps</span><span class="p">);</span>
+</span></code></pre></div>
+<p>From the result you can :</p>
+<ul>
+<li>Navigate in the resolved dependency tree as :</li>
+</ul>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-9-1"><span class="n">JkDependencyNode</span><span class="w"> </span><span class="n">slfjApiNodeDep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getDependencyTree</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">JkModuleId</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;org.slf4j:slf4j-api&quot;</span><span class="p">));</span>
+</span><span id="__span-9-2"><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">slfjApiNode</span><span class="p">.</span><span class="na">getModuleInfo</span><span class="p">().</span><span class="na">getResolvedVersion</span><span class="p">());</span>
+</span></code></pre></div>
+<ul>
+<li>Get the direct list of artifact files</li>
+</ul>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-10-1"><span class="n">JkPathSequence</span><span class="w"> </span><span class="n">sequence</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getFiles</span><span class="p">();</span><span class="w">  </span>
+</span><span id="__span-10-2"><span class="n">sequence</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">::</span><span class="n">println</span><span class="p">);</span><span class="w"> </span><span class="c1">// print each files part of the dependency resolution</span>
+</span></code></pre></div>
+<h3 id="publication">Publication<a class="headerlink" href="#publication" title="Permanent link">&para;</a></h3>
+<p>Jeka is able to publish on both Maven and Ivy repository. This includes repositories as <a href="http://www.sonatype.org/nexus/">Sonatype Nexus</a>.</p>
+<p>Maven and Ivy have different publication model, so Jeka proposes specific APIs according you want to publish on a Maven or Ivy repository.</p>
+<h4 id="publish-to-a-maven-repository">Publish to a Maven repository<a class="headerlink" href="#publish-to-a-maven-repository" title="Permanent link">&para;</a></h4>
+<p>Jeka proposes a complete API to pubish on Maven repository. POM files will be generated by Jeka according
+provided elements.</p>
+<p>The following snippet demonstrate a pretty sophisticated publishing on Maven :</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-11-1"><span class="w">    </span><span class="n">JkVersionedModule</span><span class="w"> </span><span class="n">versionedModule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkVersionedModule</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;org.myorg:mylib:1.2.6&quot;</span><span class="p">);</span>
+</span><span id="__span-11-2"><span class="w">    </span><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-11-3"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.slf4j:slf4j-simple&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">COMPILE_AND_RUNTIME</span><span class="p">)</span>
+</span><span id="__span-11-4"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;junit:junit:4.11&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">TEST</span><span class="p">);</span>
+</span><span id="__span-11-5"><span class="w">    </span><span class="n">JkMavenPublication</span><span class="w"> </span><span class="n">mavenPublication</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkMavenPublication</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;org.myorg.mylib.jar&quot;</span><span class="p">))</span>
+</span><span id="__span-11-6">
+</span><span id="__span-11-7"><span class="w">            </span><span class="c1">// the following are optional but required to publish on public repositories.</span>
+</span><span id="__span-11-8"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;org.myorg.mylib-sources.jar&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;sources&quot;</span><span class="p">)</span>
+</span><span id="__span-11-9"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;org.myorg.mylib-javadoc.jar&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;javadoc&quot;</span><span class="p">)</span>
+</span><span id="__span-11-10"><span class="w">            </span><span class="p">.</span><span class="na">withChecksums</span><span class="p">(</span><span class="s">&quot;sha-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;md5&quot;</span><span class="p">)</span>
+</span><span id="__span-11-11"><span class="w">            </span><span class="p">.</span><span class="na">withSigner</span><span class="p">(</span><span class="n">JkPgp</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;myPubring&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;mySecretRing&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;mypassword&quot;</span><span class="p">))</span>
+</span><span id="__span-11-12"><span class="w">            </span><span class="p">.</span><span class="na">with</span><span class="p">(</span><span class="n">JkMavenPublicationInfo</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;My sample project&quot;</span><span class="p">,</span>
+</span><span id="__span-11-13"><span class="w">                    </span><span class="s">&quot;A project to demonstrate publishing on Jeka&quot;</span><span class="p">,</span>
+</span><span id="__span-11-14"><span class="w">                    </span><span class="s">&quot;http://project.jeka.org&quot;</span><span class="p">)</span>
+</span><span id="__span-11-15"><span class="w">                    </span><span class="p">.</span><span class="na">andApache2License</span><span class="p">()</span>
+</span><span id="__span-11-16"><span class="w">                    </span><span class="p">.</span><span class="na">andDeveloper</span><span class="p">(</span><span class="s">&quot;djeang&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myemail@gmail.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;jeka.org&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://project.jeka.org/&quot;</span><span class="p">));</span>
+</span><span id="__span-11-17">
+</span><span id="__span-11-18"><span class="w">    </span><span class="c1">// A complex case for repo (credential + signature + filtering) </span>
+</span><span id="__span-11-19"><span class="w">    </span><span class="n">JkRepo</span><span class="w"> </span><span class="n">repo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkRepo</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;http://myserver/myrepo&quot;</span><span class="p">)</span>
+</span><span id="__span-11-20"><span class="w">            </span><span class="p">.</span><span class="na">withOptionalCredentials</span><span class="p">(</span><span class="s">&quot;myUserName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myPassword&quot;</span><span class="p">)</span>
+</span><span id="__span-11-21"><span class="w">            </span><span class="p">.</span><span class="na">with</span><span class="p">(</span><span class="n">JkRepo</span><span class="p">.</span><span class="na">JkPublishConfig</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-11-22"><span class="w">                        </span><span class="p">.</span><span class="na">withUniqueSnapshot</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-11-23"><span class="w">                        </span><span class="p">.</span><span class="na">withNeedSignature</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-11-24"><span class="w">                        </span><span class="p">.</span><span class="na">withFilter</span><span class="p">(</span><span class="n">mod</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="c1">// only accept SNAPSHOT and MILESTONE</span>
+</span><span id="__span-11-25"><span class="w">                            </span><span class="n">mod</span><span class="p">.</span><span class="na">getVersion</span><span class="p">().</span><span class="na">isSnapshot</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">mod</span><span class="p">.</span><span class="na">getVersion</span><span class="p">().</span><span class="na">getValue</span><span class="p">().</span><span class="na">endsWith</span><span class="p">(</span><span class="s">&quot;MILESTONE&quot;</span><span class="p">)</span>
+</span><span id="__span-11-26"><span class="w">                        </span><span class="p">));</span>
+</span><span id="__span-11-27">
+</span><span id="__span-11-28"><span class="w">    </span><span class="c1">// Actually publish the artifacts</span>
+</span><span id="__span-11-29"><span class="w">    </span><span class="n">JkPublisher</span><span class="w"> </span><span class="n">publisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkPublisher</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">repo</span><span class="p">);</span>
+</span><span id="__span-11-30"><span class="w">    </span><span class="n">publisher</span><span class="p">.</span><span class="na">publishMaven</span><span class="p">(</span><span class="n">versionedModule</span><span class="p">,</span><span class="w"> </span><span class="n">mavenPublication</span><span class="p">,</span><span class="w"> </span><span class="n">deps</span><span class="p">);</span>
+</span></code></pre></div>
+<p>Notice that Jeka allows to :</p>
+<ul>
+<li>Publish more than one artifact.</li>
+<li>Produce &amp; publish checksum files for each published artifact.</li>
+<li>Mention to use unique snapshot (<a href="http://stackoverflow.com/questions/1243574/how-to-stop-maven-artifactory-from-keeping-snapshots-with-timestamps">What is it ?</a>).</li>
+<li>Feed generated pom with data necessary to publish on <a href="https://maven.apache.org/guides/mini/guide-central-repository-upload.html">central repository</a>.</li>
+<li>Sign published artifact with PGP</li>
+<li>Publish to multiple repository by creating the publisher using a <code>JkRepoSet</code> instead of a <code>JkRepo</code>.</li>
+</ul>
+<p>To sign with PGP, no need to have PGP installed on Jeka machine. Jeka uses <a href="https://www.bouncycastle.org/">Bouncy Castle</a> internally to sign artifacts.</p>
+<h4 id="publish-to-a-ivy-repository">Publish to a Ivy repository<a class="headerlink" href="#publish-to-a-ivy-repository" title="Permanent link">&para;</a></h4>
+<p>Publishing on Ivy repo is pretty similar than on Maven though there is specific options to Ivy.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-12-1"><span class="w">    </span><span class="n">JkVersionedModule</span><span class="w"> </span><span class="n">versionedModule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkVersionedModule</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;org.myorg:mylib:1.2.6-SNAPSHOT&quot;</span><span class="p">);</span>
+</span><span id="__span-12-2"><span class="w">    </span><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-12-3"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.slf4j:slf4j-simple&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">COMPILE_AND_RUNTIME</span><span class="p">)</span>
+</span><span id="__span-12-4"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;junit:junit:4.11&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">TEST</span><span class="p">);</span>
+</span><span id="__span-12-5">
+</span><span id="__span-12-6"><span class="w">    </span><span class="n">JkIvyPublication</span><span class="w"> </span><span class="n">publication</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkIvyPublication</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;org.myorg.mylib.jar&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;master&quot;</span><span class="p">)</span>
+</span><span id="__span-12-7"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;org.myorg.mylib-sources.jar&quot;</span><span class="p">));</span>
+</span><span id="__span-12-8">
+</span><span id="__span-12-9"><span class="w">    </span><span class="n">JkRepo</span><span class="w"> </span><span class="n">repo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkRepo</span><span class="p">.</span><span class="na">ofIvy</span><span class="p">(</span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;ivyrepo&quot;</span><span class="p">));</span>
+</span><span id="__span-12-10">
+</span><span id="__span-12-11"><span class="w">    </span><span class="n">JkPublisher</span><span class="w"> </span><span class="n">publisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkPublisher</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">repo</span><span class="p">);</span>
+</span><span id="__span-12-12"><span class="w">    </span><span class="n">publisher</span><span class="p">.</span><span class="na">publishIvy</span><span class="p">(</span><span class="n">versionedModule</span><span class="p">,</span><span class="w"> </span><span class="n">publication</span><span class="p">,</span><span class="w"> </span><span class="n">deps</span><span class="p">,</span><span class="w"> </span><span class="n">JkJavaDepScopes</span><span class="p">.</span><span class="na">DEFAULT_SCOPE_MAPPING</span><span class="p">,</span>
+</span><span id="__span-12-13"><span class="w">            </span><span class="n">Instant</span><span class="p">.</span><span class="na">now</span><span class="p">(),</span><span class="w"> </span><span class="n">JkVersionProvider</span><span class="p">.</span><span class="na">of</span><span class="p">());</span>
+</span></code></pre></div>
+<h2 id="project-building">Project Building<a class="headerlink" href="#project-building" title="Permanent link">&para;</a></h2>
+<p>Jeka features high-level and low-level classes to deal with Java builds and JVM concepts.</p>
+<h3 id="java-tool-base-api">Java Tool Base API<a class="headerlink" href="#java-tool-base-api" title="Permanent link">&para;</a></h3>
+<p>Base classes are used as foundation for implementing Jeka high-level build API but they can be used directly in a low level build description.
+These classes belong to <code>dev.jeka.core.api.java</code> <a href="https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java">package</a>.</p>
+<ul>
+<li>
+<p><code>JkClassLoader</code> and <code>JkUrlClassloader</code> Wrap a <code>java.lang.ClassLoader</code> adding convenient methods and classpath scanning capability.</p>
+</li>
+<li>
+<p><code>JkJarPacker</code> A simple utility tyo create Jar or fat Jar file from compiled classes.</p>
+</li>
+<li>
+<p><code>JkJavaCompiler</code> Wraps either a Java Compiler tool, nor a <em>javac</em> process.</p>
+</li>
+<li>
+<p><code>JkJavadocProcessor</code> A Java source processor producing standard Javadoc</p>
+</li>
+<li>
+<p><code>JkJavaProcess</code> A utility to launch Java process (from class dirs or jars)</p>
+</li>
+<li>
+<p><code>JkManifest</code> Stands for the manifest file to include in jar files.</p>
+</li>
+</ul>
+<h3 id="testing-api">Testing API<a class="headerlink" href="#testing-api" title="Permanent link">&para;</a></h3>
+<p>Jeka features a simple yet powerful API to launch tests. It relies entirely on JUnit5. This means that any test framework supported by Junit5 platform.</p>
+<p>Jeka testing API mostly hides <em>Junit Platform</em>. For most of the cases, you won't need to code
+against <em>Junit-Platform</em> API to launch tests with Jeka. Nevertheless, Jeka allows users to
+code against <em>Junit-Platform</em> for fine-tuning.</p>
+<p>The API classes all belongs to <code>dev.jeka.core.api.java.testing</code> <a href="https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java/testing">package</a>.</p>
+<ul>
+<li><code>JkTestProcessor</code> This is the entry point to launch tests. Tests are executed using the
+  current classloader classpath + extra class path mentioned in <code>#launch</code> method arguments.</li>
+<li><code>JkTestResult</code> The result of a test launch : count for found, failure, skip, success ...</li>
+<li><code>JkTestSelection</code> A mean to determine which test to launch. It can be set using file or tag filter. It is
+  also possible to code against <em>JUnit Platform</em></li>
+</ul>
+<h3 id="project-api">Project API<a class="headerlink" href="#project-api" title="Permanent link">&para;</a></h3>
+<p>This is the Jeka high-level API to build Java/JVM projects. API classes belong to  <code>dev.jeka.core.api.project</code> <a href="https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project">package</a>.</p>
+<p>It introduces the concept of <code>JkProject</code> from where is performed compilation, testing, resources processing, packaging, publication and more.
+<code>JkProject</code> is the root of a deep structure embracing the <em>parent-chaining</em> pattern for readability.</p>
+<p>The API contains a lot of extension points to add specific behaviors.</p>
+<details>
+ <summary>Project API structure</summary>
+
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1">project
+</span><span id="__span-13-2">+- baseDir
+</span><span id="__span-13-3">+- outputDir
+</span><span id="__span-13-4">+- artifactProducer (define artifacts to be produce by the build as map of artifactName -&gt; Consumer&lt;Path&gt; producing the artifact)
+</span><span id="__span-13-5">+- duplicateDependencyConflictStrategy
+</span><span id="__span-13-6">+- construction  (Produce packaged binaries from sources. This includes test checking)
+</span><span id="__span-13-7">|  +- jvmTargetVersion
+</span><span id="__span-13-8">|  +- sourceEncoding
+</span><span id="__span-13-9">|  +- javaCompiler
+</span><span id="__span-13-10">|  +- dependencyResolver
+</span><span id="__span-13-11">|  +- runtimeDependencies
+</span><span id="__span-13-12">|  +- manifest
+</span><span id="__span-13-13">|  +- fatJar (customize produced fat/uber jar if any)
+</span><span id="__span-13-14">|  +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, transpiling, post binary processing, ...)
+</span><span id="__span-13-15">|  |  +- layout (where are located source and resource files)
+</span><span id="__span-13-16">|  |  +- dependencies   (stands for compile dependencies)
+</span><span id="__span-13-17">|  |  +- preCompileActions (including resources processing)
+</span><span id="__span-13-18">|  |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
+</span><span id="__span-13-19">|  |  +- postCompileActions
+</span><span id="__span-13-20">|  |  +- methods : resolveDependencies(), run()
+</span><span id="__span-13-21">|  +- testing
+</span><span id="__span-13-22">|  |  +- compilation (same as above &#39;compilation&#39; but for test sources/resources)
+</span><span id="__span-13-23">|  |  |  +- layout
+</span><span id="__span-13-24">|  |  |  +- dependencies (stands for test dependencies)
+</span><span id="__span-13-25">|  |  |  + ...
+</span><span id="__span-13-26">|  |  +- breakOnFailure (true/false)
+</span><span id="__span-13-27">|  |  +- skipped (true/false)
+</span><span id="__span-13-28">|  |  +- testProcessor
+</span><span id="__span-13-29">|  |  |  +- forkedProcess (configured the forked process who will run tests)
+</span><span id="__span-13-30">|  |  |  +- preActions
+</span><span id="__span-13-31">|  |  |  +- postActions
+</span><span id="__span-13-32">|  |  |  +- engineBehavior
+</span><span id="__span-13-33">|  |  |  |  +- progressDisplayer
+</span><span id="__span-13-34">|  |  |  |  +- launcherConfiguration (based on junit5 platform API)
+</span><span id="__span-13-35">|  |  |  +- testSelection
+</span><span id="__span-13-36">|  |  |  |  +- includePatterns
+</span><span id="__span-13-37">|  |  |  |  +- includeTags
+</span><span id="__span-13-38">|  |  +- method : run()
+</span><span id="__span-13-39">|  +- methods : createBinJar(), createFatJar(), resolveRuntimeDependencies(), getDependenciesAsXml()
+</span><span id="__span-13-40">|  +            includeLocalDependencies(), includeTextDependencies()            
+</span><span id="__span-13-41">+- documentation (mainly procude javadoc and source jar)
+</span><span id="__span-13-42">|  +- javadocConfiguration
+</span><span id="__span-13-43">|  +- methods : createJavadocJar(), createSourceJar(), run()
+</span><span id="__span-13-44">+- publication (define information about module and artifacts to be published)
+</span><span id="__span-13-45">|  +- moduleId (group:name)
+</span><span id="__span-13-46">|  +- version
+</span><span id="__span-13-47">|  +- maven (maven specific information to be published in a Maven Repositoty)
+</span><span id="__span-13-48">|  |  +- dependencyCustomizer (customize the dependencies to be published)
+</span><span id="__span-13-49">|  |  +- mavenSpecificInfo
+</span><span id="__span-13-50">|  |  +- methods : publish
+</span><span id="__span-13-51">|  +- ivy (Ivy specific information to be published in a Ivy Repositoty)
+</span><span id="__span-13-52">|  |  +- dependencyCustomizer (customize the dependencies to be published)
+</span><span id="__span-13-53">|  |  +- ivySpecifictInfo
+</span><span id="__span-13-54">|  |  +- method : publish()
+</span><span id="__span-13-55">|  +- methods : publish(), getVersion(), getModuleId()
+</span><span id="__span-13-56">+ methods : getArtifacctPath(artifactName), toDependency(transitivity), getIdeSupport(), pack()
+</span></code></pre></div>
+ </details>
+
+<p>For simplicity’s sake, <code>JkProject</code> provides a facade in order to setup common settings friendly,
+without navigating deep into the structure. From facade, you can
+setup dependencies, java version, project layout, test behavior, test selection and publication.</p>
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-14-1"><span class="n">JkProject</span><span class="p">.</span><span class="na">of</span><span class="p">().</span><span class="na">simpleFacade</span><span class="p">()</span>
+</span><span id="__span-14-2"><span class="w">   </span><span class="p">.</span><span class="na">configureCompileDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-14-3"><span class="w">           </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava:21.0&quot;</span><span class="p">)</span>
+</span><span id="__span-14-4"><span class="w">           </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.sun.jersey:jersey-server:1.19.4&quot;</span><span class="p">)</span>
+</span><span id="__span-14-5"><span class="w">           </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.junit.jupiter:junit-jupiter-engine:5.6.0&quot;</span><span class="p">))</span>
+</span><span id="__span-14-6"><span class="w">   </span><span class="p">.</span><span class="na">configureRuntimeDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-14-7"><span class="w">           </span><span class="p">.</span><span class="na">minus</span><span class="p">(</span><span class="s">&quot;org.junit.jupiter:junit-jupiter-engine&quot;</span><span class="p">)</span>
+</span><span id="__span-14-8"><span class="w">           </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.github.djeang:vincer-dom:1.2.0&quot;</span><span class="p">))</span>
+</span><span id="__span-14-9"><span class="w">   </span><span class="p">.</span><span class="na">configureTestDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-14-10"><span class="w">           </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.junit.vintage:junit-vintage-engine:5.6.0&quot;</span><span class="p">))</span>
+</span><span id="__span-14-11"><span class="w">   </span><span class="p">.</span><span class="na">addTestExcludeFilterSuffixedBy</span><span class="p">(</span><span class="s">&quot;IT&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-14-12"><span class="w">   </span><span class="p">.</span><span class="na">setJavaVersion</span><span class="p">(</span><span class="n">JkJavaVersion</span><span class="p">.</span><span class="na">V8</span><span class="p">)</span>
+</span><span id="__span-14-13"><span class="w">   </span><span class="p">.</span><span class="na">setPublishedModuleId</span><span class="p">(</span><span class="s">&quot;dev.jeka:sample-javaplugin&quot;</span><span class="p">)</span>
+</span><span id="__span-14-14"><span class="w">   </span><span class="p">.</span><span class="na">setPublishedVersion</span><span class="p">(</span><span class="s">&quot;1.0-SNAPSHOT&quot;</span><span class="p">);</span>
+</span></code></pre></div>
+<p>If facade is not sufficient for setting up project build, it's still possible to complete through the main API.
+<code>JkProject</code> instances are highly configurable.</p>
+<p>Here is a pretty complete example inspired from the <a href="https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java">Jeka Build Class</a> .</p>
+<h2 id="third-party-tool-integration">Third Party Tool Integration<a class="headerlink" href="#third-party-tool-integration" title="Permanent link">&para;</a></h2>
+<p>The <code>dev.jeka.core.api.tooling</code> package provides integration with tools developers generally deal with.</p>
+<h3 id="eclipse">Eclipse<a class="headerlink" href="#eclipse" title="Permanent link">&para;</a></h3>
+<p><code>JkEclipseClasspathGenerator</code> and <code>JkEclipseProjectGenerator</code> provides method to generate a proper .classpath and .project file respectively.</p>
+<p><code>JkEclipseClasspathApplier</code> reads information from a .classpath file.</p>
+<h3 id="intellij">Intellij<a class="headerlink" href="#intellij" title="Permanent link">&para;</a></h3>
+<p><code>JkIntellijImlGenerator</code> generates proper .iml files.</p>
+<h3 id="git">Git<a class="headerlink" href="#git" title="Permanent link">&para;</a></h3>
+<p><code>JkGitWrapper</code> wraps common Git commands in a lean API.</p>
+<h3 id="maven">Maven<a class="headerlink" href="#maven" title="Permanent link">&para;</a></h3>
+<p><code>JkMvn</code> wraps Maven command line in a lean API</p>
+<p><code>JkPom</code> reads POM/BOM to extract information like : declared dependencies, dependency management, repos,
+properties, version and artifactId.</p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tracking", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.1e8ae164.min.js"></script>
+      
+    
+  </body>
+</html>
