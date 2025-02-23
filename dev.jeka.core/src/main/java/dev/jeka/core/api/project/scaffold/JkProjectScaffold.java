@@ -168,8 +168,11 @@ public final class JkProjectScaffold extends JkScaffold {
         }
 
         if (kind == Kind.REGULAR) {
+            addJekaPropsContent("\n@project.pack.jarType=FAT\n" +
+                    "@project.pack.detectMainClass=true\n");
             String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
             addFileEntry(BUILD_CLASS_PATH, code);
+
 
         } else if (kind == Kind.PLUGIN) {
             String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");

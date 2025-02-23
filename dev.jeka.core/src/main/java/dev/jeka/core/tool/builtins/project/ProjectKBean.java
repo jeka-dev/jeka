@@ -219,7 +219,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         @JkDepSuggest(versionOnly = true, hint = "uber,all")
         public String shadeJarClassifier;
 
-        @JkDoc("Main class name to include in Manifest. Use 'auto' to automatic discovering.")
+        @JkDoc("Main class name to include in Manifest.")
         public String mainClass;
 
         @JkDoc("If true and no mainClass specified, it will be detected and added to the Manifest.")

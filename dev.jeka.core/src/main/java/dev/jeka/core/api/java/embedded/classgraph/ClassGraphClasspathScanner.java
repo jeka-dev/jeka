@@ -112,32 +112,11 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
 
     @Override
     public List<String> findClassesWithMainMethod(ClassLoader extraClassLoader) {
-        final ClassGraph classGraph = new ClassGraph()
-                .rejectPackages(REJECTED_PACKAGES)
-                .enableClassInfo()
-                .enableMethodInfo()
-                .disableJarScanning()  // only scan non-jar entries
-                .overrideClassLoaders(extraClassLoader)
-                .ignoreParentClassLoaders();
-        final List<String> result;
-        try (ScanResult scanResult = classGraph.scan()) {
-            result = new LinkedList<>();
-            for (final ClassInfo classInfo : scanResult.getAllClasses()) {
-                MethodInfoList methodInfoList = classInfo.getMethodInfo("main");
-                for (MethodInfo methodInfo : methodInfoList) {
-                    if (methodInfo.isPublic() && methodInfo.isStatic() && methodInfo.getParameterInfo().length == 1) {
-                        MethodParameterInfo methodParameterInfo = methodInfo.getParameterInfo()[0];
-                        if (methodParameterInfo.getTypeDescriptor() instanceof ArrayTypeSignature) {
-                            ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeDescriptor();
-                            if ("java.lang.String[]".equals(arrayTypeSignature.toString())) {
-                                result.add(classInfo.getName());
-                            }
-                        }
-                    }
-                }
-            }
+        List<String> result = findClassesWithMainMethod(extraClassLoader, true);
+        if (!result.isEmpty()) {
+            return result;
         }
-        return result;
+        return findClassesWithMainMethod(extraClassLoader, false);
     }
 
     @Override
@@ -269,6 +248,38 @@ class ClassGraphClasspathScanner implements JkInternalClasspathScanner {
             files = scanResult.getClasspathFiles();
         }
         return JkPathSequence.of(JkUtilsPath.toPaths(files));
+    }
+
+    private static List<String> findClassesWithMainMethod(ClassLoader extraClassLoader, boolean onlyPublicClasses) {
+        ClassGraph classGraph = new ClassGraph()
+                .rejectPackages(REJECTED_PACKAGES)
+                .enableClassInfo()
+                .enableMethodInfo()
+                .disableJarScanning()  // only scan non-jar entries
+                .overrideClassLoaders(extraClassLoader)
+                .ignoreParentClassLoaders();
+        if (!onlyPublicClasses) {
+            classGraph = classGraph.ignoreClassVisibility();
+        }
+        final List<String> result;
+        try (ScanResult scanResult = classGraph.scan()) {
+            result = new LinkedList<>();
+            for (final ClassInfo classInfo : scanResult.getAllClasses()) {
+                MethodInfoList methodInfoList = classInfo.getMethodInfo("main");
+                for (MethodInfo methodInfo : methodInfoList) {
+                    if (methodInfo.isPublic() && methodInfo.isStatic() && methodInfo.getParameterInfo().length == 1) {
+                        MethodParameterInfo methodParameterInfo = methodInfo.getParameterInfo()[0];
+                        if (methodParameterInfo.getTypeDescriptor() instanceof ArrayTypeSignature) {
+                            ArrayTypeSignature arrayTypeSignature = (ArrayTypeSignature) methodParameterInfo.getTypeDescriptor();
+                            if ("java.lang.String[]".equals(arrayTypeSignature.toString())) {
+                                result.add(classInfo.getName());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private static boolean inheritOf(ClassInfo classInfo, String parentClassName) {
