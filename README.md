@@ -22,6 +22,13 @@ JeKa is a modern Java build tool designed for simplicity, combining ease of use 
 It targets a generation of Java developers who prefer simple, Java-centric tools over complex XML-based 
 or external DSL-based solutions for building their applications.
 
+## Use Cases
+- **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL.
+- **Use Java for scripting:** Write scripts, devOps pipelines or applications in Java, runnable directly from source code.
+- **Package Java applications as source:** Publish the source code in a Git repo and execute it from everywhere, in JVM or native mode.
+- **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
+- **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating heavy tools.
+
 ## Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration required.
 - **Java-Based Configuration:** Customize builds with simple properties or plain Java code — no XML, No DSL.
@@ -32,13 +39,6 @@ or external DSL-based solutions for building their applications.
 - **Simple Extensions:** Easily integrate third-party tools or handle complex scenarios with minimal effort.
 - **Super Lightweight:** Comes as a zero-dependency JAR of less than 2MB.
 - **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring-Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
-
-## Use Cases
-- **Effortless project builds:** Build traditional or cloud-native Java projects with minimal configuration.
-- **Use Java for scripting:** Write scripts, devOps pipelines or applications in Java, runnable directly from source code.
-- **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
-- **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating heavy tools.
-
 
 ## Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).

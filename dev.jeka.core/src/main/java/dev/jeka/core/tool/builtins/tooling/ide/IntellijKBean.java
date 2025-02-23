@@ -21,6 +21,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.tooling.intellij.JkMiscXml;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
@@ -76,6 +77,7 @@ public final class IntellijKBean extends KBean {
     public void sync() {
         JkLog.startTask("generate-iml");
         Path imlPath = getImlFile();
+        adaptMiscXml();
         generateIml(imlPath);
         JkLog.endTask();
     }
@@ -199,9 +201,9 @@ public final class IntellijKBean extends KBean {
                 .setDownloadSources(this.downloadSources)
                 .setRunbaseDependencies(this.getRunbase().getFullDependencies())
                 .setUseVarPath(useVarPath);
-        if (!JkUtilsString.isBlank(jdkName)) {
+        if (!JkUtilsString.isBlank(jdkName) && !JkMiscXml.ofBaseDir(this.getBaseDir()).exists()) {
             imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
-        } else if (!JkUtilsString.isBlank(suggestedJdkName)) {
+        } else if (!JkUtilsString.isBlank(suggestedJdkName) && !JkMiscXml.ofBaseDir(this.getBaseDir()).exists()) {
             imlGenerator.configureIml(iml -> iml.component.setJdkName(suggestedJdkName));
         }
         this.imlGeneratorCache = imlGenerator;
@@ -220,6 +222,20 @@ public final class IntellijKBean extends KBean {
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
         JkLog.info("Iml file generated at " + imlPath);
+    }
+
+    private void adaptMiscXml() {
+        JkMiscXml miscXml = JkMiscXml.ofBaseDir(getBaseDir());
+        if (!miscXml.exists()) {
+            return;
+        }
+        if (!JkUtilsString.isBlank(jdkName)) {
+            miscXml.setJdk(jdkName);
+            JkLog.verbose("misc.xml modified for JDK project=" + jdkName);
+        } else if (!JkUtilsString.isBlank(suggestedJdkName)) {
+            miscXml.setJdk(suggestedJdkName);
+            JkLog.verbose("misc.xml modified for JDK project=" + suggestedJdkName);
+        }
     }
 
     private void generateImlExec(Path moduleDir) {

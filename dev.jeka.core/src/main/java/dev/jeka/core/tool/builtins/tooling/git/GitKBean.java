@@ -58,7 +58,6 @@ public final class GitKBean extends KBean {
         if (found) {
             git.execCmd("push", "origin", "--delete", tagName);
             git.copy().execCmd("tag", "-d", tagName);
-
         }
         git.execCmd("tag", "-f", tagName);
         git.execCmd("push", "origin", tagName, "-f");
