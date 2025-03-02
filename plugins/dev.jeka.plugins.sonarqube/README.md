@@ -39,7 +39,7 @@ Resources:
 ## Configuration Example
 
 ```properties
-jeka.inject=dev.jeka:sonarqube-plugin
+jeka.classpath=dev.jeka:sonarqube-plugin
 
 # Optional properties
 @sonarqube.scannerVersion=5.0.1.3006
