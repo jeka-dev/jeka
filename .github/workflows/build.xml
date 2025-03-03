@@ -8,11 +8,11 @@
 
 	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="dev.jeka.core/libs/compile-only">
+	<fileset id="libs" dir="core/libs/compile-only">
 		<include name='**/*.jar' />
 	</fileset>
 
-	<fileset id="junit5-libs" dir="dev.jeka.core/libs/test">
+	<fileset id="junit5-libs" dir="core/libs/test">
 		<include name='**/*.jar' />
 	</fileset>
 
@@ -24,25 +24,25 @@
 		<delete dir="${bin}" />
 		<mkdir dir="${bin}" />
 		<javac destdir="${bin}" encoding="UTF-8" includeantruntime="false">
-			<src path="dev.jeka.core/src/main/java" />
+			<src path="core/src/main/java" />
 
 			<!-- needed to include sample builds into quality analysis -->
-			<src path="plugins/dev.jeka.plugins.jacoco" />
-			<src path="plugins/dev.jeka.plugins.sonarqube" />
-			<src path="plugins/dev.jeka.plugins.nexus" />
+			<src path="plugins/plugins.jacoco" />
+			<src path="plugins/plugins.sonarqube" />
+			<src path="plugins/plugins.nexus" />
 
 			<classpath>
 				<fileset refid="libs" />
 			</classpath>
 		</javac>
 		<copy todir="${bin}">
-			<fileset dir="dev.jeka.core/src/main/java" excludes="**/*.java" />
+			<fileset dir="core/src/main/java" excludes="**/*.java" />
 		</copy>
 	</target>
 
 	<target name="run" depends="bootstrap">
 		<property environment="env"/>
-		<java classname="dev.jeka.core.tool.Main" dir="dev.jeka.master" fork="true" failonerror="true">
+		<java classname="dev.jeka.core.tool.Main" dir="." fork="true" failonerror="true">
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>

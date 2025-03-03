@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GBrowserProjectService"><![CDATA[{
+  "tabs": [
+    {
+      "url": "https://dorkag.com/dorkag",
+      "createdAt": "2024-11-17T20:20:32Z"
+    },
+    {
+      "url": "http://localhost:8080/",
+      "name": "localhost:8080",
+      "createdAt": "2024-12-11T23:58:45Z"
+    },
+    {
+      "url": "https://github.com/djeang",
+      "name": "djeang (Jerome Angibaud) · GitHub",
+      "createdAt": "2024-12-14T15:24:18Z"
+    },
+    {
+      "url": "https://hub.docker.com/",
+      "name": "Docker Hub Container Image Library | App Containerization",
+      "createdAt": "2024-12-16T11:08:43Z"
+    },
+    {
+      "url": "http://localhost:8080/index.html",
+      "name": "Spring Native Demo Application",
+      "createdAt": "2025-01-07T10:16:24Z"
+    },
+    {
+      "url": "http://localhost:8080",
+      "createdAt": "2025-01-22T23:57:59Z"
+    }
+  ]
+}]]></component>
+</project>

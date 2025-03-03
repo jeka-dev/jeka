@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="CORE BUILD skip test" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
-    <module name="dev.jeka.core" />
+    <module name="core" />
     <option name="PROGRAM_PARAMETERS" value="project: pack test.skip=true --inspect --clean --stacktrace" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <extension name="net.ashald.envfile">
