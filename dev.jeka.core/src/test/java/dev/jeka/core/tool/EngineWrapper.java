@@ -108,11 +108,11 @@ class EngineWrapper {
         List<String> allKBeans = allKBeanClasses.stream().map(Class::getName).collect(Collectors.toList());
         List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
 
-        DefaultAndLocalKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
+        DefaultAndImplicitKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
 
         return new KBeanResolution(
-                allKBeans, jekaSrcKBeans, defaultAndInitKBean.localKbeanClassName,
-                defaultAndInitKBean.defaultKBeanClassName);
+                allKBeans, jekaSrcKBeans, defaultAndInitKBean.defaultKBeanClassName, defaultAndInitKBean.implicitKbeanClassName
+        );
     }
 
     private KBeanAction.Container parse(String[] args, JkProperties props, KBeanResolution kBeanResolution) {

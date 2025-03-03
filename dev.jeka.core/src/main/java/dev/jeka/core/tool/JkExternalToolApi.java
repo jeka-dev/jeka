@@ -161,14 +161,36 @@ public final class JkExternalToolApi {
         return KBean.nameMatches(className, candidate);
     }
 
+    /**
+     * Resolves and retrieves the path to the KBean class name cache file located in the specified base directory.
+     *
+     * @param baseDir the root directory from which the path will be resolved
+     * @return the resolved path to the KBean class name cache file
+     */
     public static Path getKBeanClassnameCacheFile(Path baseDir) {
         return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASS_NAMES_CACHE_FILE);
     }
 
+    /**
+     * Resolves the path to the KBean classpath cache file located in the specified base directory.
+     *
+     * @param baseDir the base directory from which the path to the KBean classpath cache file will be resolved
+     * @return the resolved path to the KBean classpath cache file
+     */
     public static Path getKBeanClasspathCacheFile(Path baseDir) {
         return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(JkConstants.KBEAN_CLASSPATH_CACHE_FILE);
     }
 
+    /**
+     * Retrieves a list of available command-line options for the annotated class.
+     * Each option is represented as an array of strings, containing the following information:
+     * - The option's longest name.
+     * - The option's description.
+     * - The type name of the option.
+     * - The parameter label of the option.
+     *
+     * @return a list of string arrays, each representing an available option's details
+     */
     public static List<String[]> availableOptions() {
         List<CommandLine.Model.OptionSpec> options =CommandLine.Model.CommandSpec
                 .forAnnotatedObject(new PicocliMainCommand())
@@ -182,6 +204,39 @@ public final class JkExternalToolApi {
                     return new String[] {name, desc, typeName, paramLabel};
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves the default and initialization KBean class names for the specified base directory.
+     *
+     * @param baseDir the base directory from which to read and determine the KBean class names
+     * @return an instance of {@code EngineClasspathCache.DefafaulAndInitKBeans} containing the default
+     *         and initialization KBean class names
+     */
+    public static InitKBeans getDefaultAndInitKBeans(Path baseDir) {
+        KBeanInitStore store = KBeanInitStore.read(baseDir);
+        return InitKBeans.of(store);
+    }
+
+    public static class InitKBeans {
+
+        public final String defaultClassName;
+
+        public final String implicitClassName;
+
+        public final List<String> involvedClassNames;
+
+        InitKBeans(String defaultClassName, String implicitClassName, List<String> involvedClassNames) {
+            this.defaultClassName = defaultClassName;
+            this.implicitClassName = implicitClassName;
+            this.involvedClassNames = involvedClassNames;
+        }
+
+        static InitKBeans of(KBeanInitStore store) {
+            return new InitKBeans(store.defaultKBeanClassName,
+                    store.implicitKBeanClassName,
+                    store.involvedKBeanClassNames);
+        }
     }
 
 
@@ -219,8 +274,6 @@ public final class JkExternalToolApi {
         private Path resolvedClasspathCache(Scope scope) {
             return baseDir.resolve(JkConstants.JEKA_WORK_PATH).resolve(scope.prefix() + RESOLVED_CLASSPATH_FILE);
         }
-
-
 
     }
 }

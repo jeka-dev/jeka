@@ -44,40 +44,34 @@ class KBeanResolution {
     final List<String> localKBeanClassNames;
 
     // fqn of local KBean class. Can be null only if there is no local bean
-    final String localKBeanClassName;
+    final String implicitKBeanClassName;
 
     //fqn of default KBean class. Can be null
     final String defaultKbeanClassName;
 
     KBeanResolution(List<String> allKbeanClassNames,
                     List<String> localKBeanClassNames,
-                    String localKBeanClassName,
-                    String defaultKbeanClassName) {
+                    String defaultKbeanClassName,
+                    String implicitKBeanClassName) {
         this.allKbeanClassNames = allKbeanClassNames;
         this.localKBeanClassNames = localKBeanClassNames;
-        this.localKBeanClassName = localKBeanClassName;
+        this.implicitKBeanClassName = implicitKBeanClassName;
         this.defaultKbeanClassName = defaultKbeanClassName;
     }
 
-    static KBeanResolution of(boolean isMaster, JkProperties properties,
+    static KBeanResolution of(boolean isMasterEngine, JkProperties properties,
                               Path baseDir,
                               List<String> allKbeanClassNames) {
 
         List<String> localKbeanClassNames = localKBean(baseDir, allKbeanClassNames);
-        DefaultAndLocalKBean defaultAndLocalKBean = DefaultAndLocalKBean.of(isMaster, properties,
+        DefaultAndImplicitKBean defaultAndLocalKBean = DefaultAndImplicitKBean.of(isMasterEngine, properties,
                 allKbeanClassNames, localKbeanClassNames);
 
         return new KBeanResolution(
                 allKbeanClassNames,
                 localKbeanClassNames,
-                defaultAndLocalKBean.localKbeanClassName,
-                defaultAndLocalKBean.defaultKBeanClassName);
-    }
-
-    KBeanResolution toSubRunbase(Path baseDir) {
-        List<String> localKbeanClassNames = localKBean(baseDir, allKbeanClassNames);
-        DefaultAndLocalKBean defaultAndLocal = new DefaultAndLocalKBean(allKbeanClassNames, localKbeanClassNames, null, null);
-        return new KBeanResolution(allKbeanClassNames, localKbeanClassNames, defaultAndLocal.localKbeanClassName, null);
+                defaultAndLocalKBean.defaultKBeanClassName, defaultAndLocalKBean.implicitKbeanClassName
+        );
     }
 
     Optional<String> findKbeanClassName(String kbeanName) {
@@ -90,9 +84,9 @@ class KBeanResolution {
                 .findFirst();
     }
 
-    Optional<Class<? extends KBean>> findLocalKBeanClass() {
-        return localKBeanClassName == null ? Optional.empty() : Optional.of(JkClassLoader.ofCurrent()
-                .load(localKBeanClassName));
+    Optional<Class<? extends KBean>> findImplicitKBeanClass() {
+        return implicitKBeanClassName == null ? Optional.empty() : Optional.of(JkClassLoader.ofCurrent()
+                .load(implicitKBeanClassName));
     }
 
     private static List<String> localKBean(Path baseDir, List<String> allKbeans) {

@@ -129,18 +129,18 @@ A _KBean method_ is a specific method defined in a KBean class, designed to be e
 * It must not require any arguments upon invocation.
 * It must not return any value, as indicated by a `void` return type.
 
-## KBean Attributes
+## KBean Fields
 
-A _KBean attribute_ is a `public` instance field of a KBean class. Its value can be injected from the command line or from a property file.  
+A _KBean field_ is a `public` instance field of a KBean class. Its value can be injected from the command line or from a property file.  
 Additionally, it can be a non-public field annotated with `@JkDoc`.
 
-Attributes can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ into the field.
+Fields can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ into the field.
 
 We can also inject value using *jeka.properties
 
 For more details on field accepted types, see the `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
 
-_KBean attributes_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
+_KBean fields_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
 ## Naming KBeans
 
@@ -190,7 +190,7 @@ jeka <kbeanName>: [methodName...] [attributeName=xxx...]
 jeka project: info pack tests.fork=false pack.jarType=FAT sonarqube: run
 ```
 
-You can call multiple methods and set multiple attributes in a single command.
+You can call multiple methods and set multiple fields in a single command.
     
 
 ### From IntelliJ Jeka Plugin
@@ -215,35 +215,39 @@ Invoking the `dev.jeka.core.tool.Main` method with arguments `project:` and `com
 
 
 ## Default KBean
-The _[kbeanName]_ prefix is optional and defaults to:
 
-- The KBean specified by the `jeka.kbean.default` property (if this property is set).
-- If the property is not set, it defaults to the first KBean found in the _jeka-src_ directory, sorted alphabetically by fully qualified class name.
+When invoking Kbean methods or fields, we generaly specify to which KBean this applies:
 
-### Example
-The following command:
+Examples:
+```shell
+jeka project: pack
+jeka myBean: foo bar=1
 ```
-jeka doSomething aProperty=xxxx
-```  
-executes the `doSomething` method of the default KBean.
 
-To explicitly reference the default KBean and avoid ambiguity, use `:` as the prefix.
+If the target KBean is the *default KBean*, then this we don't need to mention the KBean name.
 
-### Examples
-- `jeka : --doc` displays the documentation of the default KBean.
-- `jeka --doc` displays the overall documentation.
+By default, the *default KBean* is the first KBean found in *jeka-src* dir.  For instance, if you have a single KBean 
+`MyBean` in  *jeka-src*, then you can invoke directly the methods and fields as following:
+```shell
+jeka foo bar=1
+```
+If you need to invoke methods of other KBean, in between, you can use the `:` symbol as:
+```shell
+jeka project: pack : foo bar=1
+```
+The above example invokes the `ProjectKBean#pack` method, then the  `MyBean#foo` method.
+
+You can select a specific default KBean, by setting the following property in *jeka-src* or as command-line argument:
+```properties
+jeka.kbean.default=project
+```
+This is quite frequent for project builds to use such setting as it shortens command line and prone usage of 
+`ProjectKBean` standard methods.
 
 
-## KBean Collaboration
+## Invoke KBean from another KBean
 
-There's 2 goals for making KBean collaboration:
-
-1. Invoke a KBean from another one
-2. Configure a KBean from another one
-
-### Invoke KBean from another one
-
-#### Using @JkInject
+### Using @JkInject
 
 ```Java 
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -270,7 +274,7 @@ class Build extends KBean {
 ```
 Both `ProjectKBean` and `MavenKBean` are created and injected into the `Build` KBean during initialization.
 
-#### Using #load and #find methods
+### Using #load and #find methods
 
 As we saw earlier, you can dynamically retrieve a `KBean` using the `KBean#load(Class)` method.  
 This method forces the initialization of the `KBean` if it is not already present.  
@@ -298,12 +302,12 @@ public void cleanup() {
 }
 ```
 
-### Configure a Kbean from another KBean.
+## Configure a Kbean from another KBean.
 
-Wether you want to create a JeKa extension or just configure a build, the technic is 
-the same: create a KBean and configure an existing one.
+Whether you want to create a JeKa plugin or simply configure a build, the approach is the same: 
+create a `KBean` and configure an existing one.
 
-For example, to configure a build, you can create a Build class as:
+For example, to configure a build, you can create a `Build` class as follows:
 
 ```java
 class Build extends KBean {
@@ -339,9 +343,9 @@ class Build extends KBean {
 
 }
 ```
-This KBean defines a `Build` class that customizes the `project` and `maven` KBeans.  
+This KBean defines a `Build` class that customizes the `project` and `maven` KBeans. 
 
-#### Pre-initialize KBeans
+### Pre-initialize KBeans
 
 The `preInit` methods are invoked before the KBean is instantiated; therefore, they must be declared as `static`.  
 These methods are applied to the target KBean immediately after it is instantiated but before it is initialized.  
@@ -350,7 +354,7 @@ This means they are executed prior to the injection of properties or command-lin
 The sole purpose of `preInit` methods is to provide default values, which can later be overridden by properties or command-line arguments.  
 They should not perform further configuration, as the target KBean has not yet been fully initialized when these methods are invoked.
 
-#### Post-initialize KBeans
+### Post-initialize KBeans
 
 The `postInit` methods are invoked only if their respective `KBean` is fully initialized. 
 This occurs after its properties and command-line values have been injected, and its `init()` method has been executed.
@@ -363,6 +367,17 @@ The instance will then be passed to the `postInit` method before invoking the `p
 
 When executing `jeka maven: publish`, the `project` KBean will be implicitly loaded and configured, 
 followed by the same process for the `maven` KBean, before invoking the `publish` method.
+
+### Implicit KBean
+A KBean participates in initialization if any of the following conditions are met:
+
+- Its name is mentioned in the *jeka.properties* file using the format `@[kbeanName]=`, such as `@springboot=`.
+- Its name is included as part of the command-line arguments, for example: `jeka maven:publish`.
+- The KBean is post-initialized by a participating KBean that specifies `@JkPostInit(required=true)`.
+- The KBean is identified as the *implicit* KBean.
+
+The *implicit* KBean is the first KBean found in the *jeka-src* directory using a breadth-first traversal method. 
+This mechanism allows the creation of a KBean that configures, for instance, the `project` KBean without requiring additional configuration.
 
 ## Lifecycle
 

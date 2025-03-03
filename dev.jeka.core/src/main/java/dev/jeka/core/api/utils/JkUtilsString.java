@@ -491,6 +491,14 @@ public final class JkUtilsString {
     }
 
     /**
+     * Converts an empty or blank string to null.
+     * If the input string is non-empty and non-blank, it is returned unchanged.
+     */
+    public static String emptyToNull(String in) {
+        return isBlank(in) ? null : in;
+    }
+
+    /**
      * Wraps the given string character-wise to fit within the specified width.
      */
     public static String wrapStringCharacterWise(String input, int maxLineLength) {

@@ -64,8 +64,8 @@ public class CmdLineParserTest {
         return new KBeanResolution(
                 kbeanClasses,
                 Collections.emptyList(),
-                null,
-                null);
+                null, null
+        );
     }
 
 

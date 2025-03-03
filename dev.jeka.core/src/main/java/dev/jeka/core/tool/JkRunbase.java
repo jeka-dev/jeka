@@ -322,12 +322,12 @@ public final class JkRunbase {
     void init(KBeanAction.Container cmdLineActionContainer) {
 
         // Add initKBean
-        Class<? extends KBean> localKBeanClass = kbeanResolution.findLocalKBeanClass().orElse(null);
+        Class<? extends KBean> localKBeanClass = kbeanResolution.findImplicitKBeanClass().orElse(null);
         KBeanAction.Container actions = cmdLineActionContainer.withInitBean(localKBeanClass);
 
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize JkRunbase with \n" + actions.toColumnText());
-            JkLog.debug("Local KBean class name: " + kbeanResolution.localKBeanClassName);
+            JkLog.debug("Local KBean class name: " + kbeanResolution.implicitKBeanClassName);
             JkLog.debug("Local KBean class: " + localKBeanClass);
             JkLog.debug("All KBean classes: " + kbeanResolution.allKbeanClassNames);
             JkLog.debug("All local KBean classes: " + kbeanResolution.localKBeanClassNames);
@@ -442,6 +442,14 @@ public final class JkRunbase {
 
     KBean getBean(Class<?> kbeanClass) {
         return beans.get(kbeanClass.getName());
+    }
+
+    KBeanInitStore getInitStore() {
+        return new KBeanInitStore(
+                kbeanResolution.defaultKbeanClassName,
+                kbeanResolution.implicitKBeanClassName,
+                new LinkedList<>(this.beans.keySet())
+        );
     }
 
     static JkProperties constructProperties(Path baseDir) {

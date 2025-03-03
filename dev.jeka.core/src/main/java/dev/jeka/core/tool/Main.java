@@ -108,7 +108,6 @@ public class Main {
             // erasing line, there is one excessive back-delete.
             JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
             if (LogSettings.INSTANCE.inspect) {
-                engine.resolveKBeans();
                 logRuntimeInfoBase(engine, props);
             }
 
@@ -152,7 +151,8 @@ public class Main {
             }
 
             // Init runbase
-            engine.initRunbase(actionContainer);
+            JkRunbase runbase = engine.initRunbase(actionContainer);
+
 
             // -- Handle doc ([kbean]: --doc)
             if (docKbeanName != null) {
@@ -169,6 +169,7 @@ public class Main {
 
             // Run
             engine.run();
+            runbase.getInitStore().store(baseDir);  // Store init state in file for external tools
 
             logOutro(startTime);
 
@@ -279,7 +280,7 @@ public class Main {
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {
         JkLog.info(Jk2ColumnsText.of(18, 150)
-                .add("Local KBean", engine.resolveKBeans().localKBeanClassName)
+                .add("Local KBean", engine.resolveKBeans().implicitKBeanClassName)
                 .add("Default KBean", engine.resolveKBeans().defaultKbeanClassName)
                 .toString());
         JkLog.info("Properties         :");

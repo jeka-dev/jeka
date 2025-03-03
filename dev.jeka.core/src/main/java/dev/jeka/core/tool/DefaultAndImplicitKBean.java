@@ -16,30 +16,40 @@
 
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 
 // non-private for testing purpose
-class DefaultAndLocalKBean {
-
-    final String localKbeanClassName;
+class DefaultAndImplicitKBean {
 
     final String defaultKBeanClassName;
 
-    DefaultAndLocalKBean(List<String> kbeanClassNames,
-                         List<String> localKbeanClassNames,
-                         String defaultBeanName,
-                         String localBeanName) {
+    final String implicitKbeanClassName;
+    
+    DefaultAndImplicitKBean(String defaultKBeanClassName, String implicitKBeanClassName) {
+        this.defaultKBeanClassName = defaultKBeanClassName;
+        this.implicitKbeanClassName = implicitKBeanClassName;
+
+    }
+
+    DefaultAndImplicitKBean(List<String> kbeanClassNames,
+                            List<String> localKbeanClassNames,
+                            String defaultKBeanClassName,
+                            String implicitKBeanName) {
 
         // First get the local KBean
-        if (localBeanName != null) {
-            localKbeanClassName = firstMatchingClassname(localKbeanClassNames, localBeanName).orElseThrow(
+        if (implicitKBeanName != null) {
+            implicitKbeanClassName = firstMatchingClassname(localKbeanClassNames, implicitKBeanName).orElseThrow(
                     () -> {
                         String message = String.format("No Kbean class found in jeka-src matching %s name.",
-                                localBeanName);
+                                implicitKBeanName);
                         if (LogSettings.INSTANCE.debug) {
                             message = message + "\nLocal available KBeans are: " + localKbeanClassNames;
                         }
@@ -47,32 +57,31 @@ class DefaultAndLocalKBean {
                     }
             );
         } else {
-            localKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(null);
+            implicitKbeanClassName = localKbeanClassNames.stream().findFirst().orElse(null);
         }
 
         // Get the default KBean
-        String defaultKBeanName = BehaviorSettings.INSTANCE.defaultKbeanName.orElse(defaultBeanName);
+        String defaultKBeanName = BehaviorSettings.INSTANCE.defaultKbeanName.orElse(defaultKBeanClassName);
         if (defaultKBeanName == null) {
-            defaultKBeanClassName = localKbeanClassName;
+            this.defaultKBeanClassName = implicitKbeanClassName;
         } else {
-            defaultKBeanClassName = firstMatchingClassname(kbeanClassNames, defaultKBeanName)
+            this.defaultKBeanClassName = firstMatchingClassname(kbeanClassNames, defaultKBeanName)
                     .orElse(localKbeanClassNames.stream().findFirst().orElse(null));
-            JkLog.debug("Default KBean Class Name : " + defaultKBeanClassName);
-            if (defaultKBeanClassName == null) {
+            JkLog.debug("Default KBean Class Name : " + this.defaultKBeanClassName);
+            if (this.defaultKBeanClassName == null) {
                 JkLog.warn("Specified default KBean '%s' not found among KBeans %s", defaultKBeanName, kbeanClassNames);
             }
         }
     }
 
-    static DefaultAndLocalKBean of(boolean isMaster, JkProperties properties, List<String> kbeanClassNames, List<String> localKbeanClassNames) {
+    static DefaultAndImplicitKBean of(boolean isMasterEngine, JkProperties properties, List<String> kbeanClassNames, List<String> localKbeanClassNames) {
         String defaultKBeanName = Optional.ofNullable(properties.get(JkConstants.KBEAN_DEFAULT_PROP))
-                                .orElse(properties.get(JkConstants.DEFAULT_KBEAN_PROP));
+                .orElse(properties.get(JkConstants.DEFAULT_KBEAN_PROP));  // for backward compatibility
 
-        String localKBeanName = isMaster ? Optional.ofNullable(properties.get(JkConstants.KBEAN_LOCAL_PROP))
+        String implicitKBeanName = isMasterEngine ? Optional.ofNullable(properties.get(JkConstants.KBEAN_LOCAL_PROP))
                 .orElse(null) : null;
 
-        return new DefaultAndLocalKBean(kbeanClassNames, localKbeanClassNames, defaultKBeanName, localKBeanName);
-
+        return new DefaultAndImplicitKBean(kbeanClassNames, localKbeanClassNames, defaultKBeanName, implicitKBeanName);
     }
 
     private static Optional<String> firstMatchingClassname(List<String> classNames, String candidate) {

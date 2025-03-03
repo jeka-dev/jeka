@@ -289,8 +289,8 @@ class Engine {
         runbase.run(actionContainer);
     }
 
-    DefaultAndLocalKBean defaultAndInitKbean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
-        return DefaultAndLocalKBean.of(this.isMaster, this.properties, kbeanClassNames, localKbeanClassNames);
+    DefaultAndImplicitKBean defaultAndInitKbean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
+        return DefaultAndImplicitKBean.of(this.isMaster, this.properties, kbeanClassNames, localKbeanClassNames);
     }
 
     JkRunbase getRunbase() {
