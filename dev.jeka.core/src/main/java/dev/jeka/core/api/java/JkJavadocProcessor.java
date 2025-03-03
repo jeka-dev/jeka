@@ -44,7 +44,7 @@ public final class JkJavadocProcessor {
 
     private final List<String> options = new LinkedList<>();
 
-    private Boolean displayOutput;
+    //private Boolean displayOutput;
 
 
     /**
@@ -75,16 +75,6 @@ public final class JkJavadocProcessor {
         JkUtilsIterable.addAllWithoutDuplicate(this.options, options);
         return this;
     }
-
-    public Boolean getDisplayOutput() {
-        return displayOutput;
-    }
-
-    public JkJavadocProcessor setDisplayOutput(Boolean displayOutput) {
-        this.displayOutput = displayOutput;
-        return this;
-    }
-
     /**
      * Actually processes and creates the javadoc files.
      */
@@ -121,7 +111,7 @@ public final class JkJavadocProcessor {
         if (!Files.exists(javadocExe)) {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
-        boolean verbose = JkUtilsObject.firstNonNull(displayOutput, JkLog.isVerbose());
+        boolean verbose = JkLog.isVerbose();
         JkLog.verbose("%s", javadocExe);
         LinkedHashSet packages = computePackages(srcDirs);
         if (packages.isEmpty()) {

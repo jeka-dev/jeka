@@ -149,22 +149,19 @@ public final class JkJavaCompilerToolChain {
         }
         JkUtilsPath.createDirectories(outputDir);
 
-        if (JkLog.isVerbose()) {
-            JkLog.startTask("[VERBOSE] compile");
-            JkLog.verbose("sources      : " + compileSpec.getSources());
-            JkLog.verbose("class dir    : " + compileSpec.getOutputDir());
-            JkLog.verbose("source count : " + compileSpec.getSources().count(Integer.MAX_VALUE, false));
-        }
-        if (JkLog.isDebug()) {
-            JkLog.debug("with options : " );
-            JkLog.debug(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
-        }
+        JkLog.verboseStartTask("run-compiler");
+        JkLog.verbose("sources      : " + compileSpec.getSources());
+        JkLog.verbose("class dir    : " + compileSpec.getOutputDir());
+        JkLog.verbose("source count : " + compileSpec.getSources().count(Integer.MAX_VALUE, false));
+
+        JkLog.debug("with options : " );
+        JkLog.debug(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
+
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(targetVersion)
                 .orElse(compileSpec.minJavaVersion());
         final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
-        if (JkLog.isVerbose()) {
-            JkLog.endTask("Compilation " + (result ? "completed successfully" : "failed"));
-        }
+        JkLog.verbose("Compilation " + (result ? "completed successfully" : "failed"));
+        JkLog.verboseEndTask();
         return result;
     }
 
@@ -359,16 +356,6 @@ public final class JkJavaCompilerToolChain {
             javac = javaHome.getParent().resolve("bin/javac");
         }
         return javac;
-    }
-
-    private static void loadOptionsIfNeeded(JkJavaCompileSpec compileSpec) {
-        if (JkLog.isVerbose()) {
-            JkLog.startTask("compile");
-            JkLog.info("sources      : " + compileSpec.getSources());
-            JkLog.info("to           : " + compileSpec.getOutputDir());
-            JkLog.info("with options : " );
-            JkLog.info(JkUtilsString.readableCommandAgs("    ", compileSpec.getOptions()));
-        }
     }
 
     public static class JkJdks {

@@ -69,7 +69,7 @@ class MasterBuild extends KBean {
     // ------ Slave projects
 
     @JkInject("../dev.jeka.core")
-    CoreBuild coreBuild;
+    ProjectKBean coreProject;
 
     @JkInject("../plugins/dev.jeka.plugins.sonarqube")
     SonarqubeBuild sonarqubeBuild;
@@ -111,14 +111,14 @@ class MasterBuild extends KBean {
         System.out.println("Effective version        : " + effectiveVersion);
         System.out.println("==============================================");
 
-        coreBuild.runIT = true;
+        coreProject.load(CoreBuild.class).runIT = true;
         getImportedKBeans().load(ProjectKBean.class, false).forEach(this::applyToSlave);
         getImportedKBeans().load(MavenKBean.class, false).forEach(
                 mavenKBean -> mavenKBean.customizePublication(this::customize));
 
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
-        jacocoForCore.configureAndApplyTo(coreBuild.load(ProjectKBean.class).project);
+        jacocoForCore.configureAndApplyTo(coreProject.project);
 
     }
 
@@ -131,7 +131,13 @@ class MasterBuild extends KBean {
         importedProjectKBeans.forEach(projectKBean -> {
             JkLog.startTask("package %s", projectKBean);
             projectKBean.clean();
+            if (!projectKBean.test.skip) {
+                projectKBean.test();
+            }
             projectKBean.pack();
+            if (!projectKBean.test.skip) {
+                projectKBean.e2eTest();
+            }
             JkLog.endTask();
         });
         JkLog.endTask();
@@ -175,7 +181,7 @@ class MasterBuild extends KBean {
             JkLog.endTask();
         }
         if (getRunbase().getProperties().get("sonar.host.url") != null) {
-            coreBuild.load(SonarqubeKBean.class).run();
+            coreProject.load(SonarqubeKBean.class).run();
         }
 
         // Copy dir to and augment documentation
@@ -215,7 +221,8 @@ class MasterBuild extends KBean {
 
     @JkDoc("Clean Pack jeka-core")
     public void buildCore() {
-        coreBuild.cleanPack();
+        coreProject.clean();
+        coreProject.pack();
     }
 
     @JkDoc("Run samples")

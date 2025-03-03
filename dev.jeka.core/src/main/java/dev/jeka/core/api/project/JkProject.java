@@ -17,11 +17,9 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
 import dev.jeka.core.api.file.JkPathSequence;
@@ -36,7 +34,6 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.JkRunbase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -185,6 +182,18 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     public final JkProjectTesting testing;
 
     /**
+     * Object responsible for running end-to-end tests. It simply consists in a runnable container where users
+     * can register e2e tests and run it a later phase.
+     */
+    public final JkRunnableContainer e2eTesting = new JkRunnableContainer("test-end-to-end");
+
+    /**
+     * Object responsible for running quality checkers. It simply consists in a runnable container where users
+     * can register quality-checkers and run it a later phase.
+     */
+    public final JkRunnableContainer qualityChecking = new JkRunnableContainer("check-quality");
+
+    /**
      * Function to modify the {@link JkIdeSupport} used for configuring IDEs.
      */
     public Function<JkIdeSupport, JkIdeSupport> ideSupportModifier = x -> x;
@@ -222,10 +231,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     private LocalAndTxtDependencies cachedTextAndLocalDeps;
 
     private URL dependencyTxtUrl;
-
-    private final JkRunnables e2eTesters = JkRunnables.of().setLogTasks(true);
-
-    private final JkRunnables qualityCheckers = JkRunnables.of().setLogTasks(true);
 
     private JkProject() {
         artifactLocator = artifactLocator();
@@ -639,64 +644,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         return this;
     }
 
-    /**
-     * Registers an end-to-end tester to this project.
-     *
-     * @param testerName The name of the tester to be added. This name is mainly used
-     *                   to be displayed on console output when the tester runs.
-     * @param runnable   The runnable implementation of the tester to be executed.
-     */
-    public JkProject addE2eTester(String testerName, Runnable runnable) {
-        this.e2eTesters.append(testerName, runnable);
-        return this;
-    }
-
-    /**
-     * Executes all registered end-to-end testers for this project in the order of their execution chain.
-     * Each tester is represented by a {@link Runnable} and executed sequentially.
-     */
-    public void e2eTest() {
-        JkLog.startTask("e2e-test");
-        if (e2eTesters.getSize() == 0) {
-            JkLog.info("No registered end-to-end testers found.");
-        } else if (e2eTesters.getSize() == 1) {
-            JkLog.info(e2eTesters.getRunnableNames().get(0));
-            e2eTesters.getRunnable(0).run();
-        } else {
-            e2eTesters.run();
-        }
-        JkLog.endTask();
-    }
-
-    /**
-     * Registers a quality checker to this project.
-     *
-     * @param checkerName The name of the quality checker to be added. This name is mainly used
-     *                   to be displayed on console output when the qulity check runs.
-     * @param runnable   The runnable implementation of the quality-checker to be executed.
-     */
-    public JkProject addQualityChecker(String checkerName, Runnable runnable) {
-        this.qualityCheckers.append(checkerName, runnable);
-        return this;
-    }
-
-    /**
-     * Executes all registered quality-checkers for this project in the order of their execution chain.
-     * Each checker is represented by a {@link Runnable} and executed sequentially.
-     */
-    public void checkQuality() {
-        JkLog.startTask("quality-check");
-        if (qualityCheckers.getSize() == 0) {
-            JkLog.info("No registered quality-checkers found.");
-        } else if (qualityCheckers.getSize() == 1) {
-            JkLog.info(qualityCheckers.getRunnableNames().get(0));
-            qualityCheckers.getRunnable(0).run();
-        } else {
-            qualityCheckers.run();
-        }
-        JkLog.endTask();
-    }
-
     LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
             return cachedTextAndLocalDeps;
@@ -880,4 +827,38 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         };
     }
 
+    public static class JkRunnableContainer {
+
+        private final String containerName;
+
+        private final JkRunnables runnables = JkRunnables.of().setLogTasks(true);
+
+        public JkRunnableContainer(String containerName) {
+            this.containerName = containerName;
+        }
+
+        public JkRunnableContainer add(String name, Runnable runnable) {
+            runnables.append(name, runnable);
+            return this;
+        }
+
+        /**
+         * Executes all registered runners for this project in the order of their execution chain.
+         * Each tester is represented by a {@link Runnable} and executed sequentially.
+         */
+        public void run() {
+            JkLog.startTask("name");
+            if (runnables.getSize() == 0) {
+                JkLog.info("No registered end-to-end testers found.");
+            } else if (runnables.getSize() == 1) {
+                JkLog.info(runnables.getRunnableNames().get(0));
+                runnables.getRunnable(0).run();
+            } else {
+                runnables.run();
+            }
+            JkLog.endTask();
+        }
+
+
+    }
 }

@@ -19,7 +19,6 @@ public class JkJavadocMakerRunner {
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         Iterable<Path> classpath = JkPathTree.of(srcDir.resolve("jeka/libs/compile+po").normalize()).getFiles();
         JkJavadocProcessor.of()
-                .setDisplayOutput(true)
                 .make(classpath, sources, out);
     }
 }

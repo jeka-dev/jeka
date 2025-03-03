@@ -178,12 +178,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     @JkDoc("Runs the registered end-to-end tests")
     public void e2eTest() {
-        this.project.e2eTest();
+        this.project.e2eTesting.run();
     }
 
     @JkDoc("Runs the quality checkers")
     public void checkQuality() {
-        this.project.checkQuality();
+        this.project.qualityChecking.run();
     }
 
     @Override

@@ -43,8 +43,19 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Run main method to create full distrib.
- * For publishing in OSSRH the following options must be set : -ossrhPwd=Xxxxxx -pgp#secretKeyPassword=Xxxxxxx
+ * Executes the main method to generate the full distribution.
+ * <p>
+ * When publishing to OSSRH, ensure the following options are provided as system properties:
+ * <ul>
+ *   <li><code>-ossrhPwd=&lt;your_ossrh_password&gt;</code> - The password for OSSRH authentication.</li>
+ *   <li><code>-pgp#secretKeyPassword=&lt;your_pgp_secret_password&gt;</code> - The password for the PGP secret key.</li>
+ * </ul>
+ * <p>
+ * Example:
+ * <pre>{@code
+ * java -DossrhPwd=MyPassword -Dpgp#secretKeyPassword=MyPGPSecretKeyPassword -cp ... Main
+ * }</pre>
+ * </p>
  */
 public class CoreBuild extends KBean {
 
@@ -52,49 +63,32 @@ public class CoreBuild extends KBean {
 
     private static final JkArtifactId SDKMAN_FILE_ID = JkArtifactId.of("sdkman", "zip");
 
-    // This method has to be run in dev.jeka.core (this module root) working directory
-    public static void main(String[] args) {
-        JkInit.kbean(CoreBuild.class, args).cleanPack();
-    }
-
-    public static class RunBuildAndIT {
-        public static void main(String[] args) {
-            CoreBuild coreBuild = JkInit.kbean(CoreBuild.class, args, "-runIT");
-            coreBuild.projectKBean.pack();
-        }
-    }
-
-    @JkInject
-    private ProjectKBean projectKBean;
-
     public boolean runIT = false;
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
 
-        project
-                .setJvmTargetVersion(JkJavaVersion.V8)
-                .setModuleId("dev.jeka:jeka-core")
-                .packActions
+        project.setJvmTargetVersion(JkJavaVersion.V8);
+        project.setModuleId("dev.jeka:jeka-core");
+        project.packActions
                     .append("include-embedded-jar", this::doPackWithEmbeddedJar)
                     .append("create-distrib", this::doDistrib)
                     .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
-
         project.compilerToolChain.setForkCompiler(true);
-        project.compilation
-                    .addJavaCompilerOptions("-Xlint:none", "-g")
-                    .layout
-                        .setMixResourcesAndSources();
+
+        project.compilation.addJavaCompilerOptions("-Xlint:none", "-g");
+        project.compilation.layout.setMixResourcesAndSources();
 
         project.testing.compilation.layout.setMixResourcesAndSources();
         project.testing.testSelection.addExcludePatternsIf(!runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
-        project.packaging
-                .setMainClass("dev.jeka.core.tool.Main")
-                .javadocProcessor
-                    .setDisplayOutput(false)
-                    .addOptions("-notimestamp");
+        project.packaging.setMainClass("dev.jeka.core.tool.Main");
+        project.packaging.javadocProcessor.addOptions("-notimestamp");
+
+        project.e2eTesting.add("test-scaffold", () -> new ScaffoldTester().run());
+        project.e2eTesting.add("test-docker", () -> new DockerTester().run());
+        project.e2eTesting.add("test-remote", () -> new ShellRemoteTester().run());
     }
 
     @JkPostInit
@@ -110,15 +104,13 @@ public class CoreBuild extends KBean {
                     .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
     }
 
-    public void cleanPack() {
-        projectKBean.project.clean().pack();
-    }
-
+    // Call from gitHub actions
+    @JkDoc("Publish javadoc on the Github page")
     public void addJavadocToGhPages() {
         String gitUrl = "https://github.com/jeka-dev/jeka.git";
         String ghPageBranch = "gh-pages";
 
-        Path ghPageDir = projectKBean.project.getOutputDir().resolve("gh-pages");
+        Path ghPageDir = load(ProjectKBean.class).project.getOutputDir().resolve("gh-pages");
         JkPathTree.of(ghPageDir).deleteContent();
         JkUtilsPath.createDirectories(ghPageDir);
 
@@ -126,36 +118,15 @@ public class CoreBuild extends KBean {
         JkGit git = JkGit.of(ghPageDir).setFailOnError(true).setLogCommand(true);
         git.execCmdLine("clone --depth 1 --branch %s %s .", ghPageBranch, gitUrl);
         JkPathTree.of(ghPageDir.resolve("javadoc")).importDir(javadocPath, StandardCopyOption.REPLACE_EXISTING);
-
-        // commit-push will be done by a specific github actions
-        /*
-        git
-                .execCmdLine("add .")
-                .execCmdLine("config user.name  jeka-bot")
-                .execCmdLine("config user.email jeka-bot@github-action.com")
-                .execCmdLine("commit -m update-javadoc --allow-empty")
-                .execCmdLine("push");
-                */
-    }
-
-    void testScaffolding()  {
-        JkLog.startTask("Run scaffold tests");
-        new ScaffoldTester().run();
-        JkLog.endTask();
-    }
-
-    private Path distribFolder() {
-        return projectKBean.project.getOutputDir().resolve("distrib");
     }
 
     private void doDistrib() {
-        JkProject project = projectKBean.project;
+        JkProject project = load(ProjectKBean.class).project;
         Path distribFile = project.artifactLocator.getArtifactPath(DISTRIB_FILE_ID);
         project.packaging.createSourceJar(); // Sources should be included in distrib
 
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
-        JkLog.startTask("Create distrib");
 
         distrib
             .importFiles(getBaseDir().toAbsolutePath().normalize().getParent().resolve("LICENSE"));
@@ -168,22 +139,15 @@ public class CoreBuild extends KBean {
 
         JkPathFile.of(binDir.resolve("jeka")).setPosixExecPermissions();
         JkPathFile.of(binDir.resolve("jeka-update")).setPosixExecPermissions();
-        if (!project.testing.isSkipped() && runIT) {
-            testScaffolding();
-            new DockerTester().run();
-            new ShellRemoteTester().run();
-
-        }
         JkLog.info("Distribution created in " + distrib.getRoot());
         zipDistrib(distrib.getRoot(), distribFile);
         JkLog.info("Distribution zipped in " + distribFile);
-        JkLog.endTask();
     }
 
     // We create a specific archive for sdkman to conform to the constraints
     // that the zip must have a root entry having the same name than the archive.
     private void doSdkmanDistrib() {
-        JkProject project = projectKBean.project;
+        JkProject project = load(ProjectKBean.class).project;
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         String entryName = "jeka-core-" + project.getVersion() + "-sdkman";
         Path sdkmanDistribDir = getOutputDir().resolve(entryName);
@@ -195,6 +159,10 @@ public class CoreBuild extends KBean {
         JkProcess.of("zip", "-r", zipFile.getFileName().toString(), entryName)
                 .setWorkingDir(getOutputDir())
                 .exec();
+    }
+
+    private Path distribFolder() {
+        return load(ProjectKBean.class).project.getOutputDir().resolve("distrib");
     }
 
     // see example here https://www.tabnine.com/code/java/methods/org.apache.commons.compress.archivers.zip.ZipArchiveEntry/setUnixMode
@@ -231,7 +199,7 @@ public class CoreBuild extends KBean {
     }
 
     private void doPackWithEmbeddedJar() {
-        JkProject project = projectKBean.project;
+        JkProject project = load(ProjectKBean.class).project;
         Path targetJar = project.artifactLocator.getMainArtifactPath();
 
         // Main jar
@@ -259,11 +227,5 @@ public class CoreBuild extends KBean {
         // Cleanup
         JkUtilsPath.deleteIfExists(embeddedJar);
     }
-
-    public void print() {
-        System.out.println("\uD83D\uDE800Booting JeKa...");
-    }
-
-
 
 }
