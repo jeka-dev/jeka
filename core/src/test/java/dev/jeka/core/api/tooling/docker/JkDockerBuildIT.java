@@ -70,6 +70,9 @@ public class JkDockerBuildIT {
 
     @Test
     public void javaFromScratch() throws URISyntaxException {
+        if (!JkDocker.of().isPresent()) {
+            return;
+        }
         final Path certFile = Paths.get(JkDockerBuildIT.class.getResource("my-cert.jks").toURI());
         final Path jarFile = Paths.get(JkDockerBuildIT.class.getResource("hello-jeka.jar").toURI());
         JkLog.setDecorator(JkLog.Style.INDENT);

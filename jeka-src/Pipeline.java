@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-import dev.jeka.core.CoreBuild;
 import dev.jeka.core.DockerImageMaker;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
@@ -37,7 +36,6 @@ import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
-import github.Github;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -47,7 +45,7 @@ import java.util.List;
 @JkDep("plugins/plugins.sonarqube/jeka-output/classes")
 @JkDep("plugins/plugins.jacoco/jeka-output/classes")
 @JkDep("plugins/plugins.nexus/jeka-output/classes")
-class MasterBuild extends KBean {
+class Pipeline extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
 
@@ -96,7 +94,7 @@ class MasterBuild extends KBean {
 
     private final String effectiveVersion;
 
-    MasterBuild() {
+    Pipeline() {
         effectiveVersion = versionFromGit.getVersion();
     }
 
@@ -111,7 +109,6 @@ class MasterBuild extends KBean {
         System.out.println("Effective version        : " + effectiveVersion);
         System.out.println("==============================================");
 
-        coreProject.load(CoreBuild.class).runIT = true;
         getImportedKBeans().load(ProjectKBean.class, false).forEach(this::applyToSlave);
         getImportedKBeans().load(MavenKBean.class, false).forEach(
                 mavenKBean -> mavenKBean.customizePublication(this::customize));
@@ -123,7 +120,7 @@ class MasterBuild extends KBean {
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
-    public void make() throws IOException {
+    public void run() throws IOException {
 
         // Build core project then plugins
         JkLog.startTask("build-core-and-plugins");
@@ -347,12 +344,12 @@ class MasterBuild extends KBean {
      * Build + test + publish
      */
     public static void main(String[] args) throws Exception {
-        JkInit.kbean(MasterBuild.class, args).make();
+        JkInit.kbean(Pipeline.class, args).run();
     }
 
     static class BuildFast {
         public static void main(String[] args) {
-            JkInit.kbean(MasterBuild.class, args).buildFast();
+            JkInit.kbean(Pipeline.class, args).buildFast();
         }
     }
 

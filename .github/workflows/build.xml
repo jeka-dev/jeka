@@ -46,7 +46,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="masterBuild: make -i --stacktrace" />
+			<arg line="pipeline: run --inspect --stacktrace" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
