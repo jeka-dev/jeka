@@ -36,7 +36,7 @@ public class DockerImageMaker {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         Path jekaDist = Paths.get("jeka-output/distrib/bin");
         if (!Files.exists(jekaDist)) {
-            jekaDist = Paths.get("dev.jeka.core").resolve(jekaDist);
+            jekaDist = Paths.get("core").resolve(jekaDist);
         }
         if(!Files.exists(jekaDist)) {
             jekaDist = Paths.get("..").resolve(jekaDist).normalize();
