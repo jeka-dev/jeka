@@ -1,13 +1,12 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("javadoc")
-public class JkExternalModuleTest {
+class JkExternalModuleTest {
 
     @SuppressWarnings("unused")
     @Test
-    public void testOf() {
+    void testOf() {
         JkDependency dep;
         dep = JkCoordinateDependency.of("org.hibernate:hibernate-core:3.0.1.Final");
         dep = JkCoordinateDependency.of("org.hibernate:hibernate-core:3.0.1+");

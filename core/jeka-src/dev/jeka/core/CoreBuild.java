@@ -25,7 +25,6 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -63,7 +62,6 @@ public class CoreBuild extends KBean {
 
     private static final JkArtifactId SDKMAN_FILE_ID = JkArtifactId.of("sdkman", "zip");
 
-    public boolean runIT = false;
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
@@ -81,7 +79,6 @@ public class CoreBuild extends KBean {
         project.compilation.layout.setMixResourcesAndSources();
 
         project.testing.compilation.layout.setMixResourcesAndSources();
-        project.testing.testSelection.addExcludePatternsIf(!runIT, JkTestSelection.IT_INCLUDE_PATTERN);
 
         project.packaging.setMainClass("dev.jeka.core.tool.Main");
         project.packaging.javadocProcessor.addOptions("-notimestamp");

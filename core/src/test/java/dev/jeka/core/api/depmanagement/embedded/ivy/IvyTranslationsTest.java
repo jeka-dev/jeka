@@ -7,19 +7,21 @@ import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 
 /**
  * Created by angibaudj on 08-03-17.
  */
-public class IvyTranslationsTest {
+class IvyTranslationsTest {
 
     private static final JkCoordinate OWNER = JkCoordinate.of("ownerGroup:ownerName:ownerVersion");
 
     @Test
-    public void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn1dependencies() {
+    void toResolveModuleDescriptor_2identicalModuleWithDistinctClassifiers_leadsIn1dependencies() {
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and(null, JkCoordinateDependency.of(JkCoordinate.of("aGroup:aName:1.0").withClassifier("linux")))
                 .and(null, "bGroup:bName:win:exe:1.0");
@@ -36,7 +38,7 @@ public class IvyTranslationsTest {
     }
 
     @Test
-    public void toResolveModuleDescriptor_2identicalModuleIdWithDistinctClassifiers_leadsIn1dependencyWithTwoArtifacts() {
+    void toResolveModuleDescriptor_2identicalModuleIdWithDistinctClassifiers_leadsIn1dependencyWithTwoArtifacts() {
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and(null, JkCoordinateDependency.of(JkCoordinate.of("aGroup:aName:linux:exe:1.0")))
                 .and(null, JkCoordinateDependency.of(JkCoordinate.of("aGroup:aName:1.0")));
@@ -50,8 +52,7 @@ public class IvyTranslationsTest {
         assertEquals("linux", linuxArtifact.getExtraAttribute("classifier"));
         DependencyArtifactDescriptor defaultArtifact = dependencyDescriptors[0].getAllDependencyArtifacts()[1];
         assertEquals("jar", defaultArtifact.getType());
-        assertEquals(null, defaultArtifact.getExtraAttribute("classifier"));
+        assertNull(defaultArtifact.getExtraAttribute("classifier"));
     }
-
 
 }

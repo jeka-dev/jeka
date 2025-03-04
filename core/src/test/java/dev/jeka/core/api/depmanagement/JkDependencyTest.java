@@ -1,19 +1,18 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import java.nio.file.Paths;
 
-@SuppressWarnings("javadoc")
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class JkDependencyTest {
 
 
     @Test
     public void ofCoordinateDescription_providesCoordinateDeps() {
-        Assert.assertEquals(JkCoordinateDependency.class,
+       assertEquals(JkCoordinateDependency.class,
                 JkDependency.of(Paths.get(""), "commons-lang:commons-lang:2.63").getClass());
-        Assert.assertEquals(JkCoordinateDependency.class,
+       assertEquals(JkCoordinateDependency.class,
                 JkDependency.of(Paths.get(""), "dev.jeka:a-jeka-module").getClass());
     }
 

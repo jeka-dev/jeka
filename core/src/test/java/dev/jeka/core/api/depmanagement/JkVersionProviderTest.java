@@ -1,14 +1,15 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.jupiter.api.Test;
 
-public class JkVersionProviderTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+class JkVersionProviderTest {
 
     @Test
-    public void withExactAndWildCard_returnExact() {
+    void withExactAndWildCard_returnExact() {
         JkVersionProvider provider = JkVersionProvider.of()
                 .and("foo:bar", "1.0.0")
                 .and("foo:*", "2.0.0");

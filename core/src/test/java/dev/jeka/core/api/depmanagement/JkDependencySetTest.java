@@ -1,14 +1,13 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Assert;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class JkDependencySetTest {
+class JkDependencySetTest {
 
     @Test
-    public void normalised_takeHighest_ok() {
+    void normalised_takeHighest_ok() {
         JkDependencySet dependencySet = JkDependencySet.of()
                 .and("my.group:module:2.0")
                     .withLocalExclusions("a_transitive:dependency")
@@ -17,18 +16,18 @@ public class JkDependencySetTest {
                 .and("my.group:module")
                 .and("other:other")
                 .normalised(JkCoordinate.ConflictStrategy.TAKE_HIGHEST);
-        assertEquals("2.8", dependencySet.get("my.group:module").getCoordinate().getVersion().toString());
+        Assertions.assertEquals("2.8", dependencySet.get("my.group:module").getCoordinate().getVersion().toString());
     }
 
     @Test
-    public void and_modules_ok() {
+    void and_modules_ok() {
         final JkDependencySet deps = JkDependencySet.of()
                 .and("hibernate:hjmlm:1212.0")
                 .and("spring:spring:6.3")
                 .and(secondaryDeps())
                 .and("klklkl:lklk:mlml")
                 .and("hhhhh:ll:ppp");
-        Assert.assertEquals(secondaryDeps().getEntries().size() + 4, deps.getEntries().size());
+        Assertions.assertEquals(secondaryDeps().getEntries().size() + 4, deps.getEntries().size());
     }
 
     private static JkDependencySet secondaryDeps() {

@@ -1,26 +1,26 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class JkCoordinateTest {
+class JkCoordinateTest {
 
     @Test
-    public void testTestEquals() {
+    void testTestEquals() {
         String description = "mygroup:myname:myVersion";
         assertEquals(JkCoordinate.of(description), JkCoordinate.of(description));
     }
 
     @Test
-    public void testOfDescription() {
+    void testOfDescription() {
         assertEquals(JkVersion.UNSPECIFIED, JkCoordinate.of("group:name:classifier::").getVersion());
         assertEquals(JkVersion.UNSPECIFIED, JkCoordinate.of("group:name::extension:").getVersion());
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         String desc = "org.lwjgl:lwjgl-bom::pom:3.3.1";
         JkCoordinate coordinate = JkCoordinate.of(desc);
         assertEquals(desc, coordinate.toString());

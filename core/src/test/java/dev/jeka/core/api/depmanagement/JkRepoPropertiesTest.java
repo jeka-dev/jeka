@@ -1,26 +1,27 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.system.JkProperties;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JkRepoPropertiesTest {
+class JkRepoPropertiesTest {
 
     private static final String URL = "https://myurl";
 
     @Test
-    public void getPublishRepository_default_mavenCentral() {
+    void getPublishRepository_default_mavenCentral() {
         Map<String, String> props = new HashMap<>();
         assertEquals(JkRepo.ofMavenCentral().getUrl(), of(props).getDownloadRepos().getRepos().get(0).getUrl());
     }
 
     @Test
-    public void getPublishRepository_downloadPropOnly_present() {
+    void getPublishRepository_downloadPropOnly_present() {
         Map<String, String> props = new HashMap<>();
         props.put("jeka.repos.download", URL);
         JkRepo repo = of(props).getDownloadRepos().getRepos().get(0);
@@ -28,7 +29,7 @@ public class JkRepoPropertiesTest {
     }
 
     @Test
-    public void getPublishRepository_downloadPropWithCredential_present() {
+    void getPublishRepository_downloadPropWithCredential_present() {
         String name = "myname";
         String pwd = "myPwd";
         String realm = "myRealm";
@@ -51,7 +52,7 @@ public class JkRepoPropertiesTest {
     }
 
     @Test
-    public void getPublishRepository_downloadPropWithNames_present() {
+    void getPublishRepository_downloadPropWithNames_present() {
         String name = "myname";
         String pwd = "myPwd";
         String realm = "myRealm";
@@ -77,14 +78,14 @@ public class JkRepoPropertiesTest {
     }
 
     @Test
-    public void testToColumnText() {
+    void testToColumnText() {
         Map<String, String> map = new HashMap<>();
         System.out.println(JkProperties.ofMap(map).toColumnText(1, 1, false).toString());
     }
 
     @Test
-    @Ignore("Does not work in GH action cause name values GH_TOKEN")
-    public void getPublishRepository_downloadAliases_ok() {
+    @Disabled("Does not work in GH action cause name values GH_TOKEN")
+    void getPublishRepository_downloadAliases_ok() {
         String name = "myname";
         String pwd = "myPwd";
         Map<String, String> props = new HashMap<>();

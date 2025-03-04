@@ -1,16 +1,16 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JkVersionTest {
+
+class JkVersionTest {
 
     @Test
-    public void semanticVersionComparator() {
+    void semanticVersionComparator() {
         Comparator<String> comp = JkVersion.VERSION_COMPARATOR;
         assertTrue(comp.compare("1", "2") < 0);
         assertTrue(comp.compare("1.0.1.RELEASE", "1.0.1.RC1") > 0);
@@ -21,11 +21,11 @@ public class JkVersionTest {
         assertTrue(comp.compare("1.0.0", "1.0.0-RC1") > 0);
         assertTrue(comp.compare("1.0", "1.0.1") < 0);
         assertTrue(comp.compare("1.0.0", "1.0.0.1") < 0);
-        assertTrue(comp.compare("1.0.0", "1.0.0.0") == 0);
+        assertEquals(0, comp.compare("1.0.0", "1.0.0.0"));
     }
 
     @Test
-    public void testIsDigitOnly() {
+    void testIsDigitOnly() {
         assertTrue(JkVersion.of("12.3.21").isDigitsOnly());
         assertFalse(JkVersion.of("36.0.6.RC10").isDigitsOnly());
     }

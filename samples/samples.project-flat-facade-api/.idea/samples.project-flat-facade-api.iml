@@ -147,7 +147,9 @@
                     <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
-                <SOURCES/>
+                <SOURCES>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.apiguardian/apiguardian-api/jars/apiguardian-api-1.1.2-sources.jar!/"/>
+                </SOURCES>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="TEST" type="module-library">
@@ -192,7 +194,9 @@
                     <root url="jar://$JEKA_CACHE_DIR$/repo/org.projectlombok/lombok/jars/lombok-1.18.30.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
-                <SOURCES/>
+                <SOURCES>
+                    <root url="jar://$JEKA_CACHE_DIR$/repo/org.projectlombok/lombok/jars/lombok-1.18.30-sources.jar!/"/>
+                </SOURCES>
             </library>
         </orderEntry>
         <orderEntry exported="" scope="RUNTIME" type="module-library">
