@@ -3,7 +3,7 @@
 The Git API provides classes for conveniently working with Git in Java.
 The classes are part of the [`dev.jeka.core.api.tooling.git` package](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/tooling/git).
 
-## [`JkGit` class](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/tooling/git/JkGit.java)
+## [`JkGit` class](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/tooling/git/JkGit.java)
 
 The `JkGit` class extends `JkProcess`, which means it inherits methods that make process execution easier.
 

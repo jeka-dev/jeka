@@ -9,17 +9,16 @@
             <sourceFolder type="java-resource" url="file://$MODULE_DIR$/res"/>
             <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/test"/>
             <sourceFolder type="java-test-resource" url="file://$MODULE_DIR$/test-res"/>
-            <sourceFolder url="file://$MODULE_DIR$/jeka-output/generated-sources/java/protobuf"/>
             <excludeFolder url="file://$MODULE_DIR$/jeka-output"/>
             <excludeFolder url="file://$MODULE_DIR$/.jeka-work"/>
             <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
         </content>
         <orderEntry type="inheritedJdk"/>
         <orderEntry forTests="false" type="sourceFolder"/>
-        <orderEntry exported="" scope="COMPILE" type="module-library">
+        <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://$JEKA_CACHE_DIR$/repo/com.google.protobuf/protobuf-java/jars/protobuf-java-3.21.12.jar!/"/>
+                    <root url="jar://C:/Users/jerom/IdeaProjects/jeka/plugins/plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -28,24 +27,11 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/plugins/plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin.jar!/"/>
-                </CLASSES>
-                <JAVADOC>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/plugins/plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin-javadoc.jar!/"/>
-                </JAVADOC>
-                <SOURCES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/plugins/plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin-sources.jar!/"/>
-                </SOURCES>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="TEST" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core.jar!/"/>
+                    <root url="jar://C:/Users/jerom/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core-sources.jar!/"/>
+                    <root url="jar://C:/Users/jerom/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core-sources.jar!/"/>
                 </SOURCES>
             </library>
         </orderEntry>

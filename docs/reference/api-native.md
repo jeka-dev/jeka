@@ -1,6 +1,6 @@
 # Native API
 
-The **Native API** offers a [`JkNativeCompilation` class](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/tooling/nativ/JkNativeCompilation.java) that creates an executable file from compiled classes or JARs. 
+The **Native API** offers a [`JkNativeCompilation` class](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/tooling/nativ/JkNativeCompilation.java) that creates an executable file from compiled classes or JARs. 
 
 An easy way to use it is by passing a `JkProject` when instantiating.
 This setup prepares everything for native compilation. The class automatically downloads GraalVM, 

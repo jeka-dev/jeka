@@ -62,7 +62,7 @@ project1
 The repositories used to download and publish artifacts can be defined using _properties_.
 The download repositories are set using the `jeka.repos.download` property, while the publish repository is defined using `jeka.repos.publish`.
 
-Use [JkRepoFromProperties class](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkRepoFromProperties.java)
+Use [JkRepoFromProperties class](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkRepoFromProperties.java)
 to get the repositories defined by _properties_.
 
 !!! Note

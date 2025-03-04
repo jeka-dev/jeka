@@ -3,7 +3,7 @@
 <!-- autogen-doc -->
 
 
-[`MavenKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/tooling/maven/MavenKBean.java) provides ability to publish artifacts on a 
+[`MavenKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/maven/MavenKBean.java) provides ability to publish artifacts on a 
 Maven repository. The artifacts are those produces by *project* or *base* Kbeans. 
 It also provides convenient mean to migrate from Maven prajects.
 

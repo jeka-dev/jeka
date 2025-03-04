@@ -13,10 +13,10 @@
       <module fileurl="file://$PROJECT_DIR$/plugins/plugins.springboot/.idea/plugins.springboot.iml" filepath="$PROJECT_DIR$/plugins/plugins.springboot/.idea/plugins.springboot.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.baseapp/.idea/samples.baseapp.iml" filepath="$PROJECT_DIR$/samples/samples.baseapp/.idea/samples.baseapp.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.baselib/samples.baselib.iml" filepath="$PROJECT_DIR$/samples/samples.baselib/samples.baselib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/samples.basic/samples.basic.iml" filepath="$PROJECT_DIR$/samples/samples.basic/samples.basic.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/samples.dependers/samples.dependers.iml" filepath="$PROJECT_DIR$/samples/samples.dependers/samples.dependers.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/samples.jacoco/samples.jacoco.iml" filepath="$PROJECT_DIR$/samples/samples.jacoco/samples.jacoco.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/samples.junit5/samples.junit5.iml" filepath="$PROJECT_DIR$/samples/samples.junit5/samples.junit5.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.basic/.idea/samples.basic.iml" filepath="$PROJECT_DIR$/samples/samples.basic/.idea/samples.basic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.dependers/.idea/samples.dependers.iml" filepath="$PROJECT_DIR$/samples/samples.dependers/.idea/samples.dependers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.jacoco/.idea/samples.jacoco.iml" filepath="$PROJECT_DIR$/samples/samples.jacoco/.idea/samples.jacoco.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.junit5/.idea/samples.junit5.iml" filepath="$PROJECT_DIR$/samples/samples.junit5/.idea/samples.junit5.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.project-api/.idea/samples.project-api.iml" filepath="$PROJECT_DIR$/samples/samples.project-api/.idea/samples.project-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.project-app/.idea/samples.project-app.iml" filepath="$PROJECT_DIR$/samples/samples.project-app/.idea/samples.project-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.project-flat-facade-api/.idea/samples.project-flat-facade-api.iml" filepath="$PROJECT_DIR$/samples/samples.project-flat-facade-api/.idea/samples.project-flat-facade-api.iml" />

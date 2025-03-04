@@ -171,7 +171,7 @@ JkDependencySet deps = JkDependencySet.of()
 #### DependencySet 
 
 A _dependencySet_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
-war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
+war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
 
 _dependencySet_ also defines :
 
@@ -412,7 +412,7 @@ Jeka features high-level and low-level classes to deal with Java builds and JVM 
 ### Java Tool Base API
 
 Base classes are used as foundation for implementing Jeka high-level build API but they can be used directly in a low level build description.
-These classes belong to `dev.jeka.core.api.java` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java).
+These classes belong to `dev.jeka.core.api.java` [package](https://github.com/jerkar/jeka/tree/master/core/src/main/java/dev/jeka/core/api/java).
 
 * `JkClassLoader` and `JkUrlClassloader` Wrap a `java.lang.ClassLoader` adding convenient methods and classpath scanning capability.
 
@@ -434,7 +434,7 @@ Jeka testing API mostly hides *Junit Platform*. For most of the cases, you won't
 against *Junit-Platform* API to launch tests with Jeka. Nevertheless, Jeka allows users to
 code against *Junit-Platform* for fine-tuning.
 
-The API classes all belongs to `dev.jeka.core.api.java.testing` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/java/testing).
+The API classes all belongs to `dev.jeka.core.api.java.testing` [package](https://github.com/jerkar/jeka/tree/master/core/src/main/java/dev/jeka/core/api/java/testing).
 
 * `JkTestProcessor` This is the entry point to launch tests. Tests are executed using the
   current classloader classpath + extra class path mentioned in `#launch` method arguments.

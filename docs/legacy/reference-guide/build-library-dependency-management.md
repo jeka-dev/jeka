@@ -122,7 +122,7 @@ JkDependencySet deps = JkDependencySet.of()
 ## Dependency Set 
 
 A _dependency set_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
-war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
+war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
 
 _dependencySet_ also defines :
 

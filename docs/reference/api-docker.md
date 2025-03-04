@@ -68,7 +68,7 @@ EXPOSE 8080
 - The non-root user has been automatically added as part of the Dockerfile.
 - Jar files from the filesystem have been imported into the *[build context]/imported-files* directory.
 
-For more details, refer to the [Javadoc](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/tooling/docker/JkDockerBuild.java).
+For more details, refer to the [Javadoc](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/tooling/docker/JkDockerBuild.java).
 
 ### `JkDockerJvmBuild`
 

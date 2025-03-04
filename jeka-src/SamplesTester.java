@@ -45,7 +45,7 @@ class SamplesTester extends JekaCommandLineExecutor {
         // Protobuf seems failed on last macos ship
         if (!(JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64())) {
             // Test with injecting plugin dep via jeka.properties file
-            run("samples.protobuf", "-ivc project: test pack");
+            run("samples.protobuf", "-ivc project: test pack -cp=../../plugins/plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin.jar");
         }
 
         // Test with injecting dep via @JkDep(...)

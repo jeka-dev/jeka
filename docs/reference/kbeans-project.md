@@ -3,7 +3,7 @@
 <!-- autogen-doc -->
 
 
-[`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
+[`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
 acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
 This _KBean_ provides core methods for fundamental build tasks, including **compiling**, **testing**, and **packaging**.
 

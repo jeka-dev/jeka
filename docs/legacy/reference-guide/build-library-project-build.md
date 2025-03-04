@@ -144,7 +144,7 @@ JkProject.of().flatFacade()
 If the façade is not sufficient to set up the project build, you can use the main API.
 `JkProject` instances are highly configurable.
 
-Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/dev.jeka.core/jeka/def/dev/jeka/core/CoreBuild.java) .
+Here is a pretty complete example inspired from the [Jeka Build Class](https://github.com/jerkar/jeka/blob/master/core/jeka/def/dev/jeka/core/CoreBuild.java) .
 
 ### Dependencies
 

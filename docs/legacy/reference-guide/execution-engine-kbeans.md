@@ -67,7 +67,7 @@ Attributes can be annotated with `@JkInjectProperty("my.prop.name")` to inject t
 
 For more details on field accepted types, see `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
 
-_KBean properties_ can also be nested composite objects, see example in `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
+_KBean properties_ can also be nested composite objects, see example in `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
 ### Naming KBeans
 
