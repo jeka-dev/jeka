@@ -18,18 +18,19 @@ package dev.jeka.core.api.java;
 
 import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
 import dev.jeka.core.api.depmanagement.JkRepo;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
+
 import dev.jeka.core.api.utils.JkUtilsPath;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 
 import java.nio.file.Path;
 
-public class JkJarPackerTest {
+class JkJarPackerTest {
 
     @Test
-    @Ignore // Classloader issue prevents to run it in the test suite.
-    public void testShade() {
+    @Disabled // Classloader issue prevents to run it in the test suite.
+    void testShade() {
         Path vincerDomJar = JkCoordinateFileProxy.of(JkRepo.ofMavenCentral().toSet(),
                 "com.github.djeang:vincer-dom:1.4.1").get();
         Path jsonSimpleJar = JkCoordinateFileProxy.of(JkRepo.ofMavenCentral().toSet(),

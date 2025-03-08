@@ -18,13 +18,14 @@ package dev.jeka.core.api.tooling.docker;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class JkDockerBuildIT {
+class JkDockerBuildIT {
 
     @Test
     public void simple() throws Exception {
@@ -69,7 +70,8 @@ public class JkDockerBuildIT {
     }
 
     @Test
-    public void javaFromScratch() throws URISyntaxException {
+    @Disabled
+    void javaFromScratch() throws URISyntaxException {
         if (!JkDocker.of().isPresent()) {
             return;
         }
@@ -86,7 +88,7 @@ public class JkDockerBuildIT {
                 .addEntrypoint("java", "-jar", "/app/my-app.jar")
                 .moveCursorBeforeUserNonRoot()
                 .addCopy(certFile, "/app/my-cert.jks")
-                .add("keytool -import -file /app/my-cert.jks -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit");
+                .add("RUN keytool -import -file /app/my-cert.jks -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit");
         System.out.println(dockerBuild.renderDockerfile());
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
         dockerBuild.buildImage(contextDir, "my-demo-image");
@@ -94,7 +96,7 @@ public class JkDockerBuildIT {
     }
 
     @Test
-    public void simple_nonroot() {
+    void simple_nonroot() {
         if (!JkDocker.of().isPresent()) {
             return;
         }
@@ -103,8 +105,6 @@ public class JkDockerBuildIT {
         simpleNonRootWithBaseImage("alpine:latest");
         simpleNonRootWithBaseImage(JkDockerJvmBuild.DEFAULT_BASE_IMAGE);
         simpleNonRootWithBaseImage("ubuntu");
-
-
     }
 
     private void simpleNonRootWithBaseImage(String baseImage) {

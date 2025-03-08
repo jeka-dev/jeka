@@ -20,17 +20,17 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsIterable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-public class JkDockerNativeTest {
+class JkDockerNativeTest {
 
     @Test
-    public void runDefault() throws Exception {
+    void runDefault() throws Exception {
 
         List<Path> cp = new LinkedList<>();
         cp.add( Paths.get(JkDockerBuildIT.class.getResource("hello-jeka.jar").toURI()) );
@@ -47,7 +47,7 @@ public class JkDockerNativeTest {
     }
 
     @Test
-    public void distroless() throws Exception {
+    void distroLess() throws Exception {
 
         List<Path> cp = JkUtilsIterable.listOf(Paths.get("lib-a"),
                 Paths.get("lib-b"), Paths.get("lib-c"),  Paths.get("/toto/lib-c"));

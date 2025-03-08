@@ -5,7 +5,7 @@ import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 
-public class JkDependencyResolverRunner {
+class JkDependencyResolverRunner {
 
     public static void main(String[] args) {
         JkRepo repo = JkRepo.ofMavenCentral().copy();

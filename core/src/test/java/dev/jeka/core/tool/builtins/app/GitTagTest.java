@@ -16,8 +16,8 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.tool.builtins.app.GitTag;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 

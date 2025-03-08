@@ -113,7 +113,10 @@ public final class JkTestProcessor {
 
     public final JkEngineBehavior engineBehavior;
 
+    private final Supplier<JkPathSequence> testClasspath;
+
     public final JkRunnables preActions = JkRunnables.of();
+
 
     /**
      * Collection of <i>Runnables</i> to be executed after the test processor has run.
@@ -134,12 +137,17 @@ public final class JkTestProcessor {
     private Supplier<JkRepoSet> repoSetSupplier = () ->
             JkRepoProperties.of(JkProperties.ofStandardProperties()).getDownloadRepos();
 
-    private JkTestProcessor() {
-        engineBehavior = new JkEngineBehavior();
+    private JkTestProcessor(Supplier<JkPathSequence> testClasspath) {
+        this.engineBehavior = new JkEngineBehavior();
+        this.testClasspath = testClasspath;
     }
 
-    public static JkTestProcessor of() {
-        return new JkTestProcessor();
+    public static JkTestProcessor of(Supplier<JkPathSequence> testClasspath) {
+        return new JkTestProcessor(testClasspath);
+    }
+
+    public static JkTestProcessor of(JkPathSequence testClasspath) {
+        return new JkTestProcessor(() -> testClasspath);
     }
 
     public static boolean isEngineTestPresent() {
@@ -193,7 +201,7 @@ public final class JkTestProcessor {
      * Launches the specified test set with the underlying junit-platform. The classloader running the tests includes
      * the classpath of the current classloader plus the specified one.
      */
-    public JkTestResult launch(JkPathSequence extraTestClasspath, JkTestSelection testSelection) {
+    public JkTestResult launch(JkTestSelection testSelection) {
         if (!testSelection.hasTestClasses()) {
             JkLog.info("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
             return JkTestResult.of();
@@ -203,9 +211,9 @@ public final class JkTestProcessor {
         JkLog.startTask("execute-tests");
         JkLog.verbose(testSelection.toString());
         if (forkingProcess == null) {
-            result = launchInClassloader(extraTestClasspath, testSelection);
+            result = launchInClassloader(testSelection);
         } else {
-            result = launchInForkedProcess(extraTestClasspath, testSelection);
+            result = launchInForkedProcess(testSelection);
         }
         postActions.run();
         boolean success = result.getFailures().isEmpty();
@@ -278,8 +286,8 @@ public final class JkTestProcessor {
         return result;
     }
 
-    private JkTestResult launchInClassloader(JkPathSequence testClasspath, JkTestSelection testSelection) {
-        List<Path> classpath = computeClasspath(testClasspath);
+    private JkTestResult launchInClassloader(JkTestSelection testSelection) {
+        List<Path> classpath = computeClasspath(testClasspath.get());
         if (JkLog.isDebug()) {
             JkLog.debug("------------ Test Classpath --------------");
             classpath.forEach(path -> JkLog.debug(path.toString()));
@@ -288,7 +296,7 @@ public final class JkTestProcessor {
         return JkInternalJunitDoer.instance(classpath).launch(engineBehavior, testSelection);
     }
 
-    private JkTestResult launchInForkedProcess(JkPathSequence testClasspath, JkTestSelection testSelection) {
+    private JkTestResult launchInForkedProcess(JkTestSelection testSelection) {
         Path serializedResultPath = JkUtilsPath.createTempFile("testResult-", ".ser");
         Args args = new Args();
         args.resultFile = serializedResultPath.toAbsolutePath().toString();
@@ -298,7 +306,7 @@ public final class JkTestProcessor {
         JkUtilsIO.serialize(args, serializedArgPath);
         String arg = serializedArgPath.toAbsolutePath().toString();
         List<Path> classpath = JkClassLoader.ofCurrent().getClasspath()
-                .andPrepend(computeClasspath(testClasspath)).withoutDuplicates().getEntries();
+                .andPrepend(computeClasspath(testClasspath.get())).withoutDuplicates().getEntries();
         if (JkLog.isDebug()) {
             JkLog.debug("------------ Test Classpath --------------");
             classpath.forEach(path -> JkLog.debug(path.toString()));

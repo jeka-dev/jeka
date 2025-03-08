@@ -17,19 +17,19 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.utils.JkUtilsString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CmdLineParserTest {
+class CmdLineParserTest {
 
     @Test
-    public void nestedEnum_ok() {
+    void nestedEnum_ok() {
         List<KBeanAction> kBeanActions = parse(
                 "project: scaffold scaffold.kind=REGULAR layout.style=SIMPLE").toList();
         kBeanActions.forEach(System.out::println);

@@ -1,13 +1,14 @@
 package dev.jeka.core.api.system;
 
-import org.junit.Ignore;
-import org.junit.Test;
 
-public class JkLogTest {
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+class JkLogTest {
 
     @Test
-    @Ignore
-    public void testMultiThread() throws Exception {
+    @Disabled
+    void testMultiThread() throws Exception {
         JkLog.setDecorator(JkLog.Style.INDENT);
         JkLog.info("toto");
         Runnable runnable = () -> {

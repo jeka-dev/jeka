@@ -1,11 +1,10 @@
 package dev.jeka.core.api.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JkUtilsObjectTest {
+class JkUtilsObjectTest {
 
     private static class Foo {
 
@@ -62,7 +61,6 @@ public class JkUtilsObjectTest {
 
         JkUtilsObject.copyNonNullPublicFieldsInto(originalBar, overriderBar);
         assertEquals("coco", originalBar.aString);
-        assertTrue(1 == originalBar.aFoo.aField);
-
+        assertEquals(1, (int) originalBar.aFoo.aField);
     }
 }

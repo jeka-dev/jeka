@@ -1,13 +1,13 @@
 package dev.jeka.core.api.java;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JkJavaCompileSpecTest {
+class JkJavaCompileSpecTest {
 
     @Test
-    public void setSourceVersion() {
+    void setSourceVersion() {
         JkJavaCompileSpec spec = JkJavaCompileSpec.of();
         spec.setSourceVersion("8");
         spec.setSourceVersion("8");   // set it twice but only 1 entry should remain

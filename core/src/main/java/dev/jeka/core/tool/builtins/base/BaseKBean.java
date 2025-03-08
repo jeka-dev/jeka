@@ -138,9 +138,9 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
                     "to the classpath for testing.");
         }
         JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getAppClasses().getRoot());
-        JkTestResult testResult = JkTestProcessor.of()
+        JkTestResult testResult = JkTestProcessor.of(JkClassLoader.ofCurrent().getClasspath())
                 .setForkingProcess(true)
-                .launch(JkClassLoader.ofCurrent().getClasspath(), testSelection);
+                .launch(testSelection);
         if (!testResult.getFailures().isEmpty()) {
             System.exit(1);
         }

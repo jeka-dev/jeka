@@ -103,7 +103,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
         project
             .testing
                 .testSelection
-                    .addIncludePatterns(JkTestSelection.IT_INCLUDE_PATTERN);
+                    .addIncludePatterns(JkTestSelection.IT_PATTERN);
 
         // Control on test process
         project

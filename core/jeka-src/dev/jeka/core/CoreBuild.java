@@ -25,6 +25,8 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -42,19 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Executes the main method to generate the full distribution.
- * <p>
- * When publishing to OSSRH, ensure the following options are provided as system properties:
- * <ul>
- *   <li><code>-ossrhPwd=&lt;your_ossrh_password&gt;</code> - The password for OSSRH authentication.</li>
- *   <li><code>-pgp#secretKeyPassword=&lt;your_pgp_secret_password&gt;</code> - The password for the PGP secret key.</li>
- * </ul>
- * <p>
- * Example:
- * <pre>{@code
- * java -DossrhPwd=MyPassword -Dpgp#secretKeyPassword=MyPGPSecretKeyPassword -cp ... Main
- * }</pre>
- * </p>
+ * Defines build for <i>core</i> module..
  */
 public class CoreBuild extends KBean {
 
@@ -62,6 +52,15 @@ public class CoreBuild extends KBean {
 
     private static final JkArtifactId SDKMAN_FILE_ID = JkArtifactId.of("sdkman", "zip");
 
+    @JkDoc("If true, Integration tests, including some Docker tests will be included in junit tests.")
+    public boolean runIT = true;
+
+    @JkDoc("Creates and publishes Jeka Docker image on Dockerhub")
+    public void publishJekaDockerImage() {
+        DockerImageMaker.createImage();
+        String version = load(ProjectKBean.class).project.getVersion().getValue();
+        DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));
+    }
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
@@ -78,14 +77,14 @@ public class CoreBuild extends KBean {
         project.compilation.addJavaCompilerOptions("-Xlint:none", "-g");
         project.compilation.layout.setMixResourcesAndSources();
 
+        project.testing.testSelection.addExcludePatterns(JkTestSelection.E2E_PATTERN);
+        project.testing.testSelection.addExcludePatternsIf(!runIT, JkTestSelection.IT_PATTERN);
         project.testing.compilation.layout.setMixResourcesAndSources();
 
         project.packaging.setMainClass("dev.jeka.core.tool.Main");
         project.packaging.javadocProcessor.addOptions("-notimestamp");
 
-        project.e2eTesting.add("test-scaffold", () -> new ScaffoldTester().run());
-        project.e2eTesting.add("test-docker", () -> new DockerTester().run());
-        project.e2eTesting.add("test-remote", () -> new ShellRemoteTester().run());
+        project.e2eTesting.add("", this::runE2eTests);
     }
 
     @JkPostInit
@@ -223,6 +222,17 @@ public class CoreBuild extends KBean {
 
         // Cleanup
         JkUtilsPath.deleteIfExists(embeddedJar);
+    }
+
+    private void runE2eTests() {
+        JkProject project = load(ProjectKBean.class).project;
+        JkTestSelection selection = project.testing.createDefaultTestSelection()
+                .addIncludePatterns(JkTestSelection.E2E_PATTERN);
+        JkTestProcessor testProcessor = project.testing.createDefaultTestProcessor();
+        testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
+        testProcessor
+               .launch(selection)
+               .assertSuccess();
     }
 
 }

@@ -2,14 +2,14 @@ package dev.jeka.core.integrationtest.javaproject;
 
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ImlGeneratorTest {
+class ImlGeneratorTest {
 
     private static final String VERSION = "2.2.0.RELEASE";
 
     @Test
-    public void generateIml_springbootProject_ok() {
+    void generateIml_springbootProject_ok() {
 
         JkProject project = JkProject.of();
         project.compilation.dependencies

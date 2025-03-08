@@ -16,27 +16,26 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.api.tooling.git.JkGit;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class TagBucketTest {
+class TagBucketTest {
 
     List<String> tags = Arrays.asList("0.0.1", "0.0.2", "0.0.3", "latest");
 
     @Test
-    public void testHighest() {
+    void testHighest() {
         String highest = TagBucket.ofValues(tags).getHighestVersion();
-        Assert.assertEquals("0.0.3", highest);
+        Assertions.assertEquals("0.0.3", highest);
     }
 
     @Test
     public void testHigherThan() {
         List<String> higherList = TagBucket.ofValues(tags).getHighestVersionsThan("0.0.1");
-        Assert.assertEquals(Arrays.asList("0.0.2", "0.0.3"), higherList);
+        Assertions.assertEquals(Arrays.asList("0.0.2", "0.0.3"), higherList);
     }
 
 }

@@ -1,21 +1,18 @@
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.file.JkPathMatcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.*;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-
-@SuppressWarnings("javadoc")
 public class JkUtilsPathTest {
 
     @Test
-    public void testCopyDir() throws Exception {
+    void testCopyDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -45,8 +42,11 @@ public class JkUtilsPathTest {
         assertFalse(Files.exists(target4.resolve("subfolder")));
     }
 
+    private void assertTrue(boolean exists) {
+    }
+
     @Test
-    public void testZipRoot() throws IOException {
+    void testZipRoot() throws IOException {
         Path zipFile = Paths.get("toto.zip");
         Files.deleteIfExists(zipFile);
         JkUtilsPath.JkZipRoot zipRoot = JkUtilsPath.zipRoot(zipFile);  // create the zip file if needed

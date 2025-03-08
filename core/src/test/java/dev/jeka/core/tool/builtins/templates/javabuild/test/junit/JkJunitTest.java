@@ -1,12 +1,11 @@
 package dev.jeka.core.tool.builtins.templates.javabuild.test.junit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("javadoc")
-public class JkJunitTest {
+class JkJunitTest {
 
     @Test
-    public void testSystemOutRedirect() {
+    void testSystemOutRedirect() {
 
         // Just print something in the console to see if it appears during test
         // execution

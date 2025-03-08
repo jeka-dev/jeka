@@ -5,7 +5,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -16,13 +16,13 @@ import java.util.Set;
 
 import static dev.jeka.core.api.depmanagement.JkPopularLibs.GUAVA;
 import static dev.jeka.core.api.depmanagement.JkPopularLibs.JAVAX_SERVLET_API;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class QualifiedDependenciesResolutionIT {
+class QualifiedDependenciesResolutionIT {
 
     @Test
-    public void resolve_qualifierWith2MasterConfigurations_ok() {
+    void resolve_qualifierWith2MasterConfigurations_ok() {
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile, runtime", "com.github.djeang:vincer-dom:1.3.0");
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -31,7 +31,7 @@ public class QualifiedDependenciesResolutionIT {
     }
 
     @Test
-    public void resolve_computedIdeDependencies_ok() {
+    void resolve_computedIdeDependencies_ok() {
         JkDependencySet compile = JkDependencySet.of()
                 .and(GUAVA.toCoordinate("19.0"))
                 .and (JAVAX_SERVLET_API.toCoordinate(JkVersion.UNSPECIFIED))
@@ -46,7 +46,7 @@ public class QualifiedDependenciesResolutionIT {
     }
 
     @Test
-    public void resolve_moduleAndFilesDependencies_resultTreePreservesOrder() throws URISyntaxException {
+    void resolve_moduleAndFilesDependencies_resultTreePreservesOrder() throws URISyntaxException {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         Path dep0File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource( "dep1").toURI());
@@ -103,7 +103,7 @@ public class QualifiedDependenciesResolutionIT {
     }
 
     @Test
-    public void resolve_manyModules_resultTreeIsCorrect() {
+    void resolve_manyModules_resultTreeIsCorrect() {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("compile, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.22.RELEASE")
@@ -151,7 +151,7 @@ public class QualifiedDependenciesResolutionIT {
     }
 
     @Test
-    public void resolve_manyModules_artifactCountIsCorrect() {
+    void resolve_manyModules_artifactCountIsCorrect() {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
                 .and("comple, runtime", "org.springframework.boot:spring-boot-starter-web:1.5.22.RELEASE")

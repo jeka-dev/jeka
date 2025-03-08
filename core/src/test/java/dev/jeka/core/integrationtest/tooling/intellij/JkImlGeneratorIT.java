@@ -6,7 +6,7 @@ import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorIT;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -17,10 +17,10 @@ import java.nio.file.Paths;
 /**
  * Created by angibaudj on 21-09-17.
  */
-public class JkImlGeneratorIT {
+class JkImlGeneratorIT {
 
     @Test
-    public void generate() throws Exception {
+    void generate() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
 
         final Path base = top.resolve("base");

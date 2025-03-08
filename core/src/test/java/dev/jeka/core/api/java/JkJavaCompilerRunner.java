@@ -5,8 +5,7 @@ import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Paths;
 
-@SuppressWarnings("javadoc")
-public class JkJavaCompilerRunner {
+class JkJavaCompilerRunner {
 
     public static void main(String[] args) {
         JkLog.setDecorator(JkLog.Style.INDENT);

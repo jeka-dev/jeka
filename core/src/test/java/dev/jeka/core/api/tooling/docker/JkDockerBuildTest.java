@@ -16,14 +16,13 @@
 
 package dev.jeka.core.api.tooling.docker;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class JkDockerBuildTest {
-
+class JkDockerBuildTest {
 
     @Test
-    public void testMoveCursor() {
+    void testMoveCursor() {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
 
         // Add Root
@@ -39,19 +38,19 @@ public class JkDockerBuildTest {
                 .moveCursorBefore("## 4")
                 .remove();
         result = getResult(dockerBuild);
-        Assert.assertFalse(result.contains("## 4"));
+        Assertions.assertFalse(result.contains("## 4"));
 
         // Add it back
         dockerBuild.dockerfileTemplate.add("## 4bis");
         result = getResult(dockerBuild);
-        Assert.assertTrue(result.endsWith("## 4bis"));
+        Assertions.assertTrue(result.endsWith("## 4bis"));
 
         // Insert a step
         dockerBuild.dockerfileTemplate.moveCursorBefore("## 3")
             .add("## 2.5")
             .add("## 2.6");
         result = getResult(dockerBuild);
-        Assert.assertTrue(result.contains("## 2\n## 2.5\n## 2.6\n## 3"));
+        Assertions.assertTrue(result.contains("## 2\n## 2.5\n## 2.6\n## 3"));
     }
 
     @Test
@@ -61,12 +60,12 @@ public class JkDockerBuildTest {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         dockerBuild.setBaseImage("ubuntu:latest");
         String result = getResult(dockerBuild);
-        Assert.assertTrue(result.contains("USER nonroot"));
+        Assertions.assertTrue(result.contains("USER nonroot"));
 
         // In default mode the nonroot user is not created on distroless non-root
         dockerBuild.setBaseImage("gcr.io/distroless/static-debian12:nonroot");
         result = getResult(dockerBuild);
-        Assert.assertFalse(result.contains("USER nonroot"));
+        Assertions.assertFalse(result.contains("USER nonroot"));
     }
 
     private String getResult(JkDockerBuild dockerBuild) {

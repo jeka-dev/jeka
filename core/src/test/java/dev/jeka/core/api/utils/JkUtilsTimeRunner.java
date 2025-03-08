@@ -1,7 +1,6 @@
 package dev.jeka.core.api.utils;
 
-@SuppressWarnings("javadoc")
-public class JkUtilsTimeRunner {
+class JkUtilsTimeRunner {
 
     public static void main(String[] args) {
         final String pattern = "yyyyMMdd.HHmmss";

@@ -1,20 +1,19 @@
 package dev.jeka.core.api.file;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("javadoc")
-public class JkPathMatcherTest {
+
+class JkPathMatcherTest {
 
     @Test
-    public void testAccept() {
+    void testAccept() {
         this.testDoMatchOk("foo/bar.txt");
         this.testDoMatchOk("./foo/bar.txt");
 
@@ -27,10 +26,10 @@ public class JkPathMatcherTest {
 
         final String pathString = "foo/bar.txt";
         Path path = Paths.get(pathString);
-        assertTrue(!JkPathMatcher.of(true,"**/*.tx").matches(path));
-        assertTrue(!JkPathMatcher.of(true,"foo/br.txt").matches(path));
-        assertTrue(!JkPathMatcher.of(true,"k*/bar.txt").matches(path));
-        assertTrue(!JkPathMatcher.of(true,"*.java").matches(Paths.get("foo/Bar.java")));
+        assertFalse(JkPathMatcher.of(true, "**/*.tx").matches(path));
+        assertFalse(JkPathMatcher.of(true, "foo/br.txt").matches(path));
+        assertFalse(JkPathMatcher.of(true, "k*/bar.txt").matches(path));
+        assertFalse(JkPathMatcher.of(true, "*.java").matches(Paths.get("foo/Bar.java")));
     }
 
     @Test
@@ -66,11 +65,11 @@ public class JkPathMatcherTest {
 
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.txt");
         assertTrue(matcher.matches(path));
-        assertTrue(pathString, JkPathMatcher.of(true,"**/*.txt").matches(path));
+        assertTrue(JkPathMatcher.of(true,"**/*.txt").matches(path), pathString);
 
         matcher = FileSystems.getDefault().getPathMatcher("glob:foo/bar.txt");
-        assertTrue(pathString , matcher.matches(path));
-        assertTrue(pathString, JkPathMatcher.of(true,"foo/bar.txt").matches(path));
+        assertTrue(matcher.matches(path), pathString);
+        assertTrue(JkPathMatcher.of(true,"foo/bar.txt").matches(path), pathString);
 
         assertTrue(JkPathMatcher.of(true,"foo/b?r.txt").matches(path));
         assertTrue(JkPathMatcher.of(true,"f*/bar.txt").matches(path));

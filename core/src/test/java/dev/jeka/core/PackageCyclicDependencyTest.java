@@ -21,7 +21,7 @@ import jdepend.framework.JavaClass;
 import jdepend.framework.JavaPackage;
 import jdepend.framework.PackageFilter;
 import org.apache.ivy.Main;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,21 +30,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /*
  * Unit test failing if a cyclic dependency has been detected in the jeka-core code base.
  */
-public class PackageCyclicDependencyTest {
+class PackageCyclicDependencyTest {
 
     @Test
-    public void codeBase_hasNoCyclicDependency() throws Exception {
+    void codeBase_hasNoCyclicDependency() throws Exception {
         final String packagePrefix = "dev.jeka.core";
         final File classDir = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
         PackageAnalyser packageAnalyser = PackageAnalyser.of(classDir, packagePrefix);
         final String cycle = packageAnalyser.cycle();
-        assertTrue(cycle, cycle == null);
+        assertNull(cycle, cycle);
     }
 
     public static class PackageAnalyser {
@@ -109,7 +109,5 @@ public class PackageCyclicDependencyTest {
             return builder.toString();
         }
     }
-
-
 
 }

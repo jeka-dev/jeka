@@ -7,8 +7,8 @@ import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPublications;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class JavaProjectBuildIT {
+class JavaProjectBuildIT {
 
     private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
         final Path dest = Files.createTempDirectory(JavaProjectBuildIT.class.getName());
@@ -27,7 +27,7 @@ public class JavaProjectBuildIT {
     }
 
     @Test
-    public void publish_maven_ok() throws IOException, URISyntaxException {
+    void publish_maven_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base"));
         project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
@@ -47,12 +47,12 @@ public class JavaProjectBuildIT {
         JkMavenPublication mavenPublication = JkMavenPublication.of(project.asBuildable()).publishLocal();
         mavenPublication.publishLocal();
         System.out.println(project.getInfo());
-        Assert.assertEquals(JkTransitivity.COMPILE, mavenPublication.getDependencies()
+        Assertions.assertEquals(JkTransitivity.COMPILE, mavenPublication.getDependencies()
                 .get("com.google.guava:guava").getTransitivity());
     }
 
     @Test
-    public void publish_ivy_ok() throws IOException, URISyntaxException {
+    void publish_ivy_ok() throws IOException, URISyntaxException {
         Path root = unzipToDir("sample-multiproject.zip");
         JkProject project = JkProject.of().setBaseDir(root.resolve("base"));
         project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);

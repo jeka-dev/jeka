@@ -16,67 +16,67 @@
 
 package dev.jeka.core.api.tooling.git;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JkGitTest {
+class JkGitTest {
 
     JkGit git = JkGit.of(Paths.get(""));
 
     @Test
-    public void getCurrentBranch() {
+    void getCurrentBranch() {
         System.out.printf("--%s--%n", git.getCurrentBranch());
     }
 
     @Test
-    @Ignore  // May fail on githubAction build when doing a release (tag ??)
-    public void isSyncWithRemote() {
+    @Disabled  // May fail on githubAction build when doing a release (tag ??)
+    void isSyncWithRemote() {
         System.out.printf("--%s--%n", git.isSyncWithRemote());
     }
 
     @Test
-    public void isWorkspaceDirty() {
+    void isWorkspaceDirty() {
         System.out.printf("--%s--%n", git.isWorkspaceDirty());
     }
 
     @Test
-    public void getCurrentCommit() {
+    void getCurrentCommit() {
         System.out.printf("--%s--%n", git.getCurrentCommit());
     }
 
     @Test
-    public void getTagsOnCurrentCommit() {
+    void getTagsOnCurrentCommit() {
         System.out.printf("--%s--%n", git.getTagsOnCurrentCommit());
     }
 
     @Test
-    public void diff() {
+    void diff() {
        JkGit.FileList fileList = git.diiff("22453db1627c559c2c3549a1c54793697366332c",
                 "250f6702d7bf9ac1b12881f5e6384393f2b76cdc");
-        Assert.assertEquals(1, fileList.get().size());
+       Assertions.assertEquals(1, fileList.get().size());
        fileList.get().forEach(System.out::println);
-       Assert.assertTrue(fileList.hasFileStartingWith("docs/"));
+       Assertions.assertTrue(fileList.hasFileStartingWith("docs/"));
     }
 
     @Test
-    public void badCommand_throwException() {
+    void badCommand_throwException() {
         Exception thrown = null;
         try {
             JkGit.of().execCmdLine("bad command");
         } catch (Exception e) {
             thrown = e;
         }
-        Assert.assertNotNull(thrown);
+        Assertions.assertNotNull(thrown);
     }
 
     @Test
-    public void testGetRemoteTag() {
+    void testGetRemoteTag() {
 
         // Test with null tag
         String jekaRepo = "https://github.com/jeka-dev/jeka.git";
@@ -94,8 +94,8 @@ public class JkGitTest {
     }
 
     @Test
-    @Ignore
-    public void testGetRemoteTag_noTags_returnsEmpty() {
+    @Disabled
+    void testGetRemoteTag_noTags_returnsEmpty() {
         // This repo may have tags in the future, that's why test is disabled
         String taglessRepo = "https://github.com/jeka-dev/demo-build-templates-consumer.git";
         List<JkGit.Tag> tags =  JkGit.of().getRemoteTags(taglessRepo);
@@ -103,7 +103,7 @@ public class JkGitTest {
     }
 
     @Test
-    public void testGitTagParseCmdLineResponse() {
+    void testGitTagParseCmdLineResponse() {
         String cliResponse = "c7bff170c6d2657bef3198d6ee3cb3856728dca1        refs/tags/0.11.0-beta.7";
         JkGit.Tag gitTag = JkGit.Tag.ofGitCmdlineResult(cliResponse);
         System.out.println(gitTag);
@@ -112,11 +112,10 @@ public class JkGitTest {
     }
 
     @Test
-    public void testGetRemoteTagCommit() {
+    void testGetRemoteTagCommit() {
         String branch = JkGit.of().getRemoteDefaultBranch("https://github.com/jeka-dev/jeka");
         assertNotNull(branch);
         System.out.println(branch);
     }
-
 
 }

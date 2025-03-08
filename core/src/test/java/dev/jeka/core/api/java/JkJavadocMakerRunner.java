@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class JkJavadocMakerRunner {
+class JkJavadocMakerRunner {
 
     public static void main(String[] args) throws Exception {
         Path srcDir = Paths.get(JkJavadocProcessor.class.getProtectionDomain().getCodeSource().getLocation().toURI())

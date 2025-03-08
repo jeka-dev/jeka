@@ -8,8 +8,8 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DependencySetResolutionIT {
 
@@ -31,7 +31,7 @@ public class DependencySetResolutionIT {
     private static final String COMMONS_LOGIN_102 = "commons-logging:commons-logging:1.0.2";
 
     @Test
-    public void resolve_unspecifiedVersionButPresentInProvider_ok() {
+    void resolve_unspecifiedVersionButPresentInProvider_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and("com.google.guava:guava")
                 .withVersionProvider(JkVersionProvider.of("com.google.guava:guava", "22.0"));
@@ -39,11 +39,11 @@ public class DependencySetResolutionIT {
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getChildren().get(0).getModuleInfo();
-        assertEquals("22.0", moduleNodeInfo.getDeclaredVersion().getValue());
+        Assertions.assertEquals("22.0", moduleNodeInfo.getDeclaredVersion().getValue());
     }
 
     @Test
-    public void resolve_jerseyServer_ok() {
+    void resolve_jerseyServer_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkCoordinateDependency.of("com.sun.jersey:jersey-server:1.19.4")
                         .withTransitivity(JkTransitivity.NONE));
@@ -55,7 +55,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_dependencyDeclaredAsNonTransitive_ok() {
+    void resolve_dependencyDeclaredAsNonTransitive_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION).withTransitivity(JkTransitivity.NONE));
         JkDependencyResolver resolver = JkDependencyResolver.of()
@@ -66,7 +66,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_transitiveDependency_ok() {
+    void resolve_transitiveDependency_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -77,7 +77,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_transitiveDependencyLocallyExcluded_ok() {
+    void resolve_transitiveDependencyLocallyExcluded_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION).andExclusion(COMMONS_LOGIN));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -87,7 +87,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_transitiveDependencyGloballyExcluded_ok() {
+    void resolve_transitiveDependencyGloballyExcluded_ok() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkCoordinateDependency.of(SPRINGBOOT_TEST_AND_VERSION))
                 .andGlobalExclusion(COMMONS_LOGIN);
@@ -98,7 +98,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_moduleWithMainAndExtraArtifact_bothArtifactsArePresentInResult() {
+    void resolve_moduleWithMainAndExtraArtifact_bothArtifactsArePresentInResult() {
         //JkLog.setDecorator(JkLog.Style.INDENT);
         //JkLog.setVerbosity(JkLog.Verbosity.QUITE_VERBOSE);
         JkCoordinate lwjgl= JkCoordinate.of("org.lwjgl:lwjgl:3.1.1");
@@ -121,12 +121,10 @@ public class DependencySetResolutionIT {
         List<Path> lwjglFiles = lwjglNode.getNodeInfo().getFiles();
         System.out.println(lwjglFiles);
         assertEquals(2, lwjglFiles.size());
-
     }
 
-
     @Test
-    public void resolve_notExistingModuleId_reportError() {
+    void resolve_notExistingModuleId_reportError() {
         JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularLibs.JAVAX_SERVLET_API.toCoordinate("2.5.3").toString());  // does not exist
@@ -142,7 +140,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_sameDependencyAsDirectAndTransitiveWithDistinctVersion_directWin() {
+    void resolve_sameDependencyAsDirectAndTransitiveWithDistinctVersion_directWin() {
         JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
         String directCoreVersion = "4.3.6.RELEASE";
@@ -169,7 +167,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_sourcesArtifact_doesNotBringTransitiveDependencies() {
+    void resolve_sourcesArtifact_doesNotBringTransitiveDependencies() {
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkCoordinateDependency.of(
                         "org.springframework.boot:spring-boot-starter-web:sources:1.5.10.RELEASE"))
@@ -180,25 +178,23 @@ public class DependencySetResolutionIT {
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         System.out.println(resolveResult.getFiles());
         System.out.println(tree.toStringTree());
-
-
     }
 
     @Test
-    public void resolve_usingDynamicVersion_ok() {
+    void resolve_usingDynamicVersion_ok() {
         JkModuleId jkModuleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkDependencySet deps = JkDependencySet.of().and(jkModuleId.toCoordinate("1.4.+"));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolvedDependencyNode tree = resolver.resolve(deps).assertNoError().getDependencyTree();
         System.out.println(tree.toStrings());
         JkResolvedDependencyNode.JkModuleNodeInfo moduleNodeInfo = tree.getFirst(jkModuleId).getModuleInfo();
-        assertTrue(moduleNodeInfo.getDeclaredVersion().getValue().equals("1.4.+"));
+        assertEquals("1.4.+", moduleNodeInfo.getDeclaredVersion().getValue());
         String resolvedVersionName = moduleNodeInfo.getResolvedVersion().getValue();
         assertEquals("1.4.7.RELEASE", resolvedVersionName);
     }
 
     @Test
-    public void resolve_compileTransitivity_dontFetchRuntimeTransitiveDependencies() {
+    void resolve_compileTransitivity_dontFetchRuntimeTransitiveDependencies() {
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -208,7 +204,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_runtimeTransitivity_fetchRuntimeTransitiveDependencies() {
+    void resolve_runtimeTransitivity_fetchRuntimeTransitiveDependencies() {
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", JkTransitivity.RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -218,7 +214,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_fileDependenciesOnly_ok() throws URISyntaxException {
+    void resolve_fileDependenciesOnly_ok() throws URISyntaxException {
         Path dep0File = Paths.get(DependencySetResolutionIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(DependencySetResolutionIT.class.getResource("dep1").toURI());
         JkDependencySet deps = JkDependencySet.of()
@@ -233,7 +229,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_onlyFilesDependencies_ok() throws Exception {
+    void resolve_onlyFilesDependencies_ok() throws Exception {
         URL sampleJarUrl = DependencySetResolutionIT.class.getResource("myArtifactSample.jar");
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()
@@ -241,11 +237,11 @@ public class DependencySetResolutionIT {
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of()
                 .addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
-        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+        Assertions.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
     }
 
     @Test
-    public void resolve_fileAndModuleDependencies_ok() throws Exception {
+    void resolve_fileAndModuleDependencies_ok() throws Exception {
         URL sampleJarUrl = DependencySetResolutionIT.class.getResource("myArtifactSample.jar");
         Path jarFile = Paths.get(sampleJarUrl.toURI());
         JkDependencySet dependencies = JkDependencySet.of()
@@ -253,24 +249,24 @@ public class DependencySetResolutionIT {
                 .andFiles(jarFile);
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
-        Assert.assertEquals(2, resolveResult.getDependencyTree().getChildren().size());
+        Assertions.assertEquals(2, resolveResult.getDependencyTree().getChildren().size());
         resolveResult.assertNoError();
     }
 
     @Test
-    public void resolve_only1ModuleDependencies_ok() throws Exception {
+    void resolve_only1ModuleDependencies_ok() throws Exception {
         JkLog.Verbosity verbosity = JkLog.verbosity();
         JkDependencySet dependencies = JkDependencySet.of()
                 .and(JkPopularLibs.GUAVA + ":23.0");
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
         JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         resolveResult.assertNoError();
-        Assert.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
+        Assertions.assertEquals(1, resolveResult.getDependencyTree().getChildren().size());
         JkLog.setVerbosity(verbosity);
     }
 
     @Test
-    public void resolve_usingSeveralClassifierOnSingleLine_ok() {
+    void resolve_usingSeveralClassifierOnSingleLine_ok() {
         JkProject project = JkProject.of();
         project.setJvmTargetVersion(JkJavaVersion.V11);
         project.compilation.dependencies
@@ -284,7 +280,7 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    public void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
+    void resolve_usingSeveralClassifiersIncludingDefaultOne_ok() {
         JkProject project = JkProject.of()
                 .setJvmTargetVersion(JkJavaVersion.V11);
         project.compilation.dependencies
@@ -295,6 +291,5 @@ public class DependencySetResolutionIT {
         assertEquals(1, paths.getEntries().size());
         // the order Ivy resolve classifiers cannot be controlled
     }
-
 
 }

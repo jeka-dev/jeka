@@ -17,20 +17,20 @@
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.system.JkLog;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JkUtilsJdkTest {
+class JkUtilsJdkTest {
 
     @Test
-    @Ignore
+    @Disabled
     public void testGetJdk() {
         JkLog.setDecorator(JkLog.Style.INDENT);
         Path path = JkUtilsJdk.getJdk("graalvm", "22");
-        Assert.assertTrue(Files.exists(path.resolve("bin")));
+        Assertions.assertTrue(Files.exists(path.resolve("bin")));
     }
 }

@@ -19,11 +19,15 @@ package dev.jeka.core.api.scaffold;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class JkScaffoldTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
 
-    public void testInterpolateLastVersionOf() {
+
+class JkScaffoldTest {
+
+    @Test
+    void testInterpolateLastVersionOf() {
         JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
 
         String noToken = "azertyuio azer {";

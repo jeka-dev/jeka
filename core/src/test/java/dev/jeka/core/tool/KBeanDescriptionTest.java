@@ -1,14 +1,14 @@
 package dev.jeka.core.tool;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class KBeanDescriptionTest {
+class KBeanDescriptionTest {
 
     @Test
     public void readNestedElement_ok() {
         JkBeanDescription desc = JkBeanDescription.of(NestedProp.class);
-        Assert.assertEquals(1, desc.beanFields.size());
+        Assertions.assertEquals(1, desc.beanFields.size());
     }
 
     static class NestedProp extends KBean {

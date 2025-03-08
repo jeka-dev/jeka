@@ -1,15 +1,15 @@
 package dev.jeka.core.api.project;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LocalAndTxtDependenciesTest {
+class LocalAndTxtDependenciesTest {
 
     @Test
-    public void testFromDescription()  {
+    void testFromDescription()  {
         URL url = LocalAndTxtDependenciesTest.class.getResource("dependencies.txt");
         LocalAndTxtDependencies commonDeps = LocalAndTxtDependencies.ofTextDescription(url);
         assertEquals(4, commonDeps.getCompile().getEntries().size());

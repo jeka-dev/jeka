@@ -200,7 +200,7 @@ public class JkProjectTesting {
      * @return a default {@link JkTestProcessor} object.
      */
     public JkTestProcessor createDefaultTestProcessor() {
-        JkTestProcessor result = JkTestProcessor.of();
+        JkTestProcessor result = JkTestProcessor.of(() -> project.testing.getTestClasspath());
         final Path reportDir = compilation.layout.getOutputDir().resolve(this.reportDir);
         result
                 .setRepoSetSupplier(() -> project.dependencyResolver.getRepos()) // cannot use lambda
@@ -212,7 +212,7 @@ public class JkProjectTesting {
 
     private void executeWithTestProcessor() {
         testSelection.resolveTestRootClasses();
-        JkTestResult result = testProcessor.launch(getTestClasspath(), testSelection);
+        JkTestResult result = testProcessor.launch(testSelection);
         if (breakOnFailures) {
             result.assertSuccess();
         }

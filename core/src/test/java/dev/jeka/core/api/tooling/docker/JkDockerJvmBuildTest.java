@@ -21,16 +21,16 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JkDockerJvmBuildTest {
+class JkDockerJvmBuildTest {
 
     @Test
-    public void testAgents() {
+    void testAgents() {
         JkLog.setDecorator(JkLog.Style.INDENT);
 
         JkProject project = project();
@@ -42,15 +42,14 @@ public class JkDockerJvmBuildTest {
         System.out.println(dockerJvmBuild.renderInfo());
 
         // Test docker files is correct
-        Assert.assertTrue(dockerJvmBuild.renderDockerfile().contains("/app/agents/"));
+        Assertions.assertTrue(dockerJvmBuild.renderDockerfile().contains("/app/agents/"));
 
         // Test build dir is properly generated
         Path dir = JkUtilsPath.createTempDirectory("jk-test");
         dockerJvmBuild.generateContextDir(dir);
-        Assert.assertTrue("No files found in " + dir.resolve("agents"),
-                JkPathTree.of(dir.resolve("agents")).containFiles());
+        Assertions.assertTrue(JkPathTree.of(dir.resolve("agents")).containFiles(),
+                "No files found in " + dir.resolve("agents"));
     }
-
 
     private JkProject project() {
         JkProject project = JkProject.of();

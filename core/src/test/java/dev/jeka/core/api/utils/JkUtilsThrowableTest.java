@@ -1,12 +1,12 @@
 package dev.jeka.core.api.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class JkUtilsThrowableTest {
+class JkUtilsThrowableTest {
 
     @Test
     public void printStackTrace() {
-        Exception e = nestedExeption();
+        Exception e = nestedException();
         e.printStackTrace();
         System.out.println("---------------");
         JkUtilsThrowable.printStackTrace(System.err, e, 2);
@@ -19,7 +19,7 @@ public class JkUtilsThrowableTest {
         return stackedException(stackCount -1, cause);
     }
 
-    private Exception nestedExeption() {
+    private Exception nestedException() {
         return stackedException(10, stackedException(8, null));
     }
 }

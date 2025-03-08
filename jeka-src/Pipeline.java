@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import dev.jeka.core.DockerImageMaker;
+import dev.jeka.core.CoreBuild;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
@@ -36,6 +36,8 @@ import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
 import dev.jeka.plugins.sonarqube.SonarqubeKBean;
+import test.PluginScaffoldTester;
+import test.SamplesTester;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -109,7 +111,7 @@ class Pipeline extends KBean {
         System.out.println("Effective version        : " + effectiveVersion);
         System.out.println("==============================================");
 
-        getImportedKBeans().load(ProjectKBean.class, false).forEach(this::applyToSlave);
+        getImportedKBeans().load(ProjectKBean.class, false).forEach(this::configureCommonSettings);
         getImportedKBeans().load(MavenKBean.class, false).forEach(
                 mavenKBean -> mavenKBean.customizePublication(this::customize));
 
@@ -153,6 +155,19 @@ class Pipeline extends KBean {
         JkLog.info("current ossrhUser:  %s", ossrhUser);
 
         // Publish artifacts on maven central only if we are on 'master' branch
+        publish();
+
+        if (getRunbase().getProperties().get("sonar.host.url") != null) {
+            coreProject.load(SonarqubeKBean.class).run();
+        }
+
+        // Copy dir to and augment documentation
+        JkLog.startTask("augment-mkdocs");
+        this.copyDocsToWorkDir();
+        JkLog.endTask();
+    }
+
+    private void publish() throws IOException {
         if (shouldPublishOnMavenCentral()) {
             JkLog.startTask("publish-artifacts");
             getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publish);
@@ -168,7 +183,7 @@ class Pipeline extends KBean {
 
             // Create a Docker Image of Jeka and publish it to docker hub
             if (System.getenv(DOCKERHUB_TOKEN_ENV_NAME) != null) {
-                publishJekaDockerImage(effectiveVersion);
+                this.coreProject.load(CoreBuild.class).publishJekaDockerImage();
             }
 
             // If not on 'master' branch, publish only locally
@@ -177,14 +192,6 @@ class Pipeline extends KBean {
             publishLocal();
             JkLog.endTask();
         }
-        if (getRunbase().getProperties().get("sonar.host.url") != null) {
-            coreProject.load(SonarqubeKBean.class).run();
-        }
-
-        // Copy dir to and augment documentation
-        JkLog.startTask("augment-mkdocs");
-        this.copyDocsToWorkDir();
-        JkLog.endTask();
     }
 
     @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
@@ -291,7 +298,7 @@ class Pipeline extends KBean {
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 
-    private void applyToSlave(ProjectKBean projectKBean) {
+    private void configureCommonSettings(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.setVersion(effectiveVersion);
         project.compilation.addJavaCompilerOptions("-g");
@@ -321,11 +328,6 @@ class Pipeline extends KBean {
         });
         customize(result);
         return result;
-    }
-
-    private void publishJekaDockerImage(String version) {
-        DockerImageMaker.createImage();
-        DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));
     }
 
     private void copyDocsToWorkDir() {

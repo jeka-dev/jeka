@@ -4,7 +4,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkPopularLibs;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,7 +18,7 @@ public class JkEclipseClasspathGeneratorIT {
     static final String ZIP_NAME = "sample-multi-scriptless.zip";
 
     @Test
-    public void generate() throws Exception {
+    void generate() throws Exception {
         final Path top = unzipToDir(ZIP_NAME);
 
         final JkProject baseProject = JkProject.of()

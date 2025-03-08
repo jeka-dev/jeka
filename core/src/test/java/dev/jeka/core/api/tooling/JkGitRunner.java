@@ -6,7 +6,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.util.Arrays;
 import java.util.List;
 
-public class JkGitRunner {
+class JkGitRunner {
 
     public static void main(String[] args) {
         String line = JkGit.of()

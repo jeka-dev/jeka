@@ -7,14 +7,14 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.depmanagement.resolution.JkResolvedDependencyNode;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResolveSpringIT {
 
@@ -23,7 +23,7 @@ public class ResolveSpringIT {
     private static final JkModuleId SLF4J_API = JkModuleId.of("org.slf4j:slf4j-api");
 
     @Test
-    public void resolveCompile() {
+    void resolveCompile() {
         //JkLog.setHierarchicalConsoleConsumer();
         final JkResolveResult result = resolver().resolve(JkDependencySet.of(SPRINGBOOT_STARTER));
         System.out.println(result.getDependencyTree().toStringTree());
@@ -37,7 +37,7 @@ public class ResolveSpringIT {
         }
 
         // Does not contains test-jars
-        Assert.assertFalse(result.getFiles().getEntries().stream().anyMatch(path -> path.getFileName().toString().endsWith("-tests.jar")));
+        Assertions.assertFalse(result.getFiles().getEntries().stream().anyMatch(path -> path.getFileName().toString().endsWith("-tests.jar")));
     }
 
     private JkDependencyResolver resolver() {
@@ -46,7 +46,7 @@ public class ResolveSpringIT {
     }
 
     @Test
-    public void resolveSpringbootTestStarter() {
+    void resolveSpringbootTestStarter() {
         final JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkTransitivity.RUNTIME);
         final JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());
@@ -54,7 +54,7 @@ public class ResolveSpringIT {
         final Set<JkModuleId> moduleIds = resolveResult.getDependencyTree().getResolvedVersions().getModuleIds();
 
         // According presence or absence of cache it could be 24 or 25
-        assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() >= 24);
-        assertTrue("Wrong modules size " + moduleIds,  moduleIds.size() <= 25);
+        assertTrue(moduleIds.size() >= 24, "Wrong modules size " + moduleIds);
+        assertTrue(moduleIds.size() <= 25, "Wrong modules size " + moduleIds);
     }
 }

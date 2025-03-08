@@ -2,8 +2,9 @@ package dev.jeka.core.api.file;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsPathTest;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,76 +17,76 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("javadoc")
-public class JkPathTreeTest {
+
+class JkPathTreeTest {
 
     @Test
-    public void testFilesOnly() throws Exception {
+    void testFilesOnly() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
 
         final Path sampleFile = Paths.get(sampleFileUrl.toURI());
-        assertTrue(Files.exists(sampleFile));
+        Assertions.assertTrue(Files.exists(sampleFile));
         final Path sampleFolder = sampleFile.getParent().getParent();
 
-        System.out.println(JkPathTree.of(sampleFolder).getRelativeFiles());
+        System.out.println(JkPathTree.of(sampleFolder).stream().relativizeFromRoot().collect(Collectors.toList()));
 
         final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).andMatching(true, "subfolder/*.txt");
-        assertEquals(1, subfolderTxt1.getFiles().size());
+        Assertions.assertEquals(1, subfolderTxt1.getFiles().size());
         System.out.println(subfolderTxt1);
 
         final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).andMatching(true, "subfolder/*.txt");
-        assertEquals(1, subfolderTxt2.getFiles().size());
+        Assertions.assertEquals(1, subfolderTxt2.getFiles().size());
     }
 
     @Test
-    public void testRelativeFiles() throws Exception {
+    void testRelativeFiles() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
 
         final JkPathTree tree = JkPathTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
-        System.out.println(tree.getRelativeFiles());
+        System.out.println(tree.stream().relativizeFromRoot().collect(Collectors.toList()));
     }
 
     @Test
-    public void testStream() throws Exception {
+    void testStream() throws Exception {
         Path sampleDir = sampleDir();
 
         // Root is included in the getOutputStream
-        assertTrue(JkPathTree.of(sampleDir).stream().anyMatch(path -> path.equals(sampleDir)));
+        Assertions.assertTrue(JkPathTree.of(sampleDir).stream().anyMatch(path -> path.equals(sampleDir)));
     }
 
     @Test
-    public void testZipTo() throws Exception {
+    void testZipTo() throws Exception {
         Path zip = Files.createTempFile("filetree", ".zip");
         Files.delete(zip);
         JkPathTree.of(sampleDir()).zipTo(zip);
         try (JkUtilsPath.JkZipRoot zipRoot = JkUtilsPath.zipRoot(zip)) {
-            assertTrue(Files.exists(zipRoot.get().resolve("subfolder/sample.txt")));
+            Assertions.assertTrue(Files.exists(zipRoot.get().resolve("subfolder/sample.txt")));
         }
 
         // Test with match
         Files.delete(zip);
         JkPathTree.of(sampleDir()).andMatching(false, "**r/sample.txt").zipTo(zip);
         try (JkUtilsPath.JkZipRoot zipRoot = JkUtilsPath.zipRoot(zip)) {
-            assertFalse(Files.exists(zipRoot.get().resolve("subfolder/sample.txt")));
+            Assertions.assertFalse(Files.exists(zipRoot.get().resolve("subfolder/sample.txt")));
         }
     }
 
     @Test
-    public void testOfZip() throws Exception {
+    void testOfZip() throws Exception {
         Path zipFile = Files.createTempFile("jksample",".zip");
         Files.deleteIfExists(zipFile);
         JkZipTree zipTree = JkZipTree.of(zipFile);
         zipTree.importDir(sampleDir());
         List<Path> paths = zipTree.getFiles();
-        assertEquals(1, paths.size());
+        Assertions.assertEquals(1, paths.size());
 
         //System.out.println(Files.exists(zipRoot));
         //zipRoot.getFileSystem().close();
@@ -93,7 +94,7 @@ public class JkPathTreeTest {
     }
 
     @Test  // Ensure we can create a zip from a zip
-    public void testZipZipTo() throws Exception {
+    void testZipZipTo() throws Exception {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
@@ -107,7 +108,7 @@ public class JkPathTreeTest {
     }
 
     @Test  // Ensure we can import  a zip from a zip
-    public void testZipImportTree() throws Exception {
+    void testZipImportTree() throws Exception {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
@@ -121,7 +122,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testImportTree() throws Exception {
+    void testImportTree() throws Exception {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         tree.importTree(JkZipTree.of(createSampleZip()));
@@ -131,7 +132,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testImportFiles() throws Exception {
+    void testImportFiles() throws Exception {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
@@ -141,7 +142,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testImportFile() throws Exception {
+    void testImportFile() throws Exception {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree treeSample = JkPathTree.of(dirSample);
         testImportFile(treeSample);
@@ -164,7 +165,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testZipGet() throws Exception {
+    void testZipGet() throws Exception {
         Path zipFile = createSampleZip();
         JkZipTree zipTree = JkZipTree.of(zipFile);
         Path zipEntry = zipTree.get("/subfolder/sample.txt");
@@ -174,7 +175,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testDeleteContent() throws IOException {
+    void testDeleteContent() throws IOException {
         Path foo = Files.createTempDirectory("foo");
         Path bar = foo.resolve("bar");
         Files.createDirectories(bar);
@@ -192,7 +193,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testZipDeleteContent() throws Exception {
+    void testZipDeleteContent() throws Exception {
         Path zip = createSampleZip();
         boolean subfolderExist = Files.exists(JkZipTree.of(zip).goTo("subfolder").getRoot());
         assertTrue(subfolderExist);
@@ -221,7 +222,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testAndMatching() throws Exception {
+    void testAndMatching() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -236,7 +237,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void stream_relativeToCurrentDir_orAbsolute() throws Exception {
+    void stream_relativeToCurrentDir_orAbsolute() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -249,7 +250,7 @@ public class JkPathTreeTest {
 
         // Test with root being a relative pah
         Path root = Paths.get("").toAbsolutePath().relativize(sampleFolder).normalize();
-        assertTrue("Root does not exist", Files.exists(root));
+        assertTrue(Files.exists(root), "Root does not exist");
         assertFalse(root.isAbsolute());
         JkPathTree relPathTree = JkPathTree.of(root);
         first = relPathTree.stream()
@@ -263,7 +264,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void streamBreathFirst_orderIsOk() throws Exception {
+    void streamBreathFirst_orderIsOk() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -277,7 +278,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void stream_relativizeFromRootIsOk() throws Exception {
+    void stream_relativizeFromRootIsOk() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -287,8 +288,8 @@ public class JkPathTreeTest {
     }
 
     @Test
-    @Ignore  // This test fails when launched in forked mode
-    public void testAndMatching_rootIsWorkingDir() throws Exception {
+    @Disabled  // This test fails when launched in forked mode
+    void testAndMatching_rootIsWorkingDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -300,7 +301,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testCopyToWithFilter() throws Exception {
+    void testCopyToWithFilter() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path sampleFolder = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
@@ -313,7 +314,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testCopyTo() throws Exception {
+    void testCopyTo() throws Exception {
         Path zipFile = createSampleZip();
         Path tempDir = Files.createTempDirectory("jeka-test");
         try (JkZipTree tree = JkZipTree.of(zipFile)) {
@@ -323,7 +324,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testCopyToSingle() throws Exception {
+    void testCopyToSingle() throws Exception {
         Path zipFile = createSampleZip();
         Path tempDir = Files.createTempDirectory("jeka-test");
         try (JkZipTree pathTree = JkZipTree.of(zipFile)) {
@@ -333,7 +334,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testZipStreamWithNoDirectoryMatcher() throws Exception {
+    void testZipStreamWithNoDirectoryMatcher() throws Exception {
         JkZipTree zipTree = JkZipTree.of(createSampleZip());
         try (Stream<Path> stream = zipTree.withMatcher(JkPathMatcher.ofNoDirectory()).stream()) {
             stream.forEach(System.out::println);

@@ -20,16 +20,16 @@ import dev.jeka.core.api.depmanagement.JkTransitivity;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
 public class JkDockerJvmBuildIT {
 
     @Test
-    @Ignore  // Fails in automated test cause no jeka-output/classes dir exist
-    public void simple() {
+    @Disabled  // Fails in automated test cause no jeka-output/classes dir exist
+    void simple() {
         if (!JkDocker.of().isPresent()) {
             return;
         }

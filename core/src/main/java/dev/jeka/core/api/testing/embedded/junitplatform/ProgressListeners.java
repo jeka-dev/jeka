@@ -112,6 +112,10 @@ class ProgressListeners {
             if (testIdentifier.getType().isTest()) {
                 skippedCount++;
             }
+            if (isClassContainer(testIdentifier)) {
+                System.out.println(className(testIdentifier) + ": skipped");
+            }
+
         }
 
         @Override

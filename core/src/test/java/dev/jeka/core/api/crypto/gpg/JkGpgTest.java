@@ -2,7 +2,6 @@ package dev.jeka.core.api.crypto.gpg;
 
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.tool.JkConstants;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +41,7 @@ class JkGpgTest {
             Path sampleFile = Paths.get(JkGpgTest.class.getResource("sampleFileToSign.txt").toURI());
             signer.sign(sampleFile, signatureFile);
             JkGpgVerifier verifier = JkGpgVerifier.of(pubFile);
-            Assert.assertTrue(verifier.verify(sampleFile, signatureFile));
+            Assertions.assertTrue(verifier.verify(sampleFile, signatureFile));
         });
     }
 

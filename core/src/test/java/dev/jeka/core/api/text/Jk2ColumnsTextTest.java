@@ -1,14 +1,12 @@
 package dev.jeka.core.api.text;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-
-
-public class Jk2ColumnsTextTest {
+class Jk2ColumnsTextTest {
 
     @Test
-    public void format() {
+    void format() {
        String text = Jk2ColumnsText.of(8, 30).setMarginLeft("  ")
                .add("title 1 hjhjhjhjhjh", "description 1")
                .add("title 2", "description 2")
@@ -18,7 +16,7 @@ public class Jk2ColumnsTextTest {
                .add("title 6", "a desc \nwith breaking lines")
                .add("title 7", "description 7")
                .toString();
-        Assert.assertFalse(text.endsWith("\n"));
+        Assertions.assertFalse(text.endsWith("\n"));
         System.out.println("------");
         System.out.print(text);
         System.out.println("----");

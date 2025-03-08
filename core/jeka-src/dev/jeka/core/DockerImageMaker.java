@@ -25,14 +25,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class DockerImageMaker {
+//  Creates and published the Dpcker image containing the Jeka executable.
+class DockerImageMaker {
 
     public static final String GROUP = "jekadev";
 
     public static final String IMAGE_NAME = GROUP + "/jeka";
 
     // Run : docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jeka --version
-    public static void createImage() {
+    static void createImage() {
         JkDockerBuild dockerBuild = JkDockerBuild.of();
         Path jekaDist = Paths.get("jeka-output/distrib/bin");
         if (!Files.exists(jekaDist)) {
@@ -58,7 +59,7 @@ public class DockerImageMaker {
         System.out.println("Jeka image built from " + ctxDir);
     }
 
-    public static void pushImage(String version, String password) {
+    static void pushImage(String version, String password) {
         String imageNameWithVersion = IMAGE_NAME + ":" + version;
         JkDocker docker = JkDocker.of();
         docker

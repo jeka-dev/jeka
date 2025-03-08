@@ -1,11 +1,11 @@
 package dev.jeka.core.api.text;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class JkColumnTextTest {
+class JkColumnTextTest {
 
     @Test
-    public void test_ok()  {
+    void test_ok()  {
         JkColumnText columnText = JkColumnText
                 .ofSingle(20, 30)
                 .addColumn(10, 40)
@@ -19,7 +19,7 @@ public class JkColumnTextTest {
     }
 
     @Test
-    public void test2_ok()  {
+    void test2_ok()  {
         JkColumnText columnText = JkColumnText
                 .ofSingle(2, 30)
                 .addColumn(1, 40)

@@ -16,13 +16,13 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.api.utils.JkUtilsIO;
-import org.junit.Test;
 
-public class PropFileTest {
+import org.junit.jupiter.api.Test;
+
+class PropFileTest {
 
     @Test
-    public void testUpdateProperty_multiline() throws Exception {
+    void testUpdateProperty_multiline() throws Exception {
         String content = "aa.1=toto\n" +
                 "bb=bla \\\n" +
                 "  bb=bla \\\n" +
@@ -37,7 +37,5 @@ public class PropFileTest {
         System.out.println(result);
         System.out.println("---------- end -------------- ");
     }
-
-
 
 }

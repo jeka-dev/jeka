@@ -1,10 +1,11 @@
 package dev.jeka.core.api.java;
 
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
-public class JkJavaCompilerToolChainTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class JkJavaCompilerToolChainTest {
 
     @Test
     public void currentJdkSourceVersion() {

@@ -851,8 +851,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
             if (runnables.getSize() == 0) {
                 JkLog.info("No registered end-to-end testers found.");
             } else if (runnables.getSize() == 1) {
-                JkLog.info(runnables.getRunnableNames().get(0));
+                runnables.setLogTasks(false);
                 runnables.getRunnable(0).run();
+                runnables.setLogTasks(true);
             } else {
                 runnables.run();
             }

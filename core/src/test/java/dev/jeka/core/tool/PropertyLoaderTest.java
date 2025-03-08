@@ -1,12 +1,12 @@
 package dev.jeka.core.tool;
 
-import org.junit.Test;
 
-@SuppressWarnings("javadoc")
-public class PropertyLoaderTest {
+import org.junit.jupiter.api.Test;
+
+class PropertyLoaderTest {
 
     @Test
-    public void testPopulate() {
+    void testPopulate() {
 
     }
 

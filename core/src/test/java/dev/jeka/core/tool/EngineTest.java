@@ -21,11 +21,12 @@ import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class EngineTest {
+
+class EngineTest {
 
     @Test
     public void defaultKBeanAsName_ok() {

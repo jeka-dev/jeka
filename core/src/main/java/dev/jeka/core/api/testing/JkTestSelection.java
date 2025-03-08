@@ -41,7 +41,19 @@ public final class JkTestSelection implements Serializable {
 
     public static final String MAVEN_INCLUDE_PATTERN = "^(Test.*|.+[.$]Test.*|.*Tests?)$";
 
-    public static final String IT_INCLUDE_PATTERN = ".*IT";
+    /**
+     * A regular expression pattern for selecting integration test classes.
+     * The pattern `.*IT` matches test class names ending with "IT".
+     */
+    public static final String IT_PATTERN = ".*IT";
+
+    /**
+     * A regular expression that matches strings beginning with "e2e.".
+     * <p>
+     * This regular expression is commonly used to identify fully qualified
+     * end-to-end (E2E) classes that belong to the <i>e2e</i> package.
+     */
+    public static final String E2E_PATTERN = "^e2e\\..*";
 
     private transient Supplier<Path> rootResolver = () -> Paths.get("");
 

@@ -1,6 +1,5 @@
 package dev.jeka.core.api.depmanagement;
 
-import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
