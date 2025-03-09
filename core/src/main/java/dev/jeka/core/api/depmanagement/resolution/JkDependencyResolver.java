@@ -287,11 +287,11 @@ public final class JkDependencyResolver  {
         JkLog.verboseStartTask("resolve-dependencies");
         int dependencyCount = bomResolvedDependencies.getDependencies().size();
         if (dependencyCount == 1) {
-            JkLog.info("Unique dependency %s to resolve.", bomResolvedDependencies.getDependencies().get(0));
+            JkLog.verbose("Unique dependency %s to resolve.", bomResolvedDependencies.getDependencies().get(0));
         } else {
-            JkLog.info("%s dependencies to resolve:", dependencyCount);
+            JkLog.verbose("%s dependencies to resolve:", dependencyCount);
             bomResolvedDependencies.getEntries().forEach(
-                    dependency -> JkLog.info("   %s", dependency));;
+                    dependency -> JkLog.verbose("   %s", dependency));;
         }
 
         // Actually resolve dependencies

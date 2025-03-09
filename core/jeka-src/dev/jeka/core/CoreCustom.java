@@ -46,7 +46,7 @@ import java.nio.file.StandardCopyOption;
 /**
  * Defines build for <i>core</i> module..
  */
-public class CoreBuild extends KBean {
+public class CoreCustom extends KBean {
 
     private static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 

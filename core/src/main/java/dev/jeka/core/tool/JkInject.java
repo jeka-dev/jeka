@@ -31,10 +31,10 @@ import java.lang.annotation.Target;
  * <pre><code>
  * public class FatJarBuild extends KBean {
  *
- *     @JkInjectRunbase
+ *     @JkInject
  *     ProjectKBean projectKBean;
  *
- *     @JkInjectRunbase("../anotherJekaProject")
+ *     @JkInject("../anotherJekaProject")
  *     private AClassicBuild sampleBuild;
  *
  *     ...

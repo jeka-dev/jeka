@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import dev.jeka.core.CoreBuild;
+import dev.jeka.core.CoreCustom;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
@@ -42,12 +42,13 @@ import test.SamplesTester;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @JkDep("plugins/plugins.sonarqube/jeka-output/classes")
 @JkDep("plugins/plugins.jacoco/jeka-output/classes")
 @JkDep("plugins/plugins.nexus/jeka-output/classes")
-class Pipeline extends KBean {
+class Build extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
 
@@ -62,9 +63,8 @@ class Pipeline extends KBean {
     @JkPropValue("GITHUB_TOKEN")
     public String githubToken;
 
-    public boolean runSamples = true;
-
-    private final JkVersionFromGit versionFromGit = JkVersionFromGit.of();
+    @JkPropValue("jeka.test.skip")
+    public boolean skipTest = false;
 
     // ------ Slave projects
 
@@ -96,7 +96,8 @@ class Pipeline extends KBean {
 
     private final String effectiveVersion;
 
-    Pipeline() {
+    Build() {
+        JkVersionFromGit versionFromGit = JkVersionFromGit.of();
         effectiveVersion = versionFromGit.getVersion();
     }
 
@@ -118,7 +119,6 @@ class Pipeline extends KBean {
         // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
         jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
         jacocoForCore.configureAndApplyTo(coreProject.project);
-
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -142,7 +142,7 @@ class Pipeline extends KBean {
         JkLog.endTask();
 
         // Run tests on sample projects if required
-        if (runSamples) {
+        if (!skipTest) {
             doRunSamples();
         }
 
@@ -183,7 +183,7 @@ class Pipeline extends KBean {
 
             // Create a Docker Image of Jeka and publish it to docker hub
             if (System.getenv(DOCKERHUB_TOKEN_ENV_NAME) != null) {
-                this.coreProject.load(CoreBuild.class).publishJekaDockerImage();
+                this.coreProject.load(CoreCustom.class).publishJekaDockerImage();
             }
 
             // If not on 'master' branch, publish only locally
@@ -336,8 +336,9 @@ class Pipeline extends KBean {
         Path docBaseDir = baseDir.resolve("docs");
         Path generatedDocDir = baseDir.resolve(MKDOCS_OUTPUT_DIR).resolve("docs");
 
-        JkPathTree.of(docBaseDir).copyTo(generatedDocDir);
-        JkPathFile.of(baseDir.resolve(mkdocYmlFilename)).copyToDir(generatedDocDir.getParent());
+        JkPathTree.of(docBaseDir).copyTo(generatedDocDir, StandardCopyOption.REPLACE_EXISTING);
+        JkPathFile.of(baseDir.resolve(mkdocYmlFilename)).copyToDir(generatedDocDir.getParent(),
+                StandardCopyOption.REPLACE_EXISTING);
         new MkDocsAugmenter(generatedDocDir).perform();
 
     }
@@ -346,12 +347,12 @@ class Pipeline extends KBean {
      * Build + test + publish
      */
     public static void main(String[] args) throws Exception {
-        JkInit.kbean(Pipeline.class, args).run();
+        JkInit.kbean(Build.class, args).run();
     }
 
     static class BuildFast {
         public static void main(String[] args) {
-            JkInit.kbean(Pipeline.class, args).buildFast();
+            JkInit.kbean(Build.class, args).buildFast();
         }
     }
 

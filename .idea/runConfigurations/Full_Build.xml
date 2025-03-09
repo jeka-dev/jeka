@@ -5,7 +5,7 @@
       <env name="JAVA_OPTS" value="“-XX:UseSVE=0” " />
     </envs>
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
-    <option name="MAIN_CLASS_NAME" value="Pipeline" />
+    <option name="MAIN_CLASS_NAME" value="Build" />
     <module name="jeka" />
     <option name="PROGRAM_PARAMETERS" value="--clean-work --duration --clean --stacktrace --inspect --verbose" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
