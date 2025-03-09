@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2025  the original author or authors.
+ * Copyright 2014-2024  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  *  limitations under the License.
  */
 
-package test;import dev.jeka.core.api.system.JkLog;
+package test;
+
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -27,7 +29,7 @@ import java.nio.file.Paths;
 /**
  * Base class for running jeka executables.
  */
-public abstract class JekaCommandLineExecutor {
+final class JekaCmdLineExecutor {
 
     private final Path jekaShellCmd;
 
@@ -35,7 +37,7 @@ public abstract class JekaCommandLineExecutor {
 
     private Path jacocoReportFile;
 
-    protected JekaCommandLineExecutor() {
+    JekaCmdLineExecutor() {
         super();
         String relPath = "jeka-output/distrib/bin/" + scriptName();
         Path candidate = Paths.get(relPath).toAbsolutePath().normalize();
@@ -56,19 +58,19 @@ public abstract class JekaCommandLineExecutor {
         jacocoReportFile = report.toAbsolutePath().normalize();
     }
 
-    protected void runWithBaseDirJekaShell(Path baseDir, String cmdLine) {
+    void runWithBaseDirJekaShell(Path baseDir, String cmdLine) {
         runJeka(true, baseDir, cmdLine);
     }
 
-    protected JkProcess prepareWithBaseDirJekaShell(Path baseDir, String cmdLine) {
+    JkProcess prepareWithBaseDirJekaShell(Path baseDir, String cmdLine) {
        return prepareJeka(true, baseDir, cmdLine);
     }
 
-    protected void runWithDistribJekaShell(Path baseDir, String cmdLine) {
+    void runWithDistribJekaShell(Path baseDir, String cmdLine) {
         runJeka(false, baseDir, cmdLine);
     }
 
-    protected JkProcess prepareJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
+    JkProcess prepareJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
         Path cmd = useBaseDirJeka ? baseDir.resolve(scriptName()) : jekaShellCmd;
         boolean usePowerShell = JkUtilsSystem.IS_WINDOWS && useBaseDirJeka;
         if (usePowerShell) {
@@ -108,7 +110,7 @@ public abstract class JekaCommandLineExecutor {
         return process;
     }
 
-    protected void runJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
+    void runJeka(boolean useBaseDirJeka, Path baseDir, String cmdLine) {
         JkLog.startTask("Run in [%s]: jeka %s", baseDir, cmdLine);
         prepareJeka(useBaseDirJeka, baseDir, cmdLine).exec();
         JkLog.endTask();

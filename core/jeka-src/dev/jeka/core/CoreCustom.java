@@ -84,7 +84,7 @@ public class CoreCustom extends KBean {
         project.packaging.setMainClass("dev.jeka.core.tool.Main");
         project.packaging.javadocProcessor.addOptions("-notimestamp");
 
-        project.e2eTesting.add("", this::runE2eTests);
+        project.setupEndToEndTest();
     }
 
     @JkPostInit
@@ -224,15 +224,6 @@ public class CoreCustom extends KBean {
         JkUtilsPath.deleteIfExists(embeddedJar);
     }
 
-    private void runE2eTests() {
-        JkProject project = load(ProjectKBean.class).project;
-        JkTestSelection selection = project.testing.createDefaultTestSelection()
-                .addIncludePatterns(JkTestSelection.E2E_PATTERN);
-        JkTestProcessor testProcessor = project.testing.createDefaultTestProcessor();
-        testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
-        testProcessor
-               .launch(selection)
-               .assertSuccess();
-    }
+
 
 }

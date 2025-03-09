@@ -15,6 +15,7 @@
  */
 
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkBeanDescription;
 import dev.jeka.core.tool.KBean;
@@ -38,11 +39,12 @@ class MkDocsAugmenter {
         this.docDir = docDir;
     }
 
-    void perform() {
-        JkBeanDescription.STANDARD_KBEAN_CLASSES.forEach(this::perform);
+    void run() {
+        JkBeanDescription.STANDARD_KBEAN_CLASSES.forEach(this::run);
+        JkLog.info("Documents generated in: %s", docDir);
     }
 
-    private void perform(Class<? extends KBean> clazz) {
+    private void run(Class<? extends KBean> clazz) {
         String simpleClassName = clazz.getSimpleName();
         String beanName = JkUtilsString.substringBeforeLast(simpleClassName, "KBean");
         beanName = JkUtilsString.uncapitalize(beanName);

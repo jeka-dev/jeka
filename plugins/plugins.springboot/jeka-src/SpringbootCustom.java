@@ -3,6 +3,8 @@ import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
@@ -10,7 +12,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-public class SpringbootBuild extends KBean {
+public class SpringbootCustom extends KBean {
 
     @JkPostInit
     private void postInit(IntellijKBean intellijKBean) {
@@ -25,11 +27,12 @@ public class SpringbootBuild extends KBean {
         project.setModuleId("dev.jeka:springboot-plugin");
         project.setJvmTargetVersion(JkJavaVersion.V8);
         project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
-        project.compilation.dependencies.add(JkLocator.getJekaJarPath());
-        project.compilation.layout.setResources(JkPathTreeSet.ofRoots("resources"));
-        project.testing.setSkipped(true);
-        project.packaging.runtimeDependencies.remove(JkLocator.getJekaJarPath());
-
+        project.flatFacade.dependencies.compile.add(JkLocator.getJekaJarPath());
+        project.flatFacade.dependencies.runtime.add(JkLocator.getJekaJarPath());
+        project.flatFacade.dependencies.test
+                .add("org.junit.platform:junit-platform-launcher:1.12.0")
+                .add("org.junit.jupiter:junit-jupiter:5.12.0");
+        project.setupEndToEndTest();
     }
 
     @JkPostInit

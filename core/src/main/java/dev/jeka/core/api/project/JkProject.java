@@ -29,6 +29,8 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -644,6 +646,24 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         return this;
     }
 
+    /**
+     * Configures the standard end-to-end testing setup for the project.
+     * <p>
+     * This method adjusts the test selection to exclude the predefined end-to-end test pattern (tests located in `e2e` root package).
+     * and register them to be run with `e2eTest` method.
+     * </p>
+     */
+    public void setupEndToEndTest() {
+        testing.testSelection.addExcludePatterns(JkTestSelection.E2E_PATTERN);
+        e2eTesting.add("", () -> {
+            JkTestProcessor testProcessor = testing.createDefaultTestProcessor();
+            testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
+            testProcessor
+                    .launch(JkTestSelection.of().addIncludePatterns(JkTestSelection.E2E_PATTERN))
+                    .assertSuccess();
+        });
+    }
+
     LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
             return cachedTextAndLocalDeps;
@@ -657,8 +677,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
     }
-
-
 
     JkProject setDependencyTxtUrl(URL url) {
         this.dependencyTxtUrl = url;

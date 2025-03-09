@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  * @author Jerome Angibaud
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target({ElementType.FIELD})
 public @interface JkInject {
 
     /** Dependee project relative path */

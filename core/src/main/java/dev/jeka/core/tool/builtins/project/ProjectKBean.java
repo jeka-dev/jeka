@@ -178,6 +178,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     @JkDoc("Runs the registered end-to-end tests")
     public void e2eTest() {
+        if (this.project.testing.isSkipped()) {
+            return;
+        }
         this.project.e2eTesting.run();
     }
 
@@ -425,7 +428,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
         // Configure testing
         JkTestProcessor testProcessor = project.testing.testProcessor;
-        testProcessor.setJvmHints(jdks(), project.getJvmTargetVersion());
+        testProcessor.setToolChain(jdks(), project.getJvmTargetVersion());
         if (test.fork) {
             String className = JkTestProcessor.class.getName();
 

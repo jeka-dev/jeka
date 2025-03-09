@@ -14,14 +14,17 @@
  *  limitations under the License.
  */
 
-package test;
+package e2e;
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcHandler;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,49 +33,64 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * End-to-end tests about scaffolding.
- * Supposed to be run in dev.jeka.core working dir.
  */
-public class PluginScaffoldTester extends JekaCommandLineExecutor {
+class ScaffoldTest {
 
-    private final String sprinbootPluginJar = Paths.get("plugins/plugins.springboot/jeka-output/" +
-            "dev.jeka.springboot-plugin.jar").toAbsolutePath().normalize().toString();
+    private final JekaCmdLineExecutor executor = new JekaCmdLineExecutor();
 
-    public void run() {
+    private static Path PLUGIN_JAR;
 
-        System.out.println("=================================");
-        System.out.println("Scaffold Springboot tests =======");
-        System.out.println("=================================");
+    @BeforeAll
+    static void beforeAll() {
+        JkLog.setDecorator(JkLog.Style.INDENT);
+        String relPath = "jeka-output/dev.jeka.springboot-plugin.jar";
+        Path path = Paths.get(relPath);
+        if (!Files.exists(path)) {
+            path = Paths.get("plugins/plugins.springboot").resolve(relPath);
+        }
+        PLUGIN_JAR = path.toAbsolutePath().normalize();
+    }
 
-        // Regular project
-        String scaffoldCmd = scaffoldArgs("project: scaffold");
-        String buildCmd = withJavaVersionArgs("project: info pack version=0.0.1");
+    @Test
+    void scaffold_regularProject_ok() {
         RunChecker runChecker = new RunChecker();
-        runChecker.scaffoldCmd = scaffoldCmd;
-        runChecker.buildCmd = buildCmd;
-        //runChecker.runCmd = withJavaVersionArgs("project: runJar");
+        runChecker.scaffoldCmd = scaffoldArgs("project: scaffold");
+        runChecker.buildCmd = withJavaVersionArgs("project: info test pack version=0.0.1");
         runChecker.run();
+    }
 
-        // Project with simple layout
-        scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold");
-        buildCmd = withJavaVersionArgs("project: pack");
-
-        runChecker = new RunChecker();
-        runChecker.scaffoldCmd = scaffoldCmd;
-        runChecker.buildCmd = buildCmd;
+    @Test
+    void scaffold_simpleLayoutProject_ok() {
+        RunChecker runChecker = new RunChecker();
+        runChecker.scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold");
+        runChecker.buildCmd = withJavaVersionArgs("project: test pack");
         runChecker.run();
+    }
 
-        // Project with self springboot
-        scaffoldCmd = scaffoldArgs("base: scaffold springboot:");
-        buildCmd = withJavaVersionArgs("base: test pack");
-        runChecker = new RunChecker();
-        runChecker.scaffoldCmd = scaffoldCmd;
-        runChecker.buildCmd = buildCmd;
+    @Test
+    void scaffold_base_ok() {
+        RunChecker runChecker = new RunChecker();
+        runChecker.scaffoldCmd = scaffoldArgs("base: scaffold springboot:");
+        runChecker.buildCmd = withJavaVersionArgs("base: test pack");
         runChecker.cleanup = false;
-        //runChecker.runCmd = withJavaVersionArgs("project: runJar");
         Path baseDir = runChecker.run();
         JkUtilsAssert.state(!Files.exists(baseDir.resolve("src")),
-                "Self Springboot was scaffolded with project structure !");
+                "Base Springboot was scaffolded with project structure !");
         JkPathTree.of(baseDir).deleteRoot();
+    }
+
+    private String scaffoldArgs(String original)  {
+
+        // inject springboot-plugin.jar both as a jeka dependencies (for running plugin)
+        // And as a substitute of  @JkDep("${jeka.springboot.plugin.dependency}") in scaffolded project
+        return String.format(original + " -Djeka.springboot.plugin.dependency=%s -cp=%s",
+                PLUGIN_JAR, PLUGIN_JAR);
+    }
+
+    private static String withJavaVersionArgs(String original)  {
+
+        // Needed to force starting springboot process with java 17
+        return original + " -Djeka.java.version=17";
     }
 
     private class RunChecker {
@@ -87,8 +105,8 @@ public class PluginScaffoldTester extends JekaCommandLineExecutor {
         Path run() {
 
             Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
-            runWithDistribJekaShell(path, scaffoldCmd);
-            runWithDistribJekaShell(path, buildCmd);
+            executor.runWithDistribJekaShell(path, scaffoldCmd);
+            executor.runWithDistribJekaShell(path, buildCmd);
 
             // TODO Fix the problem of springboot jar on Windows
             if (runCmd != null) {
@@ -98,7 +116,7 @@ public class PluginScaffoldTester extends JekaCommandLineExecutor {
                 System.out.println("Run command " + runCmd);
 
                 // launch checker in separate process
-                JkProcHandler handler = prepareWithBaseDirJekaShell(path, runCmd)
+                JkProcHandler handler = executor.prepareWithBaseDirJekaShell(path, runCmd)
                         .setCollectStdout(true)
                         .setCollectStderr(true)
                         .execAsync();
@@ -120,28 +138,12 @@ public class PluginScaffoldTester extends JekaCommandLineExecutor {
                 JkUtilsAssert.state(ended, "Can't kill process");
 
             } else {
-                runJeka(!JkUtilsSystem.IS_WINDOWS, path, buildCmd);
+                executor.runJeka(!JkUtilsSystem.IS_WINDOWS, path, buildCmd);
             }
 
             return path;
         }
 
     }
-
-    private String scaffoldArgs(String original)  {
-
-        // inject springboot-plugin.jar both as a jeka dependencies (for running plugin)
-        // And as a substitute of  @JkDep("${jeka.springboot.plugin.dependency}") in scaffolded project
-        return String.format(original + " -Djeka.springboot.plugin.dependency=%s -cp=%s",
-                sprinbootPluginJar,
-                sprinbootPluginJar);
-    }
-
-    private String withJavaVersionArgs(String original)  {
-
-        // Needed to force starting springboot process with java 17
-        return original + " -Djeka.java.version=17";
-    }
-
 
 }

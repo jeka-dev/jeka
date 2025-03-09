@@ -43,7 +43,9 @@ public final class JkTestSelection implements Serializable {
 
     /**
      * A regular expression pattern for selecting integration test classes.
-     * The pattern `.*IT` matches test class names ending with "IT".
+     * The pattern `.*IT` matches test class names ending with "IT".<p>
+     * Integration tests are tests run within the regular test phase but
+     * running slower than regular unit tests.
      */
     public static final String IT_PATTERN = ".*IT";
 
@@ -52,10 +54,11 @@ public final class JkTestSelection implements Serializable {
      * <p>
      * This regular expression is commonly used to identify fully qualified
      * end-to-end (E2E) classes that belong to the <i>e2e</i> package.
+     * <p>
+     * End-to-end tests are tests running in <i>e2eTest</i> after the
+     * application or library has been packaged.
      */
     public static final String E2E_PATTERN = "^e2e\\..*";
-
-    private transient Supplier<Path> rootResolver = () -> Paths.get("");
 
     private JkPathSequence testClassRoots = JkPathSequence.of();
 
@@ -95,16 +98,6 @@ public final class JkTestSelection implements Serializable {
      */
     public JkPathSequence getTestClassRoots() {
         return testClassRoots;
-    }
-
-    /**
-     * Adds specified dir to the test class root directories. It can be a collection of path or
-     * a single path (as Path implements Iterable<Path>
-     */
-    public JkTestSelection addTestClassRoots(Iterable<Path> paths) {
-        List<Path> pathList = JkUtilsPath.disambiguate(paths);
-        testClassRoots = testClassRoots.and(pathList);
-        return this;
     }
 
     /**
@@ -164,8 +157,6 @@ public final class JkTestSelection implements Serializable {
         return this;
     }
 
-
-
     public Set<String> getIncludeTags() {
         return Collections.unmodifiableSet(includeTags);
     }
@@ -197,15 +188,6 @@ public final class JkTestSelection implements Serializable {
     }
 
     /**
-     * If some testClassRoots are defined with relative paths, these ones will be resolved
-     * against the path supplied by the specified supplier.
-     */
-    public JkTestSelection setRootResolver(Supplier<Path> rootPathResolver) {
-        this.rootResolver = rootPathResolver;
-        return this;
-    }
-
-    /**
      * Sets the include patterns for selecting test classes. Include patterns are
      * regular expressions used to filter test class names. Only test classes
      * whose names match at least one of the specified patterns will be included.
@@ -213,10 +195,6 @@ public final class JkTestSelection implements Serializable {
     public JkTestSelection setIncludePatterns(Collection<String> includePatterns) {
         this.includePatterns = new LinkedHashSet<>(includePatterns);
         return this;
-    }
-
-    public void resolveTestRootClasses() {
-        testClassRoots = testClassRoots.resolvedTo(rootResolver.get());
     }
 
     /**
@@ -247,7 +225,11 @@ public final class JkTestSelection implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Test Class Roots: ").append(testClassRoots.relativizeFromWorkingDir());
+        if (testClassRoots != null) {
+            sb.append("Test Class Roots: ").append(testClassRoots.relativizeFromWorkingDir());
+        } else {
+            sb.append("Test Class Roots: not set.");
+        }
         if (!includePatterns.isEmpty()) {
             sb.append(", Include Patterns: ").append(includePatterns);
         }
@@ -261,6 +243,17 @@ public final class JkTestSelection implements Serializable {
             sb.append(", Exclude Tags: ").append(excludeTags);
         }
         return sb.toString();
+    }
+
+    /**
+     * Adds specified dir to the test class root directories. It can be a collection of path or
+     * a single path (as Path implements Iterable<Path>)
+     */
+    JkTestSelection withTestClassRoots(Iterable<Path> paths) {
+        List<Path> pathList = JkUtilsPath.disambiguate(paths);
+        JkTestSelection result = copy();
+        result.testClassRoots = JkPathSequence.of(pathList);
+        return result;
     }
 
     boolean hasTestClasses() {

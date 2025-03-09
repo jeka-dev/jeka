@@ -137,10 +137,9 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
                     "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies" +
                     "to the classpath for testing.");
         }
-        JkTestSelection testSelection = JkTestSelection.of().addTestClassRoots(getAppClasses().getRoot());
-        JkTestResult testResult = JkTestProcessor.of(JkClassLoader.ofCurrent().getClasspath())
+        JkTestResult testResult = JkTestProcessor.of(JkClassLoader.ofCurrent()::getClasspath, getAppClasses()::getRoot)
                 .setForkingProcess(true)
-                .launch(testSelection);
+                .launch();
         if (!testResult.getFailures().isEmpty()) {
             System.exit(1);
         }

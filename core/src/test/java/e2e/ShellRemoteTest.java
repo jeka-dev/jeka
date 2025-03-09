@@ -117,6 +117,9 @@ class ShellRemoteTest  {
 
     @Test
     void cowsay_dockerBuildNative_ok() {
+        if (isDockerAbsent()) {
+            return;
+        }
         prepareJeka("-ru %s -Djeka.java.version=21 docker: buildNative", COW_SAY_URL).exec();
     }
 

@@ -92,7 +92,7 @@ public final class JkTestProcessor {
     private static final String PLATFORM_LAUNCHER_CLASS_NAME = "org.junit.platform.launcher.Launcher";
 
     // This class is absent from platform-engine 1.5.2,
-    // so if 1.5.2 is present inh the classpath, we need to add 1.6 as well.
+    // so if 1.5.2 is present in the classpath, we need to add 1.6 as well.
     private static final String PLATFORM_ENGINE_CLASS_NAME = "org.junit.platform.engine.EngineDiscoveryListener";
 
     private static final String PLATFORM_REPORT_CLASS_NAME =
@@ -114,6 +114,8 @@ public final class JkTestProcessor {
     public final JkEngineBehavior engineBehavior;
 
     private final Supplier<JkPathSequence> testClasspath;
+
+    private final Supplier<Iterable<Path>> testClassRootDirs;
 
     public final JkRunnables preActions = JkRunnables.of();
 
@@ -137,17 +139,19 @@ public final class JkTestProcessor {
     private Supplier<JkRepoSet> repoSetSupplier = () ->
             JkRepoProperties.of(JkProperties.ofStandardProperties()).getDownloadRepos();
 
-    private JkTestProcessor(Supplier<JkPathSequence> testClasspath) {
+    private JkTestProcessor(Supplier<JkPathSequence> testClasspath, Supplier<Iterable<Path>> testClassRootDirs) {
         this.engineBehavior = new JkEngineBehavior();
         this.testClasspath = testClasspath;
+        this.testClassRootDirs = testClassRootDirs;
     }
 
-    public static JkTestProcessor of(Supplier<JkPathSequence> testClasspath) {
-        return new JkTestProcessor(testClasspath);
+    public static JkTestProcessor of(Supplier<JkPathSequence> testClasspath,
+                                     Supplier<Iterable<Path>> testClassRootDirs) {
+        return new JkTestProcessor(testClasspath, testClassRootDirs);
     }
 
-    public static JkTestProcessor of(JkPathSequence testClasspath) {
-        return new JkTestProcessor(() -> testClasspath);
+    public static JkTestProcessor of(JkPathSequence testClasspath, Iterable<Path> testClassRootDirs) {
+        return new JkTestProcessor(() -> testClasspath, () -> testClassRootDirs);
     }
 
     public static boolean isEngineTestPresent() {
@@ -163,7 +167,7 @@ public final class JkTestProcessor {
         return this;
     }
 
-    public JkTestProcessor setJvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
+    public JkTestProcessor setToolChain(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
         JkUtilsAssert.argument(jdks != null, "jdks argument cannot be null");
         this.jvmHints = new JvmHints(jdks, javaVersion);
         return this;
@@ -202,18 +206,19 @@ public final class JkTestProcessor {
      * the classpath of the current classloader plus the specified one.
      */
     public JkTestResult launch(JkTestSelection testSelection) {
-        if (!testSelection.hasTestClasses()) {
-            JkLog.info("No test class found in %s. No test to run." , testSelection.getTestClassRoots() );
+        JkTestSelection effectiveSelection = testSelection.withTestClassRoots(testClassRootDirs.get());
+        if (!effectiveSelection.hasTestClasses()) {
+            JkLog.info("No test class found in %s. No test to run." , effectiveSelection.getTestClassRoots() );
             return JkTestResult.of();
         }
         final JkTestResult result;
         preActions.run();
         JkLog.startTask("execute-tests");
-        JkLog.verbose(testSelection.toString());
+        JkLog.verbose(effectiveSelection.toString());
         if (forkingProcess == null) {
-            result = launchInClassloader(testSelection);
+            result = launchInClassloader(effectiveSelection);
         } else {
-            result = launchInForkedProcess(testSelection);
+            result = launchInForkedProcess(effectiveSelection);
         }
         postActions.run();
         boolean success = result.getFailures().isEmpty();
@@ -227,8 +232,16 @@ public final class JkTestProcessor {
         JkLog.info(summaryTitle + ": " + result.getTestCount().toReportString());
         JkLog.endTask();
 
-
         return result;
+    }
+
+    /**
+     * Launches the default test selection using the underlying JUnit Platform setup.
+     * This method executes tests defined within the provided test classpath and root directories.
+     *
+     */
+    public JkTestResult launch() {
+        return launch(JkTestSelection.of());
     }
 
     private List<Path> computeClasspath(JkPathSequence testClasspath) {

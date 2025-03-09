@@ -68,7 +68,7 @@ public class JkProjectTesting {
         this.project = project;
         compilation = new JkProjectTestCompilation();
         testProcessor = createDefaultTestProcessor();
-        testSelection = createDefaultTestSelection();
+        testSelection = JkTestSelection.of();
     }
 
     /**
@@ -79,7 +79,6 @@ public class JkProjectTesting {
         consumer.accept(this);
         return this;
     }
-
 
     /**
      * Returns the classpath to run the test. It consists in test classes + prod classes +
@@ -185,25 +184,18 @@ public class JkProjectTesting {
     }
 
     /**
-     * Creates a default test selection for the current project.
-     * The default test selection includes the compiled test classes
-     */
-    public JkTestSelection createDefaultTestSelection() {
-        return JkTestSelection.of()
-                .addTestClassRoots(compilation.layout.resolveClassDir())
-                .setRootResolver(project::getBaseDir);
-    }
-
-    /**
      * Creates a default test processor for running tests.
      *
      * @return a default {@link JkTestProcessor} object.
      */
     public JkTestProcessor createDefaultTestProcessor() {
-        JkTestProcessor result = JkTestProcessor.of(() -> project.testing.getTestClasspath());
+        JkTestProcessor result = JkTestProcessor.of(
+                () -> project.testing.getTestClasspath(),   // cannot use lambda cause testing may not be present
+                () -> project.testing.compilation.layout.resolveClassDir()   // same
+        );
         final Path reportDir = compilation.layout.getOutputDir().resolve(this.reportDir);
         result
-                .setRepoSetSupplier(() -> project.dependencyResolver.getRepos()) // cannot use lambda
+                .setRepoSetSupplier(() -> project.dependencyResolver.getRepos()) // cannot use lambda cause dependencyResolver may not be present
                 .engineBehavior
                 .setLegacyReportDir(reportDir)
                 .setProgressDisplayer(defaultProgressStyle());
@@ -211,7 +203,6 @@ public class JkProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-        testSelection.resolveTestRootClasses();
         JkTestResult result = testProcessor.launch(testSelection);
         if (breakOnFailures) {
             result.assertSuccess();

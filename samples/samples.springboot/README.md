@@ -1,7 +1,7 @@
 # Sample for Jeka + Springboot
 
 Warning:
-This springboot project is highly used in integration test. Use it with caution.
+This springboot project is highly used in integration test. Modify it with caution.
 
 
 ## Play with native

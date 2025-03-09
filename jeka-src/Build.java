@@ -28,16 +28,14 @@ import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-import dev.jeka.plugins.jacoco.JkJacoco;
 import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
-import dev.jeka.plugins.sonarqube.SonarqubeKBean;
-import test.PluginScaffoldTester;
-import test.SamplesTester;
+import test.SamplesTest;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -45,8 +43,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-@JkDep("plugins/plugins.sonarqube/jeka-output/classes")
-@JkDep("plugins/plugins.jacoco/jeka-output/classes")
+@JkDep("org.junit.jupiter:junit-jupiter:5.12.0")
+@JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
+
 @JkDep("plugins/plugins.nexus/jeka-output/classes")
 class Build extends KBean {
 
@@ -72,13 +71,13 @@ class Build extends KBean {
     ProjectKBean coreProject;
 
     @JkInject("plugins/plugins.sonarqube")
-    SonarqubeBuild sonarqubeBuild;
+    ProjectKBean sonarqubeBuild;
 
     @JkInject("plugins/plugins.jacoco")
     JacocoBuild jacocoBuild;
 
     @JkInject("plugins/plugins.springboot")
-    SpringbootBuild springbootBuild;
+    SpringbootCustom springbootCustom;
 
     @JkInject("plugins/plugins.nodejs")
     NodeJsBuild nodeJsBuild;
@@ -91,8 +90,6 @@ class Build extends KBean {
 
     @JkInject("plugins/plugins.nexus")
     NexusBuild nexusBuild;
-
-    private JkJacoco jacocoForCore;
 
     private final String effectiveVersion;
 
@@ -112,13 +109,10 @@ class Build extends KBean {
         System.out.println("Effective version        : " + effectiveVersion);
         System.out.println("==============================================");
 
-        getImportedKBeans().load(ProjectKBean.class, false).forEach(this::configureCommonSettings);
-        getImportedKBeans().load(MavenKBean.class, false).forEach(
-                mavenKBean -> mavenKBean.customizePublication(this::customize));
-
-        // For better self-testing, we instrument tests with Jacoco, even if sonarqube is not used.
-        jacocoForCore = JkJacoco.ofVersion(getRunbase().getDependencyResolver(), JkJacoco.DEFAULT_VERSION);
-        jacocoForCore.configureAndApplyTo(coreProject.project);
+        getImportedKBeans().load(ProjectKBean.class, false)
+                .forEach(this::configureCommonSettings);
+        getImportedKBeans().load(MavenKBean.class, false)
+                .forEach(this::configurePublication);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -130,36 +124,23 @@ class Build extends KBean {
         importedProjectKBeans.forEach(projectKBean -> {
             JkLog.startTask("package %s", projectKBean);
             projectKBean.clean();
-            if (!projectKBean.test.skip) {
-                projectKBean.test();
-            }
+            projectKBean.test();
             projectKBean.pack();
-            if (!projectKBean.test.skip) {
-                projectKBean.e2eTest();
-            }
+            projectKBean.e2eTest();
             JkLog.endTask();
         });
         JkLog.endTask();
 
         // Run tests on sample projects if required
         if (!skipTest) {
-            doRunSamples();
+            testSamples();
         }
 
-        // Share same versioning for all sub-projects
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(
-                projectJkBean -> JkVersionFromGit.of().handleVersioning(projectJkBean.project)
-        );
-        String branch = computeBranchName();
-        JkLog.info("Current build branch: %s", branch);
-        JkLog.info("current ossrhUser:  %s", ossrhUser);
+
 
         // Publish artifacts on maven central only if we are on 'master' branch
-        publish();
 
-        if (getRunbase().getProperties().get("sonar.host.url") != null) {
-            coreProject.load(SonarqubeKBean.class).run();
-        }
+        publish();
 
         // Copy dir to and augment documentation
         JkLog.startTask("augment-mkdocs");
@@ -168,7 +149,9 @@ class Build extends KBean {
     }
 
     private void publish() throws IOException {
+        JkLog.info("Current build branch: %s", computeBranchName());
         if (shouldPublishOnMavenCentral()) {
+            JkLog.info("current ossrhUser:  %s", ossrhUser);
             JkLog.startTask("publish-artifacts");
             getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
@@ -217,55 +200,27 @@ class Build extends KBean {
         });
     }
 
-    @JkDoc("publish-on-local-repo")
+    @JkDoc("publishes on local repo")
     public void publishLocal() {
         getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
         bomPublication().publishLocal();
     }
 
-    @JkDoc("Clean Pack jeka-core")
+    @JkDoc("Cleans Pack jeka-core")
     public void buildCore() {
         coreProject.clean();
         coreProject.pack();
     }
 
-    @JkDoc("Run samples")
-    public void runSamples()  {
-        new SamplesTester().run();
-    }
-
-    @JkDoc("Run scaffold test")
-    public void runScaffoldsWithPlugins() {
-        new PluginScaffoldTester().run();
+    @JkDoc("Tests samples")
+    public void testSamples()  {
+        load(BaseKBean.class).test();
     }
 
     @JkPostInit(required = true)
     private void postInit(NexusKBean nexusKBean) {
         nexusKBean.configureNexusRepo(nexusRepo ->
                 nexusRepo.setReadTimeout(60*1000));
-    }
-
-    private void doRunSamples() {
-        JkLog.startTask("run-samples");
-        SamplesTester samplesTester = new SamplesTester();
-        PluginScaffoldTester pluginScaffoldTester = new PluginScaffoldTester();
-
-        // Instrument core with Jacoco when running sample tests
-        if (jacocoForCore != null) {
-            samplesTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
-            pluginScaffoldTester.setJacoco(jacocoForCore.getAgentJar(), jacocoForCore.getExecFile());
-        }
-
-        // run sample including springboot scaffolding project
-        pluginScaffoldTester.run();
-
-        // run samples
-        samplesTester.run();
-
-        if (jacocoForCore != null) {
-            jacocoForCore.generateExport();
-        }
-        JkLog.endTask();
     }
 
     private boolean shouldPublishOnMavenCentral() {
@@ -302,15 +257,20 @@ class Build extends KBean {
         JkProject project = projectKBean.project;
         project.setVersion(effectiveVersion);
         project.compilation.addJavaCompilerOptions("-g");
+        JkVersionFromGit.handleVersioning(project, "");
     }
 
-    private void customize(JkMavenPublication mavenPublication) {
-        mavenPublication
+    private void configurePublication(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(this::configurePublication);
+    }
+
+    private void configurePublication(JkMavenPublication publication) {
+        publication
                 .setRepos(this.publishRepo())
                 .pomMetadata
-                    .setProjectUrl("https://jeka.dev")
-                    .setScmUrl("https://github.com/jerkar/jeka.git")
-                    .addApache2License();
+                .setProjectUrl("https://jeka.dev")
+                .setScmUrl("https://github.com/jerkar/jeka.git")
+                .addApache2License();
     }
 
     private JkMavenPublication bomPublication() {
@@ -326,7 +286,7 @@ class Build extends KBean {
             JkProject project = projectKBean.project;
             result.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
         });
-        customize(result);
+        configurePublication(result);
         return result;
     }
 
@@ -339,7 +299,7 @@ class Build extends KBean {
         JkPathTree.of(docBaseDir).copyTo(generatedDocDir, StandardCopyOption.REPLACE_EXISTING);
         JkPathFile.of(baseDir.resolve(mkdocYmlFilename)).copyToDir(generatedDocDir.getParent(),
                 StandardCopyOption.REPLACE_EXISTING);
-        new MkDocsAugmenter(generatedDocDir).perform();
+        new MkDocsAugmenter(generatedDocDir).run();
 
     }
 

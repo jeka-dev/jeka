@@ -62,9 +62,7 @@ public class CompressSpringbootJarWriter implements  AutoCloseable, SpringbootJa
 
     /**
      * Create a new {@link CompressSpringbootJarWriter} instance.
-     * @param file the file to write
-     * @throws IOException if the file cannot be opened
-     * @throws FileNotFoundException if the file cannot be found
+     * @param targetPath the file to write
      */
     public CompressSpringbootJarWriter(Path targetPath)  {
         if (targetPath.getParent() != null) {

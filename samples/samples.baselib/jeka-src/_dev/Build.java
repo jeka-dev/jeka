@@ -13,6 +13,7 @@ class Build extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(BaseKBean baseKBean) {
+        baseKBean.setModuleId("dev.jeka:samples-baselib");
     }
 
     @JkPostInit

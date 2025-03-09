@@ -68,7 +68,7 @@ public class SpringbootScaffoldTest {
     }
 
     @Test
-    public void scaffoldProject_regularWithSimpleLayout_ok() throws IOException {
+    public void scaffoldProject_regularWithSimpleLayout_ok() {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
         project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
@@ -80,8 +80,8 @@ public class SpringbootScaffoldTest {
 
         // Check project layout
         assertFalse(Files.isDirectory(baseDir.resolve("src/main/java")));
-        assertTrue(Files.exists(baseDir.resolve("src/app//Application.java")));
-        assertFalse(Files.isDirectory(baseDir.resolve("res")));
+        assertTrue(Files.exists(baseDir.resolve("src/app/Application.java")));
+        assertTrue(Files.isDirectory(baseDir.resolve("res")));
 
         // Check default KBean is present
         String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();
