@@ -30,12 +30,10 @@ import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
-import dev.jeka.core.tool.builtins.tooling.git.GitKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
-import test.SamplesTest;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -119,27 +117,20 @@ class Build extends KBean {
     public void run() throws IOException {
 
         // Build core project then plugins
-        JkLog.startTask("build-core-and-plugins");
         List<ProjectKBean> importedProjectKBeans = getImportedKBeans().get(ProjectKBean.class, false);
         importedProjectKBeans.forEach(projectKBean -> {
-            JkLog.startTask("package %s", projectKBean);
+            JkLog.startTask("pack-and-test %s", projectKBean);
             projectKBean.clean();
             projectKBean.test();
             projectKBean.pack();
             projectKBean.e2eTest();
             JkLog.endTask();
         });
-        JkLog.endTask();
 
         // Run tests on sample projects if required
         if (!skipTest) {
             testSamples();
         }
-
-
-
-        // Publish artifacts on maven central only if we are on 'master' branch
-
         publish();
 
         // Copy dir to and augment documentation
@@ -169,7 +160,6 @@ class Build extends KBean {
                 this.coreProject.load(CoreCustom.class).publishJekaDockerImage();
             }
 
-            // If not on 'master' branch, publish only locally
         } else {
             JkLog.startTask("publish-locally");
             publishLocal();
@@ -316,10 +306,6 @@ class Build extends KBean {
         }
     }
 
-    static class ShowVersion {
-        public static void main(String[] args) {
-            System.out.println(JkInit.kbean(GitKBean.class, args).gerVersionFromGit().getVersion());
-        }
-    }
+
 
 }

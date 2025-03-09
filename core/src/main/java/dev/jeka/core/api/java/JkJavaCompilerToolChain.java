@@ -260,10 +260,8 @@ public final class JkJavaCompilerToolChain {
                 null, new JkDiagnosticListener(), options, null, javaFileObjects);
         if (JkLog.isVerbose()) {
             JkLog.verbose("Compile in-process.");
-            if (JkLog.isDebug()) {
-                JkLog.debug("Compile options: %s", options);
-            } else {
-                JkLog.verbose("Compile options: %s", JkUtilsString.ellipse(options.toString(), 100));
+            if (JkLog.isVerbose()) {
+                JkLog.verbose("Compile options: %s", compileOptionsAsString(options));
             }
         }
         return task.call();
@@ -271,7 +269,7 @@ public final class JkJavaCompilerToolChain {
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Fork compile using command " + process.getParamAt(0));
-        JkLog.info("Compile options: " + compileSpec.getOptions());
+        JkLog.info("Compile options: " + compileOptionsAsString(compileSpec.getOptions()));
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));
@@ -358,6 +356,21 @@ public final class JkJavaCompilerToolChain {
         return javac;
     }
 
+    private static String compileOptionsAsString(List<String> options) {
+        StringBuilder sb = new StringBuilder();
+        for (String option : options) {
+            if (option.contains(File.pathSeparator) && option.length() > 100) {
+                Arrays.stream(option.split(File.pathSeparator))
+                        .forEach(item -> sb.append("\n    ").append(item));
+            } else if (option.startsWith("-")) {
+                sb.append("\n  ").append(option);
+            } else {
+                sb.append(" ").append(option);
+            }
+        }
+        return sb.toString();
+    }
+
     public static class JkJdks {
 
         private final Map<JkJavaVersion, Path> explicitJdkHomes;
@@ -390,4 +403,7 @@ public final class JkJavaCompilerToolChain {
             return result;
         }
     }
+
 }
+
+
