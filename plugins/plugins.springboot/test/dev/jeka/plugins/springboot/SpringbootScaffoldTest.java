@@ -49,7 +49,7 @@ public class SpringbootScaffoldTest {
                 .run();
 
         // check .gitIgnore
-        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitIgnore")).readAsString();
+        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitignore")).readAsString();
         assertTrue(gitIgnoreContent.contains("/.jeka-work"));
         assertTrue(gitIgnoreContent.contains("/jeka-output"));
 
