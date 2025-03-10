@@ -74,7 +74,7 @@ public class CoreCustom extends KBean {
                     .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
         project.compilerToolChain.setForkCompiler(true);
 
-        project.compilation.addJavaCompilerOptions("-Xlint:none", "-g");
+        project.compilation.addJavaCompilerOptions("-Xlint:none");
         project.compilation.layout.setMixResourcesAndSources();
 
         project.testing.testSelection.addExcludePatterns(JkTestSelection.E2E_PATTERN);

@@ -69,7 +69,7 @@ class Build extends KBean {
     ProjectKBean coreProject;
 
     @JkInject("plugins/plugins.sonarqube")
-    ProjectKBean sonarqubeBuild;
+    SonarqubeBuild sonarqubeBuild;
 
     @JkInject("plugins/plugins.jacoco")
     JacocoBuild jacocoBuild;
