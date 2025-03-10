@@ -207,14 +207,15 @@ public final class JkTestProcessor {
      */
     public JkTestResult launch(JkTestSelection testSelection) {
         JkTestSelection effectiveSelection = testSelection.withTestClassRoots(testClassRootDirs.get());
-        if (!effectiveSelection.hasTestClasses()) {
-            JkLog.info("No test class found in %s. No test to run." , effectiveSelection.getTestClassRoots() );
-            return JkTestResult.of();
-        }
         final JkTestResult result;
         preActions.run();
         JkLog.startTask("execute-tests");
         JkLog.verbose(effectiveSelection.toString());
+        if (!effectiveSelection.hasTestClasses()) {
+            JkLog.info("No test class found in %s." , effectiveSelection.getTestClassRoots() );
+            JkLog.endTask();
+            return JkTestResult.of();
+        }
         if (forkingProcess == null) {
             result = launchInClassloader(effectiveSelection);
         } else {

@@ -163,10 +163,6 @@ public class JkProjectTesting {
             this.project.compilation.runIfNeeded();
         }
         this.compilation.run();
-        if (!JkPathTree.of(this.compilation.layout.resolveClassDir()).containFiles()) {
-            JkLog.info("No tests to run.");
-            return;
-        }
         executeWithTestProcessor();
         postActions.run();
     }
