@@ -85,7 +85,7 @@ public final class DockerKBean extends KBean {
         String imageName = resolveJvmImageName();
         String dirName = "docker-build-" + imageName.replace(':', '#');
         JkLog.startTask("build-jvm-docker-image");
-        JkLog.info("Image Name : " + imageName);
+        JkLog.info("Image Name: " + imageName);
         Path contextDir = getOutputDir().resolve(dirName);
         jvmDockerBuild(buildable).buildImage(contextDir, imageName);
         JkLog.endTask();
@@ -106,7 +106,7 @@ public final class DockerKBean extends KBean {
         String imageName = resolveNativeImageName();
         String dirName = "docker-build-" + imageName.replace(':', '#');
         JkLog.startTask("build-native-docker-image");
-        JkLog.info("Image Name : " + imageName);
+        JkLog.info("Image Name: " + imageName);
         Path contextDir = getOutputDir().resolve(dirName);
         nativeDockerBuild(buildable).buildImage(contextDir, imageName);
         JkLog.endTask();
