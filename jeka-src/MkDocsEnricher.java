@@ -1,19 +1,3 @@
-/*
- * Copyright 2014-2025  the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -27,15 +11,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 /*
- * Include inferred documentation (from @JkDoc, @JkPostInt,...)  in KBeans md doc.
+ * Include inferred documentation (from @JkDoc, @JkPostInt,...)  in KBeans MkDocs.
  */
-class MkDocsAugmenter {
+class MkDocsEnricher {
 
-    private static final String PLACE_HOLDER = Matcher.quoteReplacement("<!-- autogen-doc -->");
+    private static final String HEADER_PLACE_HOLDER = Matcher.quoteReplacement("<!-- header-autogen-doc -->");
+
+    private static final String BODY_PLACE_HOLDER = Matcher.quoteReplacement("<!-- body-autogen-doc -->");
 
     private final Path docDir;
 
-     MkDocsAugmenter(Path docDir) {
+     MkDocsEnricher(Path docDir) {
         this.docDir = docDir;
     }
 
@@ -53,17 +39,18 @@ class MkDocsAugmenter {
         JkPathFile docPathFile = JkPathFile.of(docFileName);
         String fileContent = docPathFile.readAsString();
 
-        String genContent = JkBeanDescription.of(clazz).toMdContent();
-        String newFileContent = replace(fileContent, genContent);
+        JkBeanDescription.MdContent genContent = JkBeanDescription.of(clazz).toMdContent();
+        String newFileContent = replace(fileContent, HEADER_PLACE_HOLDER, genContent.header);
+        newFileContent = replace(newFileContent, BODY_PLACE_HOLDER, genContent.body);
 
         docPathFile.deleteIfExist().createIfNotExist().write(newFileContent);
     }
 
-    private static String replace(String original, String replacement) {
+    private static String replace(String original, String placeHolder, String replacement) {
         List<String> result = new LinkedList<>();
         List<String> lines = Arrays.asList(original.split("\n"));
         for (String line : lines) {
-            if (line.trim().equals(PLACE_HOLDER)) {
+            if (line.trim().equals(placeHolder)) {
                 result.add(replacement);
             } else {
                 result.add(line);

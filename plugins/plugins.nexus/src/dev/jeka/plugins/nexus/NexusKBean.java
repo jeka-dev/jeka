@@ -72,6 +72,16 @@ public class NexusKBean extends KBean {
         return this;
     }
 
+    /**
+     * Sets the read timeout for the Nexus repository HTTP connections.
+     *
+     * The timeout is defined in milliseconds. A value of zero indicates
+     * no timeout (infinite).
+     */
+    public NexusKBean setRepoReadTimeout(int millis) {
+        return configureNexusRepo(nexusRepo -> nexusRepo.setReadTimeout(millis));
+    }
+
     private String[] profiles() {
         return JkUtilsString.isBlank(profileNamesFilter) ? new String[0] : profileNamesFilter.split(",");
     }

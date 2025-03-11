@@ -401,7 +401,7 @@ public class Main {
         }
         ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath).get();
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
-        String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent();
+        String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent().toString();
         System.out.println(mdDoc);
         return true;
     }

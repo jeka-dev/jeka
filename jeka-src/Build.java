@@ -1,19 +1,3 @@
-/*
- * Copyright 2014-2024  the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 import dev.jeka.core.CoreCustom;
 import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.JkRepo;
@@ -63,7 +47,7 @@ class Build extends KBean {
     @JkPropValue("jeka.test.skip")
     public boolean skipTest = false;
 
-    // ------ Slave projects
+    // ------ Child projects
 
     @JkInject("core")
     ProjectKBean coreProject;
@@ -98,15 +82,6 @@ class Build extends KBean {
 
     @Override
     protected void init()  {
-
-        System.out.println("==============================================");
-        System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
-        System.out.println("Branch from Git          : " + computeBranchName());
-        System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOnCurrentCommit());
-        System.out.println("Tag Count from Git       : " + JkGit.of(getBaseDir()).getTagsOnCurrentCommit().size());
-        System.out.println("Effective version        : " + effectiveVersion);
-        System.out.println("==============================================");
-
         getImportedKBeans().load(ProjectKBean.class, false)
                 .forEach(this::configureCommonSettings);
         getImportedKBeans().load(MavenKBean.class, false)
@@ -115,6 +90,14 @@ class Build extends KBean {
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void run() throws IOException {
+
+        System.out.println("==============================================");
+        System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
+        System.out.println("Branch from Git          : " + computeBranchName());
+        System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOnCurrentCommit());
+        System.out.println("Tag Count from Git       : " + JkGit.of(getBaseDir()).getTagsOnCurrentCommit().size());
+        System.out.println("Effective version        : " + effectiveVersion);
+        System.out.println("==============================================");
 
         // Build the core and plugin projects
         List<ProjectKBean> importedProjectKBeans = getImportedKBeans().get(ProjectKBean.class, false);
@@ -129,24 +112,34 @@ class Build extends KBean {
 
         // Run tests on sample projects if required
         if (!skipTest) {
-            testSamples();
+            load(BaseKBean.class).test();
         }
         publish();
+        enrichDoc();
 
-        // Copy dir to and augment documentation
-        JkLog.startTask("augment-mkdocs");
-        this.copyDocsToWorkDir();
-        JkLog.endTask();
+    }
+
+    @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
+    public void setPosixPermissions() {
+        JkPathTree.of("../samples").andMatching("*/jeka", "**/jeka").getFiles().forEach(path -> {
+            JkLog.info("Setting exec permission on git for file " + path);
+            JkProcess.ofCmdLine("git update-index --chmod=+x " + path).run();
+        });
+    }
+
+    @JkPostInit(required = true)
+    private void postInit(NexusKBean nexusKBean) {
+        nexusKBean.configureNexusRepo(nexusRepos -> nexusRepos.setReadTimeout(60 * 1000));
     }
 
     private void publish() throws IOException {
-        JkLog.info("Current build branch: %s", computeBranchName());
         if (shouldPublishOnMavenCentral()) {
             JkLog.info("current ossrhUser:  %s", ossrhUser);
             JkLog.startTask("publish-artifacts");
             getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publish);
             bomPublication().publish();
-            closeAndReleaseRepo();
+            JkRepo repo = publishRepo().getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
+            JkNexusRepos.ofRepo(repo).closeAndRelease();
             JkLog.endTask();
 
             JkLog.startTask("create-github-release");
@@ -162,55 +155,10 @@ class Build extends KBean {
 
         } else {
             JkLog.startTask("publish-locally");
-            publishLocal();
+            getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
+            bomPublication().publishLocal();
             JkLog.endTask();
         }
-    }
-
-    @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
-    public void setPosixPermissions() {
-        JkPathTree.of("../samples").andMatching("*/jeka", "**/jeka").getFiles().forEach(path -> {
-            JkLog.info("Setting exec permission on git for file " + path);
-            JkProcess.ofCmdLine("git update-index --chmod=+x " + path).run();
-        });
-    }
-
-    @JkDoc("Closes and releases staging Nexus repositories (typically, after a publish).")
-    public void closeAndReleaseRepo() {
-        JkRepo repo = publishRepo().getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
-        JkNexusRepos.ofRepo(repo).closeAndRelease();
-    }
-
-    @JkDoc("Clean build of core + plugins bypassing tests.")
-    public void buildFast() {
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(bean -> {
-            bean.project.flatFacade.setTestsSkipped(true);
-            bean.clean();
-            bean.project.pack();
-        });
-    }
-
-    @JkDoc("publishes on local repo")
-    public void publishLocal() {
-        getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
-        bomPublication().publishLocal();
-    }
-
-    @JkDoc("Cleans Pack jeka-core")
-    public void buildCore() {
-        coreProject.clean();
-        coreProject.pack();
-    }
-
-    @JkDoc("Tests samples")
-    public void testSamples()  {
-        load(BaseKBean.class).test();
-    }
-
-    @JkPostInit(required = true)
-    private void postInit(NexusKBean nexusKBean) {
-        nexusKBean.configureNexusRepo(nexusRepo ->
-                nexusRepo.setReadTimeout(60*1000));
     }
 
     private boolean shouldPublishOnMavenCentral() {
@@ -280,7 +228,8 @@ class Build extends KBean {
         return result;
     }
 
-    private void copyDocsToWorkDir() {
+    private void enrichDoc() {
+        JkLog.startTask("enrich-mkdocs");
         String mkdocYmlFilename = "mkdocs.yml";
         Path baseDir = JkPathFile.of(mkdocYmlFilename).exists() ? Paths.get(".") : Paths.get("..");
         Path docBaseDir = baseDir.resolve("docs");
@@ -289,8 +238,8 @@ class Build extends KBean {
         JkPathTree.of(docBaseDir).copyTo(generatedDocDir, StandardCopyOption.REPLACE_EXISTING);
         JkPathFile.of(baseDir.resolve(mkdocYmlFilename)).copyToDir(generatedDocDir.getParent(),
                 StandardCopyOption.REPLACE_EXISTING);
-        new MkDocsAugmenter(generatedDocDir).run();
-
+        new MkDocsEnricher(generatedDocDir).run();
+        JkLog.endTask();
     }
 
     /**
@@ -299,13 +248,5 @@ class Build extends KBean {
     public static void main(String[] args) throws Exception {
         JkInit.kbean(Build.class, args).run();
     }
-
-    static class BuildFast {
-        public static void main(String[] args) {
-            JkInit.kbean(Build.class, args).buildFast();
-        }
-    }
-
-
 
 }
