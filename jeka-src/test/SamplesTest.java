@@ -7,6 +7,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -57,8 +58,8 @@ public class SamplesTest {
 
     @Test
     void sonarqube_ok() {
-        Path sonarqubePluginJar = pluginsDir().resolve("plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar");
-        run("samples.sonarqube", "-cw " +
+        Path sonarqubePluginJar = fromPlugins("plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar");
+        run("samples.sonarqube", "-cw -i -v " +
                 "-cp=" + sonarqubePluginJar +
                 " project: info pack sonarqube: -Djeka.java.version=17");
     }
@@ -70,13 +71,13 @@ public class SamplesTest {
         if (JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64()) {
             return;
         }
-        Path protobufPluginJar = pluginsDir().resolve("plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin.jar");
+        Path protobufPluginJar = fromPlugins("plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin.jar");
         run("samples.protobuf", "-ivc project: test pack -cp=" + protobufPluginJar);
     }
 
     @Test
     void jacoco_ok() {
-        Path jacocoPluginJar = pluginsDir().resolve("plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar");
+        Path jacocoPluginJar = fromPlugins("plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar");
         run("samples.jacoco", "-c -la=false -cp=" + jacocoPluginJar +
                 " project: test pack : checkGeneratedReport");
     }
@@ -108,11 +109,19 @@ public class SamplesTest {
         executor.runWithDistribJekaShell(sampleBaseDir, cmdLine);
     }
 
-    private Path pluginsDir() {
+    private static Path pluginsDir() {
         if (Paths.get("").toAbsolutePath().getFileName().toString().equals("jeka")) {
             return Paths.get("plugins");
         }
         return Paths.get("..");
+    }
+
+    private static Path fromPlugins(String relativePath) {
+        Path result = pluginsDir().resolve(relativePath).toAbsolutePath().normalize();
+        if (!Files.exists(result)) {
+            throw new IllegalStateException(result + " not found");
+        }
+        return result;
     }
 
 }

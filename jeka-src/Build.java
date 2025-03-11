@@ -44,7 +44,7 @@ import java.util.List;
 @JkDep("org.junit.jupiter:junit-jupiter:5.12.0")
 @JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
 
-@JkDep("plugins/plugins.nexus/jeka-output/classes")
+@JkDep("dev.jeka:nexus-plugin:0.11.23")
 class Build extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
@@ -116,10 +116,10 @@ class Build extends KBean {
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void run() throws IOException {
 
-        // Build core project then plugins
+        // Build the core and plugin projects
         List<ProjectKBean> importedProjectKBeans = getImportedKBeans().get(ProjectKBean.class, false);
         importedProjectKBeans.forEach(projectKBean -> {
-            JkLog.startTask("pack-and-test %s", projectKBean);
+            JkLog.startTask("pack-and-test %s", projectKBean.project.getBaseDir().getFileName());
             projectKBean.clean();
             projectKBean.test();
             projectKBean.pack();

@@ -23,15 +23,12 @@ class SonarqubeBuild extends KBean {
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
+        project.flatFacade
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .setMixResourcesAndSources()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                //.setMainArtifactJarType(JkProjectPackaging.JarType.SHADE)
-                .dependencies.compile
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+        project.flatFacade.dependencies.compile
                     .add(JkLocator.getJekaJarPath());
-        project.flatFacade.dependencies.runtime
-                        .remove(JkLocator.getJekaJarPath());
     }
 
     @JkPostInit

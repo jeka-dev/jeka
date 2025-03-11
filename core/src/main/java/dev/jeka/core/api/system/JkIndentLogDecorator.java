@@ -73,12 +73,6 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
     public void handle(JkLog.JkLogEvent event) {
         JkLog.Type logType = event.getType();
         PrintStream stream = out;
-        if (logType == JkLog.Type.ERROR || logType == JkLog.Type.WARN) {
-            out.flush();
-            stream = err;
-        } else {
-            err.flush();
-        }
         String message = event.getMessage();
         if (event.getType().isMessageType()) {
             if (event.getType() == JkLog.Type.WARN) {

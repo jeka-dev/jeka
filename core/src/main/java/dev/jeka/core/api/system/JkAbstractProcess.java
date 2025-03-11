@@ -491,18 +491,24 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             if (collectStdout) {
                 ByteArrayOutputStream collectedStdout = (ByteArrayOutputStream) collectStdoutStream;
                 JkLog.error("Std out was ===============================================");
-                JkUtilsIO.write(JkLog.getErrPrintStream(), collectedStdout.toByteArray());
+                System.out.println(JkAnsi.of().fgBright(JkAnsi.Color.BLACK));
+                JkUtilsIO.write(JkLog.getOutPrintStream(), collectedStdout.toByteArray());
+                System.out.println(JkAnsi.of().reset());
                 if (!collectStderr) {
                     JkLog.error("===========================================================");
                 }
-                JkLog.getErrPrintStream().flush();
+                JkLog.getOutPrintStream().flush();
+
             }
             if (collectStderr) {
                 ByteArrayOutputStream collectedStdErr = (ByteArrayOutputStream) collectStderrStream;
                 JkLog.error("Std err was ===============================================");
-                JkUtilsIO.write(JkLog.getErrPrintStream(), collectedStdErr.toByteArray());
+                System.out.println(JkAnsi.of().fgBright(JkAnsi.Color.BLACK));
+                JkUtilsIO.write(JkLog.getOutPrintStream(), collectedStdErr.toByteArray());
+                System.out.println(JkAnsi.of().reset());
                 JkLog.error("===========================================================");
                 JkLog.getErrPrintStream().flush();
+
             }
 
             throw new IllegalStateException("Process has returned with error code " + exitCode);
