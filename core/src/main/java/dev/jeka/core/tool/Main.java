@@ -280,7 +280,6 @@ public class Main {
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {
         JkLog.info(Jk2ColumnsText.of(18, 150)
-                .add("Local KBean", engine.resolveKBeans().implicitKBeanClassName)
                 .add("Default KBean", engine.resolveKBeans().defaultKbeanClassName)
                 .toString());
         JkLog.info("Properties         :");

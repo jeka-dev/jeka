@@ -260,7 +260,7 @@ class Engine {
 
         // Find all KBean class available for this
         List<String> kbeanClassNames = findKBeanClassNames();
-        this.kbeanResolution = KBeanResolution.of(this.isMaster, this.properties, baseDir, kbeanClassNames);
+        this.kbeanResolution = KBeanResolution.of(isMaster, this.properties, baseDir, kbeanClassNames);
         return kbeanResolution;
     }
 
@@ -289,8 +289,8 @@ class Engine {
         runbase.run(actionContainer);
     }
 
-    DefaultAndImplicitKBean defaultAndInitKbean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
-        return DefaultAndImplicitKBean.of(this.isMaster, this.properties, kbeanClassNames, localKbeanClassNames);
+    String defaultKBeanClassName(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
+        return DefaultKBeanResolver.get(isMaster, this.properties, kbeanClassNames, localKbeanClassNames);
     }
 
     JkRunbase getRunbase() {

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public final class JkBaseScaffold extends JkScaffold {
 
-    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/Build.java";
+    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/Custom.java";
 
     public static final String TEST_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/test/MyTest.java";
 
@@ -136,6 +136,7 @@ public final class JkBaseScaffold extends JkScaffold {
     private void configureScaffold() {
         if (baseScaffoldOption.kind != Kind.JEKA_SCRIPT) {
             this.addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=base");
+            this.addJekaPropValue("@custom=on");
         }
 
         if (baseScaffoldOption.kind == Kind.APP) {

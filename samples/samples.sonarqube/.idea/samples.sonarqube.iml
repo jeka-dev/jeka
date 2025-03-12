@@ -94,11 +94,11 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://C:/Users/jerom/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core.jar!/"/>
+                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES>
-                    <root url="jar://C:/Users/jerom/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core-sources.jar!/"/>
+                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core-sources.jar!/"/>
                 </SOURCES>
             </library>
         </orderEntry>

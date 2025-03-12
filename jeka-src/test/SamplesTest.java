@@ -85,15 +85,15 @@ public class SamplesTest {
     @Test
     void basic_ok() {
         run("samples.basic", "cleanPackPublish checkedValue=A checkValueIsA");
-        run("samples.basic", "-Djeka.kbean.local=signedArtifacts cleanPackPublish");
-        run("samples.basic", "-Djeka.kbean.local=thirdPartyDependencies cleanPack");
-        run("samples.basic", "-Djeka.kbean.local=antStyle cleanPackPublish");
+        run("samples.basic", "--kbean=signedArtifacts cleanPackPublish");
+        run("samples.basic", "--kbean=thirdPartyDependencies cleanPack");
+        run("samples.basic", "--kbean=antStyle cleanPackPublish");
     }
 
     @Test
     void dependee_ok() {
-        run("samples.dependers", "-Djeka.kbean.local=fatJar -c project: pack");
-        run("samples.dependers", "-Djeka.kbean.local=normalJar -c project: pack");
+        run("samples.dependers", "--kbean=fatJar -c -i project: pack");
+        run("samples.dependers", "--kbean=normalJar -c project: pack");
     }
 
     @Test

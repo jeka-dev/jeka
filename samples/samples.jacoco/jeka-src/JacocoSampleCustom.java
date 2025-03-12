@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @JkDep("../../plugins/plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")  // For local testing
-public class JacocoSampleBuild extends KBean {
+public class JacocoSampleCustom extends KBean {
 
     @JkInject
     ProjectKBean projectKBean;
@@ -38,7 +38,7 @@ public class JacocoSampleBuild extends KBean {
     }
 
     public static void main(String[] args) {
-        JacocoSampleBuild build = JkInit.kbean(JacocoSampleBuild.class);
+        JacocoSampleCustom build = JkInit.kbean(JacocoSampleCustom.class);
         JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         build.cleanOutput();
         build.projectKBean.test();

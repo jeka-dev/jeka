@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  */
 public final class JkProjectScaffold extends JkScaffold {
 
-    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Build.java";
+    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Custom.java";
 
     public static final String SIMPLE_STYLE_PROP = "@project.layout.style=SIMPLE";
 
@@ -162,6 +162,7 @@ public final class JkProjectScaffold extends JkScaffold {
     private void configureScaffold() {
 
         addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=project");
+        addJekaPropsContent("@custom=on\n");
         if (useSimpleStyle) {
             project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
             addJekaPropValue(SIMPLE_STYLE_PROP);
@@ -170,12 +171,11 @@ public final class JkProjectScaffold extends JkScaffold {
         if (kind == Kind.REGULAR) {
             addJekaPropsContent("\n@project.pack.jarType=FAT\n" +
                     "@project.pack.detectMainClass=true\n");
-            String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
+            String code = readResource(JkProjectScaffold.class, "custom-class.snippet");
             addFileEntry(BUILD_CLASS_PATH, code);
 
-
         } else if (kind == Kind.PLUGIN) {
-            String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");
+            String code = readResource(JkProjectScaffold.class, "custom-class-plugin.snippet");
             if (!UNSPECIFIED_JEKA_VERSION.equals(getJekaVersion())) {
                 code = code.replace("${jekaVersion}", JkInfo.getJekaVersion());
             }
@@ -207,18 +207,18 @@ public final class JkProjectScaffold extends JkScaffold {
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
             JkPathFile.of(breakingChangeFile).write(text);
 
-            String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("pluginclass.snippet"));
+            String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("plugin-class.snippet"));
             JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxKBean.java"))
                     .createIfNotExist()
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));
 
         } else if (kind == Kind.REGULAR) {
-            String mainClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("mainClass.snippet"));
+            String mainClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("main-class.snippet"));
             JkPathFile.of(sourceDir.resolve("app/Main.java"))
                     .createIfNotExist()
                     .write(mainClass.getBytes(StandardCharsets.UTF_8));
 
-            String testClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("testClass.snippet"));
+            String testClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("test-class.snippet"));
             JkPathFile.of(testSourceDir.resolve("app/MainTest.java"))
                     .createIfNotExist()
                     .write(testClass.getBytes(StandardCharsets.UTF_8));
@@ -269,7 +269,5 @@ public final class JkProjectScaffold extends JkScaffold {
         String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
         JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist().write(content);
     }
-
-
 
 }

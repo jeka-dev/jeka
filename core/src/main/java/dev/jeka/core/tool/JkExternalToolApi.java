@@ -222,23 +222,18 @@ public final class JkExternalToolApi {
 
         public final String defaultClassName;
 
-        public final String implicitClassName;
-
         public final List<String> involvedClassNames;
 
-        InitKBeans(String defaultClassName, String implicitClassName, List<String> involvedClassNames) {
+        InitKBeans(String defaultClassName, List<String> involvedClassNames) {
             this.defaultClassName = defaultClassName;
-            this.implicitClassName = implicitClassName;
             this.involvedClassNames = involvedClassNames;
         }
 
         static InitKBeans of(KBeanInitStore store) {
             return new InitKBeans(store.defaultKBeanClassName,
-                    store.implicitKBeanClassName,
                     store.involvedKBeanClassNames);
         }
     }
-
 
     private static class EngineClasspathCache {
 

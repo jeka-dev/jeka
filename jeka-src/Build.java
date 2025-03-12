@@ -53,25 +53,25 @@ class Build extends KBean {
     ProjectKBean coreProject;
 
     @JkInject("plugins/plugins.sonarqube")
-    SonarqubeBuild sonarqubeBuild;
+    SonarqubeCustom sonarqubeBuild;
 
     @JkInject("plugins/plugins.jacoco")
-    JacocoBuild jacocoBuild;
+    JacocoCustom jacocoBuild;
 
     @JkInject("plugins/plugins.springboot")
     SpringbootCustom springbootCustom;
 
     @JkInject("plugins/plugins.nodejs")
-    NodeJsBuild nodeJsBuild;
+    NodeJsCustom nodeJsBuild;
 
     @JkInject("plugins/plugins.kotlin")
-    KotlinBuild kotlinBuild;
+    KotlinCustom kotlinBuild;
 
     @JkInject("plugins/plugins.protobuf")
-    ProtobufBuild protobufBuild;
+    ProtobufCustom protobufBuild;
 
     @JkInject("plugins/plugins.nexus")
-    NexusBuild nexusBuild;
+    NexusCustom nexusBuild;
 
     private final String effectiveVersion;
 

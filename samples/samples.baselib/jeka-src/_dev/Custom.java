@@ -6,7 +6,7 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 @JkDep("dev.jeka:nodejs-plugin:0.11.0-alpha.2")
 @JkDep("org.junit.jupiter:junit-jupiter:5.10.2")
-class Build extends KBean {
+class Custom extends KBean {
 
     @JkPropValue("PATH")
     public String path;
@@ -35,7 +35,7 @@ class Build extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.kbean(Build.class, args).hello();
+        JkInit.kbean(Custom.class, args).hello();
     }
 
 }

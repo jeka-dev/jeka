@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
  */
 @JkDep("../../plugins/plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")
 @JkDep("org.eclipse.jdt:ecj:3.25.0")  // Inject Eclipse compiler that we are using in this build
-class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
+class JkProjectCustom extends KBean implements JkIdeSupportSupplier {
 
     JkProject project = project();
 

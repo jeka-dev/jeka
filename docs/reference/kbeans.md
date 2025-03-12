@@ -100,7 +100,7 @@ jeka --doc
 KBeans can be added to the classpath like any third-party dependency.  
 This can be done by setting the `jeka.inject.classpath` property in the *jeka.properties* file as follows:
 ```properties
-jeka.inject.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
+jeka.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
 ```
 
 KBeans can also be included directly in the source code using the `@JkDep` annotation:
@@ -109,7 +109,7 @@ import dev.jeka.core.tool.JkDep;
 
 @JkDep("dev.jeka:springboot-plugin")
 @JkDep("dev.jeka:openapi-plugin:0.11.8-1")
-class Build extends KBean {
+class Custom extends KBean {
 ...
 ```
 
@@ -216,7 +216,7 @@ Invoking the `dev.jeka.core.tool.Main` method with arguments `project:` and `com
 
 ## Default KBean
 
-When invoking Kbean methods or fields, we generaly specify to which KBean this applies:
+When invoking Kbean methods or fields, we generally specify to which KBean this applies:
 
 Examples:
 ```shell
@@ -227,7 +227,7 @@ jeka myBean: foo bar=1
 If the target KBean is the *default KBean*, then this we don't need to mention the KBean name.
 
 By default, the *default KBean* is the first KBean found in *jeka-src* dir.  For instance, if you have a single KBean 
-`MyBean` in  *jeka-src*, then you can invoke directly the methods and fields as following:
+`MyBean` in *jeka-src*, then you can invoke directly the methods and fields as following:
 ```shell
 jeka foo bar=1
 ```
@@ -241,6 +241,11 @@ You can select a specific default KBean, by setting the following property in *j
 ```properties
 jeka.kbean.default=project
 ```
+
+You can also mention the default KBean using `--kbean=` option.
+
+The default KBean always participate in the runbase initialisation.
+
 This is quite frequent for project builds to use such setting as it shortens command line and prone usage of 
 `ProjectKBean` standard methods.
 
@@ -367,17 +372,6 @@ The instance will then be passed to the `postInit` method before invoking the `p
 
 When executing `jeka maven: publish`, the `project` KBean will be implicitly loaded and configured, 
 followed by the same process for the `maven` KBean, before invoking the `publish` method.
-
-### Implicit KBean
-A KBean participates in initialization if any of the following conditions are met:
-
-- Its name is mentioned in the *jeka.properties* file using the format `@[kbeanName]=`, such as `@springboot=`.
-- Its name is included as part of the command-line arguments, for example: `jeka maven:publish`.
-- The KBean is post-initialized by a participating KBean that specifies `@JkPostInit(required=true)`.
-- The KBean is identified as the *implicit* KBean.
-
-The *implicit* KBean is the first KBean found in the *jeka-src* directory using a breadth-first traversal method. 
-This mechanism allows the creation of a KBean that configures, for instance, the `project` KBean without requiring additional configuration.
 
 ## Lifecycle
 

@@ -52,7 +52,7 @@ class SpringbootScaffold {
 
         // Augment jeka.properties if needed
         projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_PROP + "=dev.jeka:springboot-plugin");
-        projectScaffold.addJekaPropValue("@springboot=");
+        projectScaffold.addJekaPropValue("@springboot=on");
 
         // Add dependencies
         projectScaffold.compileDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion);

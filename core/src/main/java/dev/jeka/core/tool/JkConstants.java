@@ -76,8 +76,6 @@ public final class JkConstants {
 
     public static final String KBEAN_DEFAULT_PROP = "jeka.kbean.default";
 
-    public static final String KBEAN_LOCAL_PROP = "jeka.kbean.local";
-
     static final String CMD_APPEND_PROP = CMD_PREFIX_PROP + CMD_APPEND_SUFFIX_PROP;
 
     static final String CMD_SUBSTITUTE_SYMBOL = "::";

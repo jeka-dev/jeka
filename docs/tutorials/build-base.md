@@ -21,7 +21,7 @@ You’ll get the following project structure:
 ├── jeka-src             <- Source root directory
 │   ├── _dev             <- Optional package containing all non-prod (build and test)
 │   │   ├── test
-│   │   └── Build.java  
+│   │   └── Custom.java  
 │   └── app              <- Sugested base package for production code/resources
 │       └── App.java     
 ├── jeka-output          <- Generated dir where artifacts as jars, classes, reports or doc are generated
@@ -74,7 +74,7 @@ import sun.lwawt.macosx.CWarningWindow;
 
 @JkDep("org.junit.jupiter:junit-jupiter:5.11.4")
 @JkDep("org.mockito:mockito-junit-jupiter:5.15.2")
-class Build extends KBean {
+class Custom extends KBean {
     ...
 }
 ```

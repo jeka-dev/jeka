@@ -9,7 +9,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-public class NodeJsBuild extends KBean {
+public class NodeJsCustom extends KBean {
 
     @JkPostInit
     private void postInit(IntellijKBean intellijKBean) {

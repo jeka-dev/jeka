@@ -54,7 +54,7 @@ public class SpringbootScaffoldTest {
         assertTrue(gitIgnoreContent.contains("/jeka-output"));
 
         // Check Build class is present
-        assertTrue(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Build.java")));
+        assertTrue(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Custom.java")));
 
         // Check project layout
         assertTrue(Files.exists(baseDir.resolve("src/main/java/app/Application.java")));
