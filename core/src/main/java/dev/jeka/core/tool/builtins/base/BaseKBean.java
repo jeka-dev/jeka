@@ -27,13 +27,10 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.api.project.JkIdeSupport;
-import dev.jeka.core.api.project.JkProjectFlatFacade;
 import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
-import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -139,7 +136,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         }
         JkTestResult testResult = JkTestProcessor.of(JkClassLoader.ofCurrent()::getClasspath, getAppClasses()::getRoot)
                 .setForkingProcess(true)
-                .launch();
+                .run();
         if (!testResult.getFailures().isEmpty()) {
             System.exit(1);
         }

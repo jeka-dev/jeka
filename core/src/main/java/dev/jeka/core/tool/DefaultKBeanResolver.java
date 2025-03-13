@@ -20,7 +20,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 
 import java.util.List;
-import java.util.Optional;
 
 // non-private for testing purpose
 class DefaultKBeanResolver {

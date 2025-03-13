@@ -1,10 +1,7 @@
-import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
@@ -32,7 +29,7 @@ public class SpringbootCustom extends KBean {
         project.flatFacade.dependencies.test
                 .add("org.junit.platform:junit-platform-launcher:1.12.0")
                 .add("org.junit.jupiter:junit-jupiter:5.12.0");
-        project.setupEndToEndTest();
+        project.e2eTest.setupBasic();
     }
 
     @JkPostInit

@@ -16,7 +16,6 @@
 
 package dev.jeka.core.api.java;
 
-import dev.jeka.core.api.crypto.gpg.JkInternalGpgDoer;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;

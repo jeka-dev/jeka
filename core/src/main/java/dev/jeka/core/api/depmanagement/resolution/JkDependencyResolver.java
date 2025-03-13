@@ -312,7 +312,7 @@ public final class JkDependencyResolver  {
         if (JkLog.isVerbose()) {
             int moduleCount = resolveResult.getInvolvedCoordinates().size();
             int fileCount = resolveResult.getFiles().getEntries().size();
-            JkLog.info("->  Resolved to %s, resulting in %s.",
+            JkLog.verbose("->  Resolved to %s, resulting in %s.",
                     pluralize(moduleCount, "coordinate"),
                     pluralize(fileCount, "file"));
 

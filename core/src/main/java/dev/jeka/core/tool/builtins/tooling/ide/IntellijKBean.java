@@ -22,14 +22,12 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.tooling.intellij.JkMiscXml;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Consumer;

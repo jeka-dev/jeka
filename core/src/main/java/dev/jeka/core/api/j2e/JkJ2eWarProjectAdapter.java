@@ -19,6 +19,7 @@ package dev.jeka.core.api.j2e;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -61,7 +62,7 @@ public class JkJ2eWarProjectAdapter {
         JkArtifactId warArtifact = JkArtifactId.ofMainArtifact("war");
         Path warFile = project.artifactLocator.getArtifactPath(warArtifact);
         Consumer<Path> warMaker = path -> generateWar(project, path);
-        project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION,
+        project.pack.actions.replaceOrAppend(JkProjectPackaging.CREATE_JAR_ACTION,
                 () -> warMaker.accept(warFile));
     }
 
@@ -82,10 +83,10 @@ public class JkJ2eWarProjectAdapter {
         JkJ2eWarArchiver archiver = JkJ2eWarArchiver.of()
                 .setClassDir(project.compilation.layout.resolveClassDir())
                 .setExtraStaticResourceDir(extraStaticResourcePath)
-                .setLibs(project.packaging.resolveRuntimeDependenciesAsFiles())
+                .setLibs(project.pack.resolveRuntimeDependenciesAsFiles())
                 .setWebappDir(webappPath);
         project.compilation.runIfNeeded();
-        project.testing.runIfNeeded();
+        project.test.runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
             archiver.generateWarDir(dirPath);

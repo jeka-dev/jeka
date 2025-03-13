@@ -16,7 +16,10 @@
 
 package dev.jeka.core.tool;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Marks a static KBean method to run during KBean initialization.

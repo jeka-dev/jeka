@@ -19,7 +19,10 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.net.MalformedURLException;

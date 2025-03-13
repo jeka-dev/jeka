@@ -25,6 +25,7 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJarPacker;
 import dev.jeka.core.api.java.JkJavadocProcessor;
 import dev.jeka.core.api.java.JkManifest;
@@ -38,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -45,6 +47,13 @@ import java.util.function.Supplier;
  * Responsible to create binary, Javadoc and Source jars.
  */
 public class JkProjectPackaging {
+
+    /**
+     * Represents the identifier for an action to create a JAR file in the project lifecycle.
+     * Used within the context of project execution to trigger the corresponding task or operation
+     * that handles the creation of the Java Archive (JAR) artifact.
+     */
+    public static final String CREATE_JAR_ACTION = "create-jar";
 
     public enum JarType {
 
@@ -57,6 +66,18 @@ public class JkProjectPackaging {
         @JkDoc("Jar including classes and resources of dependencies, by relocating packages of dependencies for avoiding classpath collisions.")
         SHADE
     }
+
+    /**
+     * Actions to execute when {@link JkProject#pack()} is invoked.<p>
+     * By default, the build action creates a regular binary jar. It can be
+     * replaced by an action creating other jars/artifacts or doing special
+     * action as publishing a Docker image, for example.
+     * <p>
+     * To insert before the JAR action, use {@link JkRunnables#insertBefore(String, String, Runnable)}
+     * by specifying the {@link #CREATE_JAR_ACTION} as action to insert before.
+     * </p>
+     */
+    public final JkRunnables actions = JkRunnables.of().setLogTasks(true);
 
     /**
      * Consumer container for customizing the manifest that will bbe included in constructed Jar files.
@@ -72,6 +93,8 @@ public class JkProjectPackaging {
             .modify(deps -> baseDependencies());
 
     private final JkProject project;
+
+    private Consumer<Path> jarMaker = this::createBinJar;;
 
     private JkPathTreeSet fatJarExtraContent = JkPathTreeSet.ofEmpty();
 
@@ -89,6 +112,26 @@ public class JkProjectPackaging {
         this.project = project;
         this.javadocProcessor = JkJavadocProcessor.of();
         this.mainClassFinder = this::findMainClass;
+        actions.append(CREATE_JAR_ACTION,
+                () -> jarMaker.accept(project.artifactLocator.getMainArtifactPath()));
+    }
+
+    /**
+     * Executes the packing process for this project, which includes compiling, testing, and creating JAR files.
+     *
+     * @see #actions
+     */
+    public void run() {
+        this.project.compilation.runIfNeeded();  // Better to launch it first explicitly for log clarity
+        this.actions.run();
+    }
+
+    /**
+     * Sets a {@link Runnable} to create the JAR used by {@link JkProject#prepareRunJar(JkProject.RuntimeDeps)}
+     */
+    public JkProjectPackaging setJarMaker(Consumer<Path> jarMaker) {
+        this.jarMaker = jarMaker;
+        return this;
     }
 
     public Path getJavadocDir() {

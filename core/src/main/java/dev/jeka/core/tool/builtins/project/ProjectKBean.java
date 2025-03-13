@@ -131,12 +131,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     @JkDoc("Compiles and run tests defined within the project (typically Junit tests)")
     public void test() {    //NOSONAR
-        project.testing.run();
+        project.test.run();
     }
 
     @JkDoc("Generates artifacts based on 'pack' options. Creates a single JAR by default.")
-    public void pack() {   //NOSONAR
-        project.pack();
+    public void pack() {
+        project.pack.run();
     }
 
     @JkDoc("Displays resolved dependency trees on console.")
@@ -178,15 +178,15 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     @JkDoc("Runs the registered end-to-end tests")
     public void e2eTest() {
-        if (this.project.testing.isSkipped()) {
+        if (this.project.test.isSkipped()) {
             return;
         }
-        this.project.e2eTesting.run();
+        this.project.e2eTest.run();
     }
 
     @JkDoc("Runs the quality checkers")
     public void checkQuality() {
-        this.project.qualityChecking.run();
+        this.project.qualityCheck.run();
     }
 
     @Override
@@ -384,7 +384,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     private void configureProject() {
         project.setBaseDir(getBaseDir());
         if (!JkLog.isAnimationAccepted()) {
-            project.testing.testProcessor.engineBehavior.setProgressDisplayer(
+            project.test.processor.engineBehavior.setProgressDisplayer(
                     JkTestProcessor.JkProgressStyle.MUTE);
         }
         if (!JkUtilsString.isBlank(version)) {
@@ -419,15 +419,15 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             project.flatFacade.setMainArtifactJarType(pack.jarType);
         }
         if (pack.mainClass != null) {
-            project.packaging.setMainClass(pack.mainClass);
+            project.pack.setMainClass(pack.mainClass);
         }
-        project.packaging.setDetectMainClass(pack.detectMainClass);
+        project.pack.setDetectMainClass(pack.detectMainClass);
         if (!JkUtilsString.isBlank(pack.shadeJarClassifier)) {
             project.flatFacade.addShadeJarArtifact(pack.shadeJarClassifier);
         }
 
         // Configure testing
-        JkTestProcessor testProcessor = project.testing.testProcessor;
+        JkTestProcessor testProcessor = project.test.processor;
         testProcessor.setToolChain(jdks(), project.getJvmTargetVersion());
         if (test.fork) {
             String className = JkTestProcessor.class.getName();
@@ -446,19 +446,19 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         } else {
             testProcessor.setForkingProcess(false);
         }
-        project.testing.setSkipped(test.skip);
+        project.test.setSkipped(test.skip);
 
         // -- The style should not be forced by default as it is determined by the presence of a console, and the log level
         if (test.progress != null) {
-            project.testing.testProcessor.engineBehavior.setProgressDisplayer(test.progress);
+            project.test.processor.engineBehavior.setProgressDisplayer(test.progress);
         }
         if (compilation.compilerOptions != null) {
             String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);
             project.compilation.addJavaCompilerOptions(options);
-            project.testing.compilation.addJavaCompilerOptions(options);
+            project.test.compilation.addJavaCompilerOptions(options);
         }
         List<String> includePatterns = JkUtilsString.splitWhiteSpaces(test.includePatterns);
-        project.testing.testSelection.addIncludePatterns(includePatterns);
+        project.test.selection.addIncludePatterns(includePatterns);
 
         // Configure scaffold
         this.projectScaffold = JkProjectScaffold.of(project);

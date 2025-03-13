@@ -19,7 +19,6 @@ package dev.jeka.core.api.system;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
-import dev.jeka.core.tool.JkExternalToolApi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
