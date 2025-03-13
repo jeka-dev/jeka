@@ -33,6 +33,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -120,7 +121,7 @@ public final class JkRunbase {
         // Map#computeIsAbsent may throw ConcurrentModificationException
         JkRunbase result = SUB_RUN_BASES.get(baseDir);
         if (result == null) {
-            JkLog.startTask("Initializing Runbase " + baseDir);
+            JkLog.startTask("Initializing Runbase " + Paths.get("").toAbsolutePath().relativize(baseDir));
             Engine engine = Engines.get(baseDir);
             engine.resolveKBeans();
             result = engine.initRunbase(new KBeanAction.Container());
