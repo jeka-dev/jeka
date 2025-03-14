@@ -27,8 +27,9 @@ import java.util.List;
 
 @JkDep("org.junit.jupiter:junit-jupiter:5.12.0")
 @JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
-
 @JkDep("dev.jeka:nexus-plugin:0.11.23")
+
+//@JkSubBase("plugins/*")
 class Build extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
@@ -47,7 +48,7 @@ class Build extends KBean {
     @JkPropValue("jeka.test.skip")
     public boolean skipTest = false;
 
-    // ------ Child projects
+    // ------ Sub projects
 
     @JkInject("core")
     ProjectKBean coreProject;

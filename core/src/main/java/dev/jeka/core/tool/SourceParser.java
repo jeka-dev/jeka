@@ -22,8 +22,12 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 final class SourceParser {
 
@@ -83,7 +87,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectClasspath
+        // Handle @JkInjectClasspath
         AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -91,7 +95,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectClasspath
+        // Handle @JkInjectClasspath
         annotationParser = new AnnotationParser(line, JkDep.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -99,7 +103,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectRunbase
+        // Handle @JkInjectRunbase
         annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -109,7 +113,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInject
+        // Handle @JkInject
         annotationParser = new AnnotationParser(line, JkInject.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -119,7 +123,15 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectCompileOption
+        // Handle @JkSubBase
+        annotationParser = new AnnotationParser(line, JkSubBase.class);
+        if (annotationParser.isMatching()) {
+            String value = annotationParser.readUniqueStringValue();
+            List<Path> subBaseDirs = findBaseDirs(value, baseDir);
+            info.importedBaseDirs.addAll(subBaseDirs);
+        }
+
+        // Handle @JkInjectCompileOption
         annotationParser = new AnnotationParser(line, JkInjectCompileOption.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -154,5 +166,21 @@ final class SourceParser {
             return JkUtilsString.substringBeforeFirst(afterAnnotation, "\"");
         }
 
+    }
+
+    private static List<Path> findBaseDirs(String dirPath, Path baseDir) {
+        if (dirPath.endsWith("*")) {
+            String parentDirString = dirPath.equals("*") ? "" : JkUtilsString.substringBeforeLast(dirPath, "/*");
+            Path parentDir = baseDir.resolve(parentDirString);
+            return JkUtilsPath.listDirectChildren(parentDir).stream()
+                    .filter(JkRunbase::isJekaProject)
+                    .collect(Collectors.toList());
+        }
+        Path candidate = baseDir.resolve(dirPath);
+        if (!Files.isDirectory(candidate) ) {
+            return Collections.singletonList(candidate);
+        }
+        throw new JkException("@JkSubBase(\"%s\") mentions a directectory that does not exist (base-dir=%s).",
+                candidate, baseDir);
     }
 }

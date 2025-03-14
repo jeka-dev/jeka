@@ -167,7 +167,9 @@ public class Main {
 
             // Run
             engine.run();
-            runbase.getInitStore().store(baseDir);  // Store init state in file for external tools
+            if (JkRunbase.isJekaProject(baseDir)) {
+                runbase.getInitStore().store(baseDir);  // Store init state in file for external tools, in case we are in a jeka project.
+            }
 
             logOutro(startTime);
 

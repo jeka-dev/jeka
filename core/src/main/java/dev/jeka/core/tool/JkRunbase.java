@@ -493,6 +493,18 @@ public final class JkRunbase {
         return String.format("JkRunbase{ baseDir=%s, beans=%s }", relBaseDir(), beans.keySet());
     }
 
+    static boolean isJekaProject(Path baseDir) {
+        if (!Files.isDirectory(baseDir)) {
+            return false;
+        }
+        Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
+        if (Files.exists(jekaPropertiesFile) && Files.isRegularFile(jekaPropertiesFile)) {
+            return true;
+        }
+        Path jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        return Files.exists(jekaSrcDir) && Files.isDirectory(jekaSrcDir);
+    }
+
     private <T extends KBean> T instantiateKBean(Class<T> beanClass) {
 
         // Record the instantiation to allow visual tracking of initialization activity.

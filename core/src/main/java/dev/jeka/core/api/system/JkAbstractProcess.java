@@ -562,14 +562,15 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         JkLog.info("working dir   : %s", workingDirName);
         String cmdPath = processParams.isEmpty() ? "" : processParams.get(0);
         String cmdArgs = JkUtilsString.substringAfterFirst(fullCmdLine(), cmdPath).trim();
+        String formattedCmdArgs = formatOptions(cmdArgs);
         JkLog.info("command path  : %s", cmdPath);
-        if (JkLog.isVerbose()) {
-            cmdArgs = JkUtilsString.ellipse(cmdArgs, 480);
-        } else if (!JkLog.isDebug()) {
-            cmdArgs = JkUtilsString.ellipse(cmdArgs, 120);
-        }
-        JkLog.info("command args  : %s", cmdArgs);
+        JkLog.info("command args  : %s", formattedCmdArgs);
         JkLog.getOutPrintStream().flush();
+    }
+
+    private static String formatOptions(String optionLine) {
+        List<String> options = Arrays.asList(JkUtilsString.parseCommandline(optionLine));
+        return JkUtilsString.formatOptions(options);
     }
 
 }

@@ -24,8 +24,7 @@ class KotlinCustom extends KBean {
                 .setJvmTargetVersion(JkJavaVersion.V8)
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .setMixResourcesAndSources()
-                .dependencies.compile
-                .add(JkLocator.getJekaJarPath());
+                .dependencies.compile.add(JkLocator.getJekaJarPath());
     }
 
     @JkPostInit
