@@ -77,6 +77,9 @@ public final class JkRunbase {
 
     private final JkPathSequence importedBaseDirs = JkPathSequence.of();
 
+    // Contains the runbase children
+    private RunbaseGraph runbaseGraph;
+
     // Note: An empty container has to be present at instantiation time for sub-runBases, as
     // they are not initialized with any KbeanActions.
     private KBeanAction.Container cmdLineActions = new KBeanAction.Container();
@@ -90,9 +93,9 @@ public final class JkRunbase {
 
     private final JkRunnables cleanActions = JkRunnables.of().setLogTasks(JkLog.isDebug());
 
-    // We use class name as key because using `Class` objects as key may lead
-    // in duplicate initialization in some circumstances where several class loader
-    // are present (this has happened when using "jeka aKbean: --doc)
+    // We use class name as a key because using `Class` objects as a key may lead
+    // in duplicate initialization in some circumstances where several classloader
+    // are present (this has happened when using "jeka aKbean: --doc").
     private final Map<String, KBean> beans = new LinkedHashMap<>();
 
     private PreInitializer preInitializer = PreInitializer.of(Collections.emptyList());
@@ -124,11 +127,8 @@ public final class JkRunbase {
             JkLog.startTask("Initializing Runbase " + Paths.get("").toAbsolutePath().relativize(baseDir));
             Engine engine = Engines.get(baseDir);
             engine.resolveKBeans();
-            result = engine.initRunbase(new KBeanAction.Container());
+            result = engine.getOrCreateRunbase(new KBeanAction.Container());
             JkLog.endTask();
-            //JkRunbase result = new JkRunbase(path);
-            //result.classpath = MASTER.classpath;  // todo need to narrow
-            //result.kbeanResolution = MASTER.kbeanResolution.toSubRunbase(baseDir);
             SUB_RUN_BASES.put(baseDir, result);
         }
         return result;
@@ -240,6 +240,18 @@ public final class JkRunbase {
         return new LinkedList<>(beans.values());
     }
 
+    public List<JkRunbase> getChildRunbases() {
+       return runbaseGraph.getRunbases();
+    }
+
+    public JkRunbase getChildRunbase(String name) {
+        return runbaseGraph.getRunbase(name);
+    }
+
+    public <T extends KBean> List<T> loadChildren(Class<T> beanClass) {
+        return getChildRunbases().stream().map(runBase -> runBase.load(beanClass)).collect(Collectors.toList());
+    }
+
     /**
      * Returns the JkProperties object associated with the current instance of JkRunBase.
      * JkProperties is a class that holds key-value pairs of properties relevant to the execution of Jeka build tasks.
@@ -322,8 +334,9 @@ public final class JkRunbase {
 
     void init(KBeanAction.Container cmdLineActionContainer) {
 
-        // Add initKBean
+        // Add default KBean
         Class<? extends KBean> defaultKBeanClass = kbeanResolution.findDefaultBeanClass();
+        runbaseGraph = defaultKBeanClass == null ? RunbaseGraph.empty() : RunbaseGraph.of(defaultKBeanClass, baseDir);
         KBeanAction.Container actions = cmdLineActionContainer.withInitBean(defaultKBeanClass);
 
         if (JkLog.isDebug()) {
@@ -440,6 +453,10 @@ public final class JkRunbase {
         return initialized;
     }
 
+    RunbaseGraph getRunbaseGraph() {
+        return runbaseGraph;
+    }
+
     KBean getBean(Class<?> kbeanClass) {
         return beans.get(kbeanClass.getName());
     }
@@ -519,7 +536,7 @@ public final class JkRunbase {
         this.beans.put(beanClass.getName(), bean);
 
         // Inject values annotated with raw @JkInject
-        Injects.injectLocalKBeans(bean);
+        Injects.injectAnnotatedFields(bean);
 
         // Apply the defaultProvider defined in method annotated with @JkDefaultProvider
         this.preInitializer.accept(bean);
@@ -537,7 +554,6 @@ public final class JkRunbase {
             }
             JkLog.warn("Can't instantiate bean %s due to %s.", beanClass.getName(), e.getMessage());
         }
-
         return bean;
     }
 
@@ -565,10 +581,11 @@ public final class JkRunbase {
     }
 
     private Path relBaseDir() {
-        if (MASTER.baseDir != null && baseDir.isAbsolute()) {
-            return MASTER.baseDir.relativize(baseDir);
+        Path result =  Paths.get("").toAbsolutePath().relativize(baseDir);
+        if (result.getFileName().toString().isEmpty()) {
+            result = Paths.get(".");
         }
-        return baseDir;
+        return result;
     }
 
     private static void setValue(Object target, String propName, Object value) {

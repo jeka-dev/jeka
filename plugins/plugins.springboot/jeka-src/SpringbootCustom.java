@@ -36,9 +36,9 @@ public class SpringbootCustom extends KBean {
     private void postInit(MavenKBean mavenKBean) {
         mavenKBean.customizePublication(mavenPublication -> mavenPublication
                 .pomMetadata
-                .setProjectName("Jeka plugin for Spring Boot")
-                .setProjectDescription("A Jeka plugin for Spring boot application")
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
+                    .setProjectName("Jeka plugin for Spring Boot")
+                    .setProjectDescription("A Jeka plugin for Spring boot application")
+        );
     }
 
 }

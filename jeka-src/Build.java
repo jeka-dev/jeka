@@ -8,7 +8,6 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.tool.*;
@@ -16,20 +15,21 @@ import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-import dev.jeka.plugins.nexus.JkNexusRepos;
 import dev.jeka.plugins.nexus.NexusKBean;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
+import java.util.Optional;
 
 @JkDep("org.junit.jupiter:junit-jupiter:5.12.0")
 @JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
-@JkDep("dev.jeka:nexus-plugin:0.11.23")
+@JkDep("dev.jeka:nexus-plugin:0.11.24")
+@JkDep("core")
 
-//@JkSubBase("plugins/*")
+@JkChildBase("core")        // Forces core to be initialized prior plugin runbases
+@JkChildBase("plugins/*")
 class Build extends KBean {
 
     private static final String DOCKERHUB_TOKEN_ENV_NAME = "DOCKER_HUB_TOKEN";
@@ -48,66 +48,28 @@ class Build extends KBean {
     @JkPropValue("jeka.test.skip")
     public boolean skipTest = false;
 
-    // ------ Sub projects
-
     @JkInject("core")
-    ProjectKBean coreProject;
+    CoreCustom coreCustom;
 
-    @JkInject("plugins/plugins.sonarqube")
-    SonarqubeCustom sonarqubeBuild;
-
-    @JkInject("plugins/plugins.jacoco")
-    JacocoCustom jacocoBuild;
-
-    @JkInject("plugins/plugins.springboot")
-    SpringbootCustom springbootCustom;
-
-    @JkInject("plugins/plugins.nodejs")
-    NodeJsCustom nodeJsBuild;
-
-    @JkInject("plugins/plugins.kotlin")
-    KotlinCustom kotlinBuild;
-
-    @JkInject("plugins/plugins.protobuf")
-    ProtobufCustom protobufBuild;
-
-    @JkInject("plugins/plugins.nexus")
-    NexusCustom nexusBuild;
-
-    private final String effectiveVersion;
-
-    Build() {
-        JkVersionFromGit versionFromGit = JkVersionFromGit.of();
-        effectiveVersion = versionFromGit.getVersion();
-    }
+    private final String effectiveVersion = JkVersionFromGit.of().getVersion();
 
     @Override
     protected void init()  {
-        getImportedKBeans().load(ProjectKBean.class, false)
-                .forEach(this::configureCommonSettings);
-        getImportedKBeans().load(MavenKBean.class, false)
-                .forEach(this::configurePublication);
+        getRunbase().loadChildren(ProjectKBean.class).forEach(this::configCommon);
+        getRunbase().loadChildren(MavenKBean.class).forEach(this::configCommon);
+        getRunbase().loadChildren(NexusKBean.class).forEach(this::postInit);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void run() throws IOException {
 
-        System.out.println("==============================================");
-        System.out.println("Version from Git         : " + JkVersionFromGit.of(getBaseDir(), "").getVersion());
-        System.out.println("Branch from Git          : " + computeBranchName());
-        System.out.println("Tag from Git             : " + JkGit.of(getBaseDir()).getTagsOnCurrentCommit());
-        System.out.println("Tag Count from Git       : " + JkGit.of(getBaseDir()).getTagsOnCurrentCommit().size());
-        System.out.println("Effective version        : " + effectiveVersion);
-        System.out.println("==============================================");
-
-        // Build the core and plugin projects
-        List<ProjectKBean> importedProjectKBeans = getImportedKBeans().get(ProjectKBean.class, false);
-        importedProjectKBeans.forEach(projectKBean -> {
+        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkLog.startTask("pack-and-test %s", projectKBean.project.getBaseDir().getFileName());
-            projectKBean.clean();
-            projectKBean.test();
-            projectKBean.pack();
-            projectKBean.e2eTest();
+            JkProject project = projectKBean.project;
+            project.clean();
+            project.test.run();
+            project.pack.run();
+            project.e2eTest.run();
             JkLog.endTask();
         });
 
@@ -117,68 +79,68 @@ class Build extends KBean {
         }
         publish();
         enrichDoc();
-
     }
 
     @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
     public void setPosixPermissions() {
         JkPathTree.of("../samples").andMatching("*/jeka", "**/jeka").getFiles().forEach(path -> {
             JkLog.info("Setting exec permission on git for file " + path);
-            JkProcess.ofCmdLine("git update-index --chmod=+x " + path).run();
+            JkGit.exec("update-index", "--chmod=+x", path);
         });
     }
 
     @JkPostInit(required = true)
     private void postInit(NexusKBean nexusKBean) {
-        nexusKBean.configureNexusRepo(nexusRepos -> nexusRepos.setReadTimeout(60 * 1000));
+        nexusKBean.setRepoReadTimeout(60 * 1000);
     }
 
-    private void publish() throws IOException {
-        if (shouldPublishOnMavenCentral()) {
-            JkLog.info("current ossrhUser:  %s", ossrhUser);
-            JkLog.startTask("publish-artifacts");
-            getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publish);
-            bomPublication().publish();
-            JkRepo repo = publishRepo().getRepoConfigHavingUrl(JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE);
-            JkNexusRepos.ofRepo(repo).closeAndRelease();
+    @JkPostInit(required = true)
+    private void postInit(MavenKBean mavenKBean) {
+        configCommon(mavenKBean);
+        mavenKBean.customizePublication(this::configBomPublication);
+    }
+
+    private void publish() {
+        if (shouldPublishOnOSSRH()) {
+
+            JkLog.startTask("publish-ossrh");
+            JkLog.info("current OSSRH user:  %s", ossrhUser);
+            getRunbase().loadChildren(MavenKBean.class).forEach(MavenKBean::publish);
+            load(MavenKBean.class).publish();
             JkLog.endTask();
 
+            /*
             JkLog.startTask("create-github-release");
             Github github = new Github();
             github.ghToken = githubToken;
             github.publishGhRelease();
             JkLog.endTask();
+             */
 
             // Create a Docker Image of Jeka and publish it to docker hub
             if (System.getenv(DOCKERHUB_TOKEN_ENV_NAME) != null) {
-                this.coreProject.load(CoreCustom.class).publishJekaDockerImage();
+                coreCustom.publishJekaDockerImage();
             }
 
         } else {
-            JkLog.startTask("publish-locally");
-            getImportedKBeans().load(MavenKBean.class, false).forEach(MavenKBean::publishLocal);
-            bomPublication().publishLocal();
+            JkLog.startTask("publish-local");
+            getRunbase().loadChildren(MavenKBean.class).forEach(MavenKBean::publishLocal);
+            load(MavenKBean.class).publishLocal();
             JkLog.endTask();
         }
     }
 
-    private boolean shouldPublishOnMavenCentral() {
+    private boolean shouldPublishOnOSSRH() {
         String branchOrTag = computeBranchName();
-        if (branchOrTag != null &&
-                (branchOrTag.startsWith("refs/tags/") || branchOrTag.equals("refs/heads/master"))
-                && ossrhUser != null) {
-            return true;
-        }
-        return false;
+        return branchOrTag != null
+                && (branchOrTag.startsWith("refs/tags/") || branchOrTag.equals("refs/heads/master"))
+                && ossrhUser != null;
     }
 
-    // For a few time ago, JkGit.of().getCurrentBranch() returns 'null' on githyb
+    // `JkGit.of().getCurrentBranch()` may return 'null' on GitHub Actions
     private static String computeBranchName() {
-        String githubBranch = System.getenv("GITHUB_BRANCH");
-        if (githubBranch != null) {
-            return githubBranch;
-        }
-        return JkGit.of().getCurrentBranch();
+        return Optional.ofNullable(System.getenv("GITHUB_BRANCH"))
+                .orElseGet(JkGit.of()::getCurrentBranch);
     }
 
     private JkRepoSet publishRepo() {
@@ -192,41 +154,40 @@ class Build extends KBean {
         return  JkRepoSet.of(snapshotRepo, releaseRepo, githubRepo);
     }
 
-    private void configureCommonSettings(ProjectKBean projectKBean) {
+    private void configCommon(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.setVersion(effectiveVersion);
         project.compilation.addJavaCompilerOptions("-g");
         JkVersionFromGit.handleVersioning(project, "");
     }
 
-    private void configurePublication(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(this::configurePublication);
+    private void configCommon(MavenKBean mavenKBean) {
+        mavenKBean.customizePublication(publication -> {
+            publication
+                    .setRepos(this.publishRepo())
+                    .pomMetadata
+                        .setProjectUrl("https://jeka.dev")
+                        .setScmUrl("https://github.com/jerkar/jeka.git")
+                        .addGithubDeveloper("djeang", "djeangdev@yahoo.fr")
+                        .addApache2License();
+        });
     }
 
-    private void configurePublication(JkMavenPublication publication) {
-        publication
-                .setRepos(this.publishRepo())
-                .pomMetadata
-                .setProjectUrl("https://jeka.dev")
-                .setScmUrl("https://github.com/jerkar/jeka.git")
-                .addApache2License();
-    }
+    private void configBomPublication(JkMavenPublication bomPublication) {
 
-    private JkMavenPublication bomPublication() {
-        JkMavenPublication result = JkMavenPublication.ofPomOnly();
-        result.setModuleId("dev.jeka:bom")
+        // Populate dependencyManagement section
+        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
+            JkProject project = projectKBean.project;
+            bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
+        });
+
+        bomPublication
+                .setModuleId("dev.jeka:bom")
                 .setVersion(effectiveVersion)
                 .pomMetadata
                     .setProjectName("Jeka BOM")
-                    .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr");
+                    .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group");
 
-        getImportedKBeans().get(ProjectKBean.class, false).forEach(projectKBean -> {
-            JkProject project = projectKBean.project;
-            result.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
-        });
-        configurePublication(result);
-        return result;
     }
 
     private void enrichDoc() {

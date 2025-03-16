@@ -32,9 +32,9 @@ class SonarqubeCustom extends KBean {
     private void postInit(MavenKBean mavenKBean) {
         mavenKBean.customizePublication(mavenPublication -> mavenPublication
                 .pomMetadata
-                .setProjectName("Jeka plugin for Sonarqube")
-                .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
+                    .setProjectName("Jeka plugin for Sonarqube")
+                    .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
+        );
     }
 
 }

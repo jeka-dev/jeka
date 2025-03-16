@@ -16,8 +16,6 @@
 
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDepSuggest;
-
 import java.lang.annotation.*;
 
 /**
@@ -27,10 +25,10 @@ import java.lang.annotation.*;
  *
  * @author Jerome Angibaud
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Repeatable(JkSubBase.JkSubBases.class)
-public @interface JkSubBase {
+@Repeatable(JkChildBase.JkItems.class)
+public @interface JkChildBase {
 
     /**
      * Specifies the sub-base relative path to import.
@@ -63,10 +61,10 @@ public @interface JkSubBase {
      * Repeatable container.
      */
     @Target(ElementType.TYPE)
-    @interface JkSubBases {
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface JkItems {
 
-        @JkDepSuggest
-        JkSubBase[] value();
+        JkChildBase[] value();
     }
 
 }

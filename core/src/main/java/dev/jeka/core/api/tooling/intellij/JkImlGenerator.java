@@ -252,7 +252,7 @@ public final class JkImlGenerator {
         return ideSupportSupplier == null ? baseDir : ideSupportSupplier.get().getProdLayout().getBaseDir();
     }
 
-    // For def, we have computed classpath from runtime
+    // For jeka-src, we have computed classpath from runtime
     private List<JkIml.OrderEntry> jekaSrcOrderEntries() {
         OrderEntries orderEntries = new OrderEntries();
         JkPathSequence importedClasspath = jekaSrcImportedProjects.getEntries().stream()

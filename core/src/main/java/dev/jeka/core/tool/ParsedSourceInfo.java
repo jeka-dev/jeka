@@ -18,12 +18,15 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkFileDependency;
+import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 final class ParsedSourceInfo {
 
@@ -90,6 +93,33 @@ final class ParsedSourceInfo {
                 this.exportedDependencies.getEntries().isEmpty() &&
                 this.importedBaseDirs.isEmpty() &&
                 this.dependencies.getEntries().isEmpty();
+    }
+
+    List<Path> getDepBaseDirs() {
+        return dependencies.getEntries().stream()
+                .filter(JkFileSystemDependency.class::isInstance)
+                .map(JkFileSystemDependency.class::cast)
+                .map(fsDep -> fsDep.getFiles().get(0))
+                .filter(JkRunbase::isJekaProject)
+                .collect(Collectors.toList());
+    }
+
+    JkDependencySet getSanitizedDeps() {
+        List<JkDependency> sanitized = dependencies.getEntries().stream()
+                .map(ParsedSourceInfo::sanitize)
+                .collect(Collectors.toList());
+        return JkDependencySet.of(sanitized);
+    }
+
+    private static JkDependency sanitize(JkDependency dependency) {
+        if (dependency instanceof JkFileDependency) {
+            JkFileSystemDependency fsDep = (JkFileSystemDependency) dependency;
+            Path depPath = fsDep.getFiles().get(0);
+            if (JkRunbase.isJekaProject(depPath)) {
+                return JkFileSystemDependency.of(depPath.resolve(JkConstants.JEKA_SRC_CLASSES_DIR));
+            }
+        }
+        return dependency;
     }
 
 }

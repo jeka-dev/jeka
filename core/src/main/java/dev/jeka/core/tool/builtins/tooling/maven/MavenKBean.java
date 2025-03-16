@@ -115,11 +115,10 @@ public final class MavenKBean extends KBean {
         if (mavenPublication != null) {
             return mavenPublication;
         }
+
         // Configure with ProjectKBean if present
         JkBuildable buildable = this.getRunbase().getBuildable();
-        JkUtilsAssert.state(buildable != null, "No buildable is found for runbase %s for publication.",
-                getRunbase().getBaseDir());
-        mavenPublication = JkMavenPublication.of(buildable);
+        mavenPublication = buildable == null ? JkMavenPublication.ofPomOnly() : JkMavenPublication.of(buildable);
 
         this.publication.metadata.applyTo(mavenPublication);
 

@@ -149,8 +149,7 @@ public class Main {
             }
 
             // Init runbase
-            JkRunbase runbase = engine.initRunbase(actionContainer);
-
+            JkRunbase runbase = engine.getOrCreateRunbase(actionContainer);
 
             // -- Handle doc ([kbean]: --doc)
             if (docKbeanName != null) {

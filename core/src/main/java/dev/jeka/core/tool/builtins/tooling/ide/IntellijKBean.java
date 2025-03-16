@@ -246,13 +246,4 @@ public final class IntellijKBean extends KBean {
         return Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(getBaseDir()));
     }
 
-    private boolean isMavenOrGradlePresent() {
-        return Files.exists(getBaseDir().resolve("pom.xml")) ||
-                Files.exists(getBaseDir().resolve("gradle")) ||
-                Files.exists(getBaseDir().resolve("build.gradle")) ||
-                Files.exists(getBaseDir().resolve("build.gradle.kts"));
-    }
-
-
-
 }

@@ -1,8 +1,6 @@
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPackaging;
-import dev.jeka.core.tool.JkInject;
-import dev.jeka.core.tool.JkPostInit;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
@@ -10,7 +8,6 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
  * Simple build demonstrating of how Jeka can handle multi-project build.
  * 
  * @author Jerome Angibaud
- *
  */
 class FatJarKBean extends KBean {
     

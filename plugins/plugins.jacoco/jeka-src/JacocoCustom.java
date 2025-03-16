@@ -33,7 +33,7 @@ public class JacocoCustom extends KBean {
                 .pomMetadata
                     .setProjectName("Jeka plugin for Jacoco")
                     .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
+        );
     }
 
 }

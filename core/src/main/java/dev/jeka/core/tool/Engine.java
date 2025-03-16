@@ -134,7 +134,7 @@ class Engine {
                 key -> new Engine(isMaster, key, downloadRepos, commandLineDependencies));
     }
 
-    private Engine withBaseDir(Path baseDir) {
+    Engine withBaseDir(Path baseDir) {
         return of(false, baseDir, this.dependencyResolver.getRepos(), this.commandLineDependencies);
     }
 
@@ -180,11 +180,13 @@ class Engine {
         JkLog.debugStartTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
 
-        JkLog.debug("Imported base dirs:" + parsedSourceInfo.importedBaseDirs);
+        //Collection<Path> depBaseDirs = parsedSourceInfo.importedBaseDirs;
+        Collection<Path> depBaseDirs = parsedSourceInfo.getDepBaseDirs();
+        JkLog.debug("Dependency base-dirs:" + depBaseDirs);
         JkLog.debugEndTask();
 
         // Compute and get the classpath from sub-dirs
-        List<Engine> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
+        List<Engine> subBaseDirs = depBaseDirs.stream()
                 .map(this::withBaseDir)
                 .collect(Collectors.toList());
 
@@ -267,7 +269,7 @@ class Engine {
         return kbeanResolution;
     }
 
-    JkRunbase initRunbase(KBeanAction.Container actionContainer) {
+    JkRunbase getOrCreateRunbase(KBeanAction.Container actionContainer) {
         if (runbase != null) {
             return runbase;
         }
