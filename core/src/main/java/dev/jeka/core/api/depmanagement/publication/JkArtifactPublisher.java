@@ -95,4 +95,11 @@ public final class JkArtifactPublisher {
             JkLog.endTask();
         }
     }
+
+    @Override
+    public String toString() {
+        return "ArtifactPublisher{" +
+                "artifactLocator:" + artifactLocator +
+                '}';
+    }
 }

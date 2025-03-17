@@ -181,6 +181,10 @@ public final class JkPomMetadata  implements Serializable {
         return Collections.unmodifiableList(licenses);
     }
 
+    @Override
+    public String toString() {
+        return String.format("projectName=%s, projectUrl=%s", projectName, projectUrl);
+    }
 
     /**
      * Information about a developer.

@@ -66,7 +66,20 @@ public final class MavenKBean extends KBean {
 
     private JkMavenPublication mavenPublication;
 
-    private final JkConsumers<JkMavenPublication> mavenPublicationCustomizer = JkConsumers.of();
+    @Override
+    protected void init() {
+        // Configure with ProjectKBean if present
+        JkBuildable buildable = this.getRunbase().getBuildable();
+        mavenPublication = JkMavenPublication.of(buildable);
+
+        this.publication.metadata.applyTo(mavenPublication);
+
+        // Add Publish Repos from JKProperties
+        mavenPublication.setRepos(getPublishReposFromProps());
+
+        // Add artifacts declared in "publication.extraArtifacts"
+        publication.extraArtifacts().forEach(mavenPublication::putArtifact);
+    }
 
     @JkDoc("Displays Maven publication information on the console.")
     public void info() {
@@ -109,57 +122,7 @@ public final class MavenKBean extends KBean {
      * Returns the Maven Publication associated with this KBean
      */
     public JkMavenPublication getMavenPublication() {
-
-        // maven Can't be instantiated in init(), cause it will fail if there is no project or self kbean,
-        // that may happen when doing a 'showPomDeps'.
-        if (mavenPublication != null) {
-            return mavenPublication;
-        }
-
-        // Configure with ProjectKBean if present
-        JkBuildable buildable = this.getRunbase().getBuildable();
-        mavenPublication = buildable == null ? JkMavenPublication.ofPomOnly() : JkMavenPublication.of(buildable);
-
-        this.publication.metadata.applyTo(mavenPublication);
-
-        // Add Publish Repos from JKProperties
-        mavenPublication.setRepos(getPublishReposFromProps());
-
-        this.mavenPublicationCustomizer.accept(mavenPublication);
-
-        // Add artifacts declared in "publication.extraArtifacts"
-        publication.extraArtifacts().forEach(mavenPublication::putArtifact);
-        
         return mavenPublication;
-    }
-
-    /**
-     * @see #customizePublication(String, Consumer)
-     */
-    public void customizePublication(Consumer<JkMavenPublication> publicationCustomizer) {
-        this.customizePublication(publicationCustomizer.toString(), publicationCustomizer);
-    }
-
-    /**
-     * Customizes the Maven publication by appending a custom action to the publication customization process.
-     *
-     * @param customizationName The name of the customization for identification purposes.
-     * @param publicationCustomizer A Consumer that applies custom configurations to the Maven publication.
-     */
-    public void customizePublication(String customizationName, Consumer<JkMavenPublication> publicationCustomizer) {
-        JkUtilsAssert.state(mavenPublication == null, "Maven publication has already been initialized, " +
-                "the customization can not be taken in account.");
-        this.mavenPublicationCustomizer.append(customizationName, publicationCustomizer);
-    }
-
-    /**
-     * Customizes the Maven dependencies by applying a modifier function to the dependency set.
-     * This allows for dynamic alterations to the dependencies before the Maven publication process.
-     */
-    public void customizePublishedDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        this.mavenPublicationCustomizer.append(mavenPublication -> {
-            mavenPublication.customizeDependencies(modifier);
-        });
     }
 
     private JkRepoSet getPublishReposFromProps() {
@@ -175,8 +138,6 @@ public final class MavenKBean extends KBean {
         }
         return result;
     }
-
-
 
     public static class JkPomMetadata {
 

@@ -66,8 +66,7 @@ class SignedArtifactsKBean extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> {
-            mavenPublication
+        mavenKBean.getMavenPublication()
                     .setModuleId("dev.jeka.core:samples-signedArtifacts")
                     .setVersion("1.3.1")
                     .setDefaultSigner(JkGpgSigner.ofSecretRing(secringPath, secringPassword, ""))
@@ -78,8 +77,7 @@ class SignedArtifactsKBean extends KBean {
                         .setScmConnection("https://github.com/jerkar/sample.git")
                         .addApache2License()
                         .addGithubDeveloper("John Doe", "johndoe6591@gmail.com");
-            configForLocalRepo(mavenPublication);
-        });
+            configForLocalRepo(mavenKBean.getMavenPublication());
     }
 
     private void configForLocalRepo(JkMavenPublication publication) {

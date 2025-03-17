@@ -25,8 +25,8 @@ import java.util.Optional;
 
 @JkDep("org.junit.jupiter:junit-jupiter:5.12.0")
 @JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
-@JkDep("dev.jeka:nexus-plugin:0.11.24")
 @JkDep("core")
+@JkDep("plugins/plugins.nexus/.idea/output/production") // To run into IntelliJ
 
 @JkChildBase("core")        // Forces core to be initialized prior plugin runbases
 @JkChildBase("plugins/*")
@@ -49,7 +49,7 @@ class Build extends KBean {
     public boolean skipTest = false;
 
     @JkInject("core")
-    CoreCustom coreCustom;
+    private JkRunbase coreRunbase;
 
     private final String effectiveVersion = JkVersionFromGit.of().getVersion();
 
@@ -97,7 +97,21 @@ class Build extends KBean {
     @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
         configCommon(mavenKBean);
-        mavenKBean.customizePublication(this::configBomPublication);
+
+        // Configure BOM publication
+        JkMavenPublication bomPublication = mavenKBean.getMavenPublication();
+        bomPublication.removeAllArtifacts();
+        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
+            JkProject project = projectKBean.project;
+            bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
+        });
+
+        bomPublication
+                .setModuleId("dev.jeka:bom")
+                .setVersion(effectiveVersion)
+                .pomMetadata
+                    .setProjectName("Jeka BOM")
+                    .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group");
     }
 
     private void publish() {
@@ -106,7 +120,7 @@ class Build extends KBean {
             JkLog.startTask("publish-ossrh");
             JkLog.info("current OSSRH user:  %s", ossrhUser);
             getRunbase().loadChildren(MavenKBean.class).forEach(MavenKBean::publish);
-            load(MavenKBean.class).publish();
+            load(MavenKBean.class).publish();  // publish BOM
             JkLog.endTask();
 
             /*
@@ -119,7 +133,7 @@ class Build extends KBean {
 
             // Create a Docker Image of Jeka and publish it to docker hub
             if (System.getenv(DOCKERHUB_TOKEN_ENV_NAME) != null) {
-                coreCustom.publishJekaDockerImage();
+                coreRunbase.load(CoreCustom.class).publishJekaDockerImage();
             }
 
         } else {
@@ -162,32 +176,13 @@ class Build extends KBean {
     }
 
     private void configCommon(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(publication -> {
-            publication
+        mavenKBean.getMavenPublication()
                     .setRepos(this.publishRepo())
                     .pomMetadata
                         .setProjectUrl("https://jeka.dev")
                         .setScmUrl("https://github.com/jerkar/jeka.git")
                         .addGithubDeveloper("djeang", "djeangdev@yahoo.fr")
                         .addApache2License();
-        });
-    }
-
-    private void configBomPublication(JkMavenPublication bomPublication) {
-
-        // Populate dependencyManagement section
-        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
-            JkProject project = projectKBean.project;
-            bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), effectiveVersion);
-        });
-
-        bomPublication
-                .setModuleId("dev.jeka:bom")
-                .setVersion(effectiveVersion)
-                .pomMetadata
-                    .setProjectName("Jeka BOM")
-                    .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group");
-
     }
 
     private void enrichDoc() {

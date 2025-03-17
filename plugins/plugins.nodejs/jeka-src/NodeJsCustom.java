@@ -31,11 +31,10 @@ public class NodeJsCustom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+        mavenKBean.getMavenPublication()
                 .pomMetadata
                     .setProjectName("Jeka plugin for NodeJs")
-                    .setProjectDescription("A Jeka plugin to integrate with NodeJs")
-        );
+                    .setProjectDescription("A Jeka plugin to integrate with NodeJs");
     }
 
 }

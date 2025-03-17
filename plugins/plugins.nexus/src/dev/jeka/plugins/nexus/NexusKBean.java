@@ -43,10 +43,11 @@ public class NexusKBean extends KBean {
     @JkDoc("Wraps Maven publish repo with Nexus autoclose trigger")
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> {
+        JkMavenPublication mavenPublication = mavenKBean.getMavenPublication();
+        mavenPublication.postActions.replaceOrAppend(JkNexusRepos.TASK_NAME, () -> {
             JkNexusRepos nexusRepos = getJkNexusRepos(mavenPublication);
             nexusRepos.setCloseTimeout(closeTimeout);
-            nexusRepos.autoReleaseAfterPublication(mavenPublication);
+            nexusRepos.closeAndReleaseOpenRepositories();
         });
     }
 

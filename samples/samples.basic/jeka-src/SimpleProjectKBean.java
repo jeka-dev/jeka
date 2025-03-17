@@ -78,8 +78,7 @@ public class SimpleProjectKBean extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication ->
-            mavenPublication
+        mavenKBean.getMavenPublication()
                 .setModuleId("dev.jeka:sample-javaplugin")
                 .setVersion("1.0-SNAPSHOT")
                 .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose
@@ -87,7 +86,7 @@ public class SimpleProjectKBean extends KBean {
                 // Published dependencies can be modified here from the ones declared in dependency management.
                 // Here jersey-server is not supposed to be part of the API but only needed at runtime.
                 .customizeDependencies(deps -> deps
-                        .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME)));
+                        .withTransitivity("com.sun.jersey:jersey-server", JkTransitivity.RUNTIME));
     }
 
 

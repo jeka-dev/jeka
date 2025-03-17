@@ -29,10 +29,9 @@ class KotlinCustom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+        mavenKBean.getMavenPublication()
                 .pomMetadata
                     .setProjectName("Jeka plugin for Kotlin")
-                    .setProjectDescription("A Jeka plugin for Kotlin language support")
-        );
+                    .setProjectDescription("A Jeka plugin for Kotlin language support");
     }
 }

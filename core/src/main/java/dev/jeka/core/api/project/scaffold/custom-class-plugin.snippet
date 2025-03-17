@@ -26,13 +26,13 @@ class Custom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+        mavenKBean.getMavenPublication()
             .pomMetadata
                 .addApache2License()
                 .setProjectName("Jeka plugin for ....")
                 .setProjectDescription("A Jeka plugin for ...")
                 .setProjectUrl("https://github.com/your_org/your_repo")
-                .setScmUrl("https://github.com/your_org/your_repo"));
+                .setScmUrl("https://github.com/your_org/your_repo");
     }
 
 }

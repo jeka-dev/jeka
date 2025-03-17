@@ -45,7 +45,7 @@ public class JkNexusRepos {
 
     static final int DEFAULT_CLOSE_TIMEOUT_SECONDS = 15 * 60; // 15 minutes
 
-    private static final String TASK_NAME = "Closing and releasing repositories";
+    static final String TASK_NAME = "Closing and releasing repositories";
 
     private static final long CLOSE_WAIT_INTERVAL_MILLIS = 10_000L;
 
