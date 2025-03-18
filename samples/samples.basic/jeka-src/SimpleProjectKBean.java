@@ -78,7 +78,7 @@ public class SimpleProjectKBean extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.getMavenPublication()
+        mavenKBean.getPublication()
                 .setModuleId("dev.jeka:sample-javaplugin")
                 .setVersion("1.0-SNAPSHOT")
                 .addRepos(JkRepo.of(getOutputDir().resolve("test-output/maven-repo")))  // Use a dummy repo for demo purpose

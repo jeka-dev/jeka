@@ -29,7 +29,7 @@ public class JacocoCustom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.getMavenPublication()
+        mavenKBean.getPublication()
                 .pomMetadata
                     .setProjectName("Jeka plugin for Jacoco")
                     .setProjectDescription("A Jeka plugin for Jacoco coverage tool");

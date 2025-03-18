@@ -90,7 +90,7 @@ public class CoreCustom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.getMavenPublication()
+        mavenKBean.getPublication()
                 .putArtifact(DISTRIB_FILE_ID)
                 .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID)
                 .pomMetadata

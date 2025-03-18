@@ -87,7 +87,7 @@ class Build extends KBean {
         String version = coreRunbase.load(ProjectKBean.class).project.getVersion().getValue();
 
         // Configure BOM publication
-        JkMavenPublication bomPublication = mavenKBean.getMavenPublication();
+        JkMavenPublication bomPublication = mavenKBean.getPublication();
         bomPublication.removeAllArtifacts();  // No artifacts to publish, just POM.
         getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkProject project = projectKBean.project;

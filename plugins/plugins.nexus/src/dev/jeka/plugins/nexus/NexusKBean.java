@@ -46,7 +46,7 @@ public class NexusKBean extends KBean {
     @JkDoc("Wraps Maven publish repo with Nexus autoclose trigger")
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        JkMavenPublication mavenPublication = mavenKBean.getMavenPublication();
+        JkMavenPublication mavenPublication = mavenKBean.getPublication();
         mavenPublication.postActions.replaceOrAppend(JkNexusRepos.TASK_NAME, () -> {
             JkNexusRepos nexusRepos = getJkNexusRepos(mavenPublication);
             nexusRepos.setCloseTimeout(closeTimeout);
@@ -62,7 +62,7 @@ public class NexusKBean extends KBean {
             JkLog.error("No MavenKBean found in runbase %s.", getBaseDir());
             return;
         }
-        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenKBean.getMavenPublication());
+        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenKBean.getPublication());
         if (nexusRepos == null) {
             return;
         }

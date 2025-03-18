@@ -26,7 +26,7 @@ class Custom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.getMavenPublication()
+        mavenKBean.getPublication()
             .pomMetadata
                 .addApache2License()
                 .setProjectName("Jeka plugin for ....")

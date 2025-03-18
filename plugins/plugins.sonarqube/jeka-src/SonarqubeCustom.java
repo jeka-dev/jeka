@@ -30,7 +30,7 @@ class SonarqubeCustom extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.getMavenPublication()
+        mavenKBean.getPublication()
                 .pomMetadata
                     .setProjectName("Jeka plugin for Sonarqube")
                     .setProjectDescription("A Jeka plugin for Jacoco coverage tool");

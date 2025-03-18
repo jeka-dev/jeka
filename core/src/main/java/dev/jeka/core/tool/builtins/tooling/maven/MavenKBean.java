@@ -20,11 +20,9 @@ import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkRequire;
@@ -34,8 +32,6 @@ import dev.jeka.core.tool.KBean;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @JkDoc("Manages Maven publication for project and 'jeka-src'.")
@@ -62,43 +58,44 @@ public final class MavenKBean extends KBean {
     @JkDoc("Indentation size for 'showPomDeps' output.")
     public int codeIndent = 4;
 
-    public final JkPublicationOptions publication = new JkPublicationOptions();
+    @JkDoc
+    private final JkPublicationOptions pub = new JkPublicationOptions();
 
-    private JkMavenPublication mavenPublication;
+    private JkMavenPublication publication;
 
     @Override
     protected void init() {
         // Configure with ProjectKBean if present
         JkBuildable buildable = this.getRunbase().getBuildable();
-        mavenPublication = JkMavenPublication.of(buildable);
+        publication = JkMavenPublication.of(buildable);
 
-        this.publication.metadata.applyTo(mavenPublication);
+        this.pub.metadata.applyTo(publication);
 
         // Add Publish Repos from JKProperties
-        mavenPublication.setRepos(getPublishReposFromProps());
+        publication.setRepos(getPublishReposFromProps());
 
         // Add artifacts declared in "publication.extraArtifacts"
-        publication.extraArtifacts().forEach(mavenPublication::putArtifact);
+        pub.extraArtifacts().forEach(publication::putArtifact);
     }
 
     @JkDoc("Displays Maven publication information on the console.")
     public void info() {
-        JkLog.info(getMavenPublication().info());
+        JkLog.info(getPublication().info());
     }
 
     @JkDoc("Publishes the Maven publication on the repositories specified inside this publication.")
     public void publish() {
-        getMavenPublication().publish();
+        getPublication().publish();
     }
 
     @JkDoc("Publishes the Maven publication on the local JeKa repository.")
     public void publishLocal() {
-        getMavenPublication().publishLocal();
+        getPublication().publishLocal();
     }
 
     @JkDoc("Publishes the Maven publication on the local M2 repository. This is the local repository of Maven.")
     public void publishLocalM2() {
-        getMavenPublication().publishLocalM2();
+        getPublication().publishLocalM2();
     }
 
     @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
@@ -121,8 +118,8 @@ public final class MavenKBean extends KBean {
     /**
      * Returns the Maven Publication associated with this KBean
      */
-    public JkMavenPublication getMavenPublication() {
-        return mavenPublication;
+    public JkMavenPublication getPublication() {
+        return publication;
     }
 
     public JkRepoSet createStandardOssrhRepos() {
@@ -133,7 +130,7 @@ public final class MavenKBean extends KBean {
     }
 
     private JkRepoSet getPublishReposFromProps() {
-        if (publication.predefinedRepo == PredefinedRepo.OSSRH) {
+        if (pub.predefinedRepo == PredefinedRepo.OSSRH) {
             return createStandardOssrhRepos();
         }
         JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
