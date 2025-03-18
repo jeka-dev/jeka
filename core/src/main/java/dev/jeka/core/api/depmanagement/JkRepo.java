@@ -295,7 +295,11 @@ public final class JkRepo {
 
     @Override
     public String toString() {
-        return url.toString() + "     " + publishConfig;
+        StringBuilder sb = new StringBuilder();
+        sb.append("url:").append(url).append(", ");
+        sb.append("credentials: ").append(credentials).append(", ");
+        sb.append("publish config: ").append(this.publishConfig);
+        return sb.toString();
     }
 
     private static URL toUrl(String urlOrDir) {
@@ -356,6 +360,10 @@ public final class JkRepo {
             return userName == null && password == null;
         }
 
+        @Override
+        public String toString() {
+            return "realm:" + realm + ", userName:" + userName;
+        }
     }
 
     /**
