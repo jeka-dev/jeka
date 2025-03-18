@@ -29,7 +29,7 @@ jobs:
 
     - name: Build JeKa bootstrapped with ANT
       env:
-        jeka.repos.publish.username: ${{ secrets.OSSRH_USER }}
+        JEKA_REPOS_PUBLISH_USERNAME: ${{ secrets.OSSRH_USER }}
         jeka.repos.publish.password: ${{ secrets.OSSRH_PWD }}
         jeka.gpg.secret-key: ${{ secrets.GPG_SECRET_KEY}}
         jeka.gpg.passphrase: ${{ secrets.GPG_PASSPHRASE }}
