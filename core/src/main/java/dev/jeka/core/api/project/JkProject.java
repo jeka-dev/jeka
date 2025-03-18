@@ -429,6 +429,16 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     /**
+     * Executes the full build process by executing clean, test, pack and test end-to-end.
+     */
+    public void fullBuild() {
+        clean();
+        test.run();
+        pack.run();
+        e2eTest.run();
+    }
+
+    /**
      * Returns a human-readable text that mentions various settings for this project
      * (source locations, file count, declared dependencies, ...).
      */

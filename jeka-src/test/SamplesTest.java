@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package _dev.test;
+package test;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;

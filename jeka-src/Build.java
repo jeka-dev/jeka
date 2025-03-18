@@ -1,4 +1,5 @@
 import dev.jeka.core.CoreCustom;
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
@@ -23,19 +24,12 @@ class Build extends KBean {
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void pack() throws IOException {
-
         getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkLog.startTask("pack-and-test %s", projectKBean.project.getBaseDir().getFileName());
-            JkProject project = projectKBean.project;
-            project.clean();
-            project.test.run();
-            project.pack.run();
-            project.e2eTest.run();
+            projectKBean.project.fullBuild();
             JkLog.endTask();
         });
-
         load(BaseKBean.class).test();
-
         MkDocsEnricher.run();
     }
 
@@ -88,7 +82,8 @@ class Build extends KBean {
 
         // Configure BOM publication
         JkMavenPublication bomPublication = mavenKBean.getPublication();
-        bomPublication.removeAllArtifacts();  // No artifacts to publish, just POM.
+        bomPublication.customizeDependencies(deps -> JkDependencySet.of()); // No dependencies in BOM
+        bomPublication.removeAllArtifacts();  // No artifacts in BOM
         getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkProject project = projectKBean.project;
             bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(), version);
