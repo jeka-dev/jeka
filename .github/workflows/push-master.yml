@@ -30,9 +30,9 @@ jobs:
     - name: Build JeKa bootstrapped with ANT
       env:
         JEKA_REPOS_PUBLISH_USERNAME: ${{ secrets.OSSRH_USER }}
-        jeka.repos.publish.password: ${{ secrets.OSSRH_PWD }}
-        jeka.gpg.secret-key: ${{ secrets.GPG_SECRET_KEY}}
-        jeka.gpg.passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        JEKA_REPOS_PUBLISH_PASSWORD: ${{ secrets.OSSRH_PWD }}
+        JEKA_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY}}
+        JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}

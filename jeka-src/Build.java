@@ -55,6 +55,7 @@ class Build extends KBean {
 
         JkLog.startTask("publish-ossrh");
         JkLog.info("---------------- jeka.repos.publish.username=" + System.getenv("jeka.repos.publish.username"));
+        JkLog.info("----------------jeka.gpg.secret-key=" + getRunbase().getProperties().get("jeka.gpg.secret-key"));
         getRunbase().loadChildren(MavenKBean.class).forEach(MavenKBean::publish);
         load(MavenKBean.class).publish();  // publish BOM
         JkLog.endTask();

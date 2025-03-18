@@ -167,6 +167,12 @@ public final class JkProperties {
      * Checks if the given property name exists in the properties.
      */
     public boolean containsKey(String propName) {
+        if (this == ENVIRONMENT_VARIABLES) {
+            String envValue = System.getenv(propNameToEnvVarName(propName));
+            if (envValue != null) {
+                return true;
+            }
+        }
         boolean result = props.containsKey(propName);
         if (result) {
             return result;
@@ -178,6 +184,12 @@ public final class JkProperties {
     }
 
     private String getRawValue(String propName) {
+        if (this == ENVIRONMENT_VARIABLES) {
+            String envValue = System.getenv(propNameToEnvVarName(propName));
+            if (envValue != null) {
+                return envValue;
+            }
+        }
         String result =  props.get(propName);
         if (result != null) {
             return result;
@@ -193,7 +205,7 @@ public final class JkProperties {
         for (String varName : System.getenv().keySet() ) {
             String value = System.getenv(varName);
             props.put(varName, value);
-            props.put(lowerCase(varName), value);
+            props.put(envVarNameToPropName(varName), value);
         }
         return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
     }
@@ -211,8 +223,12 @@ public final class JkProperties {
         return JkUtilsString.interpolate(string, this::get);
     }
 
-    private static String lowerCase(String value) {
+    private static String envVarNameToPropName(String value) {
         return value.toLowerCase().replace('_', '.');
+    }
+
+    private static String propNameToEnvVarName(String propName) {
+        return propName.toUpperCase().replace('.', '_').replace('-', '_');
     }
 
     public Map<String,String> getAllStartingWith(String prefix, boolean keepPrefix) {
@@ -320,6 +336,6 @@ public final class JkProperties {
     }
 
     private boolean isSystem() {
-        return SYS_PROPS_NAME == source || ENV_VARS_NAME == source;
+        return SYS_PROPS_NAME == source || ENV_VARS_NAME == source;  // source is set using constant
     }
 }
