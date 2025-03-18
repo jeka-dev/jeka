@@ -98,7 +98,7 @@ public class CoreCustom extends KBean {
                     .setProjectDescription("Build and Run Java Code from Everywhere");
     }
 
-    // Call from gitHub actions
+    // Call from GitHub actions
     @JkDoc("Publish javadoc on the Github page")
     public void addJavadocToGhPages() {
         String gitUrl = "https://github.com/jeka-dev/jeka.git";

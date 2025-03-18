@@ -42,7 +42,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="build: run --inspect --stacktrace" />
+			<arg line="build: pack publish --inspect --stacktrace" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

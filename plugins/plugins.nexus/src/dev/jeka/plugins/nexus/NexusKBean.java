@@ -38,6 +38,9 @@ public class NexusKBean extends KBean {
     @JkDoc("Timeout in seconds, before the 'close' operation times out.")
     public int closeTimeout = JkNexusRepos.DEFAULT_CLOSE_TIMEOUT_SECONDS;
 
+    @JkDoc("Read timeout in millis, when querying the Nexus repo via http. 0 means no timeout.")
+    public int readTimeout;
+
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
     @JkDoc("Wraps Maven publish repo with Nexus autoclose trigger")
@@ -47,6 +50,7 @@ public class NexusKBean extends KBean {
         mavenPublication.postActions.replaceOrAppend(JkNexusRepos.TASK_NAME, () -> {
             JkNexusRepos nexusRepos = getJkNexusRepos(mavenPublication);
             nexusRepos.setCloseTimeout(closeTimeout);
+            nexusRepos.setReadTimeout(readTimeout);
             nexusRepos.closeAndReleaseOpenRepositories();
         });
     }

@@ -129,6 +129,10 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
     @JkDoc("Launches test suite")
     public void test() {
+        if ("true".equals(getRunbase().getProperties().get("jeka.test.skip"))) {
+            JkLog.info("Tests are skipped.");
+            return;
+        }
         if (!JkTestProcessor.isEngineTestPresent()) {
             throw new JkException("No engine test class found in current classloader. " +
                     "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies" +

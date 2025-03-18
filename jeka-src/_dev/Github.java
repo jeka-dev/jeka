@@ -1,3 +1,21 @@
+/*
+ * Copyright 2014-2025  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+package _dev;
+
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -15,10 +33,10 @@ import java.util.List;
 
 class Github  {
 
-    @JkDoc("Github token injected bby the pipeline")
+    @JkDoc("_dev.Github token injected bby the pipeline")
     public String ghToken;
 
-    @JkDoc("Publish a Release description on Github. The description is extracted from the release-note.md file " +
+    @JkDoc("Publish a Release description on _dev.Github. The description is extracted from the release-note.md file " +
             "which describe content of all releases.")
     public void publishGhRelease() throws IOException {
         JkGit git = JkGit.of();
@@ -50,7 +68,7 @@ class Github  {
         }
         int status = con.getResponseCode();
         if (status != 201) {
-            JkLog.warn("Release publication on Github failed. Status code = " + status);
+            JkLog.warn("Release publication on _dev.Github failed. Status code = " + status);
         }
     }
 

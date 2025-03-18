@@ -125,13 +125,18 @@ public final class MavenKBean extends KBean {
         return mavenPublication;
     }
 
-    private JkRepoSet getPublishReposFromProps() {
+    public JkRepoSet createStandardOssrhRepos() {
         JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
-        if (publication.predefinedRepo == PredefinedRepo.OSSRH) {
-            JkGpgSigner signer = JkGpgSigner.ofStandardProperties();
-            return JkRepoSet.ofOssrhSnapshotAndRelease(repoProperties.getPublishUsername(),
+        JkGpgSigner signer = JkGpgSigner.ofStandardProperties();
+        return JkRepoSet.ofOssrhSnapshotAndRelease(repoProperties.getPublishUsername(),
                     repoProperties.getPublishPassword(), signer);
+    }
+
+    private JkRepoSet getPublishReposFromProps() {
+        if (publication.predefinedRepo == PredefinedRepo.OSSRH) {
+            return createStandardOssrhRepos();
         }
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
         JkRepoSet result = repoProperties.getPublishRepository();
         if (result.getRepos().isEmpty()) {
             result = result.and(JkRepo.ofLocal());
@@ -153,10 +158,10 @@ public final class MavenKBean extends KBean {
         @JkDoc("The url to fetch source code, as the git repo url")
         public String projectScmUrl;
 
-        @JkDoc("Comma separated list of license formated as <license name>:<license url>")
+        @JkDoc("Comma separated list of license formated as <license name>=<license url>")
         @JkDepSuggest(versionOnly = true, hint =
-                "Apache License V2.0:https://www.apache.org/licenses/LICENSE-2.0.html," +
-                "MIT License:https://www.mit.edu/~amini/LICENSE.md")
+                "Apache License V2.0=https://www.apache.org/licenses/LICENSE-2.0.html," +
+                "MIT License=https://www.mit.edu/~amini/LICENSE.md")
         public String licenses;
 
         @JkDoc("Comma separated list of developers formatted as <dev nam>:<dev email>")
@@ -179,9 +184,9 @@ public final class MavenKBean extends KBean {
             if (licenses != null) {
                 Arrays.stream(licenses.split(",")).forEach(
                         item -> {
-                            String[] licenseItems = item.split(":");
+                            String[] licenseItems = item.split("=");
                             String licenseName = licenseItems[0];
-                            String licenseUrl = licenseItems[1];
+                            String licenseUrl = licenseItems.length > 1 ? licenseItems[1] : "";
                             publication.pomMetadata.addLicense(licenseName, licenseUrl);
                         }
                 );
