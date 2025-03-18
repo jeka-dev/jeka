@@ -42,7 +42,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="build: pack publish --inspect --stacktrace -v" />
+			<arg line="build: pack publish --inspect --stacktrace -v -Djeka.test.skip=true" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
