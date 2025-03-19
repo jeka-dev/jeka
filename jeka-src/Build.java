@@ -10,20 +10,18 @@ import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-import java.io.IOException;
-
-@JkDep("core")
-@JkDep("plugins/plugins.nexus/.idea/output/production") // To run into IntelliJ
+@JkDep("core/.idea/output/test")                         // To bootstrap jeka in IntelliJ
+@JkDep("plugins/plugins.nexus/.idea/output/production")  // To bootstrap jeka in IntelliJ
 
 @JkChildBase("core")        // Forces core to be initialized prior plugin runbases
 @JkChildBase("plugins/*")
 class Build extends KBean {
 
-    @JkInject("core")
-    private JkRunbase coreRunbase;
+    @JkInject
+    private CoreCustom coreCustom;
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
-    public void pack() throws IOException {
+    public void pack() {
         getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkLog.startTask("pack-and-test %s", projectKBean.project.getBaseDir().getFileName());
             projectKBean.project.fullBuild();
@@ -65,7 +63,7 @@ class Build extends KBean {
         github.publishGhRelease();
         JkLog.endTask();
          */
-        coreRunbase.load(CoreCustom.class).publishJekaDockerImage();
+        coreCustom.publishJekaDockerImage();
     }
 
     @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
@@ -78,7 +76,7 @@ class Build extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
-        String version = coreRunbase.load(ProjectKBean.class).project.getVersion().getValue();
+        String version = coreCustom.load(ProjectKBean.class).project.getVersion().getValue();
 
         // Configure BOM publication
         JkMavenPublication bomPublication = mavenKBean.getPublication();
