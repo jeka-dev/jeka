@@ -23,7 +23,7 @@ class Build extends KBean {
 
     @Override
     protected void init() {
-        this.getRunbase().getChildRunbases().forEach(runbase -> runbase.load(NexusKBean.class));
+        this.getRunbase().loadChildren(NexusKBean.class).forEach(this::postInit);
     }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
@@ -103,6 +103,7 @@ class Build extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(NexusKBean nexusKBean) {
+        nexusKBean.setRepoReadTimeout(60000);
     }
 
 }
