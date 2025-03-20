@@ -141,7 +141,6 @@ public class JkNexusRepos {
     public void closeAndReleaseOpenRepositories() {
         JkLog.startTask("Nexus: Closing and releasing staged repositories");
         List<JkStagingRepo> stagingRepos = findStagingRepositories();
-        JkLog.info("Nexus: Found staging repositories : ");
         stagingRepos.forEach(repo -> JkLog.info(repo.toString()));
         List<String> openRepoIds = stagingRepos.stream()
                 .filter(profileNameFilter(profileNameFilters))
@@ -152,7 +151,7 @@ public class JkNexusRepos {
             JkLog.info("Nexus: Taking in account repositories with profile name in "
                     + Arrays.asList(profileNameFilters));
         }
-        JkLog.info("Nexus: Repositories to close and release : " + openRepoIds);
+        JkLog.info("Nexus Repositories to close and release: " + openRepoIds);
         close(openRepoIds);
         openRepoIds.forEach(this::waitForClosing);
         release(openRepoIds);
