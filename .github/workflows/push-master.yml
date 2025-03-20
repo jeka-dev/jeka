@@ -55,7 +55,7 @@ jobs:
 
     - name: Add Javadoc to gh-pages
       working-directory: core
-      run: jeka-output/distrib/bin/jeka addJavadocToGhPages
+      run: jeka-output/distrib/bin/jeka addJavadocToGhPages  --stacktrace
 
     - name: Deploy gh-pages
       uses: peaceiris/actions-gh-pages@v4
