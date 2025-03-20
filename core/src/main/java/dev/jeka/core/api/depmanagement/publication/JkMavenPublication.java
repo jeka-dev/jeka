@@ -393,7 +393,8 @@ public final class JkMavenPublication {
 
         artifactPublisher.makeMissingArtifacts();
 
-        JkLog.verbose("Published repos: %s", repos);
+        JkLog.verbose("Published repos:");
+        JkLog.verbose(repos.toStringMultiline("  "));
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
         internalPublisher.publishMaven(

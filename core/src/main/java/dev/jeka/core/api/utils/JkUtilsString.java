@@ -656,14 +656,20 @@ public final class JkUtilsString {
      */
     public static String formatOptions(List<String> options) {
         StringBuilder sb = new StringBuilder();
+        boolean followHyphen = false;
         for (String option : options) {
             if (option.contains(File.pathSeparator) && option.length() > 100) {
                 Arrays.stream(option.split(File.pathSeparator))
                         .forEach(item -> sb.append("\n    ").append(item));
             } else if (option.startsWith("-")) {
                 sb.append("\n  ").append(option);
-            } else {
+                followHyphen = true;
+            } else if (followHyphen){
                 sb.append(" ").append(option);
+                followHyphen = false;
+            } else {
+                sb.append("\n  ").append(option);
+                followHyphen = false;
             }
         }
         return sb.toString();

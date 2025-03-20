@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides fluent interface for producing Javadoc.
@@ -111,8 +112,7 @@ public final class JkJavadocProcessor {
             javadocExe = JkUtilsJdk.javaHome().resolve("../bin/" + exeName).normalize();
         }
         boolean verbose = JkLog.isVerbose();
-        JkLog.verbose("%s", javadocExe);
-        LinkedHashSet<String> packages = computePackages(srcDirs);
+        List<String> packages = computePackages(srcDirs);
         if (packages.isEmpty()) {
             JkLog.warn("No package detected. Skip Javadoc.");
             return;
@@ -130,9 +130,9 @@ public final class JkJavadocProcessor {
         }
     }
 
-    private LinkedHashSet<String> computePackages(JkPathTreeSet srcDirs) {
+    private List<String> computePackages(JkPathTreeSet srcDirs) {
         srcDirs = srcDirs.withMatcher(JkJavaCompilerToolChain.JAVA_SOURCE_MATCHER);
-        LinkedHashSet<String> result = new LinkedHashSet<>();
+        List<String> result = new LinkedList<>();
         for (Path relFile: srcDirs.getRelativeFiles()) {
             Path packageDir = relFile.getParent();
             if (packageDir != null) {
@@ -140,7 +140,7 @@ public final class JkJavadocProcessor {
                 result.add(packageName);
             }
         }
-        return result;
+        return result.stream().distinct().collect(Collectors.toList());
     }
 
     private List<String> computeOptions(Iterable<Path> classpath, JkPathTreeSet srcDirs, Path outputDir) {
@@ -166,7 +166,6 @@ public final class JkJavadocProcessor {
             options.add("-quiet");
         }
         options.addAll(this.options);
-        JkLog.verbose("%s", options);
         return options;
     }
 
