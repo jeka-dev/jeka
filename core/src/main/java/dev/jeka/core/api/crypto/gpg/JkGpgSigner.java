@@ -50,8 +50,6 @@ public final class JkGpgSigner implements JkSigner {
 
     private final String passphrase;
 
-
-
     private JkGpgSigner(Path secretRingPath, String passphrase, String keyName, String asciiKey) {
         super();
         this.secretRingPath = secretRingPath;
@@ -181,4 +179,8 @@ public final class JkGpgSigner implements JkSigner {
         JkUtilsAssert.state(Files.exists(secretRingPath), "Specified public ring file %s not found.", secretRingPath);
     }
 
+    @Override
+    public String toString() {
+        return "GPG Signer: keyName=" + keyName;
+    }
 }
