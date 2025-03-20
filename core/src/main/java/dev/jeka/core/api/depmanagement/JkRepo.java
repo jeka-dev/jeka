@@ -346,8 +346,10 @@ public final class JkRepo {
             sb.append(subMargin).append("checksums: ").append(publishConfig.checksumAlgos).append("\n");
             sb.append(subMargin).append("version-filter: ").append(publishConfig.versionFilter).append("\n");
             sb.append(subMargin).append("sign-artifacts: ").append(publishConfig.signatureRequired).append("\n");
-            sb.append(subMargin).append("unique-snapshot: ").append(publishConfig.uniqueSnapshot).append("\n");
-            sb.append(subMargin).append("file-signer: ").append(publishConfig.signer);
+            if (publishConfig.signatureRequired) {
+                sb.append(subMargin).append("file-signer: ").append(publishConfig.signer).append("\n");
+            }
+            sb.append(subMargin).append("unique-snapshot: ").append(publishConfig.uniqueSnapshot);
         } else {
             sb.append(margin).append("publish config: none");
         }
