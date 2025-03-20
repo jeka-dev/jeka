@@ -9,6 +9,7 @@ import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+import dev.jeka.plugins.nexus.NexusKBean;
 
 @JkDep("core/.idea/output/test")                         // To bootstrap jeka in IntelliJ
 @JkDep("plugins/plugins.nexus/.idea/output/production")  // To bootstrap jeka in IntelliJ
@@ -19,6 +20,11 @@ class Build extends KBean {
 
     @JkInject
     private CoreCustom coreCustom;
+
+    @Override
+    protected void init() {
+        this.getRunbase().getChildRunbases().forEach(runbase -> runbase.load(NexusKBean.class));
+    }
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void pack() {
@@ -93,6 +99,10 @@ class Build extends KBean {
                 .pomMetadata
                     .setProjectName("Jeka BOM")
                     .setProjectDescription("Provides versions for all artifacts in 'dev.jeka' artifact group");
+    }
+
+    @JkPostInit(required = true)
+    private void postInit(NexusKBean nexusKBean) {
     }
 
 }
