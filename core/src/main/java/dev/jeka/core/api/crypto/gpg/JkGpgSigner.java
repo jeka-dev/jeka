@@ -181,6 +181,9 @@ public final class JkGpgSigner implements JkSigner {
 
     @Override
     public String toString() {
-        return "GPG Signer: keyName=" + keyName;
+        if (this.keyName == null) {
+            return "GPG Signer";
+        }
+        return "GPG Signer (keyName=" + keyName + ")";
     }
 }
