@@ -67,7 +67,7 @@ class KBeanAction implements Comparable<KBeanAction> {
         this.valueSource = valueSource;
     }
 
-    static KBeanAction ofInit(Class<? extends KBean> beanClass) {
+    static KBeanAction ofInitialization(Class<? extends KBean> beanClass) {
         return new KBeanAction(Action.BEAN_INIT, beanClass, null, null, null);
     }
 
@@ -227,25 +227,52 @@ class KBeanAction implements Comparable<KBeanAction> {
             return columnText;
         }
 
-        KBeanAction.Container withInitBean(Class<? extends KBean> inintKBeanClass) {
-            if (inintKBeanClass == null) {
+        KBeanAction.Container withKBeanInitialization(Class<? extends KBean> initKBeanClass) {
+            if (initKBeanClass == null) {
                 return this;
             }
             KBeanAction.Container container = new KBeanAction.Container();
             container.addAll(this.kBeanActions);
-            container.addInitBean(inintKBeanClass);
+            container.addKBeanInitialization(initKBeanClass);
             return container;
         }
 
-        private void addInitBean(Class<? extends KBean> initKBeanClass) {
+        KBeanAction.Container withOnlyKBeanClasses(List<String> kbeanClassNames) {
+            List<KBeanAction> kBeanActions = this.kBeanActions.stream()
+                    .filter(kBeanAction -> kbeanClassNames.contains(kBeanAction.beanClass.getName()))
+                    .collect(Collectors.toList());
+            KBeanAction.Container result = new KBeanAction.Container();
+            result.addAll(kBeanActions);
+            return result;
+        }
+
+        KBeanAction.Container withoutAnyOfKBeanClasses(List<String> kbeanClassNames) {
+            List<KBeanAction> kBeanActions = this.kBeanActions.stream()
+                    .filter(kBeanAction -> !kbeanClassNames.contains(kBeanAction.beanClass.getName()))
+                    .collect(Collectors.toList());
+            KBeanAction.Container result = new KBeanAction.Container();
+            result.addAll(kBeanActions);
+            return result;
+        }
+
+        private void addKBeanInitialization(Class<? extends KBean> defaultKBeanClass) {
             KBeanAction present = kBeanActions.stream()
                     .filter(action -> action.type == BEAN_INIT)
-                    .filter(action -> action.beanClass.equals(initKBeanClass))
+                    .filter(action -> action.beanClass.equals(defaultKBeanClass))
                     .findFirst().orElse(null);
             if (present != null) {
                 kBeanActions.remove(present);
             }
-            kBeanActions.add(0, KBeanAction.ofInit(initKBeanClass));
+            kBeanActions.add(0, KBeanAction.ofInitialization(defaultKBeanClass));
+        }
+
+        String toCmdLineRun() {
+            List<String> sortedCommands = this.kBeanActions.stream()
+                    .sorted()
+                    .filter(kBeanAction -> kBeanAction.type == INVOKE)
+                    .map(kBeanAction -> kBeanAction.beanClass.getSimpleName() + "." + kBeanAction.member)
+                    .collect(Collectors.toList());
+            return String.join(" ", sortedCommands);
         }
 
 

@@ -210,5 +210,14 @@
         </orderEntry>
         <orderEntry exported="" module-name="plugins.jacoco" scope="TEST" type="module"/>
         <orderEntry exported="" module-name="core" scope="TEST" type="module"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="file:///Users/jerome/IdeaProjects/jeka/samples/samples.project-flat-facade-api/.jeka-work/jeka-src-classes"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
     </component>
 </module>

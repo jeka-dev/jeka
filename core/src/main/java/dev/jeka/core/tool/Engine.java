@@ -182,15 +182,15 @@ class Engine {
 
         //Collection<Path> depBaseDirs = parsedSourceInfo.importedBaseDirs;
         Collection<Path> depBaseDirs = parsedSourceInfo.getDepBaseDirs();
-        JkLog.debug("Dependency base-dirs:" + depBaseDirs);
+        JkLog.debug("Dependency base-dirs for %s: %s", baseDir, depBaseDirs);
         JkLog.debugEndTask();
 
         // Compute and get the classpath from sub-dirs
-        List<Engine> subBaseDirs = depBaseDirs.stream()
+        List<Engine> subEngines = depBaseDirs.stream()
                 .map(this::withBaseDir)
                 .collect(Collectors.toList());
 
-        JkPathSequence addedClasspathFromSubDirs = subBaseDirs.stream()
+        JkPathSequence addedClasspathFromSubDirs = subEngines.stream()
                 .map(Engine::resolveClassPaths)
                 .map(classpathSetupResult -> classpathSetupResult.runClasspath)
                 .reduce(JkPathSequence.of(), JkPathSequence::and);
@@ -208,7 +208,7 @@ class Engine {
                 .collect(Collectors.toList());
         JkDependencySet dependencies = commandLineDependencies
                 .and(jekaPropsDeps)
-                .and(parsedSourceInfo.getDependencies())
+                .and(parsedSourceInfo.getSanitizedDeps()) // TODO we should include dependencies of sub-runbases when declared as @JKDep("subBaseDir")
                 .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
 
         JkPathSequence kbeanClasspath = JkPathSequence.of(dependencyResolver.resolveFiles(dependencies))
@@ -216,7 +216,7 @@ class Engine {
 
         if (BehaviorSettings.INSTANCE.skipCompile) {
             JkLog.debugEndTask();
-            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs, kbeanClasspath, dependencies);
+            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subEngines, kbeanClasspath, dependencies);
             return this.classpathSetupResult;
         }
 
@@ -248,7 +248,7 @@ class Engine {
 
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
-                runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs, dependencies);
+                runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subEngines, dependencies);
 
 
         JkLog.debugEndTask();
@@ -269,13 +269,16 @@ class Engine {
         return kbeanResolution;
     }
 
-    JkRunbase getOrCreateRunbase(KBeanAction.Container actionContainer) {
+    JkRunbase getOrCreateRunbase(KBeanAction.Container actionContainer, boolean isMaster) {
         if (runbase != null) {
             return runbase;
         }
         this.actionContainer = actionContainer;
 
-        runbase = JkRunbase.createMaster(baseDir);
+        runbase = new JkRunbase(baseDir);
+        if (isMaster) {
+            JkRunbase.setMaster(runbase);
+        }
         runbase.setKbeanResolution(getKbeanResolution());
         runbase.setDependencyResolver(dependencyResolver);
         runbase.setClasspath(classpathSetupResult.runClasspath);
@@ -286,12 +289,12 @@ class Engine {
 
 
         // initialise runbase with resolved commands
-        runbase.init(this.actionContainer);
+        runbase.init(this.actionContainer, isMaster);
         return runbase;
     }
 
     void run() {
-        runbase.run(actionContainer);
+        runbase.run(actionContainer, true);
     }
 
     String defaultKBeanClassName(List<String> kbeanClassNames, List<String> localKbeanClassNames) {

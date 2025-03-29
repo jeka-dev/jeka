@@ -438,6 +438,12 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         e2eTest.run();
     }
 
+    public void fullBuildTask() {
+        JkLog.startTask("full-build: " + this.baseDir);
+        fullBuild();
+        JkLog.endTask();
+    }
+
     /**
      * Returns a human-readable text that mentions various settings for this project
      * (source locations, file count, declared dependencies, ...).

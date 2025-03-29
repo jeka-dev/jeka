@@ -149,7 +149,7 @@ public class Main {
             }
 
             // Init runbase
-            JkRunbase runbase = engine.getOrCreateRunbase(actionContainer);
+            JkRunbase runbase = engine.getOrCreateRunbase(actionContainer, true);
 
             // -- Handle doc ([kbean]: --doc)
             if (docKbeanName != null) {
@@ -308,7 +308,8 @@ public class Main {
         JkBusyIndicator.stop();
         JkLog.restoreToInitialState();
         if (t.getMessage() != null) {
-            String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + t.getMessage());
+            String errClassName = (t instanceof Error) ? t.getClass().getName() + " " : "";
+            String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + errClassName + t.getMessage());
             System.err.println(txt);
         } else {
             String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");

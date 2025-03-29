@@ -18,76 +18,147 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 class RunbaseGraph {
 
-    private final List<Node> nodes;
+    private final List<LazyNode> children;
 
-    private final Path parentBaseDir;
+    private final JkRunbase runbase;
 
-    private RunbaseGraph(List<Node> nodes, Path parentBaseDir) {
-        this.nodes = nodes;
-        this.parentBaseDir = parentBaseDir;
+    private final boolean declaresChildren;
+
+    private RunbaseGraph(List<LazyNode> children, JkRunbase runbase, boolean declaresChildren) {
+        this.children = children;
+        this.runbase = runbase;
+        this.declaresChildren = declaresChildren;
     }
 
-    static RunbaseGraph of(Class<? extends KBean> parentKBean, Path parentBaseDir) {
-        List<Node> nodes = getChildPaths(parentKBean, parentBaseDir).stream()
-                .map(Node::new)
+    static RunbaseGraph of(Class<? extends KBean> parentKBean, JkRunbase runbase) {
+        List<LazyNode> nodes = getChildPaths(parentKBean, runbase.getBaseDir()).stream()
+                .map(LazyNode::of)
                 .collect(Collectors.toList());
-        return new RunbaseGraph(nodes, parentBaseDir);
+        LazyNode.find(runbase).ifPresent(lazyNode -> lazyNode.populate(runbase, nodes));
+        boolean declaresChildren = isDeclaringChildren(parentKBean);
+        return new RunbaseGraph(nodes, runbase, declaresChildren);
     }
 
     static RunbaseGraph empty() {
-        return new RunbaseGraph(Collections.emptyList(), null);
+        return new RunbaseGraph(Collections.emptyList(), null, false);
     }
 
-    List<JkRunbase> getRunbases() {
-        return nodes.stream().map(Node::get).collect(Collectors.toList());
+    List<JkRunbase> getOrInitRunbases() {
+        LinkedHashSet<LazyNode> sortedNodes = new LinkedHashSet<>();
+        for (LazyNode node : children) {
+            fill(sortedNodes, node);
+        }
+        return sortedNodes.stream().map(LazyNode::getRunbase).collect(Collectors.toList());
+    }
+
+    private static void fill(Collection<LazyNode> recipient, LazyNode node) {
+        for (LazyNode child : node.children) {
+            fill(recipient, child);
+        }
+        recipient.add(node);
+    }
+
+    boolean declaresChildren() {
+        return declaresChildren;
     }
 
     JkRunbase getRunbase(String baseDirRelPath) {
-        return nodes.stream()
-                .filter(node -> parentBaseDir.resolve(baseDirRelPath).normalize().equals(node.baseDir))
-                .map(Node::get)
+        return LazyNode.ALL.stream()
+                .filter(node -> runbase.getBaseDir().resolve(baseDirRelPath).normalize().equals(node.baseDir))
+                .map(LazyNode::getRunbase)
                 .findFirst()
                 .orElseThrow(() -> new JkException("No runbase '%s' found among %s.",
-                        parentBaseDir.resolve(baseDirRelPath).normalize(), childBaseDirs()));
+                        runbase.getBaseDir().resolve(baseDirRelPath).normalize(), childBaseDirs()));
     }
 
     private List<Path> childBaseDirs() {
-        return nodes.stream().map(node -> node.baseDir).collect(Collectors.toList());
+        return children.stream().map(node -> node.baseDir).collect(Collectors.toList());
     }
 
-    private static class Node {
+    private static class LazyNode implements Comparable<LazyNode> {
+
+        private final static LinkedHashSet<LazyNode> ALL = new LinkedHashSet<>();
 
         private JkRunbase runbase;
 
         private final Path baseDir;
 
-        private Node(Path baseDir) {
-            this.baseDir = baseDir;
+        private List<LazyNode> children = new LinkedList<>();
+
+        private static LazyNode of(Path baseDir) {
+            return ALL.stream()
+                    .filter(node -> node.baseDir.equals(baseDir.toAbsolutePath()))
+                    .findFirst()
+                    .orElseGet(() -> new LazyNode(baseDir));
         }
 
-        JkRunbase get() {
+        private LazyNode(Path baseDir) {
+            JkUtilsAssert.argument(baseDir.isAbsolute(), "baseDir must be absolute");
+            this.baseDir = baseDir;
+            ALL.add(this);
+        }
+
+        private static Optional<LazyNode> find(JkRunbase searchedRunbase) {
+            return LazyNode.ALL.stream()
+                    .filter(node -> searchedRunbase.getBaseDir().toAbsolutePath().equals(node.baseDir))
+                    .findFirst();
+        }
+
+        JkRunbase getRunbase() {
             if (runbase != null) {
                 return runbase;
             }
-            JkLog.startTask("init-runbase: " + baseDir);
             Engine engine = Engines.get(baseDir);
             engine.resolveKBeans();
             ClassLoader augmentedClassloader = JkUrlClassLoader.of(engine.getClasspathSetupResult().runClasspath).get();
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
-            this.runbase = engine.getOrCreateRunbase(new KBeanAction.Container());
-            JkLog.endTask();
-            return runbase;
+            this.runbase = engine.getOrCreateRunbase(new KBeanAction.Container(), false);
+            return this.runbase;
         }
+
+        void populate(JkRunbase runbase, List<LazyNode> children) {
+            this.runbase = runbase;
+            this.children = children;
+        }
+
+        @Override
+        public int compareTo(LazyNode other) {
+            return 0;
+        }
+
+        @Override
+        public final boolean equals(Object o) {
+            if (!(o instanceof LazyNode)) return false;
+
+            LazyNode node = (LazyNode) o;
+            return baseDir.equals(node.baseDir);
+        }
+
+        @Override
+        public int hashCode() {
+            return baseDir.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return this.baseDir.getFileName().toString();
+        }
+    }
+
+    private static boolean isDeclaringChildren(Class<? extends KBean> parentKBeanClass) {
+        return parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class).length > 0;
     }
 
     private static List<Path> getChildPaths(Class<? extends KBean> parentKBeanClass, Path parentBaseDir) {

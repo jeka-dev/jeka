@@ -28,6 +28,7 @@ import dev.jeka.core.tool.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -44,7 +45,7 @@ public final class IntellijKBean extends KBean {
 
     @JkDoc("If true, the iml generation fails when a dependency can not be resolved. If false, it will be ignored " +
             "(only a warning will be notified).")
-    private boolean failOnDepsResolutionError = true;
+    private boolean failOnDepsResolutionError = !getRunbase().isForceMode();
 
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
@@ -193,7 +194,6 @@ public final class IntellijKBean extends KBean {
         imlGenerator
                 .setBaseDir(this.getBaseDir())
                 .setJekaSrcClasspath(this.getRunbase().getClasspath())
-                .setJekaSrcImportedProjects(this.getRunbase().getImportBaseDirs())
                 .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
                 .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
                 .setDownloadSources(this.downloadSources)
@@ -219,7 +219,7 @@ public final class IntellijKBean extends KBean {
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        JkLog.info("Iml file generated at " + imlPath);
+        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlPath).normalize());
     }
 
     private void adaptMiscXml() {

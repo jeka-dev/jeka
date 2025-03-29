@@ -622,5 +622,14 @@
             </library>
         </orderEntry>
         <orderEntry exported="" module-name="core" scope="COMPILE" type="module"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="file://$MODULE_DIR$/.jeka-work/jeka-src-classes"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
     </component>
 </module>

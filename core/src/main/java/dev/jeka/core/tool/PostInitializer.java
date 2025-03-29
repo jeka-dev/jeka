@@ -19,6 +19,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsReflect;
+import dev.jeka.core.api.utils.JkUtilsThrowable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -65,8 +66,30 @@ class PostInitializer {
         Class<? extends KBean> kbeanClass = kbeanToPostInitialize.getClass();
         if (map.containsKey(kbeanClass)) {
             JkConsumers consumers = map.get(kbeanClass);
-            consumers.accept(kbeanToPostInitialize);
-            return consumers.getConsumerNames();
+            List<String> consumerNames = new LinkedList<>();
+            for (Object entry : consumers.toMap().entrySet()) {
+                Map.Entry<String, Consumer> consumerEntry = (Map.Entry<String, Consumer>) entry;
+                String name = consumerEntry.getKey();
+                try {
+                    consumerEntry.getValue().accept(kbeanToPostInitialize);
+                    consumerNames.add(name);
+                }  catch (Throwable e) {
+                    if (BehaviorSettings.INSTANCE.forceMode) {
+                        JkLog.warn("Error occurred while invoking post-initializer %s for kbean %s.",
+                                name, kbeanToPostInitialize);
+                        JkLog.warn(e.getClass() + ": " + e.getMessage());
+                        if (JkLog.isVerbose()) {
+                            e.printStackTrace(JkLog.getOutPrintStream());
+                        }
+                    } else {
+                        if (e instanceof Error) {
+                            throw e;
+                        }
+                        throw JkUtilsThrowable.unchecked((Exception) e);
+                    }
+                }
+            }
+            return consumerNames;
         }
         return Collections.emptyList();
     }

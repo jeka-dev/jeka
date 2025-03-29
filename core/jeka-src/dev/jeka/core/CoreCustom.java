@@ -27,11 +27,13 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -220,6 +222,10 @@ public class CoreCustom extends KBean {
 
         // Cleanup
         JkUtilsPath.deleteIfExists(embeddedJar);
+    }
+
+    public void selfTest() {
+        JkUtilsAssert.state(!getRunbase().find(BaseKBean.class).isPresent(), "BaseKBean mistakenly present in runbase.");
     }
 
 }

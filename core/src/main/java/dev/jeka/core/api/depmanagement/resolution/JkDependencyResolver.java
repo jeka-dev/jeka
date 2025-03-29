@@ -274,8 +274,12 @@ public final class JkDependencyResolver  {
         JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies
                 .withCoordinateDependenciesOnly()
                 .withResolvedBoms(effectiveRepos())
-                .assertNoUnspecifiedVersion()
+                //.assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
+
+        if (params.isFailOnDependencyResolutionError()) {
+            moduleQualifiedDependencies.assertNoUnspecifiedVersion();
+        }
 
         // Warn if no dependency is present
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();

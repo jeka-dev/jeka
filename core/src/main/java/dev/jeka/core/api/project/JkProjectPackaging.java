@@ -194,8 +194,10 @@ public class JkProjectPackaging {
      * Creates a binary jar (without dependencies) at the specified location.
      */
     public void createBinJar(Path target) {
-        createBinJarQuiet(target);
-        JkLog.info("Jar created at: " + friendlyPath(target));
+        boolean done = createBinJarQuiet(target);
+        if (done) {
+            JkLog.info("Jar created at: " + friendlyPath(target));
+        }
     }
 
     /**
@@ -251,16 +253,17 @@ public class JkProjectPackaging {
         return path;
     }
 
-    private void createBinJarQuiet(Path target) {
+    private boolean createBinJarQuiet(Path target) {
         project.compilation.runIfNeeded();
         Path classDir = project.compilation.layout.resolveClassDir();
         if (!Files.exists(classDir)) {
             JkLog.warn("No class dir found : skip bin jar.");
-            return;
+            return false;
         }
         JkJarPacker.of(classDir)
                 .withManifest(getManifest())
                 .makeJar(target);
+        return true;
     }
 
     /**

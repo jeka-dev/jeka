@@ -12,14 +12,16 @@ import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import dev.jeka.plugins.nexus.NexusKBean;
 
 @JkDep("core/.idea/output/test")                         // To bootstrap jeka in IntelliJ
+@JkDep("core/jeka-boot/commonmark-0.11.0.jar")
+@JkDep("core/jeka-boot/commons-compress-1.21.jar")
 @JkDep("plugins/plugins.nexus/.idea/output/production")  // To bootstrap jeka in IntelliJ
 
 @JkChildBase("core")        // Forces core to be initialized prior plugin runbases
 @JkChildBase("plugins/*")
 class Build extends KBean {
 
-    @JkInject
-    private CoreCustom coreCustom;
+    @JkInject("core")
+    private JkRunbase coreRunbase;
 
     @Override
     protected void init() {
@@ -28,11 +30,9 @@ class Build extends KBean {
 
     @JkDoc("Clean build of core and plugins + running all tests + publish if needed.")
     public void pack() {
-        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
-            JkLog.startTask("pack-and-test %s", projectKBean.project.getBaseDir().getFileName());
-            projectKBean.project.fullBuild();
-            JkLog.endTask();
-        });
+        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean ->
+            projectKBean.project.fullBuildTask()
+        );
         load(BaseKBean.class).test();
         MkDocsEnricher.run();
     }
@@ -69,7 +69,7 @@ class Build extends KBean {
         github.publishGhRelease();
         JkLog.endTask();
          */
-        coreCustom.publishJekaDockerImage();
+        coreRunbase.load(CoreCustom.class).publishJekaDockerImage();
     }
 
     @JkDoc("Convenient method to set Posix permission for all jeka shell files on git.")
@@ -82,7 +82,7 @@ class Build extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
-        String version = coreCustom.load(ProjectKBean.class).project.getVersion().getValue();
+        String version = coreRunbase.load(ProjectKBean.class).project.getVersion().getValue();
 
         // Configure BOM publication
         JkMavenPublication bomPublication = mavenKBean.getPublication();

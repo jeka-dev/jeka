@@ -114,7 +114,7 @@ final class ParsedSourceInfo {
     private static JkDependency sanitize(JkDependency dependency) {
         if (dependency instanceof JkFileDependency) {
             JkFileSystemDependency fsDep = (JkFileSystemDependency) dependency;
-            Path depPath = fsDep.getFiles().get(0);
+            Path depPath = fsDep.getFiles().get(0).normalize();
             if (JkRunbase.isJekaProject(depPath)) {
                 return JkFileSystemDependency.of(depPath.resolve(JkConstants.JEKA_SRC_CLASSES_DIR));
             }

@@ -129,7 +129,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
     @JkDoc("Launches test suite")
     public void test() {
-        if ("true".equals(getRunbase().getProperties().get("jeka.test.skip"))) {
+        if ("true".equals(getRunbase().getProperties().get(JkConstants.TEST_SKIP_PROP))) {
             JkLog.info("Tests are skipped.");
             return;
         }

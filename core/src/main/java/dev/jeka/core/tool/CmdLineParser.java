@@ -75,7 +75,7 @@ class CmdLineParser {
 
         // Add init action
         List<KBeanAction> kBeanActions = new LinkedList<>();
-        kBeanActions.add(KBeanAction.ofInit(kbeanClass));
+        kBeanActions.add(KBeanAction.ofInitialization(kbeanClass));
 
         // Add field-injection
 

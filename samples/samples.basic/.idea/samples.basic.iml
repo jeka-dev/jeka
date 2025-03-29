@@ -275,5 +275,14 @@
             </library>
         </orderEntry>
         <orderEntry module-name="core" scope="COMPILE" type="module"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="file:///Users/jerome/IdeaProjects/jeka/samples/samples.basic/.jeka-work/jeka-src-classes"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
     </component>
 </module>

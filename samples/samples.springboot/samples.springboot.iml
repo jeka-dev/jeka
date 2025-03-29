@@ -870,5 +870,14 @@
         </orderEntry>
         <orderEntry exported="" module-name="plugins.springboot" scope="COMPILE" type="module"/>
         <orderEntry exported="" module-name="core" scope="COMPILE" type="module"/>
+        <orderEntry exported="" scope="TEST" type="module-library">
+            <library>
+                <CLASSES>
+                    <root url="file:///Users/jerome/IdeaProjects/jeka/samples/samples.springboot/.jeka-work/jeka-src-classes"/>
+                </CLASSES>
+                <JAVADOC/>
+                <SOURCES/>
+            </library>
+        </orderEntry>
     </component>
 </module>

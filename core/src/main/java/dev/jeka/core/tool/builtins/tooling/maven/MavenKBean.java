@@ -63,21 +63,6 @@ public final class MavenKBean extends KBean {
 
     private JkMavenPublication publication;
 
-    @Override
-    protected void init() {
-        // Configure with ProjectKBean if present
-        JkBuildable buildable = this.getRunbase().getBuildable();
-        publication = JkMavenPublication.of(buildable);
-
-        this.pub.metadata.applyTo(publication);
-
-        // Add Publish Repos from JKProperties
-        publication.setRepos(getPublishReposFromProps());
-
-        // Add artifacts declared in "publication.extraArtifacts"
-        pub.extraArtifacts().forEach(publication::putArtifact);
-    }
-
     @JkDoc("Displays Maven publication information on the console.")
     public void info() {
         JkLog.info(getPublication().info());
@@ -119,6 +104,18 @@ public final class MavenKBean extends KBean {
      * Returns the Maven Publication associated with this KBean
      */
     public JkMavenPublication getPublication() {
+        if (publication == null) {
+            JkBuildable buildable = this.getRunbase().getBuildable();
+            publication = JkMavenPublication.of(buildable);
+
+            this.pub.metadata.applyTo(publication);
+
+            // Add Publish Repos from JKProperties
+            publication.setRepos(getPublishReposFromProps());
+
+            // Add artifacts declared in "publication.extraArtifacts"
+            pub.extraArtifacts().forEach(publication::putArtifact);
+        }
         return publication;
     }
 

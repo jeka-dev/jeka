@@ -68,6 +68,8 @@ public final class JkConstants {
 
     public static final String CLASSPATH_PROP = "jeka.classpath";
 
+    public static final String TEST_SKIP_PROP = "jeka.test.skip";
+
     /**
      * @deprecated Use {@link #KBEAN_DEFAULT_PROP} instead.
      */
