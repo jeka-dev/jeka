@@ -44,6 +44,7 @@ jobs:
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
+        ls -l plugins/plugins.nexus/jeka-output
         jeka maven: publish
         jeka -r core publishDockerImage
 
