@@ -32,7 +32,7 @@ jobs:
         ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
 
-    - name: Publish
+    - name: Publish to OSSRH
       if: github.ref == 'refs/heads/master'
       env:
         JEKA_REPOS_PUBLISH_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -44,7 +44,7 @@ jobs:
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
-        jeka maven: publish
+        jeka maven: publish -cp=plugins/plugins.nexus/jeka-output/classes
         cd core
         jeka publishDockerImage
 
