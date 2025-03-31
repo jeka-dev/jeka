@@ -44,7 +44,7 @@ jobs:
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
-        tree -L 6
+        tree -L 6 plugins
         jeka maven: publish
         jeka -r core publishDockerImage
 
