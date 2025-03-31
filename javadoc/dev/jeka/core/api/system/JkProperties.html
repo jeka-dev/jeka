@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":10,"i11":10,"i12":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":10,"i12":10,"i13":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -204,32 +204,38 @@ extends java.lang.Object</pre>
                   boolean&nbsp;keepPrefix)</code>&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#getSource--">getSource</a></span>()</code>
+<div class="block">Returns the source of the properties, it can be a file, system-properties or a simple map</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#ofFile-java.nio.file.Path-">ofFile</a></span>(java.nio.file.Path&nbsp;propertyFile)</code>
 <div class="block">Returns an instance of JkProperties by loading properties from the specified file.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#ofMap-java.util.Map-">ofMap</a></span>(java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;props)</code>&nbsp;</td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#ofMap-java.lang.String-java.util.Map-">ofMap</a></span>(java.lang.String&nbsp;sourceName,
      java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;props)</code>&nbsp;</td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#ofStandardProperties--">ofStandardProperties</a></span>()</code>
 <div class="block">Returns an instance of JkProperties from system properties and environment variables,
  with fallback to global.properties if they exist.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#ofSysPropsThenEnv--">ofSysPropsThenEnv</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../dev/jeka/core/api/text/JkColumnText.html" title="class in dev.jeka.core.api.text">JkColumnText</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#toColumnText-int-int-boolean-">toColumnText</a></span>(int&nbsp;keyMaxLength,
             int&nbsp;valueMaxLength,
@@ -237,11 +243,11 @@ extends java.lang.Object</pre>
 <div class="block">Converts the properties to a formatted column text representation.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#toString--">toString</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../dev/jeka/core/api/system/JkProperties.html#withFallback-dev.jeka.core.api.system.JkProperties-">withFallback</a></span>(<a href="../../../../../dev/jeka/core/api/system/JkProperties.html" title="class in dev.jeka.core.api.system">JkProperties</a>&nbsp;fallback)</code>
 <div class="block">Returns a JkProperties instance from this one plus the specified fallback.</div>
@@ -425,6 +431,16 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;find(java.lang.String&nbsp;prefix)</pre>
 <div class="block">Returns all keys with the specified prefix. If prefix is <code>null</code> or empty,
  then returns all keys.</div>
+</li>
+</ul>
+<a name="getSource--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSource</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getSource()</pre>
+<div class="block">Returns the source of the properties, it can be a file, system-properties or a simple map</div>
 </li>
 </ul>
 <a name="toString--">
