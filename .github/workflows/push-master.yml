@@ -44,7 +44,7 @@ jobs:
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
         tree -L 10 plugins
-        jeka maven: publish -D@nexus=on -cp=plugins/plugins.nexus/jeka-output/classes --inspect --stacktrace
+        jeka maven: publish -D@nexus=on -D@nexus.readTimeout=600000 -cp=plugins/plugins.nexus/jeka-output/classes --inspect --stacktrace
 
     - name: Publish to DockerHub
       if: github.ref == 'refs/heads/master' && github.ref_type == 'tag'
