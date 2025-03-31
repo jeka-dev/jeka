@@ -71,7 +71,6 @@ public final class JkProperties {
 
     public static final JkProperties EMPTY = JkProperties.ofMap("", Collections.emptyMap());
 
-
     private final String source;
 
     private final Map<String, String> props;
@@ -258,6 +257,13 @@ public final class JkProperties {
             result.addAll(fallback.find(prefix));
         }
         return result;
+    }
+
+    /**
+     * Returns the source of the properties, it can be a file, system-properties or a simple map
+     */
+    public String getSource() {
+        return source;
     }
 
     @Override

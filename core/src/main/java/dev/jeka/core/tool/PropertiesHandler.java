@@ -88,7 +88,7 @@ class PropertiesHandler {
                 result.put(sanitizedKey, value);
             }
         });
-        return dev.jeka.core.api.system.JkProperties.ofMap(result);
+        return JkProperties.ofMap(properties.getSource(), result);
     }
 
     private static JkProperties withoutUnderscoreProps(JkProperties properties) {
@@ -98,6 +98,6 @@ class PropertiesHandler {
                 result.put(key, value);
             }
         });
-        return dev.jeka.core.api.system.JkProperties.ofMap(result);
+        return JkProperties.ofMap(properties.getSource(), result);
     }
 }
