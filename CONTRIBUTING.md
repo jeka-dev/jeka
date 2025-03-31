@@ -56,7 +56,7 @@ Contributions range from improving JeKa itself to creating plugins for better in
 
 ## Building JeKa from Command Line
 
-JeKa uses itself for builds. Initially, an _Ant_ script compiles JeKa to bootstrap the process:  
+JeKa builds itself. An _Ant_ script is first used to compile JeKa and start the process.
 ```shell
 ant -f .github\workflows\build.xml
 ```
