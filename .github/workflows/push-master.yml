@@ -41,12 +41,16 @@ jobs:
         JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
-        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
         tree -L 10 plugins
-        jeka maven: publish
-        jeka -r core publishDockerImage
+        jeka maven: publish --inspect --stacktrace
+
+    - name: Publish to DockerHub
+      if: github.ref == 'refs/heads/master' && github.ref_type == 'tag'
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
+      run: jeka -r core publishDockerImage
 
     - name: Enrich MkDocs
       if: github.ref == 'refs/heads/master'
@@ -54,7 +58,7 @@ jobs:
         jeka build: enrichMkDocs
 
     - name: Deploy MkDocs
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master' && github.ref_type == 'tag'
       uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
         CONFIG_FILE: jeka-output/mkdocs/mkdocs.yml
