@@ -70,6 +70,8 @@ public final class JkConstants {
 
     public static final String TEST_SKIP_PROP = "jeka.test.skip";
 
+    public static final String JEKA_CHILD_BASES_PROP = "jeka.child-bases";
+
     /**
      * @deprecated Use {@link #KBEAN_DEFAULT_PROP} instead.
      */

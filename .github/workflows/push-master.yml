@@ -27,7 +27,13 @@ jobs:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 
-    - name: Build JeKa bootstrapped with ANT
+    - name: Build JeKa bootstrapped by ANT
+      run: |
+        ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+        echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
+
+    - name: Publish
+      if: github.ref == 'refs/heads/master'
       env:
         JEKA_REPOS_PUBLISH_USERNAME: ${{ secrets.OSSRH_USER }}
         JEKA_REPOS_PUBLISH_PASSWORD: ${{ secrets.OSSRH_PWD }}
@@ -37,13 +43,15 @@ jobs:
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
         GITHUB_BRANCH: ${{ github.ref }}
-      run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
-      
-    - name: Save JeKa cache
-      uses: actions/cache/save@v4
-      with:
-        path: ~/.jeka/cache
-        key: ${{ runner.os }}
+      run: |
+        jeka maven: publish
+        cd core
+        jeka publishDockerImage
+
+    - name: Enrich MkDocs
+      if: github.ref == 'refs/heads/master'
+      run: |
+        jeka build: enrichMkDocs
 
     - name: Deploy MkDocs
       if: github.ref == 'refs/heads/master'
@@ -54,16 +62,18 @@ jobs:
         REQUIREMENTS: .github/workflows/requirements.txt
 
     - name: Add Javadoc to gh-pages
+      if: github.ref == 'refs/heads/master'
       working-directory: core
-      run: jeka-output/distrib/bin/jeka addJavadocToGhPages  --stacktrace
+      run: jeka addJavadocToGhPages --stacktrace
 
     - name: Deploy gh-pages
+      if: github.ref == 'refs/heads/master'
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: core/jeka-output/gh-pages
         
-    - name: Deploy distrib to Release
+    - name: Deploy distrib to GITHUB Release
       if: github.event_name == 'create' && github.ref_type == 'tag'
       uses: svenstaro/upload-release-action@v2
       with:
@@ -72,3 +82,9 @@ jobs:
         asset_name: distrib.zip
         tag: ${{ github.ref }}
         overwrite: true
+
+    - name: Save JeKa cache
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.jeka/cache
+        key: ${{ runner.os }}

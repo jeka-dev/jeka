@@ -23,7 +23,6 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkAnsi;
-import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.text.Jk2ColumnsText;
@@ -57,6 +56,8 @@ public final class JkRunbase {
     static final ThreadLocal<JkRunbase> CURRENT = new ThreadLocal<>();
 
     private static final String PROP_KBEAN_PREFIX = "@";
+
+    private static final String PROP_KBEAN_OFF = "off";
 
     private static JkRunbase MASTER;
 
@@ -102,9 +103,11 @@ public final class JkRunbase {
 
     private boolean initialized;
 
+    private boolean cleanActionsExecuted;
+
     JkRunbase(Path baseDir) {
         this.baseDir = baseDir;
-        this.properties = constructProperties(baseDir);
+        this.properties = PropertiesHandler.constructRunbaseProperties(baseDir);
     }
 
     /**
@@ -330,12 +333,16 @@ public final class JkRunbase {
                 new KBeanAction.Container() : cmdLineActionContainer;
         actions = actions.withKBeanInitialization(defaultKBeanClass);
 
+        if (!master) {
+            List<String> kbeansToExclude = kbeansToExclude();
+            actions = actions.withoutAnyOfKBeanClasses(kbeansToExclude);
+        }
 
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize Runbase with \n" + actions.toColumnText());
             JkLog.debug("Default KBean class name: " + kbeanResolution.defaultKbeanClassName);
-            JkLog.debug("All KBean classes: " + kbeanResolution.allKbeanClassNames);
-            JkLog.debug("All local KBean classes: " + kbeanResolution.localKBeanClassNames);
+            JkLog.debug("All KBean classes: \n  " + String.join("\n  ", kbeanResolution.allKbeanClassNames));
+            JkLog.debug("All local KBean classes: " + String.join("\n  ", kbeanResolution.localKBeanClassNames));
         }
 
         // Needed for find() and inject values at instantiation time
@@ -426,6 +433,33 @@ public final class JkRunbase {
     }
 
     void run(KBeanAction.Container actionContainer, boolean master) {
+        List<KBeanAction.Container> splitContainers = actionContainer.splitByKBean();
+        final boolean needSplit;
+         if (master) {
+             if (runbaseGraph.declaresChildren()) {
+                 List<JkRunbase> childRunbases = runbaseGraph.getOrInitRunbases();
+                 String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
+                 JkLog.info("%s %n    %s", msg, childRunbases.stream()
+                         .map(JkRunbase::toRelPathName).collect(Collectors.joining("\n    ")));
+                 needSplit = splitContainers.size() > 1;
+             } else {
+                 needSplit = false;
+             }
+         } else {
+             needSplit = splitContainers.size() > 1;
+         }
+         if (needSplit) {
+             actionContainer.splitByKBean().forEach(splitContainer -> {
+                 JkLog.info(JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Running KBean methods: ").reset().toString()
+                         + splitContainer.toCmdLineRun());
+                 runUnit(splitContainer, master);
+             });
+         } else {
+             runUnit(actionContainer, master);
+         }
+    }
+
+    private void runUnit(KBeanAction.Container actionContainer, boolean master) {
 
         KBeanAction.Container runActions = actionContainer;
 
@@ -433,19 +467,23 @@ public final class JkRunbase {
 
             // Run child runbases
             // -- We remove from child actions, parent local KBeans
-            KBeanAction.Container childActions =
-                    runActions.withoutAnyOfKBeanClasses(kbeanResolution.localKBeanClassNames);
+            KBeanAction.Container childActions = runActions
+                    .withoutAnyOfKBeanClasses(kbeanResolution.localKBeanClassNames);
             List<JkRunbase> childRunbases = runbaseGraph.getOrInitRunbases();
-            String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
-            JkLog.info("%s %n    %s", msg, childRunbases.stream()
-                    .map(JkRunbase::toRelPathName).collect(Collectors.joining("\n    ")));
 
             childRunbases.forEach(runbase -> {
                         String relPath = runbase.toRelPathName();
-                        JkLog.startTask("run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath).reset()
-                                + " " + childActions.toCmdLineRun());
-                        runbase.run(childActions, false);
-                        JkLog.endTask();
+                        KBeanAction.Container runChildActions =
+                                childActions.withoutAnyOfKBeanClasses(runbase.kbeansToExclude());
+                        if (!runChildActions.toList().isEmpty()) {
+                            String msgPrefix = "run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath).reset();
+                            JkLog.startTask(msgPrefix + " " + runChildActions.toCmdLineRun());
+                            runbase.run(runChildActions, false);
+                            JkLog.endTask();
+                        } else if (JkLog.isVerbose()) {
+                            String msgPrefix = "run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath);
+                            JkLog.verbose(msgPrefix + " -skipped-");
+                        }
             });
 
             // For parent runbase, we only keep the actions for KBeans that has been initialized
@@ -454,12 +492,17 @@ public final class JkRunbase {
                     .map(Class::getName)
                     .collect(Collectors.toList());
             runActions = runActions.withOnlyKBeanClasses(initializedClasses);
+            if (runActions.toList().isEmpty()) {
+                JkLog.verbose("run-main-base: -skipped-");
+                return;
+            }
             JkLog.startTask("run-main-base " + runActions.toCmdLineRun());
         }
 
-        if (cleanActions.getSize() > 0 && BehaviorSettings.INSTANCE.cleanOutput) {
+        if (cleanActions.getSize() > 0 && BehaviorSettings.INSTANCE.cleanOutput && !cleanActionsExecuted) {
             JkLog.verbose("Run extra-clean actions");
             cleanActions.run();
+            cleanActionsExecuted = true;
         }
 
         for (KBeanAction kBeanAction : runActions.findInvokes()) {
@@ -491,43 +534,6 @@ public final class JkRunbase {
                 kbeanResolution.defaultKbeanClassName,
                 new LinkedList<>(this.beans.keySet())
         );
-    }
-
-    static JkProperties constructProperties(Path baseDir) {
-        JkProperties result = JkProperties.ofSysPropsThenEnv()
-                    .withFallback(readBasePropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir)));
-        Path globalPropertiesFile = JkLocator.getGlobalPropertiesFile();
-        if (Files.exists(globalPropertiesFile)) {
-            result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
-        }
-        return result;
-    }
-
-    /*
-     * Reads the properties from the baseDir/jeka.properties and its ancestors.
-     *
-     * Takes also in account properties defined in parent project dirs if any.
-     * this doesn't take in account System and global props.
-     */
-    static JkProperties readBasePropertiesRecursively(Path baseDir) {
-        baseDir = baseDir.toAbsolutePath().normalize();
-        JkProperties result = readBaseProperties(baseDir);
-        Path parentDir = baseDir.getParent();
-
-        // Stop if parent dir has no jeka.properties file
-        if (parentDir != null && Files.exists(parentDir.resolve(JkConstants.PROPERTIES_FILE))) {
-            result = result.withFallback(readBasePropertiesRecursively(parentDir));
-        }
-        return result;
-    }
-
-    // Reads the properties from the baseDir/jeka.properties
-    static JkProperties readBaseProperties(Path baseDir) {
-        Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
-        if (Files.exists(jekaPropertiesFile)) {
-            return JkProperties.ofFile(jekaPropertiesFile);
-        }
-        return JkProperties.EMPTY;
     }
 
     @Override
@@ -714,17 +720,44 @@ public final class JkRunbase {
     private List<Class<? extends KBean>> kbeansToInitFromProps() {
         List<String> kbeanClassNames = properties.getAllStartingWith(PROP_KBEAN_PREFIX, false).keySet().stream()
                 .filter(key -> !key.contains("."))
+                .filter(key -> {
+                    String propName = PROP_KBEAN_PREFIX + key;
+                    String value = JkUtilsString.nullToEmpty(properties.get(propName)).trim();
+                    return !PROP_KBEAN_OFF.equals(value);
+                })
                 .map(key -> kbeanResolution.findKbeanClassName(key))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
         List<Class<? extends KBean>> actions = new LinkedList<>();
         for (String className : kbeanClassNames) {
-            Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(className);
-            actions.add(kbeanClass);
+            try {
+                Class<? extends KBean> kbeanClass =
+                        (Class<? extends KBean>) JkClassLoader.ofCurrent().get().loadClass(className);
+                actions.add(kbeanClass);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException("Cannot load KBean class " + className + " from base '"
+                        + this.toRelPathName() + "'", e);
+            }
+
         }
         return actions;
     }
+
+    private List<String> kbeansToExclude() {
+        return properties.getAllStartingWith(PROP_KBEAN_PREFIX, false).keySet().stream()
+                .filter(key -> !key.contains("."))
+                .filter(key -> {
+                    String propName = PROP_KBEAN_PREFIX + key;
+                    String value = JkUtilsString.nullToEmpty(properties.get(propName)).trim();
+                    return PROP_KBEAN_OFF.equals(value);
+                })
+                .map(key -> kbeanResolution.findKbeanClassName(key))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
 
     private static String propNameForField(String kbeanName, String fieldName) {
         return PROP_KBEAN_PREFIX + kbeanName + "." + fieldName;

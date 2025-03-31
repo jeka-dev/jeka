@@ -321,7 +321,7 @@ public final class JkDependencyResolver  {
                     pluralize(fileCount, "file"));
 
             if (JkLog.isDebug()) {
-                resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
+                resolveResult.getFiles().forEach(path -> JkLog.debug("  " + path.toString()));
             }
         }
 

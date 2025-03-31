@@ -79,7 +79,7 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = JkRunbase.constructProperties(baseDir);
+        JkProperties props = PropertiesHandler.constructRunbaseProperties(baseDir);
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
 
         Engine engine = null;
@@ -219,7 +219,7 @@ public class Main {
         }
         txt.add("Jeka User Home", JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         txt.add("Jeka Cache Dir",  JkLocator.getCacheDir().toAbsolutePath().normalize());
-        JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
+        JkProperties properties = PropertiesHandler.constructRunbaseProperties(Paths.get(""));
         txt.add("Download Repos", JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
                 .map(JkRepo::getUrl).collect(Collectors.toList()));
         JkLog.info(txt.toString());

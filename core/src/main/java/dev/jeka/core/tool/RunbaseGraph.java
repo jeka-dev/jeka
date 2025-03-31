@@ -17,14 +17,12 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,11 +41,11 @@ class RunbaseGraph {
     }
 
     static RunbaseGraph of(Class<? extends KBean> parentKBean, JkRunbase runbase) {
-        List<LazyNode> nodes = getChildPaths(parentKBean, runbase.getBaseDir()).stream()
+        List<LazyNode> nodes = getChildPaths(parentKBean, runbase).stream()
                 .map(LazyNode::of)
                 .collect(Collectors.toList());
         LazyNode.find(runbase).ifPresent(lazyNode -> lazyNode.populate(runbase, nodes));
-        boolean declaresChildren = isDeclaringChildren(parentKBean);
+        boolean declaresChildren = isDeclaringChildren(parentKBean, runbase);
         return new RunbaseGraph(nodes, runbase, declaresChildren);
     }
 
@@ -157,11 +155,13 @@ class RunbaseGraph {
         }
     }
 
-    private static boolean isDeclaringChildren(Class<? extends KBean> parentKBeanClass) {
-        return parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class).length > 0;
+    private static boolean isDeclaringChildren(Class<? extends KBean> parentKBeanClass, JkRunbase runbase) {
+        return parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class).length > 0 ||
+                !getChildBaseProps(runbase).isEmpty();
     }
 
-    private static List<Path> getChildPaths(Class<? extends KBean> parentKBeanClass, Path parentBaseDir) {
+    private static List<Path> getChildPaths(Class<? extends KBean> parentKBeanClass, JkRunbase runbase) {
+        Path parentBaseDir = runbase.getBaseDir();
         List<Path> result = new LinkedList<>();
         Arrays.stream(parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class))
                 .map(JkChildBase::value)
@@ -178,6 +178,8 @@ class RunbaseGraph {
                 .map(parentBaseDir::resolve)
                 .map(Path::normalize)
                 .forEach(result::add);
+        result.addAll(getChildBaseProps(runbase));
+
         return result.stream().distinct().collect(Collectors.toList());
     }
 
@@ -195,6 +197,21 @@ class RunbaseGraph {
         }
         throw new JkException("@JkSubBase(\"%s\") mentions a directory that does not exist (base-dir=%s).",
                 candidate, baseDir);
+    }
+
+    private static List<Path> getChildBaseProps(JkRunbase runbase) {
+        Path parentBaseDir = runbase.getBaseDir();
+        String childBasesProp = runbase.getProperties().get(JkConstants.JEKA_CHILD_BASES_PROP);
+        if (!JkUtilsString.isBlank(childBasesProp)) {
+            return Arrays.stream(childBasesProp.split(","))
+                    .map(String::trim)
+                    .filter(value -> !value.isEmpty())
+                    .flatMap(value -> findBaseDirs(value, parentBaseDir).stream())
+                    .map(parentBaseDir::resolve)
+                    .map(Path::normalize)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
 }

@@ -31,14 +31,16 @@ Documentation is regenerated after each push or pull request.
 
 See [internal design](https://jeka-dev.github.io/jeka/under-the-hood/) of  **core**.
 
-## Getting Started
+## How to build
 
 1. Clone this repository and open it in IntelliJ (project files are pre-configured).
-2. Use the pre-defined IntelliJ configurations:
+2. Use the pre-defined IntelliJ run configurations:
   - Run **CORE BUILD** for the core only.
   - Run **FULL BUILD** for the core, plugins, and test suite.
 
-The JeKa distribution is generated in `core/jeka-output/distrib`. Add this path to your `PATH` variable to use the local build.
+The JeKa distribution is generated in `core/jeka-output/distrib`. 
+
+Add this path to your `PATH` variable to use the local build.
 
 > IntelliJ Debugging: Disable the coroutine agent under **Settings > Debugger > Data Views > Kotlin** to avoid IDE issues. [More details](https://stackoverflow.com/questions/68753383/how-to-fix-classnotfoundexception-kotlinx-coroutines-debug-agentpremain-in-debu).
 

@@ -21,13 +21,17 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.project.JkBuildable;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkRequire;
 import dev.jeka.core.tool.JkRunbase;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -107,6 +111,16 @@ public final class MavenKBean extends KBean {
         if (publication == null) {
             JkBuildable buildable = this.getRunbase().getBuildable();
             publication = JkMavenPublication.of(buildable);
+            if (!JkUtilsString.isBlank(pub.moduleId)) {
+                publication.setModuleId(pub.moduleId);
+            }
+            if (!JkUtilsString.isBlank(pub.version)) {
+                publication.setVersion(pub.version);
+            }
+            if (pub.gitVersioning.enable) {
+                publication.setVersionSupplier(
+                        JkVersionFromGit.of(this.getBaseDir(), pub.gitVersioning.tagPrefix)::getVersionAsJkVersion);
+            }
 
             this.pub.metadata.applyTo(publication);
 
@@ -115,6 +129,10 @@ public final class MavenKBean extends KBean {
 
             // Add artifacts declared in "publication.extraArtifacts"
             pub.extraArtifacts().forEach(publication::putArtifact);
+
+            if (pub.parentBom) {
+                configureForBom(publication);
+            }
         }
         return publication;
     }
@@ -124,6 +142,16 @@ public final class MavenKBean extends KBean {
         JkGpgSigner signer = JkGpgSigner.ofStandardProperties();
         return JkRepoSet.ofOssrhSnapshotAndRelease(repoProperties.getPublishUsername(),
                     repoProperties.getPublishPassword(), signer);
+    }
+
+    private void configureForBom(JkMavenPublication bomPublication ) {
+        bomPublication.customizeDependencies(deps -> JkDependencySet.of()); // No dependencies in BOM
+        bomPublication.removeAllArtifacts();  // No artifacts in BOM
+        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
+            JkProject project = projectKBean.project;
+            bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(),
+                    bomPublication.getVersion().toString());
+        });
     }
 
     private JkRepoSet getPublishReposFromProps() {
@@ -199,6 +227,20 @@ public final class MavenKBean extends KBean {
     }
 
     public static class JkPublicationOptions {
+
+        @JkDoc("Module id of the module to publish formatted as groupId:artifactId")
+        public String moduleId;
+
+        @JkDoc("The version of the module to publish")
+        public String version;
+
+        @JkDoc("If true, the publication will generate a BOM as its only artifact. \n" +
+                "The BOM will point to the version of each child base that contains a project KBean.\n" +
+                "Be caution to declare it with leading '_' as  '_@maven.pub.parentBom' in jeka.properties to not" +
+                " propagate it to children.")
+        public boolean parentBom;
+
+        public final JkGitVersioning gitVersioning = JkGitVersioning.of();
 
         @JkDoc("POM metadata to publish. Mainly useful for publishing to Maven Central")
         public final JkPomMetadata metadata = new JkPomMetadata();

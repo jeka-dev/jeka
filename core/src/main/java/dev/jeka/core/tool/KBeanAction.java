@@ -24,10 +24,7 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.KBeanAction.Action.*;
@@ -275,6 +272,28 @@ class KBeanAction implements Comparable<KBeanAction> {
             return String.join(" ", sortedCommands);
         }
 
+        // split in chunks having the same KBean
+        List<Container> splitByKBean() {
+            List<Class<? extends KBean>> involvedKBeanClasses = kBeanActions.stream()
+                    .filter(kBeanAction -> kBeanAction.type == INVOKE)
+                    .map(action -> action.beanClass)
+                    .distinct()
+                    .collect(Collectors.toList());
+            Map<Class<? extends KBean>, KBeanAction.Container> involvedKBeanContainers = new HashMap<>();
+            LinkedHashMap<Class<? extends KBean>, List<KBeanAction>> map = new LinkedHashMap<>();
+            for (KBeanAction action : kBeanActions) {
+                Class<? extends KBean> kBeanClass = action.beanClass;
+                map.putIfAbsent(kBeanClass, new LinkedList<>());
+                map.get(kBeanClass).add(action);
+            }
+            return map.values().stream()
+                    .map(actions -> {
+                        Container splittedContainer = new Container();
+                        splittedContainer.addAll(actions);
+                        return splittedContainer;
+                    })
+                    .collect(Collectors.toList());
+        }
 
     }
 }

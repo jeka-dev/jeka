@@ -59,7 +59,7 @@ public class CoreCustom extends KBean {
     public boolean runIT = true;
 
     @JkDoc("Creates and publishes Jeka Docker image on Dockerhub")
-    public void publishJekaDockerImage() {
+    public void publishDockerImage() {
         DockerImageMaker.createImage();
         String version = load(ProjectKBean.class).project.getVersion().getValue();
         DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));

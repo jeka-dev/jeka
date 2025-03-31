@@ -75,7 +75,7 @@ public final class JkExternalToolApi {
      * Returns download repositories for the specified base directory.
      */
     public static JkRepoSet getDownloadRepos(Path baseDir) {
-        JkProperties properties = JkRunbase.constructProperties(baseDir);
+        JkProperties properties = PropertiesHandler.constructRunbaseProperties(baseDir);
         JkRepoSet result = JkRepoProperties.of(properties).getDownloadRepos();
         return result;
     }
@@ -120,7 +120,7 @@ public final class JkExternalToolApi {
      * the specified base dir context.
      */
     public static Map<String, String> getCmdShorthandsProperties(Path baseDir) {
-        Map<String, String> result = JkRunbase.readBasePropertiesRecursively(baseDir)
+        Map<String, String> result = PropertiesHandler.readJekaPropertiesRecursively(baseDir)
                 .getAllStartingWith(JkConstants.CMD_PREFIX_PROP, false);
         List<String> keys = new LinkedList<>(result.keySet());
         keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
@@ -132,7 +132,7 @@ public final class JkExternalToolApi {
      * Returns the properties defined from the specifies base dir..
      */
     public static JkProperties getProperties(Path baseDir) {
-        return JkRunbase.readBasePropertiesRecursively(baseDir);
+        return PropertiesHandler.readJekaPropertiesRecursively(baseDir);
     }
 
     /**
