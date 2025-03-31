@@ -67,8 +67,7 @@ jobs:
 
     - name: Add Javadoc to gh-pages
       if: github.ref == 'refs/heads/master'
-      working-directory: core
-      run: jeka addJavadocToGhPages --stacktrace
+      run: jeka -r core addJavadocToGhPages --stacktrace
 
     - name: Deploy gh-pages
       if: github.ref == 'refs/heads/master'
