@@ -19,6 +19,7 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,9 +32,9 @@ class PropertiesHandler {
     static JkProperties readJekaPropertiesFile(Path baseDir) {
         Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
         if (Files.exists(jekaPropertiesFile)) {
-            return dev.jeka.core.api.system.JkProperties.ofFile(jekaPropertiesFile);
+            return JkProperties.ofFile(jekaPropertiesFile);
         }
-        return dev.jeka.core.api.system.JkProperties.EMPTY;
+        return JkProperties.EMPTY;
     }
 
     static JkProperties constructRunbaseProperties(Path baseDir) {
@@ -53,26 +54,30 @@ class PropertiesHandler {
      * this doesn't take in account System and global props.
      */
     static JkProperties readJekaPropertiesRecursively(Path baseDir) {
-        return readJekaPropertiesRecursively(baseDir, true);
-    }
-
-    private static JkProperties readJekaPropertiesRecursively(Path baseDir, boolean origin) {
         baseDir = baseDir.toAbsolutePath().normalize();
         JkProperties result = readJekaPropertiesFile(baseDir);
-        if (origin) {
-            result = mergeUnderscore(result);
-        } else {
-            result = withoutUnderscoreProps(result);
-        }
+        return readJekaPropertiesRecursively(result, baseDir, true);
+    }
 
+    private static JkProperties readJekaPropertiesRecursively(JkProperties props, Path baseDir, boolean origin) {
+        if (origin) {
+            props = mergeUnderscore(props);
+        } else {
+            props = withoutUnderscoreProps(props);
+        }
         Path parentDir = baseDir.getParent();
 
         // Stop if parent dir has no jeka.properties file
-        if (parentDir != null && Files.exists(parentDir.resolve(JkConstants.PROPERTIES_FILE))) {
-
-            result = result.withFallback(readJekaPropertiesRecursively(parentDir, false));
+        if (parentDir != null) {
+            Path parentPropsFile = parentDir.resolve(JkConstants.PROPERTIES_FILE);
+            if (Files.exists(parentPropsFile)) {
+                JkProperties parentProps = JkProperties.ofFile(parentPropsFile);
+                JkProperties parentChainProps = readJekaPropertiesRecursively(parentProps, parentDir, false);
+                props = resolvePlus(props, parentChainProps);
+                props = props.withFallback(parentChainProps);
+            }
         }
-        return result;
+        return props;
     }
 
     private static JkProperties mergeUnderscore(JkProperties properties) {
@@ -96,6 +101,27 @@ class PropertiesHandler {
         properties.getAllStartingWith("", true).forEach((key, value) -> {
             if (!key.startsWith("_")) {
                 result.put(key, value);
+            }
+        });
+        return JkProperties.ofMap(properties.getSource(), result);
+    }
+
+    public static JkProperties resolvePlus(JkProperties properties, JkProperties parentProps) {
+        Map<String, String> result = new HashMap<>();
+        properties.getAllStartingWith("", true).forEach((key, value) -> {
+            if (!key.startsWith("+")) {
+                result.put(key, value);
+            } else {
+                String propName = key.substring(1);
+                String thisValue = properties.get(key);
+                String parentValue = parentProps.get(propName);
+                final String resolvedValue;
+                if (parentValue == null || parentValue.isEmpty()) {
+                    resolvedValue = thisValue;
+                } else {
+                    resolvedValue = parentValue + " " + thisValue;
+                }
+                result.put(propName, resolvedValue);
             }
         });
         return JkProperties.ofMap(properties.getSource(), result);

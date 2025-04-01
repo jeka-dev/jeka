@@ -228,6 +228,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         @JkDoc("If true and no mainClass specified, it will be detected and added to the Manifest.")
         public boolean detectMainClass;
 
+        @JkDoc("Options to pass to javadoc tool when invoked. e.g '--notimestamp -doctitle \"My Project API\"'")
+        public String javadocOptions;
+
     }
 
     /**
@@ -424,6 +427,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         project.pack.setDetectMainClass(pack.detectMainClass);
         if (!JkUtilsString.isBlank(pack.shadeJarClassifier)) {
             project.flatFacade.addShadeJarArtifact(pack.shadeJarClassifier);
+        }
+        if (!JkUtilsString.isBlank(pack.javadocOptions)) {
+            project.pack.javadocProcessor.addOptions(JkUtilsString.parseCommandline(pack.javadocOptions));
         }
 
         // Configure testing

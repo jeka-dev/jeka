@@ -68,25 +68,11 @@ public class CoreCustom extends KBean {
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-
-        project.setJvmTargetVersion(JkJavaVersion.V8);
-        project.setModuleId("dev.jeka:jeka-core");
         project.pack.actions
                     .append("include-embedded-jar", this::doPackWithEmbeddedJar)
                     .append("create-distrib", this::doDistrib)
                     .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
-        project.compilerToolChain.setForkCompiler(true);
-
-        project.compilation.addJavaCompilerOptions("-Xlint:none");
-        project.compilation.layout.setMixResourcesAndSources();
-
-        project.test.selection.addExcludePatterns(JkTestSelection.E2E_PATTERN);
         project.test.selection.addExcludePatternsIf(!runIT, JkTestSelection.IT_PATTERN);
-        project.test.compilation.layout.setMixResourcesAndSources();
-
-        project.pack.setMainClass("dev.jeka.core.tool.Main");
-        project.pack.javadocProcessor.addOptions("-notimestamp");
-
         project.e2eTest.setupBasic();
     }
 
@@ -94,10 +80,7 @@ public class CoreCustom extends KBean {
     private void postInit(MavenKBean mavenKBean) {
         mavenKBean.getPublication()
                 .putArtifact(DISTRIB_FILE_ID)
-                .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID)
-                .pomMetadata
-                    .setProjectName("JeKa")
-                    .setProjectDescription("Build and Run Java Code from Everywhere");
+                .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID);
     }
 
     // Call from GitHub actions
@@ -199,7 +182,6 @@ public class CoreCustom extends KBean {
         Path targetJar = project.artifactLocator.getMainArtifactPath();
 
         // Main jar
-        //project.packaging.createBinJar(targetJar);
         JkZipTree jarTree = JkZipTree.of(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project

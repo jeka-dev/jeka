@@ -221,6 +221,9 @@ public final class JkJavaCompilerToolChain {
             }
             Path javaHome = Paths.get(System.getProperty("java.home"));
             if (!Files.exists(javaHome.resolve("bin/javac"))) {
+                javaHome = javaHome.getParent();
+            }
+            if (!Files.exists(javaHome.resolve("bin/javac"))) {
                 throw  new IllegalStateException("The current Java is not a JDK." +
                         " Please run a JDK or precise the java version to run.");
             }

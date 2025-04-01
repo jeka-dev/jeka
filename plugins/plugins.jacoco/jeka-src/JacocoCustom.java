@@ -21,18 +21,8 @@ public class JacocoCustom extends KBean {
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
-                .setModuleId("dev.jeka:jacoco-plugin")
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .dependencies.compile.add(JkLocator.getJekaJarPath());
-    }
-
-    @JkPostInit
-    private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.getPublication()
-                .pomMetadata
-                    .setProjectName("Jeka plugin for Jacoco")
-                    .setProjectDescription("A Jeka plugin for Jacoco coverage tool");
+        project.flatFacade.dependencies.compile
+                .add(JkLocator.getJekaJarPath());
     }
 
 }
