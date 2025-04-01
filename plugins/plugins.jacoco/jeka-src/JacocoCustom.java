@@ -20,8 +20,7 @@ public class JacocoCustom extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
-        JkProject project = projectKBean.project;
-        project.flatFacade.dependencies.compile
+        projectKBean.project.compilation.dependencies
                 .add(JkLocator.getJekaJarPath());
     }
 
