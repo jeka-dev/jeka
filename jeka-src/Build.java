@@ -3,6 +3,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 
 class Build extends KBean {
 
@@ -17,6 +18,10 @@ class Build extends KBean {
             JkLog.info("Setting exec permission on git for file " + path);
             JkGit.exec("update-index", "--chmod=+x", path);
         });
+    }
+
+    public void testall() {
+        load(BaseKBean.class).test();
     }
 
 }

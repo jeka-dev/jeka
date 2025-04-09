@@ -4,8 +4,9 @@ import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
-@JkDep("dev.jeka:nodejs-plugin:0.11.0-alpha.2")
-@JkDep("org.junit.jupiter:junit-jupiter:5.10.2")
+@JkDep("dev.jeka:nodejs-plugin:0.11.24")
+@JkDep("org.junit.jupiter:junit-jupiter:5.12.1")
+@JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
 class Custom extends KBean {
 
     @JkPropValue("PATH")

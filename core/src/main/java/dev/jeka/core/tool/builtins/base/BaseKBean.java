@@ -134,11 +134,14 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
             return;
         }
         if (!JkTestProcessor.isEngineTestPresent()) {
-            throw new JkException("No engine test class found in current classloader. " +
-                    "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies" +
+            throw new JkException("No test engine class found in current classloader. " +
+                    "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies " +
                     "to the classpath for testing.");
         }
-        JkTestResult testResult = JkTestProcessor.of(JkClassLoader.ofCurrent()::getClasspath, getAppClasses()::getRoot)
+
+        Supplier<JkPathSequence> classpathSupplier = this.getRunbase()::getClasspath;
+        Supplier<Iterable<Path>> rootClassSupplier = () -> this.getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
+        JkTestResult testResult = JkTestProcessor.of(classpathSupplier, rootClassSupplier)
                 .setForkingProcess(true)
                 .run();
         if (!testResult.getFailures().isEmpty()) {

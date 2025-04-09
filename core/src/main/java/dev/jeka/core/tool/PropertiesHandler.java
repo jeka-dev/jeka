@@ -19,7 +19,6 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

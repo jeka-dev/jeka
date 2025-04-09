@@ -382,6 +382,25 @@ public final class JkUtilsPath {
     }
 
     /**
+     * Retrieves the path to a resource by its name from the same class loader as the specified class.
+     *
+     * @param clazz the class used to retrieve the resource's class loader
+     * @param resourceName the name of the resource to locate
+     * @return the Path object corresponding to the resource location
+     * @throws IllegalArgumentException if the resource cannot be located
+     * @throws RuntimeException if there is an error converting the resource URL to a Path
+     */
+    public static Path getResourceAsPath(Class<?> clazz, String resourceName) {
+        URL url = clazz.getResource(resourceName);
+        JkUtilsAssert.argument(url != null, "Resource not found: " + resourceName);
+        try {
+            return Paths.get(url.toURI().getPath());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Cannot read resource " + resourceName, e);
+        }
+    }
+
+    /**
      * Delegates to Files{@link #createTempDirectory(String, FileAttribute[])}
      */
     public static Path createTempDirectory(String prefix, FileAttribute ... fileAttributes) {

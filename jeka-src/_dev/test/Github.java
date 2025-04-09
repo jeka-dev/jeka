@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package test;
+package _dev.test;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
@@ -33,7 +33,7 @@ import java.util.List;
 
 class Github  {
 
-    @JkDoc("_dev.Github token injected bby the pipeline")
+    @JkDoc("_dev.Github token injected by the pipeline")
     public String ghToken;
 
     @JkDoc("Publish a Release description on _dev.Github. The description is extracted from the release-note.md file " +

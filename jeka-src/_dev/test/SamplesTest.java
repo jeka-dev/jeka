@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package test;
+package _dev.test;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
@@ -35,7 +35,7 @@ import java.nio.file.Paths;
 
 @JkDep("org.junit.jupiter:junit-jupiter:5.12.0")
 @JkDep("org.junit.platform:junit-platform-launcher:1.12.0")
-public class SamplesTest {
+class SamplesTest {
 
     private final JekaCmdLineExecutor executor = new JekaCmdLineExecutor();
 

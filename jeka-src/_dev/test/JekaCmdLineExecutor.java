@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package test;
+package _dev.test;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
