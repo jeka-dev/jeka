@@ -107,18 +107,16 @@ Classpath needed to compile and run the tests.
 
 This classpath is constructed by merging the compile and runtime classpaths upon which other libraries can be added or removed.
 
-**Coordinate syntax**
-
 Dependencies must follow the format: `group:module:[classifier]:[type]:[version]`
 where *classifier*, *type*, and *version* are optional. See [`JkCoordinate` javadoc](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkCoordinate.java) for details.
 
 To import a *bill-of-materials* (BOM), declare a dependency as: `group:module::pom:version`.
 
-Using the programatic api, you can also declare filesystem dependencies, meaning jar files located in 
+Using the programmatic api, you can also declare filesystem dependencies, meaning jar files located in 
 the project code base.
 
-<a href="#full-text-description"></a>
-**Dependency Description - Full Text**
+<a href="#dependencies_txt"></a>
+#### dependencies.txt
 
 Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/dependencies.txt* file.
 

@@ -1,0 +1,9 @@
+# sample file
+
+
+
+[version]
+org.springframework.boot:spring-boot-dependencies::pom:3.4.4
+io.quarkus:quarkus-bom:2.11.2.Final@pom
+org.mockito:mockito-core:5.16.1
+

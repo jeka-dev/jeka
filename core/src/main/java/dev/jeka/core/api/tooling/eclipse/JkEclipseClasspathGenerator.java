@@ -148,7 +148,7 @@ public final class JkEclipseClasspathGenerator {
     /**
      * For the specified dependency, specify a child attribute tag to add to the mapping classpathentry tag.
      * @param dependency The dependency paired to the classpathentry we want to generate `<attributes></attributes>` children
-     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
+     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkCoordinateDependency} or a
      *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
      *                   is relevant.
@@ -171,7 +171,7 @@ public final class JkEclipseClasspathGenerator {
     /**
      * For the specified dependency, specify a child accessrule tag to add to the mapping classpathentry tag.
      * @param dependency The dependency paired to the classpathentry we want to generate `<attributes></attributes>` children
-     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkModuleDependency} or a
+     *                   for. It can be a {@link dev.jeka.core.api.depmanagement.JkCoordinateDependency} or a
      *                   {@link dev.jeka.core.api.depmanagement.JkFileSystemDependency}.
      *                   If it is a module dependency, it can be a direct or transitive dependency and only group:name
      *                   is relevant.
@@ -394,11 +394,12 @@ public final class JkEclipseClasspathGenerator {
                                           JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
 
         // dependencies with IDE project dir will be omitted. The project dir will be added in other place.
-        List<JkDependency> deps = dependencies.getEntries().stream()
-                .map(qDep -> qDep.getDependency())
+        List<JkDependency> depList = dependencies.getEntries().stream()
+                .map(JkQualifiedDependency::getDependency)
                 .filter(dep -> dep.getIdeProjectDir() == null)
                 .collect(Collectors.toList());
-        final JkResolveResult resolveResult = resolver.resolve(JkDependencySet.of(deps));
+        JkDependencySet deps = JkDependencySet.of(depList).andVersionProvider(dependencies.getVersionProvider());
+        final JkResolveResult resolveResult = resolver.resolve(deps);
         final JkRepoSet repos = resolver.getRepos();
         for (final JkResolvedDependencyNode node : resolveResult.getDependencyTree().toFlattenList()) {
             // Maven dependency

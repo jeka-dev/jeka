@@ -20,6 +20,7 @@ import dev.jeka.core.api.depmanagement.JkDependency;
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkFileDependency;
 import dev.jeka.core.api.depmanagement.JkFileSystemDependency;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 
 import java.nio.file.Path;
@@ -100,7 +101,7 @@ final class ParsedSourceInfo {
                 .filter(JkFileSystemDependency.class::isInstance)
                 .map(JkFileSystemDependency.class::cast)
                 .map(fsDep -> fsDep.getFiles().get(0))
-                .filter(JkRunbase::isJekaProject)
+                .filter(JkLocator::isJekaProject)
                 .collect(Collectors.toList());
     }
 
@@ -115,7 +116,7 @@ final class ParsedSourceInfo {
         if (dependency instanceof JkFileDependency) {
             JkFileSystemDependency fsDep = (JkFileSystemDependency) dependency;
             Path depPath = fsDep.getFiles().get(0).normalize();
-            if (JkRunbase.isJekaProject(depPath)) {
+            if (JkLocator.isJekaProject(depPath)) {
                 return JkFileSystemDependency.of(depPath.resolve(JkConstants.JEKA_SRC_CLASSES_DIR));
             }
         }

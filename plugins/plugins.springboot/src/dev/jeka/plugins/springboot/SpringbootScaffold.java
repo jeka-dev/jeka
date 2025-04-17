@@ -29,14 +29,19 @@ import java.util.List;
 class SpringbootScaffold {
 
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.4.2";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.4.4";
 
     public static void customize(JkProjectScaffold projectScaffold) {
 
         projectScaffold.setKind(JkProjectScaffold.Kind.EMPTY);
 
-        // Remove the default build class defined for project
-        projectScaffold.removeFileEntry(JkProjectScaffold.BUILD_CLASS_PATH);
+        // Add springboot-plugin to jeka.classpath
+        projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_PROP + "=dev.jeka:springboot-plugin");
+        projectScaffold.addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=project");
+        projectScaffold.addJekaPropsContent("\n");
+        projectScaffold.addJekaPropValue("@custom=on");
+        projectScaffold.addJekaPropValue("@springboot=on");
+        projectScaffold.addCustomKbeanFileEntry();
 
         String lastSpringbootVersion = projectScaffold.findLatestStableVersion(
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
@@ -50,14 +55,12 @@ class SpringbootScaffold {
             projectScaffold.setJekaPropsCustomizer(content -> content.replace("dev.jeka:springboot-plugin", pluginDep));
         }
 
-        // Augment jeka.properties if needed
-        projectScaffold.addJekaPropValue(JkConstants.CLASSPATH_PROP + "=dev.jeka:springboot-plugin");
-        projectScaffold.addJekaPropValue("@springboot=on");
+
 
         // Add dependencies
-        projectScaffold.compileDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion);
         projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
         projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
+        projectScaffold.versionDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom");
 
         // Add sample code
         String basePackage = "app";
@@ -84,7 +87,7 @@ class SpringbootScaffold {
                 DEFAULT_SPRINGBOOT_VERSION);
 
         List<String> deps = JkUtilsIterable.listOf(
-                JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion,
+                JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom",
                 "org.springframework.boot:spring-boot-starter-web");
 
         List<String> devDeps = JkUtilsIterable.listOf("org.springframework.boot:spring-boot-starter-test");

@@ -46,6 +46,10 @@ import java.util.*;
  */
 public final class JkJavaCompilerToolChain {
 
+    public enum Status {
+        SUCCESS, FAILED, NO_SOURCES
+    }
+
     /**
      * Filter to consider only Java source
      */
@@ -136,7 +140,7 @@ public final class JkJavaCompilerToolChain {
      *
      * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
      */
-    public boolean compile(JkJavaVersion targetVersion, JkJavaCompileSpec compileSpec) {
+    public Status compile(JkJavaVersion targetVersion, JkJavaCompileSpec compileSpec) {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
@@ -145,7 +149,7 @@ public final class JkJavaCompilerToolChain {
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
             JkLog.warn("No Java source files found in %s", compileSpec.getSources());
-            return true;
+            return Status.NO_SOURCES;
         }
         JkUtilsPath.createDirectories(outputDir);
 
@@ -162,13 +166,13 @@ public final class JkJavaCompilerToolChain {
         final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
         JkLog.verbose("Compilation " + (result ? "completed successfully" : "failed"));
         JkLog.verboseEndTask();
-        return result;
+        return result ? Status.SUCCESS : Status.FAILED;
     }
 
     /**
      * @see #compile(JkJavaVersion, JkJavaCompileSpec)
      */
-    public boolean compile(JkJavaCompileSpec compileSpec) {
+    public Status compile(JkJavaCompileSpec compileSpec) {
         return compile(null, compileSpec);
     }
 
@@ -224,7 +228,7 @@ public final class JkJavaCompilerToolChain {
                 javaHome = javaHome.getParent();
             }
             if (!Files.exists(javaHome.resolve("bin/javac"))) {
-                throw  new IllegalStateException("The current Java is not a JDK." +
+                throw new IllegalStateException("The current Java is not a JDK." +
                         " Please run a JDK or precise the java version to run.");
             }
             return new ToolOrProcess(javaHome);

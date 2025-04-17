@@ -23,15 +23,15 @@ It targets a generation of Java developers who prefer simple, Java-centric tools
 or external DSL-based solutions for building their applications.
 
 ## Use Cases
-- **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL.
-- **Use Java for scripting:** Write scripts, devOps pipelines or applications in Java, runnable directly from source code.
-- **Package Java applications as source:** Publish the source code in a Git repo and execute it from everywhere, in JVM or native mode.
+- **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL. Get rid of JDK installations.
+- **Use Java for scripting:** Write scripts, devOps pipelines or complex applications in Java, runnable directly from source code.
+- **Package Java applications as source:** Publish the source code in a Git repo and execute it instantly from everywhere, in JVM or native mode.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
 - **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating heavy tools.
 
 ## Features
-- **Zero-Config Builds:** Build Java projects with zero setup — no configuration required.
-- **Java-Based Configuration:** Customize builds with simple properties or plain Java code — no XML, No DSL.
+- **Zero-Config Builds:** Build Java projects with zero setup — no configuration or JDK installation required. 
+- **Java-Based Configuration:** Customize builds with simple properties or fine-tune with plain Java code — no XML, No DSL.
 - **Full Portability:** Automatically download specific versions of the JDK, JeKa, or third-party tools if missing — no JDK required.
 - **Cloud-Native Ready:** Effortless native compilation and Docker image creation — no setup or configuration needed.
 - **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code — no compilation and dep management needed.
@@ -46,7 +46,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 ## Usage (Examples)
 
 **Execute build methods**
-- **Compile, test and create JAR**: `jeka project: pack`
+- **Compile, test and create JAR**: `jeka project: test pack`
 - **Compile to native executable**: `jeka native: compile`
 - **Create a JVM-based Docker image**: `jeka docker: build`
 - **Create a native-based Docker image**: `jeka docker: buildNative`
@@ -59,15 +59,17 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 - Display help on console: `jeka --help`
 - Display docs on KBeans: `jeka --doc`
 
-**Configure using properties**
+**Configure builds using properties**
 ```properties
-jeka.classpath=dev.jeka:jacoco-plugin   dev.jeka:sonarqube-plugin
+jeka.classpath=dev.jeka:jacoco-plugin  dev.jeka:sonarqube-plugin
 
 @project.moduleId=my-org:my-lib
 @project.gitVersioning.enable=true
 @project.pack.jarType=SHADE
 
-@jacoco.jacocoVersion=0.8.12
+@jacoco=on
+@sonarqube=on
+@sonarqube.gate=true
 ```
 
 **Create specific tasks with Java code**

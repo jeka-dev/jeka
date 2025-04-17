@@ -756,7 +756,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
-                return JkProject.this.compilerToolChain.compile(compileSpec);
+                return JkProject.this.compilerToolChain.compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;
             }
 
             @Override

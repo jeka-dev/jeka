@@ -327,16 +327,14 @@ public final class JkRunbase {
             }
         }
 
-        // For the parent runbase, we skip initializing beans from the command line.
-        // We only run KBeans explicitly defined in the configuration.
-        KBeanAction.Container actions = runbaseGraph.declaresChildren() ?
-                new KBeanAction.Container() : cmdLineActionContainer;
+        // Add default kbean
+        KBeanAction.Container actions = cmdLineActionContainer;
         actions = actions.withKBeanInitialization(defaultKBeanClass);
 
-        if (!master) {
-            List<String> kbeansToExclude = kbeansToExclude();
-            actions = actions.withoutAnyOfKBeanClasses(kbeansToExclude);
-        }
+        // Remove Kbean explicitly disabled
+        List<String> kbeansToExclude = kbeansToExclude();
+        actions = actions.withoutAnyOfKBeanClasses(kbeansToExclude);
+
 
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize Runbase with \n" + actions.toColumnText());
@@ -557,18 +555,6 @@ public final class JkRunbase {
 
     static void setMaster(JkRunbase runbase) {
         MASTER = runbase;
-    }
-
-    static boolean isJekaProject(Path baseDir) {
-        if (!Files.isDirectory(baseDir)) {
-            return false;
-        }
-        Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
-        if (Files.exists(jekaPropertiesFile) && Files.isRegularFile(jekaPropertiesFile)) {
-            return true;
-        }
-        Path jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
-        return Files.exists(jekaSrcDir) && Files.isDirectory(jekaSrcDir);
     }
 
     private <T extends KBean> T instantiateKBean(Class<T> beanClass) {

@@ -150,6 +150,17 @@ public final class JkUtilsPath {
     }
 
     /**
+     * Converts a given URL to a {@link Path} object.
+     */
+    public static Path fromUrl(URL url)  {
+        try {
+            return Paths.get(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Cannot translate url '" + url + "' to path.", e);
+        }
+    }
+
+    /**
      *  A container object representing both a zip file and its content. The content is seen as a regular
      *  <code>Path</code> representing the content root.
      */

@@ -407,7 +407,7 @@ class Engine {
             throw new JkException(NO_JDK_MSG);
         }
         if (jekaSource.containFiles()) {
-            return JkJavaCompilerToolChain.of().compile(javaCompileSpec);
+            return JkJavaCompilerToolChain.of().compile(javaCompileSpec) != JkJavaCompilerToolChain.Status.FAILED;
         }
         JkLog.verbose("jeka-src dir does not contain sources. Skip compile");
         return true;

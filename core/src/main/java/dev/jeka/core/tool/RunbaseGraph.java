@@ -16,7 +16,10 @@
 
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.project.JkDependenciesTxt;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -178,6 +181,7 @@ class RunbaseGraph {
                 .map(parentBaseDir::resolve)
                 .map(Path::normalize)
                 .forEach(result::add);
+        //result.addAll(JkDependenciesTxt.getModuleDependencies(parentBaseDir));
         result.addAll(getChildBaseProps(runbase));
 
         return result.stream().distinct().collect(Collectors.toList());
@@ -188,7 +192,7 @@ class RunbaseGraph {
             String parentDirString = dirPath.equals("*") ? "" : JkUtilsString.substringBeforeLast(dirPath, "/*");
             Path parentDir = baseDir.resolve(parentDirString);
             return JkUtilsPath.listDirectChildren(parentDir).stream()
-                    .filter(JkRunbase::isJekaProject)
+                    .filter(JkLocator::isJekaProject)
                     .collect(Collectors.toList());
         }
         Path candidate = baseDir.resolve(dirPath).normalize();

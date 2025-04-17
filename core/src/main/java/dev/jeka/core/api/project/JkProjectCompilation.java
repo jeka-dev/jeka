@@ -226,8 +226,11 @@ public class JkProjectCompilation {
     }
 
     private void compileJava() {
-        boolean success = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec());
-        if (!success) {
+        JkJavaCompilerToolChain.Status status = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec());
+        if (!JkLog.isVerbose() && status == JkJavaCompilerToolChain.Status.SUCCESS) {
+            JkLog.info("Succeed");  // must log something otherwise next task will indent badly
+        }
+        if (status == JkJavaCompilerToolChain.Status.FAILED) {
             throw new IllegalStateException("Compilation of Java sources failed.");
         }
     }

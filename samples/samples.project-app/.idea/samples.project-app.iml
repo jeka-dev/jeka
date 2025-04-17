@@ -169,14 +169,5 @@
                 </SOURCES>
             </library>
         </orderEntry>
-        <orderEntry exported="" scope="TEST" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="file:///Users/jerome/IdeaProjects/jeka/samples/samples.project-app/.jeka-work/jeka-src-classes"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES/>
-            </library>
-        </orderEntry>
     </component>
 </module>

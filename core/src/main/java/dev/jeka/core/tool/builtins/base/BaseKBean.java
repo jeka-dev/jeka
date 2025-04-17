@@ -526,7 +526,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
-                return JkJavaCompilerToolChain.of().compile(compileSpec);
+                return JkJavaCompilerToolChain.of().compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;
             }
 
             @Override

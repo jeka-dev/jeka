@@ -71,6 +71,7 @@ nav:
             - app: reference/kbeans-app.md
             - setup: reference/kbeans-setup.md
         - Properties: reference/properties.md
+        - Multi-Module: reference/multi-modules.md
         - Build Library:
             - Intro : reference/api-intro.md
             - Files : reference/api-files.md

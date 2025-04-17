@@ -16,6 +16,7 @@
 
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.file.JkPathTree;
@@ -45,7 +46,7 @@ public final class JkSpringbootProject {
     public static final String OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME
             = "jeka.springboot.plugin.dependency";
 
-    static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies::pom:";
+    static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies:";
 
     private final JkProject project;
 
@@ -117,7 +118,7 @@ public final class JkSpringbootProject {
     }
 
     /**
-     * Configures the underlying project for Spring-Boot usinf sensitive default
+     * Configures the underlying project for Spring-Boot using sensitive default
      * @see #configure(boolean, boolean, boolean)
      */
     public JkSpringbootProject configure() {
@@ -132,7 +133,7 @@ public final class JkSpringbootProject {
      */
     public JkSpringbootProject includeParentBom(String version) {
         project.compilation.dependencies
-                .add(BOM_COORDINATE + version);
+                .addVersionProvider(JkVersionProvider.of().andBom(BOM_COORDINATE + version));
         return this;
     }
 

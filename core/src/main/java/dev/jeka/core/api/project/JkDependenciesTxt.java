@@ -17,26 +17,28 @@
 package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-class DependenciesTxt {
+public class JkDependenciesTxt {
 
     public static final String COMPILE = "compile";
 
-    private static final String COMPILE_ONLY = "compile-only";
+    static final String COMPILE_ONLY = "compile-only";
 
     public static final String RUNTIME = "runtime";
 
     public static final String TEST = "test";
 
     private static final String VERSION = "version";
+
+    private static final String FILE_NAME = "dependencies.txt";
 
     private static final String MINUS_SYMBOL = "-";
 
@@ -48,32 +50,32 @@ class DependenciesTxt {
 
     private final JkVersionProvider versionProvider;
 
-    private DependenciesTxt(Map<String, JkDependencySet> dependencySets, JkVersionProvider versionProvider) {
+    private JkDependenciesTxt(Map<String, JkDependencySet> dependencySets, JkVersionProvider versionProvider) {
         this.dependencySets = dependencySets;
         this.versionProvider = versionProvider;
     }
 
-    static DependenciesTxt parse(Path dependenciesXmlPath) {
-        Map<String, JkDependencySet> raw = parseFile(dependenciesXmlPath);
-        Map<String, JkDependencySet> result = new LinkedHashMap<>();
-
-        result.put(TEST, raw.get(TEST));
-
-        // Manage compile-only
-        JkDependencySet compileDeps = raw.get(COMPILE);
-        JkDependencySet runtimeDeps = raw.get(RUNTIME);
-        for (JkDependency dependency : raw.getOrDefault(COMPILE_ONLY, JkDependencySet.of()).getEntries()) {
-            compileDeps = compileDeps.and(dependency);
-            if (dependency instanceof JkCoordinateDependency) {
-                JkCoordinateDependency dep = (JkCoordinateDependency) dependency;
-                JkCoordinate coordinate = dep.getCoordinate();
-                runtimeDeps = runtimeDeps.minus(coordinate.getModuleId());
-            } else {
-                runtimeDeps = runtimeDeps.minus(dependency);
-            }
+    public static List<Path> getModuleDependencies(Path baseDir) {
+        Path dependenciesTxtFile = baseDir.resolve(FILE_NAME);
+        if (!Files.exists(dependenciesTxtFile)) {
+            return Collections.emptyList();
         }
-        result.put(COMPILE, compileDeps);
-        result.put(RUNTIME, runtimeDeps);
+        return JkUtilsPath.readAllLines(dependenciesTxtFile).stream()
+                .map(String::trim)
+                .filter(line -> !line.startsWith("#"))
+                .filter(line -> !line.startsWith("-"))
+                .filter(line -> !line.isEmpty())
+                .filter(line -> !JkDependency.isCoordinate(line))
+                .map(baseDir::resolve)
+                .filter(Files::exists)
+                .filter(JkLocator::isJekaProject)
+                .map(Path::normalize)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    static JkDependenciesTxt parse(Path dependenciesXmlPath) {
+        Map<String, JkDependencySet> raw = parseFile(dependenciesXmlPath);
 
         // Manage Version provider
         JkVersionProvider versionProvider = JkVersionProvider.of();
@@ -98,7 +100,14 @@ class DependenciesTxt {
                 versionProvider = versionProvider.and(coordinate.getModuleId(), coordinate.getVersion());
             }
         }
-        return new DependenciesTxt(result, versionProvider);
+
+        Path parent = dependenciesXmlPath.getParent().getParent().resolve("dependencies.txt");
+        if (Files.exists(parent)) {
+            JkDependenciesTxt parsedDependenciesTxt = JkDependenciesTxt.parse(parent);
+            versionProvider = parsedDependenciesTxt.versionProvider.and(versionProvider);
+        }
+
+        return new JkDependenciesTxt(raw, versionProvider);
     }
 
     JkDependencySet getDependencies(String section) {
@@ -107,6 +116,18 @@ class DependenciesTxt {
 
     JkVersionProvider getVersionProvider() {
         return versionProvider;
+    }
+
+    public JkDependencySet computeCompileDeps() {
+        return dependencySets.get(COMPILE).and(dependencySets.get(COMPILE_ONLY)).andVersionProvider(versionProvider);
+    }
+
+    public JkDependencySet computeRuntimeDeps() {
+        return dependencySets.get(RUNTIME).and(dependencySets.get(COMPILE)).andVersionProvider(versionProvider);
+    }
+
+    public JkDependencySet computeTestDeps() {
+        return dependencySets.get(TEST).and(computeRuntimeDeps());
     }
 
     private static Map<String, JkDependencySet> parseFile(Path dependenciesXmlPath) {
@@ -135,8 +156,6 @@ class DependenciesTxt {
             if (line.contains("#")) {
                 line = JkUtilsString.substringBeforeFirst(line, "#").trim();
             }
-
-
             if (line.startsWith("[") && line.endsWith("]")) {
                 currentSection = line.substring(1, line.length() - 1);
                 currentList = new ArrayList<>();
@@ -149,10 +168,6 @@ class DependenciesTxt {
     }
 
     private static JkDependencySet apply(String line, JkDependencySet current) {
-        if (line.startsWith(MINUS_SYMBOL)) {
-            String coordinate = line.substring(MINUS_SYMBOL.length()).trim();
-            return current.minus(coordinate);
-        }
         if (line.startsWith(LOCAL_EXCLUDE_SYMBOL)) {
             String coordinate = line.substring(LOCAL_EXCLUDE_SYMBOL.length()).trim();
             return current.withLocalExclusions(coordinate);

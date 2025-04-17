@@ -123,9 +123,8 @@ public final class JkBaseScaffold extends JkScaffold {
         return getJUnitDeps();
     }
 
-
-
-    private String code(String snippetName, List<String> ...deps) {
+    @SafeVarargs
+    private final String code(String snippetName, List<String>... deps) {
         String baseCode = readResource(JkBaseScaffold.class, snippetName);
         List<String> allDeps = JkUtilsIterable.concatLists(deps);
         String injectCode = toJkInject(allDeps);
@@ -139,7 +138,9 @@ public final class JkBaseScaffold extends JkScaffold {
         }
 
         if (baseScaffoldOption.kind == Kind.APP) {
-            addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", junitDeps(), devDeps));
+            List<String> testDeps = new LinkedList<>(junitDeps());
+            testDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+            addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", testDeps, devDeps));
             addFileEntry(TEST_CLASS_PATH, code("MyTest.snippet"));
             addFileEntry(APP_CLASS_PATH, code("App.snippet", deps));
 

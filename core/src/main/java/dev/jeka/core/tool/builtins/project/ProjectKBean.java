@@ -348,7 +348,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             projectScaffold.setKind(kind);
             projectScaffold.setUseSimpleStyle(ProjectKBean.this.layout.style == JkCompileLayout.Style.SIMPLE);
 
-            // Create 'project-dependencies.txt' file if needed
+            // Create 'dependencies.txt' file if needed
             List<String> compileDeps = dependencies.toList(dependencies.compile);
             List<String> runtimeDeps = dependencies.toList(dependencies.runtime);
             List<String> testDeps = dependencies.toList(dependencies.test);

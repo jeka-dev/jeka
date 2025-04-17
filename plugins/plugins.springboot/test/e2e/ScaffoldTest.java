@@ -16,6 +16,7 @@
 
 package e2e;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcHandler;
@@ -62,7 +63,7 @@ class ScaffoldTest {
     @Test
     void scaffold_simpleLayoutProject_ok() {
         RunChecker runChecker = new RunChecker();
-        runChecker.scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold");
+        runChecker.scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold.jekaVersion=NO scaffold");
         runChecker.buildCmd = withJavaVersionArgs("project: test pack");
         runChecker.run();
     }
@@ -70,7 +71,7 @@ class ScaffoldTest {
     @Test
     void scaffold_base_ok() {
         RunChecker runChecker = new RunChecker();
-        runChecker.scaffoldCmd = scaffoldArgs("base: scaffold springboot:");
+        runChecker.scaffoldCmd = scaffoldArgs("base: scaffold springboot: -Djeka.version=.");
         runChecker.buildCmd = withJavaVersionArgs("base: test pack");
         runChecker.cleanup = false;
         Path baseDir = runChecker.run();
@@ -106,6 +107,8 @@ class ScaffoldTest {
 
             Path path = JkUtilsPath.createTempDirectory("jeka-scaffold-test-");
             executor.runWithDistribJekaShell(path, scaffoldCmd);
+            String jekaPropsContent = JkPathFile.of(path.resolve("jeka.properties")).readAsString();
+            JkLog.info(jekaPropsContent);
             executor.runWithDistribJekaShell(path, buildCmd);
 
             // TODO Fix the problem of springboot jar on Windows

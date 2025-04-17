@@ -39,6 +39,7 @@ public class SpringbootScaffoldTest {
     @Test
     public void scaffoldProject_regular_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
+        System.out.println("Scaffolding springboot project in " + baseDir);
         JkProject project = JkProject.of().setBaseDir(baseDir);
         JkProjectScaffold projectScaffold = JkProjectScaffold.of(project);
         projectScaffold.compileDeps.add("toto:titi:0.0.1");

@@ -1,10 +1,14 @@
-# Syntax : https://jeka-dev.github.io/jeka/reference/api-project/#full-text-description
+# Syntax : https://jeka-dev.github.io/jeka/reference/api-project/#dependencies_txt
 
-== COMPILE ==
+[compile]
 
-== RUNTIME ==
+[compile-only]
 
-== TEST ==
+[runtime]
+
+[test]
+
+[version]
 
 
 
