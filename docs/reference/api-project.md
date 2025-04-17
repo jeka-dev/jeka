@@ -121,42 +121,49 @@ the project code base.
 Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/dependencies.txt* file.
 
 
-!!! example
+Example:
+```INI
+[compile]
+om.google.guava:guava:33.4.8-jre
+org.lwjgl:lwjgl:natives-linux:3.3.6  # specify the 'natives-linux' classifier for lwjgl
 
-    ```
-    == COMPILE ==
-    org.lwjgl:lwjgl-bom::pom:3.3.1   # Use lwjgl BOM so we don't need to specify lwjgl versions afterward
-    org.lwjgl:lwjgl:natives-linux::  # specify the 'natives-linux' classifier for lwjgl
-    org.projectlombok:lombok:1.16.16  
+[compile-only]
+org.projectlombok:lombok:1.18.36
 
-    == RUNTIME ==
-    org.postgresql:postgresql:42.5.0
-    - org.projectlombok:lombok       # remove lombok from runtime dependencies 
+[runitme]
+org.postgresql:postgresql
 
-    == TEST ==
-    org.seleniumhq.selenium:selenium-chrome-driver:3.4.0
-    org.fluentlenium:fluentlenium-junit:3.2.0
-    @ org.apache.httpcomponents:httpclient  # exclude http-client from fluentlenium-junit transitive dependencies
-    org.fluentlenium:fluentlenium-assertj:3.2.0
-    @@ net.sourceforge.htmlunit:htmlunit    # exclude htmlunit from all transitive dependencies
+[test]
+org.junit.jupiter:junit-jupiter
+org.junit.platform:junit-platform-launcher
+org.fluentlenium:fluentlenium-junit:3.2.0
+    @org.apache.httpcomponents:httpclient  # exclude http-client from 'fluentlenium-junit' transitive dependencies
+@@net.sourceforge.htmlunit:htmlunit    # exclude htmlunit from all transitive dependencies
 
-    ```
+[version]
+org.junit:junit-bom:5.12.1@pom    # use this pom as a version provider for all junit dependencies
+org.postgresql:postgresql:42.5.0
+```
 
-As shown on the above example, we can use `@` and `@@` symbols to specify dependency exclusions.`
+As shown in the example above, we can use the `@` and `@@` symbols to specify dependency exclusions.
 
-`== COMPILE ==`  
-Defines dependencies for the *compile* classpath.
+`[compile]`  
+Specifies dependencies required for both compiling and running the project.
 
-`== RUNTIME ==`  
-Defines dependencies for the *runtime* classpath.
+`[compile-only]`  
+Specifies dependencies required only for compiling the project, which are excluded at runtime.
 
-If any dependencies from the *COMPILE* section should not be included in the *runtime* classpath, 
-they must be explicitly removed using the '-' symbol.
+`[runtime]`  
+Specifies dependencies required only for running the project.
 
-`== TEST ==`  
-Defines dependencies for the *test* classpath.  
-This will include dependencies from both the *COMPILE* and *RUNTIME* sections, along with those specified in the *TEST* section.
+`[test]`  
+Specifies dependencies for the *test* classpath.  
+This includes dependencies from the *compile*, *compile-only*, and *runtime* sections, along with those specified in the *test* section.
 
+`[version]`  
+Specifies the versions of dependencies to use when not explicitly defined.  
+You can include all versions defined in a *BOM* by referencing its coordinates and appending `@pom`.  
+The versions section inherits definitions from the *version* section in the `dependencies.txt` file located in the parent directory.
 !!! tip  
     If you're using the Jeka plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
 

@@ -134,7 +134,6 @@ public final class JkBaseScaffold extends JkScaffold {
     private void configureScaffold() {
         if (baseScaffoldOption.kind != Kind.JEKA_SCRIPT) {
             this.addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=base");
-            this.addJekaPropValue("@custom=on");
         }
 
         if (baseScaffoldOption.kind == Kind.APP) {
