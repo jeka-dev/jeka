@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":9,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":9,"i8":10,"i9":10,"i10":10,"i11":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -168,8 +168,8 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#compileDeps">compileDeps</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected <a href="../../../../../../dev/jeka/core/api/project/JkProject.html" title="class in dev.jeka.core.api.project">JkProject</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#project">project</a></span></code>&nbsp;</td>
+<td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#compileOnlyDeps">compileOnlyDeps</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
@@ -183,13 +183,17 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 <td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#testDeps">testDeps</a></span></code>&nbsp;</td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#versionDeps">versionDeps</a></span></code>&nbsp;</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="fields.inherited.from.class.dev.jeka.core.api.scaffold.JkScaffold">
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;dev.jeka.core.api.scaffold.<a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" title="class in dev.jeka.core.api.scaffold">JkScaffold</a></h3>
-<code><a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#baseDir">baseDir</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#fileEntries">fileEntries</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#UNSPECIFIED_JEKA_VERSION">UNSPECIFIED_JEKA_VERSION</a></code></li>
+<code><a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#baseDir">baseDir</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#fileEntries">fileEntries</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#JUPITER_VERSION">JUPITER_VERSION</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#UNSPECIFIED_JEKA_VERSION">UNSPECIFIED_JEKA_VERSION</a></code></li>
 </ul>
 </li>
 </ul>
@@ -212,36 +216,34 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getResRelPath--">getResRelPath</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#addCustomKbeanFileEntry--">addCustomKbeanFileEntry</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getSrcRelPath--">getSrcRelPath</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getResRelPath--">getResRelPath</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getSrcRelPath--">getSrcRelPath</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.Kind.html" title="enum in dev.jeka.core.api.project.scaffold">JkProjectScaffold.Kind</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getTemplate--">getTemplate</a></span>()</code>
 <div class="block">Returns the template currently set for this scaffold</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getTestRelPath--">getTestRelPath</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#getTestResPath--">getTestResPath</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#of-dev.jeka.core.api.project.JkProject-">of</a></span>(<a href="../../../../../../dev/jeka/core/api/project/JkProject.html" title="class in dev.jeka.core.api.project">JkProject</a>&nbsp;project)</code>&nbsp;</td>
-</tr>
-<tr id="i7" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#removeFileEntry-java.lang.String-">removeFileEntry</a></span>(java.lang.String&nbsp;relativePath)</code>
-<div class="block">Removes a file entry from the list of file entries.</div>
-</td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
@@ -269,7 +271,7 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;dev.jeka.core.api.scaffold.<a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" title="class in dev.jeka.core.api.scaffold">JkScaffold</a></h3>
-<code><a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#addFileEntry-java.lang.String-java.lang.String-">addFileEntry</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#addJekaPropsContent-java.lang.String-">addJekaPropsContent</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#addJekaPropValue-java.lang.String-">addJekaPropValue</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#createShellScripts-java.nio.file.Path-">createShellScripts</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#findLatestStableVersion-java.lang.String-java.lang.String-">findLatestStableVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#getJekaVersion--">getJekaVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#getJUnitDeps--">getJUnitDeps</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#lastJekaVersion--">lastJekaVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#readResource-java.lang.Class-java.lang.String-">readResource</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#removeFileEntriesStartingWith-java.nio.file.Path-">removeFileEntriesStartingWith</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaDistribLocation-java.lang.String-">setJekaDistribLocation</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaDistribRepo-java.lang.String-">setJekaDistribRepo</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaPropsCustomizer-java.util.function.UnaryOperator-">setJekaPropsCustomizer</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaVersion-java.lang.String-">setJekaVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setRawJekaPropsPath-java.nio.file.Path-">setRawJekaPropsPath</a></code></li>
+<code><a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#addFileEntry-java.lang.String-java.lang.String-">addFileEntry</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#addJekaPropsContent-java.lang.String-">addJekaPropsContent</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#addJekaPropValue-java.lang.String-">addJekaPropValue</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#createShellScripts-java.nio.file.Path-">createShellScripts</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#findLatestStableVersion-java.lang.String-java.lang.String-">findLatestStableVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#getJekaVersion--">getJekaVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#getJUnitDeps--">getJUnitDeps</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#lastJekaVersion--">lastJekaVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#readResource-java.lang.Class-java.lang.String-">readResource</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#removeFileEntriesStartingWith-java.nio.file.Path-">removeFileEntriesStartingWith</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#removeFileEntry-java.lang.String-">removeFileEntry</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaDistribLocation-java.lang.String-">setJekaDistribLocation</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaDistribRepo-java.lang.String-">setJekaDistribRepo</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaPropsCustomizer-java.util.function.UnaryOperator-">setJekaPropsCustomizer</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setJekaVersion-java.lang.String-">setJekaVersion</a>, <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html#setRawJekaPropsPath-java.nio.file.Path-">setRawJekaPropsPath</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -318,15 +320,6 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 </dl>
 </li>
 </ul>
-<a name="project">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>project</h4>
-<pre>protected final&nbsp;<a href="../../../../../../dev/jeka/core/api/project/JkProject.html" title="class in dev.jeka.core.api.project">JkProject</a> project</pre>
-</li>
-</ul>
 <a name="compileDeps">
 <!--   -->
 </a>
@@ -334,6 +327,15 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 <li class="blockList">
 <h4>compileDeps</h4>
 <pre>public final&nbsp;java.util.List&lt;java.lang.String&gt; compileDeps</pre>
+</li>
+</ul>
+<a name="compileOnlyDeps">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>compileOnlyDeps</h4>
+<pre>public final&nbsp;java.util.List&lt;java.lang.String&gt; compileOnlyDeps</pre>
 </li>
 </ul>
 <a name="runtimeDeps">
@@ -348,10 +350,19 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 <a name="testDeps">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>testDeps</h4>
 <pre>public final&nbsp;java.util.List&lt;java.lang.String&gt; testDeps</pre>
+</li>
+</ul>
+<a name="versionDeps">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>versionDeps</h4>
+<pre>public final&nbsp;java.util.List&lt;java.lang.String&gt; versionDeps</pre>
 </li>
 </ul>
 </li>
@@ -470,19 +481,13 @@ extends <a href="../../../../../../dev/jeka/core/api/scaffold/JkScaffold.html" t
 </dl>
 </li>
 </ul>
-<a name="removeFileEntry-java.lang.String-">
+<a name="addCustomKbeanFileEntry--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>removeFileEntry</h4>
-<pre>public&nbsp;void&nbsp;removeFileEntry(java.lang.String&nbsp;relativePath)</pre>
-<div class="block">Removes a file entry from the list of file entries. This gives a chance to plugins
- to remove the non-necessary files.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>relativePath</code> - the path, relative to base dir.</dd>
-</dl>
+<h4>addCustomKbeanFileEntry</h4>
+<pre>public&nbsp;void&nbsp;addCustomKbeanFileEntry()</pre>
 </li>
 </ul>
 </li>

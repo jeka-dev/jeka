@@ -217,6 +217,8 @@
 <dd>
 <div class="block">Adds a customizer to this instance, that will be executed at <a href="dev/jeka/core/tool/builtins/base/JkBaseScaffold.html#run--"><code>JkBaseScaffold.run()</code></a> execution.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#addCustomKbeanFileEntry--">addCustomKbeanFileEntry()</a></span> - Method in class dev.jeka.core.api.project.scaffold.<a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/publication/JkPomMetadata.html#addDeveloper-dev.jeka.core.api.depmanagement.publication.JkPomMetadata.JkDeveloperInfo-">addDeveloper(JkPomMetadata.JkDeveloperInfo)</a></span> - Method in class dev.jeka.core.api.depmanagement.publication.<a href="dev/jeka/core/api/depmanagement/publication/JkPomMetadata.html" title="class in dev.jeka.core.api.depmanagement.publication">JkPomMetadata</a></dt>
 <dd>
 <div class="block">Adds a developer to this publication.</div>
@@ -1129,6 +1131,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkBuildable.html#compile-dev.jeka.core.api.java.JkJavaCompileSpec-">compile(JkJavaCompileSpec)</a></span> - Method in interface dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkBuildable.html" title="interface in dev.jeka.core.api.project">JkBuildable</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#COMPILE">COMPILE</a></span> - Static variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkProjectFlatFacade.JkDependencyFacade.html#compile">compile</a></span> - Variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkProjectFlatFacade.JkDependencyFacade.html" title="class in dev.jeka.core.api.project">JkProjectFlatFacade.JkDependencyFacade</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/tool/builtins/project/ProjectKBean.html#compile--">compile()</a></span> - Method in class dev.jeka.core.tool.builtins.project.<a href="dev/jeka/core/tool/builtins/project/ProjectKBean.html" title="class in dev.jeka.core.tool.builtins.project">ProjectKBean</a></dt>
@@ -1142,6 +1146,8 @@
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#compileDeps">compileDeps</a></span> - Variable in class dev.jeka.core.api.project.scaffold.<a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkBuildable.html#compileIfNeeded--">compileIfNeeded()</a></span> - Method in interface dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkBuildable.html" title="interface in dev.jeka.core.api.project">JkBuildable</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#compileOnlyDeps">compileOnlyDeps</a></span> - Variable in class dev.jeka.core.api.project.scaffold.<a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/kotlin/JkKotlinModules.html#COMPILER">COMPILER</a></span> - Static variable in class dev.jeka.core.api.kotlin.<a href="dev/jeka/core/api/kotlin/JkKotlinModules.html" title="class in dev.jeka.core.api.kotlin">JkKotlinModules</a></dt>
 <dd>&nbsp;</dd>
@@ -1179,6 +1185,8 @@
 <dd>
 <div class="block">If this node comes from a computed dependency, it returns computed dependency in question.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#computeCompileDeps--">computeCompileDeps()</a></span> - Method in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/JkQualifiedDependencySet.html#computeIdeDependencies-dev.jeka.core.api.depmanagement.JkDependencySet-dev.jeka.core.api.depmanagement.JkDependencySet-dev.jeka.core.api.depmanagement.JkDependencySet-dev.jeka.core.api.depmanagement.JkCoordinate.ConflictStrategy-">computeIdeDependencies(JkDependencySet, JkDependencySet, JkDependencySet, JkCoordinate.ConflictStrategy)</a></span> - Static method in class dev.jeka.core.api.depmanagement.<a href="dev/jeka/core/api/depmanagement/JkQualifiedDependencySet.html" title="class in dev.jeka.core.api.depmanagement">JkQualifiedDependencySet</a></dt>
 <dd>
 <div class="block">Computes the set of IDE dependencies based on the given compile, runtime, and test dependencies.</div>
@@ -1206,6 +1214,10 @@
 <div class="block">Computes the published transitive dependencies from the specified <i>compile</i> and <i>runtime</i>
  dependencies of the project that we are publishing artifacts for.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#computeRuntimeDeps--">computeRuntimeDeps()</a></span> - Method in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#computeTestDeps--">computeTestDeps()</a></span> - Method in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/utils/JkUtilsIterable.html#concat-T:A-T:A-">concat(T[], T[])</a></span> - Static method in class dev.jeka.core.api.utils.<a href="dev/jeka/core/api/utils/JkUtilsIterable.html" title="class in dev.jeka.core.api.utils">JkUtilsIterable</a></dt>
 <dd>
 <div class="block">Concatenates two arrays</div>
@@ -2189,6 +2201,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/utils/JkUtilsPath.html#friendlyName-java.nio.file.Path-">friendlyName(Path)</a></span> - Static method in class dev.jeka.core.api.utils.<a href="dev/jeka/core/api/utils/JkUtilsPath.html" title="class in dev.jeka.core.api.utils">JkUtilsPath</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/utils/JkUtilsPath.html#fromUrl-java.net.URL-">fromUrl(URL)</a></span> - Static method in class dev.jeka.core.api.utils.<a href="dev/jeka/core/api/utils/JkUtilsPath.html" title="class in dev.jeka.core.api.utils">JkUtilsPath</a></dt>
+<dd>
+<div class="block">Converts a given URL to a <code>Path</code> object.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkProject.html#fullBuild--">fullBuild()</a></span> - Method in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkProject.html" title="class in dev.jeka.core.api.project">JkProject</a></dt>
 <dd>
 <div class="block">Executes the full build process by executing clean, test, pack and test end-to-end.</div>
@@ -3096,6 +3112,8 @@
 <dd>
 <div class="block">Returns the missing files or empty directory for this dependency.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#getModuleDependencies-java.nio.file.Path-">getModuleDependencies(Path)</a></span> - Static method in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/JkCoordinate.html#getModuleId--">getModuleId()</a></span> - Method in class dev.jeka.core.api.depmanagement.<a href="dev/jeka/core/api/depmanagement/JkCoordinate.html" title="class in dev.jeka.core.api.depmanagement">JkCoordinate</a></dt>
 <dd>
 <div class="block">Returns the getModuleId of this dependency.</div>
@@ -4235,6 +4253,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/JkRepo.html#isIvyRepo--">isIvyRepo()</a></span> - Method in class dev.jeka.core.api.depmanagement.<a href="dev/jeka/core/api/depmanagement/JkRepo.html" title="class in dev.jeka.core.api.depmanagement">JkRepo</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/system/JkLocator.html#isJekaProject-java.nio.file.Path-">isJekaProject(Path)</a></span> - Static method in class dev.jeka.core.api.system.<a href="dev/jeka/core/api/system/JkLocator.html" title="class in dev.jeka.core.api.system">JkLocator</a></dt>
+<dd>
+<div class="block">Determines whether the specified directory is a Jeka project.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/tool/JkExternalToolApi.html#isJekaProject-java.nio.file.Path-">isJekaProject(Path)</a></span> - Static method in class dev.jeka.core.tool.<a href="dev/jeka/core/tool/JkExternalToolApi.html" title="class in dev.jeka.core.tool">JkExternalToolApi</a></dt>
 <dd>
 <div class="block">Returns <code>true</code> if the specified path is the root directory of a Jeka project.</div>
@@ -4652,6 +4674,8 @@
 <dd>
 <div class="block">Repeatable container.</div>
 </dd>
+<dt><a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project"><span class="typeNameLink">JkDependenciesTxt</span></a> - Class in <a href="dev/jeka/core/api/project/package-summary.html">dev.jeka.core.api.project</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="dev/jeka/core/api/depmanagement/JkDependency.html" title="interface in dev.jeka.core.api.depmanagement"><span class="typeNameLink">JkDependency</span></a> - Interface in <a href="dev/jeka/core/api/depmanagement/package-summary.html">dev.jeka.core.api.depmanagement</a></dt>
 <dd>
 <div class="block">Interface standing for a dependency.</div>
@@ -4952,6 +4976,8 @@
 <div class="block">Compiler for Java source code.</div>
 </dd>
 <dt><a href="dev/jeka/core/api/java/JkJavaCompilerToolChain.JkJdks.html" title="class in dev.jeka.core.api.java"><span class="typeNameLink">JkJavaCompilerToolChain.JkJdks</span></a> - Class in <a href="dev/jeka/core/api/java/package-summary.html">dev.jeka.core.api.java</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="dev/jeka/core/api/java/JkJavaCompilerToolChain.Status.html" title="enum in dev.jeka.core.api.java"><span class="typeNameLink">JkJavaCompilerToolChain.Status</span></a> - Enum in <a href="dev/jeka/core/api/java/package-summary.html">dev.jeka.core.api.java</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="dev/jeka/core/api/java/JkJavaCompileSpec.html" title="class in dev.jeka.core.api.java"><span class="typeNameLink">JkJavaCompileSpec</span></a> - Class in <a href="dev/jeka/core/api/java/package-summary.html">dev.jeka.core.api.java</a></dt>
 <dd>
@@ -5511,6 +5537,8 @@
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/JkPopularLibs.html#JUNIT_5">JUNIT_5</a></span> - Static variable in class dev.jeka.core.api.depmanagement.<a href="dev/jeka/core/api/depmanagement/JkPopularLibs.html" title="class in dev.jeka.core.api.depmanagement">JkPopularLibs</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/JkPopularLibs.html#JUNIT_5_PLATFORM_LAUNCHER">JUNIT_5_PLATFORM_LAUNCHER</a></span> - Static variable in class dev.jeka.core.api.depmanagement.<a href="dev/jeka/core/api/depmanagement/JkPopularLibs.html" title="class in dev.jeka.core.api.depmanagement">JkPopularLibs</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/scaffold/JkScaffold.html#JUPITER_VERSION">JUPITER_VERSION</a></span> - Static variable in class dev.jeka.core.api.scaffold.<a href="dev/jeka/core/api/scaffold/JkScaffold.html" title="class in dev.jeka.core.api.scaffold">JkScaffold</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/tool/builtins/tooling/docker/DockerKBean.html#jvmBaseImage">jvmBaseImage</a></span> - Variable in class dev.jeka.core.tool.builtins.tooling.docker.<a href="dev/jeka/core/tool/builtins/tooling/docker/DockerKBean.html" title="class in dev.jeka.core.tool.builtins.tooling.docker">DockerKBean</a></dt>
 <dd>&nbsp;</dd>
@@ -7007,8 +7035,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/tool/builtins/project/ProjectKBean.JkTestOptions.html#progress">progress</a></span> - Variable in class dev.jeka.core.tool.builtins.project.<a href="dev/jeka/core/tool/builtins/project/ProjectKBean.JkTestOptions.html" title="class in dev.jeka.core.tool.builtins.project">ProjectKBean.JkTestOptions</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#project">project</a></span> - Variable in class dev.jeka.core.api.project.scaffold.<a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/tool/builtins/project/ProjectKBean.html#project">project</a></span> - Variable in class dev.jeka.core.tool.builtins.project.<a href="dev/jeka/core/tool/builtins/project/ProjectKBean.html" title="class in dev.jeka.core.tool.builtins.project">ProjectKBean</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkProject.html#PROJECT_LIBS_DIR">PROJECT_LIBS_DIR</a></span> - Static variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkProject.html" title="class in dev.jeka.core.api.project">JkProject</a></dt>
@@ -7312,7 +7338,7 @@
 <dd>
 <div class="block">Removes the file entries that start with the specified path prefix.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#removeFileEntry-java.lang.String-">removeFileEntry(String)</a></span> - Method in class dev.jeka.core.api.project.scaffold.<a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></dt>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/scaffold/JkScaffold.html#removeFileEntry-java.lang.String-">removeFileEntry(String)</a></span> - Method in class dev.jeka.core.api.scaffold.<a href="dev/jeka/core/api/scaffold/JkScaffold.html" title="class in dev.jeka.core.api.scaffold">JkScaffold</a></dt>
 <dd>
 <div class="block">Removes a file entry from the list of file entries.</div>
 </dd>
@@ -7587,6 +7613,8 @@
 <div class="block">Dependency will be fetched along transitive dependencies declared as 'runtime'
  or 'compile'</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#RUNTIME">RUNTIME</a></span> - Static variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkProjectFlatFacade.JkDependencyFacade.html#runtime">runtime</a></span> - Variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkProjectFlatFacade.JkDependencyFacade.html" title="class in dev.jeka.core.api.project">JkProjectFlatFacade.JkDependencyFacade</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/JkQualifiedDependencySet.html#RUNTIME_SCOPE">RUNTIME_SCOPE</a></span> - Static variable in class dev.jeka.core.api.depmanagement.<a href="dev/jeka/core/api/depmanagement/JkQualifiedDependencySet.html" title="class in dev.jeka.core.api.depmanagement">JkQualifiedDependencySet</a></dt>
@@ -8770,6 +8798,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/kotlin/JkKotlinModules.html#TEST">TEST</a></span> - Static variable in class dev.jeka.core.api.kotlin.<a href="dev/jeka/core/api/kotlin/JkKotlinModules.html" title="class in dev.jeka.core.api.kotlin">JkKotlinModules</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkDependenciesTxt.html#TEST">TEST</a></span> - Static variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkDependenciesTxt.html" title="class in dev.jeka.core.api.project">JkDependenciesTxt</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/JkProject.html#test">test</a></span> - Variable in class dev.jeka.core.api.project.<a href="dev/jeka/core/api/project/JkProject.html" title="class in dev.jeka.core.api.project">JkProject</a></dt>
 <dd>
 <div class="block">Object responsible for compiling and running tests.</div>
@@ -9253,6 +9283,10 @@
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/java/JkJavaCompilerToolChain.Status.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum dev.jeka.core.api.java.<a href="dev/jeka/core/api/java/JkJavaCompilerToolChain.Status.html" title="enum in dev.jeka.core.api.java">JkJavaCompilerToolChain.Status</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this type with the specified name.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/kotlin/JkKotlinCompiler.Target.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum dev.jeka.core.api.kotlin.<a href="dev/jeka/core/api/kotlin/JkKotlinCompiler.Target.html" title="enum in dev.jeka.core.api.kotlin">JkKotlinCompiler.Target</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
@@ -9357,6 +9391,11 @@
 the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/resolution/JkResolutionParameters.JkConflictResolver.html#values--">values()</a></span> - Static method in enum dev.jeka.core.api.depmanagement.resolution.<a href="dev/jeka/core/api/depmanagement/resolution/JkResolutionParameters.JkConflictResolver.html" title="enum in dev.jeka.core.api.depmanagement.resolution">JkResolutionParameters.JkConflictResolver</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum type, in
+the order they are declared.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/java/JkJavaCompilerToolChain.Status.html#values--">values()</a></span> - Static method in enum dev.jeka.core.api.java.<a href="dev/jeka/core/api/java/JkJavaCompilerToolChain.Status.html" title="enum in dev.jeka.core.api.java">JkJavaCompilerToolChain.Status</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum type, in
 the order they are declared.</div>
@@ -9515,6 +9554,8 @@ the order they are declared.</div>
 <dd>
 <div class="block">Compares <a href="dev/jeka/core/api/tooling/git/JkGit.Tag.html" title="class in dev.jeka.core.api.tooling.git"><code>JkGit.Tag</code></a> objects by their version names.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html#versionDeps">versionDeps</a></span> - Variable in class dev.jeka.core.api.project.scaffold.<a href="dev/jeka/core/api/project/scaffold/JkProjectScaffold.html" title="class in dev.jeka.core.api.project.scaffold">JkProjectScaffold</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/kotlin/JkKotlinModules.html#versionProvider-java.lang.String-">versionProvider(String)</a></span> - Static method in class dev.jeka.core.api.kotlin.<a href="dev/jeka/core/api/kotlin/JkKotlinModules.html" title="class in dev.jeka.core.api.kotlin">JkKotlinModules</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="dev/jeka/core/api/depmanagement/artifact/JkArtifactLocator.html#VOID">VOID</a></span> - Static variable in class dev.jeka.core.api.depmanagement.artifact.<a href="dev/jeka/core/api/depmanagement/artifact/JkArtifactLocator.html" title="class in dev.jeka.core.api.depmanagement.artifact">JkArtifactLocator</a></dt>
