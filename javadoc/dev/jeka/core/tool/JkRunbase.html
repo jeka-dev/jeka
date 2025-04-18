@@ -433,9 +433,9 @@ extends java.lang.Object</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>A class object representing a subclass of <code>KBean</code>. The possible
-         return values are <code>ProjectKBean.class</code> or <code>BaseKBean.class</code>,
-         depending on the presence of the classes or a specific directory structure.
-         Never returns <code>null</code>, but BaseKBean in last resort.</dd>
+ return values are <code>ProjectKBean.class</code> or <code>BaseKBean.class</code>,
+ depending on the presence of the classes or a specific directory structure.
+ Never returns <code>null</code>, but BaseKBean in last resort.</dd>
 </dl>
 </li>
 </ul>
@@ -449,9 +449,9 @@ extends java.lang.Object</pre>
                                 java.lang.Runnable&nbsp;runnable)</pre>
 <div class="block">Register extra file-system clean action to run when --clean option is specified.
  This is used for KBeans as nodeJS that needs to clean an extra folder that does not belong to jeka-output.
-
+ <p>
  Important: This method should be called inside the a KBean #init() method in order it
-            can be taken in account by the execution engine.</div>
+ can be taken in account by the execution engine.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>name</code> - </dd>
