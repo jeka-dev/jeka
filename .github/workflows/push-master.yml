@@ -31,6 +31,7 @@ jobs:
       run: |
         ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
+        
 
     - name: Publish to OSSRH
       if: github.ref == 'refs/heads/master'
