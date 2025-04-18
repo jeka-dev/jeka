@@ -123,6 +123,10 @@ Entire project dependencies can be declared in full text located in the *[PROJEC
 
 Example:
 ```INI
+[version]
+org.junit:junit-bom:5.12.1@pom    # use this pom as a version provider for all junit dependencies
+org.postgresql:postgresql:42.5.0
+
 [compile]
 om.google.guava:guava:33.4.8-jre
 org.lwjgl:lwjgl:natives-linux:3.3.6  # specify the 'natives-linux' classifier for lwjgl
@@ -140,13 +144,13 @@ org.junit.platform:junit-platform-launcher
 org.fluentlenium:fluentlenium-junit:3.2.0
     @org.apache.httpcomponents:httpclient  # exclude http-client from 'fluentlenium-junit' transitive dependencies
 @@net.sourceforge.htmlunit:htmlunit    # exclude htmlunit from all transitive dependencies
-
-[version]
-org.junit:junit-bom:5.12.1@pom    # use this pom as a version provider for all junit dependencies
-org.postgresql:postgresql:42.5.0
 ```
 
 As shown in the example above, we can use the `@` and `@@` symbols to specify dependency exclusions.
+`[version]`  
+Specifies the versions of dependencies to use when not explicitly defined.  
+You can include all versions defined in a *BOM* by referencing its coordinates and appending `@pom`.  
+The versions section inherits definitions from the *version* section in the `dependencies.txt` file located in the parent directory.
 
 `[compile]`  
 Specifies dependencies required for both compiling and running the project.
@@ -161,10 +165,6 @@ Specifies dependencies required only for running the project.
 Specifies dependencies for the *test* classpath.  
 This includes dependencies from the *compile*, *compile-only*, and *runtime* sections, along with those specified in the *test* section.
 
-`[version]`  
-Specifies the versions of dependencies to use when not explicitly defined.  
-You can include all versions defined in a *BOM* by referencing its coordinates and appending `@pom`.  
-The versions section inherits definitions from the *version* section in the `dependencies.txt` file located in the parent directory.
 !!! tip  
     If you're using the Jeka plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
 

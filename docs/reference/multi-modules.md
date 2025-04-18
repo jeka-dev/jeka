@@ -137,22 +137,17 @@ This could be the case if *plugin-common* should not be published as a Maven art
 
 If you need to run some Jeka command for a child modules, you have 3 options:
 
-1. Execute actions from child module directory:
+1. Use `-cb` (alias `--child-base`) option
+   ```properties
+   jeka -cb=plugins/plugin-1 project: test pack
+   ```
+
+2. Execute actions from child module directory:
    ```properties
    cd plugins/plugin-1
    jeka project: test pack
    ```
    This approach works well, but code in `jeka-src` declared in parent module won't be taken in account.
-
-
-2. Execute with remote option from the parent directory:
-   ```properties
-   jeka -r plugins/plugin-1 project: test pack
-   ```
-   Same as for option 1, `jeka-src` declared in parent module won't be taken in account.
-   
-3. TO DO
-
 
 ## Managing dependencies.txt
 
