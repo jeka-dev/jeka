@@ -40,8 +40,6 @@ public class JkDependenciesTxt {
 
     private static final String FILE_NAME = "dependencies.txt";
 
-    private static final String MINUS_SYMBOL = "-";
-
     private static final String LOCAL_EXCLUDE_SYMBOL = "@";
 
     private static final String GLOBAL_EXCLUDE_SYMBOL = "@@";
@@ -119,15 +117,19 @@ public class JkDependenciesTxt {
     }
 
     public JkDependencySet computeCompileDeps() {
-        return dependencySets.get(COMPILE).and(dependencySets.get(COMPILE_ONLY)).andVersionProvider(versionProvider);
+        return dependencySets.getOrDefault(COMPILE, JkDependencySet.of())
+                .and(dependencySets.getOrDefault(COMPILE_ONLY, JkDependencySet.of()))
+                    .andVersionProvider(versionProvider);
     }
 
     public JkDependencySet computeRuntimeDeps() {
-        return dependencySets.get(RUNTIME).and(dependencySets.get(COMPILE)).andVersionProvider(versionProvider);
+        return dependencySets.getOrDefault(RUNTIME, JkDependencySet.of())
+                .and(dependencySets.getOrDefault(COMPILE, JkDependencySet.of()))
+                .andVersionProvider(versionProvider);
     }
 
     public JkDependencySet computeTestDeps() {
-        return dependencySets.get(TEST).and(computeRuntimeDeps());
+        return dependencySets.getOrDefault(TEST, JkDependencySet.of()).and(computeRuntimeDeps());
     }
 
     private static Map<String, JkDependencySet> parseFile(Path dependenciesXmlPath) {

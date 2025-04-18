@@ -126,6 +126,7 @@ Example:
 [compile]
 om.google.guava:guava:33.4.8-jre
 org.lwjgl:lwjgl:natives-linux:3.3.6  # specify the 'natives-linux' classifier for lwjgl
+../module-utils                      # specify a project directory located on file system
 
 [compile-only]
 org.projectlombok:lombok:1.18.36

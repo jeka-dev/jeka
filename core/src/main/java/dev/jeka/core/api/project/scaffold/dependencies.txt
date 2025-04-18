@@ -1,4 +1,5 @@
 # Syntax : https://jeka-dev.github.io/jeka/reference/api-project/#dependencies_txt
+[version]
 
 [compile]
 
@@ -8,7 +9,7 @@
 
 [test]
 
-[version]
+
 
 
 

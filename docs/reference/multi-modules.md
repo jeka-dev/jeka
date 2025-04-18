@@ -17,21 +17,21 @@ Example:
 project-root
 ├── jeka.properties
 ├── jeka-src (optional)
-├── module1
+├── module-1
 │   ├── jeka.properties
 │   ├── dependencies.txt
 │   ├── src
 │   │   ├── main
 │   │   └── test
 │   └── ...
-├── module2
+├── module-2
 │   ├── jeka.properties
 │   ├── dependencies.txt
 │   ├── src
 │   │   ├── main
 │   │   └── test
 │   └── ...
-└── moduleX ...
+└── module-Xxxx ...
 ```
 To be recognized as a parent project, *jeka.properties* file must specify the `_jeka.child-bases` property 
 indicating where are located child modules.
@@ -126,7 +126,7 @@ If we run the following command on the above example:
 jeka project: pack maven: publish
 ```
 This will first run `project: test pack` method on all child modules. Parent module won't execute these actions 
-cause it does not declare explicit*ly project KBean (`@project=on` is absent).*
+cause it does not declare explicitly project KBean (`@project=on` is absent).
 
 The the `maven: publish` action is invoked on all child modules and the parent module as it declares it explicitly (`@maven=on`).
 

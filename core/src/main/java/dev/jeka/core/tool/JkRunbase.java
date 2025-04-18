@@ -171,7 +171,6 @@ public final class JkRunbase {
      * Since KBeans are singletons within a runbase, calling this method has no effect if the bean is already loaded.
      *
      * @param beanClass The class of the KBean to load.
-     *
      * @return This object for call chaining.
      */
     public <T extends KBean> T load(Class<T> beanClass) {
@@ -250,9 +249,9 @@ public final class JkRunbase {
      * to decide the appropriate KBean type.
      *
      * @return A class object representing a subclass of {@code KBean}. The possible
-     *         return values are {@code ProjectKBean.class} or {@code BaseKBean.class},
-     *         depending on the presence of the classes or a specific directory structure.
-     *         Never returns <code>null</code>, but BaseKBean in last resort.
+     * return values are {@code ProjectKBean.class} or {@code BaseKBean.class},
+     * depending on the presence of the classes or a specific directory structure.
+     * Never returns <code>null</code>, but BaseKBean in last resort.
      */
     public Class<? extends KBean> getBuildableKBeanClass() {
         if (isKBeanClassPresent(ProjectKBean.class)) {
@@ -268,13 +267,12 @@ public final class JkRunbase {
     }
 
 
-
     /**
      * Register extra file-system clean action to run when --clean option is specified.
      * This is used for KBeans as nodeJS that needs to clean an extra folder that does not belong to jeka-output.
-     *
+     * <p>
      * Important: This method should be called inside the a KBean #init() method in order it
-     *            can be taken in account by the execution engine.
+     * can be taken in account by the execution engine.
      *
      * @param name
      * @param runnable
@@ -312,15 +310,24 @@ public final class JkRunbase {
         // Add default KBean
         Class<? extends KBean> defaultKBeanClass = kbeanResolution.findDefaultBeanClass();
 
-        runbaseGraph = defaultKBeanClass == null ? RunbaseGraph.empty() : RunbaseGraph.of(defaultKBeanClass, this);
+        runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
 
         if (master) {
             runbaseGraph.getOrInitRunbases(); // force init sub-base
         }
 
+        String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
+        if (childBaseFilter != null && !master) {
+            String relativePath = MASTER.baseDir.relativize(this.baseDir).toString();
+            if (!childBaseFilter.equals(relativePath)) {
+                JkLog.verbose("Child base filtered on %s, skip init child base %s", childBaseFilter, relativePath);
+                return;
+            }
+        }
+
         if (LogSettings.INSTANCE.inspect) {
             if (master) {
-                JkLog.startTask("init-main-base");
+                JkLog.startTask("init-" + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a("main").reset() + "-base");
             } else {
                 JkLog.startTask("init-child-runbase " +
                         JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(toRelPathName()).reset());
@@ -413,7 +420,7 @@ public final class JkRunbase {
             List<String> initializerNames = postInitializer.apply(kbean);
             if (LogSettings.INSTANCE.inspect) {
                 for (String initializerName : initializerNames) {
-                    postInitializeText.add("    "  + KBean.name(beanClass), initializerName);
+                    postInitializeText.add("    " + KBean.name(beanClass), initializerName);
                 }
             }
         }
@@ -431,33 +438,52 @@ public final class JkRunbase {
     }
 
     void run(KBeanAction.Container actionContainer, boolean master) {
+
+        // Guard if '-cb=" is activated
+        String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
+
+
         List<KBeanAction.Container> splitContainers = actionContainer.splitByKBean();
         final boolean needSplit;
-         if (master) {
-             if (runbaseGraph.declaresChildren()) {
-                 List<JkRunbase> childRunbases = runbaseGraph.getOrInitRunbases();
-                 String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
-                 JkLog.info("%s %n    %s", msg, childRunbases.stream()
-                         .map(JkRunbase::toRelPathName).collect(Collectors.joining("\n    ")));
-                 needSplit = splitContainers.size() > 1;
-             } else {
-                 needSplit = false;
-             }
-         } else {
-             needSplit = splitContainers.size() > 1;
-         }
-         if (needSplit) {
-             actionContainer.splitByKBean().forEach(splitContainer -> {
-                 JkLog.info(JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Running KBean methods: ").reset().toString()
-                         + splitContainer.toCmdLineRun());
-                 runUnit(splitContainer, master);
-             });
-         } else {
-             runUnit(actionContainer, master);
-         }
+        if (master) {
+            if (runbaseGraph.declaresChildren()) {
+                List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getOrInitRunbases());
+
+                if (childBaseFilter == null) {
+                    String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
+                    JkLog.info("%s %n    %s", msg, childRunbases.stream()
+                            .map(JkRunbase::toRelPathName).collect(Collectors.joining("\n    ")));
+                } else {
+                    List<String> allRelPaths = childRunbases.stream()
+                            .map(JkRunbase::toRelPathName)
+                            .collect(Collectors.toList());
+                    if (!childBaseFilter.equals(".") && !allRelPaths.contains(childBaseFilter)) {
+                        throw new JkException("No child base found at location %s", childBaseFilter);
+                    }
+                }
+                needSplit = splitContainers.size() > 1;
+            } else {
+                needSplit = false;
+            }
+        } else {
+            needSplit = splitContainers.size() > 1;
+        }
+
+        if (needSplit) {
+            actionContainer.splitByKBean().forEach(splitContainer -> {
+                JkLog.info(JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Running KBean methods: ").reset().toString()
+                        + splitContainer.toCmdLineRun());
+                runUnit(splitContainer, master);
+            });
+        } else {
+            runUnit(actionContainer, master);
+        }
     }
 
     private void runUnit(KBeanAction.Container actionContainer, boolean master) {
+
+        // Guard if '-cb=" is activated
+        String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
 
         KBeanAction.Container runActions = actionContainer;
 
@@ -467,25 +493,43 @@ public final class JkRunbase {
             // -- We remove from child actions, parent local KBeans
             KBeanAction.Container childActions = runActions
                     .withoutAnyOfKBeanClasses(kbeanResolution.localKBeanClassNames);
-            List<JkRunbase> childRunbases = runbaseGraph.getOrInitRunbases();
+            List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getOrInitRunbases());
+
+            // filter if -cb= option
+            if (childBaseFilter != null) {
+                for (ListIterator<JkRunbase> it = childRunbases.listIterator(); it.hasNext(); ) {
+                    JkRunbase childBase = it.next();
+                    String relPath = childBase.toRelPathName();
+                    if (!childBaseFilter.equals(relPath)) {
+                        JkLog.verbose("Child base filtered on %s, skip child base %s", childBaseFilter, relPath);
+                        it.remove();
+                    }
+                }
+            }
 
             childRunbases.forEach(runbase -> {
-                        String relPath = runbase.toRelPathName();
-                        KBeanAction.Container runChildActions =
-                                childActions.withoutAnyOfKBeanClasses(runbase.kbeansToExclude());
-                        if (!runChildActions.toList().isEmpty()) {
-                            String msgPrefix = "run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath).reset();
-                            JkLog.startTask(msgPrefix + " " + runChildActions.toCmdLineRun());
-                            runbase.run(runChildActions, false);
-                            JkLog.endTask();
-                        } else if (JkLog.isVerbose()) {
-                            String msgPrefix = "run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath);
-                            JkLog.verbose(msgPrefix + " -skipped-");
-                        }
+                String relPath = runbase.toRelPathName();
+                KBeanAction.Container runChildActions =
+                        childActions.withoutAnyOfKBeanClasses(runbase.kbeansToExclude());
+                if (!runChildActions.toList().isEmpty()) {
+                    String msgPrefix = "run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath).reset();
+                    JkLog.startTask(msgPrefix + " " + runChildActions.toCmdLineRun());
+                    runbase.run(runChildActions, false);
+                    JkLog.endTask();
+                } else if (JkLog.isVerbose()) {
+                    String msgPrefix = "run-child-base " + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a(relPath);
+                    JkLog.verbose(msgPrefix + " -skipped-");
+                }
             });
 
+            // Guard on -cb= option
+            if (childBaseFilter != null && !childBaseFilter.equals(".")) {
+                JkLog.verbose("Main base filtered on %s, skip main base", childBaseFilter);
+                return;
+            }
+
             // For parent runbase, we only keep the actions for KBeans that has been initialized
-           List<String> initializedClasses = this.beans.values().stream()
+            List<String> initializedClasses = this.beans.values().stream()
                     .map(Object::getClass)
                     .map(Class::getName)
                     .collect(Collectors.toList());
@@ -616,7 +660,7 @@ public final class JkRunbase {
     }
 
     private Path relBaseDir() {
-        Path result =  Paths.get("").toAbsolutePath().relativize(baseDir);
+        Path result = Paths.get("").toAbsolutePath().relativize(baseDir);
         if (result.getFileName().toString().isEmpty()) {
             result = Paths.get(".");
         }
@@ -631,7 +675,7 @@ public final class JkRunbase {
             if (child == null) {
                 String msg = String.format(
                         "Compound property '%s' on class '%s' should not value 'null'" +
-                        " right after been instantiate.%n. Please instantiate this property in %s constructor",
+                                " right after been instantiate.%n. Please instantiate this property in %s constructor",
                         first, target.getClass().getName(), target.getClass().getSimpleName());
                 throw new JkException(msg);
             }

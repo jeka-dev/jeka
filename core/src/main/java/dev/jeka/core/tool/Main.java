@@ -113,7 +113,7 @@ public class Main {
             KBeanResolution kBeanResolution = engine.getKbeanResolution();
             Engine.ClasspathSetupResult classpathSetupResult = engine.getClasspathSetupResult();
             Engines.registerMaster(engine);
-            JkLog.debug("Found KBeans : %s" , kBeanResolution.allKbeanClassNames);
+            JkLog.debug("Found KBeans : %s" , String.join("\n  ", kBeanResolution.allKbeanClassNames));
 
             // log-debug engine classpath resolutions
             logAllEnginesClasspath(engine);

@@ -31,7 +31,6 @@ jobs:
       run: |
         ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
-        
 
     - name: Publish to OSSRH
       if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
@@ -44,7 +43,7 @@ jobs:
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
-        jeka maven: publish -D@nexus=on -D@nexus.readTimeout=600000 -cp=plugins/plugins.nexus/jeka-output/classes
+        jeka maven: publish -D@nexus=on -D@nexus.readTimeout=90000 -cp=plugins/plugins.nexus/jeka-output/classes -i
 
     - name: Publish to DockerHub
       if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')

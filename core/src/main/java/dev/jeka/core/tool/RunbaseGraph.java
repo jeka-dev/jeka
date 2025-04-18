@@ -16,10 +16,9 @@
 
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.java.JkUrlClassLoader;
-import dev.jeka.core.api.project.JkDependenciesTxt;
 import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -159,32 +158,37 @@ class RunbaseGraph {
     }
 
     private static boolean isDeclaringChildren(Class<? extends KBean> parentKBeanClass, JkRunbase runbase) {
-        return parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class).length > 0 ||
-                !getChildBaseProps(runbase).isEmpty();
+        if (parentKBeanClass != null && parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class).length > 0) {
+            return true;
+        }
+        return !getChildBaseProps(runbase).isEmpty();
     }
 
     private static List<Path> getChildPaths(Class<? extends KBean> parentKBeanClass, JkRunbase runbase) {
         Path parentBaseDir = runbase.getBaseDir();
         List<Path> result = new LinkedList<>();
-        Arrays.stream(parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class))
-                .map(JkChildBase::value)
-                .filter(Objects::nonNull)
-                .flatMap(value -> findBaseDirs(value, parentBaseDir).stream())
-                .map(parentBaseDir::resolve)
-                .map(Path::normalize)
-                .forEach(result::add);
-        Arrays.stream(parentKBeanClass.getDeclaredFields())
-                .map(field -> field.getAnnotation(JkInject.class))
-                .filter(Objects::nonNull)
-                .map(JkInject::value)
-                .filter(value -> !value.isEmpty())
-                .map(parentBaseDir::resolve)
-                .map(Path::normalize)
-                .forEach(result::add);
-        //result.addAll(JkDependenciesTxt.getModuleDependencies(parentBaseDir));
+        if (parentKBeanClass != null) {
+            Arrays.stream(parentKBeanClass.getDeclaredAnnotationsByType(JkChildBase.class))
+                    .map(JkChildBase::value)
+                    .filter(Objects::nonNull)
+                    .flatMap(value -> findBaseDirs(value, parentBaseDir).stream())
+                    .map(parentBaseDir::resolve)
+                    .map(Path::normalize)
+                    .forEach(result::add);
+            Arrays.stream(parentKBeanClass.getDeclaredFields())
+                    .map(field -> field.getAnnotation(JkInject.class))
+                    .filter(Objects::nonNull)
+                    .map(JkInject::value)
+                    .filter(value -> !value.isEmpty())
+                    .map(parentBaseDir::resolve)
+                    .map(Path::normalize)
+                    .forEach(result::add);
+        }
         result.addAll(getChildBaseProps(runbase));
 
-        return result.stream().distinct().collect(Collectors.toList());
+        List<Path> distinctResult = result.stream().distinct().collect(Collectors.toList());
+        JkLog.debug("Found child bases for %s: %s", runbase.getBaseDir(), distinctResult);
+        return distinctResult;
     }
 
     private static List<Path> findBaseDirs(String dirPath, Path baseDir) {
