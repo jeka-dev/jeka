@@ -25,6 +25,8 @@ import dev.jeka.core.api.system.JkInfo;
  */
 public final class JkConstants {
 
+
+
     // ------------ Standard file names and locations --------------------------
 
     /**
@@ -58,6 +60,10 @@ public final class JkConstants {
     public static final String PROPERTIES_FILE = "jeka.properties";
 
     // ------------ Jeka standard properties --------------------------
+
+    public static final String JEKA_JAVA_VERSION = "jeka.java.version";
+
+    public static final String JEKA_JAVA_DISTRIB = "jeka.java.distrib";
 
     static final String CMD_PREFIX_PROP = "jeka.cmd.";
 

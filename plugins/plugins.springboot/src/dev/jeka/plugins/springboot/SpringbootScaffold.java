@@ -55,8 +55,6 @@ class SpringbootScaffold {
             projectScaffold.setJekaPropsCustomizer(content -> content.replace("dev.jeka:springboot-plugin", pluginDep));
         }
 
-
-
         // Add dependencies
         projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
         projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");

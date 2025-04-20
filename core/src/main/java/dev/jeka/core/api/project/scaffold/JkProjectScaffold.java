@@ -45,6 +45,8 @@ public final class JkProjectScaffold extends JkScaffold {
 
     public static final String SIMPLE_STYLE_PROP = "@project.layout.style=SIMPLE";
 
+    public static final String MIX_SOURCES_RES = "@project.layout.mixSourcesAndResources=true";
+
     public enum Kind {
         REGULAR, PLUGIN, EMPTY
     }
@@ -52,6 +54,8 @@ public final class JkProjectScaffold extends JkScaffold {
     private final JkProject project;
 
     private boolean useSimpleStyle;
+
+    private boolean mixSourcesAndResources;
 
     public final List<String> compileDeps = new LinkedList<>();
 
@@ -104,6 +108,11 @@ public final class JkProjectScaffold extends JkScaffold {
 
     public JkProjectScaffold setUseSimpleStyle(boolean useSimpleStyle) {
         this.useSimpleStyle = useSimpleStyle;
+        return this;
+    }
+
+    public JkProjectScaffold setMixSourcesAndResources(boolean mixSourcesAndResources) {
+        this.mixSourcesAndResources = mixSourcesAndResources;
         return this;
     }
 
@@ -164,6 +173,10 @@ public final class JkProjectScaffold extends JkScaffold {
         if (useSimpleStyle) {
             project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
             addJekaPropValue(SIMPLE_STYLE_PROP);
+        }
+        if (mixSourcesAndResources) {
+            project.flatFacade.setMixResourcesAndSources();
+            addJekaPropValue(MIX_SOURCES_RES);
         }
         if (kind == Kind.REGULAR) {
             addJekaPropsContent("\n@project.pack.jarType=FAT\n" +

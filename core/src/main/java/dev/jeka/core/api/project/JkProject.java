@@ -241,7 +241,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
     private URL dependencyTxtUrl;
 
-    private JkProject() {
+    private final Function<Path, JkProject> projectResolver;
+
+    private JkProject(Function<Path, JkProject> projectResolver) {
         artifactLocator = artifactLocator();
         compilerToolChain = JkJavaCompilerToolChain.of();
         compilation = JkProjectCompilation.ofProd(this);
@@ -254,13 +256,17 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .setDisplaySpinner(true)
                 .setUseInMemoryCache(true);
         flatFacade = new JkProjectFlatFacade(this);
+        this.projectResolver = projectResolver;
     }
 
+    public static JkProject of(Function<Path, JkProject> projectPathMapper) {
+        return new JkProject(projectPathMapper);
+    }
     /**
      * Creates a new project having the current working directory as base dir.
      */
     public static JkProject of() {
-        return new JkProject();
+        return new JkProject(path -> null);
     }
 
     /**
@@ -678,8 +684,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 baseDir.resolve(PROJECT_LIBS_DIR));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(DEPENDENCIES_TXT_FILE))
-                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
+                baseDir.resolve(DEPENDENCIES_TXT_FILE), baseDir, projectResolver)
+                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl, baseDir, projectResolver);
+
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
     }

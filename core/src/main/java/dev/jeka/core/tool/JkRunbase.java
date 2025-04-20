@@ -453,6 +453,7 @@ public final class JkRunbase {
                     String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
                     JkLog.info("%s %n    %s", msg, childRunbases.stream()
                             .map(JkRunbase::toRelPathName).collect(Collectors.joining("\n    ")));
+                    JkLog.info("    *parent base*");
                 } else {
                     List<String> allRelPaths = childRunbases.stream()
                             .map(JkRunbase::toRelPathName)
@@ -524,7 +525,7 @@ public final class JkRunbase {
 
             // Guard on -cb= option
             if (childBaseFilter != null && !childBaseFilter.equals(".")) {
-                JkLog.verbose("Main base filtered on %s, skip main base", childBaseFilter);
+                JkLog.verbose("Parent base filtered on %s, skip main base", childBaseFilter);
                 return;
             }
 
@@ -535,10 +536,11 @@ public final class JkRunbase {
                     .collect(Collectors.toList());
             runActions = runActions.withOnlyKBeanClasses(initializedClasses);
             if (runActions.toList().isEmpty()) {
-                JkLog.verbose("run-main-base: -skipped-");
+                JkLog.verbose("run-parent-base: -skipped-");
                 return;
             }
-            JkLog.startTask("run-main-base " + runActions.toCmdLineRun());
+            JkLog.startTask("run-" + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a("parent").reset()
+                    + "-base " + runActions.toCmdLineRun());
         }
 
         if (cleanActions.getSize() > 0 && BehaviorSettings.INSTANCE.cleanOutput && !cleanActionsExecuted) {
@@ -769,7 +771,6 @@ public final class JkRunbase {
                 throw new IllegalStateException("Cannot load KBean class " + className + " from base '"
                         + this.toRelPathName() + "'", e);
             }
-
         }
         return actions;
     }
@@ -787,7 +788,6 @@ public final class JkRunbase {
                 .map(Optional::get)
                 .collect(Collectors.toList());
     }
-
 
     private static String propNameForField(String kbeanName, String fieldName) {
         return PROP_KBEAN_PREFIX + kbeanName + "." + fieldName;

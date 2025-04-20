@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 
 class LocalAndTxtDependencies {
@@ -68,25 +69,27 @@ class LocalAndTxtDependencies {
     /**
      * @see #ofTextDescription(String)
      */
-    public static LocalAndTxtDependencies ofOptionalTextDescription(Path path) {
+    public static LocalAndTxtDependencies ofOptionalTextDescription(Path path, Path baseDir,
+                                                                    Function<Path, JkProject> projectResolver) {
         if (Files.notExists(path)) {
             return LocalAndTxtDependencies.of();
         }
-        return ofTextDescription(JkUtilsPath.toUrl(path));
+        return ofTextDescription(JkUtilsPath.toUrl(path), baseDir, projectResolver);
     }
 
     /**
      * @see #ofTextDescription(String)
      */
-    public static LocalAndTxtDependencies ofTextDescription(URL url) {
+    public static LocalAndTxtDependencies ofTextDescription(URL url, Path baseDir,
+                                                            Function<Path, JkProject> projectResolver) {
         String content = JkUtilsIO.read(url);
         if (isLegacyFormat(content)) {
-            Path path = JkUtilsPath.fromUrl(url).normalize();
+            Path path = JkUtilsPath.fromUrl(url);
             JkLog.warn("%s has still legacy format.", path);
             return ofTextDescription(JkUtilsIO.read(url));
         } else {
             Path path = JkUtilsPath.fromUrl(url);
-            JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path);
+            JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path, baseDir, projectResolver);
             return new LocalAndTxtDependencies(dependenciesTxt.computeCompileDeps(),
                     dependenciesTxt.computeRuntimeDeps(), dependenciesTxt.computeTestDeps());
         }

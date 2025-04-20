@@ -155,6 +155,30 @@ public final class JkProperties {
     }
 
     /**
+     * Retrieves the value associated with the specified property name, returning the value
+     * if non-blank, or null if the value is blank or not specified.
+     *
+     * @param propertyName the name of the property to retrieve
+     * @return the value associated with the specified property name if non-blank, or null otherwise
+     */
+    public String getNonBlank(String propertyName) {
+        String value  = get(propertyName);
+        return JkUtilsString.isBlank(value) ? null : value;
+    }
+
+    /**
+     * Retrieves the value associated with the specified property name, trims it, and
+     * returns it if non-blank. If the value is blank or not specified, returns null.
+     *
+     * @param propertyName the name of the property to retrieve
+     * @return the trimmed property value if it is non-blank, or null otherwise
+     */
+    public String getTrimmedNonBlank(String propertyName) {
+        String value  = get(propertyName);
+        return JkUtilsString.isBlank(value) ? null : value;
+    }
+
+    /**
      * Returns the value associated with the specified property name or the defaultValue if no value has been
      * specified for this name.
      */

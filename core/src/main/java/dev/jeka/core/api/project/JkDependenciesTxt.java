@@ -23,7 +23,9 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JkDependenciesTxt {
@@ -40,9 +42,9 @@ public class JkDependenciesTxt {
 
     private static final String FILE_NAME = "dependencies.txt";
 
-    private static final String LOCAL_EXCLUDE_SYMBOL = "@";
+    private static final String LOCAL_EXCLUDE_SYMBOL = "!";
 
-    private static final String GLOBAL_EXCLUDE_SYMBOL = "@@";
+    private static final String GLOBAL_EXCLUDE_SYMBOL = "!!";
 
     private final Map<String, JkDependencySet> dependencySets;
 
@@ -72,8 +74,8 @@ public class JkDependenciesTxt {
                 .collect(Collectors.toList());
     }
 
-    static JkDependenciesTxt parse(Path dependenciesXmlPath) {
-        Map<String, JkDependencySet> raw = parseFile(dependenciesXmlPath);
+    static JkDependenciesTxt parse(Path dependenciesXmlPath, Path baseDir, Function<Path, JkProject> projectResolver) {
+        Map<String, JkDependencySet> raw = parseFile(dependenciesXmlPath, baseDir, projectResolver);
 
         // Manage Version provider
         JkVersionProvider versionProvider = JkVersionProvider.of();
@@ -101,7 +103,7 @@ public class JkDependenciesTxt {
 
         Path parent = dependenciesXmlPath.getParent().getParent().resolve("dependencies.txt");
         if (Files.exists(parent)) {
-            JkDependenciesTxt parsedDependenciesTxt = JkDependenciesTxt.parse(parent);
+            JkDependenciesTxt parsedDependenciesTxt = JkDependenciesTxt.parse(parent, baseDir, projectResolver);
             versionProvider = parsedDependenciesTxt.versionProvider.and(versionProvider);
         }
 
@@ -132,13 +134,14 @@ public class JkDependenciesTxt {
         return dependencySets.getOrDefault(TEST, JkDependencySet.of()).and(computeRuntimeDeps());
     }
 
-    private static Map<String, JkDependencySet> parseFile(Path dependenciesXmlPath) {
+    private static Map<String, JkDependencySet> parseFile(Path dependenciesXmlPath,
+                                                          Path baseDir, Function<Path, JkProject> projectResolver) {
         Map<String, JkDependencySet> result = new LinkedHashMap<>();
         Map<String, List<String>> sectionLines = parseToStrings(dependenciesXmlPath);
         sectionLines.forEach((key, value) -> {
             JkDependencySet dependencySet = JkDependencySet.of();
             for (String line : value) {
-                dependencySet = apply(line, dependencySet);
+                dependencySet = apply(line, dependencySet, baseDir, projectResolver);
             }
             result.putIfAbsent(key, dependencySet);
         });
@@ -169,7 +172,8 @@ public class JkDependenciesTxt {
         return sections;
     }
 
-    private static JkDependencySet apply(String line, JkDependencySet current) {
+    private static JkDependencySet apply(String line, JkDependencySet current,
+                                         Path baseDir, Function<Path, JkProject> projectResolver) {
         if (line.startsWith(LOCAL_EXCLUDE_SYMBOL)) {
             String coordinate = line.substring(LOCAL_EXCLUDE_SYMBOL.length()).trim();
             return current.withLocalExclusions(coordinate);
@@ -178,11 +182,25 @@ public class JkDependenciesTxt {
             String coordinate = line.substring(GLOBAL_EXCLUDE_SYMBOL.length()).trim();
             return current.withGlobalExclusions(coordinate);
         } else {
-            return current.and(translate(line));
+            return current.and(translate(line, baseDir, projectResolver));
         }
     }
 
-    private static JkDependency translate(String line) {
-        return JkDependency.of(line);
+    private static JkDependency translate(String line, Path baseDir, Function<Path, JkProject> projectResolver) {
+        if (JkDependency.isCoordinate(line)) {
+            return JkCoordinateDependency.of(line.trim());
+        }
+        Path file = Paths.get(line.trim());
+        if (file.isAbsolute()) {
+            return JkFileSystemDependency.of(file);
+        }
+        file = baseDir.resolve(file);
+        if (JkLocator.isJekaProject(file)) {
+            JkProject project = projectResolver.apply(file);
+            if (project != null) {
+                return project.toDependency();
+            }
+        }
+        return JkFileSystemDependency.of(file);
     }
 }

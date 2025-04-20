@@ -17,6 +17,7 @@
 package dev.jeka.core.tool;
 
 import dev.jeka.core.api.java.JkUrlClassLoader;
+import dev.jeka.core.api.project.JkDependenciesTxt;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -185,6 +186,7 @@ class RunbaseGraph {
                     .forEach(result::add);
         }
         result.addAll(getChildBaseProps(runbase));
+        result.addAll(JkDependenciesTxt.getModuleDependencies(parentBaseDir));
 
         List<Path> distinctResult = result.stream().distinct().collect(Collectors.toList());
         JkLog.debug("Found child bases for %s: %s", runbase.getBaseDir(), distinctResult);

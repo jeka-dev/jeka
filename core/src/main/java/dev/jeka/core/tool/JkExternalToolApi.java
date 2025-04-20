@@ -20,13 +20,17 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -132,7 +136,7 @@ public final class JkExternalToolApi {
      * Returns the properties defined from the specifies base dir..
      */
     public static JkProperties getProperties(Path baseDir) {
-        return PropertiesHandler.readJekaPropertiesRecursively(baseDir);
+        return PropertiesHandler.constructRunbaseProperties(baseDir);
     }
 
     /**
@@ -218,6 +222,17 @@ public final class JkExternalToolApi {
         return InitKBeans.of(store);
     }
 
+    /**
+     * Retrieves the JDK information including version, distribution name, and the JDK home directory
+     * based on the provided base directory.
+     *
+     * @param baseDir the base directory used to resolve JDK properties and paths
+     * @return an instance of JdkInfo containing the resolved JDK information
+     */
+    public static JdkInfo getJdkInfo(Path baseDir) {
+        return JdkInfo.of(baseDir);
+    }
+
     public static class InitKBeans {
 
         public final String defaultClassName;
@@ -232,6 +247,53 @@ public final class JkExternalToolApi {
         static InitKBeans of(KBeanInitStore store) {
             return new InitKBeans(store.defaultKBeanClassName,
                     store.involvedKBeanClassNames);
+        }
+    }
+
+    public static class JdkInfo {
+
+        public static final String LOCAL = "local";
+
+        public final String version;
+
+        // values 'local' when the path is specified in 'jeka.jdk.xxx='
+        public final String distribName;
+
+        // 'java' bin lies in jkdHome/bin
+        public final Path jdkHome;
+
+        public JdkInfo(String version, String distribName, Path jdkHome) {
+            this.version = version;
+            this.distribName = distribName;
+            this.jdkHome = jdkHome;
+        }
+
+        static JdkInfo of(Path moduleDir) {
+            JkProperties props = JkExternalToolApi.getProperties(moduleDir);
+            String version = props.getTrimmedNonBlank(JkConstants.JEKA_JAVA_VERSION);
+            if (JkUtilsString.isBlank(version)) {
+                version = JkJavaVersion.LAST_LTS.toString();
+            }
+            String specificJdkPathProp = "jeka.jdk." + version.trim();
+            String specificLocation = props.getTrimmedNonBlank(specificJdkPathProp);
+            String specifiedDistrib = props.getTrimmedNonBlank(JkConstants.JEKA_JAVA_DISTRIB);
+
+            final String effectiveDistrib;
+            if (specifiedDistrib != null) {
+                effectiveDistrib = specifiedDistrib;
+            } else if (specificLocation != null) {
+                effectiveDistrib = LOCAL;
+            } else {
+                effectiveDistrib = "temurin";
+            }
+
+            final Path distribPath;
+            if (LOCAL.equals(effectiveDistrib)) {
+                distribPath = Paths.get(specificLocation);
+            } else {
+                distribPath = JkLocator.getCacheDir().resolve("jdks").resolve(effectiveDistrib + "-" + version);
+            }
+            return new JdkInfo(version, effectiveDistrib, distribPath);
         }
     }
 

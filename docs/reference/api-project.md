@@ -142,8 +142,8 @@ org.postgresql:postgresql
 org.junit.jupiter:junit-jupiter
 org.junit.platform:junit-platform-launcher
 org.fluentlenium:fluentlenium-junit:3.2.0
-    @org.apache.httpcomponents:httpclient  # exclude http-client from 'fluentlenium-junit' transitive dependencies
-@@net.sourceforge.htmlunit:htmlunit    # exclude htmlunit from all transitive dependencies
+    !org.apache.httpcomponents:httpclient  # exclude http-client from 'fluentlenium-junit' transitive dependencies
+!!net.sourceforge.htmlunit:htmlunit        # exclude htmlunit from all transitive dependencies
 ```
 
 As shown in the example above, we can use the `@` and `@@` symbols to specify dependency exclusions.

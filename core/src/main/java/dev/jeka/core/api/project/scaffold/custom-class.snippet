@@ -1,4 +1,5 @@
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.JkPreInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -15,6 +16,7 @@ class Custom extends KBean {
     /*
      * Use this method to fine-tune 'project' KBean after its initialization.
      */
+    JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
     }

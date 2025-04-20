@@ -34,7 +34,7 @@ class JkDependenciesTxtTest {
     @Test
     void readFile_ok()  {
         Path path = JkUtilsPath.getResourceAsPath(JkDependenciesTxtTest.class, "dependencies-ini.txt");
-        JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path);
+        JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path, Paths.get(""), p -> null);
         JkDependencySet compileDeps = dependenciesTxt.getDependencies(JkDependenciesTxt.COMPILE);
         JkDependencySet compileOnlyDeps = dependenciesTxt.getDependencies(JkDependenciesTxt.COMPILE_ONLY);
         JkDependencySet runtimeDeps = dependenciesTxt.getDependencies(JkDependenciesTxt.RUNTIME);
@@ -66,7 +66,7 @@ class JkDependenciesTxtTest {
     @Test
     void readFile_withParent_parentVersionIncluded()  {
         Path path = JkUtilsPath.getResourceAsPath(JkDependenciesTxtTest.class, "parent/child/dependencies.txt");
-        JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path);
+        JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path, Paths.get(""), (p) -> null);
         assertEquals(1, dependenciesTxt.getVersionProvider().getModuleIds().size());
         assertEquals(2, dependenciesTxt.getVersionProvider().getBoms().size());
     }

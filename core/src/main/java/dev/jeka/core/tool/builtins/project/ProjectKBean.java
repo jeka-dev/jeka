@@ -49,7 +49,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     // The underlying project managed by this KBean
     @JkDoc(hide = true)
-    public final JkProject project = JkProject.of();
+    public final JkProject project = JkProject.of(this::getExternalProject);
 
     @JkDoc("Version of the project. Can be used by a CI/CD tool to inject version.")
     public String version;
@@ -187,6 +187,15 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     @JkDoc("Runs the quality checkers")
     public void checkQuality() {
         this.project.qualityCheck.run();
+    }
+
+    @JkDoc("Runs a full build: cleans, compiles, tests, packs, checks quality and run end-to-end tests")
+    public void build() {
+        clean();
+        test();
+        pack();
+        checkQuality();
+        e2eTest();
     }
 
     @Override
@@ -347,6 +356,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             JkProjectScaffold projectScaffold = (JkProjectScaffold) scaffold;
             projectScaffold.setKind(kind);
             projectScaffold.setUseSimpleStyle(ProjectKBean.this.layout.style == JkCompileLayout.Style.SIMPLE);
+            projectScaffold.setMixSourcesAndResources(ProjectKBean.this.layout.mixSourcesAndResources);
 
             // Create 'dependencies.txt' file if needed
             List<String> compileDeps = dependencies.toList(dependencies.compile);
@@ -488,6 +498,20 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             }
             return Arrays.asList(description.split(","));
         }
+    }
+
+    private JkProject getExternalProject(Path baseDir) {
+        JkRunbase runbase = this.getRunbase().getChildRunbases().stream()
+                .filter(rb -> baseDir.toAbsolutePath().normalize().equals(rb.getBaseDir()))
+                .findFirst().orElse(null);
+        if (runbase == null) {
+            return null;
+        }
+        ProjectKBean projectKBean = runbase.find(ProjectKBean.class).orElse(null);
+        if (projectKBean == null) {
+            return null;
+        }
+        return projectKBean.project;
     }
 
 }

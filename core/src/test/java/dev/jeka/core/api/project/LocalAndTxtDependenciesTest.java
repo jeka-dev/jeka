@@ -12,7 +12,7 @@ class LocalAndTxtDependenciesTest {
     @Test
     void testFromDescription()  {
         URL url = LocalAndTxtDependenciesTest.class.getResource("dependencies.txt");
-        LocalAndTxtDependencies commonDeps = LocalAndTxtDependencies.ofTextDescription(url);
+        LocalAndTxtDependencies commonDeps = LocalAndTxtDependencies.ofTextDescription(url, null, null);
         assertEquals(4, commonDeps.getCompile().getEntries().size());
         assertEquals(6, commonDeps.getRuntime().getEntries().size());
         assertEquals(11, commonDeps.getTest().getEntries().size());
