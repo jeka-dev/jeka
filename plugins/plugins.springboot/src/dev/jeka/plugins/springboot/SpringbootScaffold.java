@@ -68,6 +68,9 @@ class SpringbootScaffold {
         projectScaffold.addFileEntry(pack + "/Application.java", readSnippet("Application.java"));
         projectScaffold.addFileEntry(pack + "/Controller.java", readSnippet("Controller.java"));
 
+        // -- resources
+        projectScaffold.addFileEntry(projectScaffold.getResRelPath() + "/application.properties", "");
+
         // -- test
         pack = projectScaffold.getTestRelPath() + "/" + basePackage;
         projectScaffold.addFileEntry(pack + "/ControllerIT.java", readSnippet("ControllerIT.java"));

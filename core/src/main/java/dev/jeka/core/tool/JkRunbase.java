@@ -204,17 +204,39 @@ public final class JkRunbase {
         return new LinkedList<>(beans.values());
     }
 
+    /**
+     * Finds and returns a child JkRunbase instance with the specified name from the master runbase.
+     *
+     * @param name the name (the relative path from this runbase) of the runbase to find.
+     * @return the child JkRunbase instance with the specified name, or null if no such child runbase exists
+     */
+    public JkRunbase findRunbase(String name) {
+        Path masterRelativePath = this.relBaseDir().resolve(name).normalize();
+        return MASTER.getChildRunbase(masterRelativePath.toString());
+    }
+
+    public List<JkRunbase> getInjectedRunbases() {
+        Path masterRelativePath = this.relBaseDir();
+        return MASTER.runbaseGraph.getInjectedRunbases(masterRelativePath.toString());
+    }
+
     public List<JkRunbase> getChildRunbases() {
-        List<JkRunbase> result = runbaseGraph.getOrInitRunbases();
+        JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
+                "loadChildren() can only be called on the parent runbase.");
+        List<JkRunbase> result = runbaseGraph.getChildren();
         JkLog.debug("Child runbases of %s are: %s", this.baseDir, result.stream().map(JkRunbase::getBaseDir).collect(Collectors.toList()));
         return result;
     }
 
     public JkRunbase getChildRunbase(String name) {
+        JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
+                "loadChildren() can only be called on the parent runbase.");
         return runbaseGraph.getRunbase(name);
     }
 
     public <T extends KBean> List<T> loadChildren(Class<T> beanClass) {
+        JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
+                "loadChildren() can only be called on the parent runbase.");
         return getChildRunbases().stream().map(runBase -> runBase.load(beanClass)).collect(Collectors.toList());
     }
 
@@ -310,10 +332,8 @@ public final class JkRunbase {
         // Add default KBean
         Class<? extends KBean> defaultKBeanClass = kbeanResolution.findDefaultBeanClass();
 
-        runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
-
         if (master) {
-            runbaseGraph.getOrInitRunbases(); // force init sub-base
+            runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
         }
 
         String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
@@ -447,7 +467,7 @@ public final class JkRunbase {
         final boolean needSplit;
         if (master) {
             if (runbaseGraph.declaresChildren()) {
-                List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getOrInitRunbases());
+                List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getChildren());
 
                 if (childBaseFilter == null) {
                     String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
@@ -494,7 +514,7 @@ public final class JkRunbase {
             // -- We remove from child actions, parent local KBeans
             KBeanAction.Container childActions = runActions
                     .withoutAnyOfKBeanClasses(kbeanResolution.localKBeanClassNames);
-            List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getOrInitRunbases());
+            List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getChildren());
 
             // filter if -cb= option
             if (childBaseFilter != null) {
@@ -553,7 +573,7 @@ public final class JkRunbase {
             KBean bean = load(kBeanAction.beanClass);
             JkUtilsReflect.invoke(bean, kBeanAction.method());
         }
-        if (runbaseGraph.declaresChildren()) {
+        if (master && runbaseGraph.declaresChildren()) {
             JkLog.endTask();
         }
     }

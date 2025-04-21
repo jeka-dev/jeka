@@ -76,7 +76,7 @@ parent-project
 jeka.java.version=21
 
 # specify location of child modules
-_jeka.child-bases=core, plugins/*
+_jeka.child-base=core, plugins/*
 
 # Parent module does not contain a JVM project
 _@project=off

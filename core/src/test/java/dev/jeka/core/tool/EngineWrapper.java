@@ -86,7 +86,7 @@ class EngineWrapper {
         KBeanAction.Container cmdLineActions = parse(args, props, kBeanResolution);
         props.getAllStartingWith("", true).forEach(System::setProperty);
         try {
-            engine.getOrCreateRunbase(cmdLineActions, false);
+            engine.getOrCreateRunbase(cmdLineActions, true);
         } finally {
             props.getAllStartingWith("", true).keySet().forEach(System::clearProperty);
         }

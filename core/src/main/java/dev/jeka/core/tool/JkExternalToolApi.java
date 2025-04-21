@@ -233,6 +233,17 @@ public final class JkExternalToolApi {
         return JdkInfo.of(baseDir);
     }
 
+    /**
+     * Retrieves the child paths based on the given base directory.
+     *
+     * @param baseDir the base directory from which to determine child paths
+     * @return a list of paths representing the child paths of the specified base directory
+     */
+    public static List<Path> getChildPaths(Path baseDir) {
+        JkProperties props = getProperties(baseDir);
+        return RunbaseGraph.getChildBaseProps(baseDir, props);
+    }
+
     public static class InitKBeans {
 
         public final String defaultClassName;

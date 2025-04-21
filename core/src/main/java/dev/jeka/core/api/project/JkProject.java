@@ -880,7 +880,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         public void run() {
             JkLog.startTask(containerName);
             if (runnables.getSize() == 0) {
-                JkLog.info("No registered end-to-end testers found.");
+                JkLog.info("No %s processor registered.", containerName);
             } else if (runnables.getSize() == 1) {
                 runnables.setLogTasks(false);
                 runnables.getRunnable(0).run();

@@ -189,7 +189,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         this.project.qualityCheck.run();
     }
 
-    @JkDoc("Runs a full build: cleans, compiles, tests, packs, checks quality and run end-to-end tests")
+    @JkDoc("Runs a full build: cleans, compiles, tests, packs, checks quality and runs end-to-end tests")
     public void build() {
         clean();
         test();
@@ -501,7 +501,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     }
 
     private JkProject getExternalProject(Path baseDir) {
-        JkRunbase runbase = this.getRunbase().getChildRunbases().stream()
+        JkRunbase runbase = this.getRunbase().getInjectedRunbases().stream()
                 .filter(rb -> baseDir.toAbsolutePath().normalize().equals(rb.getBaseDir()))
                 .findFirst().orElse(null);
         if (runbase == null) {

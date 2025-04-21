@@ -16,7 +16,7 @@ class Custom extends KBean {
     /*
      * Use this method to fine-tune 'project' KBean after its initialization.
      */
-    JkPostInit
+    @JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
     }
