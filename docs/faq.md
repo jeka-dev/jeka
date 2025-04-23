@@ -4,9 +4,21 @@
 
 ### My organization prevents access to Maven Central. What can I do?
 
-You can [configure Maven repositories](reference/properties/#repositories) in a central place by editing the *[USER HOME]/.jeka/global.properties* file.
+You can [configure Maven repositories](reference/properties.md/#repositories) in a central place by editing the *[USER HOME]/.jeka/global.properties* file.
 
-To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a URL file. This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
+```properties
+jeka.repos.download=https://my.company/repo
+
+# You can specify username/password
+jeka.repos.download.username=myName
+jeka.repos.download.password=myPassw0rd!
+
+# ... or specify Authorization header to avoid password in clear
+jeka.repos.download.headers.Authorization=Basic hKXhhtggjREfg4P=
+```
+
+To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a folder. 
+This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
 
 ### My organization prevents downloading JDKs. What can I do?
 

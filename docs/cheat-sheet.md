@@ -15,7 +15,6 @@
 | Property Name         | Default Value                       | Description                                                                                                                                                                            |
 |-----------------------|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | jeka.version          |                                     | The Jeka version to use. It will be fetched from the repository specified in the `jeka.distrib.repo` property. Use `jeka.version=.` to force the use of the locally installed version. |
-| jeka.distrib.repo     | https://repo1.maven.org/maven2      | The repo where to fetch JeKa versions. Use https://oss.sonatype.org/content/repositories/snapshots for snapshot versions                                                               |
 | jeka.distrib.location |                                     | The exact location (file dir or url) to get the JeKa distribution. If set, both `jeka.version` and `jeka.distrib.repo` will be ignored.                                                |
 | jeka.java.version     |                                     | The version of the JDK used to compile and run Java code                                                                                                                               |
 | jeka.java.distrib     | temurin                             | The distribution of JDK to fetch when `jeka.java.version` is mentioned                                                                                                                 |
@@ -25,15 +24,14 @@
 | jeka.kbean.default    |                                     | Name or class name of the KBean to use as default (when none is specified)                                                                                                             |
 | jeka.test.skip        |                                     | Skip tests when building projects or code bases.                                                                                                                                       |
 
-## Rules for selecting JDK 
-
-- if JEKA_JDK_HOME env var is specified, select it
-- if `jeka.java.version` property is specified 
-    - if a `jeka.jdk.[version]` property is specified, select it. 
-    - else, look in cache or download the proper JDK
-- else
-    - if *JAVA_HOME* env var is specified, select it
-    - else, look in cache and download default version (21)
+## JDK Selection Rules
+1. If `JEKA_JDK_HOME` is set, use this JDK
+2. If `jeka.java.version` is specified:
+    - Use JDK from `jeka.jdk.[version]` if available
+    - Otherwise fetch JDK from local cache or download it
+3. If no version is specified:
+    - Use JDK from `JAVA_HOME` if set
+    - Otherwise fetch JDK 21 from local cache or download it
 
 ## How JeKa Reads Properties
 JeKa reads properties in this order:

@@ -57,6 +57,7 @@ CURRENT_SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 # Global variables are preferred over passing all arguments
 # in method call, cause they are too many.
+declare MAVEN_CENTRAL="https://repo.maven.apache.org/maven2"
 declare DEFAULT_JAVA_VERSION="21"
 declare JDK_DOWNLOAD_DISTRIB="temurin"
 declare JDK_DOWNLOAD_LIBC_TYPE="glibc"  # default for linux, overridden for other os
@@ -169,18 +170,19 @@ download_and_unpack() {
   local url=$1
   local dir=$2
   local file_type=$3  # 'zip' or 'tar.gz'
+  local auth_header=$4
   local temp_file
   temp_file=$(mktemp)
   rm "$temp_file"
 
   ## download
-  debug $url
+  debug "download $url"
   if [ -x "$(command -v curl)" ]; then
     local silent_flag="s"
     if [ "$IS_VERBOSE" != "" ]; then
       silent_flag=""
     fi
-    curl -"$silent_flag"Lf --fail --show-error -o "$temp_file" "$url"
+    curl ${auth_header:+ -H "Authorization: $auth_header"} -"$silent_flag"Lf --fail --show-error -o "$temp_file" "$url"
     if [ $? -ne 0 ]; then
         msg "Curl request failed $url"
         msg "Returned code: $?"
@@ -233,7 +235,7 @@ compute_VERBOSE_QUIET_CLEAN() {
 #######################################
 debug() {
   if [ -n "$LOG_DEBUG" ] || [ -n "$IS_VERBOSE" ]; then
-    echo "$*" 1>&2
+    echo "DEBUG: $*" 1>&2
   fi
 }
 
@@ -298,8 +300,6 @@ get_cache_dir() {
 get_git_cache_dir() {
   echo "$(get_cache_dir)/git"
 }
-
-
 
 #######################################
 # Gets the value of a property declared within a property file
@@ -672,15 +672,27 @@ compute_JEKA_DIST_DIR() {
         if [[ "$jeka_version" == *"-SNAPSHOT" ]]; then
           jeka_repo="https://oss.sonatype.org/content/repositories/snapshots"
         else
-          jeka_repo="https://repo.maven.apache.org/maven2"
+          jeka_repo=$MAVEN_CENTRAL
         fi
         local distrib_repo
-        distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
+        distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.repos.download")
+        [ -n "$distrib_repo" ] && distrib_repo=$(echo "$distrib_repo" | cut -d',' -f1 | xargs)
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
 
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
+        local auth_header=""
+        auth_header=$(get_prop_value_from_base_dir "$base_dir" "jeka.repos.download.headers.Authorization")
+        if [ -z "$auth_header" ]; then
+          repo_username=$(get_prop_value_from_base_dir "$base_dir" "jeka.repos.download.username")
+          repo_password=$(get_prop_value_from_base_dir "$base_dir" "jeka.repos.download.password")
+          if [[ -n "$repo_username" && -n "$repo_password" ]]; then
+            encoded_credentials=$(echo -n "$repo_username:$repo_password" | base64)
+            auth_header="Basic $encoded_credentials"
+          fi
+        fi
+
         info "Download Jeka distrib from $url in $distrib_cache_dir"
-        download_and_unpack "$url" "$distrib_cache_dir"
+        download_and_unpack "$url" "$distrib_cache_dir" "zip" "$auth_header"
         JEKA_DIST_DIR=$distrib_cache_dir
       fi
     fi
