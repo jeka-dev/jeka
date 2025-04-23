@@ -368,8 +368,8 @@ class Jdks {
   }
 
   hidden [string] JavaHome() {
-    if ($null -ne $Env:JEKA_JAVA_HOME) {
-      return $Env:JEKA_JAVA_HOME
+    if ($null -ne $Env:JEKA_JDK_HOME) {
+      return $Env:JEKA_JDK_HOME
     }
     $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
     $distib = ($this.Props.GetValueOrDefault("jeka.java.distrib", "temurin"))
@@ -380,7 +380,6 @@ class Jdks {
     }
     return $cachedJdkDir
   }
-
 }
 
 class JekaDistrib {
@@ -428,7 +427,6 @@ class JekaDistrib {
   [string] GetJar() {
     return $this.GetBinDir() + "\dev.jeka.jeka-core.jar"
   }
-
 }
 
 class ZipExtractor {
