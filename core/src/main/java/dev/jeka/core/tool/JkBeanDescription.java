@@ -157,50 +157,54 @@ public final class JkBeanDescription {
      * @return A formatted string in markdown representing the bean's information
      *         including its fields, methods, and initialization description if available.
      */
-    public String toMdContent() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.synopsisHeader).append("\n\n");
-        sb.append(this.synopsisDetail).append("\n");
+    public MdContent toMdContent() {
+        StringBuilder header = new StringBuilder();
+        header.append(this.synopsisHeader).append("\n\n");
+        header.append(this.synopsisDetail);
+
+        StringBuilder body = new StringBuilder();
+        body.append(this.synopsisHeader).append("\n\n");
+        body.append(this.synopsisDetail).append("\n");
 
         if (!preInitInfos.isEmpty()) {
-            sb.append("\n\n");
-            sb.append("**This KBean pre-initializes the following KBeans:**\n\n");
-            sb.append("|Pre-initialized KBean  |Description  |\n");
-            sb.append("|-------|-------------|\n");
-            this.preInitInfos.forEach(info -> sb.append(preInitContent(info)));
+            body.append("\n\n");
+            body.append("**This KBean pre-initializes the following KBeans:**\n\n");
+            body.append("|Pre-initialized KBean  |Description  |\n");
+            body.append("|-------|-------------|\n");
+            this.preInitInfos.forEach(info -> body.append(preInitContent(info)));
         }
 
         if (!JkUtilsString.isBlank(this.initDescription)) {
-            sb.append("\n\n");
-            sb.append("|KBean Initialisation  |\n");
-            sb.append("|--------|\n");
-            sb.append(String.format("|%s |%n", oneLiner(this.initDescription)));
+            body.append("\n\n");
+            body.append("|KBean Initialisation  |\n");
+            body.append("|--------|\n");
+            body.append(String.format("|%s |%n", oneLiner(this.initDescription)));
         }
 
         if (!postInitInfos.isEmpty()) {
-            sb.append("\n\n");
-            sb.append("**This KBean post-initializes the following KBeans:**\n\n");
-            sb.append("|Post-initialised KBean   |Description  |\n");
-            sb.append("|-------|-------------|\n");
-            this.postInitInfos.forEach(info -> sb.append(preInitContent(info)));
+            body.append("\n\n");
+            body.append("**This KBean post-initializes the following KBeans:**\n\n");
+            body.append("|Post-initialised KBean   |Description  |\n");
+            body.append("|-------|-------------|\n");
+            this.postInitInfos.forEach(info -> body.append(preInitContent(info)));
         }
 
         if (!beanFields.isEmpty()) {
-            sb.append("\n\n");
-            sb.append("**This KBean exposes the following fields:**\n\n");
-            sb.append("|Field  |Description  |\n");
-            sb.append("|-------|-------------|\n");
-            this.beanFields.forEach(field -> sb.append(fieldContent(field)));
+            body.append("\n\n");
+            body.append("**This KBean exposes the following fields:**\n\n");
+            body.append("|Field  |Description  |\n");
+            body.append("|-------|-------------|\n");
+            this.beanFields.forEach(field -> body.append(fieldContent(field)));
         }
 
         if (!beanMethods.isEmpty()) {
-            sb.append("\n\n");
-            sb.append("**This KBean exposes the following methods:**\n\n");
-            sb.append("|Method  |Description  |\n");
-            sb.append("|--------|-------------|\n");
-            this.beanMethods.forEach(method -> sb.append(methodContent(method)));
+            body.append("\n\n");
+            body.append("**This KBean exposes the following methods:**\n\n");
+            body.append("|Method  |Description  |\n");
+            body.append("|--------|-------------|\n");
+            this.beanMethods.forEach(method -> body.append(methodContent(method)));
         }
-        return sb.toString();
+        return new MdContent(header.toString(), body.toString());
     }
 
     private static String fieldContent(JkBeanDescription.BeanField beanField) {
@@ -593,6 +597,23 @@ public final class JkBeanDescription {
                     .collect(Collectors.toList());
         }
 
+    }
+
+    public static class MdContent {
+
+        public final String header;
+
+        public final String body;
+
+        public MdContent(String header, String body) {
+            this.header = header;
+            this.body = body;
+        }
+
+        @Override
+        public String toString() {
+            return header + "\n" + body;
+        }
     }
 
 }

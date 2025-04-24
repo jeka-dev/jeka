@@ -1,5 +1,5 @@
 # A push on master will build, test and publish Jeka on OSSRH.
-# Beside it will push the built documentation on the Jeka landing page.
+# Besides, it will push the built documentation on the Jeka landing page.
 
 # If a tag is present on the last commit, Jeka will publish versioned artifacts according tag name on OSSRH public repo.
 # If no tag is present, the built artifacts will be published to OSSRH snapshot repository.
@@ -27,26 +27,37 @@ jobs:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 
-    - name: Build JeKa bootstrapped with ANT
+    - name: Build JeKa bootstrapped by ANT
+      run: |
+        ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+        echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
+
+    - name: Publish to OSSRH
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
       env:
-        OSSRH_USER: ${{ secrets.OSSRH_USER }}
-        OSSRH_PWD: ${{ secrets.OSSRH_PWD }}
+        JEKA_REPOS_PUBLISH_USERNAME: ${{ secrets.OSSRH_USER }}
+        JEKA_REPOS_PUBLISH_PASSWORD: ${{ secrets.OSSRH_PWD }}
         JEKA_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY}}
         JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
-        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
         GITHUB_BRANCH: ${{ github.ref }}
-      run: ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
-      
-    - name: Save JeKa cache
-      uses: actions/cache/save@v4
-      with:
-        path: ~/.jeka/cache
-        key: ${{ runner.os }}
+      run: |
+        jeka maven: publish -D@nexus=on -D@nexus.readTimeout=90000 -cp=plugins/plugins.nexus/jeka-output/classes -i
+
+    - name: Publish to DockerHub
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB }}
+      run: jeka -r core publishDockerImage
+
+    - name: Enrich MkDocs
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+      run: |
+        jeka build: enrichMkDocs
 
     - name: Deploy MkDocs
-      if: github.ref == 'refs/heads/master'
+      if: startsWith(github.ref, 'refs/tags/')
       uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
         CONFIG_FILE: jeka-output/mkdocs/mkdocs.yml
@@ -54,17 +65,18 @@ jobs:
         REQUIREMENTS: .github/workflows/requirements.txt
 
     - name: Add Javadoc to gh-pages
-      working-directory: core
-      run: jeka-output/distrib/bin/jeka addJavadocToGhPages
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+      run: jeka -r core addJavadocToGhPages --inspect --stacktrace
 
     - name: Deploy gh-pages
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: core/jeka-output/gh-pages
         
-    - name: Deploy distrib to Release
-      if: github.event_name == 'create' && github.ref_type == 'tag'
+    - name: Deploy distrib to GITHUB Release
+      if: startsWith(github.ref, 'refs/tags/')
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,3 +84,9 @@ jobs:
         asset_name: distrib.zip
         tag: ${{ github.ref }}
         overwrite: true
+
+    - name: Save JeKa cache
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.jeka/cache
+        key: ${{ runner.os }}

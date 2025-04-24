@@ -38,15 +38,20 @@ public class NexusKBean extends KBean {
     @JkDoc("Timeout in seconds, before the 'close' operation times out.")
     public int closeTimeout = JkNexusRepos.DEFAULT_CLOSE_TIMEOUT_SECONDS;
 
+    @JkDoc("Read timeout in millis, when querying the Nexus repo via http. 0 means no timeout.")
+    public int readTimeout;
+
     private final JkConsumers<JkNexusRepos> nexusReposConfigurators = JkConsumers.of();
 
     @JkDoc("Wraps Maven publish repo with Nexus autoclose trigger")
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> {
+        JkMavenPublication mavenPublication = mavenKBean.getPublication();
+        mavenPublication.postActions.replaceOrAppend(JkNexusRepos.TASK_NAME, () -> {
             JkNexusRepos nexusRepos = getJkNexusRepos(mavenPublication);
             nexusRepos.setCloseTimeout(closeTimeout);
-            nexusRepos.autoReleaseAfterPublication(mavenPublication);
+            nexusRepos.setReadTimeout(readTimeout);
+            nexusRepos.closeAndReleaseOpenRepositories();
         });
     }
 
@@ -57,7 +62,7 @@ public class NexusKBean extends KBean {
             JkLog.error("No MavenKBean found in runbase %s.", getBaseDir());
             return;
         }
-        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenKBean.getMavenPublication());
+        JkNexusRepos nexusRepos  = getJkNexusRepos(mavenKBean.getPublication());
         if (nexusRepos == null) {
             return;
         }
@@ -70,6 +75,16 @@ public class NexusKBean extends KBean {
     public NexusKBean configureNexusRepo(Consumer<JkNexusRepos> nexusReposConfigurator) {
         this.nexusReposConfigurators.append(nexusReposConfigurator);
         return this;
+    }
+
+    /**
+     * Sets the read timeout for the Nexus repository HTTP connections.
+     *
+     * The timeout is defined in milliseconds. A value of zero indicates
+     * no timeout (infinite).
+     */
+    public NexusKBean setRepoReadTimeout(int millis) {
+        return configureNexusRepo(nexusRepo -> nexusRepo.setReadTimeout(millis));
     }
 
     private String[] profiles() {

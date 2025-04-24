@@ -51,6 +51,14 @@ public class JkSpringbootAppTester extends JkApplicationTester {
         startTimeout = 30*1000;
     }
 
+    /**
+     * Creates a new {@code JkSpringbootAppTester} instance initialized with the specified buildable
+     * and tester.
+     *
+     * @param buildable the project or base under testing
+     * @param tester    the consumer responsible for handling the output from the application being tested.
+     *                  It consumes the base url of the application to test.
+     */
     public static JkSpringbootAppTester of(JkBuildable.Supplier buildable, Consumer<String> tester) {
         return new JkSpringbootAppTester(buildable, tester);
     }

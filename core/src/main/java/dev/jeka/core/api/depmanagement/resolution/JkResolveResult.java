@@ -199,7 +199,9 @@ public final class JkResolveResult {
         public String toString() {
             final StringBuilder sb = new StringBuilder();
             if (!moduleProblems.isEmpty()) {
-                sb.append("Errors with dependencies : ").append(moduleProblems);
+                sb.append("Error with dependencies:\n");
+                moduleProblems.forEach(pb -> sb.append("  ").append(pb).append("\n"));
+                sb.deleteCharAt(sb.length() - 1);
             }
             return sb.toString();
         }

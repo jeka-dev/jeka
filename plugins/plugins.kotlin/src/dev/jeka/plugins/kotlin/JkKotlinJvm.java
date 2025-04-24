@@ -83,7 +83,7 @@ public class JkKotlinJvm {
      */
     public void configure(JkProject project, String kotlinSourceDir, String kotlinTestSourceDir) {
         JkProjectCompilation prodCompile = project.compilation;
-        JkProjectCompilation testCompile = project.testing.compilation;
+        JkProjectCompilation testCompile = project.test.compilation;
 
         prodCompile.dependencies.addVersionProvider(kotlinVersionProvider());
 
@@ -161,7 +161,7 @@ public class JkKotlinJvm {
     }
 
     private void compileTestKotlin(JkProject javaProject, String kotlinTestSourceDir) {
-        JkProjectCompilation compilation = javaProject.testing.compilation;
+        JkProjectCompilation compilation = javaProject.test.compilation;
         JkPathTreeSet sources = compilation.layout.resolveSources();
         if (JkUtilsString.isBlank(kotlinTestSourceDir)) {
             sources = sources.and(javaProject.getBaseDir().resolve(kotlinTestSourceDir));

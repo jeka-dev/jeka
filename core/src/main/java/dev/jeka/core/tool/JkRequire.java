@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method that dynamically computes the required class for a given KBean.
+ * Marks a method that dynamically computes a required KBean for a KBean declaring the method.
  *
  * The method must be static, take one argument of type {@link JkRunbase},
  * and return a `Class<? extends KBean>` or null.

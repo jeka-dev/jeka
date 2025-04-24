@@ -61,11 +61,7 @@ class CmdLineParserTest {
     private static KBeanResolution kBeanResolution() {
         List<String> kbeanClasses = JkBeanDescription.STANDARD_KBEAN_CLASSES.stream()
                 .map(Class::getName).collect(Collectors.toList());
-        return new KBeanResolution(
-                kbeanClasses,
-                Collections.emptyList(),
-                null, null
-        );
+        return new KBeanResolution(kbeanClasses, Collections.emptyList(), null);
     }
 
 

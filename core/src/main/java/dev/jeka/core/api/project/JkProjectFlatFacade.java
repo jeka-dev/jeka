@@ -72,11 +72,11 @@ public class JkProjectFlatFacade {
      */
     public JkProjectFlatFacade setMainArtifactJarType(JkProjectPackaging.JarType jarType) {
         if (jarType == JkProjectPackaging.JarType.REGULAR) {
-            project.setJarMaker(project.packaging::createBinJar);
+            project.pack.setJarMaker(project.pack::createBinJar);
         } else if (jarType == JkProjectPackaging.JarType.FAT) {
-            project.setJarMaker(project.packaging::createFatJar);
+            project.pack.setJarMaker(project.pack::createFatJar);
         } else if (jarType == JkProjectPackaging.JarType.SHADE) {
-            project.setJarMaker(project.packaging::createShadeJar);
+            project.pack.setJarMaker(project.pack::createShadeJar);
         } else {
             throw new IllegalArgumentException("Jar type " + jarType + " is not handled.");
         }
@@ -86,8 +86,8 @@ public class JkProjectFlatFacade {
     public JkProjectFlatFacade addShadeJarArtifact(String classifier) {
         JkArtifactId artifactId = JkArtifactId.of(classifier, "jar");
         Path path = project.artifactLocator.getArtifactPath(artifactId);
-        project.packActions.append("create-shade-jar",
-                () -> project.packaging.createShadeJar(path));
+        project.pack.actions.append("create-shade-jar",
+                () -> project.pack.createShadeJar(path));
         return this;
     }
 
@@ -122,10 +122,10 @@ public class JkProjectFlatFacade {
     public JkProjectFlatFacade setLayoutStyle(JkCompileLayout.Style style) {
         if (style == JkCompileLayout.Style.SIMPLE) {
             project.compilation.layout.setSourceSimpleStyle(PROD);
-            project.testing.compilation.layout.setSourceSimpleStyle(TEST);
+            project.test.compilation.layout.setSourceSimpleStyle(TEST);
         } else if (style == JkCompileLayout.Style.MAVEN) {
             project.compilation.layout.setSourceMavenStyle(PROD);
-            project.testing.compilation.layout.setSourceMavenStyle(TEST);
+            project.test.compilation.layout.setSourceMavenStyle(TEST);
         } else {
             throw new IllegalStateException("Style " + style + " not handled.");
         }
@@ -137,7 +137,7 @@ public class JkProjectFlatFacade {
      */
     public JkProjectFlatFacade setMixResourcesAndSources() {
         project.compilation.layout.setMixResourcesAndSources();
-        project.testing.compilation.layout.setMixResourcesAndSources();
+        project.test.compilation.layout.setMixResourcesAndSources();
         return this;
     }
 
@@ -148,7 +148,7 @@ public class JkProjectFlatFacade {
      * @see JkProjectPackaging#setMainClass(String)
      */
     public JkProjectFlatFacade setMainClass(String mainClass) {
-        project.packaging.setMainClass(mainClass);
+        project.pack.setMainClass(mainClass);
         return this;
     }
 
@@ -170,7 +170,7 @@ public class JkProjectFlatFacade {
      * Sets whether to skip running tests for the project.
      */
     public JkProjectFlatFacade setTestsSkipped(boolean skipped) {
-        project.testing.setSkipped(skipped);
+        project.test.setSkipped(skipped);
         return this;
     }
 
@@ -230,7 +230,7 @@ public class JkProjectFlatFacade {
      */
     public JkProjectFlatFacade addTestExcludeSuffixIf(boolean condition, String suffix) {
         if (condition) {
-            project.testing.testSelection.addExcludePatterns(".*" + suffix);
+            project.test.selection.addExcludePatterns(".*" + suffix);
         }
         return this;
     }
@@ -242,7 +242,7 @@ public class JkProjectFlatFacade {
      * @param condition : the filter will be added only if this parameter is <code>true</code>.
      */
     public JkProjectFlatFacade addTestIncludeSuffixIf(boolean condition, String suffix) {
-        project.testing.testSelection.addIncludePatternsIf(condition, ".*" + suffix);
+        project.test.selection.addIncludePatternsIf(condition, ".*" + suffix);
         return this;
     }
 
@@ -253,7 +253,7 @@ public class JkProjectFlatFacade {
      * @see #addTestIncludeSuffixIf(boolean, String)
      */
     public JkProjectFlatFacade addTestMavenIncludePattern(boolean condition) {
-        project.testing.testSelection.addIncludePatternsIf(condition,
+        project.test.selection.addIncludePatternsIf(condition,
                 JkTestSelection.MAVEN_INCLUDE_PATTERN);
         return this;
     }
@@ -263,7 +263,7 @@ public class JkProjectFlatFacade {
      * test class inclusion filters. This ensures that all class tests are included.
      */
     public JkProjectFlatFacade removeAllTestIncludePatterns() {
-        project.testing.testSelection.setIncludePatterns(Collections.emptySet());
+        project.test.selection.setIncludePatterns(Collections.emptySet());
         return this;
     }
 
@@ -271,7 +271,7 @@ public class JkProjectFlatFacade {
      * Sets the style for displaying test progress during test execution.
      */
     public JkProjectFlatFacade setTestProgressStyle(JkTestProcessor.JkProgressStyle style) {
-        project.testing.testProcessor.engineBehavior.setProgressDisplayer(style);
+        project.test.processor.engineBehavior.setProgressDisplayer(style);
         return this;
     }
 
@@ -291,7 +291,7 @@ public class JkProjectFlatFacade {
      * @see JkProject#packActions
      */
     public JkProjectFlatFacade doPack() {
-        project.pack();
+        project.pack.run();
         return this;
     }
 
@@ -300,7 +300,7 @@ public class JkProjectFlatFacade {
      */
     public JkProjectFlatFacade doFastPack() {
         project.compilation.runIfNeeded();  // Better to launch it first explicitly for log clarity
-        project.packActions.run();
+        project.pack.actions.run();
         return this;
     }
 
@@ -331,7 +331,7 @@ public class JkProjectFlatFacade {
      * Returns the classpath used for running the built jar.
      */
     public List<Path> getRuntimeClasspath() {
-        return project.packaging.resolveRuntimeDependenciesAsFiles();
+        return project.pack.resolveRuntimeDependenciesAsFiles();
     }
 
     // -------------------------------------------------------------------
@@ -346,8 +346,8 @@ public class JkProjectFlatFacade {
 
         private JkDependencyFacade() {
             this.compile = project.compilation.dependencies;;
-            this.runtime = project.packaging.runtimeDependencies;
-            this.test = project.testing.compilation.dependencies;
+            this.runtime = project.pack.runtimeDependencies;
+            this.test = project.test.compilation.dependencies;
         }
 
     }

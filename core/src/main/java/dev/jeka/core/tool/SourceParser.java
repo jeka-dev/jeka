@@ -83,7 +83,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectClasspath
+        // Handle @JkInjectClasspath
         AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -91,7 +91,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectClasspath
+        // Handle @JkInjectClasspath
         annotationParser = new AnnotationParser(line, JkDep.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -99,7 +99,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInjectRunbase
+        // Handle @JkInjectRunbase
         annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -109,17 +109,7 @@ final class SourceParser {
             return;
         }
 
-        // Handle JkInject
-        annotationParser = new AnnotationParser(line, JkInject.class);
-        if (annotationParser.isMatching()) {
-            String value = annotationParser.readUniqueStringValue();
-            if (!JkUtilsString.isBlank(value) && !".".equals(value)) {
-                info.importedBaseDirs.add(baseDir.resolve(value));
-            }
-            return;
-        }
-
-        // Handle JkInjectCompileOption
+        // Handle @JkInjectCompileOption
         annotationParser = new AnnotationParser(line, JkInjectCompileOption.class);
         if (annotationParser.isMatching()) {
             String value = annotationParser.readUniqueStringValue();
@@ -155,4 +145,5 @@ final class SourceParser {
         }
 
     }
+
 }

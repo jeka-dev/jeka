@@ -41,23 +41,31 @@ import java.util.function.Consumer;
  */
 public final class JkProjectScaffold extends JkScaffold {
 
-    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Build.java";
+    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/Custom.java";
 
     public static final String SIMPLE_STYLE_PROP = "@project.layout.style=SIMPLE";
+
+    public static final String MIX_SOURCES_RES = "@project.layout.mixSourcesAndResources=true";
 
     public enum Kind {
         REGULAR, PLUGIN, EMPTY
     }
 
-    protected final JkProject project;
+    private final JkProject project;
 
     private boolean useSimpleStyle;
 
+    private boolean mixSourcesAndResources;
+
     public final List<String> compileDeps = new LinkedList<>();
+
+    public final List<String> compileOnlyDeps = new LinkedList<>();
 
     public final List<String> runtimeDeps = new LinkedList<>();
 
     public final List<String> testDeps = new LinkedList<>();
+
+    public final List<String> versionDeps = new LinkedList<>();
 
     private boolean generateLibsFolders;
 
@@ -103,6 +111,11 @@ public final class JkProjectScaffold extends JkScaffold {
         return this;
     }
 
+    public JkProjectScaffold setMixSourcesAndResources(boolean mixSourcesAndResources) {
+        this.mixSourcesAndResources = mixSourcesAndResources;
+        return this;
+    }
+
     public JkProjectScaffold setGenerateLibsFolders(boolean generateLibsFolders) {
         this.generateLibsFolders = generateLibsFolders;
         return this;
@@ -127,8 +140,11 @@ public final class JkProjectScaffold extends JkScaffold {
     @Override
     public void run() {
         JkLog.startTask("scaffold-project");
-        configureScaffold();
+        if (customizers.isEmpty()) {
+            configureDefault();
+        }
         customizers.accept(this);
+        postConfigureScaffold();
         super.run();
         generateProjectStructure();
         generateDependencyTxt();
@@ -139,49 +155,41 @@ public final class JkProjectScaffold extends JkScaffold {
         JkLog.endTask("Project generated.");
     }
 
-    /**
-     * Removes a file entry from the list of file entries. This gives a chance to plugins
-     * to remove the non-necessary files.
-     *
-     * @param relativePath the path, relative to base dir.
-     */
-    public void removeFileEntry(String relativePath) {
-        ListIterator<JkFileEntry> it = fileEntries.listIterator();
-        while (it.hasNext()) {
-            JkFileEntry fileEntry = it.next();
-            if (relativePath.equals(fileEntry.relativePath)) {
-                it.remove();
-            }
-        }
+    public void addCustomKbeanFileEntry() {
+        String code = readResource(JkProjectScaffold.class, "custom-class.snippet");
+        addFileEntry(BUILD_CLASS_PATH, code);
+    }
+
+    private void configureDefault() {
+        addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=project");
+        addJekaPropsContent("@custom=on\n");
     }
 
     /*
      * Configures scaffold to create project structure, including build class, according
      * the specified template.
      */
-    private void configureScaffold() {
-
-        addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=project");
+    private void postConfigureScaffold() {
         if (useSimpleStyle) {
             project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
             addJekaPropValue(SIMPLE_STYLE_PROP);
         }
-
+        if (mixSourcesAndResources) {
+            project.flatFacade.setMixResourcesAndSources();
+            addJekaPropValue(MIX_SOURCES_RES);
+        }
         if (kind == Kind.REGULAR) {
             addJekaPropsContent("\n@project.pack.jarType=FAT\n" +
                     "@project.pack.detectMainClass=true\n");
-            String code = readResource(JkProjectScaffold.class, "buildclass.snippet");
-            addFileEntry(BUILD_CLASS_PATH, code);
-
+            addCustomKbeanFileEntry();
 
         } else if (kind == Kind.PLUGIN) {
-            String code = readResource(JkProjectScaffold.class, "buildclassplugin.snippet");
+            String code = readResource(JkProjectScaffold.class, "custom-class-plugin.snippet");
             if (!UNSPECIFIED_JEKA_VERSION.equals(getJekaVersion())) {
                 code = code.replace("${jekaVersion}", JkInfo.getJekaVersion());
             }
             addFileEntry(BUILD_CLASS_PATH, code);
         }
-
     }
 
     /**
@@ -191,14 +199,14 @@ public final class JkProjectScaffold extends JkScaffold {
         JkCompileLayout prodLayout = project.compilation.layout;
         prodLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
         prodLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
-        JkCompileLayout testLayout = project.testing.compilation.layout;
+        JkCompileLayout testLayout = project.test.compilation.layout;
         testLayout.resolveSources().toList().forEach(JkPathTree::createIfNotExist);
         testLayout.resolveResources().toList().forEach(JkPathTree::createIfNotExist);
 
         Path sourceDir =
                 project.compilation.layout.resolveSources().toList().get(0).getRoot();
         Path testSourceDir =
-                project.testing.compilation.layout.resolveSources().toList().get(0).getRoot();
+                project.test.compilation.layout.resolveSources().toList().get(0).getRoot();
 
         // This is special scaffolding for plugin projects
         if (kind == Kind.PLUGIN) {
@@ -207,18 +215,18 @@ public final class JkProjectScaffold extends JkScaffold {
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
             JkPathFile.of(breakingChangeFile).write(text);
 
-            String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("pluginclass.snippet"));
+            String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("plugin-class.snippet"));
             JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxKBean.java"))
                     .createIfNotExist()
                     .write(pluginCode.getBytes(StandardCharsets.UTF_8));
 
         } else if (kind == Kind.REGULAR) {
-            String mainClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("mainClass.snippet"));
+            String mainClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("main-class.snippet"));
             JkPathFile.of(sourceDir.resolve("app/Main.java"))
                     .createIfNotExist()
                     .write(mainClass.getBytes(StandardCharsets.UTF_8));
 
-            String testClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("testClass.snippet"));
+            String testClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("test-class.snippet"));
             JkPathFile.of(testSourceDir.resolve("app/MainTest.java"))
                     .createIfNotExist()
                     .write(testClass.getBytes(StandardCharsets.UTF_8));
@@ -243,20 +251,26 @@ public final class JkProjectScaffold extends JkScaffold {
     private void generateDependencyTxt() {
         List<String> lines = JkUtilsIO.readAsLines(JkProjectScaffold.class.getResourceAsStream("dependencies.txt"));
         StringBuilder sb = new StringBuilder();
+        if (testDeps.isEmpty()) {
+            testDeps.addAll(getJUnitDeps());
+            versionDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+        }
         for (String line : lines) {
             sb.append(line).append("\n");
-            if (line.startsWith("== COMPILE") && !compileDeps.isEmpty()) {
+            if (line.startsWith("[compile]") && !compileDeps.isEmpty()) {
                 compileDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
             }
-            if (line.startsWith("== RUNTIME") && !runtimeDeps.isEmpty()) {
+            if (line.startsWith("[compile-only]") && !compileOnlyDeps.isEmpty()) {
+                compileOnlyDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
+            }
+            if (line.startsWith("[runtime]") && !runtimeDeps.isEmpty()) {
                 runtimeDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
             }
-            List<String> effectiveTestDeps = new LinkedList<>(testDeps);
-            if (effectiveTestDeps.isEmpty()) {
-                effectiveTestDeps.addAll(getJUnitDeps());
+            if (line.startsWith("[test]")) {
+                testDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
             }
-            if (line.startsWith("== TEST")) {
-                effectiveTestDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
+            if (line.startsWith("[version]") && !versionDeps.isEmpty()) {
+                versionDeps.forEach(extraDep -> sb.append(extraDep.trim()).append("\n"));
             }
         }
         String content = sb.toString();
@@ -269,7 +283,5 @@ public final class JkProjectScaffold extends JkScaffold {
         String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
         JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist().write(content);
     }
-
-
 
 }

@@ -18,7 +18,6 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
@@ -44,13 +43,25 @@ public class JkProjectTesting {
     public final JkProjectCompilation compilation;
 
     /**
+     * @deprecated Use {@link #processor} instead
+     */
+    @Deprecated
+    public final JkTestProcessor testProcessor;
+
+    /**
      * The processor running the tests.
      */
-    public final JkTestProcessor testProcessor;
+    public final JkTestProcessor processor;
 
     /**
      * Tests to be run.
      */
+    public final JkTestSelection selection;
+
+    /**
+     * @deprecated Use {@link #selection} instead
+     */
+    @Deprecated
     public final JkTestSelection testSelection;
 
     public final JkRunnables postActions = JkRunnables.of().setLogTasks(true);
@@ -67,8 +78,10 @@ public class JkProjectTesting {
     JkProjectTesting(JkProject project) {
         this.project = project;
         compilation = new JkProjectTestCompilation();
-        testProcessor = createDefaultTestProcessor();
-        testSelection = JkTestSelection.of();
+        processor = createDefaultProcessor();
+        testProcessor = processor;
+        selection = JkTestSelection.of();
+        testSelection = selection;
     }
 
     /**
@@ -95,7 +108,7 @@ public class JkProjectTesting {
                 // This is the case for apache.commons.lang
                 .and(prodCompilation.layout.resolveClassDir())
                 .and(compilation.resolveDependenciesAsFiles())
-                .and(project.packaging.resolveRuntimeDependenciesAsFiles())
+                .and(project.pack.resolveRuntimeDependenciesAsFiles())
                 .withoutDuplicates();
     }
 
@@ -163,10 +176,6 @@ public class JkProjectTesting {
             this.project.compilation.runIfNeeded();
         }
         this.compilation.run();
-        if (!JkPathTree.of(this.compilation.layout.resolveClassDir()).containFiles()) {
-            JkLog.info("No tests to run.");
-            return;
-        }
         executeWithTestProcessor();
         postActions.run();
     }
@@ -188,10 +197,10 @@ public class JkProjectTesting {
      *
      * @return a default {@link JkTestProcessor} object.
      */
-    public JkTestProcessor createDefaultTestProcessor() {
+    public JkTestProcessor createDefaultProcessor() {
         JkTestProcessor result = JkTestProcessor.of(
-                () -> project.testing.getTestClasspath(),   // cannot use lambda cause testing may not be present
-                () -> project.testing.compilation.layout.resolveClassDir()   // same
+                () -> project.test.getTestClasspath(),   // cannot use lambda cause testing may not be present
+                () -> project.test.compilation.layout.resolveClassDir()   // same
         );
         final Path reportDir = compilation.layout.getOutputDir().resolve(this.reportDir);
         result
@@ -203,7 +212,7 @@ public class JkProjectTesting {
     }
 
     private void executeWithTestProcessor() {
-        JkTestResult result = testProcessor.launch(testSelection);
+        JkTestResult result = testProcessor.run(testSelection);
         if (breakOnFailures) {
             result.assertSuccess();
         }
@@ -233,7 +242,7 @@ public class JkProjectTesting {
 
         @Override
         protected JkDependencySet baseDependencies() {
-            JkDependencySet base = project.packaging.runtimeDependencies.get()
+            JkDependencySet base = project.pack.runtimeDependencies.get()
                     .merge(project.compilation.dependencies.get()).getResult();
             if (project.isIncludeTextAndLocalDependencies()) {
                 base = project.textAndLocalDeps().getTest().and(base);

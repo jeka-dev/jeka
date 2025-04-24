@@ -47,7 +47,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
     private final List<Path> files;
 
     @Override
-    public final List<Path> getFiles() {
+    public List<Path> getFiles() {
         return files;
     }
 

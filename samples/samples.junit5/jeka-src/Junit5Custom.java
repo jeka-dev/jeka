@@ -30,7 +30,7 @@ import java.nio.file.Path;
  * {@link org.junit.platform.launcher.LauncherDiscoveryRequest}.
  */
 @JkDep("org.junit.platform:junit-platform-launcher:1.8.2")
-class Junit5Build extends KBean {
+class Junit5Custom extends KBean {
 
     @JkInject
     private ProjectKBean projectKBean;
@@ -88,7 +88,7 @@ class Junit5Build extends KBean {
     }
 
     public static void main(String[] args) {
-        JkInit.kbean(Junit5Build.class, args).cleanPack();
+        JkInit.kbean(Junit5Custom.class, args).cleanPack();
     }
 
 }

@@ -25,7 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-//  Creates and published the Dpcker image containing the Jeka executable.
+//  Creates and published the Docker image containing the Jeka executable.
 class DockerImageMaker {
 
     public static final String GROUP = "jekadev";

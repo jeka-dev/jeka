@@ -33,18 +33,21 @@ class BehaviorSettings {
 
     final boolean skipCompile;
 
+    final String childBase;
+
 
     BehaviorSettings(String defaultKbeanName, boolean cleanWork, boolean cleanOutput, boolean forceMode,
-                     boolean skipCompile) {
+                     boolean skipCompile, String childBase) {
         this.defaultKbeanName = Optional.ofNullable(defaultKbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
         this.forceMode = forceMode;
         this.skipCompile = skipCompile;
+        this.childBase = childBase;
     }
 
     static BehaviorSettings ofDefault() {
-        return new BehaviorSettings(null, false, false, false, false);
+        return new BehaviorSettings(null, false, false, false, false, null);
     }
 
 }

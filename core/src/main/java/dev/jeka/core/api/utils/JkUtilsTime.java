@@ -89,7 +89,7 @@ public final class JkUtilsTime {
             result += hours + "h";
         }
         if (minutes > 0) {
-            result += millis + "m";
+            result += minutes + "m";
         }
         if (seconds > 0) {
             result += seconds + "s";

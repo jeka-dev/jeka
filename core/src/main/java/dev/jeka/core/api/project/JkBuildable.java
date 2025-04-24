@@ -27,11 +27,9 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkManifest;
-import dev.jeka.core.api.system.JkProcess;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Adapter for both JkProject an BaseKBean that can be used as an abstraction

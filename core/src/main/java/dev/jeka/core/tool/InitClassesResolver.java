@@ -20,6 +20,7 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,8 +93,7 @@ class InitClassesResolver {
      */
     private static class RequiringClass implements Comparable<RequiringClass> {
 
-
-        private static final Map<Class<? extends KBean>, RequiringClass> MAP = new HashMap<>();
+        private static final Map<KBeanClassRunbase, RequiringClass> MAP = new HashMap<>();
 
         private final Class<? extends KBean> kBeanClass;
 
@@ -109,7 +109,9 @@ class InitClassesResolver {
         }
 
         static RequiringClass of(Class<? extends KBean> kBeanClass, JkRunbase runbase) {
-            return MAP.computeIfAbsent(kBeanClass, (key) -> new RequiringClass(kBeanClass, runbase));
+            KBeanClassRunbase kBeanClassRunbase = new KBeanClassRunbase(kBeanClass, runbase);
+            return MAP.computeIfAbsent(kBeanClassRunbase,
+                    (key) -> new RequiringClass(kBeanClass, runbase));
         }
 
         @Override
@@ -247,6 +249,33 @@ class InitClassesResolver {
                     }
                 }
             }
+            return result;
+        }
+    }
+
+    private static class KBeanClassRunbase {
+
+        final Class<? extends KBean> kBeanClass;
+
+        final Path runbasePath;
+
+        KBeanClassRunbase(Class<? extends KBean> kBeanClass, JkRunbase runbase) {
+            this.kBeanClass = kBeanClass;
+            this.runbasePath = runbase.getBaseDir();
+        }
+
+        @Override
+        public final boolean equals(Object o) {
+            if (!(o instanceof KBeanClassRunbase)) return false;
+
+            KBeanClassRunbase that = (KBeanClassRunbase) o;
+            return kBeanClass.equals(that.kBeanClass) && runbasePath.equals(that.runbasePath);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = kBeanClass.hashCode();
+            result = 31 * result + runbasePath.hashCode();
             return result;
         }
     }

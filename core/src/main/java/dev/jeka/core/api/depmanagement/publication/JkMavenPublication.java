@@ -285,6 +285,15 @@ public final class JkMavenPublication {
     }
 
     /**
+     * Removes all published artifacts. Suitable for publishing POM only.
+     */
+    public JkMavenPublication removeAllArtifacts() {
+        List<JkArtifactId> artifactIds = this.artifactPublisher.getArtifactIds();
+        artifactIds.forEach(this::removeArtifact);
+        return this;
+    }
+
+    /**
      * Publishes this publication to its defined repositories
      */
     public JkMavenPublication publish() {
@@ -330,9 +339,9 @@ public final class JkMavenPublication {
 
     @Override
     public String toString() {
-        return "JkMavenPublication{" +
-                "artifactFileLocator=" + artifactPublisher +
-                ", extraInfo=" + pomMetadata +
+        return "MavenPublication{" +
+                "artifactPublisher:" + artifactPublisher +
+                ", metadata:" + pomMetadata +
                 '}';
     }
 
@@ -384,6 +393,8 @@ public final class JkMavenPublication {
 
         artifactPublisher.makeMissingArtifacts();
 
+        JkLog.verbose("Published repos:");
+        JkLog.verbose(repos.toStringMultiline("  "));
         JkInternalPublisher internalPublisher = JkInternalPublisher.of(repos, null);
         JkCoordinate coordinate = getModuleId().toCoordinate(versionSupplier.get());
         internalPublisher.publishMaven(

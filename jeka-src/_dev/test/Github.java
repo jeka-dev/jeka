@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 
+package _dev.test;
+
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -31,10 +33,10 @@ import java.util.List;
 
 class Github  {
 
-    @JkDoc("Github token injected bby the pipeline")
+    @JkDoc("_dev.Github token injected by the pipeline")
     public String ghToken;
 
-    @JkDoc("Publish a Release description on Github. The description is extracted from the release-note.md file " +
+    @JkDoc("Publish a Release description on _dev.Github. The description is extracted from the release-note.md file " +
             "which describe content of all releases.")
     public void publishGhRelease() throws IOException {
         JkGit git = JkGit.of();
@@ -66,7 +68,7 @@ class Github  {
         }
         int status = con.getResponseCode();
         if (status != 201) {
-            JkLog.warn("Release publication on Github failed. Status code = " + status);
+            JkLog.warn("Release publication on _dev.Github failed. Status code = " + status);
         }
     }
 

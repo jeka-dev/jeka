@@ -14,7 +14,7 @@ jeka project: pack --clean
 
 Run test and create jar:
 ```shell
-jeka project:test pack 
+jeka project: test pack 
 ```
 
 Run jar

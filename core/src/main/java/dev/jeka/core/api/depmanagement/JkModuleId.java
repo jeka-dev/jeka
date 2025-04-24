@@ -36,7 +36,6 @@ public final class JkModuleId implements Comparator<JkModuleId> {
 
     private final String name;
 
-
     /**
      * Creates a module id according the specified group and name.
      */

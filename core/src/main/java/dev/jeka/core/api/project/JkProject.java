@@ -88,7 +88,7 @@ import java.util.stream.Collectors;
  * |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
  * |  +- postCompileActions
  * |  +- methods : resolveDependencies(), run()
- * +- testing
+ * +- test
  * |  +- testCompilation (same as for 'prod' compilation but configured for tests purpose)
  * |  +- breakOnFailure (true/false)
  * |  +- skipped (true/false)
@@ -110,6 +110,10 @@ import java.util.stream.Collectors;
  * |  +- manifest
  * |  +- fatJar (customize produced fat/uber jar if any)
  * |  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
+ * +- e2eTest
+ * |  +- methods : add(), run()
+ * +- qualityCheck
+ * |  +- methods : add(), run()
  * + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()
  * </code></pre>
  */
@@ -128,11 +132,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     /**
-     * Represents the identifier for an action to create a JAR file in the project lifecycle.
-     * Used within the context of project execution to trigger the corresponding task or operation
-     * that handles the creation of the Java Archive (JAR) artifact.
+     * @deprecated Use {@link JkProjectPackaging#CREATE_JAR_ACTION} instead
      */
-    public static final String CREATE_JAR_ACTION = "create-jar";
+    @Deprecated
+    public static final String CREATE_JAR_ACTION = JkProjectPackaging.CREATE_JAR_ACTION;
 
     public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
 
@@ -146,16 +149,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     public final JkArtifactLocator artifactLocator;
 
     /**
-     * Actions to execute when {@link JkProject#pack()} is invoked.<p>
-     * By default, the build action creates a regular binary jar. It can be
-     * replaced by an action creating other jars/artifacts or doing special
-     * action as publishing a Docker image, for example.
-     * <p>
-     * To insert before the JAR action, use {@link JkRunnables#insertBefore(String, String, Runnable)}
-     * by specifying the {@link #CREATE_JAR_ACTION} as action to insert before.
-     * </p>
+     * @deprecated Use {@link JkProjectPackaging#actions} instead;
      */
-    public final JkRunnables packActions = JkRunnables.of().setLogTasks(true);
+    @Deprecated
+    public final JkRunnables packActions;
 
     /**
      * Object responsible for resolving dependencies.
@@ -173,27 +170,39 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     public final JkProjectCompilation compilation;
 
     /**
+     * @deprecated Use #pack instead
+     */
+    @Deprecated
+    public final JkProjectPackaging packaging;
+
+    /**
      * Object responsible for creating binary, fat, javadoc and sources jars.
      * It also defines the runtime dependencies of this project.
      */
-    public final JkProjectPackaging packaging;
+    public final JkProjectPackaging pack;
+
+    /**
+     * @deprecated Use #test instead
+     */
+    @Deprecated
+    public final JkProjectTesting testing;
 
     /**
      * Object responsible for compiling and running tests.
      */
-    public final JkProjectTesting testing;
+    public final JkProjectTesting test;
 
     /**
      * Object responsible for running end-to-end tests. It simply consists in a runnable container where users
      * can register e2e tests and run it a later phase.
      */
-    public final JkRunnableContainer e2eTesting = new JkRunnableContainer("test-end-to-end");
+    public final JkProjectE2eTest e2eTest = new JkProjectE2eTest();
 
     /**
      * Object responsible for running quality checkers. It simply consists in a runnable container where users
      * can register quality-checkers and run it a later phase.
      */
-    public final JkRunnableContainer qualityChecking = new JkRunnableContainer("check-quality");
+    public final JkRunnableContainer qualityCheck = new JkRunnableContainer("check-quality");
 
     /**
      * Function to modify the {@link JkIdeSupport} used for configuring IDEs.
@@ -209,8 +218,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * Convenient facade for configuring the project.
      */
     public final JkProjectFlatFacade flatFacade;
-
-    private Consumer<Path> jarMaker;
 
     private Path baseDir = Paths.get("");
 
@@ -234,26 +241,32 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
     private URL dependencyTxtUrl;
 
-    private JkProject() {
+    private final Function<Path, JkProject> projectResolver;
+
+    private JkProject(Function<Path, JkProject> projectResolver) {
         artifactLocator = artifactLocator();
         compilerToolChain = JkJavaCompilerToolChain.of();
         compilation = JkProjectCompilation.ofProd(this);
-        testing = new JkProjectTesting(this);
-        packaging = new JkProjectPackaging(this);
+        test = new JkProjectTesting(this);
+        testing = test;
+        pack = new JkProjectPackaging(this);
+        packActions = pack.actions;
+        packaging = pack;
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
                 .setDisplaySpinner(true)
                 .setUseInMemoryCache(true);
-        jarMaker = packaging::createBinJar;
-        packActions.append(CREATE_JAR_ACTION,
-                () -> jarMaker.accept(artifactLocator.getMainArtifactPath()));
         flatFacade = new JkProjectFlatFacade(this);
+        this.projectResolver = projectResolver;
     }
 
+    public static JkProject of(Function<Path, JkProject> projectPathMapper) {
+        return new JkProject(projectPathMapper);
+    }
     /**
      * Creates a new project having the current working directory as base dir.
      */
     public static JkProject of() {
-        return new JkProject();
+        return new JkProject(path -> null);
     }
 
     /**
@@ -351,10 +364,11 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     // ------------------------- Run ---------------------------
 
     /**
-     * Sets a {@link Runnable} to create the JAR used by {@link #prepareRunJar(RuntimeDeps)}
+     * @deprecated Use {@link JkProjectPackaging#setJarMaker(Consumer)} instead
      */
+    @Deprecated
     public JkProject setJarMaker(Consumer<Path> jarMaker) {
-        this.jarMaker = jarMaker;
+        this.pack.setJarMaker(jarMaker);
         return this;
     }
 
@@ -421,6 +435,22 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     /**
+     * Executes the full build process by executing clean, test, pack and test end-to-end.
+     */
+    public void fullBuild() {
+        clean();
+        test.run();
+        pack.run();
+        e2eTest.run();
+    }
+
+    public void fullBuildTask() {
+        JkLog.startTask("full-build: " + this.baseDir);
+        fullBuild();
+        JkLog.endTask();
+    }
+
+    /**
      * Returns a human-readable text that mentions various settings for this project
      * (source locations, file count, declared dependencies, ...).
      */
@@ -454,11 +484,11 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                         .count(Integer.MAX_VALUE, false))
                 .add("Test Source file count       ", testing.compilation.layout.resolveSources()
                         .count(Integer.MAX_VALUE, false))
-                .add("Test Class Dirs", testing.testSelection.getTestClassRoots())
-                .add("Test Inclusions", testing.testSelection.getIncludePatterns())
-                .add("Test Exclusions", testing.testSelection.getExcludePatterns())
-                .add("Test Progress Style", testing.testProcessor.engineBehavior.getProgressStyle())
-                .add("Junit5 Platform Version", testing.testProcessor.getJunitPlatformVersion())
+                .add("Test Class Dirs", test.selection.getTestClassRoots())
+                .add("Test Inclusions", test.selection.getIncludePatterns())
+                .add("Test Exclusions", test.selection.getExcludePatterns())
+                .add("Test Progress Style", test.processor.engineBehavior.getProgressStyle())
+                .add("Junit5 Platform Version", test.processor.getJunitPlatformVersion())
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
                 .add("Pack actions", this.packActions.getRunnableNames())
@@ -537,13 +567,11 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     /**
-     * Executes the packing process for this project, which includes compiling, testing, and creating JAR files.
-     *
-     * @see JkProject#packActions
+     * @deprecated Use {@link JkProjectPackaging#run()} instead
      */
+    @Deprecated
     public void pack() {
-        this.compilation.runIfNeeded();  // Better to launch it first explicitly for log clarity
-        this.packActions.run();
+        this.pack.run();
     }
 
     /**
@@ -646,23 +674,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         return this;
     }
 
-    /**
-     * Configures the standard end-to-end testing setup for the project.
-     * <p>
-     * This method adjusts the test selection to exclude the predefined end-to-end test pattern (tests located in `e2e` root package).
-     * and register them to be run with `e2eTest` method.
-     * </p>
-     */
-    public void setupEndToEndTest() {
-        testing.testSelection.addExcludePatterns(JkTestSelection.E2E_PATTERN);
-        e2eTesting.add("", () -> {
-            JkTestProcessor testProcessor = testing.createDefaultTestProcessor();
-            testProcessor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
-            testProcessor
-                    .launch(JkTestSelection.of().addIncludePatterns(JkTestSelection.E2E_PATTERN))
-                    .assertSuccess();
-        });
-    }
+
 
     LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
@@ -672,8 +684,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 baseDir.resolve(PROJECT_LIBS_DIR));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(DEPENDENCIES_TXT_FILE))
-                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl);
+                baseDir.resolve(DEPENDENCIES_TXT_FILE), baseDir, projectResolver)
+                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl, baseDir, projectResolver);
+
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;
     }
@@ -750,7 +763,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
-                return JkProject.this.compilerToolChain.compile(compileSpec);
+                return JkProject.this.compilerToolChain.compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;
             }
 
             @Override
@@ -867,7 +880,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         public void run() {
             JkLog.startTask(containerName);
             if (runnables.getSize() == 0) {
-                JkLog.info("No registered end-to-end testers found.");
+                JkLog.info("No %s processor registered.", containerName);
             } else if (runnables.getSize() == 1) {
                 runnables.setLogTasks(false);
                 runnables.getRunnable(0).run();
@@ -878,6 +891,42 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
             JkLog.endTask();
         }
 
+    }
+
+    public class JkProjectE2eTest extends JkRunnableContainer{
+
+        public JkProjectE2eTest() {
+            super("test-end-to-end");
+        }
+
+        /**
+         * Configures the standard end-to-end testing setup for the project.
+         * <p>
+         * This method adjusts the test selection to exclude the predefined end-to-end test pattern (tests located in `e2e` root package).
+         * and register them to be run with `e2eTest` method.
+         * </p>
+         */
+        public void setupBasic() {
+            test.selection.addExcludePatterns(JkTestSelection.E2E_PATTERN);
+            this.add("", () -> {
+                JkTestProcessor processor = createProcessor();
+                processor
+                        .runMatchingPatterns(JkTestSelection.E2E_PATTERN)
+                        .assertSuccess();
+            });
+        }
+
+        /**
+         * Creates and configures a JkTestProcessor instance for running tests.
+         * The processor is set to use the full progress display style.
+         *
+         * @return a configured instance of JkTestProcessor ready for test execution
+         */
+        public JkTestProcessor createProcessor() {
+            JkTestProcessor processor = test.createDefaultProcessor();
+            processor.engineBehavior.setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
+            return processor;
+        }
 
     }
 }

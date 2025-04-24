@@ -25,13 +25,11 @@ import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
-import dev.jeka.core.api.system.JkAnsiConsole;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
-
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,7 +79,7 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = JkRunbase.constructProperties(baseDir);
+        JkProperties props = PropertiesHandler.constructRunbaseProperties(baseDir);
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
 
         Engine engine = null;
@@ -115,7 +113,7 @@ public class Main {
             KBeanResolution kBeanResolution = engine.getKbeanResolution();
             Engine.ClasspathSetupResult classpathSetupResult = engine.getClasspathSetupResult();
             Engines.registerMaster(engine);
-            JkLog.debug("Found KBeans : %s" , kBeanResolution.allKbeanClassNames);
+            JkLog.debug("Found KBeans : %s" , String.join("\n  ", kBeanResolution.allKbeanClassNames));
 
             // log-debug engine classpath resolutions
             logAllEnginesClasspath(engine);
@@ -151,8 +149,7 @@ public class Main {
             }
 
             // Init runbase
-            JkRunbase runbase = engine.initRunbase(actionContainer);
-
+            JkRunbase runbase = engine.getOrCreateRunbase(actionContainer, true);
 
             // -- Handle doc ([kbean]: --doc)
             if (docKbeanName != null) {
@@ -169,7 +166,9 @@ public class Main {
 
             // Run
             engine.run();
-            runbase.getInitStore().store(baseDir);  // Store init state in file for external tools
+            if (JkLocator.isJekaProject(baseDir)) {
+                runbase.getInitStore().store(baseDir);  // Store init state in file for external tools, in case we are in a jeka project.
+            }
 
             logOutro(startTime);
 
@@ -220,7 +219,7 @@ public class Main {
         }
         txt.add("Jeka User Home", JkLocator.getJekaUserHomeDir().toAbsolutePath().normalize());
         txt.add("Jeka Cache Dir",  JkLocator.getCacheDir().toAbsolutePath().normalize());
-        JkProperties properties = JkRunbase.constructProperties(Paths.get(""));
+        JkProperties properties = PropertiesHandler.constructRunbaseProperties(Paths.get(""));
         txt.add("Download Repos", JkRepoProperties.of(properties).getDownloadRepos().getRepos().stream()
                 .map(JkRepo::getUrl).collect(Collectors.toList()));
         JkLog.info(txt.toString());
@@ -280,7 +279,6 @@ public class Main {
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {
         JkLog.info(Jk2ColumnsText.of(18, 150)
-                .add("Local KBean", engine.resolveKBeans().implicitKBeanClassName)
                 .add("Default KBean", engine.resolveKBeans().defaultKbeanClassName)
                 .toString());
         JkLog.info("Properties         :");
@@ -310,7 +308,8 @@ public class Main {
         JkBusyIndicator.stop();
         JkLog.restoreToInitialState();
         if (t.getMessage() != null) {
-            String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + t.getMessage());
+            String errClassName = (t instanceof Error) ? t.getClass().getName() + " " : "";
+            String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + errClassName + t.getMessage());
             System.err.println(txt);
         } else {
             String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");
@@ -401,7 +400,7 @@ public class Main {
         }
         ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath).get();
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
-        String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent();
+        String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent().toString();
         System.out.println(mdDoc);
         return true;
     }

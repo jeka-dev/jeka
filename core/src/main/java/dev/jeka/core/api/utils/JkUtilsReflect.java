@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.utils;
 
+import dev.jeka.core.api.java.JkClassLoader;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -114,8 +116,22 @@ public final class JkUtilsReflect {
             setAccessibleIfNeeded(field);
             field.set(object, value);
         } catch (final Exception e) {
-            throw new RuntimeException(String.format("Error while setting value '%s'(class %s) on field %s",
-                    value, value == null ? "null" : value.getClass().getName(), field), e);
+            Class<?> valueType = value == null ? Void.class : value.getClass();
+            Class<?> fieldType = field.getType();
+            StringBuilder msg = new StringBuilder();
+            msg.append(String.format("Can not set object of type %s on field %s", valueType, field));
+
+            // Classloader issue: same class name but coming from distinct classloader
+            if(fieldType.getName().equals(valueType.getName())) {
+                ClassLoader fieldClassLoader = fieldType.getClassLoader();
+                ClassLoader valueClassLoader = valueType.getClassLoader();
+                msg.append("\nTry to assign a value of compatible type but coming from distinct classloader\n");
+                msg.append("Field: ").append(field).append("\n");
+                msg.append("Value: ").append(value).append("\n");
+                msg.append("Field classloader: ").append(JkClassLoader.of(fieldClassLoader)).append("\n\n");
+                msg.append("Value classloader: ").append(JkClassLoader.of(valueClassLoader)).append("\n");
+            }
+            throw new RuntimeException(msg.toString(), e);
         }
     }
 

@@ -16,24 +16,16 @@
 
 package dev.jeka.plugins.springboot;
 
-import dev.jeka.core.api.depmanagement.JkRepoSet;
-import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.depmanagement.JkVersionProvider;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.j2e.JkJ2eWarProjectAdapter;
 import dev.jeka.core.api.project.JkProject;
-import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.tool.JkConstants;
 
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -54,7 +46,7 @@ public final class JkSpringbootProject {
     public static final String OVERRIDE_SCAFFOLDED_SPRINGBOOT_PLUGIN_DEPENDENCY_PROP_NAME
             = "jeka.springboot.plugin.dependency";
 
-    static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies::pom:";
+    static final String BOM_COORDINATE = "org.springframework.boot:spring-boot-dependencies:";
 
     private final JkProject project;
 
@@ -80,38 +72,38 @@ public final class JkSpringbootProject {
                           boolean createOriginalJar) {
 
         // run tests in forked mode
-        project.testing.testProcessor.setForkingProcess(true);
+        project.test.processor.setForkingProcess(true);
 
-        project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION, () -> {});
+        project.pack.actions.replaceOrAppend(JkProjectPackaging.CREATE_JAR_ACTION, () -> {});
 
         // define bootable jar as main artifact
         if (createBootJar) {
             JkArtifactId artifactId = JkArtifactId.MAIN_JAR_ARTIFACT_ID;
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
-            project.setJarMaker(this::createBootJar);
-            project.packActions.replaceOrAppend(JkProject.CREATE_JAR_ACTION, () -> createBootJar(artifactFile));
+            project.pack.setJarMaker(this::createBootJar);
+            project.pack.actions.replaceOrAppend(JkProjectPackaging.CREATE_JAR_ACTION, () -> createBootJar(artifactFile));
         }
         if (createWarFile) {
             JkArtifactId artifactId = JkArtifactId.ofMainArtifact("war");
             Path artifactFile = project.artifactLocator.getArtifactPath(artifactId);
             Consumer<Path> warMaker = path -> JkJ2eWarProjectAdapter.of().generateWar(project, path);
-            project.packActions.replaceOrAppend("make-war-file", () -> warMaker.accept(artifactFile) );
+            project.pack.actions.replaceOrAppend("make-war-file", () -> warMaker.accept(artifactFile) );
         }
         if (createOriginalJar) {
             Path artifactFile = project.artifactLocator.getArtifactPath(ORIGINAL_ARTIFACT);
-            Consumer<Path> makeBinJar = project.packaging::createBinJar;
-            project.packActions.replaceOrAppend("make-original-jar", () -> makeBinJar.accept(artifactFile));
+            Consumer<Path> makeBinJar = project.pack::createBinJar;
+            project.pack.actions.replaceOrAppend("make-original-jar", () -> makeBinJar.accept(artifactFile));
         }
 
         // To deploy spring-Boot app in a container, we don't need to create a jar
         // This is more efficient to keep the structure exploded to have efficient image layering.
         // In this case, just copy manifest in class dir is enough.
         if (!createBootJar && !createOriginalJar && !createWarFile) {
-            project.packActions.replaceOrAppend("include-manifest", project.packaging::copyManifestInClassDir);
+            project.pack.actions.replaceOrAppend("include-manifest", project.pack::copyManifestInClassDir);
         }
 
-        project.packaging.setDetectMainClass(true);
-        project.packaging.setMainClassFinder(() -> {
+        project.pack.setDetectMainClass(true);
+        project.pack.setMainClassFinder(() -> {
             try {
                 return JkSpringbootJars.findMainClassName(project.compilation.layout.resolveClassDir());
             } catch (IllegalStateException e) {
@@ -126,7 +118,7 @@ public final class JkSpringbootProject {
     }
 
     /**
-     * Configures the underlying project for Spring-Boot usinf sensitive default
+     * Configures the underlying project for Spring-Boot using sensitive default
      * @see #configure(boolean, boolean, boolean)
      */
     public JkSpringbootProject configure() {
@@ -141,7 +133,7 @@ public final class JkSpringbootProject {
      */
     public JkSpringbootProject includeParentBom(String version) {
         project.compilation.dependencies
-                .add(BOM_COORDINATE + version);
+                .addVersionProvider(JkVersionProvider.of().andBom(BOM_COORDINATE + version));
         return this;
     }
 
@@ -172,12 +164,12 @@ public final class JkSpringbootProject {
         JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
         if (!classTree.exists()) {
             project.compilation.runIfNeeded();
-            project.testing.runIfNeeded();
+            project.test.runIfNeeded();
         }
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
-        final List<Path> embeddedJars = project.packaging.resolveRuntimeDependenciesAsFiles();
+        final List<Path> embeddedJars = project.pack.resolveRuntimeDependenciesAsFiles();
         JkSpringbootJars.createBootJar(classTree, embeddedJars, dependencyResolver.getRepos(), target,
-                project.packaging.getManifest());
+                project.pack.getManifest());
     }
 
 }

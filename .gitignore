@@ -1,2 +1,5 @@
 /.jeka-work/
 /jeka-output/
+/samples/samples.project-app/.idea/output/
+/samples/samples.sonarqube/.idea/output/
+/.idea/output/

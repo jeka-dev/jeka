@@ -16,7 +16,10 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.api.system.*;
+import dev.jeka.core.api.system.JkBusyIndicator;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkPrompt;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;

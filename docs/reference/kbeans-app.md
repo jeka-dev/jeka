@@ -1,6 +1,6 @@
 # App KBean
 
-<!-- autogen-doc -->
+<!-- header-autogen-doc -->
 
 ## Security
 
@@ -16,5 +16,6 @@ Example: `jeka.apps.url.trusted=github.com/djeang/` will trust urls formed as:
   - git@github.com:my-user-name/djeang/xxx..
   - ...
 
+<!-- body-autogen-doc -->
 
 

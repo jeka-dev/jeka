@@ -205,16 +205,17 @@ public final class JkTestProcessor {
      * Launches the specified test set with the underlying junit-platform. The classloader running the tests includes
      * the classpath of the current classloader plus the specified one.
      */
-    public JkTestResult launch(JkTestSelection testSelection) {
+    public JkTestResult run(JkTestSelection testSelection) {
         JkTestSelection effectiveSelection = testSelection.withTestClassRoots(testClassRootDirs.get());
-        if (!effectiveSelection.hasTestClasses()) {
-            JkLog.info("No test class found in %s. No test to run." , effectiveSelection.getTestClassRoots() );
-            return JkTestResult.of();
-        }
         final JkTestResult result;
         preActions.run();
         JkLog.startTask("execute-tests");
         JkLog.verbose(effectiveSelection.toString());
+        if (!effectiveSelection.hasTestClasses()) {
+            JkLog.info("No test class found in %s." , effectiveSelection.getTestClassRoots() );
+            JkLog.endTask();
+            return JkTestResult.of();
+        }
         if (forkingProcess == null) {
             result = launchInClassloader(effectiveSelection);
         } else {
@@ -236,12 +237,33 @@ public final class JkTestProcessor {
     }
 
     /**
+     * Launches the specified test set by including the provided patterns, using the underlying junit-platform setup.
+     * The method processes the given inclusion patterns to determine which tests to run and executes them.
+     * 
+     * @see #run(JkTestSelection)
+     * @see JkTestSelection#IT_PATTERN
+     * @see JkTestSelection#E2E_PATTERN
+     */
+    public JkTestResult runMatchingPatterns(String ... patterns) {
+        JkTestSelection testSelection = JkTestSelection.of().addIncludePatterns(patterns);
+        return run(testSelection);
+    }
+
+    /**
+     * @deprecated Use #run instead
+     */
+    @Deprecated
+    public JkTestResult launch() {
+        return run();
+    }
+
+    /**
      * Launches the default test selection using the underlying JUnit Platform setup.
      * This method executes tests defined within the provided test classpath and root directories.
      *
      */
-    public JkTestResult launch() {
-        return launch(JkTestSelection.of());
+    public JkTestResult run() {
+        return run(JkTestSelection.of());
     }
 
     private List<Path> computeClasspath(JkPathSequence testClasspath) {

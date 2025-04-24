@@ -27,66 +27,64 @@ import java.util.stream.Collectors;
 class Injects {
 
     static List<Class<? extends KBean>> getLocalInjectedClasses(Class<? extends KBean> kbeanClass) {
-        return getInjectFields(kbeanClass, true).stream()
+        return getInjectFields(kbeanClass).stream()
                 .map(Field::getType)
                 .map(clazz -> (Class<? extends KBean>) clazz)
                 .collect(Collectors.toList());
     }
 
-    static String getImportedDir(Field field) {
-        String importedDir;
-        final JkInject jkInject = field.getAnnotation(JkInject.class);
-        if (jkInject != null) {
-            importedDir = jkInject.value();
-        } else {
-            final JkInjectRunbase jkInjectRunbase = field.getAnnotation(JkInjectRunbase.class);
-            if (jkInjectRunbase != null) {
-                importedDir = jkInjectRunbase.value();
-            } else {
-                importedDir = null;
-            }
-        }
-        if (JkUtilsString.isBlank(importedDir)) {
-            importedDir = null;
-        }
-        return importedDir;
-    }
-
-    static void injectLocalKBeans(KBean kbeanUnderInitialization) {
+    static void injectAnnotatedFields(KBean kbeanUnderInitialization) {
         Field[] fields = kbeanUnderInitialization.getClass().getDeclaredFields();
         for (Field field : fields) {
             JkInject jkInject = field.getAnnotation(JkInject.class);
-            if (jkInject != null && JkUtilsString.isBlank(jkInject.value())) {
-                Class<?> type = field.getType();
-                if (!KBean.class.isAssignableFrom(type)) {
-                    String msg = String.format("A Field annotated with @JkInject should be of type or subtype " +
-                            "of KBean. Was: %s.%nPlease fix this in the code: %s.", type, field);
-                    throw new RuntimeException(msg);
-                }
-                JkRunbase runbase = kbeanUnderInitialization.getRunbase();
+            if (jkInject == null) {
+                continue;
+            }
+            Class<?> type = field.getType();
+            String jkInjectValue = jkInject.value();
+            JkRunbase runbase = kbeanUnderInitialization.getRunbase();
+
+            if (type.equals(JkRunbase.class)) {
+                JkRunbase childRunbase = runbase.getChildRunbase(jkInjectValue);
+                JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, childRunbase);
+                continue;
+            }
+
+            if (!KBean.class.isAssignableFrom(type)) {
+                String msg = String.format("A Field annotated with @JkInject should be of type or subtype " +
+                        "of KBean. Was: %s.%nPlease fix this in the code: %s.", type, field);
+                throw new RuntimeException(msg);
+            }
+
+            Class<? extends KBean> kbeanClass = (Class<? extends KBean>) type;
+
+            if (jkInjectValue.isEmpty()) {
                 KBean injectedValue;
                 if (runbase.isInitialized()) {
-                    injectedValue = runbase.load((Class<? extends KBean>) type);
+                    injectedValue = runbase.load(kbeanClass);
                 } else {
                     injectedValue = runbase.getBean(type);
                 }
                 JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, injectedValue);
+
+            } else {
+                JkRunbase childRunbase = runbase.getChildRunbase(jkInjectValue);
+                KBean value = childRunbase.load(kbeanClass);
+                JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, value);
             }
         }
     }
 
-    private static List<Field> getInjectFields(Class<? extends KBean> kbeanClass, boolean local) {
+    private static List<Field> getInjectFields(Class<? extends KBean> kbeanClass) {
         List<Field> result = new ArrayList<>();
         for (Field field : JkUtilsReflect.getDeclaredFieldsWithAnnotation(kbeanClass, JkInject.class)) {
             JkInject inject = field.getAnnotation(JkInject.class);
-            if (!JkUtilsString.isBlank(inject.value()) == local) {
+            if (!JkUtilsString.isBlank(inject.value())) {
                 continue;  // skip it
             }
             Class<?> type = field.getType();
-            if (!local && JkRunbase.class.isAssignableFrom(type)) {
-                result.add(field);
-            } else if (!KBean.class.isAssignableFrom(type)) {
-                throw new JkException(notLBeanClassMsg(field, local));
+            if (!KBean.class.isAssignableFrom(type)) {
+                throw new JkException(notLBeanClassMsg(field, true));
             } else {
                 result.add(field);
             }

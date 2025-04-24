@@ -16,9 +16,7 @@
 
 package dev.jeka.core.api.project;
 
-import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
-import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 
 /**
  * Provides factory methods to create different types of publications for a JkProject.

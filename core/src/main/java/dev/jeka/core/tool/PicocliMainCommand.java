@@ -174,6 +174,10 @@ public class PicocliMainCommand {
             description = "Display markdown formatted documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc.md'.")
     private boolean fakeDocMd;  // Handled at upper level
 
+    @Option(names = {"-cb", "--child-base"},
+            description = "Run uniquely the specified child base.")
+    private String childBase;
+
     @Option(names = "-D", mapFallbackValue = "", description = "Define system property as '-Dmy.key=my.value'.") // allow -Dkey
     void setProperty(Map<String, String> props) {
         props.forEach(System::setProperty);
@@ -200,7 +204,8 @@ public class PicocliMainCommand {
                 cleanWork,
                 cleanOutput,
                 forceMode,
-                skipCompile);
+                skipCompile,
+                childBase);
     }
 
     JkDependencySet dependencies() {

@@ -1,6 +1,6 @@
 # Native KBean
 
-<!-- autogen-doc -->
+<!-- header-autogen-doc -->
 
 [`NativeKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/nativ/NativeKBean.java) enables native compilation for *project* and *base* KBeans.
 
@@ -21,3 +21,5 @@
 Invocation: `jeka native: compile`
 
 See [native API](api-native.md).
+
+<!-- body-autogen-doc -->

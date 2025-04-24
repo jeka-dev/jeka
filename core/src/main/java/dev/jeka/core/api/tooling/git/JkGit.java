@@ -27,10 +27,7 @@ import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,6 +67,14 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public static JkGit of() {
         return of("");
+    }
+
+    /**
+     * Executes the specified <code>git</code> command with the specified arguments.
+     */
+    public static void exec(Object ...args) {
+        String[] commands = Arrays.stream(args).map(Object::toString).toArray(String[]::new);
+        JkGit.of().execCmd(commands);
     }
 
     /**

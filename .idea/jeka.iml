@@ -13,12 +13,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="plugins.jacoco" />
-    <orderEntry type="module" module-name="plugins.kotlin" />
-    <orderEntry type="module" module-name="plugins.nexus" exported="" scope="TEST" />
-    <orderEntry type="module" module-name="plugins.nodejs" />
-    <orderEntry type="module" module-name="plugins.protobuf" />
-    <orderEntry type="module" module-name="plugins.sonarqube" />
-    <orderEntry type="module" module-name="plugins.springboot" />
   </component>
 </module>

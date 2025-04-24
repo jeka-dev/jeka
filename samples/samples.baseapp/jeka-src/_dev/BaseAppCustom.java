@@ -1,6 +1,5 @@
 package _dev;
 
-import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.JkPostInit;
@@ -12,7 +11,7 @@ import dev.jeka.plugins.springboot.SpringbootKBean;
 @JkDep("org.springframework.boot:spring-boot-starter-test")
 
 @JkDep("../../plugins/plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
-class BaseAppBuild extends KBean {
+class BaseAppCustom extends KBean {
 
     public void clean() {
         cleanOutput();

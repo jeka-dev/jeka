@@ -16,7 +16,6 @@
 
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
-import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkPostInit;
@@ -25,7 +24,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-class NexusBuild extends KBean {
+class NexusCustom extends KBean {
 
     @JkPostInit
     private void postInit(IntellijKBean intellijKBean) {
@@ -44,11 +43,10 @@ class NexusBuild extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+        mavenKBean.getPublication()
                 .pomMetadata
                     .setProjectName("Jeka plugin for Jacoco")
-                    .setProjectDescription("A Jeka plugin for Jacoco coverage tool")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
+                    .setProjectDescription("A Jeka plugin for Jacoco coverage tool");
     }
 
 }

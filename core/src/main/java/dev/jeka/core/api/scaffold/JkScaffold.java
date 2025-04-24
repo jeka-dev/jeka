@@ -45,11 +45,8 @@ public abstract class JkScaffold {
 
     private static final String LAST_VERSION_OF_TOKEN = "${lastVersionOf:";
 
-    @JkDepSuggest(versionOnly = true, hint = "org.junit.jupiter:junit-jupiter")
-    private static final String JUPITER_VERSION = "5.12.0";
-
-    @JkDepSuggest(versionOnly = true, hint = "org.junit.platform:junit-platform-launcher")
-    private static final String JUNIT_PLATFORM_LAUNCHER_VERSION = "1.12.0";
+    @JkDepSuggest(versionOnly = true, hint = "org.junit:junit-bom")
+    public static final String JUPITER_VERSION = "5.12.0";
 
     protected final Path baseDir;
 
@@ -147,14 +144,8 @@ public abstract class JkScaffold {
 
     protected List<String> getJUnitDeps() {
         String jupiterModuleId = "org.junit.jupiter:junit-jupiter";
-        String jupiterLastVersion = findLatestStableVersion(jupiterModuleId, JUPITER_VERSION);
-        String jupiterDep = jupiterModuleId + ":" + jupiterLastVersion;
-
         String launcherModuleId = "org.junit.platform:junit-platform-launcher";
-        String launcherLastVersion = findLatestStableVersion(launcherModuleId, JUNIT_PLATFORM_LAUNCHER_VERSION);
-        String launcherDep = launcherModuleId + ":" + launcherLastVersion;
-
-        return Arrays.asList(jupiterDep, launcherDep);
+        return Arrays.asList(jupiterModuleId, launcherModuleId);
     }
 
     protected String getJekaVersion() {
@@ -206,7 +197,6 @@ public abstract class JkScaffold {
         return this;
     }
 
-
     /**
      * Adds a file entry to the list of file entries in the scaffold.
      * The file entry consists of a relative path and its content.
@@ -224,6 +214,22 @@ public abstract class JkScaffold {
         for (ListIterator<JkFileEntry> it = fileEntries.listIterator(); it.hasNext();) {
             JkFileEntry entry = it.next();
             if (entry.relativePath.startsWith(pathPrefix)) {
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Removes a file entry from the list of file entries. This gives a chance to plugins
+     * to remove the non-necessary files.
+     *
+     * @param relativePath the path, relative to base dir.
+     */
+    public void removeFileEntry(String relativePath) {
+        ListIterator<JkFileEntry> it = fileEntries.listIterator();
+        while (it.hasNext()) {
+            JkFileEntry fileEntry = it.next();
+            if (relativePath.equals(fileEntry.relativePath.toString())) {
                 it.remove();
             }
         }

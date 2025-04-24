@@ -25,6 +25,8 @@ import dev.jeka.core.api.system.JkInfo;
  */
 public final class JkConstants {
 
+
+
     // ------------ Standard file names and locations --------------------------
 
     /**
@@ -59,6 +61,10 @@ public final class JkConstants {
 
     // ------------ Jeka standard properties --------------------------
 
+    public static final String JEKA_JAVA_VERSION = "jeka.java.version";
+
+    public static final String JEKA_JAVA_DISTRIB = "jeka.java.distrib";
+
     static final String CMD_PREFIX_PROP = "jeka.cmd.";
 
     static final String CMD_APPEND_SUFFIX_PROP =  "_append";
@@ -68,6 +74,10 @@ public final class JkConstants {
 
     public static final String CLASSPATH_PROP = "jeka.classpath";
 
+    public static final String TEST_SKIP_PROP = "jeka.test.skip";
+
+    public static final String JEKA_CHILD_BASES_PROP = "jeka.child-bases";
+
     /**
      * @deprecated Use {@link #KBEAN_DEFAULT_PROP} instead.
      */
@@ -75,8 +85,6 @@ public final class JkConstants {
     public static final String DEFAULT_KBEAN_PROP = "jeka.default.kbean";
 
     public static final String KBEAN_DEFAULT_PROP = "jeka.kbean.default";
-
-    public static final String KBEAN_LOCAL_PROP = "jeka.kbean.local";
 
     static final String CMD_APPEND_PROP = CMD_PREFIX_PROP + CMD_APPEND_SUFFIX_PROP;
 

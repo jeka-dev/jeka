@@ -1,6 +1,6 @@
 # Maven KBean
 
-<!-- autogen-doc -->
+<!-- heaser-autogen-doc -->
 
 
 [`MavenKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/maven/MavenKBean.java) provides ability to publish artifacts on a 
@@ -14,3 +14,4 @@ It also provides convenient mean to migrate from Maven prajects.
 - property or programmatic configuration for published POM metadata and dependencies
 - property or programmatic configuration for publication repository
 
+<!-- body-autogen-doc -->

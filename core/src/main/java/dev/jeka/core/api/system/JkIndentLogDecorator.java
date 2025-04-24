@@ -19,7 +19,6 @@ package dev.jeka.core.api.system;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsTime;
-import dev.jeka.core.tool.JkExternalToolApi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -73,12 +72,6 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
     public void handle(JkLog.JkLogEvent event) {
         JkLog.Type logType = event.getType();
         PrintStream stream = out;
-        if (logType == JkLog.Type.ERROR || logType == JkLog.Type.WARN) {
-            out.flush();
-            stream = err;
-        } else {
-            err.flush();
-        }
         String message = event.getMessage();
         if (event.getType().isMessageType()) {
             if (event.getType() == JkLog.Type.WARN) {
@@ -86,7 +79,6 @@ public final class JkIndentLogDecorator extends JkLog.JkLogDecorator {
             } else if (event.getType() == JkLog.Type.ERROR) {
                 message = ERROR + message;
             } else {
-                //message = event.getType() + ": " + message;
                 if (event.getType() == JkLog.Type.VERBOSE) {
                     message = JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(message).reset().toString();
                 } else if (event.getType() == JkLog.Type.DEBUG) {

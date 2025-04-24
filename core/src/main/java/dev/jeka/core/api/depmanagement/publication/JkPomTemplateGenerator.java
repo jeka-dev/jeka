@@ -103,7 +103,7 @@ public final class JkPomTemplateGenerator {
         writer.writeCharacters("\n");
         writeElement("    ", writer, "connection", publicationInfo.getScmConnection());
         writeElement("    ", writer, "developerConnection", publicationInfo.getScmDeveloperConnection());
-        writeElement("    ", writer, "url", publicationInfo.getProjectUrl());
+        writeElement("    ", writer, "url", publicationInfo.getScmUrl());
         writer.writeCharacters("  ");
         writer.writeEndElement();
 

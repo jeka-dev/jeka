@@ -36,7 +36,7 @@ class JkProjectScaffoldTest {
         }
 
         // Check Build class is present
-        assertTrue(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Build.java")));
+        assertTrue(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Custom.java")));
 
         // Check project layout
         assertTrue(Files.isDirectory(baseDir.resolve("src/main/java")));

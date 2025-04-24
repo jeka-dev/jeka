@@ -24,7 +24,10 @@ import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
-import dev.jeka.core.api.java.*;
+import dev.jeka.core.api.java.JkInternalClasspathScanner;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
+import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
 import dev.jeka.core.api.kotlin.JkKotlinJvmCompileSpec;
 import dev.jeka.core.api.system.JkLocator;
@@ -106,7 +109,7 @@ class Engine {
         this.baseDir = baseDir;
         this.isMaster = isMaster;
         this.commandLineDependencies = commandLineDependencies;
-        this.properties = JkRunbase.constructProperties(baseDir);
+        this.properties = PropertiesHandler.constructRunbaseProperties(baseDir);
         this.jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         this.jekaSrcClassDir = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
 
@@ -131,7 +134,7 @@ class Engine {
                 key -> new Engine(isMaster, key, downloadRepos, commandLineDependencies));
     }
 
-    private Engine withBaseDir(Path baseDir) {
+    Engine withBaseDir(Path baseDir) {
         return of(false, baseDir, this.dependencyResolver.getRepos(), this.commandLineDependencies);
     }
 
@@ -177,15 +180,17 @@ class Engine {
         JkLog.debugStartTask("Scan jeka-src code for finding dependencies");
         final ParsedSourceInfo parsedSourceInfo = SourceParser.of(this.baseDir).parse();
 
-        JkLog.debug("Imported base dirs:" + parsedSourceInfo.importedBaseDirs);
+        //Collection<Path> depBaseDirs = parsedSourceInfo.importedBaseDirs;
+        Collection<Path> depBaseDirs = parsedSourceInfo.getDepBaseDirs();
+        JkLog.debug("Dependency base-dirs for %s: %s", baseDir, depBaseDirs);
         JkLog.debugEndTask();
 
         // Compute and get the classpath from sub-dirs
-        List<Engine> subBaseDirs = parsedSourceInfo.importedBaseDirs.stream()
+        List<Engine> subEngines = depBaseDirs.stream()
                 .map(this::withBaseDir)
                 .collect(Collectors.toList());
 
-        JkPathSequence addedClasspathFromSubDirs = subBaseDirs.stream()
+        JkPathSequence addedClasspathFromSubDirs = subEngines.stream()
                 .map(Engine::resolveClassPaths)
                 .map(classpathSetupResult -> classpathSetupResult.runClasspath)
                 .reduce(JkPathSequence.of(), JkPathSequence::and);
@@ -203,7 +208,7 @@ class Engine {
                 .collect(Collectors.toList());
         JkDependencySet dependencies = commandLineDependencies
                 .and(jekaPropsDeps)
-                .and(parsedSourceInfo.getDependencies())
+                .and(parsedSourceInfo.getSanitizedDeps()) // TODO we should include dependencies of sub-runbases when declared as @JKDep("subBaseDir")
                 .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
 
         JkPathSequence kbeanClasspath = JkPathSequence.of(dependencyResolver.resolveFiles(dependencies))
@@ -211,7 +216,7 @@ class Engine {
 
         if (BehaviorSettings.INSTANCE.skipCompile) {
             JkLog.debugEndTask();
-            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subBaseDirs, kbeanClasspath, dependencies);
+            this.classpathSetupResult = compileLessClasspathResult(parsedSourceInfo, subEngines, kbeanClasspath, dependencies);
             return this.classpathSetupResult;
         }
 
@@ -243,7 +248,7 @@ class Engine {
 
         // Prepare result and return
         this.classpathSetupResult = new ClasspathSetupResult(compileResult.success,
-                runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subBaseDirs, dependencies);
+                runClasspath, kbeanClasspath, exportedClasspath, exportedDependencies, subEngines, dependencies);
 
 
         JkLog.debugEndTask();
@@ -260,17 +265,20 @@ class Engine {
 
         // Find all KBean class available for this
         List<String> kbeanClassNames = findKBeanClassNames();
-        this.kbeanResolution = KBeanResolution.of(this.isMaster, this.properties, baseDir, kbeanClassNames);
+        this.kbeanResolution = KBeanResolution.of(isMaster, this.properties, baseDir, kbeanClassNames);
         return kbeanResolution;
     }
 
-    JkRunbase initRunbase(KBeanAction.Container actionContainer) {
+    JkRunbase getOrCreateRunbase(KBeanAction.Container actionContainer, boolean isMaster) {
         if (runbase != null) {
             return runbase;
         }
         this.actionContainer = actionContainer;
 
-        runbase = JkRunbase.createMaster(baseDir);
+        runbase = new JkRunbase(baseDir);
+        if (isMaster) {
+            JkRunbase.setMaster(runbase);
+        }
         runbase.setKbeanResolution(getKbeanResolution());
         runbase.setDependencyResolver(dependencyResolver);
         runbase.setClasspath(classpathSetupResult.runClasspath);
@@ -281,16 +289,16 @@ class Engine {
 
 
         // initialise runbase with resolved commands
-        runbase.init(this.actionContainer);
+        runbase.init(this.actionContainer, isMaster);
         return runbase;
     }
 
     void run() {
-        runbase.run(actionContainer);
+        runbase.run(actionContainer, true);
     }
 
-    DefaultAndImplicitKBean defaultAndInitKbean(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
-        return DefaultAndImplicitKBean.of(this.isMaster, this.properties, kbeanClassNames, localKbeanClassNames);
+    String defaultKBeanClassName(List<String> kbeanClassNames, List<String> localKbeanClassNames) {
+        return DefaultKBeanResolver.get(isMaster, this.properties, kbeanClassNames, localKbeanClassNames);
     }
 
     JkRunbase getRunbase() {
@@ -399,7 +407,7 @@ class Engine {
             throw new JkException(NO_JDK_MSG);
         }
         if (jekaSource.containFiles()) {
-            return JkJavaCompilerToolChain.of().compile(javaCompileSpec);
+            return JkJavaCompilerToolChain.of().compile(javaCompileSpec) != JkJavaCompilerToolChain.Status.FAILED;
         }
         JkLog.verbose("jeka-src dir does not contain sources. Skip compile");
         return true;

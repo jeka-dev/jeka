@@ -274,8 +274,12 @@ public final class JkDependencyResolver  {
         JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies
                 .withCoordinateDependenciesOnly()
                 .withResolvedBoms(effectiveRepos())
-                .assertNoUnspecifiedVersion()
+                //.assertNoUnspecifiedVersion()
                 .toResolvedModuleVersions();
+
+        if (params.isFailOnDependencyResolutionError()) {
+            moduleQualifiedDependencies.assertNoUnspecifiedVersion();
+        }
 
         // Warn if no dependency is present
         boolean hasModule = !moduleQualifiedDependencies.getDependencies().isEmpty();
@@ -312,12 +316,12 @@ public final class JkDependencyResolver  {
         if (JkLog.isVerbose()) {
             int moduleCount = resolveResult.getInvolvedCoordinates().size();
             int fileCount = resolveResult.getFiles().getEntries().size();
-            JkLog.info("->  Resolved to %s, resulting in %s.",
+            JkLog.verbose("->  Resolved to %s, resulting in %s.",
                     pluralize(moduleCount, "coordinate"),
                     pluralize(fileCount, "file"));
 
             if (JkLog.isDebug()) {
-                resolveResult.getFiles().forEach(path -> JkLog.info("  " + path.toString()));
+                resolveResult.getFiles().forEach(path -> JkLog.debug("  " + path.toString()));
             }
         }
 

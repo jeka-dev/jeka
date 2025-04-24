@@ -1,0 +1,11 @@
+# sample file
+
+[compile]
+dev.jeka:jeka-core:0.11.24
+com.google.code.gson:gson:2.12.1
+../otherchild
+
+[test]
+org.mockito:mockito-core
+
+

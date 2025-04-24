@@ -7,7 +7,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-class Build extends KBean {
+class Custom extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
@@ -26,13 +26,13 @@ class Build extends KBean {
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+        mavenKBean.getPublication()
             .pomMetadata
                 .addApache2License()
                 .setProjectName("Jeka plugin for ....")
                 .setProjectDescription("A Jeka plugin for ...")
                 .setProjectUrl("https://github.com/your_org/your_repo")
-                .setScmUrl("https://github.com/your_org/your_repo"));
+                .setScmUrl("https://github.com/your_org/your_repo");
     }
 
 }

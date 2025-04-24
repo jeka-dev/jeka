@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
  */
 @JkDep("../../plugins/plugins.jacoco/jeka-output/dev.jeka.jacoco-plugin.jar")
 @JkDep("org.eclipse.jdt:ecj:3.25.0")  // Inject Eclipse compiler that we are using in this build
-class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
+class JkProjectCustom extends KBean implements JkIdeSupportSupplier {
 
     JkProject project = project();
 
@@ -41,7 +41,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Clean output and create the bin jar for this project")
     public void cleanPack() {
-        project().clean().pack();
+        project().clean().pack.run();
     }
 
     @JkDoc("Pulish on Maven repo")
@@ -63,7 +63,7 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
         JkProject project = JkProject.of().setBaseDir(getBaseDir());
 
         // we want to create regular and fat jar, when 'pack' is invoked.
-        project.packActions.append(project.packaging::createFatJar);
+        project.pack.actions.append(project.pack::createFatJar);
 
         // Control on how dependency resolver behavior
         project
@@ -92,33 +92,20 @@ class JkProjectBuild extends KBean implements JkIdeSupportSupplier {
 
 
         // Control on 'test code compilation' (same as for 'prod code')
-        project
-            .testing
-                .compilation
-                    .addJavaCompilerOptions("-g")
-                    .dependencies
-                            .add("org.junit.jupiter:junit-jupiter:5.10.1");
+        project.test.compilation.addJavaCompilerOptions("-g");
+        project.test.compilation.dependencies.add("org.junit.jupiter:junit-jupiter:5.10.1");
 
-        // Control on test selection to run
-        project
-            .testing
-                .testSelection
-                    .addIncludePatterns(JkTestSelection.IT_PATTERN);
-
-        // Control on test process
-        project
-            .testing
-                .testProcessor
+        // test settings
+        project.test.selection.addIncludePatterns(JkTestSelection.IT_PATTERN);
+        project.test.processor
                     .setForkingProcess(true)
                     // ...
                     .engineBehavior
                         //...
                         .setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);
-        project
-            .packaging
-                .javadocProcessor.addOptions("--enable-preview");
-        project
-            .packaging
+
+        project.pack.javadocProcessor.addOptions("--enable-preview");
+        project.pack
                 .customizeFatJarContent(pathTreeSet ->  pathTreeSet
                         .withMatcher(JkPathMatcher.of(false, "**/*.jks")))
                 .runtimeDependencies

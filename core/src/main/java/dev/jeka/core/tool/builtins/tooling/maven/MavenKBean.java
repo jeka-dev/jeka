@@ -20,22 +20,22 @@ import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkBuildable;
+import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
-import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkRequire;
 import dev.jeka.core.tool.JkRunbase;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @JkDoc("Manages Maven publication for project and 'jeka-src'.")
@@ -62,30 +62,29 @@ public final class MavenKBean extends KBean {
     @JkDoc("Indentation size for 'showPomDeps' output.")
     public int codeIndent = 4;
 
-    public final JkPublicationOptions publication = new JkPublicationOptions();
+    @JkDoc
+    private final JkPublicationOptions pub = new JkPublicationOptions();
 
-    private JkMavenPublication mavenPublication;
-
-    private final JkConsumers<JkMavenPublication> mavenPublicationCustomizer = JkConsumers.of();
+    private JkMavenPublication publication;
 
     @JkDoc("Displays Maven publication information on the console.")
     public void info() {
-        JkLog.info(getMavenPublication().info());
+        JkLog.info(getPublication().info());
     }
 
     @JkDoc("Publishes the Maven publication on the repositories specified inside this publication.")
     public void publish() {
-        getMavenPublication().publish();
+        getPublication().publish();
     }
 
     @JkDoc("Publishes the Maven publication on the local JeKa repository.")
     public void publishLocal() {
-        getMavenPublication().publishLocal();
+        getPublication().publishLocal();
     }
 
     @JkDoc("Publishes the Maven publication on the local M2 repository. This is the local repository of Maven.")
     public void publishLocalM2() {
-        getMavenPublication().publishLocalM2();
+        getPublication().publishLocalM2();
     }
 
     @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
@@ -108,76 +107,64 @@ public final class MavenKBean extends KBean {
     /**
      * Returns the Maven Publication associated with this KBean
      */
-    public JkMavenPublication getMavenPublication() {
+    public JkMavenPublication getPublication() {
+        if (publication == null) {
+            JkBuildable buildable = this.getRunbase().getBuildable();
+            publication = JkMavenPublication.of(buildable);
+            if (!JkUtilsString.isBlank(pub.moduleId)) {
+                publication.setModuleId(pub.moduleId);
+            }
+            if (!JkUtilsString.isBlank(pub.version)) {
+                publication.setVersion(pub.version);
+            }
+            if (pub.gitVersioning.enable) {
+                publication.setVersionSupplier(
+                        JkVersionFromGit.of(this.getBaseDir(), pub.gitVersioning.tagPrefix)::getVersionAsJkVersion);
+            }
 
-        // maven Can't be instantiated in init(), cause it will fail if there is no project or self kbean,
-        // that may happen when doing a 'showPomDeps'.
-        if (mavenPublication != null) {
-            return mavenPublication;
+            this.pub.metadata.applyTo(publication);
+
+            // Add Publish Repos from JKProperties
+            publication.setRepos(getPublishReposFromProps());
+
+            // Add artifacts declared in "publication.extraArtifacts"
+            pub.extraArtifacts().forEach(publication::putArtifact);
+
+            if (pub.parentBom) {
+                configureForBom(publication);
+            }
         }
-        // Configure with ProjectKBean if present
-        JkBuildable buildable = this.getRunbase().getBuildable();
-        JkUtilsAssert.state(buildable != null, "No buildable is found for runbase %s for publication.",
-                getRunbase().getBaseDir());
-        mavenPublication = JkMavenPublication.of(buildable);
-
-        this.publication.metadata.applyTo(mavenPublication);
-
-        // Add Publish Repos from JKProperties
-        mavenPublication.setRepos(getPublishReposFromProps());
-
-        this.mavenPublicationCustomizer.accept(mavenPublication);
-
-        // Add artifacts declared in "publication.extraArtifacts"
-        publication.extraArtifacts().forEach(mavenPublication::putArtifact);
-        
-        return mavenPublication;
+        return publication;
     }
 
-    /**
-     * @see #customizePublication(String, Consumer)
-     */
-    public void customizePublication(Consumer<JkMavenPublication> publicationCustomizer) {
-        this.customizePublication(publicationCustomizer.toString(), publicationCustomizer);
+    public JkRepoSet createStandardOssrhRepos() {
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
+        JkGpgSigner signer = JkGpgSigner.ofStandardProperties();
+        return JkRepoSet.ofOssrhSnapshotAndRelease(repoProperties.getPublishUsername(),
+                    repoProperties.getPublishPassword(), signer);
     }
 
-    /**
-     * Customizes the Maven publication by appending a custom action to the publication customization process.
-     *
-     * @param customizationName The name of the customization for identification purposes.
-     * @param publicationCustomizer A Consumer that applies custom configurations to the Maven publication.
-     */
-    public void customizePublication(String customizationName, Consumer<JkMavenPublication> publicationCustomizer) {
-        JkUtilsAssert.state(mavenPublication == null, "Maven publication has already been initialized, " +
-                "the customization can not be taken in account.");
-        this.mavenPublicationCustomizer.append(customizationName, publicationCustomizer);
-    }
-
-    /**
-     * Customizes the Maven dependencies by applying a modifier function to the dependency set.
-     * This allows for dynamic alterations to the dependencies before the Maven publication process.
-     */
-    public void customizePublishedDeps(Function<JkDependencySet, JkDependencySet> modifier) {
-        this.mavenPublicationCustomizer.append(mavenPublication -> {
-            mavenPublication.customizeDependencies(modifier);
+    private void configureForBom(JkMavenPublication bomPublication ) {
+        bomPublication.customizeDependencies(deps -> JkDependencySet.of()); // No dependencies in BOM
+        bomPublication.removeAllArtifacts();  // No artifacts in BOM
+        getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
+            JkProject project = projectKBean.project;
+            bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(),
+                    bomPublication.getVersion().toString());
         });
     }
 
     private JkRepoSet getPublishReposFromProps() {
-        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
-        if (publication.predefinedRepo == PredefinedRepo.OSSRH) {
-            JkGpgSigner signer = JkGpgSigner.ofStandardProperties();
-            return JkRepoSet.ofOssrhSnapshotAndRelease(repoProperties.getPublishUsername(),
-                    repoProperties.getPublishPassword(), signer);
+        if (pub.predefinedRepo == PredefinedRepo.OSSRH) {
+            return createStandardOssrhRepos();
         }
+        JkRepoProperties repoProperties = JkRepoProperties.of(this.getRunbase().getProperties());
         JkRepoSet result = repoProperties.getPublishRepository();
         if (result.getRepos().isEmpty()) {
             result = result.and(JkRepo.ofLocal());
         }
         return result;
     }
-
-
 
     public static class JkPomMetadata {
 
@@ -193,10 +180,10 @@ public final class MavenKBean extends KBean {
         @JkDoc("The url to fetch source code, as the git repo url")
         public String projectScmUrl;
 
-        @JkDoc("Comma separated list of license formated as <license name>:<license url>")
+        @JkDoc("Comma separated list of license formated as <license name>=<license url>")
         @JkDepSuggest(versionOnly = true, hint =
-                "Apache License V2.0:https://www.apache.org/licenses/LICENSE-2.0.html," +
-                "MIT License:https://www.mit.edu/~amini/LICENSE.md")
+                "Apache License V2.0=https://www.apache.org/licenses/LICENSE-2.0.html," +
+                "MIT License=https://www.mit.edu/~amini/LICENSE.md")
         public String licenses;
 
         @JkDoc("Comma separated list of developers formatted as <dev nam>:<dev email>")
@@ -219,9 +206,9 @@ public final class MavenKBean extends KBean {
             if (licenses != null) {
                 Arrays.stream(licenses.split(",")).forEach(
                         item -> {
-                            String[] licenseItems = item.split(":");
+                            String[] licenseItems = item.split("=");
                             String licenseName = licenseItems[0];
-                            String licenseUrl = licenseItems[1];
+                            String licenseUrl = licenseItems.length > 1 ? licenseItems[1] : "";
                             publication.pomMetadata.addLicense(licenseName, licenseUrl);
                         }
                 );
@@ -240,6 +227,20 @@ public final class MavenKBean extends KBean {
     }
 
     public static class JkPublicationOptions {
+
+        @JkDoc("Module id of the module to publish formatted as groupId:artifactId")
+        public String moduleId;
+
+        @JkDoc("The version of the module to publish")
+        public String version;
+
+        @JkDoc("If true, the publication will generate a BOM as its only artifact. \n" +
+                "The BOM will point to the version of each child base that contains a project KBean.\n" +
+                "Be caution to declare it with leading '_' as  '_@maven.pub.parentBom' in jeka.properties to not" +
+                " propagate it to children.")
+        public boolean parentBom;
+
+        public final JkGitVersioning gitVersioning = JkGitVersioning.of();
 
         @JkDoc("POM metadata to publish. Mainly useful for publishing to Maven Central")
         public final JkPomMetadata metadata = new JkPomMetadata();

@@ -1,6 +1,6 @@
 # Project KBean
 
-<!-- autogen-doc -->
+<!-- header-autogen-doc -->
 
 
 [`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
@@ -56,3 +56,4 @@ A KBean that reads te underlying `JkProject` to extract information.
 - [Protobuf KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java):
   A KBean that adds a Proto-buffer code generation to the underlying `JkProject`.
 
+<!-- body-autogen-doc -->

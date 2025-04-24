@@ -347,11 +347,13 @@ public final class JkKotlinCompiler {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + effectiveOptions);
         }
         JkUtilsPath.createDirectories(outputDir);
-        String message = "Compiling Kotlin sources " + compileSpec.getSources();
-        if (JkLog.verbosity().isVerbose()) {
-            message = message + " to " + outputDir + " using options : " + String.join(" ", effectiveOptions);
+
+        JkLog.verboseStartTask("compile-kotlin-sources");
+        JkLog.verbose("Compiling Kotlin sources " + compileSpec.getSources());
+        if (JkLog.isVerbose()) {
+            JkLog.verbose("Options: " + JkUtilsString.formatOptions(compileSpec.getOptions()));
+
         }
-        JkLog.verboseStartTask(message);
         final Result result = run(compileSpec);
         JkLog.verboseEndTask();
         if (!result.success) {
@@ -416,14 +418,14 @@ public final class JkKotlinCompiler {
             loggedOptions.add(plugin.toOption());
         }
         if (command != null) {
-            JkLog.verbose("Use kotlin compiler : %s with options %s", command, loggedOptions);
+            JkLog.verbose("Use kotlin compiler : %s with options %s", command, JkUtilsString.formatOptions(loggedOptions));
             kotlincProcess = JkProcess.of(command)
                     .addParams(this.jvmOptions.stream()
                             .map(JkKotlinCompiler::toJavaOption)
                             .collect(Collectors.toList()));
         } else {
-            JkLog.verbose("Use Kotlin compiler using jars %s", jarsVersionAndTarget);
-            JkLog.verbose("Use Kotlin compiler with options %s", loggedOptions);
+            JkLog.verbose("Use Kotlin compiler using jars %s", jarsVersionAndTarget.formattedToString());
+            JkLog.verbose("Use Kotlin compiler with options %s", JkUtilsString.formatOptions(loggedOptions));
             kotlincProcess = JkJavaProcess.ofJava( "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
                     .setClasspath(jarsVersionAndTarget.jars)
                     .addJavaOptions(this.jvmOptions)
@@ -493,6 +495,15 @@ public final class JkKotlinCompiler {
                     ", version='" + version + '\'' +
                     ", target=" + target +
                     '}';
+        }
+
+        private String formattedToString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("version=").append(version).append("\n");
+            sb.append("target=").append(target).append("\n");
+            sb.append("jars").append("\n");
+            jars.forEach(jar -> {sb.append("  ").append(jar).append("\n");});
+            return sb.toString();
         }
     }
 

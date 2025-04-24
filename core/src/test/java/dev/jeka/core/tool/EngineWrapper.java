@@ -86,7 +86,7 @@ class EngineWrapper {
         KBeanAction.Container cmdLineActions = parse(args, props, kBeanResolution);
         props.getAllStartingWith("", true).forEach(System::setProperty);
         try {
-            engine.initRunbase(cmdLineActions);
+            engine.getOrCreateRunbase(cmdLineActions, true);
         } finally {
             props.getAllStartingWith("", true).keySet().forEach(System::clearProperty);
         }
@@ -107,12 +107,9 @@ class EngineWrapper {
         allKBeanClasses.addAll(Arrays.asList(jekaSrcKBeanClasses));
         List<String> allKBeans = allKBeanClasses.stream().map(Class::getName).collect(Collectors.toList());
         List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
+        String defaultKBeanClassName = engine.defaultKBeanClassName(allKBeans, jekaSrcKBeans);
 
-        DefaultAndImplicitKBean defaultAndInitKBean = engine.defaultAndInitKbean(allKBeans, jekaSrcKBeans);
-
-        return new KBeanResolution(
-                allKBeans, jekaSrcKBeans, defaultAndInitKBean.defaultKBeanClassName, defaultAndInitKBean.implicitKbeanClassName
-        );
+        return new KBeanResolution(allKBeans, jekaSrcKBeans, defaultKBeanClassName);
     }
 
     private KBeanAction.Container parse(String[] args, JkProperties props, KBeanResolution kBeanResolution) {

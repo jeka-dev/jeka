@@ -94,7 +94,7 @@ public class SonarqubeKBean extends KBean {
     @JkDoc("Adds Sonarqube analysis to quality checkers")
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
-        projectKBean.project.qualityChecking.add("sonarqube", () -> {
+        projectKBean.project.qualityCheck.add("sonarqube", () -> {
             run();
             if (gate) {
                 check();

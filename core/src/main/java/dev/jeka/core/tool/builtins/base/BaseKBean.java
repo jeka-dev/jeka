@@ -27,13 +27,10 @@ import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkBuildable;
-import dev.jeka.core.api.project.JkIdeSupport;
-import dev.jeka.core.api.project.JkProjectFlatFacade;
 import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestResult;
-import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -132,14 +129,21 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
     @JkDoc("Launches test suite")
     public void test() {
+        if ("true".equals(getRunbase().getProperties().get(JkConstants.TEST_SKIP_PROP))) {
+            JkLog.info("Tests are skipped.");
+            return;
+        }
         if (!JkTestProcessor.isEngineTestPresent()) {
-            throw new JkException("No engine test class found in current classloader. " +
-                    "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies" +
+            throw new JkException("No test engine class found in current classloader. " +
+                    "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies " +
                     "to the classpath for testing.");
         }
-        JkTestResult testResult = JkTestProcessor.of(JkClassLoader.ofCurrent()::getClasspath, getAppClasses()::getRoot)
+
+        Supplier<JkPathSequence> classpathSupplier = this.getRunbase()::getClasspath;
+        Supplier<Iterable<Path>> rootClassSupplier = () -> this.getBaseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
+        JkTestResult testResult = JkTestProcessor.of(classpathSupplier, rootClassSupplier)
                 .setForkingProcess(true)
-                .launch();
+                .run();
         if (!testResult.getFailures().isEmpty()) {
             System.exit(1);
         }
@@ -522,7 +526,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
-                return JkJavaCompilerToolChain.of().compile(compileSpec);
+                return JkJavaCompilerToolChain.of().compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;
             }
 
             @Override

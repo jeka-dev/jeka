@@ -18,6 +18,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -26,8 +27,10 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 
 class LocalAndTxtDependencies {
@@ -66,18 +69,62 @@ class LocalAndTxtDependencies {
     /**
      * @see #ofTextDescription(String)
      */
-    public static LocalAndTxtDependencies ofOptionalTextDescription(Path path) {
+    public static LocalAndTxtDependencies ofOptionalTextDescription(Path path, Path baseDir,
+                                                                    Function<Path, JkProject> projectResolver) {
         if (Files.notExists(path)) {
             return LocalAndTxtDependencies.of();
         }
-        return ofTextDescription(JkUtilsPath.toUrl(path));
+        return ofTextDescription(JkUtilsPath.toUrl(path), baseDir, projectResolver);
     }
 
     /**
      * @see #ofTextDescription(String)
      */
-    public static LocalAndTxtDependencies ofTextDescription(URL url) {
-        return ofTextDescription(JkUtilsIO.read(url));
+    public static LocalAndTxtDependencies ofTextDescription(URL url, Path baseDir,
+                                                            Function<Path, JkProject> projectResolver) {
+        String content = JkUtilsIO.read(url);
+        if (isLegacyFormat(content)) {
+            Path path = JkUtilsPath.fromUrl(url);
+            JkLog.warn("%s has still legacy format.", path);
+            return ofTextDescription(JkUtilsIO.read(url));
+        } else {
+            Path path = JkUtilsPath.fromUrl(url);
+            JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path, baseDir, projectResolver);
+            return new LocalAndTxtDependencies(dependenciesTxt.computeCompileDeps(),
+                    dependenciesTxt.computeRuntimeDeps(), dependenciesTxt.computeTestDeps());
+        }
+    }
+
+
+
+    public JkDependencySet getCompile() {
+        return compile;
+    }
+
+    public JkDependencySet getRuntime() {
+        return runtime;
+    }
+
+    public JkDependencySet getTest() {
+        return test;
+    }
+
+
+    public LocalAndTxtDependencies and(LocalAndTxtDependencies other) {
+        return new LocalAndTxtDependencies(
+                compile.and(other.compile),
+                runtime.and(other.runtime),
+                test.and(other.test)
+        );
+    }
+
+    static boolean isLegacyFormat(String content) {
+        return Arrays.stream(content.split("\n"))
+                .noneMatch(line ->
+                        line.trim().startsWith("[compile]")
+                        || line.trim().startsWith("[runtime]")
+                        || line.trim().startsWith("[test]")
+                        || line.trim().startsWith("[version]"));
     }
 
     /**
@@ -101,29 +148,8 @@ class LocalAndTxtDependencies {
      * org.fluentlenium:fluentlenium-junit:3.2.0
      * </pre>
      */
-    public static LocalAndTxtDependencies ofTextDescription(String description) {
+    private static LocalAndTxtDependencies ofTextDescription(String description) {
         return Parser.parseTxt(description);
-    }
-
-    public JkDependencySet getCompile() {
-        return compile;
-    }
-
-    public JkDependencySet getRuntime() {
-        return runtime;
-    }
-
-    public JkDependencySet getTest() {
-        return test;
-    }
-
-
-    public LocalAndTxtDependencies and(LocalAndTxtDependencies other) {
-        return new LocalAndTxtDependencies(
-                compile.and(other.compile),
-                runtime.and(other.runtime),
-                test.and(other.test)
-        );
     }
 
     private static class Parser {

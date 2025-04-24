@@ -8,8 +8,9 @@
 
 	<property name="bin" location="jeka-bin" />
 
-	<fileset id="libs" dir="core/libs/compile-only">
-		<include name='**/*.jar' />
+	<fileset id="libs" dir="core">
+		<include name="libs/compile-only/*.jar" />
+		<include name="jeka-boot/*.jar" />
 	</fileset>
 
 	<fileset id="junit5-libs" dir="core/libs/test">
@@ -25,10 +26,7 @@
 		<mkdir dir="${bin}" />
 		<javac destdir="${bin}" encoding="UTF-8" includeantruntime="false">
 			<src path="core/src/main/java" />
-
-			<!-- needed to include sample builds into quality analysis -->
-			<src path="plugins/plugins.jacoco" />
-			<src path="plugins/plugins.sonarqube" />
+			<src path="core/jeka-src" />
 			<src path="plugins/plugins.nexus" />
 
 			<classpath>
@@ -46,7 +44,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="pipeline: run --inspect --stacktrace" />
+			<arg line="project: test pack e2eTest base: test --inspect --stacktrace -Djeka.test.skip=false" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

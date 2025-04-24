@@ -92,7 +92,7 @@ Your script may depends of some unstable JeKa APIs. To make sure your script wil
 whatever JeKa version is installed at client/user side, mention the following properties in 
 *jeka.properties*, as :
 ```properties
-jeka.version=0.11.12
+jeka.version=0.11.24
 ```
 
 ## Add dependencies

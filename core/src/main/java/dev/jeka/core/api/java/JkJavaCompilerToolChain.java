@@ -46,6 +46,10 @@ import java.util.*;
  */
 public final class JkJavaCompilerToolChain {
 
+    public enum Status {
+        SUCCESS, FAILED, NO_SOURCES
+    }
+
     /**
      * Filter to consider only Java source
      */
@@ -136,7 +140,7 @@ public final class JkJavaCompilerToolChain {
      *
      * @throws IllegalStateException if a compilation error occurred and the 'withFailOnError' flag is <code>true</code>.
      */
-    public boolean compile(JkJavaVersion targetVersion, JkJavaCompileSpec compileSpec) {
+    public Status compile(JkJavaVersion targetVersion, JkJavaCompileSpec compileSpec) {
         final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
@@ -145,7 +149,7 @@ public final class JkJavaCompilerToolChain {
         }
         if (!compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
             JkLog.warn("No Java source files found in %s", compileSpec.getSources());
-            return true;
+            return Status.NO_SOURCES;
         }
         JkUtilsPath.createDirectories(outputDir);
 
@@ -162,13 +166,13 @@ public final class JkJavaCompilerToolChain {
         final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
         JkLog.verbose("Compilation " + (result ? "completed successfully" : "failed"));
         JkLog.verboseEndTask();
-        return result;
+        return result ? Status.SUCCESS : Status.FAILED;
     }
 
     /**
      * @see #compile(JkJavaVersion, JkJavaCompileSpec)
      */
-    public boolean compile(JkJavaCompileSpec compileSpec) {
+    public Status compile(JkJavaCompileSpec compileSpec) {
         return compile(null, compileSpec);
     }
 
@@ -195,6 +199,8 @@ public final class JkJavaCompilerToolChain {
         return items[0];
     }
 
+
+
     private static JavaCompiler compileToolOrFail() {
         JavaCompiler result = ToolProvider.getSystemJavaCompiler();
         if (result == null) {
@@ -219,7 +225,10 @@ public final class JkJavaCompilerToolChain {
             }
             Path javaHome = Paths.get(System.getProperty("java.home"));
             if (!Files.exists(javaHome.resolve("bin/javac"))) {
-                throw  new IllegalStateException("The current Java is not a JDK." +
+                javaHome = javaHome.getParent();
+            }
+            if (!Files.exists(javaHome.resolve("bin/javac"))) {
+                throw new IllegalStateException("The current Java is not a JDK." +
                         " Please run a JDK or precise the java version to run.");
             }
             return new ToolOrProcess(javaHome);
@@ -261,7 +270,7 @@ public final class JkJavaCompilerToolChain {
         if (JkLog.isVerbose()) {
             JkLog.verbose("Compile in-process.");
             if (JkLog.isVerbose()) {
-                JkLog.verbose("Compile options: %s", compileOptionsAsString(options));
+                JkLog.verbose("Compile options: %s", JkUtilsString.formatOptions(options));
             }
         }
         return task.call();
@@ -269,7 +278,7 @@ public final class JkJavaCompilerToolChain {
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
         JkLog.info("Fork compile using command " + process.getParamAt(0));
-        JkLog.info("Compile options: " + compileOptionsAsString(compileSpec.getOptions()));
+        JkLog.info("Compile options: " + JkUtilsString.formatOptions(compileSpec.getOptions()));
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));
@@ -354,21 +363,6 @@ public final class JkJavaCompilerToolChain {
             javac = javaHome.getParent().resolve("bin/javac");
         }
         return javac;
-    }
-
-    private static String compileOptionsAsString(List<String> options) {
-        StringBuilder sb = new StringBuilder();
-        for (String option : options) {
-            if (option.contains(File.pathSeparator) && option.length() > 100) {
-                Arrays.stream(option.split(File.pathSeparator))
-                        .forEach(item -> sb.append("\n    ").append(item));
-            } else if (option.startsWith("-")) {
-                sb.append("\n  ").append(option);
-            } else {
-                sb.append(" ").append(option);
-            }
-        }
-        return sb.toString();
     }
 
     public static class JkJdks {

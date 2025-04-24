@@ -35,13 +35,10 @@ class KBeanInitStore {
 
     public final String defaultKBeanClassName;
 
-    public final String implicitKBeanClassName;
-
     public final List<String> involvedKBeanClassNames;
 
-    KBeanInitStore(String defaultKBeanClassName, String implicitKBeanClassName, List<String> involvedKBeanClassNames) {
+    KBeanInitStore(String defaultKBeanClassName, List<String> involvedKBeanClassNames) {
         this.defaultKBeanClassName = defaultKBeanClassName;
-        this.implicitKBeanClassName = implicitKBeanClassName;
         this.involvedKBeanClassNames = involvedKBeanClassNames;
     }
 
@@ -55,14 +52,12 @@ class KBeanInitStore {
         List<String> involvedKBeanClassNames = Arrays.asList(involvedLine.split(","));
         return new KBeanInitStore(
                 JkUtilsString.emptyToNull(props.get("default")),
-                JkUtilsString.emptyToNull(props.get("implicit")),
                 involvedKBeanClassNames);
     }
 
     void store(Path baseDir) {
         Properties properties = new Properties();
         properties.put("default", JkUtilsString.nullToEmpty(defaultKBeanClassName));
-        properties.put("implicit", JkUtilsString.nullToEmpty(implicitKBeanClassName));
         properties.put("involved", String.join(",", involvedKBeanClassNames));
         try (OutputStream out = Files.newOutputStream(storeFile(baseDir))) {
             properties.store(out, "KBean init store");
@@ -72,7 +67,7 @@ class KBeanInitStore {
     }
 
     private static KBeanInitStore ofEmpty() {
-        return new KBeanInitStore(null, null, Collections.emptyList());
+        return new KBeanInitStore(null, Collections.emptyList());
     }
 
     private static Path storeFile(Path baseDir) {

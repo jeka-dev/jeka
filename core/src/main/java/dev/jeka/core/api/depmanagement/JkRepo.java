@@ -19,7 +19,10 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.utils.*;
+import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsIterable;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -34,6 +37,32 @@ import java.util.function.Predicate;
 public final class JkRepo {
 
     private static final String LOCAL_NAME = "local";
+
+    private final static Predicate<JkVersion> SNAPSHOT_ONLY = new Predicate<JkVersion>() {
+
+        @Override
+        public boolean test(JkVersion jkVersion) {
+            return jkVersion.isSnapshot();
+        }
+
+        @Override
+        public String toString() {
+            return "Snapshot Only";
+        }
+    };
+
+    private final static Predicate<JkVersion> NO_SNAPSHOT = new Predicate<JkVersion>() {
+
+        @Override
+        public boolean test(JkVersion jkVersion) {
+            return !jkVersion.isSnapshot();
+        }
+
+        @Override
+        public String toString() {
+            return "No Snapshot";
+        }
+    };
 
     /**
      * URL of the Maven central repository.
@@ -149,7 +178,7 @@ public final class JkRepo {
                 .setCredentials(JkRepoCredentials.of(jiraId, jiraPassword, "Sonatype Nexus Repository Manager"));
         repo.publishConfig
                     .setUniqueSnapshot(false)
-                    .setVersionFilter(JkVersion::isSnapshot);
+                    .setVersionFilter(SNAPSHOT_ONLY);
         return repo;
     }
 
@@ -162,7 +191,7 @@ public final class JkRepo {
                 .setCredentials(jiraId, jiraPassword, "Sonatype Nexus Repository Manager");
         repo.publishConfig
                 .setSignatureRequired(true)
-                .setVersionFilter(version -> !version.isSnapshot())
+                .setVersionFilter(NO_SNAPSHOT)
                 .setSigner(signer)
                 .setChecksumAlgos("md5", "sha1");
         return repo;
@@ -292,7 +321,39 @@ public final class JkRepo {
 
     @Override
     public String toString() {
-        return url.toString() + "     " + publishConfig;
+        StringBuilder sb = new StringBuilder();
+        sb.append("url:").append(url).append(", ");
+        sb.append("credentials: ").append(credentials).append(", ");
+        sb.append("publish config: ").append(this.publishConfig);
+        return sb.toString();
+    }
+
+    public String toStringMultiline(String margin) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(margin).append("url: ").append(url).append("\n");
+        String subMargin = "  " + margin;
+        if (credentials != null) {
+            sb.append(margin).append("credentials: ").append("\n");
+            sb.append(subMargin).append("realm: ").append(credentials.getRealm()).append("\n");
+            sb.append(subMargin).append("username: ").append(credentials.getUserName()).append("\n");
+            String displayedPassword = credentials.password == null ? "-no password set-" : "***";
+            sb.append(subMargin).append("password: ").append(displayedPassword).append("\n");
+        } else {
+            sb.append(margin).append("credentials: none").append("\n");
+        }
+        if (publishConfig != null) {
+            sb.append(margin).append("publish-configuration: ").append("\n");
+            sb.append(subMargin).append("checksums: ").append(publishConfig.checksumAlgos).append("\n");
+            sb.append(subMargin).append("version-filter: ").append(publishConfig.versionFilter).append("\n");
+            sb.append(subMargin).append("sign-artifacts: ").append(publishConfig.signatureRequired).append("\n");
+            if (publishConfig.signatureRequired) {
+                sb.append(subMargin).append("file-signer: ").append(publishConfig.signer).append("\n");
+            }
+            sb.append(subMargin).append("unique-snapshot: ").append(publishConfig.uniqueSnapshot);
+        } else {
+            sb.append(margin).append("publish config: none");
+        }
+        return sb.toString();
     }
 
     private static URL toUrl(String urlOrDir) {
@@ -353,6 +414,10 @@ public final class JkRepo {
             return userName == null && password == null;
         }
 
+        @Override
+        public String toString() {
+            return "realm:" + realm + ", userName:" + userName;
+        }
     }
 
     /**
@@ -416,7 +481,18 @@ public final class JkRepo {
      */
     public static class JkPublishConfig {
 
-        private static Predicate<JkVersion> NO_FILTER = jkVersion -> true;
+        private final static Predicate<JkVersion> NO_FILTER = new Predicate<JkVersion>() {
+
+            @Override
+            public boolean test(JkVersion jkVersion) {
+                return true;
+            }
+
+            @Override
+            public String toString() {
+                return "none";
+            }
+        };
 
         private Predicate<JkVersion> versionFilter = NO_FILTER;
 

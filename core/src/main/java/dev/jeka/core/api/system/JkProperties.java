@@ -71,7 +71,6 @@ public final class JkProperties {
 
     public static final JkProperties EMPTY = JkProperties.ofMap("", Collections.emptyMap());
 
-
     private final String source;
 
     private final Map<String, String> props;
@@ -156,6 +155,30 @@ public final class JkProperties {
     }
 
     /**
+     * Retrieves the value associated with the specified property name, returning the value
+     * if non-blank, or null if the value is blank or not specified.
+     *
+     * @param propertyName the name of the property to retrieve
+     * @return the value associated with the specified property name if non-blank, or null otherwise
+     */
+    public String getNonBlank(String propertyName) {
+        String value  = get(propertyName);
+        return JkUtilsString.isBlank(value) ? null : value;
+    }
+
+    /**
+     * Retrieves the value associated with the specified property name, trims it, and
+     * returns it if non-blank. If the value is blank or not specified, returns null.
+     *
+     * @param propertyName the name of the property to retrieve
+     * @return the trimmed property value if it is non-blank, or null otherwise
+     */
+    public String getTrimmedNonBlank(String propertyName) {
+        String value  = get(propertyName);
+        return JkUtilsString.isBlank(value) ? null : value;
+    }
+
+    /**
      * Returns the value associated with the specified property name or the defaultValue if no value has been
      * specified for this name.
      */
@@ -167,6 +190,12 @@ public final class JkProperties {
      * Checks if the given property name exists in the properties.
      */
     public boolean containsKey(String propName) {
+        if (this == ENVIRONMENT_VARIABLES) {
+            String envValue = System.getenv(propNameToEnvVarName(propName));
+            if (envValue != null) {
+                return true;
+            }
+        }
         boolean result = props.containsKey(propName);
         if (result) {
             return result;
@@ -178,6 +207,12 @@ public final class JkProperties {
     }
 
     private String getRawValue(String propName) {
+        if (this == ENVIRONMENT_VARIABLES) {
+            String envValue = System.getenv(propNameToEnvVarName(propName));
+            if (envValue != null) {
+                return envValue;
+            }
+        }
         String result =  props.get(propName);
         if (result != null) {
             return result;
@@ -193,7 +228,7 @@ public final class JkProperties {
         for (String varName : System.getenv().keySet() ) {
             String value = System.getenv(varName);
             props.put(varName, value);
-            props.put(lowerCase(varName), value);
+            props.put(envVarNameToPropName(varName), value);
         }
         return new JkProperties(ENV_VARS_NAME, Collections.unmodifiableMap(props), null);
     }
@@ -211,8 +246,12 @@ public final class JkProperties {
         return JkUtilsString.interpolate(string, this::get);
     }
 
-    private static String lowerCase(String value) {
+    private static String envVarNameToPropName(String value) {
         return value.toLowerCase().replace('_', '.');
+    }
+
+    private static String propNameToEnvVarName(String propName) {
+        return propName.toUpperCase().replace('.', '_').replace('-', '_');
     }
 
     public Map<String,String> getAllStartingWith(String prefix, boolean keepPrefix) {
@@ -242,6 +281,13 @@ public final class JkProperties {
             result.addAll(fallback.find(prefix));
         }
         return result;
+    }
+
+    /**
+     * Returns the source of the properties, it can be a file, system-properties or a simple map
+     */
+    public String getSource() {
+        return source;
     }
 
     @Override
@@ -320,6 +366,6 @@ public final class JkProperties {
     }
 
     private boolean isSystem() {
-        return SYS_PROPS_NAME == source || ENV_VARS_NAME == source;
+        return SYS_PROPS_NAME == source || ENV_VARS_NAME == source;  // source is set using constant
     }
 }

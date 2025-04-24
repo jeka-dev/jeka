@@ -41,8 +41,6 @@ public abstract class KBean {
 
     private final JkRunbase runbase;
 
-    private final JkImportedKBeans importedKBeans;  // KBeans from other projects
-
     /**
      * Use {@link #init()} instead!
      * <p>
@@ -55,7 +53,6 @@ public abstract class KBean {
 
     private KBean(JkRunbase runbase) {
         this.runbase = runbase;
-        this.importedKBeans = new JkImportedKBeans(this);
     }
 
     /**
@@ -94,13 +91,6 @@ public abstract class KBean {
      */
     public final Path getOutputDir() {
         return getBaseDir().resolve(JkConstants.OUTPUT_PATH);
-    }
-
-    /**
-     * Refer to the KBeans coming from other sub-runbase, that has been imported in this KBean.
-     */
-    public final JkImportedKBeans getImportedKBeans() {
-        return importedKBeans;
     }
 
     /**

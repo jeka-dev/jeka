@@ -21,16 +21,18 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.file.JkZipTree;
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
-import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.tooling.git.JkGit;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
-import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -56,7 +58,7 @@ public class CoreCustom extends KBean {
     public boolean runIT = true;
 
     @JkDoc("Creates and publishes Jeka Docker image on Dockerhub")
-    public void publishJekaDockerImage() {
+    public void publishDockerImage() {
         DockerImageMaker.createImage();
         String version = load(ProjectKBean.class).project.getVersion().getValue();
         DockerImageMaker.pushImage(version, System.getenv("DOCKER_HUB_TOKEN"));
@@ -65,42 +67,22 @@ public class CoreCustom extends KBean {
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-
-        project.setJvmTargetVersion(JkJavaVersion.V8);
-        project.setModuleId("dev.jeka:jeka-core");
-        project.packActions
+        project.pack.actions
                     .append("include-embedded-jar", this::doPackWithEmbeddedJar)
                     .append("create-distrib", this::doDistrib)
                     .appendIf(!JkUtilsSystem.IS_WINDOWS, "create-sdkman-distrib", this::doSdkmanDistrib);
-        project.compilerToolChain.setForkCompiler(true);
-
-        project.compilation.addJavaCompilerOptions("-Xlint:none", "-g");
-        project.compilation.layout.setMixResourcesAndSources();
-
-        project.testing.testSelection.addExcludePatterns(JkTestSelection.E2E_PATTERN);
-        project.testing.testSelection.addExcludePatternsIf(!runIT, JkTestSelection.IT_PATTERN);
-        project.testing.compilation.layout.setMixResourcesAndSources();
-
-        project.packaging.setMainClass("dev.jeka.core.tool.Main");
-        project.packaging.javadocProcessor.addOptions("-notimestamp");
-
-        project.setupEndToEndTest();
+        project.test.selection.addExcludePatternsIf(!runIT, JkTestSelection.IT_PATTERN);
+        project.e2eTest.setupBasic();
     }
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication("coreBuild", mavenPublication ->
-                mavenPublication
+        mavenKBean.getPublication()
                 .putArtifact(DISTRIB_FILE_ID)
-                .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID)
-                .pomMetadata
-                    .setProjectName("JeKa")
-                    .addApache2License()
-                    .setProjectDescription("Build and Run Java Code from Everywhere")
-                    .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
+                .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID);
     }
 
-    // Call from gitHub actions
+    // Call from GitHub actions
     @JkDoc("Publish javadoc on the Github page")
     public void addJavadocToGhPages() {
         String gitUrl = "https://github.com/jeka-dev/jeka.git";
@@ -119,7 +101,7 @@ public class CoreCustom extends KBean {
     private void doDistrib() {
         JkProject project = load(ProjectKBean.class).project;
         Path distribFile = project.artifactLocator.getArtifactPath(DISTRIB_FILE_ID);
-        project.packaging.createSourceJar(); // Sources should be included in distrib
+        project.pack.createSourceJar(); // Sources should be included in distrib
 
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         distrib.deleteContent();
@@ -199,7 +181,6 @@ public class CoreCustom extends KBean {
         Path targetJar = project.artifactLocator.getMainArtifactPath();
 
         // Main jar
-        //project.packaging.createBinJar(targetJar);
         JkZipTree jarTree = JkZipTree.of(targetJar);
 
         // Create an embedded jar containing all 3rd party libs + embedded part code in jeka project
@@ -224,6 +205,8 @@ public class CoreCustom extends KBean {
         JkUtilsPath.deleteIfExists(embeddedJar);
     }
 
-
+    public void selfTest() {
+        JkUtilsAssert.state(!getRunbase().find(BaseKBean.class).isPresent(), "BaseKBean mistakenly present in runbase.");
+    }
 
 }

@@ -27,6 +27,9 @@ class Engines {
 
     private static List<Engine> all;
 
+    private Engines() {
+    }
+
     static void registerMaster(Engine master) {
         List<Engine> engines = new ArrayList<>();
         engines.add(master);
@@ -36,13 +39,18 @@ class Engines {
         Engines.all = engines;
     }
 
-    static Engine get(Path path) {
-        final Path enginePath = path.toAbsolutePath();
+    static Engine get(Path baseDir) {
+        final Path enginePath = baseDir.toAbsolutePath();
         return Engines.all.stream()
                 .filter(engine -> engine.baseDir.equals(enginePath))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No engine found at: " + path + " registered engines are: "
-                        + all.stream().map(e -> e.baseDir).collect(Collectors.toList())));
+                .orElseGet(() -> createSubEngine(baseDir));
+
+    }
+
+    private static Engine createSubEngine(Path baseDir) {
+        Engine rootEngine = all.get(0);
+        return rootEngine.withBaseDir(baseDir);
     }
 
     private static List<Engine> findSubs(Engine engine) {
@@ -52,8 +60,6 @@ class Engines {
             result.addAll(findSubs(subEngine));
         }
         return result.stream().distinct().collect(Collectors.toList());
-
-
     }
 
 }

@@ -18,6 +18,7 @@ package dev.jeka.plugins.nodejs;
 
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.JkException;
@@ -187,11 +188,11 @@ public class JkNodeJsProject {
      * @return this JkNodeJsProject instance for further configurations
      */
      JkNodeJsProject registerIn(JkProject project) {
-         project.testing.postActions.remove(TEST_TASK_NAME);
-         project.packActions.remove(PACK_TASK_NAME);
+         project.test.postActions.remove(TEST_TASK_NAME);
+         project.pack.actions.remove(PACK_TASK_NAME);
 
-         project.testing.postActions.append(TEST_TASK_NAME, this::test);
-         project.packActions.insertBefore(PACK_TASK_NAME, JkProject.CREATE_JAR_ACTION, () -> {
+         project.test.postActions.append(TEST_TASK_NAME, this::test);
+         project.pack.actions.insertBefore(PACK_TASK_NAME, JkProjectPackaging.CREATE_JAR_ACTION, () -> {
              this.build();
              this.pack();
          });

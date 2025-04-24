@@ -4,9 +4,21 @@
 
 ### My organization prevents access to Maven Central. What can I do?
 
-You can [configure Maven repositories](reference/properties/#repositories) in a central place by editing the *[USER HOME]/.jeka/global.properties* file.
+You can [configure Maven repositories](reference/properties.md/#repositories) in a central place by editing the *[USER HOME]/.jeka/global.properties* file.
 
-To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a URL file. This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
+```properties
+jeka.repos.download=https://my.company/repo
+
+# You can specify username/password
+jeka.repos.download.username=myName
+jeka.repos.download.password=myPassw0rd!
+
+# ... or specify Authorization header to avoid password in clear
+jeka.repos.download.headers.Authorization=Basic hKXhhtggjREfg4P=
+```
+
+To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a folder. 
+This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
 
 ### My organization prevents downloading JDKs. What can I do?
 
@@ -66,12 +78,12 @@ copy-paste in a build class or *dependencies.txt* file.
 
 ## Performance - Caching
 
-### How to cache downloaded dependencies in Github-actions ?
+### How to cache downloaded dependencies in _dev.Github-actions ?
 
 _JeKa_ caches downloaded dependencies (JDKs, JeKa distros, Maven artifacts, NodeJs exe,...) in a single 
 directory at *[USER HOME]/.jeka/cache*.
 
-When running as *Github Action* this directory is empty at the start of the build. We need to save/restore it in 
+When running as *_dev.Github Action* this directory is empty at the start of the build. We need to save/restore it in 
 order to make it persist from one build to another.
 
 For this, we can use [cache action](https://github.com/actions/cache) as follow:

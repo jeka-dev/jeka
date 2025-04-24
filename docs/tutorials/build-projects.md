@@ -25,7 +25,7 @@ You’ll get the following project structure:
 │       ├── java
 │       └── resources 
 ├── jeka-src             <- Optional Java (or Kotlin) code for building the project
-│   └── Build.java      
+│   └── Custom.java      
 ├── jeka-output          <- Generated dir where artifacts as jars, classes, reports or doc are generated
 ├── dependencies.txt     <- Dependency lists for compile, runtime and testing
 ├── jeka.properties      <- Build configuration  (Java and jeka version, kben configurations, ...)
@@ -131,7 +131,7 @@ The Manifest file will also include Git information (commit, dirty, branch, etc.
 ## Pre-defined Build Commands
 
 ```title="Common Options"
---clean (-c)      # Deletes µjeka-output* dir prior running
+--clean (-c)      # Deletes *jeka-output* dir prior running
 --verbose (-v)    # Displays verbos traces
 ```
 
@@ -196,7 +196,7 @@ The configuration can depend on any Java library by specifying its coordinates i
 
 ```java title="jeka-src/Build.java"
 @JkDep("org.apache.pdfbox:pdfbox:3.0.3")
-class Build extends KBean {
+class Custom extends KBean {
 
     @JkDoc("If true, the generated doc will include PDF documents")
     public boolean includePdfDoc;

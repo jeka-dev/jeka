@@ -20,7 +20,6 @@
       <module fileurl="file://$PROJECT_DIR$/samples/samples.project-api/.idea/samples.project-api.iml" filepath="$PROJECT_DIR$/samples/samples.project-api/.idea/samples.project-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.project-app/.idea/samples.project-app.iml" filepath="$PROJECT_DIR$/samples/samples.project-app/.idea/samples.project-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.project-flat-facade-api/.idea/samples.project-flat-facade-api.iml" filepath="$PROJECT_DIR$/samples/samples.project-flat-facade-api/.idea/samples.project-flat-facade-api.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/samples.protobuf/.idea/samples.protobuf.iml" filepath="$PROJECT_DIR$/samples/samples.protobuf/.idea/samples.protobuf.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.sonarqube/.idea/samples.sonarqube.iml" filepath="$PROJECT_DIR$/samples/samples.sonarqube/.idea/samples.sonarqube.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.springboot/samples.springboot.iml" filepath="$PROJECT_DIR$/samples/samples.springboot/samples.springboot.iml" />
     </modules>

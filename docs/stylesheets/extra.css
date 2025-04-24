@@ -3,10 +3,10 @@
 }
 
 :root > * {
-    #--md-code-hl-variable-color: hsla(200, 18%, 26%, 1);
     --md-code-hl-number-color: #cf6aa5;
     --md-code-hl-string-color: #7ca65d;
-    --md-code-hl-comment-color: rgba(179, 182, 186, 0.87);
+    --md-code-hl-variable-color: rgb(197, 143, 101);
+    --md-code-hl-comment-color: rgba(179, 182, 186, 0.71);
 
 
 

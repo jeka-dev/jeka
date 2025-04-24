@@ -645,6 +645,33 @@ public final class JkUtilsString {
                 .collect(Collectors.toList());
     }
 
-
-
+    /**
+     * Converts a list of options into a formatted string representation.
+     * The formatting depends on the content of the options, where long options
+     * containing path separators are split into separate lines, options starting
+     * with a dash are formatted with additional indentation, and others are appended as is.
+     *
+     * @param options the list of options to be formatted as a string
+     * @return a string representation of the options with appropriate formatting
+     */
+    public static String formatOptions(List<String> options) {
+        StringBuilder sb = new StringBuilder();
+        boolean followHyphen = false;
+        for (String option : options) {
+            if (option.contains(File.pathSeparator) && option.length() > 100) {
+                Arrays.stream(option.split(File.pathSeparator))
+                        .forEach(item -> sb.append("\n    ").append(item));
+            } else if (option.startsWith("-")) {
+                sb.append("\n  ").append(option);
+                followHyphen = true;
+            } else if (followHyphen){
+                sb.append(" ").append(option);
+                followHyphen = false;
+            } else {
+                sb.append("\n  ").append(option);
+                followHyphen = false;
+            }
+        }
+        return sb.toString();
+    }
 }

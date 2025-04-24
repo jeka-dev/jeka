@@ -25,9 +25,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * Mutable object to specify a set of test to run according class root dirs, file patterns and tags.<p>

@@ -17,12 +17,10 @@
 package e2e;
 
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +34,11 @@ class ScaffoldTest {
     private Path runDir;
 
     private final JekaCmdLineExecutor executor = new JekaCmdLineExecutor();
+
+    @BeforeAll
+    public static void beforeAll() {
+        JkLog.setDecorator(JkLog.Style.INDENT);
+    }
 
     @BeforeEach
     public void beforeEach() {

@@ -76,9 +76,11 @@ public final class EclipseKBean extends KBean {
         JkIdeSupport projectIde = IdeSupport.getProjectIde(getRunbase());
         if (projectIde != null) {
             final List<Path> importedRunProjects = new LinkedList<>();
+            /*
             for (final KBean importedKBean : getImportedKBeans().get(false)) {
                 importedRunProjects.add(importedKBean.getBaseDir());
             }
+            */
             final JkEclipseClasspathGenerator classpathGenerator =
                     JkEclipseClasspathGenerator.of(projectIde);
 

@@ -46,7 +46,8 @@ class FlatFacadeBuild extends KBean implements JkIdeSupportSupplier {
 
     @JkDoc("Clean and pack")
     public void cleanPack() {
-        project().clean().pack();
+        project().clean();
+        project().pack.run();
     }
 
     @Override

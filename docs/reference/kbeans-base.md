@@ -1,6 +1,6 @@
 # Base KBean
 
-<!-- autogen-doc -->
+<!-- header-autogen-doc -->
 
 [`BaseKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/base/BaseKBean.java) is similar to `ProjectKBean`, but it facilitates building JVM-based code hosted entirely in the *jeka-src* folder with a simpler classpath organization.
 
@@ -20,3 +20,4 @@
 
 - [Base Application](https://github.com/jeka-dev/demo-base-application): The `BaseKBean` is set as the default KBean in `jeka.properties`. The accompanying `README.md` file details the available `base:` methods that can be invoked.
 
+<!-- body-autogen-doc -->

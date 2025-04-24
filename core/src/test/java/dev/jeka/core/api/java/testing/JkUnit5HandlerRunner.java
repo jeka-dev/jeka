@@ -22,6 +22,6 @@ public class JkUnit5HandlerRunner {
         Path path = Paths.get(".idea/output/test");
         JkPathSequence classpath = JkPathSequence.of(path).and(pathSequence);
         JkTestProcessor tp = JkTestProcessor.of(classpath, path);
-        tp.launch(JkTestSelection.of().addIncludeMavenPatterns());
+        tp.run(JkTestSelection.of().addIncludeMavenPatterns());
     }
 }

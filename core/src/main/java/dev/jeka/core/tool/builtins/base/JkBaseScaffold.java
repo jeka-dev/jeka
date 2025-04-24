@@ -26,7 +26,6 @@ import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkDep;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.stream.Collectors;
 
 public final class JkBaseScaffold extends JkScaffold {
 
-    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/Build.java";
+    public static final String BUILD_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/Custom.java";
 
     public static final String TEST_CLASS_PATH = JkConstants.JEKA_SRC_DIR + "/_dev/test/MyTest.java";
 
@@ -124,9 +123,8 @@ public final class JkBaseScaffold extends JkScaffold {
         return getJUnitDeps();
     }
 
-
-
-    private String code(String snippetName, List<String> ...deps) {
+    @SafeVarargs
+    private final String code(String snippetName, List<String>... deps) {
         String baseCode = readResource(JkBaseScaffold.class, snippetName);
         List<String> allDeps = JkUtilsIterable.concatLists(deps);
         String injectCode = toJkInject(allDeps);
@@ -139,7 +137,9 @@ public final class JkBaseScaffold extends JkScaffold {
         }
 
         if (baseScaffoldOption.kind == Kind.APP) {
-            addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", junitDeps(), devDeps));
+            List<String> testDeps = new LinkedList<>(junitDeps());
+            testDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+            addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", testDeps, devDeps));
             addFileEntry(TEST_CLASS_PATH, code("MyTest.snippet"));
             addFileEntry(APP_CLASS_PATH, code("App.snippet", deps));
 

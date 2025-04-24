@@ -9,7 +9,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
-class ProtobufBuild extends KBean {
+public class NodeJsCustom extends KBean {
 
     @JkPostInit
     private void postInit(IntellijKBean intellijKBean) {
@@ -22,18 +22,19 @@ class ProtobufBuild extends KBean {
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
         project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
-                .setModuleId("dev.jeka:protobuf-plugin")
+                .setModuleId("dev.jeka:nodejs-plugin")
+                .setMixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
-                .dependencies.compile.add(JkLocator.getJekaJarPath());
+                .dependencies.compile
+                .add(JkLocator.getJekaJarPath());
     }
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(mavenPublication -> mavenPublication
+        mavenKBean.getPublication()
                 .pomMetadata
-                .setProjectName("Jeka plugin for NodeJs")
-                .setProjectDescription("A Jeka plugin to integrate with NodeJs")
-                .addGithubDeveloper("djeang", "djeangdev@yahoo.fr"));
+                    .setProjectName("Jeka plugin for NodeJs")
+                    .setProjectDescription("A Jeka plugin to integrate with NodeJs");
     }
 
 }

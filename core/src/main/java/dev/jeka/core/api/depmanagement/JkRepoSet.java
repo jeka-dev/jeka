@@ -127,6 +127,14 @@ public final class JkRepoSet {
         return repos.toString();
     }
 
+    public String toStringMultiline(String margin) {
+        StringBuilder sb = new StringBuilder();
+        for (final JkRepo repo : this.repos) {
+            sb.append(repo.toStringMultiline(margin)).append("\n");
+        }
+        return sb.toString();
+    }
+
     /**
      * Retrieves directly the file embodying the specified the external dependency.
      */

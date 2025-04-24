@@ -18,6 +18,7 @@ package dev.jeka.core.api.system;
 
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.tool.JkConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -112,7 +113,26 @@ public final class JkLocator {
 
     public static Path getCachedUrlContentDir() {
         return ensureCreated(getCacheDir().resolve("url-content"));
+    }
 
+    /**
+     * Determines whether the specified directory is a Jeka project.
+     * A directory is considered a Jeka project if it contains a file named
+     * "jeka.properties" or a subdirectory named "jeka-src".
+     *
+     * @param baseDir the base directory to check, which must not be null
+     * @return true if the directory is identified as a Jeka project, false otherwise
+     */
+    public static boolean isJekaProject(Path baseDir) {
+        if (!Files.isDirectory(baseDir)) {
+            return false;
+        }
+        Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
+        if (Files.exists(jekaPropertiesFile) && Files.isRegularFile(jekaPropertiesFile)) {
+            return true;
+        }
+        Path jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
+        return Files.exists(jekaSrcDir) && Files.isDirectory(jekaSrcDir);
     }
 
     private static Path ensureCreated(Path path) {

@@ -101,6 +101,8 @@ public class JkArtifactLocator {
         return getArtifactPath(getMainArtifactId());
     }
 
-
-
+    @Override
+    public String toString() {
+        return "mainArtifactPath=" + getMainArtifactPath();
+    }
 }
