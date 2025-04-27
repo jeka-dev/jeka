@@ -24,8 +24,10 @@ You can use directly `JkNexusRepos` class for lower-level access.
 
 Source Code: [Visit here](src/dev/jeka/plugins/nexus/NexusKBean.java)
 
--------
 
+_____________________________
+**Auto-Generated Documentation**
+_____________________________
 
 
 **This KBean post-initializes the following KBeans:**
