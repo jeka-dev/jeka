@@ -14,16 +14,22 @@ class Custom extends KBean {
     @JkPostInit
     private void postInit(BaseKBean baseKBean) {
         baseKBean.setModuleId("my-group:my-artifactId");
+
+        // It's generally good to version the plugin from the current jeka version it is supporting.
         baseKBean.setVersion(JkInfo.getJekaVersion() + "-0");
 
-        // Optionally specify the compatible Jeka version range for this plugin.
-        JkJekaVersionRanges.setCompatibilityRange(baseKBean.getManifest(),
+        // Optionally, specify the compatible Jeka version range for this plugin.
+        JkJekaVersionRanges.setCompatibilityRange(baseKBean.getManifest(), fromVersion(), breakingChangeFileUrl());
+    }
 
-            // Specify the minimum JeKa version required for this plugin, typically the version used during development
-            JkInfo.getJekaVersion(),
+    // Specify the minimum JeKa version required for this plugin, typically the version used during development
+    private String fromVersion() {
+        return JkInfo.getJekaVersion();
+    }
 
-            // Replace with your location, or use null to skip the compatibility limit
-            "https://raw.githubusercontent.com/jeka-dev/openapi-plugin/master/breaking_versions.txt");
+    // Replace with your location or use null to skip the upper compatibility limit
+    private String breakingChangeFileUrl() {
+        return "https://raw.githubusercontent.com/jeka-dev/openapi-plugin/master/breaking_versions.txt";
     }
 
 }

@@ -148,7 +148,9 @@ public final class JkBaseScaffold extends JkScaffold {
 
         } else if (baseScaffoldOption.kind == Kind.PLUGIN) {
             addFileEntry(JkConstants.JEKA_SRC_DIR + "/org/example/MyPlugin.java", code("PluginKBean.snippet"));
-            addFileEntry(BUILD_CLASS_PATH, code("BuildPlugin.snippet", junitDeps()));
+            List<String> testDeps = new LinkedList<>(junitDeps());
+            testDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+            addFileEntry(BUILD_CLASS_PATH, code("BuildPlugin.snippet", testDeps));
             addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/samples/Sample1.java", code("SamplePlugin.snippet"));
 
         } else {

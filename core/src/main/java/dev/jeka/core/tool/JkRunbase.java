@@ -55,9 +55,9 @@ public final class JkRunbase {
     // Trick for passing the runbase to the KBean default constructor
     static final ThreadLocal<JkRunbase> CURRENT = new ThreadLocal<>();
 
-    private static final String PROP_KBEAN_PREFIX = "@";
+    static final String PROP_KBEAN_PREFIX = "@";
 
-    private static final String PROP_KBEAN_OFF = "off";
+    static final String PROP_KBEAN_OFF = "off";
 
     private static JkRunbase MASTER;
 
@@ -215,11 +215,24 @@ public final class JkRunbase {
         return MASTER.getChildRunbase(masterRelativePath.toString());
     }
 
+    /**
+     * Retrieves a list of injected runbases associated with the current object's relative base directory.
+     *
+     * @return a list of injected {@link JkRunbase} objects derived from the runbase graph based on the
+     *         relative path of the master directory.
+     */
     public List<JkRunbase> getInjectedRunbases() {
         Path masterRelativePath = this.relBaseDir();
         return MASTER.runbaseGraph.getInjectedRunbases(masterRelativePath.toString());
     }
 
+    /**
+     * Retrieves the list of child {@code JkRunbase} instances associated with the current runbase.
+     * This method should only be called on the parent runbase; otherwise, an exception will be thrown.
+     *
+     * @return a list of {@code JkRunbase} objects representing the child runbases of the current runbase
+     * @throws IllegalStateException if the method is invoked on a non-parent runbase
+     */
     public List<JkRunbase> getChildRunbases() {
         JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
                 "loadChildren() can only be called on the parent runbase.");
@@ -228,16 +241,52 @@ public final class JkRunbase {
         return result;
     }
 
+    /**
+     * Finds and returns a child {@code JkRunbase} instance with the specified name.
+     * This method can only be invoked on the parent runbase. Otherwise, an exception will be thrown.
+     *
+     * @param name the name of the child runbase to retrieve
+     * @return the child {@code JkRunbase} instance with the specified name,
+     *         or {@code null} if no such child exists
+     * @throws IllegalStateException if invoked on a non-parent runbase
+     */
     public JkRunbase getChildRunbase(String name) {
         JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
                 "loadChildren() can only be called on the parent runbase.");
         return runbaseGraph.getRunbase(name);
     }
 
+    /**
+     * Loads KBeans of the specified type from all child runbases of the current runbase.
+     * This method must be invoked on the parent runbase; otherwise, an exception is thrown.
+     *
+     * @param <T>       the type of KBean to load, which must extend the {@code KBean} class
+     * @param beanClass the {@code Class} object representing the type of KBean to load
+     * @return a list of KBeans of the specified type found in the child runbases
+     * @throws IllegalStateException if the method is invoked on a non-parent runbase
+     */
     public <T extends KBean> List<T> loadChildren(Class<T> beanClass) {
         JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
                 "loadChildren() can only be called on the parent runbase.");
         return getChildRunbases().stream().map(runBase -> runBase.load(beanClass)).collect(Collectors.toList());
+    }
+
+    /**
+     * Finds and retrieves all child KBeans of the specified type from the current runbase's child runbases.
+     * This method should only be called on the parent runbase; otherwise, it will throw an exception.
+     *
+     * @param <T>       the type of KBean being searched for, which must extend the {@code KBean} class
+     * @param beanClass the {@code Class} object representing the type of the KBean to find
+     * @return a list of KBeans of the specified type found in the child runbases
+     */
+    public <T extends KBean> List<T> findChildren(Class<T> beanClass) {
+        JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
+                "findChildren() can only be called on the parent runbase.");
+        return getChildRunbases().stream()
+                .map(runBase -> runBase.find(beanClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -361,7 +410,6 @@ public final class JkRunbase {
         // Remove Kbean explicitly disabled
         List<String> kbeansToExclude = kbeansToExclude();
         actions = actions.withoutAnyOfKBeanClasses(kbeansToExclude);
-
 
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize Runbase with \n" + actions.toColumnText());

@@ -165,8 +165,7 @@ class RunbaseGraph {
         private static JkRunbase createRunbase(Path baseDir) {
             Engine engine = Engines.get(baseDir);
             engine.resolveKBeans();
-            ClassLoader augmentedClassloader = JkUrlClassLoader.of(engine.getClasspathSetupResult().runClasspath).get();
-            Thread.currentThread().setContextClassLoader(augmentedClassloader);
+            AppendableClassloader.append(engine.getClasspathSetupResult().runClasspath);
             return engine.getOrCreateRunbase(new KBeanAction.Container(), false);
         }
 

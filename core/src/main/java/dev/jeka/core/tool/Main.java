@@ -119,7 +119,7 @@ public class Main {
             logAllEnginesClasspath(engine);
 
             // Augment current classloader with resolved deps and compiled classes
-            ClassLoader augmentedClassloader = JkUrlClassLoader.of(classpathSetupResult.runClasspath).get();
+            AppendableClassloader augmentedClassloader = new AppendableClassloader(classpathSetupResult.runClasspath);
             Thread.currentThread().setContextClassLoader(augmentedClassloader);
 
             // Handle 'jeka --doc'

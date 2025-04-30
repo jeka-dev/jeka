@@ -244,6 +244,22 @@ public final class JkExternalToolApi {
         return RunbaseGraph.getChildBaseProps(baseDir, props);
     }
 
+    public static List<String> getKbeansDeclaredInJekaProperties(Path baseDir) {
+        JkProperties properties = getProperties(baseDir);
+        return properties.getAllStartingWith(JkRunbase.PROP_KBEAN_PREFIX, false).keySet().stream()
+                .filter(key -> !key.contains("."))
+                .filter(key -> {
+                    String propName = JkRunbase.PROP_KBEAN_PREFIX + key;
+                    String value = JkUtilsString.nullToEmpty(properties.get(propName)).trim();
+                    return !JkRunbase.PROP_KBEAN_OFF.equals(value);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public static boolean KbeanNameMatches(String className, String candidate) {
+        return KBean.nameMatches(className, candidate);
+    }
+
     public static class InitKBeans {
 
         public final String defaultClassName;

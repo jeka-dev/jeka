@@ -249,6 +249,51 @@ The default KBean always participate in the runbase initialisation.
 This is quite frequent for project builds to use such setting as it shortens command line and prone usage of 
 `ProjectKBean` standard methods.
 
+## KBean Initialization
+
+During startup, JeKa initializes these KBeans:
+
+- The default KBean
+- KBeans specified with `@myKbean=on` in *jeka.properties*
+
+After identifying these initial KBeans, JeKa performs a discovery phase to find additional KBeans that need initialization:
+
+- KBeans referenced as parameters in methods annotated with `@JkPostInit(required = true)`
+- KBeans returned by static methods annotated with `@JkRequire`
+
+This discovery mechanism allows dynamic addition of KBeans to the initialization list.
+
+**Example:**
+
+If you have a `Custom` KBean located in the *jeka-src* directory, its class will be inspected under two conditions:
+
+1. It is set as the default KBean
+2. It is enabled with `@custom=on` in the *jeka.properties* file
+
+Then it will be inspected to discover other KBeans to initialize.
+
+```java
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+
+class Custom extends KBean {
+
+    @JkRequire
+    private static Class<? extends KBean> require(JkRunbase runbase) {
+        return runbase.getBuildableClass();
+    }
+
+    @JkPostInit(required = true)
+    private void postInit(MavenKBean mavenKBean) {
+        ...
+    }
+}
+```
+
+In this example, the `MavenKBean` will be included in the initialized KBeans.
+
+The `require(JkRunbase)` method will be invoked to know which KBean should be initialized too (either `ProjectKBean` nor `BaseKBean`.)
+
 
 ## Invoke KBean from another KBean
 
