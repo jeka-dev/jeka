@@ -35,7 +35,7 @@ function MessageVerbose {
   param([string]$msg)
 
   if (($VerbosePreference -eq "Continue") -and ($global:QuietFlag -ne $true)) {
-    [Console]::Error.WriteLine($msg)
+    [Console]::Error.WriteLine("Verbose: " + $msg)
   }
 
 }
@@ -417,9 +417,27 @@ class JekaDistrib {
       return "$distDir\bin"
     }
 
-    $distRepo = $this.props.GetValueOrDefault("jeka.distrib.repo", "https://repo.maven.apache.org/maven2")
+    $distRepo = $this.props.GetValueOrDefault("jeka.repos.download", "https://repo.maven.apache.org/maven2")
+    $distRepo = $distRepo.Split(',')[0].Trim()
     $url = "$distRepo/dev/jeka/jeka-core/$jekaVersion/jeka-core-$jekaVersion-distrib.zip"
     $zipExtractor = [ZipExtractor]::new($url, $distDir)
+
+    # Manage authorization
+    $repoAuthHeader = $this.props.GetValue("jeka.repos.download.headers.Authorization")
+    if (![String]::IsNullOrWhiteSpace($repoAuthHeader)) {
+      $zipExtractor.authorisationHeader = $repoAuthHeader
+    }
+    else {
+      $repoUsername = $this.props.GetValue("jeka.repos.download.username")
+      $repoPwd = $this.props.GetValue("jeka.repos.download.password")
+      if (![string]::IsNullOrWhiteSpace($repoUsername) -or ![string]::IsNullOrWhiteSpace($repoPwd)) {
+        $credentials = $repoUsername + ":" + $repoPwd
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($credentials)
+        $encodedCredential = [Convert]::ToBase64String($bytes)
+        $zipExtractor.authorisationHeader  = "Basic " + $encodedCredential
+      }
+    }
+
     $zipExtractor.Extract()
     return "$distDir\bin"
   }
@@ -432,6 +450,7 @@ class JekaDistrib {
 class ZipExtractor {
   [string]$url
   [string]$dir
+  [string]$authorisationHeader
 
   ZipExtractor([string]$url, [string]$dir) {
     $this.url = $url
@@ -463,12 +482,17 @@ class ZipExtractor {
   hidden [string] Download() {
     $downloadFile = [System.IO.Path]::GetTempFileName() + ".zip"
     $webClient = New-Object System.Net.WebClient
+    if (![String]::IsNullOrWhiteSpace($this.authorisationHeader)) {
+      $webClient.Headers.Add("Authorization", $this.authorisationHeader)
+      Write-Host "add auth heder http $($this.authorisationHeader)"
+    }
     try {
         $webClient.DownloadFile($this.url, $downloadFile)
-    } catch {
+    } catch [System.Net.WebException] {
+      $webEx = $_.Exception
       $msg = "Error while downloading : " + $this.url
-      Write-Error $msg
-      Exit-Error "$($_.Exception.Message)"
+      Write-Host $msg
+      Exit-Error $webEx.Message
     }
     $webClient.Dispose()
     return $downloadFile
