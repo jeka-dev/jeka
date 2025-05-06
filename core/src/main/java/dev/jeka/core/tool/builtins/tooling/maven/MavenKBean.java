@@ -144,9 +144,9 @@ public final class MavenKBean extends KBean {
                     repoProperties.getPublishPassword(), signer);
     }
 
-    private void configureForBom(JkMavenPublication bomPublication ) {
+    private void configureForBom(JkMavenPublication bomPublication) {
         bomPublication.customizeDependencies(deps -> JkDependencySet.of()); // No dependencies in BOM
-        bomPublication.removeAllArtifacts();  // No artifacts in BOM
+        bomPublication.setPomPublicationOnly();  // No artifacts in BOM
         getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkProject project = projectKBean.project;
             bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(),

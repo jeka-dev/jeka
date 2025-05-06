@@ -65,7 +65,7 @@ public final class JkMavenPublication {
 
     private Supplier<JkVersion> versionSupplier = () -> JkVersion.UNSPECIFIED;
 
-    private final JkArtifactPublisher artifactPublisher;
+    private JkArtifactPublisher artifactPublisher;
 
     private JkRepoSet repos = JkRepoSet.ofLocal();
 
@@ -117,6 +117,15 @@ public final class JkMavenPublication {
      */
     public static JkMavenPublication ofPomOnly() {
         return of(JkArtifactLocator.VOID);
+    }
+
+    /**
+     * Configures the publication to include only the POM file, without any additional artifacts.
+     * This is typically used for scenarios such as creating and publishing Bill of Materials (BOM) files.
+     */
+    public JkMavenPublication setPomPublicationOnly() {
+        this.artifactPublisher = JkArtifactPublisher.of(JkArtifactLocator.VOID);
+        return this;
     }
 
     /**
