@@ -24,7 +24,7 @@ import java.io.PrintStream;
 
 public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
 
-    private static JkMemoryBufferLogDecorator jkLogInstance;
+    private static JkMemoryBufferLogDecorator instance;
 
     private final JkLog.JkLogDecorator delegate;
 
@@ -64,22 +64,22 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
 
     public static void activateOnJkLog() {
         JkLog.JkLogDecorator delegate = JkLog.getDecorator();
-        JkUtilsAssert.state(delegate != jkLogInstance, "This decorator is currently used by JkLog." +
+        JkUtilsAssert.state(delegate != instance, "This decorator is currently used by JkLog." +
                 " Inactivate it prior rebind again." );
-        jkLogInstance = new JkMemoryBufferLogDecorator(delegate);
-        JkLog.setDecorator(jkLogInstance);
+        instance = new JkMemoryBufferLogDecorator(delegate);
+        JkLog.setDecorator(instance);
     }
 
     public static void inactivateOnJkLog() {
-        JkUtilsAssert.state(jkLogInstance != null, "This decorator is not currently activated.");
-        JkLog.JkLogDecorator delegate = jkLogInstance.delegate;
-        delegate.init(jkLogInstance.originalOut, jkLogInstance.originalErr);
-        jkLogInstance = null;
+        JkUtilsAssert.state(instance != null, "This decorator is not currently activated.");
+        JkLog.JkLogDecorator delegate = instance.delegate;
+        delegate.init(instance.originalOut, instance.originalErr);
+        instance = null;
         JkLog.setDecorator(delegate);
     }
 
     public static boolean isActive() {
-        return jkLogInstance != null;
+        return instance != null;
     }
 
     /**
@@ -87,8 +87,8 @@ public class JkMemoryBufferLogDecorator extends JkLog.JkLogDecorator {
      */
     public static void flush() {
         JkUtilsAssert.state(isActive(),"This decorator must be activated in order to flush");
-        byte[] bytes = jkLogInstance.byteArrayBufferStream.toByteArray();
-        JkUtilsIO.write(jkLogInstance.delegate.getTargetOut(), bytes);
+        byte[] bytes = instance.byteArrayBufferStream.toByteArray();
+        JkUtilsIO.write(instance.delegate.getTargetOut(), bytes);
     }
 
     private static ByteArrayOutputStream byteArrayBufferStream() {

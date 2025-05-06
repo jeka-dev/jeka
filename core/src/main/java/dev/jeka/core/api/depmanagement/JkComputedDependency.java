@@ -135,16 +135,16 @@ public class JkComputedDependency implements JkFileDependency {
     @Override
     public List<Path> getFiles() {
         if (this.hasMissingFilesOrEmptyDirs()) {
-            JkLog.startTask("build-dependency (%s)", this);
+            JkLog.verboseStartTask("build-dependency (%s)", this);
             runnable.run();
-            JkLog.endTask();
+            JkLog.verboseEndTask();
         }
         final Set<Path> missingFiles = this.getMissingFilesOrEmptyDirs();
         if (!missingFiles.isEmpty()) {
             throw new IllegalStateException(this + " didn't generate " + missingFiles);
         }
         final List<Path> result = new LinkedList<>();
-        files.forEach(path -> result.add(path));
+        files.forEach(result::add);
         return result;
     }
 

@@ -385,15 +385,6 @@ public final class JkRunbase {
             runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
         }
 
-        String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
-        if (childBaseFilter != null && !master) {
-            String relativePath = MASTER.baseDir.relativize(this.baseDir).toString();
-            if (!childBaseFilter.equals(relativePath)) {
-                JkLog.verbose("Child base filtered on %s, skip init child base %s", childBaseFilter, relativePath);
-                return;
-            }
-        }
-
         if (LogSettings.INSTANCE.inspect) {
             if (master) {
                 JkLog.startTask("init-" + JkAnsi.of().fg(JkAnsi.Color.MAGENTA).a("main").reset() + "-base");

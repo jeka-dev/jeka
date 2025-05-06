@@ -194,7 +194,7 @@ public class JkDependenciesTxt {
         if (file.isAbsolute()) {
             return JkFileSystemDependency.of(file);
         }
-        file = baseDir.resolve(file);
+        file = baseDir.resolve(file).toAbsolutePath().normalize();
         if (JkLocator.isJekaProject(file)) {
             JkProject project = projectResolver.apply(file);
             if (project != null) {

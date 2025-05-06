@@ -104,7 +104,7 @@ public final class JkExternalToolApi {
         if (Files.isRegularFile(candidate.resolve("jeka"))) {
             return true;
         }
-        return Files.isRegularFile(candidate.resolve("jeka.bat"));
+        return Files.isRegularFile(candidate.resolve("jeka.ps1"));
     }
 
     /**

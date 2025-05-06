@@ -507,11 +507,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         if (runbase == null) {
             return null;
         }
-        ProjectKBean projectKBean = runbase.find(ProjectKBean.class).orElse(null);
-        if (projectKBean == null) {
-            return null;
-        }
-        return projectKBean.project;
+        return runbase.load(ProjectKBean.class).project;
     }
 
 }

@@ -32,13 +32,15 @@ or external DSL-based solutions for building their applications.
 ## Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration or JDK installation required. 
 - **Java-Based Configuration:** Customize builds with simple properties or fine-tune with plain Java code — no XML, No DSL.
-- **Full Portability:** Automatically download specific versions of the JDK, JeKa, or third-party tools if missing — no JDK required.
+- **Full Portability:** Automatically downloads required JDK versions and tools — no pre-installed JDK needed.
 - **Cloud-Native Ready:** Effortless native compilation and Docker image creation — no setup or configuration needed.
 - **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code — no compilation and dep management needed.
 - **Instant App Deployment:** Push application code to Git, and it's ready to run — no pipeline required.
-- **Simple Extensions:** Easily integrate third-party tools or handle complex scenarios with minimal effort.
+- **Simple Extensions:** Integrate third-party tools or handle complex scenarios with minimal effort.
 - **Super Lightweight:** Comes as a zero-dependency JAR of less than 2MB.
+- **Multi-Module Project Support:** Enables configuration of multi-module projects with minimal configuration required.
 - **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring-Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
+
 
 ## Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).

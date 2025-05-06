@@ -552,7 +552,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * @see #toDependency(Runnable, Path, JkTransitivity)
      */
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
-        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath(), transitivity);
+        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath().toAbsolutePath(), transitivity);
     }
 
     /**
@@ -674,8 +674,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         return this;
     }
 
-
-
     LocalAndTxtDependencies textAndLocalDeps() {
         if (cachedTextAndLocalDeps != null) {
             return cachedTextAndLocalDeps;
@@ -726,7 +724,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         JkLog.info(msg);
         JkLog.info(JkUtilsString.repeat("-", msg.length()));
         resolveResult.getFiles().getEntries().forEach(path -> JkLog.info(path.getFileName().toString()));
-        JkLog.info("");
+        System.out.println();
     }
 
     private JkArtifactLocator artifactLocator() {
