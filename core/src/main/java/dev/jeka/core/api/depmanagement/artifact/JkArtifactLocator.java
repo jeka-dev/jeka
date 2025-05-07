@@ -67,7 +67,8 @@ public class JkArtifactLocator {
      */
     public Path getArtifactPath(JkArtifactId artifactId) {
         JkUtilsAssert.state(outputDirSupplier != null,
-                "This Artifact locator has not been configured to locate artifacts.");
+                "Cannot find artifact %s cause the artifact locator has not been configured to locate extra artifacts.",
+                artifactId);
         return outputDirSupplier.get().resolve(artifactId.toFileName(baseNameSupplier.get()));
     }
 
