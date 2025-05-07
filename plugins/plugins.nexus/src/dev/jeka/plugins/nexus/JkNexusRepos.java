@@ -53,7 +53,7 @@ public class JkNexusRepos {
 
     private final String basicCredential;
 
-    private int readTimeout;
+    private int readTimeout; // millis
 
     private int closeTimeout = DEFAULT_CLOSE_TIMEOUT_SECONDS;
 
@@ -236,6 +236,7 @@ public class JkNexusRepos {
         con.setReadTimeout(readTimeout);
         JkUtilsNet.assertResponseOk(con, null);
         JkLog.startTask("Querying staging repositories");
+        JkLog.debug("Read timeout: " + readTimeout + " ms");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
             Document doc = JkUtilsXml.documentFrom(in);
             Element data = JkUtilsXml.directChild(doc.getDocumentElement(), "data");
@@ -305,6 +306,7 @@ public class JkNexusRepos {
     private void doWaitForClosing(String repositoryId) throws IOException {
         long startMillis = System.currentTimeMillis();
         JkLog.startTask("Nexus: Waiting for repository " + repositoryId + " to be closed. It may take a while ...");
+        JkLog.debug("Close timeout: " + this.closeTimeout + " seconds");
         while (true) {
             if (System.currentTimeMillis() - startMillis > (closeTimeout * 1000L)) {
                 throw new IllegalStateException("Nexus: Timeout waiting for repository close.");
