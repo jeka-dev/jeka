@@ -125,6 +125,7 @@ public final class JkMavenPublication {
      */
     public JkMavenPublication setPomPublicationOnly() {
         this.artifactPublisher = JkArtifactPublisher.of(JkArtifactLocator.VOID);
+        this.removeAllArtifacts();
         return this;
     }
 
