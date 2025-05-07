@@ -104,6 +104,9 @@ public class JkArtifactLocator {
 
     @Override
     public String toString() {
+        if (outputDirSupplier == null) {
+            return "Void artifact locator";
+        }
         return "mainArtifactPath=" + getMainArtifactPath();
     }
 }
