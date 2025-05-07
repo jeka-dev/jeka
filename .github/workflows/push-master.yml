@@ -43,7 +43,7 @@ jobs:
         PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         GITHUB_BRANCH: ${{ github.ref }}
       run: |
-        jeka maven: publish -D@nexus=on -D@nexus.readTimeout=90000 -cp=plugins/plugins.nexus/jeka-output/classes -i
+        jeka maven: publish -D@nexus=on -D@nexus.readTimeout=90000 -cp=plugins/plugins.nexus/jeka-output/classes --inspect --stacktrace
 
     - name: Publish to DockerHub
       if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
