@@ -23,12 +23,15 @@ import dev.jeka.core.api.java.JkInternalChildFirstClassLoader;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,21 +126,25 @@ public interface JkInternalDependencyResolver {
             try {
                 JkLog.verbose("Trying to download ivy from (jeka.repos.download) " + fullUrl);
                 JkUtilsPath.deleteIfExists(path);
-                JkUrlFileProxy.of(fullUrl, path).get();
+                URL downloadUrl = JkUtilsIO.toUrl(fullUrl);
+                JkUtilsNet.downloadFile(downloadUrl, path, repo::customizeUrlConnection);
                 if (checkDowloadOk(path)) {
                     return;
                 }
             } catch (UncheckedIOException e) {
                 JkLog.verbose("Failed to download ivy from " + fullUrl);
+                if (JkLog.isVerbose()) {
+                    e.printStackTrace(JkLog.getErrPrintStream());
+                }
             }
         }
         String fullUrl = "https://repo1.maven.org/maven2/" + IVY_URL_PATH;
         try {
             JkLog.verbose("Trying to download ivy from " + fullUrl);
             JkUtilsPath.deleteIfExists(path);
-            JkUrlFileProxy.of(fullUrl, path).get();
+            JkUtilsNet.downloadFile(fullUrl, path);
             if (!checkDowloadOk(path)) {
-                throw new UncheckedIOException(new IOException("Iby download not completed"));
+                throw new UncheckedIOException(new IOException("Ivy download not completed"));
             }
         } catch (UncheckedIOException e) {
             JkLog.error("Failed to download ivy from " + fullUrl);

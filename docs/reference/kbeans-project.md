@@ -56,4 +56,25 @@ A KBean that reads te underlying `JkProject` to extract information.
 - [Protobuf KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java):
   A KBean that adds a Proto-buffer code generation to the underlying `JkProject`.
 
+## Annotation Processors
+
+To use an annotation processor (like **Lombok** or **MapStruct**), add the dependency coordinates
+to the `compile-only` section in your `jeka.properties` file.
+
+
+```ini
+[compile-only]
+org.mapstruct:mapstruct-processor:1.6.3
+org.projectlombok:lombok:1.18.38
+```
+
+If some annotation processors generate sources, you must mention it in the *jeka.properties* file as:
+```properties
+@project.compilation.annotationProcSrcGen=true
+```
+The sources will be generated in *jeka-output/generated-sources/annotation-processors* dir.
+
+That's it!
+
+
 <!-- body-autogen-doc -->

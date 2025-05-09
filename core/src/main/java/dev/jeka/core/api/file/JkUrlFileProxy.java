@@ -19,17 +19,23 @@ package dev.jeka.core.api.file;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
+import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class JkUrlFileProxy {
 
     private final URL url;
 
     private final Path file;
+
+    private Consumer<HttpURLConnection> urlConnectionCustomizer = urlConnection -> {};
 
     private JkUrlFileProxy(URL url, Path file) {
         this.url = url;
@@ -38,6 +44,11 @@ public class JkUrlFileProxy {
 
     public static JkUrlFileProxy of(String url, Path path) {
         return new JkUrlFileProxy(JkUtilsIO.toUrl(url), path);
+    }
+
+    public JkUrlFileProxy setUrlConnectionCustomizer(Consumer<HttpURLConnection> urlConnectionCustomizer) {
+        this.urlConnectionCustomizer = urlConnectionCustomizer;
+        return this;
     }
 
     public static JkUrlFileProxy of(String url) {
@@ -51,6 +62,7 @@ public class JkUrlFileProxy {
             return file;
         }
         JkLog.info("Download " + url + " to " + file);
+        JkUtilsNet.downloadFile(url, file, urlConnectionCustomizer);
         return JkPathFile.of(file).createIfNotExist().fetchContentFrom(url).get();
     }
 

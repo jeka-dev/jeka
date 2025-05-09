@@ -59,12 +59,6 @@ public interface JkInternalPublisher {
         factoryClass = JkClassLoader.of(JkInternalDependencyResolver.InternalVvyClassloader.get())
                 .load(FACTORY_CLASS_NAME);
         return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
-        /*
-        return JkInternalDependencyResolver.InternalVvyClassloader.get().createCrossClassloaderProxy(
-                JkInternalPublisher.class, FACTORY_CLASS_NAME, "of", publishRepos, artifactDir);
-
-         */
-
     }
 
 }

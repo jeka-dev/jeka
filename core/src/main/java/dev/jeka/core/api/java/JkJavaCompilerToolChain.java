@@ -177,6 +177,41 @@ public final class JkJavaCompilerToolChain {
     }
 
     /**
+     * Runs annotation processors on the provided Java sources and classpath.
+     * No need to specify '-proc:only' as it will be automatically added.
+     */
+    public Status runAnnotationProcessors(JkJavaVersion targetVersion, JkJavaCompileSpec compileSpec) {
+        final Path outputDir = compileSpec.getGeneratedSourceOutputDir();
+        List<String> options = new LinkedList<>(compileSpec.getOptions());
+        JkJavaCompileSpec spec = compileSpec.copy();
+        spec.prependOptions("-proc:only");
+
+        if (outputDir == null) {
+            throw new IllegalArgumentException("Output dir option (-s) has not been specified on the compiler." +
+                    " Specified options : " + JkUtilsString.readableCommandAgs("    ", options));
+        }
+        if (!spec.getSources().andMatcher(JAVA_SOURCE_MATCHER).containFiles()) {
+            JkLog.warn("No Java source files found in %s", spec.getSources());
+            return Status.NO_SOURCES;
+        }
+        JkUtilsPath.createDirectories(outputDir);
+
+        JkLog.verboseStartTask("run-compiler-annotation-processor");
+        JkLog.verbose("sources      : " + spec.getSources());
+        JkLog.verbose("Generated source dir    : " + spec.getGeneratedSourceOutputDir());
+
+        JkLog.debug("with options : " );
+        JkLog.debug(JkUtilsString.readableCommandAgs("    ", options));
+
+        JkJavaVersion effectiveJavaVersion = Optional.ofNullable(targetVersion)
+                .orElse(spec.minJavaVersion());
+        final boolean result = runCompiler(effectiveJavaVersion, spec);
+        JkLog.verbose("Annotation processors " + (result ? "completed successfully" : "failed"));
+        JkLog.verboseEndTask();
+        return result ? Status.SUCCESS : Status.FAILED;
+    }
+
+    /**
      * Determines if the Java compilation process is forked into an external process.
      * @return true if the compilation process is forked into an external process, false otherwise.
      */

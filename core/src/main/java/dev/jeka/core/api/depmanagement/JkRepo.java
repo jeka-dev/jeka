@@ -25,8 +25,10 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.File;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
@@ -356,6 +358,16 @@ public final class JkRepo {
         return sb.toString();
     }
 
+    public void customizeUrlConnection(HttpURLConnection connection) {
+        if (credentials != null) {
+            String basicAuth = credentials.toAuthorizationHeader();
+            if (basicAuth != null) {
+                connection.setRequestProperty("Authorization", basicAuth);
+            }
+        }
+        this.httpHeaders.forEach(connection::setRequestProperty);
+    }
+
     private static URL toUrl(String urlOrDir) {
         try {
             return new URL(urlOrDir);
@@ -412,6 +424,15 @@ public final class JkRepo {
 
         public boolean isEmpty() {
             return userName == null && password == null;
+        }
+
+        public String toAuthorizationHeader() {
+            if (isEmpty()) {
+                return null;
+            }
+            String auth = JkUtilsString.nullToEmpty(userName) + ":" + JkUtilsString.nullToEmpty(password);
+            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+            return "Basic " + auth;
         }
 
         @Override

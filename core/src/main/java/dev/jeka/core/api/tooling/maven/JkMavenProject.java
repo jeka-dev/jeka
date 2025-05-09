@@ -113,17 +113,19 @@ public class JkMavenProject {
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .exec();
         JkPom pom = JkPom.of(effectivePom);
-        sb.append("\n==== COMPILE ====\n");
+        sb.append("[compile]\n");
         sb.append(JkDependencySet.toTxt( pom.getDependencies().getDependenciesHavingQualifier(null,
-                COMPILE_SCOPE, PROVIDED_SCOPE), false));
+                COMPILE_SCOPE), false));
 
-        sb.append("\n\n==== RUNTIME ====\n");
-        sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                RUNTIME_SCOPE), false));
+        sb.append("\n\n[compile-only]\n");
         sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
                 PROVIDED_SCOPE), true));
 
-        sb.append("\n\n==== TEST ====\n");
+        sb.append("\n\n[runtime]\n");
+        sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
+                RUNTIME_SCOPE), false));
+
+        sb.append("\n\n[test]\n");
         sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
                 TEST_SCOPE), false));
 

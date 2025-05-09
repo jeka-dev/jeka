@@ -52,6 +52,8 @@ public final class JkJavaCompileSpec {
 
     private static final String OUTPUT_DIR_OPTS = "-d";
 
+    private static final String GENERATED_SOURCE_OUTPUT_DIR_OPTS = "-s";
+
     private List<String> options = new LinkedList<>();
 
     private JkPathTreeSet sources = JkPathTreeSet.ofEmpty();
@@ -81,12 +83,22 @@ public final class JkJavaCompileSpec {
     // ------------ Output dir ------------------------
 
     public Path getOutputDir() {
-        final String path = findValueAfter( OUTPUT_DIR_OPTS);
+        final String path = findValueAfter(OUTPUT_DIR_OPTS);
+        return path == null ? null : Paths.get(path);
+    }
+
+    // Used by annotation-processor
+    public Path getGeneratedSourceOutputDir() {
+        final String path = findValueAfter(GENERATED_SOURCE_OUTPUT_DIR_OPTS);
         return path == null ? null : Paths.get(path);
     }
 
     public JkJavaCompileSpec setOutputDir(Path outputDir) {
         return addOptions(OUTPUT_DIR_OPTS, outputDir.toString());
+    }
+
+    public JkJavaCompileSpec setGeneratedSourceOutputDir(Path generatedSourceOutputDir) {
+        return addOptions(GENERATED_SOURCE_OUTPUT_DIR_OPTS, generatedSourceOutputDir.toString());
     }
 
     // ------- Java version & encoding ----------------
@@ -243,6 +255,13 @@ public final class JkJavaCompileSpec {
         return this;
     }
 
+    public JkJavaCompileSpec prependOptions(String... options) {
+        for (int i = options.length-1; i >= 0; i--) {
+            this.options.add(0, options[i]);
+        }
+        return this;
+    }
+
     /**
      * Some options of a compileRunner are set in a couple of name/value (version, classpath, .....).
      * So if you want to explicitly set such an option it is desirable to remove current value
@@ -261,21 +280,6 @@ public final class JkJavaCompileSpec {
     public JkJavaCompileSpec setAnnotationProcessors(String... annotationProcessorClassNames) {
         return setOption(PROCESSOR_OPTS, String.join(",", annotationProcessorClassNames));
     }
-
-    /**
-     * Disable annotation processing.
-     */
-    public JkJavaCompileSpec disableAnnotationProcessing() {
-        return addOptions("-proc:none");
-    }
-
-    /**
-     * Only process annotation.
-     */
-    public JkJavaCompileSpec setAnnotationProcessingOnly() {
-        return addOptions("-proc:only");
-    }
-
 
     // ----- options as key/values
 

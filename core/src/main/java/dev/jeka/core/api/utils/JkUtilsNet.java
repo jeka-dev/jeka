@@ -23,6 +23,7 @@ import java.net.*;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class JkUtilsNet {
 
@@ -211,21 +212,28 @@ public class JkUtilsNet {
         return sendHttpRequest(url, method, new HashMap<>(), requestBody);
     }
 
+    public static void downloadFile(String fileURL, Path saveFilePath) {
+        URL url = JkUtilsIO.toUrl(fileURL);
+        downloadFile(url, saveFilePath, httpURLConnection -> {});
+    }
+
     /**
      * Downloads the specified url file at the specified file.
-     * @param fileURL the file tu dowload
-     * @param saveFilePath The filesytem location to get the file once downloaded
+     * @param url the url file to download
+     * @param saveFilePath The filesystem location to get the file once downloaded
      */
-    public static void downloadFile(String fileURL, Path saveFilePath) {
+    public static void downloadFile(URL url, Path saveFilePath,
+                                    Consumer<HttpURLConnection> urlConnectionCustomizer) {
         try {
-            URL url = new URL(fileURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
             connection.setInstanceFollowRedirects(true);
+            urlConnectionCustomizer.accept(connection);
             int responseCode = connection.getResponseCode();
 
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 InputStream inputStream = connection.getInputStream();
+                JkUtilsPath.createDirectories(saveFilePath.getParent());
                 FileOutputStream outputStream = new FileOutputStream(saveFilePath.toString());
                 byte[] buffer = new byte[4096];
                 int bytesRead;
@@ -236,7 +244,8 @@ public class JkUtilsNet {
                 inputStream.close();
             } else {
                 connection.disconnect();
-                throw new IllegalStateException("No file to download at " + fileURL + " : Server replied with HTTP code: " + responseCode);
+                throw new IllegalStateException("No file to download at " + url
+                        + " : Server replied with HTTP code: " + responseCode);
             }
             connection.disconnect();
         } catch (IOException e) {
