@@ -20,6 +20,8 @@ import dev.jeka.core.tool.CommandLine.Help.Visibility;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
 import dev.jeka.core.tool.CommandLine.Model.OptionSpec;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 class PicocliCommands {
@@ -31,12 +33,21 @@ class PicocliCommands {
     }
 
     static CommandSpec fromKBeanDesc(JkBeanDescription beanDesc) {
+        return fromKBeanDesc(beanDesc, null);
+    }
+
+    static CommandSpec fromKBeanDesc(JkBeanDescription beanDesc, List<String> fieldArgs) {
         CommandSpec spec = CommandSpec.create();
-        beanDesc.beanFields.forEach(beanField -> {
+        final List<JkBeanDescription.BeanField> beanFields;
+        if (fieldArgs == null) {
+            beanFields = beanDesc.beanFields;
+        } else {
+            beanFields = BeanUtils.enhanceWithMultiValues(beanDesc.beanFields, fieldArgs);
+        }
+        beanFields.forEach(beanField -> {
 
             Visibility showDefault = beanDesc.includeDefaultValues ?
                     Visibility.ALWAYS : Visibility.NEVER;
-
 
             String defaultValue = beanField.defaultValue == null  ? CommandLine.Option.NULL_VALUE
                     : Objects.toString(beanField.defaultValue);
@@ -81,6 +92,5 @@ class PicocliCommands {
         spec.usageMessage().header(description);
         return spec;
     }
-
 
 }

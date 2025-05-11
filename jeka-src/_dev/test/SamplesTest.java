@@ -122,6 +122,12 @@ class SamplesTest {
         run("samples.junit5", "-c project: test pack : checkReportGenerated project: test.fork=true");
     }
 
+    @Test
+    void multivalue_ok() {
+        run("samples.multivalue", "script: test");
+        run("samples.multivalue", "script: testCmdLine addresses.2.zip=9999");
+    }
+
     private void run(String sampleDir, String cmdLine) {
 
         // assume running from 'master' dir

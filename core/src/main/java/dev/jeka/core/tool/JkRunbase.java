@@ -30,7 +30,6 @@ import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -683,7 +682,7 @@ public final class JkRunbase {
 
         // We must inject fields after instance creation cause in the KBean
         // constructor, fields of child classes are not yet initialized.
-        this.effectiveActions.addAll(injectDefaultsFromProps(bean));
+        this.effectiveActions.addAll(injectValuesFromProps(bean));
         this.effectiveActions.addAll(injectValuesFromCmdLine(bean));
 
         try {
@@ -728,43 +727,28 @@ public final class JkRunbase {
         return result;
     }
 
-    private static void setValue(Object target, String propName, Object value) {
-        if (propName.contains(".")) {
-            String first = JkUtilsString.substringBeforeFirst(propName, ".");
-            String remaining = JkUtilsString.substringAfterFirst(propName, ".");
-            Object child = JkUtilsReflect.getFieldValue(target, first);
-            if (child == null) {
-                String msg = String.format(
-                        "Compound property '%s' on class '%s' should not value 'null'" +
-                                " right after been instantiate.%n. Please instantiate this property in %s constructor",
-                        first, target.getClass().getName(), target.getClass().getSimpleName());
-                throw new JkException(msg);
-            }
-            setValue(child, remaining, value);
-            return;
-        }
-        Field field = JkUtilsReflect.getField(target.getClass(), propName);
-        JkUtilsAssert.state(field != null, "Null field found for class %s and field %s",
-                target.getClass().getName(), propName);
-        JkUtilsReflect.setFieldValue(target, field, value);
-    }
+     private static void setValue(Object target, String propName, Object value) {
+        BeanUtils.setValue(target, propName, value);
+     }
 
     /*
      * Note: sys props cannot be resolved at command-line parsing time,
      * cause beans may be loaded at init or exec time.
      */
-    private List<KBeanAction> injectDefaultsFromProps(KBean kbean) {
+    private List<KBeanAction> injectValuesFromProps(KBean kbean) {
 
         Class<? extends KBean> kbeanClass = kbean.getClass();
         List<KBeanAction> result = new LinkedList<>();
         JkBeanDescription desc = JkBeanDescription.of(kbeanClass);
 
-        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc));
-        commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, desc));
+        List<String> propNames = BeanUtils.extractKBeanPropertyNamesFromProps(kbeanClass, this.properties);
+        List<JkBeanDescription.BeanField> beanFields = BeanUtils.enhanceWithMultiValues(desc.beanFields, propNames);
+        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc, propNames));
+        commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, kbeanClass, beanFields));
         commandLine.parseArgs();
         CommandLine.Model.CommandSpec commandSpec = commandLine.getCommandSpec();
 
-        for (JkBeanDescription.BeanField beanField : desc.beanFields) {
+        for (JkBeanDescription.BeanField beanField : beanFields) {
             CommandLine.Model.OptionSpec optionSpec = commandSpec.findOption(beanField.name);
             Object value = optionSpec.getValue();
             if (value != null) {  // cannot set "null" on non-primitive
@@ -776,13 +760,16 @@ public final class JkRunbase {
         return result;
     }
 
-    private String getDefaultFromProps(CommandLine.Model.ArgSpec argSpec, JkBeanDescription desc) {
+    private String getDefaultFromProps(CommandLine.Model.ArgSpec argSpec,
+                                       Class<? extends KBean> kbeanClass,
+                                       List<JkBeanDescription.BeanField> beanFields) {
         CommandLine.Model.OptionSpec optionSpec = (CommandLine.Model.OptionSpec) argSpec;
-        JkBeanDescription.BeanField beanField = desc.beanFields.stream()
+
+        JkBeanDescription.BeanField beanField = beanFields.stream()
                 .filter(beanField1 -> beanField1.name.equals(optionSpec.longestName()))
                 .findFirst().orElseThrow(
                         () -> new IllegalStateException("Cannot find field " + optionSpec.longestName()
-                                + " in bean " + desc.kbeanClass.getName()));
+                                + " in bean " + kbeanClass.getName()));
 
         // from explicit ENV VAR or sys props defined with @JkInjectProperty
         if (beanField.injectedPropertyName != null) {
@@ -792,8 +779,8 @@ public final class JkRunbase {
         }
 
         // from property names formatted as '@kbeanName.field.name='
-        List<String> acceptedNames = new LinkedList<>(KBean.acceptedNames(desc.kbeanClass));
-        if (desc.kbeanClass.getName().equals(kbeanResolution.defaultKbeanClassName)) {
+        List<String> acceptedNames = new LinkedList<>(KBean.acceptedNames(kbeanClass));
+        if (kbeanClass.getName().equals(kbeanResolution.defaultKbeanClassName)) {
             acceptedNames.add("");
         }
         for (String acceptedName : acceptedNames) {

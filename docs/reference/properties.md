@@ -136,10 +136,44 @@ examples:
     the value will be injected on every Jeka module.
     For the latter, the value will be injected only on the root module.
 
+### Multivalue fields
 
+*Multi-value* let to use *map-like* structures in KBean objects.
 
+Example:
 
+```java
+class MyBean extends KBean {
+ 
+      public final JkMultiValue<String> phones = JkMultiValue.of(String.class);
+      public final JkMultiValue<Address> addresses = JkMultiValue.of(Address.class);
+ 
+      public static class Address {
+     
+          @JkDoc("The street name and number")
+          public String street;
+          public int zip;
+      }
+ }
+```
+`JkMultivalue` is a like-map structure that let access value according a give `key`.
 
+```java
+Address mainAddress = myBean.addresses.get("main");
+String gsmNum = myBean.phones.get("gsm");
+```
+
+These values can be set using *jeka.properties* files or command-line argument as:
+```properties
+@myBean.phones.gsm=0978765432
+@myBean.phones.home=0111334455
+
+@myBean.addresses.main.street=Georges street 32
+@myBean.addresses.main.zip=50600
+```
+
+!!! note
+    `JkMultiValue` objects support nesting, allowing you to create hierarchical data structures with multiple levels of key-value pairs.
 
 
 

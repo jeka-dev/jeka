@@ -46,8 +46,7 @@ public class SimpleProjectKBean extends KBean {
 
     @JkPostInit
     private void postInit(IntellijKBean intellijKBean) {
-        intellijKBean.replaceLibByModule("dev.jeka.jeka-core.jar", "core")
-                .setModuleAttributes("core", JkIml.Scope.COMPILE, false );
+        intellijKBean.replaceLibByModule("dev.jeka.jeka-core.jar", "core");
     }
 
     @JkPostInit(required = true)
@@ -128,5 +127,7 @@ public class SimpleProjectKBean extends KBean {
         bean.cleanPackPublish();
         bean.checkValueIsA();
     }
+
+
 
 }

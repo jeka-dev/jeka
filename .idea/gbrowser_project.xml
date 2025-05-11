@@ -29,6 +29,10 @@
     {
       "url": "http://localhost:8080",
       "createdAt": "2025-01-22T23:57:59Z"
+    },
+    {
+      "url": "https://plugins.jetbrains.com/plugin/14458-gbrowser",
+      "createdAt": "2025-05-10T17:29:42Z"
     }
   ]
 }]]></component>

@@ -115,10 +115,10 @@ public final class JkBeanDescription {
         }
         Collections.sort(methods);
         final List<BeanField> beanFields = new LinkedList<>();
-        List<NameAndField> nameAndFields =  fields(kbeanClass, "", true, null);
+        List<NameAndField> nameAndFields =  nameAndFields(kbeanClass, "", true, null);
         for (final NameAndField nameAndField : nameAndFields) {
-            beanFields.add(BeanField.of(kbeanClass, nameAndField.field,
-                    nameAndField.name));
+            final BeanField beanField = BeanField.of(kbeanClass, nameAndField);
+            beanFields.add(beanField);
         }
         Collections.sort(beanFields);
         String initDescription = getInitDescription(kbeanClass);
@@ -252,10 +252,9 @@ public final class JkBeanDescription {
         }
         Collections.sort(methods);
         final List<BeanField> beanFields = new LinkedList<>();
-        List<NameAndField> nameAndFields =  fields(kbeanClass, "", true, null);
+        List<NameAndField> nameAndFields =  nameAndFields(kbeanClass, "", true, null);
         for (final NameAndField nameAndField : nameAndFields) {
-            beanFields.add(BeanField.ofWithDefaultValues(kbeanClass, nameAndField.field,
-                    nameAndField.name, runbase));
+            beanFields.add(BeanField.ofWithDefaultValues(kbeanClass, nameAndField, runbase));
         }
         Collections.sort(beanFields);
         String initDescription = getInitDescription(kbeanClass);
@@ -289,7 +288,8 @@ public final class JkBeanDescription {
     }
 
      boolean isContainingField(String fieldName) {
-        return this.beanFields.stream().anyMatch(beanField -> fieldName.equals(beanField.name));
+        return this.beanFields.stream()
+                .anyMatch(beanField -> beanField.matchName(fieldName));
     }
 
     private static List<Method> executableMethods(Class<?> clazz) {
@@ -310,7 +310,7 @@ public final class JkBeanDescription {
         return result;
     }
 
-    private static List<NameAndField> fields(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
+    private static List<NameAndField> nameAndFields(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
         final List<NameAndField> result = new LinkedList<>();
         for (final Field field : getPropertyFields(clazz)) {
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
@@ -319,16 +319,35 @@ public final class JkBeanDescription {
             }
             final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
 
-            if (isTerminal(field.getType())) {  // optimization to avoid costly discoveries
-                result.add(new NameAndField(prefix + field.getName(), field, rootClass));
+            Class<?> fieldType = field.getType();
+            if (isTerminal(fieldType)) {  // optimization to avoid costly discoveries
+                result.add(NameAndField.of(prefix + field.getName(), field, rootClass));
+
+            } else if (JkMultiValue.class.equals(fieldType)) {
+                Class<?> multiValueType = BeanUtils.getValueType(field);
+                String multiPrefix = prefix + field.getName() + "." + JkMultiValue.KEY_TEXT;
+
+                if (isTerminal(multiValueType)) {
+                    String descr = BeanField.getDescr(field);
+                    result.add(NameAndField.of(multiPrefix, multiValueType, descr, rootClass));
+                } else {
+                    final List<NameAndField> subOpts = nameAndFields(
+                            multiValueType,
+                            multiPrefix + ".",
+                            false,
+                            rootClass);
+                    result.addAll(subOpts);
+                }
+
             } else {
-                final List<NameAndField> subOpts = fields(field.getType(), prefix + field.getName() + ".", false,
+                final List<NameAndField> subOpts = nameAndFields(field.getType(), prefix + field.getName() + ".", false,
                         rootClass);
                 result.addAll(subOpts);
             }
         }
         return result.stream()
-                .filter(nameAndField -> !Modifier.isFinal(nameAndField.field.getModifiers()))
+                .filter(nameAndField -> nameAndField.field == null
+                        || !Modifier.isFinal(nameAndField.field.getModifiers()))
                 .collect(Collectors.toList());
     }
 
@@ -336,6 +355,9 @@ public final class JkBeanDescription {
     private static boolean isTerminal(Class<?> fieldType) {
         if (fieldType.isEnum()) {
             return true;
+        }
+        if (JkMultiValue.class.equals(fieldType)) {
+            return false;
         }
         return !fieldType.isAnnotationPresent(JkDoc.class) &&
                 JkUtilsReflect.getDeclaredFieldsWithAnnotation(fieldType, JkDoc.class).isEmpty();
@@ -407,8 +429,6 @@ public final class JkBeanDescription {
      */
     public static final class BeanField implements Comparable<BeanField> {
 
-        final Field field;
-
         final String name;
 
         final String description;
@@ -422,7 +442,6 @@ public final class JkBeanDescription {
         final String injectedPropertyName;
 
         private BeanField(
-                Field field,
                 String name,
                 String description,
                 Object bean,
@@ -431,7 +450,6 @@ public final class JkBeanDescription {
                 String injectedPropertyName) {
 
             super();
-            this.field = field;
             this.name = name;
             this.description = description;
             this.bean = bean;
@@ -440,30 +458,54 @@ public final class JkBeanDescription {
             this.injectedPropertyName = injectedPropertyName;
         }
 
+        boolean containsMultiValue() {
+            return name.contains(JkMultiValue.KEY_TEXT);
+        }
+
+        private static BeanField of(Class<? extends KBean> beanClass, NameAndField nameAndField) {
+            if (nameAndField.field == null) {
+                return of(beanClass, null, null, null, nameAndField.type, nameAndField.name);
+            }
+            Field field = nameAndField.field;
+            return of(beanClass,
+                    field.getAnnotation(JkDoc.class),
+                    field.getAnnotation(JkPropValue.class),
+                    field.getAnnotation(JkInjectProperty.class),
+                    field.getType(),
+                    nameAndField.name);
+        }
+
         private static BeanField of(
                 Class<? extends KBean> beanClass,
-                Field field,
+                JkDoc jkDoc,
+                JkPropValue propValue,
+                JkInjectProperty injectProperty,
+                Class<?> type,
                 String name) {
 
-            final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
+
             final String descr = getDescr(jkDoc);
-            final Class<?> type = field.getType();
             String propertyName = null;
-            final JkPropValue propValue = field.getAnnotation(JkPropValue.class);
             if (propValue != null) {
                 propertyName = propValue.value();
             } else {
-                final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
                 propertyName = injectProperty != null ? injectProperty.value() : null;
             }
             return new BeanField(
-                    field,
                     name,
                     descr,
                     null,
                     null,
                     type,
                     propertyName);
+        }
+
+        private static String getDescr(Field field) {
+            JkDoc jkDoc = field.getAnnotation(JkDoc.class);
+            if (jkDoc == null) {
+                return null;
+            }
+            return getDescr(jkDoc);
         }
 
         private static String getDescr(JkDoc jkDoc) {
@@ -478,26 +520,29 @@ public final class JkBeanDescription {
 
         private static BeanField ofWithDefaultValues(
                 Class<? extends KBean> beanClass,
-                Field field,
-                String name,
+                NameAndField nameAndField,
                 JkRunbase runbase) {
 
-            final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
-            final String descr = getDescr(jkDoc);
-            final Class<?> type = field.getType();
-            Object instance = runbase.load(beanClass);
-            Object defaultValue = value(instance, name);
-            String propertyName;
-            final JkPropValue propValue = field.getAnnotation(JkPropValue.class);
-            if (propValue != null) {
-                propertyName = propValue.value();
+            final String descr = nameAndField.descr;
+            final Class<?> type;
+            final JkPropValue injectedPropValue;
+            if (nameAndField.field != null) {
+                type = nameAndField.field.getType();
+                injectedPropValue = nameAndField.field.getAnnotation(JkPropValue.class);
+
             } else {
-                final JkInjectProperty injectProperty = field.getAnnotation(JkInjectProperty.class);
-                propertyName = injectProperty != null ? injectProperty.value() : null;
+                type = nameAndField.type;
+                injectedPropValue = null;
+            }
+
+            Object instance = runbase.load(beanClass);
+            Object defaultValue = nameAndField.field == null ? null : value(instance, nameAndField.name);
+            String propertyName = null;
+            if (injectedPropValue != null) {
+                propertyName = injectedPropValue.value();
             }
             return new BeanField(
-                    field,
-                    name,
+                    nameAndField.name,
                     descr,
                     instance,
                     defaultValue,
@@ -510,10 +555,18 @@ public final class JkBeanDescription {
                 return JkUtilsReflect.getFieldValue(runInstance, optName);
             }
             final String first = JkUtilsString.substringBeforeFirst(optName, ".");
-            Object firstObject = JkUtilsReflect.getFieldValue(runInstance, first);
-            if (firstObject == null) {
-                final Class<?> firstClass = JkUtilsReflect.getField(runInstance.getClass(), first).getType();
-                firstObject = JkUtilsReflect.newInstance(firstClass);
+            final Object firstObject;
+            if (runInstance instanceof JkMultiValue) {
+                JkMultiValue<?> multiValue = (JkMultiValue<?>) runInstance;
+                Class<?> multiValueType = multiValue.getType();
+                firstObject = JkUtilsReflect.newInstance(multiValueType);
+            } else {
+                Object candidate = JkUtilsReflect.getFieldValue(runInstance, first);
+                if (candidate == null) {
+                    final Class<?> firstClass = JkUtilsReflect.getField(runInstance.getClass(), first).getType();
+                    candidate = JkUtilsReflect.newInstance(firstClass);
+                }
+                firstObject = candidate;
             }
             final String last = JkUtilsString.substringAfterFirst(optName, ".");
             return value(firstObject, last);
@@ -533,20 +586,39 @@ public final class JkBeanDescription {
             return 1;
         }
 
+        boolean matchName(String candidate) {
+            return JkMultiValue.propNameMatches(name, candidate);
+        }
+
+        BeanField withName(String newName) {
+            return new BeanField(newName, description, bean, defaultValue, type, injectedPropertyName);
+        }
     }
 
     private static class NameAndField {
         final String name;
-        final Field field;
+        final Field field;  // either field nor type are set, not both
+        final Class<?> type;
+        final String descr;
         final Class<?> rootClass; // for nested fields, we need the class declaring
 
         // the asScopedDependency object
 
-        NameAndField(String name, Field field, Class<?> rootClass) {
+        private NameAndField(String name, Field field, Class<?> type, String descr, Class<?> rootClass) {
             super();
             this.name = name;
             this.field = field;
+            this.type = type;
+            this.descr = descr;
             this.rootClass = rootClass;
+        }
+
+        static NameAndField of(String name, Field field, Class<?> rootClass) {
+            return new NameAndField(name, field, null, BeanField.getDescr(field), rootClass);
+        }
+
+        static NameAndField of(String name, Class<?> type, String descr, Class<?> rootClass) {
+            return new NameAndField(name, null, type, descr, rootClass);
         }
 
         @Override

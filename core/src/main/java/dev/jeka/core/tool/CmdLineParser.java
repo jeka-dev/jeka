@@ -79,7 +79,7 @@ class CmdLineParser {
 
         // Add field-injection
 
-        // --  Create a PicoCli commandLine to parse
+        // -- Create a PicoCli commandLine to parse
         JkBeanDescription kBeanDescription = JkBeanDescription.of(kbeanClass);
 
         // -- Construct args to parse only fields
@@ -89,7 +89,8 @@ class CmdLineParser {
         String[] fieldOnlyArgs = removeMethods(methodOrFieldArgs, availableMethodNames);
 
         // -- Do parse
-        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(kBeanDescription));
+        CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(kBeanDescription,
+                Arrays.asList(fieldOnlyArgs)));
         CommandLine.ParseResult parseResult = commandLine.parseArgs(fieldOnlyArgs);
         for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
             String name = optionSpec.names()[0];

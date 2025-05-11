@@ -78,6 +78,7 @@ public final class JkConstants {
 
     public static final String JEKA_CHILD_BASES_PROP = "jeka.child-bases";
 
+    // used by external tools
     public static final String JEKA_IDE_SKIP_SYNC_PROP = "jeka.ide.skip-sync";
 
     /**
