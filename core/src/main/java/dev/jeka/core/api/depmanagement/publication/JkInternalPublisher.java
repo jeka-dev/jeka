@@ -56,7 +56,7 @@ public interface JkInternalPublisher {
         if (factoryClass != null) {
             return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
         }
-        factoryClass = JkClassLoader.of(JkInternalDependencyResolver.InternalVvyClassloader.get())
+        factoryClass = JkClassLoader.of(JkInternalDependencyResolver.InternalIvyClassloader.get())
                 .load(FACTORY_CLASS_NAME);
         return JkUtilsReflect.invokeStaticMethod(factoryClass, "of", publishRepos, artifactDir);
     }

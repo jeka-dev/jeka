@@ -229,6 +229,14 @@ public class JkUtilsNet {
 
             connection.setInstanceFollowRedirects(true);
             urlConnectionCustomizer.accept(connection);
+            if (JkLog.isDebug()) {
+                String authHeader = connection.getHeaderField("Authorization");
+                JkLog.debug("Download file " + url);
+                if (authHeader != null) {
+                    String[] authHeaderValues = authHeader.split(" ");
+                    JkLog.debug("User Authorization header: " + authHeaderValues[0] + " xxxxx");
+                }
+            }
             int responseCode = connection.getResponseCode();
 
             if (responseCode == HttpURLConnection.HTTP_OK) {

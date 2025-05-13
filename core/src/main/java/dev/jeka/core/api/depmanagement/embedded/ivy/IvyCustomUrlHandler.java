@@ -38,7 +38,7 @@ import java.util.Map;
 /*
  * This implementation copy most of the code from its super class has this was not designed to be
  * friendly inherited.
- * The purpose is to :
+ * The purpose is to:
  *   - add http headers to requests based upon the headers declared in JkRepo objects.
  *   - handle follow-redirect gracefully for download method
  */
