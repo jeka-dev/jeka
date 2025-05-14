@@ -61,7 +61,7 @@ public class Main {
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
-        // Need to setup a default log decorator to display verbose message when installing Jansi and Ivy
+        // Need to setup a default log decorator to display verbose messages when installing Jansi and Ivy
         JkLog.setDecorator(JkLog.Style.INDENT);
         JkAnsiConsole.of().systemInstall();
 

@@ -101,10 +101,15 @@ public class JkProjectCompilation {
     }
 
     public void generateSources() {
+        if (!sourceGenerators.isEmpty()) {
+            JkLog.startTask("generate-sources");
+        }
         for (JkProjectSourceGenerator sourceGenerator : sourceGenerators) {
-            JkLog.startTask("generate-sources to " + sourceGenerator.getDirName());
             Path path = layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName());
             sourceGenerator.generate(this.project, path);
+            JkLog.info("Sources generated in " + path);
+        }
+        if (!sourceGenerators.isEmpty()) {
             JkLog.endTask();
         }
     }

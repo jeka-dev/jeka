@@ -116,15 +116,7 @@ public interface JkInternalDependencyResolver {
     }
 
     static void downloadIvy(Path path) {
-        Path globalPropertiesFile = JkLocator.getJekaUserHomeDir().resolve("global.properties");
-        Path localPropertiesFile = Paths.get("jeka").resolve("local.properties");
         JkProperties properties = JkProperties.ofStandardProperties();
-        if (Files.exists(localPropertiesFile)) {
-            properties = properties.withFallback(JkProperties.ofFile(localPropertiesFile));
-        }
-        if (Files.exists(globalPropertiesFile)) {
-            properties = properties.withFallback(JkProperties.ofFile(globalPropertiesFile));
-        }
         JkRepoSet repos = JkRepoProperties.of(properties).getDownloadRepos();
         for (JkRepo repo : repos.getRepos()) {
             String url = repo.getUrl().toString();

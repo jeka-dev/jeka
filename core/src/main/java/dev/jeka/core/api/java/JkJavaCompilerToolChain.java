@@ -415,7 +415,15 @@ public final class JkJavaCompilerToolChain {
         public static JkJdks ofJdkHomeProps(Map<String, String> homes) {
             Map<JkJavaVersion, Path> map = new HashMap<>();
             for (Map.Entry<String, String> entry : homes.entrySet()) {
-                map.put(JkJavaVersion.of(entry.getKey().trim()), Paths.get(entry.getValue().trim()));
+                JkJavaVersion javaVersion;
+                try {
+                    javaVersion = JkJavaVersion.of(entry.getKey().trim());
+                } catch (IllegalArgumentException e) {
+                    javaVersion = null;  // handle JEKA_JDK_HOME (which translate to jeka.jdk.home)
+                }
+                if (javaVersion != null) {
+                    map.put(javaVersion, Paths.get(entry.getValue().trim()));
+                }
             }
             return new JkJdks(map);
         }
