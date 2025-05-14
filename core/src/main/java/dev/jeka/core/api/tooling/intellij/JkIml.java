@@ -505,10 +505,6 @@ public final class JkIml {
         }
     }
 
-    private static String url(String relPath) {
-        return "file://$MODULE_DIR$/" + relPath;
-    }
-
     public JkDomDocument toDoc() {
         JkDomDocument doc = JkDomDocument.of("module");
         doc.root().attr("type", "JAVA_MODULE").attr("version", "4")
@@ -544,9 +540,10 @@ public final class JkIml {
                 return Paths.get(rootDirString).resolve(moduleDirRelativePath);
             }
             Path normalized  = original.normalize();
+            System.out.println("-----------" + substitutes);
             return substitutes.entrySet().stream()
                     .filter(pathStringEntry -> pathStringEntry.getValue() != null)
-                    .filter(pathStringEntry -> normalized.startsWith(pathStringEntry.getValue()))
+                    .filter(pathStringEntry -> normalized.startsWith(pathStringEntry.getValue().toAbsolutePath()))
                     .findFirst()
                     .map(entry -> {
                         String entryKey = "$" + entry.getKey() + "$";
@@ -554,7 +551,7 @@ public final class JkIml {
                             entryKey = entryKey + "/..";
                         }
                         return Paths.get(entryKey)
-                                .resolve(entry.getValue().relativize(normalized));
+                                .resolve(entry.getValue().toAbsolutePath().relativize(normalized));
                     })
                     .orElse(normalized);
         }

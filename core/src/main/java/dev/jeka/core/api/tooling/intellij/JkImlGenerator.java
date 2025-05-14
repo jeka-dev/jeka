@@ -34,6 +34,7 @@ import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -199,7 +200,7 @@ public final class JkImlGenerator {
         if (isForJekaSrc) {
             content.excludePattern =".idea";
         }
-        iml.component.getOrderEntries().addAll(jekaSrcOrderEntries(modulesXml));
+        iml.component.getOrderEntries().addAll(jekaSrcOrderEntries(dir, modulesXml));
         imlConfigurer.accept(iml);
         return iml;
     }
@@ -245,9 +246,8 @@ public final class JkImlGenerator {
     }
 
     // For jeka-src, we have computed classpath from runtime
-    private List<JkIml.OrderEntry> jekaSrcOrderEntries(ModulesXml modulesXml) {
+    private List<JkIml.OrderEntry> jekaSrcOrderEntries(Path dir, ModulesXml modulesXml) {
         OrderEntries orderEntries = new OrderEntries();
-
         jekaSrcClasspath.getEntries().stream()
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
                 .filter(path -> !path.equals(baseDir().resolve(JkConstants.JEKA_SRC_CLASSES_DIR)))  // does not include the work jeka-src classes of this project

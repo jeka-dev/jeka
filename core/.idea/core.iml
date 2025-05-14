@@ -163,18 +163,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core.jar!/"/>
-                </CLASSES>
-                <JAVADOC/>
-                <SOURCES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-output/distrib/bin/dev.jeka.jeka-core-sources.jar!/"/>
-                </SOURCES>
-            </library>
-        </orderEntry>
-        <orderEntry exported="" scope="TEST" type="module-library">
-            <library>
-                <CLASSES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-boot/commons-compress-1.21.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka-boot/commons-compress-1.21.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>
@@ -183,7 +172,7 @@
         <orderEntry exported="" scope="TEST" type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar:///Users/jerome/IdeaProjects/jeka/core/jeka-boot/commonmark-0.11.0.jar!/"/>
+                    <root url="jar://$MODULE_DIR$/jeka-boot/commonmark-0.11.0.jar!/"/>
                 </CLASSES>
                 <JAVADOC/>
                 <SOURCES/>

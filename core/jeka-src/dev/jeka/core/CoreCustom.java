@@ -34,6 +34,7 @@ import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -80,6 +81,11 @@ public class CoreCustom extends KBean {
         mavenKBean.getPublication()
                 .putArtifact(DISTRIB_FILE_ID)
                 .putArtifactIf(!JkUtilsSystem.IS_WINDOWS, SDKMAN_FILE_ID);
+    }
+
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        intellijKBean.excludeJekaLib();
     }
 
     // Call from GitHub actions
