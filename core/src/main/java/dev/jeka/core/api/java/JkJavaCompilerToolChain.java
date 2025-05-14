@@ -21,6 +21,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -253,27 +254,28 @@ public final class JkJavaCompilerToolChain {
     }
 
     private ToolOrProcess guess(JkJavaVersion javaVersion) {
+        String javacFileName = JkUtilsSystem.IS_WINDOWS ? "javac.exe" : "javac";
         if (javaVersion == null) {
             if (jdkHints.preferTool && ToolProvider.getSystemJavaCompiler() != null) {
                 JkLog.verbose("Use current JDK tool to compile.");
                 return new ToolOrProcess(compileToolOrFail());
             }
             Path javaHome = Paths.get(System.getProperty("java.home"));
-            if (!Files.exists(javaHome.resolve("bin/javac"))) {
+            if (!Files.exists(javaHome.resolve("bin").resolve(javacFileName))) {
                 javaHome = javaHome.getParent();
             }
-            if (!Files.exists(javaHome.resolve("bin/javac"))) {
-                throw new IllegalStateException("The current Java is not a JDK." +
+            if (!Files.exists(javaHome.resolve("bin").resolve(javacFileName))) {
+                throw new IllegalStateException("The current Java: " + javaHome + " is not a JDK." +
                         " Please run a JDK or precise the java version to run.");
             }
             return new ToolOrProcess(javaHome);
         }
         Path currentJavaHome = Paths.get(System.getProperty("java.home"));
-        boolean hasJavac = Files.exists(currentJavaHome.resolve("bin/java"));
+        boolean hasJavac = Files.exists(currentJavaHome.resolve("bin").resolve(javacFileName));
 
         // It may be running on the jre home
         if (!hasJavac) {
-            hasJavac = Files.exists(currentJavaHome.resolve("../bin/java"));
+            hasJavac = Files.exists(currentJavaHome.resolve("../bin").resolve(javacFileName));
         }
 
         boolean currentVersionMatch = javaVersion.equals(JkJavaVersion.ofCurrent());
@@ -393,9 +395,10 @@ public final class JkJavaCompilerToolChain {
     }
 
     private static Path findJavac(Path javaHome) {
-        Path javac = javaHome.resolve("bin/javac");
+        String javacFileName = JkUtilsSystem.IS_WINDOWS ? "javac.exe" : "javac";
+        Path javac = javaHome.resolve("bin").resolve(javacFileName);
         if (!Files.exists(javac)) {
-            javac = javaHome.getParent().resolve("bin/javac");
+            javac = javaHome.getParent().resolve("bin").resolve(javacFileName);
         }
         return javac;
     }

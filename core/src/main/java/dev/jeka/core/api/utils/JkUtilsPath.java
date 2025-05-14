@@ -405,7 +405,11 @@ public final class JkUtilsPath {
         URL url = clazz.getResource(resourceName);
         JkUtilsAssert.argument(url != null, "Resource not found: " + resourceName);
         try {
-            return Paths.get(url.toURI().getPath());
+            String urlPath = url.toURI().getPath();
+            if (JkUtilsSystem.IS_WINDOWS && urlPath.startsWith("/")) {
+                urlPath = urlPath.substring(1);
+            }
+            return Paths.get(urlPath);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Cannot read resource " + resourceName, e);
         }

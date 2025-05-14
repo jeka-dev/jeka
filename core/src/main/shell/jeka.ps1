@@ -373,6 +373,17 @@ class Jdks {
     }
     $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
     $distib = ($this.Props.GetValueOrDefault("jeka.java.distrib", "temurin"))
+
+    # The jeka.jdk.xx=path has been explicitly specified in properties
+    $explicitPath = ($this.Props.GetValue("jeka.jdk." + $version))
+    if (![string]::IsNullOrEmpty($explicitPath)) {
+      $javaExeFile = $this.JavaExe($explicitPath)
+      if (! [System.IO.File]::Exists($javaExeFile)) {
+        Exit-Error "Path for JDK " + $version + " does not contains java exe file: " + $javaExeFile
+      }
+      return $explicitPath
+    }
+
     $cachedJdkDir =  $this.CachedJdkDir($version, $distib)
     $javaExeFile = $this.JavaExe($cachedJdkDir)
     if (! [System.IO.File]::Exists($javaExeFile)) {
