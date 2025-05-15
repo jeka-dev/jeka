@@ -540,7 +540,6 @@ public final class JkIml {
                 return Paths.get(rootDirString).resolve(moduleDirRelativePath);
             }
             Path normalized  = original.normalize();
-            System.out.println("-----------" + substitutes);
             return substitutes.entrySet().stream()
                     .filter(pathStringEntry -> pathStringEntry.getValue() != null)
                     .filter(pathStringEntry -> normalized.startsWith(pathStringEntry.getValue().toAbsolutePath()))
