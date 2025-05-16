@@ -17,6 +17,7 @@
 package dev.jeka.core.api.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -26,6 +27,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -57,6 +59,11 @@ public final class JkPom {
      */
     public static JkPom of(Path file) {
         final Document document = JkUtilsXml.documentFrom(file);
+        return new JkPom(document);
+    }
+
+    static JkPom of(InputStream is) {
+        final Document document = JkDomDocument.parse(is).getW3cDocument();
         return new JkPom(document);
     }
 
@@ -214,6 +221,11 @@ public final class JkPom {
         return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
+    public JkPom withPropsResolved() {
+        Map<String, String> properties = getProperties();
+        return resolvedWithProps(properties);
+    }
+
     private JkQualifiedDependencySet dependencies(Element dependenciesEl, Map<String, String> props) {
         List<JkQualifiedDependency> scopedDependencies = new LinkedList<>();
         for (final Element dependencyEl : JkUtilsXml.directChildren(dependenciesEl, "dependency")) {
@@ -276,6 +288,16 @@ public final class JkPom {
             return candidate;
         }
         return null;
+    }
+
+    private JkPom resolvedWithProps(Map<String, String> props) {
+        String xml = JkDomDocument.of(pomDoc).toXml();
+        for (final Map.Entry<String, String> entry : props.entrySet()) {
+            String placeholder = "${" + entry.getKey() + "}";
+            xml = xml.replace(placeholder, entry.getValue());
+        }
+        Document newDoc = JkDomDocument.parse(xml).getW3cDocument();
+        return new JkPom(newDoc);
     }
 
 }

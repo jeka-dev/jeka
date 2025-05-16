@@ -294,8 +294,16 @@ public final class JkRepo {
         return this;
     }
 
+    public Map<String, String> getHeaders() {
+        return Collections.unmodifiableMap(this.httpHeaders);
+    }
+
     public JkRepoSet toSet() {
         return JkRepoSet.of(this);
+    }
+
+    public boolean hasAuthorizationHeader() {
+        return this.httpHeaders.containsKey("Authorization");
     }
 
     @Override
@@ -403,6 +411,11 @@ public final class JkRepo {
             return new JkRepoCredentials(realm, username, password);
         }
 
+        String encodedBase64() {
+            return Base64.getEncoder().encodeToString((JkUtilsString.nullToEmpty(userName) + ":" +
+                    JkUtilsString.nullToEmpty(password)).getBytes(StandardCharsets.UTF_8));
+        }
+
         private JkRepoCredentials merge(JkRepoCredentials other) {
             String username = Optional.ofNullable(this.userName).orElse(other.userName);
             String password = Optional.ofNullable(this.password).orElse(other.password);
@@ -423,7 +436,7 @@ public final class JkRepo {
         }
 
         public boolean isEmpty() {
-            return userName == null && password == null;
+            return JkUtilsString.isBlank(userName) && JkUtilsString.isBlank(password);
         }
 
         public String toAuthorizationHeader() {

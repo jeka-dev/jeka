@@ -484,7 +484,7 @@ class ZipExtractor {
     $webClient = New-Object System.Net.WebClient
     if (![String]::IsNullOrWhiteSpace($this.authorisationHeader)) {
       $webClient.Headers.Add("Authorization", $this.authorisationHeader)
-      Write-Host "add auth heder http $($this.authorisationHeader)"
+      MessageVerbose("add auth header http $($this.authorisationHeader)")
     }
     try {
         $webClient.DownloadFile($this.url, $downloadFile)
