@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class JkPomTest {
 
     @Test
-    void withPropsResolved() {
+    void withResolvedProperties() {
         JkPom pom = JkPom.of(JkPomTest.class.getResourceAsStream("pom-sample.xml"));
-        assertEquals("6.1.3", pom.withPropsResolved().getVersionProvider()
+        assertEquals("6.1.3", pom.withResolvedProperties().getVersionProvider()
                 .getVersionOf("org.springframework:spring-core"));
     }
 }

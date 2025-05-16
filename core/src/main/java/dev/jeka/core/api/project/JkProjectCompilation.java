@@ -23,7 +23,10 @@ import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.tool.JkConstants;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -231,7 +234,14 @@ public class JkProjectCompilation {
     }
 
     private void compileJava() {
-        JkJavaCompilerToolChain.Status status = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec());
+        JkUtilsPath.createDirectories(getGeneratedSourcesForAnnoProcessors());
+        JkJavaVersion javaVersion = project.getJvmTargetVersion() == null ? JkJavaVersion.ofCurrent()
+                : project.getJvmTargetVersion();
+        JkJavaCompileSpec compileSpec = compileSpec();
+        if (javaVersion.isEqualOrGreaterThan(21) && !compileSpec.getOptions().contains("-proc:full")) {
+            compileSpec.addOptions("-proc:full");
+        }
+        JkJavaCompilerToolChain.Status status = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec);
         if (!JkLog.isVerbose() && status == JkJavaCompilerToolChain.Status.SUCCESS) {
             JkLog.info("Succeed");  // must log something otherwise next task will indent badly
         }
@@ -246,7 +256,13 @@ public class JkProjectCompilation {
             .setClasspath(classpath())
             .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))
             .addOptions(extraJavaCompilerOptions)
+            .addOptions("-s", getGeneratedSourcesForAnnoProcessors().toString())
             .setOutputDir(layout.resolveClassDir());
+    }
+
+    private Path getGeneratedSourcesForAnnoProcessors() {
+        return project.getBaseDir().resolve(JkConstants.OUTPUT_PATH + "/" + JkCompileLayout.GENERATED_SOURCE_PATH
+                + "/annotation-processors");
     }
 
     // -------- methods to override for test compilation

@@ -333,7 +333,7 @@ public final class JkRepo {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("url:").append(url).append(", ");
-        sb.append("credentials: ").append(credentials).append(", ");
+        //sb.append("credentials: ").append(credentials).append(", ");
         sb.append("publish config: ").append(this.publishConfig);
         return sb.toString();
     }

@@ -157,7 +157,7 @@ public class JkRepoProperties {
             JkRepo.JkRepoCredentials credentials = getCredentials(repoNameProperty);
             if (!repo.hasAuthorizationHeader() && !credentials.isEmpty()) {
                 String encoded64 = credentials.encodedBase64();
-                headers.put("Authorization", encoded64);
+                headers.put("Authorization", "Basic " + encoded64);
             }
             repo.setCredentials(credentials);
             repo.setHttpHeaders(headers);

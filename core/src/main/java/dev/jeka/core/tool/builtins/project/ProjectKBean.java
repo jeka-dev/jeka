@@ -294,9 +294,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         @JkDepSuggest(versionOnly = true, hint = "-Xlint,-Xlint:deprecation,-Xlint:unchecked")
         public String compilerOptions;
 
-        @JkDoc("If true, let annotation processors to generate sources.")
-        public boolean annotationProcSrcGen;
-
     }
 
     public class JkRunOptions {
@@ -475,9 +472,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             String[] options = JkUtilsString.parseCommandline(compilation.compilerOptions);
             project.compilation.addJavaCompilerOptions(options);
             project.test.compilation.addJavaCompilerOptions(options);
-        }
-        if (compilation.annotationProcSrcGen) {
-            project.compilation.addSourceGenerator(new JkAnnotationProcessorGenerator());
         }
         List<String> includePatterns = JkUtilsString.splitWhiteSpaces(test.includePatterns);
         project.test.selection.addIncludePatterns(includePatterns);

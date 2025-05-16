@@ -221,7 +221,7 @@ public final class JkPom {
         return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
-    public JkPom withPropsResolved() {
+    public JkPom withResolvedProperties() {
         Map<String, String> properties = getProperties();
         return resolvedWithProps(properties);
     }
