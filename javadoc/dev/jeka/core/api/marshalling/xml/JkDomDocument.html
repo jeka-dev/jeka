@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10};
+var methods = {"i0":10,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -168,12 +168,16 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr id="i6" class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html" title="class in dev.jeka.core.api.marshalling.xml">JkDomDocument</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#parse-java.lang.String-">parse</a></span>(java.lang.String&nbsp;xml)</code>&nbsp;</td>
+</tr>
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#print-java.io.OutputStream-">print</a></span>(java.io.OutputStream&nbsp;out)</code>
 <div class="block">Outputs xml in the specified stream.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#print-java.io.OutputStream-java.util.function.Consumer-">print</a></span>(java.io.OutputStream&nbsp;out,
      java.util.function.Consumer&lt;org.w3c.dom.DOMConfiguration&gt;&nbsp;domConfigurationConfigurer)</code>
@@ -181,19 +185,19 @@ extends java.lang.Object</pre>
  specified <code>Consumer<javax.xml.transform.Transformer></code>.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomElement.html" title="class in dev.jeka.core.api.marshalling.xml">JkDomElement</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#root--">root</a></span>()</code>
 <div class="block">Returns the root element of this document.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#save-java.nio.file.Path-">save</a></span>(java.nio.file.Path&nbsp;file)</code>
 <div class="block">Saves this document in the specified file.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#toXml--">toXml</a></span>()</code>
 <div class="block">Returns an XML String representation of this document.</div>
@@ -261,6 +265,15 @@ extends java.lang.Object</pre>
 <h4>parse</h4>
 <pre>public static&nbsp;<a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html" title="class in dev.jeka.core.api.marshalling.xml">JkDomDocument</a>&nbsp;parse(java.io.InputStream&nbsp;inputStream)</pre>
 <div class="block">Same as <a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html#parse-java.io.InputStream-javax.xml.parsers.DocumentBuilder-"><code>parse(InputStream, DocumentBuilder)</code></a> but using a default <code>DocumentBuilder</code>.</div>
+</li>
+</ul>
+<a name="parse-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>parse</h4>
+<pre>public static&nbsp;<a href="../../../../../../dev/jeka/core/api/marshalling/xml/JkDomDocument.html" title="class in dev.jeka.core.api.marshalling.xml">JkDomDocument</a>&nbsp;parse(java.lang.String&nbsp;xml)</pre>
 </li>
 </ul>
 <a name="parse-java.nio.file.Path-">
