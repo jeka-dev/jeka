@@ -151,7 +151,7 @@ public final class JkRepo {
      * the credential is set up using this token .
      */
     public static JkRepo ofMavenCentral() {
-        return of(MAVEN_CENTRAL_URL);
+        return of(MAVEN_CENTRAL_URL).toReadonly();
     }
 
     public static JkRepo ofGitHub(String owner, String repoName) {
@@ -223,6 +223,26 @@ public final class JkRepo {
     }
 
     /**
+     * Returns a new JkRepo instance with the same configuration as the current one,
+     * but without any publication configuration, effectively making it read-only.
+     *
+     * @return a new JkRepo instance configured as read-only
+     */
+    public JkRepo toReadonly() {
+        return new JkRepo(this.url, this.ivyRepo, this.ivyConfig, null)
+                .setCredentials(this.credentials)
+                .setHttpHeaders(this.httpHeaders);
+    }
+
+    /**
+     * Returns if this repository is in read-only mode.
+     * A repository is considered read-only if it does not have a publishing configuration.
+     */
+    public boolean isReadonly() {
+        return this.publishConfig == null;
+    }
+
+    /**
      * Returns the url of this repository.
      */
     public URL getUrl() {
@@ -243,7 +263,9 @@ public final class JkRepo {
     }
 
     /**
-     * Returns the getRealm of this repository.
+     * Retrieves the credentials associated with this repository.
+     *
+     * @return the credentials configured for this repository, or null if no credentials are set
      */
     public JkRepoCredentials getCredentials() {
         return credentials;
@@ -319,7 +341,8 @@ public final class JkRepo {
     }
 
     public JkRepo copy() {
-        JkRepo result = new JkRepo(url, ivyRepo, ivyConfig.copy(), publishConfig.copy() );
+        JkPublishConfig publishCopy = publishConfig == null ? null : publishConfig.copy();
+        JkRepo result = new JkRepo(url, ivyRepo, ivyConfig.copy(), publishCopy );
         result.credentials = credentials;
         return result;
     }
@@ -333,8 +356,13 @@ public final class JkRepo {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("url:").append(url).append(", ");
+        if (httpHeaders.containsKey("Authorization")) {
+            sb.append("header Authorization: ***, ");
+        }
         //sb.append("credentials: ").append(credentials).append(", ");
-        sb.append("publish config: ").append(this.publishConfig);
+        if (this.publishConfig != null) {
+            sb.append("publish config: ").append(this.publishConfig);
+        }
         return sb.toString();
     }
 

@@ -97,7 +97,7 @@ public class JkRepoProperties {
      * Returns repo from where are downloaded dependencies. Returns Maven central repo if no download repository is defined.
      */
     public JkRepoSet getDownloadRepos() {
-        JkRepoSet repoSet = getRepos("jeka.repos.download");
+        JkRepoSet repoSet = getRepos("jeka.repos.download").toReadonly();
         if (repoSet.getRepos().isEmpty()) {
             repoSet = repoSet.and(JkRepo.ofMavenCentral());
         }
