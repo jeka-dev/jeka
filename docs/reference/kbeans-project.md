@@ -59,8 +59,7 @@ A KBean that reads te underlying `JkProject` to extract information.
 ## Annotation Processors
 
 To use an annotation processor (like **Lombok** or **MapStruct**), add the dependency coordinates
-to the `compile-only` section in your `jeka.properties` file.
-
+to the `compile-only` section in your `dependencies.txt` file.
 
 ```ini
 [compile-only]
@@ -68,13 +67,8 @@ org.mapstruct:mapstruct-processor:1.6.3
 org.projectlombok:lombok:1.18.38
 ```
 
-If some annotation processors generate sources, you must mention it in the *jeka.properties* file as:
-```properties
-@project.compilation.annotationProcSrcGen=true
-```
-The sources will be generated in *jeka-output/generated-sources/annotation-processors* dir.
+Annotation processors that generate source files will output them to the *jeka-output/generated-sources/annotation-processors* directory.
 
 That's it!
-
 
 <!-- body-autogen-doc -->

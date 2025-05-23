@@ -272,6 +272,6 @@
                 </SOURCES>
             </library>
         </orderEntry>
-        <orderEntry module-name="core" scope="COMPILE" type="module"/>
+        <orderEntry exported="" module-name="core" scope="TEST" type="module"/>
     </component>
 </module>

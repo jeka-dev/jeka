@@ -235,7 +235,9 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
      * Returns the file names concatenated with ';' on Windows and ':' on unix.
      */
     public String toPath() {
-        return String.join(File.pathSeparator, entries.stream().map(Path::toString).collect(Collectors.toList()));
+        return String.join(File.pathSeparator, entries.stream()
+                .map(Path::toString)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -260,6 +262,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
 
     public boolean hasNonExisting() {
         return this.entries.stream().anyMatch(path -> !Files.exists(path));
+    }
+
+    public List<Path> getNonExistingFiles() {
+        return this.entries.stream().filter(path -> !Files.exists(path)).collect(Collectors.toList());
     }
 
     /**

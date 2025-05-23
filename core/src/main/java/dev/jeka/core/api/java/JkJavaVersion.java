@@ -114,4 +114,8 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
         return this.compareTo(other) >= 0;
     }
 
+    public boolean isEqualOrGreaterThan(int other) {
+        return isEqualOrGreaterThan(JkJavaVersion.of(Integer.toString(other)));
+    }
+
 }

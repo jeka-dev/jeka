@@ -264,7 +264,7 @@ public final class JkVersionProvider {
                 .distinct()
                 .map(bom -> {
                     JkCoordinateFileProxy bomFile = JkCoordinateFileProxy.of(repos, bom);
-                    return JkPom.of(bomFile.get()).getVersionProvider();
+                    return JkPom.of(bomFile.get()).withResolvedProperties().getVersionProvider();
                 })
                 .reduce(this, JkVersionProvider::and);
         return new JkVersionProvider(provider.map, new LinkedHashSet<>());

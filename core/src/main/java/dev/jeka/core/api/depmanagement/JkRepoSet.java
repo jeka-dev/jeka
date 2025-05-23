@@ -114,10 +114,16 @@ public final class JkRepoSet {
         return null;
     }
 
+    /**
+     * Returns the list of repositories configured in this repository set.
+     */
     public List<JkRepo> getRepos() {
         return repos;
     }
 
+    /**
+     * Checks if the specified URL is present in the repository set.
+     */
     public boolean contains(URL url) {
         return this.repos.stream().anyMatch(repo -> url.equals(repo.getUrl()));
     }
@@ -136,6 +142,14 @@ public final class JkRepoSet {
     }
 
     /**
+     * Returns an immutable copy of this repository set, ensuring that the underlying repositories
+     * are also marked as read-only.
+     */
+    public JkRepoSet toReadonly() {
+        return new JkRepoSet(this.repos.stream().map(JkRepo::toReadonly).collect(Collectors.toList()));
+    }
+
+    /**
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public Path get(JkCoordinate coordinate) {
@@ -147,6 +161,14 @@ public final class JkRepoSet {
         return file.toPath();
     }
 
+    /**
+     * Retrieves the file associated with the specified dependency coordinate.
+     * Delegates to {@link #get(JkCoordinate)} by constructing a {@link JkCoordinate}
+     * from the given string representation.
+     *
+     * @param coordinate the string representation of the dependency coordinate to resolve
+     * @return the path to the resolved file, or {@code null} if the dependency cannot be resolved
+     */
     public Path get(String coordinate) {
         return get(JkCoordinate.of(coordinate));
     }

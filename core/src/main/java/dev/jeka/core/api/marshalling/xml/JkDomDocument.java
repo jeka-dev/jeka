@@ -104,6 +104,10 @@ public final class JkDomDocument {
         return parse(inputStream, builder);
     }
 
+    public static JkDomDocument parse(String xml) {
+        return parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+    }
+
     /**
      * Creates a {@link JkDomDocument} from the specified xml file.
      */

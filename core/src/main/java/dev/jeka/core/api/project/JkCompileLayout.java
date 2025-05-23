@@ -41,7 +41,7 @@ public class JkCompileLayout {
 
     public enum Style {SIMPLE, MAVEN}
 
-    private static final String GENERATED_SOURCE_PATH = "generated-sources/java";
+    static final String GENERATED_SOURCE_PATH = "generated-sources/java";
 
     private static final String GENERATED_RESOURCE_PATH = "generated-resources";
 

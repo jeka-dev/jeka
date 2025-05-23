@@ -46,7 +46,7 @@ class JkRepoPropertiesTest {
         assertEquals(pwd, repo.getCredentials().getPassword());
         assertEquals(realm, repo.getCredentials().getRealm());
         Map<String, String> headers = repo.getHttpHeaders();
-        assertEquals(2, headers.size());
+        assertEquals(3, headers.size());  // 3 headers cause Authorization is implicitly added
         assertEquals("1", headers.get("a"));
         assertEquals("2", headers.get("bb"));
     }

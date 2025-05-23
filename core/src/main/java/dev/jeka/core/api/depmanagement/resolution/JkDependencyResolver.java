@@ -29,10 +29,7 @@ import dev.jeka.core.tool.JkConstants;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -357,7 +354,6 @@ public final class JkDependencyResolver  {
         }
 
         Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
-        boolean nonExistingEntryOnFs = false;
         if (Files.exists(cacheFile)) {
             if (JkLog.isDebug()) {
                 JkLog.debug("Resolving Dependencies:%n%s", qualifiedDependencies.toStringMultiline("  "));
@@ -368,15 +364,14 @@ public final class JkDependencyResolver  {
             String cachedCpMsg = cachedPathSequence.getEntries().isEmpty() ? "[empty]" :
                     "\n" + cachedPathSequence.toPathMultiLine("  ");
             JkLog.debug("Cached resolved classpath :%s", cachedCpMsg);
-            if (!cachedPathSequence.hasNonExisting()) {
+            List<Path> missingEntries = cachedPathSequence.getNonExistingFiles();
+            if (missingEntries.isEmpty()) {
                 return cachedPathSequence.getEntries();
             } else {
-                nonExistingEntryOnFs = true;
-                JkLog.debug(150, "Cached resolved-classpath %s has non existing entries on local file system " +
-                        ": need resolving %s", cacheFile, qualifiedDependencies);
+                JkLog.debug(450, "Cached resolved-classpath %s has non existing entries %s on local file system" +
+                        ": need resolving.", cacheFile, missingEntries);
             }
-        }
-        if (!nonExistingEntryOnFs) {
+        } else {
             JkLog.debug(150, "Cached resolved-classpath %s not found : need resolving %s", cacheFile,
                     qualifiedDependencies);
         }
@@ -404,6 +399,9 @@ public final class JkDependencyResolver  {
      * Resolves the specified dependencies and returns a sequence of resolved files.
      */
     public List<Path> resolveFiles(JkDependencySet dependencies) {
+        if (dependencies.getEntries().isEmpty()) {
+            return Collections.emptyList();
+        }
         return resolveFiles(dependencies, this.parameters);
     }
 

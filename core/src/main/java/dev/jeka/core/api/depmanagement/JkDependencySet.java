@@ -665,6 +665,22 @@ public class JkDependencySet {
         return builder.toString();
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof JkDependencySet)) return false;
+
+        JkDependencySet that = (JkDependencySet) o;
+        return entries.equals(that.entries) && globalExclusions.equals(that.globalExclusions) && versionProvider.equals(that.versionProvider);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = entries.hashCode();
+        result = 31 * result + globalExclusions.hashCode();
+        result = 31 * result + versionProvider.hashCode();
+        return result;
+    }
+
     public static class Hint {
 
         public static final Hint NONE =new Hint(null, false, false);

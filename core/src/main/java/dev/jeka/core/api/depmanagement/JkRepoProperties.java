@@ -19,9 +19,7 @@ package dev.jeka.core.api.depmanagement;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -99,7 +97,7 @@ public class JkRepoProperties {
      * Returns repo from where are downloaded dependencies. Returns Maven central repo if no download repository is defined.
      */
     public JkRepoSet getDownloadRepos() {
-        JkRepoSet repoSet = getRepos("jeka.repos.download");
+        JkRepoSet repoSet = getRepos("jeka.repos.download").toReadonly();
         if (repoSet.getRepos().isEmpty()) {
             repoSet = repoSet.and(JkRepo.ofMavenCentral());
         }
@@ -154,9 +152,16 @@ public class JkRepoProperties {
 
     private JkRepo getRepo(String repoNameProperty, String nameOrUrl) {
         if (isUrl(nameOrUrl)) {
-            return JkRepo.of(nameOrUrl)
-                    .setCredentials(getCredentials(repoNameProperty))
-                    .setHttpHeaders(getHttpHeaders(repoNameProperty));
+            Map<String, String> headers = new HashMap<>(getHttpHeaders(repoNameProperty));
+            JkRepo repo = JkRepo.of(nameOrUrl);
+            JkRepo.JkRepoCredentials credentials = getCredentials(repoNameProperty);
+            if (!repo.hasAuthorizationHeader() && !credentials.isEmpty()) {
+                String encoded64 = credentials.encodedBase64();
+                headers.put("Authorization", "Basic " + encoded64);
+            }
+            repo.setCredentials(credentials);
+            repo.setHttpHeaders(headers);
+            return repo;
         }
         return getRepoByName(nameOrUrl);
     }

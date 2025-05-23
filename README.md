@@ -48,7 +48,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 ## Usage (Examples)
 
 **Execute build methods**
-- **Compile, test and create JAR**: `jeka project: test pack`
+- **Compile, test, and create JAR**: `jeka project: test pack`
 - **Compile to native executable**: `jeka native: compile`
 - **Create a JVM-based Docker image**: `jeka docker: build`
 - **Create a native-based Docker image**: `jeka docker: buildNative`

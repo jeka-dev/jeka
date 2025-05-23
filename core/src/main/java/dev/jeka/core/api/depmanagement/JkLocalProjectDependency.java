@@ -44,7 +44,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                                      JkTransitivity transitivity) {
         super(producer, ideProjectDir, Collections.singleton(file));
         List<JkDependency> relocatedDependencies = exportedDependencies.getEntries().stream()
-                .map(dep -> dep.withIdeProjectDir(ideProjectDir))
+                //.map(dep -> dep.withIdeProjectDir(ideProjectDir))
                 .collect(Collectors.toList());
         this.exportedDependencies = JkDependencySet.of(relocatedDependencies)
                 .withGlobalExclusions(new LinkedList<>(exportedDependencies.getGlobalExclusions()))
@@ -121,6 +121,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
 
         JkLocalProjectDependency that = (JkLocalProjectDependency) o;
 
+        if (!Objects.equals(this.getIdeProjectDir(), that.getIdeProjectDir())) return false;
         if (!exportedDependencies.equals(that.exportedDependencies)) return false;
         return Objects.equals(transitivity, that.transitivity);
     }
@@ -130,6 +131,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
         int result = super.hashCode();
         result = 31 * result + exportedDependencies.hashCode();
         result = 31 * result + (transitivity != null ? transitivity.hashCode() : 0);
+        result = 31 * result + Objects.hashCode(getIdeProjectDir());
         return result;
     }
 }
