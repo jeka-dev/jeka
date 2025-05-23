@@ -378,7 +378,7 @@ public final class JkDependencyResolver  {
         JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
         JkLog.debug("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
         JkUtilsPath.createFileSafely(cacheFile);  // On Jeka-ide JkPathFile.createifNotExist throw a "file already exist exception"
-        JkPathFile.of(cacheFile).write(result.toPath());
+        JkPathFile.of(cacheFile).write(result.toPath().replace('\\', '/'));
         return result.getEntries();
     }
 
@@ -472,7 +472,7 @@ public final class JkDependencyResolver  {
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
                 JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
 
-                // This is dependency on a pom, meaning that we are supposed to use this as a BOM
+                // This is a dependency on a pom, meaning that we are supposed to use this as a BOM
                 // Therefore, we transform the dependency to such an entry in version provider
                 if (spec.getClassifier() == null && "pom".equals(spec.getType())) {
                     JkVersionProvider versionProvider = result.getVersionProvider().andBom(coordinate);

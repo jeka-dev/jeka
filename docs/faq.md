@@ -104,6 +104,21 @@ For this, we can use [cache action](https://github.com/actions/cache) as follow:
         key: ${{ runner.os }}
 ```
 
+## Errors
+
+### Junit platform
+
+I see this error message when I launch tests. What can I do?
+```
+OutputDirectoryProvider not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.
+```
+You can explicitly declare the JUNIT component versions in dependencies.txt as:
+```ini
+[test]
+org.junit.platform:junit-platform-launcher:1.12.2
+org.junit.jupiter:junit-jupiter:5.12.2
+```
+
 ## Misc
 
 ### How do I configure projects from code ?
