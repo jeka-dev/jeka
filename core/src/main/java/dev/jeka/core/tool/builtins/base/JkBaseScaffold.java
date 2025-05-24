@@ -138,7 +138,7 @@ public final class JkBaseScaffold extends JkScaffold {
 
         if (baseScaffoldOption.kind == Kind.APP) {
             List<String> testDeps = new LinkedList<>(junitDeps());
-            testDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+            testDeps.add("org.junit:junit-bom:" + JUNIT_VERSION + "@pom");
             addFileEntry(BUILD_CLASS_PATH, code("Build.snippet", testDeps, devDeps));
             addFileEntry(TEST_CLASS_PATH, code("MyTest.snippet"));
             addFileEntry(APP_CLASS_PATH, code("App.snippet", deps));
@@ -149,7 +149,7 @@ public final class JkBaseScaffold extends JkScaffold {
         } else if (baseScaffoldOption.kind == Kind.PLUGIN) {
             addFileEntry(JkConstants.JEKA_SRC_DIR + "/org/example/MyPlugin.java", code("PluginKBean.snippet"));
             List<String> testDeps = new LinkedList<>(junitDeps());
-            testDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+            testDeps.add("org.junit:junit-bom:" + JUNIT_VERSION + "@pom");
             addFileEntry(BUILD_CLASS_PATH, code("BuildPlugin.snippet", testDeps));
             addFileEntry(JkConstants.JEKA_SRC_DIR + "/_dev/samples/Sample1.java", code("SamplePlugin.snippet"));
 

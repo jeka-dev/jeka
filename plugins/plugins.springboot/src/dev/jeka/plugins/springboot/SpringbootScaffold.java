@@ -18,6 +18,7 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
+import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
@@ -29,7 +30,7 @@ import java.util.List;
 class SpringbootScaffold {
 
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.4.4";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.5.0";
 
     public static void customize(JkProjectScaffold projectScaffold) {
 
@@ -58,6 +59,7 @@ class SpringbootScaffold {
         // Add dependencies
         projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
         projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
+        projectScaffold.testDeps.add("org.junit.platform:junit-platform-launcher:1.12.2");
         projectScaffold.versionDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom");
 
         // Add sample code
@@ -91,7 +93,9 @@ class SpringbootScaffold {
                 JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom",
                 "org.springframework.boot:spring-boot-starter-web");
 
-        List<String> devDeps = JkUtilsIterable.listOf("org.springframework.boot:spring-boot-starter-test");
+        List<String> devDeps = JkUtilsIterable.listOf(
+                "org.springframework.boot:spring-boot-starter-test",
+                "org.junit.platform:junit-platform-launcher:1.12.2");
 
         // Build class code
         String buildClassCode = readSnippet("BaseBuild.java");

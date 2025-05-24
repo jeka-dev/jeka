@@ -46,7 +46,7 @@ public abstract class JkScaffold {
     private static final String LAST_VERSION_OF_TOKEN = "${lastVersionOf:";
 
     @JkDepSuggest(versionOnly = true, hint = "org.junit:junit-bom")
-    public static final String JUPITER_VERSION = "5.12.0";
+    public static final String JUNIT_VERSION = "5.12.2";
 
     protected final Path baseDir;
 

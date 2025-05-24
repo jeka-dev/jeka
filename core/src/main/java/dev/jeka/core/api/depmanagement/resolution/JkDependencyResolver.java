@@ -26,6 +26,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 
+import java.lang.ref.SoftReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,12 +37,12 @@ import java.util.stream.Collectors;
 import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
 
 /**
- * Class to resolve dependencies to files or dependency tree. Resolution is made upon binary repositories.
+ * Class to resolve dependencies to files or dependency tree. Resolution is made upon binary repositories.<p>
  *
  * This cache results at 2 levels
  * <ul>
- *     <li>In Memory : stores the complete result tree in memory to not compute twice the same dependencies in a run.</li>
- *     <li>On Filesystem : stores the path sequence result on file system and persist to one run to another.</li>
+ *     <li>In Memory: stores the complete result tree in memory to not compute twice the same dependencies in a run.</li>
+ *     <li>On Filesystem: stores the path sequence result on file system and persist to one run to another.</li>
  * </ul>
  *
  * @author Jerome Angibaud
@@ -55,7 +56,7 @@ public final class JkDependencyResolver  {
 
     private JkRepoSet repos = JkRepoSet.of();
 
-    private final Map<JkQualifiedDependencySet, JkResolveResult> cachedResults = new HashMap<>();
+    private final Map<JkQualifiedDependencySet, SoftReference<JkResolveResult>> cachedResults = new HashMap<>();
 
     private boolean useInMemoryCache;
 
@@ -246,9 +247,9 @@ public final class JkDependencyResolver  {
             return JkResolveResult.ofRoot(moduleHolder);
         }
         if (useInMemoryCache) {
-            JkResolveResult result = cachedResults.get(qualifiedDependencies);
-            if (result != null) {
-                return result;
+            SoftReference<JkResolveResult> result = cachedResults.get(qualifiedDependencies);
+            if (result != null && result.get() != null) {
+                return result.get();
             }
         }
         AtomicReference<JkResolveResult> result = new AtomicReference<>();
@@ -335,7 +336,7 @@ public final class JkDependencyResolver  {
 
         // Cache result in memory before returning
         if (useInMemoryCache) {
-            this.cachedResults.put(bomResolvedDependencies, resolveResult);
+            this.cachedResults.put(bomResolvedDependencies, new SoftReference<>(resolveResult));
         }
         return resolveResult;
     }

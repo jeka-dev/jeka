@@ -63,7 +63,6 @@ class ScaffoldTest {
     }
 
     @Test
-    @Disabled("Springboot 3.5.0 make junit fail when no src/main/test")
     void scaffold_simpleLayoutProject_ok() {
         RunChecker runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldArgs("springboot: project: layout.style=SIMPLE scaffold.jekaVersion=NO scaffold");
@@ -72,7 +71,6 @@ class ScaffoldTest {
     }
 
     @Test
-    @Disabled("Springboot 3.5.0 make junit fail when no src/main/test")
     void scaffold_base_ok() {
         RunChecker runChecker = new RunChecker();
         runChecker.scaffoldCmd = scaffoldArgs("base: scaffold springboot: -Djeka.version=.");

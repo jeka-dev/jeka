@@ -33,7 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.function.Consumer;
 
 /**
@@ -253,7 +252,7 @@ public final class JkProjectScaffold extends JkScaffold {
         StringBuilder sb = new StringBuilder();
         if (testDeps.isEmpty()) {
             testDeps.addAll(getJUnitDeps());
-            versionDeps.add("org.junit:junit-bom:" + JUPITER_VERSION + "@pom");
+            versionDeps.add("org.junit:junit-bom:" + JUNIT_VERSION + "@pom");
         }
         for (String line : lines) {
             sb.append(line).append("\n");
