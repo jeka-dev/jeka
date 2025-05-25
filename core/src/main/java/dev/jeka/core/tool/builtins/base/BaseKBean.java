@@ -154,6 +154,12 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
         packActions.run();
     }
 
+    @JkDoc("Runs tests then 'pack'.")
+    public void build() {
+        test();
+        pack();
+    }
+
     @JkDoc("Runs fat jar.")
     public void runJar() {
         this.prepareRunJar().exec();
