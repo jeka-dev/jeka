@@ -219,6 +219,19 @@ public class JkRunnables implements Runnable {
                 });
     }
 
+    /**
+     * Replaces the current entries, log, and task suffix of this {@code JkRunnables}
+     * instance with the entries, log, and task suffix of the specified {@code JkRunnables} instance.
+     *
+     * @param runnables The {@code JkRunnables} instance whose properties will
+     *                  replace the properties in this instance.
+     */
+    public void fillWith(JkRunnables runnables) {
+        this.entries.addAll(runnables.entries);
+        this.log = runnables.log;
+        this.taskSuffix = runnables.taskSuffix;
+    }
+
     private JkRunnables append(String name, Runnable runnable, Entry.RelativePlace relativePlace) {
         JkUtilsAssert.argument(!this.contains(name), "runnable container contains already an entry named '"
                 + name + "'");

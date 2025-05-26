@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/core/.idea/core.iml" filepath="$PROJECT_DIR$/core/.idea/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/jeka.iml" filepath="$PROJECT_DIR$/.idea/jeka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugins/plugins.centralportal/.idea/plugins.centralportal.iml" filepath="$PROJECT_DIR$/plugins/plugins.centralportal/.idea/plugins.centralportal.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/plugins.jacoco/plugins.jacoco.iml" filepath="$PROJECT_DIR$/plugins/plugins.jacoco/plugins.jacoco.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/plugins.kotlin/.idea/plugins.kotlin.iml" filepath="$PROJECT_DIR$/plugins/plugins.kotlin/.idea/plugins.kotlin.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugins/plugins.nexus/plugins.nexus.iml" filepath="$PROJECT_DIR$/plugins/plugins.nexus/plugins.nexus.iml" />

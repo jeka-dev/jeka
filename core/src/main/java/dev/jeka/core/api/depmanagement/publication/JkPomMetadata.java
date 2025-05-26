@@ -89,6 +89,24 @@ public final class JkPomMetadata  implements Serializable {
         return this;
     }
 
+    /**
+     * Copies the metadata information from the specified {@link JkPomMetadata} instance
+     * into this instance, including project details, SCM information, developers list,
+     * and licenses list.
+     *
+     * @param other the {@link JkPomMetadata} instance from which to copy information.
+     */
+    public void fillWith(JkPomMetadata other) {
+        this.projectName = other.projectName;
+        this.projectDescription = other.projectDescription;
+        this.projectUrl = other.projectUrl;
+        this.scmConnection = other.scmConnection;
+        this.scmDeveloperConnection = other.scmDeveloperConnection;
+        this.scmUrl = other.scmUrl;
+        this.developers.addAll(other.developers);
+        this.licenses.addAll(other.licenses);
+    }
+
     public String getScmConnection() {
         return scmConnection;
     }

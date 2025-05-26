@@ -261,4 +261,23 @@ public final class DockerKBean extends KBean {
                 .replace("${version}", buildable.getVersion().toString());
     }
 
+    public static class jvmConfig {
+
+        public String imageName;
+
+        public String baseImage;
+
+        public String options;
+
+        public final JkMultiValue<Agent> agents = JkMultiValue.of(Agent.class);
+
+        public static class Agent {
+
+            @JkDepSuggest
+            public String coordinate;
+
+            public String options;
+        }
+    }
+
 }

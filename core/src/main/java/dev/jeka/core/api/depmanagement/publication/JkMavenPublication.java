@@ -119,6 +119,22 @@ public final class JkMavenPublication {
         return of(JkArtifactLocator.VOID);
     }
 
+    public JkMavenPublication copy() {
+        JkMavenPublication copy = new JkMavenPublication(this.artifactPublisher.artifactLocator);
+        copy.artifactPublisher = this.artifactPublisher;
+        copy.versionSupplier = this.versionSupplier;
+        copy.defaultSigner = this.defaultSigner;
+        copy.repos = this.repos;
+        copy.bomResolverRepoSupplier = this.bomResolverRepoSupplier;
+        copy.dependencies = this.dependencies;
+        copy.moduleIdSupplier = this.moduleIdSupplier;
+        copy.managedDependencies.putAll(this.managedDependencies);
+        copy.pomMetadata.fillWith(this.pomMetadata);
+        copy.preActions.fillWith(this.preActions);
+        copy.postActions.fillWith(this.postActions);
+        return copy;
+    }
+
     /**
      * Configures the publication to include only the POM file, without any additional artifacts.
      * This is typically used for scenarios such as creating and publishing Bill of Materials (BOM) files.

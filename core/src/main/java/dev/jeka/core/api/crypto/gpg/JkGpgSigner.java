@@ -116,7 +116,7 @@ public final class JkGpgSigner implements JkSigner {
      * Creates a new instance of {@link JkGpgSigner} with the standard properties.<br/>
      * Use <code>jeka.gpg.secret-key</code> property or <code>JEKA_GPG_SECRET_KEY</code> for passing private ascii key.
      * <br/>
-     * Use <code>jeka.gpg.passphrase</code> property or <code>EKA_GPG_PASSPHRASE</code> for passing key password
+     * Use <code>jeka.gpg.passphrase</code> property or <code>JEKA_GPG_PASSPHRASE</code> for passing key password
      *
      * @return a new instance of JkGpgSigner
      */
