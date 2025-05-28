@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.http;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 
 import java.io.*;
@@ -105,18 +106,15 @@ public class JkHttpResponse {
             // Trigger the actual request
             int statusCode = conn.getResponseCode();
             String statusMessage = conn.getResponseMessage();
-            System.out.println("HTTP Status: " + statusCode + " " + statusMessage);
+            JkLog.verbose("HTTP Status: " + statusCode + " " + statusMessage);
 
             // Read headers
             Map<String, List<String>> headers = conn.getHeaderFields();
             for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
                 String name = entry.getKey();
                 List<String> values = entry.getValue();
-
                 if (name != null) {
-                    System.out.println(name + ": " + java.lang.String.join(", ", values));
-                } else {
-                    // null key = status line (already printed)
+                    JkLog.verbose(name + ": " + java.lang.String.join(", ", values));
                 }
             }
             return headers;

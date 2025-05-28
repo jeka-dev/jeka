@@ -163,6 +163,7 @@ public class JkCentralPortalPublisher {
         StatusResponse status = null;
         while (System.currentTimeMillis() - start < timeoutSecond * 1000L) {
             status = getStatus(deploymentId);
+            JkLog.verbose("Current Status: %s", status);
             if (FAILED_STATUS.equals(status.deploymentState)) {
                 throw new IllegalStateException("Deployment " + deploymentId + " has status FAILED: "
                         + status.errorList());
