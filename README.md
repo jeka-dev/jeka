@@ -107,6 +107,7 @@ The following plugins are part of JeKa’s monorepo and are released together, s
 - [Kotlin Plugin](plugins/dev.jeka.plugins.kotlin)
 - [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
 - [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
+- [Central Portal Plugin](plugins/dev.jeka.plugins.centralportal)
 
 The following plugin is maintained in a separate repository:
 - [OpenAPI Plugin](https://github.com/jeka-dev/openapi-plugin)
