@@ -49,9 +49,9 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       env:
         JEKA_CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
-        JEKA_REPOS_PUBLISH_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+        JEKA_CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
         JEKA_CENTRAL_PORTAL_SIGN_KEY: ${{ secrets.GPG_SECRET_KEY}}
-        JEKA_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        JEKA_CENTRAL_PORTAL_SIGN_KEY_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: |
         jeka centralportal: publish -cp=plugins/plugins.centralportal/jeka-output/classes --inspect --stacktrace
 
