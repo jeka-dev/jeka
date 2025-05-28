@@ -33,7 +33,7 @@ jobs:
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
 
     - name: Publish to OSSRH snapshot
-      if: github.ref == 'refs/heads/master'
+      if: false
       env:
         JEKA_REPOS_PUBLISH_USERNAME: ${{ secrets.OSSRH_USER }}
         JEKA_REPOS_PUBLISH_PASSWORD: ${{ secrets.OSSRH_PWD }}
