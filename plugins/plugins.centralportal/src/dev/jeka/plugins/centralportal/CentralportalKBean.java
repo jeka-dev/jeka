@@ -62,9 +62,14 @@ public class CentralportalKBean extends KBean {
 
     @JkDoc("Publishes artifacts to Maven Central.")
     public void publish() {
-        JkLog.startTask("Publishing artifacts to Central Portal");
+
         MavenKBean mavenKBean = this.load(MavenKBean.class);
         JkMavenPublication publication = mavenKBean.getPublication();
+        if (publication.getVersion().isSnapshot()) {
+            JkLog.verbose("Current version %s is SNAPSHOT: won't publish to Central Portal", publication.getVersion());
+            return;
+        }
+        JkLog.startTask("Publishing artifacts to Central Portal");
         Path tempDir = getOutputDir().resolve("portalcentral");
         JkFileSigner signer = JkGpgSigner.ofAsciiKey(signingKey, signingKeyPassphrase);
         JkCentralPortalBundler bundleMaker = JkCentralPortalBundler.of(tempDir, signer);
