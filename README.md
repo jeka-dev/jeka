@@ -100,14 +100,14 @@ Visit the [documentation](https://jeka-dev.github.io/jeka/), and explore the [ex
 External plugins must be explicitly imported and are hosted as JAR files on Maven Central.
 
 The following plugins are part of JeKa’s monorepo and are released together, so their version does not need to be specified when importing:
-- [Spring Boot Plugin](plugins/dev.jeka.plugins.springboot)
-- [SonarQube Plugin](plugins/dev.jeka.plugins.sonarqube)
-- [JaCoCo Plugin](plugins/dev.jeka.plugins.jacoco)
-- [Node.js Plugin](plugins/dev.jeka.plugins.nodejs)
-- [Kotlin Plugin](plugins/dev.jeka.plugins.kotlin)
-- [Protobuf Plugin](plugins/dev.jeka.plugins.protobuf)
-- [Nexus Plugin](plugins/dev.jeka.plugins.nexus)
-- [Central Portal Plugin](plugins/dev.jeka.plugins.centralportal)
+- [Spring Boot Plugin](plugins/plugins.springboot)
+- [SonarQube Plugin](plugins/plugins.sonarqube)
+- [JaCoCo Plugin](plugins/plugins.jacoco)
+- [Node.js Plugin](plugins/plugins.nodejs)
+- [Kotlin Plugin](plugins/plugins.kotlin)
+- [Protobuf Plugin](plugins/plugins.protobuf)
+- [Nexus Plugin](plugins/plugins.nexus)
+- [Central Portal Plugin](plugins/plugins.centralportal)
 
 The following plugin is maintained in a separate repository:
 - [OpenAPI Plugin](https://github.com/jeka-dev/openapi-plugin)
