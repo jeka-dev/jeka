@@ -16,19 +16,16 @@
 
 package dev.jeka.plugins.centralportal;
 
+import dev.jeka.core.api.marshalling.json.JkJson;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.http.JkHttpResponse;
+import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -55,8 +52,6 @@ import java.util.stream.Collectors;
  * for all deployment and status management operations.</p>
  */
 public class JkCentralPortalPublisher {
-
-    private static final String LINE_FEED = "\r\n";
 
     private static final String UPLOAD_URL = "https://central.sonatype.com/api/v1/publisher/upload";
 
@@ -121,7 +116,7 @@ public class JkCentralPortalPublisher {
      * @return the current status of the deployment associated with the provided deployment ID
      * @throws UncheckedIOException if an I/O error occurs during the status retrieval process
      */
-    public String getStatus(String deploymentId) {
+    public StatusResponse getStatus(String deploymentId) {
         try {
             return doGetStatus(deploymentId);
         } catch (IOException e) {
@@ -161,16 +156,18 @@ public class JkCentralPortalPublisher {
         }
     }
 
-    private void doWaitUntil(String deploymentId, int timeoutSecond, int elapseRetrySecond, List<String> statuses) throws IOException {
+    private void doWaitUntil(String deploymentId, int timeoutSecond, int elapseRetrySecond, List<String> statuses)
+            throws IOException {
+
         long start = System.currentTimeMillis();
-        String status = null;
+        StatusResponse status = null;
         while (System.currentTimeMillis() - start < timeoutSecond * 1000L) {
             status = getStatus(deploymentId);
-            if (FAILED_STATUS.equals(status)) {
-                throw new IllegalStateException("Deployment " + deploymentId + " has status FAILED.");
+            if (FAILED_STATUS.equals(status.deploymentState)) {
+                throw new IllegalStateException("Deployment " + deploymentId + " has status FAILED: "
+                        + status.errorList());
             }
-            JkLog.verbose("Deployment status for %s: %s ", deploymentId, status);
-            if (statuses.contains(status)) {
+            if (statuses.contains(status.deploymentState)) {
                 return;
             }
             JkUtilsSystem.sleep(elapseRetrySecond * 1000L);
@@ -179,108 +176,71 @@ public class JkCentralPortalPublisher {
                 + deploymentId + ". " + "Last status was: " + status);
     }
 
-    private String doGetStatus(String deploymentId) throws IOException {
-        URL obj = new URL(STATUS_URL + "?id=" + deploymentId);
-        HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setUseCaches(false);
+    private StatusResponse doGetStatus(String deploymentId) throws IOException {
+        String url = STATUS_URL + "?id=" + deploymentId;
 
-        String encoded = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
-        conn.setRequestProperty("Authorization", "Bearer " + encoded);
+        JkHttpResponse response = JkHttpRequest.of(url, "POST")
+                .useCaches(false)
+                .addHeader("Authorization", authorizationHeader())
+                .execute();
 
-        // Get the response
-        int responseCode = conn.getResponseCode();
-
-        if (responseCode >= 400) {
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
-                final String response = br.lines().reduce("", String::concat);
-                final String msg = String.format("Error getting status of deploymentId: %s, status code: %s," +
-                                " message: %s", deploymentId, responseCode, response);
-                throw new IllegalStateException(msg);
-            }
+        if (response.isError()) {
+            final String msg = String.format("Error getting status of deploymentId: %s, status code: %s," +
+                                " message: %s", deploymentId, response.getStatusCode(), response.getBody());
+            throw new IllegalStateException(msg);
         }
 
         // Read the response
-        String response;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(),
-                StandardCharsets.UTF_8))) {
-            response = br.lines().reduce("", String::concat);
-            List<String> tokens = Arrays.asList(response.split(":")).stream()
-                    .map(String::trim)
-                    .collect(Collectors.toList());
-            for (int i = 0; i < tokens.size(); i++) {
-                String token = tokens.get(i).replace('"', ' ').trim();
-                if (token.equals("deploymentState")) {
-                    conn.disconnect();
-                    return tokens.get(i + 1).replace('"', ' ').trim();
-                }
-
-            }
-        }
-        conn.disconnect();
-        throw new IllegalStateException("No deployment status found for deploymentId: " + deploymentId);
+        StatusResponse statusResponse = JkJson.of().parse(response.getBody(), StatusResponse.class);
+        JkLog.verbose("Deployment status for %s: %s ", deploymentId, statusResponse.deploymentState);
+        return statusResponse;
     }
 
     private String doPublish(Path bundle, boolean automatic) throws IOException {
 
-        URL obj = new URL(UPLOAD_URL + (automatic ? "?publishingType=AUTOMATIC" : ""));
-        HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
-        conn.setUseCaches(false);
+        String url = UPLOAD_URL + (automatic ? "?publishingType=AUTOMATIC" : "");
 
+        JkHttpResponse response = JkHttpRequest.ofMultipart(url)
+                .addHeader("Authorization", authorizationHeader())
+                .addMultipartFile("bundle", bundle)
+                .execute();
+
+        if (response.isError()) {
+            final String msg = String.format("Error publishing bundle. on: %s responded status code: %s, message: %s",
+                    UPLOAD_URL, response.getStatusCode(), response.getBody());
+            throw new IllegalStateException(msg);
+        }
+
+        // The body is supposed to contain the deploymentId
+        return response.getBody();
+    }
+
+    private String authorizationHeader() {
         String encoded = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
-        conn.setRequestProperty("Authorization", "Bearer " + encoded);
+        return "Bearer " + encoded;
+    }
 
-        String boundary = "===" + System.currentTimeMillis() + "===";
-        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+    public static class StatusResponse {
 
-        try (OutputStream os = conn.getOutputStream();
-             PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8), true)) {
+        public String deploymentId;
 
-            // Start the form
-            writer.append("Content-Disposition: form-data; name=\"bundle\"; filename=\"central-bundle.zip\"");
-            writer.append(LINE_FEED);
-            writer.append("Content-Type: application/zip");
-            writer.append(LINE_FEED);
-            writer.append("Content-Transfer-Encoding: binary");
-            writer.append(LINE_FEED);
-            writer.append(LINE_FEED);
-            writer.flush();
+        public String deploymentName;
 
-            // Copy the file
-            Files.copy(bundle, os);
-            os.flush();
+        public String deploymentState;
 
-            // End of multipart/form-data
-            writer.append(LINE_FEED);
+        public List<String> purls = new ArrayList<>();
 
-            writer.append("--").append(boundary).append("--");
-            writer.append(LINE_FEED);
+        public Map<String, Object> errors = new HashMap<>();
+
+        @Override
+        public String toString() {
+            return JkJson.of().toJson(this);
         }
 
-        // Get the response
-        int responseCode = conn.getResponseCode();
-
-        if (responseCode >= 400) {
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
-                final String response = br.lines().reduce("", String::concat);
-                final String msg = String.format("Error publishing bundle on: %s, status code: %s, message: %s", UPLOAD_URL,
-                        responseCode, response);
-                throw new IllegalStateException(msg);
-            }
+        public List<String> errorList() {
+            return errors.values().stream()
+                    .map(Objects::toString)
+                    .collect(Collectors.toList());
         }
-
-        // Read the response
-        String response;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(),
-                StandardCharsets.UTF_8))) {
-            response = br.readLine();
-        }
-        conn.disconnect();
-        return response;
     }
 }

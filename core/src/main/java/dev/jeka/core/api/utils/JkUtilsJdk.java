@@ -17,6 +17,7 @@
 package dev.jeka.core.api.utils;
 
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 
@@ -72,7 +73,7 @@ public final class JkUtilsJdk {
         String tempBaseName = "jeka-jdk-download-" + distrib + "-" + majorVersion;
         Path tempArchive = JkUtilsPath.createTempFile(tempBaseName, ext);
         JkUtilsPath.deleteIfExists(tempArchive);
-        JkUtilsNet.downloadFile(url, tempArchive);
+        JkHttpRequest.of(url).downloadFile(tempArchive);
         Path expandDir = JkUtilsPath.createTempDirectory(tempBaseName);
         if (JkUtilsSystem.IS_WINDOWS) {
             JkUtilsZip.unzip(tempArchive, expandDir);

@@ -20,8 +20,8 @@ import dev.jeka.core.api.crypto.JkFileSigner;
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkRepo;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
 
@@ -36,9 +36,12 @@ public class JkCentralPortalBundler {
 
     private final JkFileSigner signer;
 
-    private JkCentralPortalBundler(Path localTempRepo, JkFileSigner signer) {
+    private final boolean tempDir;
+
+    private JkCentralPortalBundler(Path localTempRepo, JkFileSigner signer, boolean tempDir) {
         this.localTempRepo = localTempRepo;
         this.signer = signer;
+        this.tempDir = tempDir;
     }
 
     /**
@@ -52,7 +55,19 @@ public class JkCentralPortalBundler {
      *         local repository path and file signer
      */
     public static JkCentralPortalBundler of(Path localTempRepo, JkFileSigner signer) {
-        return new JkCentralPortalBundler(localTempRepo, signer);
+        return new JkCentralPortalBundler(localTempRepo, signer, false);
+    }
+
+    /**
+     * Creates a new instance of {@code JkCentralPortalBundler} using a temporary local
+     * repository and the specified file signer.
+     *
+     * @param signer the {@code JkFileSigner} used to sign the files to be bundled
+     * @return a new instance of {@code JkCentralPortalBundler} initialized with a temporary
+     *         local repository and the given file signer
+     */
+    public static JkCentralPortalBundler of(JkFileSigner signer) {
+        return new JkCentralPortalBundler(JkUtilsPath.createTempDirectory("jeka-central-portal"), signer, true);
     }
 
     /**
@@ -72,6 +87,16 @@ public class JkCentralPortalBundler {
         String name = moduleId.getName();
         String pathString = group.replace('.', '/') + "/" + name + "/" + publication.getVersion();
         JkPathTree.of(localTempRepo).andMatching(pathString + "/*").zipTo(bundlePath);
+        if (tempDir) {
+            JkUtilsPath.deleteQuietly(localTempRepo, true);
+        }
+    }
+
+    /**
+     * Returns the path to the local temporary repository directory used for storing files.
+     */
+    public Path getTempRepoDir() {
+        return localTempRepo;
     }
 
     private JkRepo centralPortalLocalRepo() {
@@ -79,7 +104,7 @@ public class JkCentralPortalBundler {
         repo.publishConfig.setChecksumAlgos("sha1", "md5");
         repo.publishConfig.setSignatureRequired(true);
         repo.publishConfig.setSigner(signer);
-        repo.publishConfig.setVersionFilter(version -> !version.isSnapshot());
+        //repo.publishConfig.setVersionFilter(version -> !version.isSnapshot());
         return repo;
     }
 

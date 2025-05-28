@@ -165,14 +165,9 @@ public class JkUtilsNet {
     }
 
     /**
-     * Sends an HTTP request to the specified URL using the specified method and parameters.
-     *
-     * @param url    The URL to send the request to
-     * @param method The HTTP method to use (e.g., "GET", "POST", etc.)
-     * @param requestBody The parameters to include in the request body
-     * @return The response from the server as a BasicHttpResponse object
-     * @throws UncheckedIOException If an I/O error occurs while sending the request or receiving the response
+     * @deprecated Use {@link dev.jeka.core.api.http.JkHttpRequest#execute()} instead
      */
+    @Deprecated
     public static BasicHttpResponse sendHttpRequest(String url, String method, Map<String, String> headers, String requestBody) {
         try {
             URL obj = new URL(url);
@@ -208,20 +203,27 @@ public class JkUtilsNet {
 
     }
 
+    /**
+     * @deprecated Use {@link dev.jeka.core.api.http.JkHttpRequest#execute()} instead
+     */
+    @Deprecated
     public static BasicHttpResponse sendHttpRequest(String url, String method, String requestBody) {
         return sendHttpRequest(url, method, new HashMap<>(), requestBody);
     }
 
+    /**
+     * @deprecated Use {@link dev.jeka.core.api.http.JkHttpRequest#downloadFile(Path)} instead
+     */
+    @Deprecated
     public static void downloadFile(String fileURL, Path saveFilePath) {
         URL url = JkUtilsIO.toUrl(fileURL);
         downloadFile(url, saveFilePath, httpURLConnection -> {});
     }
 
     /**
-     * Downloads the specified url file at the specified file.
-     * @param url the url file to download
-     * @param saveFilePath The filesystem location to get the file once downloaded
+     * @deprecated Use {@link dev.jeka.core.api.http.JkHttpRequest#downloadFile(Path)} instead
      */
+    @Deprecated
     public static void downloadFile(URL url, Path saveFilePath,
                                     Consumer<HttpURLConnection> urlConnectionCustomizer) {
         try {
@@ -262,7 +264,10 @@ public class JkUtilsNet {
 
     }
 
-
+    /**
+     * @deprecated Use {@link dev.jeka.core.api.http.JkHttpResponse} instead
+     */
+    @Deprecated
     public static class BasicHttpResponse {
 
         public final int code;

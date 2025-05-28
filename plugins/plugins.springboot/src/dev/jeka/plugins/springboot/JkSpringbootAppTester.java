@@ -16,6 +16,7 @@
 
 package dev.jeka.plugins.springboot;
 
+import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkApplicationTester;
@@ -96,7 +97,7 @@ public class JkSpringbootAppTester extends JkApplicationTester {
     public void stopGracefully() {
         String shutdownUrl = baseUrlAndPort + "/actuator/shutdown";
         JkLog.verbose("Invoke %s", shutdownUrl);
-        JkUtilsNet.sendHttpRequest(shutdownUrl, "POST", null).asserOk();
+        JkHttpRequest.of(shutdownUrl, "POST").execute().assertNoError();
     }
 
     /**

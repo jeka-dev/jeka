@@ -43,11 +43,11 @@ public class CentralportalKBean extends KBean {
 
     @JkPropValue("JEKA_CENTRAL_PORTAL_SIGN_KEY")
     @JkDoc("The armored GPG key to sign published artifacts.")
-    public String signingGpgKey;
+    public String signingKey;
 
     @JkPropValue("JEKA_CENTRAL_PORTAL_SIGN_KEY_PASSPHRASE")
     @JkDoc("The passphrase of the armored GPG key.")
-    public String signingGpgKekPassphrase;
+    public String signingKeyPassphrase;
 
     @JkDoc("If true, the bundle will be automatically deployed to Maven Central without manual intervention.")
     public boolean automatic = true;
@@ -66,7 +66,7 @@ public class CentralportalKBean extends KBean {
         MavenKBean mavenKBean = this.load(MavenKBean.class);
         JkMavenPublication publication = mavenKBean.getPublication();
         Path tempDir = getOutputDir().resolve("portalcentral");
-        JkFileSigner signer = JkGpgSigner.ofStandardProperties();
+        JkFileSigner signer = JkGpgSigner.ofAsciiKey(signingKey, signingKeyPassphrase);
         JkCentralPortalBundler bundleMaker = JkCentralPortalBundler.of(tempDir, signer);
         Path zipPath = getOutputDir().resolve("centralportal-bundle-" + publication.getModuleId().getName()
                 + "-" + publication.getVersion() + ".zip");

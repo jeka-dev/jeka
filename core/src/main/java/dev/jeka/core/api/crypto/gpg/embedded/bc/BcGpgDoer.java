@@ -112,16 +112,16 @@ final class BcGpgDoer implements JkInternalGpgDoer {
                      String asciiKey, char[] keyPassphrase) {
         OutputStream armoredOutput  = new ArmoredOutputStream(out);
         final PGPSecretKey pgpSecretKey = createSecretKey(asciiKey);
-        doSign(toSign, armoredOutput, keyPassphrase, pgpSecretKey);
+        doSign(toSign, armoredOutput, pgpSecretKey, keyPassphrase);
     }
 
     static void sign(InputStream toSign, InputStream keyRing, String keyName, OutputStream out, char[] keyPassphrase) {
         OutputStream armoredOutput  = new ArmoredOutputStream(out);
         final PGPSecretKey pgpSecretKey = readSecretKey(keyRing, keyName);
-        doSign(toSign, armoredOutput, keyPassphrase, pgpSecretKey);
+        doSign(toSign, armoredOutput, pgpSecretKey, keyPassphrase);
     }
 
-    private static void doSign(InputStream toSign, OutputStream out, char[] pass, PGPSecretKey pgpSecretKey) {
+    private static void doSign(InputStream toSign, OutputStream out, PGPSecretKey pgpSecretKey, char[] pass) {
         final PGPDigestCalculatorProvider pgpDigestCalculatorProvider = new BcPGPDigestCalculatorProvider();
         final PBESecretKeyDecryptor secretKeyDecryptor = new BcPBESecretKeyDecryptorBuilder(
                 pgpDigestCalculatorProvider).build(pass);
@@ -227,20 +227,12 @@ final class BcGpgDoer implements JkInternalGpgDoer {
     }
 
     static PGPSecretKey createSecretKey(String asciiKey)  {
-        InputStream keyIn = new ByteArrayInputStream(asciiKey.getBytes());
-        ArmoredInputStream armorIn;
-        try {
-            armorIn = new ArmoredInputStream(keyIn);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        PGPSecretKeyRingCollection pgpSec;
-        try {
-            pgpSec = new PGPSecretKeyRingCollection(armorIn, new JcaKeyFingerprintCalculator());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        Iterator<PGPSecretKeyRing> keyRingIter = pgpSec.getKeyRings();
+        InputStream keyInputStream = new ByteArrayInputStream(asciiKey.getBytes());
+        ArmoredInputStream armorInputStream = armoredInputStream(keyInputStream);
+
+        PGPSecretKeyRingCollection pgpSecretRings = extractSecretKeyRing(armorInputStream);
+        Iterator<PGPSecretKeyRing> keyRingIter = pgpSecretRings.getKeyRings();
+
         if (!keyRingIter.hasNext()) {
             JkLog.warn("No ring found in secret key %s", JkUtilsString.ellipse(asciiKey, 80));
         }
@@ -261,6 +253,22 @@ final class BcGpgDoer implements JkInternalGpgDoer {
         throw  new IllegalStateException("No secret key found for ascii key " +
                 JkUtilsString.ellipse(asciiKey, 80));
 
+    }
+
+    private static ArmoredInputStream armoredInputStream(InputStream asciiKeyInputStream) {
+        try {
+            return new ArmoredInputStream(asciiKeyInputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static PGPSecretKeyRingCollection extractSecretKeyRing(InputStream armoredInputStream) {
+        try {
+            return new PGPSecretKeyRingCollection(armoredInputStream, new JcaKeyFingerprintCalculator());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

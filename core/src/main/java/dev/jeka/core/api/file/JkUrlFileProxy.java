@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.file;
 
+import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
@@ -62,7 +63,9 @@ public class JkUrlFileProxy {
             return file;
         }
         JkLog.info("Download " + url + " to " + file);
-        JkUtilsNet.downloadFile(url, file, urlConnectionCustomizer);
+        JkHttpRequest.of(url.toString())
+                .customize(urlConnectionCustomizer)
+                .downloadFile(file);
         return JkPathFile.of(file).createIfNotExist().fetchContentFrom(url).get();
     }
 

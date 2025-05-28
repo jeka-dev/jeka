@@ -23,6 +23,12 @@ class BcGpgDoerTest {
         System.out.println(result);
     }
 
+    @Test
+    void createKey() {
+        String asciiKey = JkUtilsIO.readAsString(PgpRunner.class.getResourceAsStream("jeka-unit-test-key.asc"));
+        BcGpgDoer.createSecretKey(asciiKey);
+    }
+
     private static InputStream sample() {
         return PgpRunner.class.getResourceAsStream("sampleFileToSign.txt");
     }

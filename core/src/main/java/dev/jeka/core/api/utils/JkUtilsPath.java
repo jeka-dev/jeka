@@ -464,6 +464,14 @@ public final class JkUtilsPath {
         }
     }
 
+    public static void copy(InputStream source, Path target, CopyOption ...copyOptions) {
+        try {
+            Files.copy(source, target, copyOptions);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /**
      * Get the url to the specified path.
      */

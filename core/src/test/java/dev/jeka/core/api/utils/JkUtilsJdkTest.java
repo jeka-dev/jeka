@@ -32,5 +32,8 @@ class JkUtilsJdkTest {
         JkLog.setDecorator(JkLog.Style.INDENT);
         Path path = JkUtilsJdk.getJdk("graalvm", "22");
         Assertions.assertTrue(Files.exists(path.resolve("bin")));
+        JkUtilsPath.deleteQuietly(path, false);
+        JkUtilsJdk.getJdk("graalvm", "22");
+        Assertions.assertTrue(Files.exists(path.resolve("bin")));
     }
 }

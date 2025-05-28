@@ -20,6 +20,8 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.http.JkHttpRequest;
+import dev.jeka.core.api.http.JkHttpResponse;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
@@ -244,30 +246,30 @@ public final class JkSonarqube {
         JkLog.debug("Extracted taskId=%s from sonarqube report.", taskId);
         boolean pending = true;
         JkLog.debug("Querying for analysisId %s.", taskUrl);
-        JkUtilsNet.BasicHttpResponse response = null;
+        JkHttpResponse response = null;
         while (pending) {
-            response = JkUtilsNet.sendHttpRequest(taskUrl, "GET", headers, null);
-            response.asserOk();
-            String status = extractJsonValue(response.body, "status");
+            response = JkHttpRequest.of(taskUrl).addHeaders(headers).execute();
+            response.assertNoError();
+            String status = extractJsonValue(response.getBody(), "status");
             pending = "PENDING".equals(status) || "IN_PROGRESS".equals(status);
             if (pending) {
                 JkLog.info("Waiting for the analysis to be ready for quality gates...");
                 JkUtilsSystem.sleep(2000);
             }
         }
-        String analysisId = extractJsonValue(response.body, "analysisId");
-        JkUtilsAssert.state(!JkUtilsString.isBlank(analysisId), "Field analysisId not found in %s.", response.body);
+        String analysisId = extractJsonValue(response.getBody(), "analysisId");
+        JkUtilsAssert.state(!JkUtilsString.isBlank(analysisId), "Field analysisId not found in %s.", response.getBody());
         JkLog.verbose("Extract analysisId=%s from querying sonarqube server.", analysisId);
 
         // Query for quality gate
         String gatUrl = host + "api/qualitygates/project_status?analysisId=" + analysisId;
-        JkUtilsNet.BasicHttpResponse gateResponse = JkUtilsNet.sendHttpRequest(gatUrl, "GET", headers, null);
-        gateResponse.asserOk();
-        String status = extractJsonValue(gateResponse.body, "status");
+        JkHttpResponse gateResponse = JkHttpRequest.of(gatUrl).addHeaders(headers).execute();
+        gateResponse.assertNoError();
+        String status = extractJsonValue(gateResponse.getBody(), "status");
         boolean result = !status.equals("ERROR");
         JkLog.info("Result: %s", result? "✅ Ok" : "❌ Fail");
         JkLog.endTask();
-        return new QualityGateResponse(result, gateResponse.body);
+        return new QualityGateResponse(result, gateResponse.getBody());
     }
 
     private void runOrFail() {

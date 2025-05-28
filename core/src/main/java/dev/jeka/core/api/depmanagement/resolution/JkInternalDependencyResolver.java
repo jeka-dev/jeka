@@ -17,6 +17,7 @@
 package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.java.JkClassLoader;
 import dev.jeka.core.api.java.JkInternalChildFirstClassLoader;
 import dev.jeka.core.api.system.JkLocator;
@@ -128,7 +129,10 @@ public interface JkInternalDependencyResolver {
                 System.err.println("Trying to download ivy from (jeka.repos.download) " + fullUrl);
                 JkUtilsPath.deleteIfExists(path);
                 URL downloadUrl = JkUtilsIO.toUrl(fullUrl);
-                JkUtilsNet.downloadFile(downloadUrl, path, repo::customizeUrlConnection);
+                JkHttpRequest.of(downloadUrl.toString())
+                                .customize(repo::customizeUrlConnection)
+                                .downloadFile(path);
+                //JkUtilsNet.downloadFile(downloadUrl, path, repo::customizeUrlConnection);
                 if (checkDownloadOk(path)) {
                     return;
                 }
@@ -141,7 +145,8 @@ public interface JkInternalDependencyResolver {
         try {
             System.err.println("Trying to download ivy from " + fullUrl);
             JkUtilsPath.deleteIfExists(path);
-            JkUtilsNet.downloadFile(fullUrl, path);
+            JkHttpRequest.of(fullUrl).downloadFile(path);
+            //JkUtilsNet.downloadFile(fullUrl, path);
             if (!checkDownloadOk(path)) {
                 throw new UncheckedIOException(new IOException("Ivy download not completed"));
             }

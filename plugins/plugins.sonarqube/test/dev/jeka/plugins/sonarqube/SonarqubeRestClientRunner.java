@@ -16,6 +16,8 @@
 
 package dev.jeka.plugins.sonarqube;
 
+import dev.jeka.core.api.http.JkHttpRequest;
+import dev.jeka.core.api.http.JkHttpResponse;
 import dev.jeka.core.api.utils.JkUtilsNet;
 
 import java.util.HashMap;
@@ -30,15 +32,15 @@ public class SonarqubeRestClientRunner {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + token);
         System.out.println(url);
-        JkUtilsNet.BasicHttpResponse response = JkUtilsNet.sendHttpRequest(url, "GET", headers, null);
-        System.out.println(response.body);
-        String analysisId = JkSonarqube.extractJsonValue(response.body, "analysisId");
+        JkHttpResponse response = JkHttpRequest.of(url).addHeaders(headers).execute();
+        System.out.println(response.getBody());
+        String analysisId = JkSonarqube.extractJsonValue(response.getBody(), "analysisId");
         System.out.println(analysisId);
 
         String gateUrl =  "http://localhost:9000/api/qualitygates/project_status?analysisId=" + analysisId;
-        response = JkUtilsNet.sendHttpRequest(gateUrl, "GET", headers, null);
-        System.out.println(response.body);
-        String status = JkSonarqube.extractJsonValue(response.body, "status");
+        response = JkHttpRequest.of(gateUrl).addHeaders(headers).execute();
+        System.out.println(response.getBody());
+        String status = JkSonarqube.extractJsonValue(response.getBody(), "status");
         System.out.println(status);
     }
 }
