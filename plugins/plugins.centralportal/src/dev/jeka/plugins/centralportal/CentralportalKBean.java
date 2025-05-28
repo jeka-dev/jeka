@@ -30,7 +30,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 @JkDoc("Plugin for publishing artifacts to Maven Central.\n" +
-        "Run `jeka centralportal:publish` to publish artifacts.")
+        "Run `jeka centralportal: publish` to publish artifacts.")
 public class CentralportalKBean extends KBean {
 
     @JkPropValue("JEKA_CENTRAL_PORTAL_USERNAME")
