@@ -66,7 +66,7 @@ public class CentralportalKBean extends KBean {
         MavenKBean mavenKBean = this.load(MavenKBean.class);
         JkMavenPublication publication = mavenKBean.getPublication();
         if (publication.getVersion().isSnapshot()) {
-            JkLog.verbose("Current version %s is SNAPSHOT: won't publish to Central Portal", publication.getVersion());
+            JkLog.info("Current version %s is SNAPSHOT: won't publish to Central Portal", publication.getVersion());
             return;
         }
         JkLog.startTask("Publishing artifacts to Central Portal");
