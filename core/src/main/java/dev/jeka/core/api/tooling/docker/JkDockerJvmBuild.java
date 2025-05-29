@@ -21,6 +21,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkBuildable;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -118,9 +119,11 @@ public class JkDockerJvmBuild extends JkDockerBuild {
     @Override
     public void buildImage(Path contextDir, String imageName) {
         super.buildImage(contextDir, imageName);
-        JkLog.info("    - Pass additional JVM options using the '-e JAVA_TOOL_OPTIONS=...' option.");
+        JkLog.info("    - Pass additional JVM options using the '%s' option.",
+                JkAnsi.yellow("-e JAVA_TOOL_OPTIONS=..."));
         JkLog.info("    - Pass program arguments by appending them to the end of the command line.");
-        JkLog.info("    - Map the host's current directory to the container's working directory using the '-v $PWD:/workdir' option.");
+        JkLog.info("    - Map the host's current directory to the container's working directory using the '%s' option.",
+                JkAnsi.yellow("-v $PWD:/workdir"));
 
     }
 

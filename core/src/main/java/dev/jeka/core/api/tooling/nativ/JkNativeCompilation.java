@@ -22,6 +22,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkJavaProcess;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.*;
@@ -197,7 +198,9 @@ public class JkNativeCompilation {
 
         if (!JkLog.isVerbose()) {
             JkLog.info("Invoking nativeImage tool. This can takes several minutes. Please be patient.");
-            JkLog.info("Use the `--verbose` option to show progress during the build. Native compilation started at %s.", JkUtilsTime.now("HH:mm:ss"));
+            JkLog.info("Use the `%s` option to show progress during the build. Native compilation started at %s.",
+                    JkAnsi.yellow("--verbose"),
+                    JkUtilsTime.now("HH:mm:ss"));
         }
         process = process
                 .addParams("--no-fallback")
@@ -208,7 +211,7 @@ public class JkNativeCompilation {
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setDestroyAtJvmShutdown(true);
         process.exec();
-        JkLog.info("Native executable generated at %s", outputFile);
+        JkLog.info("Native executable generated. Run with: %s", JkAnsi.yellow(outputFile.toString()));
         JkLog.endTask();
     }
 

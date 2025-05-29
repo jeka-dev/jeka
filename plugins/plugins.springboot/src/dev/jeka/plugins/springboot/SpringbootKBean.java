@@ -23,6 +23,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
@@ -30,6 +31,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -172,6 +174,7 @@ public final class SpringbootKBean extends KBean {
         classpath.add(aotPreProcessor.getGeneratedClassesDir());
         Path compiledGeneratedSources = buildable.getOutputDir()
                 .resolve("spring-aot/compiled-generated-sources");
+        JkLog.verbose("Compile generated sources to %s",  compiledGeneratedSources);
         JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
                 .setSources(JkPathTreeSet.ofRoots(aotPreProcessor.getGeneratedSourcesDir()))
                 .setClasspath(classpath)

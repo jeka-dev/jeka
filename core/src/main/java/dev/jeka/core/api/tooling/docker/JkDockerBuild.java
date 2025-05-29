@@ -19,6 +19,7 @@ package dev.jeka.core.api.tooling.docker;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsObject;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -354,7 +355,9 @@ public class JkDockerBuild {
         JkLog.startTask("execute-docker-build");
         if (!JkLog.isVerbose()) {
             JkLog.info("Some Docker images, especially native ones, can take a long time to build. Please be patient.");
-            JkLog.info("Use the `--verbose` option to show progress during the build. Native compilation started at %s.", JkUtilsTime.now("HH:mm:ss"));
+            JkLog.info("Use the `%s` option to show progress during the build. Native compilation started at %s.",
+                    JkAnsi.yellow("--verbose"),
+                    JkUtilsTime.now("HH:mm:ss"));
         }
         JkDocker.of()
                 .assertPresent()
@@ -367,7 +370,8 @@ public class JkDockerBuild {
 
         String portMapping = getPortMappingArgs();
         JkLog.info("Build context dir generated in: file://" + buildContextDir.toAbsolutePath());
-        JkLog.info("Run docker image by executing : docker run --rm %s%s", portMapping, imageName);
+        String command = String.format("docker run --rm %s%s", portMapping, imageName);
+        JkLog.info("Run docker image with: " + JkAnsi.yellow(command));
     }
 
     /**

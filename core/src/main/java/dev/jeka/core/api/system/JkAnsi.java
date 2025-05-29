@@ -21,6 +21,18 @@ public interface JkAnsi {
     static JkAnsi of() {
         return JkAnsiConsole.of().ansi();
     }
+
+    static String colorize(Color color, String string) {
+        return JkAnsi.of().fg(color).a(string).reset().toString();
+    }
+
+    static String yellow(String string) {
+        return colorize(Color.YELLOW, string);
+    }
+
+    static String green(String string) {
+        return colorize(Color.GREEN, string);
+    }
     
     JkAnsi fg(Color color);
 

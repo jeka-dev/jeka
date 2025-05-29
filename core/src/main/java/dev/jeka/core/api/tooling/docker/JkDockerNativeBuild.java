@@ -21,6 +21,7 @@ import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,7 +106,9 @@ public class JkDockerNativeBuild extends JkDockerBuild {
             }
             String targetPath = targetBase + "/" + candidateName;
             targetPaths.add(targetPath);
-            dockerfileTemplate.addCopy(entry, targetPath);
+            if (Files.exists(entry)) {
+                dockerfileTemplate.addCopy(entry, targetPath);
+            }
         }
 
         Collections.reverse(targetPaths);
