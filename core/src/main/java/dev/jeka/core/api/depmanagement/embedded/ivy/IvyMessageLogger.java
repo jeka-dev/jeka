@@ -28,6 +28,12 @@ final class IvyMessageLogger extends AbstractMessageLogger {
     @Override
     public void log(String message, int level) {
         message = "[Ivy] " + message.trim();
+
+        // Trick to avoid 'unknown resolver ur' messages
+        if (message.startsWith("unknown resolver url:")) {
+            level =  Message.MSG_INFO;
+        }
+
         switch (level) {
         case Message.MSG_ERR:
             JkLog.error(message);

@@ -58,7 +58,7 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
     private final JkRepoSet repoSet;
 
     private IvyInternalDependencyResolver(JkRepoSet repoSet) {
-        URLHandlerRegistry.setDefault(IvyCustomUrlHandler.of(repoSet)); // must be set before ivy is initialised
+        URLHandlerRegistry.setDefault(IvyCustomUrlHandler.of(repoSet)); // must be set before ivy is initialized
         this.repoSet = repoSet;
     }
 
