@@ -17,11 +17,18 @@
 - `jeka docker:buildNative`: Builds a native Docker image of your application.
 
 **Example Configuration:**
+
+Specify base image:
 ```properties
 @docker.nativeBaseImage=gcr.io/distroless/static-debian12:nonroot
 ```
 
-**Example For Image customization:**
+Add JVM agents
+```properties
+@docker.jvmAgents.0.coordinate=io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0
+@docker.jvmAgents.0.optionLine=-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp
+```
+**Example For Programmatic customization:**
 
 ```java
 @JkPostInit

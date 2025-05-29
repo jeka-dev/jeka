@@ -57,6 +57,8 @@ public final class DockerKBean extends KBean {
             "-XX:+PrintGCDetails,-XX:+HeapDumpOnOutOfMemoryError,-Xdiag,-XshowSettings,-Xlog:exceptions")
     public String jvmOptions;
 
+
+
     @JkDoc("Base image for the native Docker image to build. " +
             "It can be replaced by a distro-less image as 'gcr.io/distroless/static-debian12:nonroot'")
     public String nativeBaseImage = JkDockerNativeBuild.DEFAULT_BASE_IMAGE;
@@ -67,12 +69,25 @@ public final class DockerKBean extends KBean {
     @JkDoc("Specifies the policy for creating a non-root user in the JVM Docker image.")
     public JkDockerBuild.NonRootMode jvmNonRootUser = JkDockerBuild.NonRootMode.AUTO;
 
+    @JkDoc("Agents to bind to the JVM")
+    public JkMultiValue<JvmAgentOptions> jvmAgents = JkMultiValue.of(JvmAgentOptions.class);
+
     /*
      * Handler on the Docker build configuration for customizing built images.
      */
     private final JkConsumers<JkDockerJvmBuild> jvmImageCustomizer = JkConsumers.of();
 
     private final JkConsumers<JkDockerNativeBuild> nativeImageCustomizer = JkConsumers.of();
+
+    @Override
+    protected void init() {
+        jvmAgents.getValues().forEach(jvmAgentOptions -> {
+            jvmImageCustomizer.append(dockerJvmBuild -> {
+                String optionLine = JkUtilsString.nullToEmpty(jvmAgentOptions.optionLine);
+                dockerJvmBuild.addAgent(jvmAgentOptions.coordinate, optionLine);
+            });
+        });
+    }
 
     @JkRequire
     private static Class<? extends KBean> requireBuildable(JkRunbase runbase) {
@@ -197,6 +212,16 @@ public final class DockerKBean extends KBean {
         return JkDockerAppTester.of(dockerBuild, tester)
                 .setImageName(imageName)
                 .setContextPath(getOutputDir().resolve(dirName));
+    }
+
+    public static final class JvmAgentOptions {
+
+        @JkDepSuggest
+        @JkDoc("Coordinate of the JVM agent, e.g. 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0'")
+        public String coordinate;
+
+        @JkDoc("Option line to pass to the agent, e.g. '-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp")
+        public String optionLine;
     }
 
     private JkBuildable getBuildable(boolean ensureClassesAreCompiled) {
