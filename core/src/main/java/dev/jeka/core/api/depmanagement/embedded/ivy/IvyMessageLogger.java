@@ -31,7 +31,10 @@ final class IvyMessageLogger extends AbstractMessageLogger {
         message = "[Ivy] " + originalTrimmedMessage;
 
         // Trick to avoid 'unknown resolver ur' messages
-        if (originalTrimmedMessage.startsWith("unknown resolver url")) {
+        // TODO fix the settings properly to avoid this message
+        if (originalTrimmedMessage.startsWith("unknown resolver url") ||
+            originalTrimmedMessage.equals(":: problems summary ::") ||
+            originalTrimmedMessage.equals(":::: ERRORS")) {
             level =  Message.MSG_INFO;
         }
 
