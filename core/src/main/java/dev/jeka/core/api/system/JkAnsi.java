@@ -33,6 +33,14 @@ public interface JkAnsi {
     static String green(String string) {
         return colorize(Color.GREEN, string);
     }
+
+    static void eraseAllLine() {
+        System.out.print(of().eraseLine(EraseKind.ALL).toString());
+    }
+
+    static void moveCursorLeft(int count) {
+        System.out.print(of().cursorLeft(count).toString());
+    }
     
     JkAnsi fg(Color color);
 
@@ -48,7 +56,11 @@ public interface JkAnsi {
 
     JkAnsi cursorUp(int i);
 
+    JkAnsi cursorLeft(int i);
+
     JkAnsi eraseLine();
+
+    JkAnsi eraseLine(EraseKind eraseKind);
 
     enum Color {
         BLACK(0, "BLACK"),
@@ -131,6 +143,10 @@ public interface JkAnsi {
         public int value() {
             return value;
         }
+    }
+
+    enum EraseKind {
+        FORWARD, BACKWARD, ALL
     }
 
 

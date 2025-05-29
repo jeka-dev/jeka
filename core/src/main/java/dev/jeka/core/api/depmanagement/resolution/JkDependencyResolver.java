@@ -20,6 +20,7 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -253,13 +254,22 @@ public final class JkDependencyResolver  {
             }
         }
         AtomicReference<JkResolveResult> result = new AtomicReference<>();
+        /*
         if (displaySpinner) {
             JkConsoleSpinner.of("Resolve dependencies")
                     .setAlternativeMassage(JkLog.isVerbose() ? null : "Resolve dependencies ...")
                     .run(() -> result.set(doResolve(qualifiedDependencies, params)));
+            result.set(doResolve(qualifiedDependencies, params))
             return result.get();
         }
-        return doResolve(qualifiedDependencies, params);
+         */
+        String msg = "Resolving dependencies...";
+        JkLog.getOutPrintStream().print(msg);
+        JkLog.getOutPrintStream().flush();
+        JkResolveResult resolveResult = doResolve(qualifiedDependencies, params);
+        JkAnsi.eraseAllLine();
+        JkAnsi.moveCursorLeft(msg.length());
+        return resolveResult;
     }
 
     private JkResolveResult doResolve(JkQualifiedDependencySet qualifiedDependencies, JkResolutionParameters params) {

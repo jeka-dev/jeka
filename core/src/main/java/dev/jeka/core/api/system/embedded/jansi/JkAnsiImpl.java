@@ -73,8 +73,20 @@ class JkAnsiImpl implements JkAnsi {
     }
 
     @Override
+    public JkAnsi cursorLeft(int i) {
+        ansi.cursorLeft(i);
+        return this;
+    }
+
+    @Override
     public JkAnsi eraseLine() {
         ansi.eraseLine();
+        return this;
+    }
+
+    @Override
+    public JkAnsi eraseLine(EraseKind eraseKind) {
+        ansi.eraseLine(Ansi.Erase.valueOf(eraseKind.name()));
         return this;
     }
 
