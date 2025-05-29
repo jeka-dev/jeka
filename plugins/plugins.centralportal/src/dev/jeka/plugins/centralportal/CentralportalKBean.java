@@ -88,7 +88,7 @@ public class CentralportalKBean extends KBean {
         if (automatic) {
             JkLog.info("Waiting for publication. Start waiting at %s.", LocalDateTime.now());
             publisher.waitUntilPublishing(deploymentId, timeout);
-            JkLog.info("Deployment publication successful.");
+            JkLog.info("Publication successful.");
         }
         JkLog.endTask();
     }
