@@ -28,6 +28,7 @@ import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -80,6 +81,15 @@ class ScaffoldTest {
         JkUtilsAssert.state(!Files.exists(baseDir.resolve("src")),
                 "Base Springboot was scaffolded with project structure !");
         JkPathTree.of(baseDir).deleteRoot();
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "JEKA_RUN_SLOW_TEST", matches = "true")
+    void docker_native_image_ok() {
+        RunChecker runChecker = new RunChecker();
+        runChecker.scaffoldCmd = scaffoldArgs("project: scaffold -Djeka.version=.");
+        runChecker.buildCmd = withJavaVersionArgs("docker: buildNative");
+        runChecker.run();
     }
 
     private String scaffoldArgs(String original)  {

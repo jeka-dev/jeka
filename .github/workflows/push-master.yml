@@ -28,6 +28,8 @@ jobs:
         key: ${{ runner.os }}
 
     - name: Build JeKa bootstrapped by ANT
+      env:
+        JEKA_RUN_SLOW_TEST: true
       run: |
         ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
