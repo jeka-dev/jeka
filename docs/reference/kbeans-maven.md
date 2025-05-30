@@ -1,6 +1,6 @@
 # Maven KBean
 
-<!-- heaser-autogen-doc -->
+<!-- header-autogen-doc -->
 
 
 [`MavenKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/maven/MavenKBean.java) provides ability to publish artifacts on a 
