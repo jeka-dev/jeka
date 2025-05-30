@@ -102,7 +102,7 @@ class AppManager {
         String remoteRepoUrl = git.getRemoteUrl();
         String tag = getTag(repoDir);
         boolean isNative = isNative(findAppFile(appName));
-        boolean isVersion = new GitTag(tag).isLVersion();
+        boolean isVersion = tag != null && new GitTag(tag).isLVersion();
         String status;
         try {
             if (isVersion) {

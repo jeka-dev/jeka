@@ -203,7 +203,7 @@ public class PicocliMainCommand {
                 defaultKBean,
                 cleanWork,
                 cleanOutput,
-                forceMode || fakeDoc || fakeDocMd,
+                forceMode,
                 skipCompile,
                 childBase);
     }

@@ -79,7 +79,8 @@ public class CentralportalKBean extends KBean {
 
         JkCentralPortalPublisher publisher = JkCentralPortalPublisher.of(username, password);
         deploymentId = publisher.publish(zipPath, automatic);
-        JkLog.info("Bundle " + zipPath + " uploaded on Central Portal server, deploymentId: " + deploymentId);
+        JkLog.info("Bundle " + zipPath + " uploaded on Central Portal server.");
+        JkLog.info("DeploymentId: " + deploymentId);
 
         JkLog.info("Waiting for validation. Start waiting at %s.", LocalDateTime.now());
         publisher.waitUntilValidate(deploymentId, timeout);
