@@ -437,29 +437,6 @@ public final class JkDependencyResolver  {
         return JkInternalDependencyResolver.of(effectiveRepos()).search(groupCriteria, moduleNameCriteria, versionCriteria);
     }
 
-    /**
-     * Returns an alphabetical sorted list of module ids present in these repositories for the specified groupId.
-     */
-    public List<String> searchModuleIds(String groupId) {
-        return JkInternalDependencyResolver.of(effectiveRepos()).searchModules(groupId);
-    }
-
-    /**
-     * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
-     */
-    public List<String> searchVersions(JkModuleId jkModuleId) {
-        return JkInternalDependencyResolver.of(effectiveRepos()).searchVersions(jkModuleId).stream()
-                .sorted(JkVersion.VERSION_COMPARATOR).collect(Collectors.toList());
-    }
-
-    /**
-     * Returns an alphabetical sorted list of version present in these repositories for the specified moduleId.
-     */
-    public List<String> searchVersions(String moduleId) {
-        return searchVersions(JkModuleId.of(moduleId));
-    }
-
-
     @Override
     public String toString() {
         if (repos == null) {

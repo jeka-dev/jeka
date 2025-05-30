@@ -129,12 +129,10 @@ public abstract class JkScaffold {
      */
     public String findLatestStableVersion(String moduleCoordinate, String defaultVersion) {
         try {
-            List<String> versions = JkDependencyResolver.of(downloadRepos)
-                    .searchVersions(moduleCoordinate);
+            List<String> versions = downloadRepos.findVersionsOf(moduleCoordinate);
             return versions.stream()
                     .filter(version -> !version.contains("-"))
-                    .sorted(JkVersion.VERSION_COMPARATOR.reversed())
-                    .findFirst().get();
+                    .findFirst().orElse(defaultVersion);
         } catch (Exception e) {
             JkLog.warn(e.getMessage());
             JkLog.warn("Cannot find latest version for '%s, choose default : %s ", moduleCoordinate, defaultVersion);
@@ -177,8 +175,7 @@ public abstract class JkScaffold {
      * @return the last version of the Jeka module
      */
     public final String lastJekaVersion() {
-        List<String> versions = JkDependencyResolver.of(downloadRepos)
-                .searchVersions(JkInfo.JEKA_MODULE_ID).stream()
+        List<String> versions = downloadRepos.findVersionsOf(JkInfo.JEKA_MODULE_ID).stream()
                     .filter(version -> !JkVersion.of(version).isSnapshot())
                     .collect(Collectors.toList());
         if (versions.isEmpty()) {
@@ -356,9 +353,7 @@ public abstract class JkScaffold {
             return originalContent;
         }
         String coordinate = originalContent.substring(index + LAST_VERSION_OF_TOKEN.length(), indexTo);
-        System.out.println(coordinate);
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(repos);
-        Optional<JkVersion> latest = dependencyResolver.searchVersions(coordinate).stream()
+        Optional<JkVersion> latest = repos.findVersionsOf(coordinate).stream()
                 .map(JkVersion::of)
                 .max(Comparator.naturalOrder());
         if (!latest.isPresent()) {
@@ -376,36 +371,10 @@ public abstract class JkScaffold {
     }
 
     private static JkVersion getLastJekaVersionSafely(JkRepoSet repoSet) {
-        JkVersion result = null;
-        for (JkRepo repo : repoSet.getRepos()) {
-            List<String> artifacts = Collections.emptyList();
-            try {
-                JkLog.info("Searching last Jeka version in repo %s ... ", repo.getUrl());
-                artifacts =JkCoordinateSearch.of(JkRepo.ofMavenCentral())
-                        .setTimeout(10000)
-                        .setGroupOrNameCriteria("dev.jeka:jeka-core:")
-                        .search();
-            } catch (RuntimeException e) {
-                JkLog.warn("Failed to get Jeka versions from repo %s : %s", repo.getUrl(), e.getMessage());
-                if (JkLog.isDebug()) {
-                    JkUtilsThrowable.printStackTrace(JkLog.getErrPrintStream(), e, 100);
-                }
-            }
-            Optional<JkVersion> candidate = artifacts.stream()
-                    .map(s -> JkUtilsString.substringAfterLast(s, ":"))
-                    .map(JkVersion::of)
-                    .filter(JkVersion::isDigitsOnly)
-                    .max(Comparator.naturalOrder());
-            if (candidate.isPresent()) {
-                if (result == null) {
-                    result = candidate.get();
-                } else if (result.compareTo(candidate.get()) < 0) {
-                    result = candidate.get();
-                }
-            }
+        return repoSet.findVersionsOf("dev.jeka:jeka-core").stream()
+                .map(JkVersion::of)
+                .findFirst().orElse(null);
 
-        }
-        return result;
     }
 
 

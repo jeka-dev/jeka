@@ -187,6 +187,24 @@ public final class JkRepoSet {
         return new JkRepoSet(reposCopy);
     }
 
+    /**
+     * Finds the available versions of a given module identifier from the configured repositories.
+     * Iterates through the repository set and returns the versions found in the first repository
+     * that contains the module versions. If no versions are found in any repository, it returns an empty list.
+     *
+     * @param moduleId the identifier of the module whose versions are to be retrieved
+     * @return a list of versions available for the specified module identifier, or an empty list if none are found
+     */
+    public List<String> findVersionsOf(String moduleId) {
+        for(final JkRepo repo : this.repos) {
+            List<String> versions = repo.findVersionsOf(moduleId);
+            if (!versions.isEmpty()) {
+                return versions;
+            }
+        }
+        return Collections.emptyList();
+    }
+
     private JkInternalDependencyResolver getInternalDependencyResolver() {
         if (internalDependencyResolver == null) {
             internalDependencyResolver = JkInternalDependencyResolver.of(this);

@@ -302,9 +302,9 @@ public final class JkJekaVersionRanges {
 
     private static void printUpperJekaVersion(JkDependencyResolver dependencyResolver, JkVersion minVersion) {
         JkLog.warn("Jeka version upper or equals to " + minVersion + " are ; ");
-        List<String> versions = dependencyResolver.searchVersions("dev.jeka:jeka-core");
+        List<String> versions =  dependencyResolver.getRepos().findVersionsOf("dev.jeka:jeka-core");
         versions.stream()
-                .map(version -> JkVersion.of(version))
+                .map(JkVersion::of)
                 .filter(version -> version.compareTo(minVersion) >= 0)
                 .map(Objects::toString)
                 .forEach(JkLog::warn);

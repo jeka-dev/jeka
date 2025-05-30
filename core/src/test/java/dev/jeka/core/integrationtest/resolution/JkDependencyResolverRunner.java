@@ -38,15 +38,5 @@ class JkDependencyResolverRunner {
         System.out.println(resolveResult.getDependencyTree());
     }
 
-    @Test
-    void searchVersion_localNexus_withAuth() {
-        JkRepo repo = JkRepo.of("http://localhost:8081/repository/maven-central");
-        //repo.setCredentials(JkRepo.JkRepoCredentials.of("admin", "admin"));
-        String encoded = Base64.getEncoder().encodeToString("admin:admin".getBytes());
-        repo.setHttpHeaders("Authorization", "Basic " + encoded);
-        List<String> versions = JkDependencyResolver.of()
-                .addRepos(repo)
-                .searchVersions("org.springframework.boot:spring-boot-starter");
-        versions.forEach(System.out::println);
-    }
+
 }

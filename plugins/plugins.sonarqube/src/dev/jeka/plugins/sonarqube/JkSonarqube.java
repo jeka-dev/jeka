@@ -496,7 +496,7 @@ public final class JkSonarqube {
         if (resolveResult.getErrorReport().hasErrors()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Cannot find dependency " + coordinate + "\n");
-            List<String> versions = dependencyResolver.searchVersions(coordinate.getModuleId());
+            List<String> versions = repos.findVersionsOf(coordinate.getModuleId().toColonNotation());
             sb.append("Known versions are : \n");
             versions.forEach(name -> sb.append(name + "\n"));
             throw new IllegalStateException(sb.toString());

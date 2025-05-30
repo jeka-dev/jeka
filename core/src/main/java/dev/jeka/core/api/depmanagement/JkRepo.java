@@ -17,12 +17,17 @@
 package dev.jeka.core.api.depmanagement;
 
 import dev.jeka.core.api.crypto.JkFileSigner;
+import dev.jeka.core.api.http.JkHttpRequest;
+import dev.jeka.core.api.http.JkHttpResponse;
+import dev.jeka.core.api.marshalling.xml.JkDomDocument;
+import dev.jeka.core.api.marshalling.xml.JkDomElement;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import org.apache.ivy.core.module.id.ModuleId;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -32,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Hold configuration necessary to instantiate download or upload repository
@@ -326,6 +332,35 @@ public final class JkRepo {
 
     public boolean hasAuthorizationHeader() {
         return this.httpHeaders.containsKey("Authorization");
+    }
+
+    /**
+     * Retrieves the list of available versions for a given module identifier.
+     * This method fetches and parses the associated Maven metadata to extract the versions.
+     * If the repository responds with client or server errors, an empty list is returned.
+     *
+     * @param moduleId a string representing the module identifier in the format group:name
+     * @return a list of strings representing the available versions of the specified module in lastest first order
+     */
+    public List<String> findVersionsOf(String moduleId) {
+        JkModuleId jkModuleId = JkModuleId.of(moduleId);
+        String path = jkModuleId.getGroup().replace('.', '/') + "/" + jkModuleId.getName() + "/maven-metadata.xml";
+        String fullPath = url.toString() + "/" + path;
+        JkHttpResponse response = JkHttpRequest.of(fullPath)
+                .addHeaders(this.httpHeaders)
+                .execute();
+        if (response.isClientError()) {
+            return Collections.emptyList();
+        } else if (response.isServerError()) {
+            JkLog.warn("Error while requesting %s. %s", fullPath, response);
+            return Collections.emptyList();
+        }
+        JkDomDocument domDocument = JkDomDocument.parse(response.getBody());
+        List<String> result = domDocument.root().get("versioning").children("version").stream()
+                .map(JkDomElement::text)
+                .collect(Collectors.toCollection(LinkedList::new));
+        Collections.reverse(result);
+        return result;
     }
 
     @Override

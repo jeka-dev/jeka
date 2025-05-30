@@ -263,6 +263,7 @@ public class JkHttpRequest {
      * and body of the response received from the server.
      */
     public JkHttpResponse execute() {
+        JkLog.debug("%s %s", connection.getRequestMethod(), connection.getURL());
         JkHttpResponse response = JkHttpResponse.get(connection);
         connection.disconnect();
         return response;
@@ -291,11 +292,11 @@ public class JkHttpRequest {
         }
 
         if (statusCode > HttpURLConnection.HTTP_BAD_REQUEST) {
-            JkLog.verbose("HTTP response status code for %s: %d", connection.getURL(), statusCode);
+            JkLog.debug("HTTP response status code for %s: %d", connection.getURL(), statusCode);
             try {
-                JkLog.verbose("HTTP response status msg: %s", JkHttpResponse.readResponseBody(connection), statusCode);
+                JkLog.debug("HTTP response status msg: %s", JkHttpResponse.readResponseBody(connection), statusCode);
             } catch (IOException e) {
-                JkLog.verbose("HTTP response status msg not available");
+                JkLog.debug("HTTP response status msg not available");
             }
         }
         try {

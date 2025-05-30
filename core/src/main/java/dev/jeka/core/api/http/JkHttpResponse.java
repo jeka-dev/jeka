@@ -55,8 +55,17 @@ public class JkHttpResponse {
         return statusCode >= HttpURLConnection.HTTP_BAD_REQUEST;
     }
 
-    public void assertNoError() {
+    public boolean isClientError() {
+        return statusCode >= HttpURLConnection.HTTP_BAD_REQUEST && statusCode < HttpURLConnection.HTTP_INTERNAL_ERROR ;
+    }
+
+    public boolean isServerError() {
+        return statusCode >= HttpURLConnection.HTTP_INTERNAL_ERROR ;
+    }
+
+    public JkHttpResponse assertNoError() {
         JkUtilsAssert.state(!isError(), "Returned HTTP status code was not OK : %s", this.statusCode);
+        return this;
     }
 
     public Map<String, List<String>> getHeaders() {
@@ -106,7 +115,7 @@ public class JkHttpResponse {
             // Trigger the actual request
             int statusCode = conn.getResponseCode();
             String statusMessage = conn.getResponseMessage();
-            JkLog.verbose("HTTP Status: " + statusCode + " " + statusMessage);
+            JkLog.debug("HTTP Status: " + statusCode + " " + statusMessage);
 
             // Read headers
             Map<String, List<String>> headers = conn.getHeaderFields();
@@ -114,7 +123,7 @@ public class JkHttpResponse {
                 String name = entry.getKey();
                 List<String> values = entry.getValue();
                 if (name != null) {
-                    JkLog.verbose(name + ": " + java.lang.String.join(", ", values));
+                    JkLog.debug(name + ": " + java.lang.String.join(", ", values));
                 }
             }
             return headers;
