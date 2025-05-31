@@ -28,12 +28,10 @@ class JkProjectScaffoldTest {
                 .setKind(JkProjectScaffold.Kind.REGULAR)
                 .run();
 
-        // check .gitIgnore
-        if (System.getenv("GITHUB_WORKFLOW") == null) {  // may fail on github action
-            String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitIgnore")).readAsString();
-            assertTrue(gitIgnoreContent.contains("/.jeka-work"));
-            assertTrue(gitIgnoreContent.contains("/jeka-output"));
-        }
+        // check .gitignore
+        String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitignore")).readAsString();
+        assertTrue(gitIgnoreContent.contains("/.jeka-work"));
+        assertTrue(gitIgnoreContent.contains("/jeka-output"));
 
         // Check Build class is present
         assertTrue(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Custom.java")));
