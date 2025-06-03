@@ -4,3 +4,4 @@
 /samples/samples.sonarqube/.idea/output/
 /.idea/output/
 /.env
+/plugins/plugins.centralportal/private.key
