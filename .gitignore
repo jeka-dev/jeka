@@ -5,4 +5,5 @@
 /.idea/output/
 /.env
 /plugins/plugins.centralportal/private.key
-/plugins/plugins.centralportal/private.key
+.DS_Store
+**/.DS_Store
