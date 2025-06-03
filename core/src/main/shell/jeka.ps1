@@ -269,6 +269,11 @@ class Props {
     if ($envValue) {
       return $envValue
     }
+    $envVarName = [Props]::ToEnvironmentVariable($propName)
+    $envValue = [Environment]::GetEnvironmentVariable($envVarName)
+    if ($envValue) {
+      return $envValue
+    }
 
     $jekaPropertyFilePath = $this.baseDir + '\jeka.properties'
     $value = [Props]::GetValueFromFile($jekaPropertyFilePath, $propName)
@@ -334,6 +339,10 @@ class Props {
     return $null
   }
 
+  static [string] ToEnvironmentVariable([string]$propertyName) {
+    return $propertyName.ToUpper().Replace(".", "_").Replace("-", "_")
+  }
+
 }
 
 class Jdks {
@@ -364,12 +373,17 @@ class Jdks {
   }
 
   hidden [string] JavaExe([string]$javaHome) {
-    return $javaHome + "\bin\java.exe"
+    $exePath = $javaHome + "\bin\java.exe"
+    if ([System.IO.File]::Exists($exePath)) {
+      return $exePath
+    }
+    return $javaHome + "\jre\bin\java.exe"
   }
 
   hidden [string] JavaHome() {
-    if ($null -ne $Env:JEKA_JDK_HOME) {
-      return $Env:JEKA_JDK_HOME
+    $explicitPath = ($this.Props.GetValue("jeka.jdk.home"))
+    if (![string]::IsNullOrEmpty($explicitPath)) {
+      return $explicitPath
     }
     $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
     $distib = ($this.Props.GetValueOrDefault("jeka.java.distrib", "temurin"))
