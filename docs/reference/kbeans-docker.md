@@ -25,7 +25,7 @@ Specify base image:
 
 Add JVM agents
 ```properties
-@docker.jvmAgents.0.coordinate=io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0
+@docker.jvmAgents.0.coordinate=io.opentelemetry.javaagent:opentelemetry-javaagent:2.16.0
 @docker.jvmAgents.0.optionLine=-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp
 ```
 **Example For Programmatic customization:**
@@ -34,7 +34,7 @@ Add JVM agents
 @JkPostInit
 private void postInit(DockerKBean dockerKBean) {
     dockerKBean.customizeJvmImage(dockerBuild -> dockerBuild
-            .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0", "")
+            .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.16.0", "")
             .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
             .nonRootSteps   // inserted after  USER nonroot
             .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")

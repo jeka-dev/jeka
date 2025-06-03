@@ -88,7 +88,7 @@ public final class SpringbootKBean extends KBean {
     @JkPreInit
     private static void initProjectKbean(ProjectKBean projectKBean) {
         projectKBean.project.testing.testProcessor.engineBehavior
-                .setProgressDisplayer(JkTestProcessor.JkProgressStyle.PLAIN);
+                .setProgressDisplayer(JkTestProcessor.JkProgressStyle.STEP);
     }
 
     @JkDoc("Adapts project: " +

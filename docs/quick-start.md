@@ -1,12 +1,15 @@
 # Quick Start
 
-This section explains how to get started quickly using the command-line mode.
-
-**Prerequisite:** Jeka CLI must be [installed](installation.md).
+## Install JeKa
+  
+- Install [Jeka CLI](installation.md) 
+- or [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka)
 
 !!! note
     Using the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka) is the fastest way to get started. 
     It provides a wizard for creating various types of projects, ranging from simple scripts to full-fledged Spring Boot applications.
+
+## Follow the Guide
 
 This quick-start guide covers muliple use cases:
  
