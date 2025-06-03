@@ -68,7 +68,7 @@ Now, the `jeka-src` folder is managed in its own IntelliJ module. Simply execute
 !!! warning
 Do not remove the generated `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from the *jeka.properties* file, or you may face synchronization issues.
 
-### How can I migrate my project from Maven ?
+### How can I migrate my project from Maven?
 
 _JeKa_ helps translate all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
 
@@ -76,9 +76,9 @@ Assuming _Maven_ is already installed and there is a _pom.xml_ file at the root 
 execute `jeka maven: migrateDeps` to display _Java_ code/configuration to 
 copy-paste in a build class or *dependencies.txt* file.
 
-## Performance - Caching
+## Performance—Caching
 
-### How to cache downloaded dependencies in _dev.Github-actions ?
+### How to cache downloaded dependencies in _dev.Github-actions?
 
 _JeKa_ caches downloaded dependencies (JDKs, JeKa distros, Maven artifacts, NodeJs exe,...) in a single 
 directory at *[USER HOME]/.jeka/cache*.

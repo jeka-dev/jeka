@@ -1,15 +1,15 @@
 # Properties
 
-_Properties_ are pairs of String  _key-value_ that are used across Jeka system. They typically carry urls, local paths,
+_Properties_ are pairs of String _key-value_ that are used across Jeka. They typically carry urls, local paths,
 tool versions, or credentials. 
 
 _Properties_ can be defined at different levels, in order of precedence :
 
-* System properties : Properties can be defined using system properties as `-DpropertyName=value`. System properties can
+* System properties: Properties can be defined using system properties as `-DpropertyName=value`. System properties can
   be injected from the Jeka command line.
-* OS environment variables : Properties can also be defined as OS environment variables.
-* Project : Defined in _[Project Root]/jeka.properties_. Typically used to store tool versions (e.g. `jeka.kotlin.version=1.5.21`).
-* Global : Defined in the _[User Home]/.jeka/global.properties_ file. Typically used to define urls, local paths, and credentials.
+* OS environment variables: Properties can also be defined as OS environment variables.
+* Project: Defined in _[Project Root]/jeka.properties_. Typically used to store tool versions (e.g. `jeka.kotlin.version=1.5.21`).
+* Global: Defined in the _[User Home]/.jeka/global.properties_ file. Typically used to define urls, local paths, and credentials.
 
 
 _Properties_ inherit from project _properties_ defined in project parent folders (if extant). 
@@ -30,15 +30,15 @@ project1
 
 ### Standard properties
 
-* `jeka.java.version` :  Target JVM version for compiled files.
-* `jeka.jdk.X=` location of the JDK version X _(e.g. jeka.jdk.11=/my/java/jdk11)_. It is used to compile projects when 
-  project JVM target version differs from Jeka running version.
-* `jeka.kotlin.version` : Version of Kotlin used to compile both _def_ and Kotlin project sources.
+* `jeka.java.version`:  Target JVM version for compiled files.
+* `jeka.jdk.X=` location of the JDK version X _(e.g., jeka.jdk.11=/my/java/jdk11)_. It is used to compile projects when 
+  the project JVM target version differs from the Jeka running version.
+* `jeka.kotlin.version`: Version of Kotlin used to compile both _def_ and Kotlin project sources.
 * `jeka.inject.classpath`: Additional dependencies that will be added to the JeKa classpath. 
    We can specify many dependencies separated by `<space>`.
    It can be either Maven coordinates or file paths. If a file path is relative, it is resolved 
    upon project base dir (could be distinct from working dir).
-   Example : `jeka.inject..classpath=dev.jeka:springboot-plugin  com.google.guava:guava:31.1-jre ../other-project/jeka/output/other-project.jar`
+   Example: `jeka.inject..classpath=dev.jeka:springboot-plugin  com.google.guava:guava:31.1-jre ../other-project/jeka/output/other-project.jar`
 * `jeka.kbean.default`: The KBean to use when omitting mentioning KBean prefix (or using `kb#` prefix) in command or field assignment.
    Example: declaring `jeka.kbean.default=myBean`, makes the following expressions equivalent : `myBean#run`, `#run`, and `kb#run`.
 
@@ -48,12 +48,12 @@ project1
     Example : `jeka.cmd.myBuild=${jeka.cmd.build} sonarqube#run jacoco#` allows you to simply execute `jeka :myBuild`.
 *  `jeka.cmd._append=` will append the argument to every Jeka execution command.
    Example : `jeka.cmd._append=@dev.jeka:springboot-plugin` will add springboot plugin to Jeka classpath for each execution.
-   This properties can be splitted when argument line becomes to long. In fact, every properties starting with `jeka.cmd._append` will 
+   This property can be split when the argument line becomes too long. In fact, every property starting with `jeka.cmd._append` will 
    be taken in account to assemble the extra command line arguments. For example, we can define `jeka.cmd._append.0=`, `jeka.cmd._append.1=`, and so on.
 
 !!! Note
     Command shorthands are a really powerful mechanism for getting rid of build classes.
-    Many projects can be built using properties only !
+    Many projects can be built using properties only!
 
 ### Repositories
 
@@ -89,7 +89,7 @@ jeka.repos.download.headers.my-header-name=myHeaderValue
 jeka.repos.download.headers.another-header-name=anotherHeaderValue
 ```
 
-Same for publish repo
+Same for the publish repo
 ```properties
 jeka.repos.publish=https://my.company/myrepo
 eka.repos.publish.username=myUsername
