@@ -3,7 +3,7 @@
 ## Install JeKa
   
 - Install [Jeka CLI](installation.md) 
-- or [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka)
+- or Install [IntelliJ Plugin for JeKa](https://plugins.jetbrains.com/plugin/24505-jeka)
 
 !!! note
     Using the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka) is the fastest way to get started. 
