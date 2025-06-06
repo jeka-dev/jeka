@@ -17,6 +17,9 @@ You can find some examples in below to learn more about _Jeka_:
 - [SpringBoot App - Java configuration](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
 - [SpringBoot - Agular - Sonarqube - Docker - E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 
+### Multi-module Projects
+- [Core and plugin modules in a single project](https://github.com/jeka-dev/demo-multi-module)
+
 ### Reuse Build Logic
 
 - [SpringBoot - ReactJs - built in 3 config lines](https://github.com/jeka-dev/demo-build-templates-consumer)
