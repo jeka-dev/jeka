@@ -348,7 +348,9 @@ class Engine {
         }
 
         // Prepare and return result
-        updateTracker.updateCompileFlag();
+        if (JkLocator.isJekaProject(baseDir)) {
+            updateTracker.updateJekaSrcHash();
+        }
         extraClasspath = extraClasspath.and(jekaSrcClassDir);
         boolean globalSuccess = javaCompileSuccess && kotlinCompileResult.success;
         if (!globalSuccess && !BehaviorSettings.INSTANCE.forceMode) {
@@ -461,8 +463,10 @@ class Engine {
                 true);
 
         // -- Update cache
-        kbeanClasspath.writeTo(classpathCache);
-        JkUtilsIterable.writeStringsTo(kbeanCache, "\n", depsKBeans);
+        if (JkLocator.isJekaProject(baseDir)) {
+            kbeanClasspath.writeTo(classpathCache);
+            JkUtilsIterable.writeStringsTo(kbeanCache, "\n", depsKBeans);
+        }
 
         // Prepare and return result
         List<String> result = new LinkedList<>(jekaSrcKBeans);

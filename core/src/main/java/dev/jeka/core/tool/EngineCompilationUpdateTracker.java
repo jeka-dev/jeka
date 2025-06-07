@@ -20,6 +20,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.charset.StandardCharsets;
@@ -44,7 +45,7 @@ class EngineCompilationUpdateTracker {
 
     boolean needRecompile(JkPathSequence classpath) {
         boolean result = isOutdated() || isMissingBinaryFiles() ||  !classpath.equals(readJekaSrcClasspath());
-        if (result) {
+        if (result && JkLocator.isJekaProject(baseDir)) {
             updateJekaSrcClasspath(classpath);
         }
         return result;
@@ -61,7 +62,7 @@ class EngineCompilationUpdateTracker {
         return result;
     }
 
-    void updateCompileFlag() {
+    void updateJekaSrcHash() {
         String hash = hashString();
         flagFile().deleteIfExist().createIfNotExist().write(hash.getBytes(StandardCharsets.UTF_8));
     }

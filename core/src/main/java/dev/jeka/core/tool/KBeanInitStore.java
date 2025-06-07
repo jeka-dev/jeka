@@ -59,7 +59,11 @@ class KBeanInitStore {
         Properties properties = new Properties();
         properties.put("default", JkUtilsString.nullToEmpty(defaultKBeanClassName));
         properties.put("involved", String.join(",", involvedKBeanClassNames));
-        try (OutputStream out = Files.newOutputStream(storeFile(baseDir))) {
+        Path storeFile = storeFile(baseDir);
+        if (!Files.exists(storeFile)) {    // the store file may not exist when scaffolding projects
+            return;
+        }
+        try (OutputStream out = Files.newOutputStream(storeFile)) {
             properties.store(out, "KBean init store");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
