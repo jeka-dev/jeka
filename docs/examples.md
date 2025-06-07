@@ -22,7 +22,7 @@ You can find some examples in below to learn more about _Jeka_:
 
 ### Reuse Build-Conventions
 
-- [SpringBoot - ReactJs - built with only 3 lines of configuration](https://github.com/jeka-dev/demo-build-convention-consumer)
+- [SpringBoot - ReactJs - built with only 3 lines of configuration](https://github.com/jeka-dev/demo-build-conventions-consumer)
 
 ### Combine with Maven
 

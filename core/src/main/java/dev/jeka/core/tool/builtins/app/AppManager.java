@@ -98,7 +98,9 @@ class AppManager {
 
     AppInfo getAppInfo(String appName) {
         Path repoDir = repoDir(appName);
+        JkLog.debug("Resolve app %s git local repo to: %s", appName, repoDir);
         JkGit git = JkGit.of(repoDir);
+
         String remoteRepoUrl = git.getRemoteUrl();
         String tag = getTag(repoDir);
         boolean isNative = isNative(findAppFile(appName));
@@ -161,6 +163,7 @@ class AppManager {
                 .filter(path -> !path.toString().endsWith(".jar"))
                 .filter(path -> !path.toString().endsWith(".ps1"))
                 .filter(path -> !systemFiles().contains(path.getFileName().toString()))
+                .filter(path -> !path.toString().equals("LICENSE"))
                 .map(path -> path.getFileName().toString())
                 .map(fileName -> fileName.endsWith(".bat") ?
                         JkUtilsString.substringBeforeLast(fileName, ".") : fileName)
