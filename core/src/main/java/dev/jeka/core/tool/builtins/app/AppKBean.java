@@ -16,10 +16,7 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.api.system.JkBusyIndicator;
-import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.system.JkLog;
-import dev.jeka.core.api.system.JkPrompt;
+import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.JkColumnText;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -67,7 +64,7 @@ public class AppKBean extends KBean {
 
         List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
         if (!installedAppsForRepo.isEmpty()) {
-            JkLog.info("This repository has been already installed for following apps:");
+            JkLog.info("This repository has been already installed for following app/versions:");
             installedAppsForRepo.forEach(System.out::println);
             String response = JkPrompt.ask("Do you want to install another version? [N,y]:").trim();
             if (!response.equalsIgnoreCase("y")) {
@@ -153,7 +150,7 @@ public class AppKBean extends KBean {
                 response = JkPrompt.ask("Choose a new name for the application:").trim();
             } else {
                 String suggestName = appManager.suggestName(suggestedAppName);
-                response = JkPrompt.ask("Choose a name for tha application. Press ENTER to select '%s':",
+                response = JkPrompt.ask("Choose a name for this application. Press ENTER to select '%s':",
                         suggestName).trim();
                 if (response.isEmpty()) {
                     response = suggestName;
@@ -246,14 +243,20 @@ public class AppKBean extends KBean {
             JkLog.info("No installed app found.");
             return;
         }
-        JkColumnText text = JkColumnText.ofSingle(4, 25)  // appName
+        JkColumnText text = JkColumnText.ofSingle(4, 55)  // appName
                 .addColumn(15, 70)  // repo url
                 .addColumn(3, 10)   // tag
                 .addColumn(8, 32)       // update status
                 .addColumn(4, 8)       // native
-                .setSeparator(COLUMN_SEPARATOR);
+                .setSeparator(JkAnsi.yellow(COLUMN_SEPARATOR));
 
         JkBusyIndicator.start(JkLog.getOutPrintStream(),"Querying Git repos...");
+        text.add(
+                "App Name",
+                "Repo",
+                "Version",
+                "Status",
+                "Runtime");
         for (String appName : installedAppNames) {
             AppInfo appInfo = appManager.getAppInfo(appName);
             String update = appInfo.updateInfo;
@@ -279,17 +282,19 @@ public class AppKBean extends KBean {
                 .addColumn(5, 15)    // app type
                 .addColumn(5, 88)    // desc
                 .addColumn(3, 80)
-                .setSeparator(COLUMN_SEPARATOR);
+                .setSeparator(JkAnsi.yellow(COLUMN_SEPARATOR));
         String nativ = "allow native";
         columnText
+                .add("https://github.com/djeang/kill8", "CLI",
+                        "Kill process on port", "")
                 .add("https://github.com/jeka-dev/demo-cowsay", "CLI",
                         "Java port or the Cowsay famous CLI.", nativ)
                 .add("https://github.com/djeang/demo-dir-checksum", "CLI",
                         "Computes folder checksums on your computer.", nativ)
                 .add("https://github.com/djeang/Calculator-jeka", "Swing GUI",
                         "Swing GUI providing a calculator", "")
-            //    .add("https://github.com/jeka-dev/demo-build-templates-consumer.git", "Server GUI",
-              //          "A pringboot app with reactJS front-end to manage coffee shops.", nativ)
+                .add("https://github.com/jeka-dev/demo-build-convention-consumer.git", "Server GUI",
+                        "A Springboot app with reactJS front-end to manage coffee shops.", nativ)
                 .add("https://github.com/jeka-dev/demo-project-springboot-angular",
                         "Server UI", "Manage a list of users. Written in Springboot and ReactJs.", nativ)
                 .add("https://github.com/jeka-dev/demo-maven-jeka-quarkus.git",

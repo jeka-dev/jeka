@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -100,7 +101,6 @@ class AppManager {
         Path repoDir = repoDir(appName);
         JkLog.debug("Resolve app %s git local repo to: %s", appName, repoDir);
         JkGit git = JkGit.of(repoDir);
-
         String remoteRepoUrl = git.getRemoteUrl();
         String tag = getTag(repoDir);
         boolean isNative = isNative(findAppFile(appName));
@@ -163,7 +163,7 @@ class AppManager {
                 .filter(path -> !path.toString().endsWith(".jar"))
                 .filter(path -> !path.toString().endsWith(".ps1"))
                 .filter(path -> !systemFiles().contains(path.getFileName().toString()))
-                .filter(path -> !path.toString().equals("LICENSE"))
+                .filter(path -> !path.getFileName().toString().equals("LICENSE"))
                 .map(path -> path.getFileName().toString())
                 .map(fileName -> fileName.endsWith(".bat") ?
                         JkUtilsString.substringBeforeLast(fileName, ".") : fileName)
@@ -200,7 +200,7 @@ class AppManager {
             JkGit git = JkGit.of(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
             if (remoteRepoUrl.equals(repoUrl)) {
-                String tag = getTag(repoDir);
+                String tag = Optional.ofNullable(getTag(repoDir)).orElse("<" + git.getCurrentBranch() + ">");
                 boolean isNative = isNative(findAppFile(appName));
                 result.add(new AppVersion(appName, tag, isNative));
             }
@@ -257,8 +257,6 @@ class AppManager {
         }
         return UpdateStatus.OUTDATED;
     }
-
-
 
     private void updateRepo(Path repoDir, String tag) {
         JkGit git = JkGit.of(repoDir);

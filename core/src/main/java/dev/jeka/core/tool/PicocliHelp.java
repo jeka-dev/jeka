@@ -49,7 +49,7 @@ class PicocliHelp {
     }
 
     static void printVersionHelp(PrintStream printStream) {
-        printStream.print(JkInfo.getJekaVersion());  // no need of carriage return
+        printStream.println(JkInfo.getJekaVersion());  // no need of carriage return
     }
 
     static void printCmdHelp(JkPathSequence classpath,
