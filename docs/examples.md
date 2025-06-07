@@ -20,9 +20,9 @@ You can find some examples in below to learn more about _Jeka_:
 ### Multi-module Projects
 - [Core and plugin modules in a single project](https://github.com/jeka-dev/demo-multi-module)
 
-### Reuse Build Logic
+### Reuse Build-Conventions
 
-- [SpringBoot - ReactJs - built in 3 config lines](https://github.com/jeka-dev/demo-build-templates-consumer)
+- [SpringBoot - ReactJs - built with only 3 config lines](https://github.com/jeka-dev/demo-build-convention-consumer)
 
 ### Combine with Maven
 
