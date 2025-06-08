@@ -133,6 +133,15 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
             JkLog.info("Tests are skipped.");
             return;
         }
+
+        //
+        boolean hasDev = JkUtilsPath.listDirectChildren(getBaseDir().resolve(JkConstants.JEKA_SRC_DIR)).stream()
+                .filter(Files::isDirectory)
+                .anyMatch(path -> path.getFileName().toString().startsWith("_"));
+        if (!hasDev) {
+            JkLog.info("No '_dev' folder found. No test to run.");
+            return;
+        }
         if (!JkTestProcessor.isEngineTestPresent()) {
             throw new JkException("No test engine class found in current classloader. " +
                     "You should add @JkDep(\"org.junit.jupiter:junit-jupiter\") dependencies " +
