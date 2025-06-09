@@ -16,19 +16,17 @@
 
 package dev.jeka.core.tool.builtins.app;
 
-import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsString;
-
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -40,33 +38,46 @@ class Catalog {
         this.apps = apps;
     }
 
-    static Catalog ofDemo() {
+    static Catalog ofBuiltin() {
         return ofInputStream(() -> Catalog.class.getResourceAsStream("demo-catalog.properties"));
+    }
+
+    static Catalog of(String url) {
+        try (InputStream inputStream = new URL(url).openStream()) {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            JkProperties props = JkProperties.ofProperties(properties);
+            Map<String, AppInfo>  apps = appEntries(props);
+            return new Catalog(apps);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid URL: " + url, e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
     }
 
     AppInfo getAppInfo(String name) {
         return apps.get(name);
     }
 
-    void print() {
+    void print(String catalogName) {
         for (Map.Entry<String, AppInfo> entry : apps.entrySet()) {
-            System.out.println(JkAnsi.yellow(entry.getKey()));
+            String appName = entry.getKey();
+            System.out.println(JkAnsi.magenta(appName));
             AppInfo appInfo = entry.getValue();
             System.out.println("Type: " + appInfo.type);
             System.out.println("Desc: " + appInfo.description);
             System.out.println("Repo: " + appInfo.repo);
+            System.out.println("Run : " + JkAnsi.yellow("jeka -r " + appInfo.repo + " -p"));
+            System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo=" + appInfo.repo + " name=" + appName));
+            //System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo=" + appName + "@" + catalogName ));
             System.out.println();
         }
     }
 
     private static Catalog ofInputStream(Supplier<InputStream> inputStreamSupplier) {
-        Properties properties = new Properties();
-        try (InputStream is = inputStreamSupplier.get()) {
-            properties.load(is);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        JkProperties props = JkProperties.ofProperties(properties);
+        JkProperties props = JkProperties.load(inputStreamSupplier);
         Map<String, AppInfo> entries = appEntries(props);
         return new Catalog(entries);
     }
@@ -78,7 +89,7 @@ class Catalog {
                 .filter(candidate -> !JkUtilsString.isBlank(candidate))
                 .distinct()
                 .collect(Collectors.toList());
-        Map<String, AppInfo> result = new LinkedHashMap<>();
+        Map<String, AppInfo> result = new TreeMap<>();
         for (String appName : appNames) {
             Map<String, String> map = JkProperties.ofMap(appPros).getAllStartingWith(appName + ".", false);
             AppInfo appInfo = new AppInfo(map.get("desc"), map.get("repo"), map.get("type"));

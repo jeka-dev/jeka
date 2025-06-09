@@ -18,33 +18,30 @@ package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class Catalogs {
 
-    private final Map<String, Catalog> map;
-
-    private Catalogs(Map<String, Catalog> map) {
-        this.map = map;
+    static Catalog getCatalog(String name) {
+        CatalogInfo catalogInfo = getAllCatalogs().get(name);
+        if (catalogInfo == null) {
+            return null;
+        }
+        String url = catalogInfo.url();
+        return Catalog.of(url);
     }
 
-    static Catalogs of() {
-        Map<String, Catalog> map = new LinkedHashMap<>();
-        map.put("demos", Catalog.ofDemo());
-        return new Catalogs(map);
-    }
-
-    Catalog get(String name) {
-        return map.get(name);
-    }
-
-    Catalog.AppInfo findApp(String alias) {
+    static Catalog.AppInfo findApp(String alias) {
         String catalogName = JkUtilsString.substringAfterFirst(alias, "@");
         String appName = JkUtilsString.substringBeforeFirst(alias, "@");
-        Catalog catalog = map.get(appName);
+        Catalog catalog = getCatalog(catalogName);
         if (catalog == null) {
             JkLog.error("No catalog '%s' found:", JkAnsi.yellow(catalogName));
             return null;
@@ -56,11 +53,78 @@ class Catalogs {
         return appInfo;
     }
 
-    void print() {
-        System.out.println("List of catalogs:");
-        map.forEach((name, catalog) -> {
+    static void print() {
+        System.out.println();
+        getAllCatalogs().forEach((name, catalog) -> {
             System.out.println(JkAnsi.magenta(name));
+            System.out.println(catalog.desc);
+            System.out.println(catalog.presentableUrl());
+            System.out.println();
         });
+    }
+
+    private static Map<String, CatalogInfo> getAllCatalogs() {
+        Map<String, CatalogInfo> result = new LinkedHashMap<>();
+        CatalogInfo builtinCatalog = new CatalogInfo("jeka-dev", "");
+        JkProperties catalogProps = JkProperties.loadFromUrl(builtinCatalog.url());
+        result.putAll(read(catalogProps));
+        result.putAll(read(JkProperties.ofStandardProperties()));
+        return result;
+    }
+
+    private static Map<String, CatalogInfo> read(JkProperties properties) {
+        Map<String, String> map = properties.getAllStartingWith("catalog.",false);
+        List<String> catalogNames = map.keySet().stream()
+                .map(key -> JkUtilsString.substringBeforeFirst(key, "."))
+                .distinct()
+                .collect(Collectors.toList());
+        Map<String, CatalogInfo> result = new LinkedHashMap<>();
+        catalogNames.forEach(name -> {
+            String repo = map.get(name + ".repo");
+            String desc =  map.get(name + ".desc");
+            result.put(name, new CatalogInfo(repo, desc));
+        });
+        return result;
+    }
+
+    private static class CatalogInfo {
+
+        CatalogInfo(String repo, String desc) {
+            this.repo = repo;
+            this.desc = desc;
+        }
+
+        // location. It can be the full http url, or the name of the github account
+        private final String repo;
+
+        private final String desc;
+
+        String url() {
+            if (repo.contains(".")) {
+                return repo;
+            }
+            if (repo.contains("/")) {
+                String template= "https://raw.githubusercontent.com/%s/refs/heads/main/jeka-catalog.properties";
+                return String.format(template, repo);
+            }
+            String template= "https://raw.githubusercontent.com/%s/jeka-catalog/refs/heads/main/jeka-catalog.properties";
+            return String.format(template, repo);
+
+        }
+
+        String presentableUrl() {
+            if (repo.contains(".")) {
+                return repo;
+            }
+            if (repo.contains("/")) {
+                String template= "https://github.com/%s";
+                return String.format(template, repo);
+            }
+            else  {
+                String template= "https://github.com/%s/jeka-catalog";
+                return String.format(template, repo);
+            }
+        }
     }
 
 

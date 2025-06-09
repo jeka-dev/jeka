@@ -21,11 +21,14 @@ import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -95,6 +98,34 @@ public final class JkProperties {
         return JkProperties.ofMap(map);
     }
 
+    public static JkProperties load(Supplier<InputStream> inputStreamSupplier) {
+        try (InputStream is = inputStreamSupplier.get()) {
+            return load(is);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static JkProperties load(InputStream inputStream) {
+        Properties properties = new Properties();
+        try {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return ofProperties(properties);
+    }
+
+    public static JkProperties loadFromUrl(String url) {
+        try (InputStream is = new URL(url).openStream()){
+            return load(is);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid URL: " + url, e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public static JkProperties ofMap(Map<String, String> props) {
         return ofMap("map", props);
     }
@@ -146,6 +177,22 @@ public final class JkProperties {
             return new JkProperties(this.source, this.props, fallback);
         }
         return new JkProperties(this.source, this.props, this.fallback.withFallback(fallback));
+    }
+
+    /**
+     * Creates a new {@code JkProperties} instance containing only the properties
+     * with keys that start with the specified prefix. The prefix is removed
+     * from the keys in the resulting properties.
+     *
+     * @param prefix the prefix to filter the properties by; only properties
+     *               with keys starting with this prefix will be included
+     * @return a new {@code JkProperties} instance with filtered properties
+     *         based on the specified prefix
+     */
+    public JkProperties sub(String prefix) {
+        Map<String, String> subProps = this.getAllStartingWith(prefix, false);
+        return new JkProperties(this.source, subProps, null);
+
     }
 
     /**
@@ -213,6 +260,8 @@ public final class JkProperties {
         }
         return false;
     }
+
+
 
     private String getRawValue(String propName) {
         if (this == ENVIRONMENT_VARIABLES) {

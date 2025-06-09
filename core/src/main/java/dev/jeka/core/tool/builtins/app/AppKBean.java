@@ -70,17 +70,21 @@ public class AppKBean extends KBean {
         if (!installedAppsForRepo.isEmpty()) {
             JkLog.info("This repository has been already installed for following app/versions:");
             installedAppsForRepo.forEach(System.out::println);
-            String response = JkPrompt.ask("Do you want to install another version? [N,y]:").trim();
+            String response = JkPrompt.ask("Do you want to install another version? %s:", JkAnsi.yellow("[N,y]")).trim();
             if (!response.equalsIgnoreCase("y")) {
                 JkLog.info("Installation aborted by user.");
                 return;
             }
         }
 
-        String suggestedAppName = JkUtilsString.substringAfterLast(remoteUrl, "/").toLowerCase();
-        if (suggestedAppName.endsWith(".git")) {
-            suggestedAppName = JkUtilsString.substringBeforeLast(suggestedAppName, ".git");
+        String suggestedAppName = name;
+        if (JkUtilsString.isBlank(suggestedAppName)) {
+            suggestedAppName = JkUtilsString.substringAfterLast(remoteUrl, "/").toLowerCase();
+            if (suggestedAppName.endsWith(".git")) {
+                suggestedAppName = JkUtilsString.substringBeforeLast(suggestedAppName, ".git");
+            }
         }
+
 
         // Ask for tag/version
         JkBusyIndicator.start(JkLog.getOutPrintStream(), "Fetching info from Git");
@@ -129,8 +133,12 @@ public class AppKBean extends KBean {
             String highest = tagBucket.getHighestVersion();
             String chooseTag = null; // empty mean choose last commit
             while (chooseTag == null) {
-                String response = JkPrompt.ask("Enter the version to install [@ = last commit /" +
-                        " ENTER = '%s' tag]:", JkAnsi.magenta(highest)).trim();
+                String response = JkPrompt.ask("Enter the version to install [%s = last commit /" +
+                        " %s = '%s' tag]:",
+                                JkAnsi.yellow("@"),
+                                JkAnsi.yellow("<ENTER>"),
+                                JkAnsi.magenta(highest)
+                        ).trim();
                 if (JkUtilsString.isBlank(response)) {
                     JkLog.info("Version %s will be installed.", JkAnsi.magenta(highest));
                     chooseTag = highest;
@@ -151,7 +159,7 @@ public class AppKBean extends KBean {
         }
 
         // Ask for name
-        boolean nameOk = false;
+        boolean nameOk = !JkUtilsString.isBlank(name) && !systemFiles().contains(name);
         boolean retry = false;
         while(!nameOk) {
             String response;
@@ -250,7 +258,7 @@ public class AppKBean extends KBean {
             JkLog.info("Installed applications are:");
             appManager.installedAppNames().forEach(JkLog::info);
         } else {
-            JkLog.info("Application %s uninstalled.", appName);
+            JkLog.info("Application %s uninstalled.", JkAnsi.yellow(appName));
         }
     }
 
@@ -293,66 +301,23 @@ public class AppKBean extends KBean {
         SecurityChecker.addTrustedUrl(url);
     }
 
-    @JkDoc("Displays some examples on the console that you can play with.")
-    public void examples() {
-        JkColumnText columnText = JkColumnText
-                .ofSingle(10, 110)   // repo url
-                .addColumn(5, 15)    // app type
-                .addColumn(5, 88)    // desc
-                .addColumn(3, 80)
-                .setSeparator(JkAnsi.yellow(COLUMN_SEPARATOR));
-        String nativ = "allow native";
-        columnText
-                .add("https://github.com/djeang/kill8", "CLI",
-                        "Kill process on port", "")
-                .add("https://github.com/jeka-dev/demo-cowsay", "CLI",
-                        "Java port or the Cowsay famous CLI.", nativ)
-                .add("https://github.com/djeang/demo-dir-checksum", "CLI",
-                        "Computes folder checksums on your computer.", nativ)
-                .add("https://github.com/djeang/Calculator-jeka", "Swing GUI",
-                        "Swing GUI providing a calculator", "")
-                .add("https://github.com/jeka-dev/demo-build-convention-consumer.git", "Server GUI",
-                        "A Springboot app with reactJS front-end to manage coffee shops.", nativ)
-                .add("https://github.com/jeka-dev/demo-project-springboot-angular",
-                        "Server UI", "Manage a list of users. Written in Springboot and Angular.", nativ)
-                .add("https://github.com/jeka-dev/demo-maven-jeka-quarkus.git",
-                        "Server UI", "Manage a basket of fruit. Written with Quarkus, built with Maven.", nativ);
 
-        System.out.println(columnText);
-        System.out.println();
-        columnText = JkColumnText
-                        .ofSingle(10, 40)
-                        .addColumn(10, 80)
-                        .setSeparator("    ");
-        columnText.add("To install an app",
-                "jeka app: install repo=https://github.com/jeka-dev/demo-cowsay");
-        columnText.add("To install a native app",
-                "jeka app: install repo=https://github.com/jeka-dev/demo-cowsay native:");
-        columnText.add("To execute directly without installing",
-                "jeka -r https://github.com/djeang/Calculator-jeka --program");
-        System.out.println(columnText);
-    }
 
-    public void demo() {
-        Catalog catalog = Catalog.ofDemo();
-        catalog.print();
-    }
-
-    public void listCatalog() {
-        Catalogs catalogs = Catalogs.of();
+    @JkDoc("List application catalogs")
+    public void catalog() {
         if (JkUtilsString.isBlank(name)) {
-            catalogs.print();
+            Catalogs.print();
             JkLog.info("Run: %s to list apps of a given catalog.",
-                    JkAnsi.yellow("jeka app: listCatalog name=<catalogName>"));
+                    JkAnsi.yellow("jeka app: catalog name=<catalogName>"));
         } else {
-            Catalog catalog = catalogs.get(name);
+            Catalog catalog = Catalogs.getCatalog(name);
             if (catalog == null) {
                 JkLog.error("Catalog not found: " + JkAnsi.magenta(name));
                 return;
             }
             JkLog.info("Apps referenced in catalog %s:", JkAnsi.magenta(name));
             JkLog.info("");
-            catalog.print();
+            catalog.print(name);
         }
     }
 
@@ -370,8 +335,8 @@ public class AppKBean extends KBean {
             urlPath += "/";
         }
 
-        JkLog.info("Host/path '%s' is not in present in the trusted list.", urlPath, GLOBAL_PROP_FILE);
-        String response = JkPrompt.ask("Add? [N,y]:").trim();
+        JkLog.info("Host/path '%s' is not in present in the trusted list.", JkAnsi.magenta(urlPath), GLOBAL_PROP_FILE);
+        String response = JkPrompt.ask("Add? %s:", JkAnsi.yellow("[N,y]")).trim();
         if ("y".equalsIgnoreCase(response)) {
             SecurityChecker.addTrustedUrl(gitUrl);
             return true;
