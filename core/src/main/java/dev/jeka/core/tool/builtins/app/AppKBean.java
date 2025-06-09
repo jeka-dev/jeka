@@ -65,6 +65,27 @@ public class AppKBean extends KBean {
             return;
         }
         String remoteUrl = this.repo.trim();
+        String suggestedAppName = name;
+        boolean shouldAskAppName = JkUtilsString.isBlank(name);
+        if (!remoteUrl.contains(":")) {
+
+            // referencing catalog app
+            if (remoteUrl.contains("@")) {
+                suggestedAppName = JkUtilsString.substringBeforeFirst(remoteUrl, "@");
+                shouldAskAppName = false;
+                Catalog.AppInfo appInfo = Catalogs.findApp(remoteUrl);
+                if (appInfo == null) {
+                    JkLog.error("No app or catalog found for: " + remoteUrl);
+
+                    return;
+                }
+                remoteUrl = appInfo.repo;
+            } else {
+                remoteUrl = Catalog.GITHUB_URL + remoteUrl;
+            }
+
+        }
+
 
         List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
         if (!installedAppsForRepo.isEmpty()) {
@@ -77,7 +98,7 @@ public class AppKBean extends KBean {
             }
         }
 
-        String suggestedAppName = name;
+
         if (JkUtilsString.isBlank(suggestedAppName)) {
             suggestedAppName = JkUtilsString.substringAfterLast(remoteUrl, "/").toLowerCase();
             if (suggestedAppName.endsWith(".git")) {
@@ -93,7 +114,7 @@ public class AppKBean extends KBean {
         TagBucket tagBucket = appManager.getRemoteTagBucketFromGitUrl(remoteUrl);
         JkBusyIndicator.stop();
 
-        boolean allowed = checkSecurityFlow(gitUrl);
+        boolean allowed = checkSecurityFlow(remoteUrl);
         if (!allowed) {
             JkLog.info("Installation aborted by user.");
             return;
@@ -111,7 +132,7 @@ public class AppKBean extends KBean {
         } else if (tagBucket.tags.size() == 1) {
             String tag = tagBucket.tags.get(0).getName();
             JkLog.info("Found one tag '%s' in the remote Git repository.", JkAnsi.magenta(tag));
-            String response = JkPrompt.ask("Do you want to install the tag '%s' or latest commit on branch %s:? " +
+            String response = JkPrompt.ask("Do you want to install the tag '%s' or last commit on branch %s:? " +
                     "[%s = last commit, %s = '%s' tag]:",
                     JkAnsi.magenta(tag),
                     JkAnsi.magenta(branch),
@@ -159,7 +180,7 @@ public class AppKBean extends KBean {
         }
 
         // Ask for name
-        boolean nameOk = !JkUtilsString.isBlank(name) && !systemFiles().contains(name);
+        boolean nameOk = !shouldAskAppName && !systemFiles().contains(name);
         boolean retry = false;
         while(!nameOk) {
             String response;

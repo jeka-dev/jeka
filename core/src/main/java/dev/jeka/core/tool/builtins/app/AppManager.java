@@ -145,7 +145,7 @@ class AppManager {
                 }
             }
         } catch (RuntimeException e) {
-            JkLog.warn("Failed to get info from remote repo %.", remoteRepoUrl);
+            JkLog.warn("Failed to get info from remote repo %s.", remoteRepoUrl);
             status = "?";
         }
         String tagValue = optionalTag.map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");
@@ -218,6 +218,7 @@ class AppManager {
         for (String appName : installedAppNames()) {
             Path repoDir = repoDir(appName);
             JkGit git = JkGit.of(repoDir);
+            JkUtilsPath.createDirectories(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
             if (remoteRepoUrl.equals(repoUrl)) {
                 String tag = getTag(repoDir).map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");

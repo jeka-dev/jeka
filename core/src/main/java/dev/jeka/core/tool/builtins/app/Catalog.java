@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 
 class Catalog {
 
+    static final String GITHUB_URL = "https://github.com/";
+
     private final Map<String, AppInfo> apps;
 
     private Catalog(Map<String, AppInfo> apps) {
@@ -70,7 +72,8 @@ class Catalog {
             System.out.println("Desc: " + appInfo.description);
             System.out.println("Repo: " + appInfo.repo);
             System.out.println("Run : " + JkAnsi.yellow("jeka -r " + appInfo.repo + " -p"));
-            System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo=" + appInfo.repo + " name=" + appName));
+            System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo="
+                    + appName + "@" + catalogName));
             //System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo=" + appName + "@" + catalogName ));
             System.out.println();
         }
@@ -111,7 +114,16 @@ class Catalog {
         public final String repo;
 
         public final String type;
+
+        private String shortenRepoUrl() {
+            if (repo.startsWith(GITHUB_URL)) {
+                return repo.substring(GITHUB_URL.length());
+            }
+            return repo;
+        }
     }
+
+
 
 
 }

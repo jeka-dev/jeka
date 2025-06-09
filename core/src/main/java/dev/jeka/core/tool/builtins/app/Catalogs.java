@@ -19,12 +19,11 @@ package dev.jeka.core.tool.builtins.app;
 import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.UncheckedIOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class Catalogs {
@@ -35,16 +34,20 @@ class Catalogs {
             return null;
         }
         String url = catalogInfo.url();
-        return Catalog.of(url);
+        return loadCatalog(url);
     }
+
 
     static Catalog.AppInfo findApp(String alias) {
         String catalogName = JkUtilsString.substringAfterFirst(alias, "@");
         String appName = JkUtilsString.substringBeforeFirst(alias, "@");
         Catalog catalog = getCatalog(catalogName);
         if (catalog == null) {
-            JkLog.error("No catalog '%s' found:", JkAnsi.yellow(catalogName));
-            return null;
+            CatalogInfo catalogInfo = new CatalogInfo(catalogName, "");
+            catalog = loadCatalog(catalogInfo.url());
+            if (catalog == null) {
+                return null;
+            }
         }
         Catalog.AppInfo appInfo = catalog.getAppInfo(appName);
         if (appInfo == null) {
@@ -66,9 +69,13 @@ class Catalogs {
     private static Map<String, CatalogInfo> getAllCatalogs() {
         Map<String, CatalogInfo> result = new LinkedHashMap<>();
         CatalogInfo builtinCatalog = new CatalogInfo("jeka-dev", "");
-        JkProperties catalogProps = JkProperties.loadFromUrl(builtinCatalog.url());
-        result.putAll(read(catalogProps));
-        result.putAll(read(JkProperties.ofStandardProperties()));
+        try {
+            JkProperties catalogProps = JkProperties.loadFromUrl(builtinCatalog.url());
+            result.putAll(read(catalogProps));
+        } catch (UncheckedIOException e) {
+            JkLog.warn("Failed to load builtin catalogs from %s", builtinCatalog.url());
+        }
+        result.putAll(read(JkProperties.ofStandardProperties().sub("jeka.")));
         return result;
     }
 
@@ -86,6 +93,19 @@ class Catalogs {
         });
         return result;
     }
+
+    private static Catalog loadCatalog(String url) {
+        try {
+            return Catalog.of(url);
+        } catch (UncheckedIOException e) {
+            JkLog.warn("Failed to load catalog from %s: %s", url, e.getMessage());
+            if (JkLog.isVerbose()) {
+                e.printStackTrace(System.err);
+            }
+            return null;
+        }
+    }
+
 
     private static class CatalogInfo {
 
