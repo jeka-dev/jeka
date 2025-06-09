@@ -30,6 +30,10 @@ public interface JkAnsi {
         return colorize(Color.YELLOW, string);
     }
 
+    static String magenta(String string) {
+        return colorize(Color.MAGENTA, string);
+    }
+
     static String green(String string) {
         return colorize(Color.GREEN, string);
     }

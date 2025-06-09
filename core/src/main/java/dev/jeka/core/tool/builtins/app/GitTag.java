@@ -23,7 +23,6 @@ class GitTag implements Comparable<GitTag> {
 
     private static final String LATEST = "latest";
 
-
     public final String value;
 
     GitTag(String value) {
@@ -35,7 +34,7 @@ class GitTag implements Comparable<GitTag> {
         return JkVersion.of(sanitize(value)).compareTo(JkVersion.of(sanitize(o.value)));
     }
 
-    boolean isLVersion() {
+    boolean isVersion() {
         String sanitized = value.startsWith("v") ? value.substring(1) : value;
         if (sanitized.isEmpty()) {
             return false;

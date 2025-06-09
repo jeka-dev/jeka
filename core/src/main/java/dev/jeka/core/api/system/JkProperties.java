@@ -87,6 +87,14 @@ public final class JkProperties {
         return new JkProperties(sourceName, Collections.unmodifiableMap(new HashMap<>(props)), null);
     }
 
+    public static JkProperties ofProperties(Properties properties) {
+        Map<String, String> map = new HashMap<>();
+        properties.forEach((key, value) ->
+                map.put(key.toString(), value.toString())
+        );
+        return JkProperties.ofMap(map);
+    }
+
     public static JkProperties ofMap(Map<String, String> props) {
         return ofMap("map", props);
     }

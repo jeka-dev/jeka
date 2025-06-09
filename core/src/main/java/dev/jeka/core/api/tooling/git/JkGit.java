@@ -454,7 +454,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
             JkLog.debug("No default branch found in  %s. Returns null.", repoUrl);
             return null;
         }
-        String partial = JkUtilsString.substringAfterFirst(lines.get(0).replace("\t", " "), REFS_TAGS);
+        String partial = JkUtilsString.substringAfterFirst(lines.get(0).replace("\t", " "), REFS_HEADS);
         return JkUtilsString.substringBeforeFirst(partial, " ");
 
     }

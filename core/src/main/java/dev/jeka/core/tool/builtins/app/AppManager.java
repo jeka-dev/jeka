@@ -76,6 +76,26 @@ class AppManager {
         buildAndInstall(appName, isNative, repoDir);
     }
 
+    void updateToLastCommit(String appName) {
+        Path appFile = findAppFile(appName);
+        if (!Files.exists(appFile)) {
+            JkLog.info("App %s not found. Nothing to update.", appFile);
+            return;
+        }
+        Path repoDir = repoDir(appName);
+        JkGit git = JkGit.of(repoDir);
+        JkLog.startTask("update-git-repo");
+        String branch = git.getCurrentBranch();
+        git.execCmd("fetch", "origin", branch);
+        git.execCmd("merge", "--ff-only", "origin/" + branch);
+
+        boolean isNative = isNative(appFile);
+        JkLog.info("Re-building the app...");
+        buildAndInstall(appName, isNative, repoDir);
+
+        JkLog.endTask();
+    }
+
     boolean uninstall(String appName) {
         Path appFile = findAppFile(appName);
         boolean found = false;
@@ -102,20 +122,20 @@ class AppManager {
         JkLog.debug("Resolve app %s git local repo to: %s", appName, repoDir);
         JkGit git = JkGit.of(repoDir);
         String remoteRepoUrl = git.getRemoteUrl();
-        String tag = getTag(repoDir);
         boolean isNative = isNative(findAppFile(appName));
-        boolean isVersion = tag != null && new GitTag(tag).isLVersion();
+        Optional<GitTag> optionalTag = getTag(repoDir);
+        boolean isVersion = optionalTag.map(GitTag::isVersion).orElse(false);
         String status;
         try {
             if (isVersion) {
                 TagBucket tagBucket = getRemoteTagBucketFromGitUrl(remoteRepoUrl);
-                if (tagBucket.isLatestVersion(tag)) {
+                if (tagBucket.isLatestVersion(optionalTag.get().value)) {
                     status = "up-to-date";
                 } else {
                     status = "outdated -> " + tagBucket.getHighestVersion();
                 }
             } else {
-                UpdateStatus updateStatus = getTagCommitStatus(appName, tag);
+                UpdateStatus updateStatus = getTagCommitStatus(appName, optionalTag.orElse(null));
                 if (updateStatus.equals(UpdateStatus.UP_TO_DATE)) {
                     status = "up-to-date";
                 } else if (updateStatus.equals(UpdateStatus.TAG_DELETED)) {
@@ -128,12 +148,12 @@ class AppManager {
             JkLog.warn("Failed to get info from remote repo %.", remoteRepoUrl);
             status = "?";
         }
-        String tagValue = tag == null ? "<" + git.getCurrentBranch() + ">" : tag;
+        String tagValue = optionalTag.map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");
         RepoAndTag repoAndTag = new RepoAndTag(remoteRepoUrl, tagValue);
         return new AppInfo(appName, repoAndTag, isNative, status);
     }
 
-    String getCurrentTag(String appName) {
+    Optional<GitTag> getCurrentTag(String appName) {
         Path repoDir = repoDir(appName);
         return getTag(repoDir);
     }
@@ -200,7 +220,7 @@ class AppManager {
             JkGit git = JkGit.of(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
             if (remoteRepoUrl.equals(repoUrl)) {
-                String tag = Optional.ofNullable(getTag(repoDir)).orElse("<" + git.getCurrentBranch() + ">");
+                String tag = getTag(repoDir).map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");
                 boolean isNative = isNative(findAppFile(appName));
                 result.add(new AppVersion(appName, tag, isNative));
             }
@@ -208,14 +228,18 @@ class AppManager {
         return result;
     }
 
-    UpdateStatus getTagCommitStatus(String appName, String tag) {
+    /**
+     * @param gitTag Maybe null. If null, look at the latest commit.
+     */
+    UpdateStatus getTagCommitStatus(String appName, GitTag gitTag) {
         Path repoDir = repoDir(appName);
         JkGit git = JkGit.of(repoDir);
         String remoteRepo = git.getRemoteUrl();
-        String remoteTagCommit = git.getRemoteTagCommit(remoteRepo, tag);
-        if (tag != null && remoteTagCommit == null) {
+        String tagValue =  Optional.ofNullable(gitTag).map(GitTag::toString).orElse(null);
+        String remoteTagCommit = git.getRemoteTagCommit(remoteRepo, tagValue);
+        if (gitTag != null && remoteTagCommit == null) {
             JkLog.warn("Found tag %s on current commit of repo %s no longer exist in remote repo %s.",
-                    tag, repoDir, remoteRepo);
+                    gitTag, repoDir, remoteRepo);
             return UpdateStatus.TAG_DELETED;
         }
         String localTagCommit = git.getCurrentCommit();
@@ -236,8 +260,8 @@ class AppManager {
         } catch (RuntimeException e) {
             JkGit git = JkGit.of(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
-            String tag = getTag(repoDir);
-            String tagExpression = tag == null ? "HEAD" : "with tag " + tag;
+            Optional<GitTag> optionalGitTag = getTag(repoDir);
+            String tagExpression = optionalGitTag.map(gitTag -> "with tag " + gitTag).orElse("HEAD");
             JkLog.error("Error building '%s' app from repo %s %s.", appName, remoteRepoUrl, tagExpression);
             JkLog.error("The version fetched may have errors. Try a different tag to install or update.");
             throw e;
@@ -247,39 +271,15 @@ class AppManager {
         JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private UpdateStatus updateRepoIfNeeded(String appName, String tag, TagBucket tagBucket) {
-        UpdateStatus updateStatus = getTagCommitStatus(appName, tag);
 
-        // Update repo
-        if (updateStatus == UpdateStatus.OUTDATED) {
-            Path repoDir = repoDir(appName);
-            updateRepo(repoDir, tag);
-        }
-        return UpdateStatus.OUTDATED;
-    }
 
-    private void updateRepo(Path repoDir, String tag) {
-        JkGit git = JkGit.of(repoDir);
-        JkLog.startTask("update-git-repo");
-        git.execCmd("fetch");
-        if (tag != null) {
-            JkLog.info("Checkout repo tag %s", tag);
-            git.execCmd("checkout", tag);
-        } else {
-            String branch = git.getCurrentBranch();
-            JkLog.info("Checkout branch %s", branch);
-            git.execCmd("checkout", branch);
-        }
-        JkLog.endTask();
-    }
-
-    private String getTag(Path repoDir) {
+    private Optional<GitTag> getTag(Path repoDir) {
         List<String> currentTags = JkGit.of(repoDir).getTagsOnCurrentCommit();
         if (currentTags.isEmpty()) {
             JkLog.debug("No repo tags found on local repo %s.", repoDir);
-            return null;
+            return Optional.empty();
         }
-        return currentTags.get(0);
+        return Optional.of(new GitTag(currentTags.get(0)));
     }
 
     private Path repoDir(String appName) {

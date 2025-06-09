@@ -27,6 +27,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.util.List;
+import java.util.Optional;
 
 @JkDoc("Provides a way to install, update, or remove applications from the user PATH.\n" +
         "Applications are installed from a Git repository and built by the client before installation.\n" +
@@ -47,6 +48,9 @@ public class AppKBean extends KBean {
 
     @JkDoc("Specifies the name of the app to update/uninstall.")
     public String name;
+
+    @JkDoc("Short description of the app provided by the application author.")
+    public String description;
 
     @JkDoc("Specifies the url to trust.")
     public String url;
@@ -81,6 +85,7 @@ public class AppKBean extends KBean {
         // Ask for tag/version
         JkBusyIndicator.start(JkLog.getOutPrintStream(), "Fetching info from Git");
         String branch = appManager.getRemoteDefaultBranch(remoteUrl);
+        JkLog.debug("Use default branch: %s", JkAnsi.magenta(branch));
         TagBucket tagBucket = appManager.getRemoteTagBucketFromGitUrl(remoteUrl);
         JkBusyIndicator.stop();
 
@@ -94,20 +99,26 @@ public class AppKBean extends KBean {
 
         // No tag available
         if (tagBucket.tags.isEmpty()) {
-            JkLog.info("No tags found in remote Git repository. Last commit from branch %s will be installed.", branch);
+            JkLog.info("No tags found in remote Git repository. Last commit from branch <%s> will be installed.",
+                    JkAnsi.magenta(branch));
             repoAndTag = new RepoAndTag(remoteUrl, null);
 
             // 1 tag available
         } else if (tagBucket.tags.size() == 1) {
             String tag = tagBucket.tags.get(0).getName();
-            JkLog.info("Found one tag '%s' in the remote Git repository.", tag);
+            JkLog.info("Found one tag '%s' in the remote Git repository.", JkAnsi.magenta(tag));
             String response = JkPrompt.ask("Do you want to install the tag '%s' or latest commit on branch %s:? " +
-                    "[@ = last commit, ENTER = '%s' tag]:", tag, branch, tag);
+                    "[%s = last commit, %s = '%s' tag]:",
+                    JkAnsi.magenta(tag),
+                    JkAnsi.magenta(branch),
+                    JkAnsi.yellow("@"),
+                    JkAnsi.yellow("<ENTER>"),
+                    JkAnsi.magenta(tag));
             if ("@".equals(response)) {
-                JkLog.info("Last commit from branch %s will be installed.", branch);
+                JkLog.info("Last commit from branch %s will be installed.", JkAnsi.magenta(branch));
                 repoAndTag = new RepoAndTag(remoteUrl, null);
             } else {
-                JkLog.info("Version %s will be installed.", tag);
+                JkLog.info("Version %s will be installed.", JkAnsi.magenta(tag));
                 repoAndTag = new RepoAndTag(remoteUrl, tag);
             }
 
@@ -119,19 +130,20 @@ public class AppKBean extends KBean {
             String chooseTag = null; // empty mean choose last commit
             while (chooseTag == null) {
                 String response = JkPrompt.ask("Enter the version to install [@ = last commit /" +
-                        " ENTER = '%s' tag]:", highest).trim();
+                        " ENTER = '%s' tag]:", JkAnsi.magenta(highest)).trim();
                 if (JkUtilsString.isBlank(response)) {
-                    JkLog.info("Version %s will be installed.", highest);
+                    JkLog.info("Version %s will be installed.", JkAnsi.magenta(highest));
                     chooseTag = highest;
                 } else if (response.equalsIgnoreCase("@")) {
-                    JkLog.info("Last commit from branch %s will be installed.", branch);
+                    JkLog.info("Last commit from branch %s will be installed.", JkAnsi.magenta(branch));
                     chooseTag = "";
                 } else {
                     if (tagBucket.hasTag(response)) {
-                        JkLog.info("Version %s will be installed.", response);
+                        JkLog.info("Version %s will be installed.", JkAnsi.magenta(response));
                         chooseTag = response;
                     } else {
-                        JkLog.info("The tag '%s' is not on the list. Please, choose one from the list.", response);
+                        JkLog.info("The tag '%s' is not on the list. Please, choose one from the list.",
+                                JkAnsi.magenta(response));
                     }
                 }
             }
@@ -145,13 +157,15 @@ public class AppKBean extends KBean {
             String response;
             if (appManager.installedAppNames().contains(suggestedAppName)) {
                 if (!retry) {
-                    JkLog.info("An application named '%s' is already installed.", suggestedAppName);
+                    JkLog.info("An application named '%s' is already installed.", JkAnsi.yellow(suggestedAppName));
                 }
                 response = JkPrompt.ask("Choose a new name for the application:").trim();
             } else {
                 String suggestName = appManager.suggestName(suggestedAppName);
-                response = JkPrompt.ask("Choose a name for this application. Press ENTER to select '%s':",
-                        suggestName).trim();
+                response = JkPrompt.ask("Choose a name for this application. Press %s to select '%s':",
+                        JkAnsi.yellow("<ENTER>"),
+                        JkAnsi.yellow(suggestName))
+                        .trim();
                 if (response.isEmpty()) {
                     response = suggestName;
                 }
@@ -166,11 +180,12 @@ public class AppKBean extends KBean {
                 continue;
             }
             if (systemFiles().contains(response)) {
-                JkLog.info("Sorry, application name should not be a jeka system name as %s.", systemFiles());
+                JkLog.info("Sorry, application name should not be a jeka system name as %s.",
+                        JkAnsi.yellow(systemFiles().toString()));
                 continue;
             }
             if (appManager.installedAppNames().contains(response)) {
-                JkLog.info("Sorry, the application name `%s` is already used by another app", response);
+                JkLog.info("Sorry, the application name `%s` is already used by another app", JkAnsi.yellow(response));
                 JkLog.info("Installed programs are:");
                 appManager.installedAppNames().forEach(JkLog::debug);
                 continue;
@@ -184,11 +199,11 @@ public class AppKBean extends KBean {
         boolean isNative = find(NativeKBean.class).isPresent();
         appManager.install(appName, repoAndTag, isNative);
 
-        JkLog.info("%s is installed.", suggestedAppName);
+        JkLog.info("App has been installed. Run with: %s", JkAnsi.yellow(suggestedAppName));
     }
 
-    @JkDoc("Updates an app from the given PATH.\n" +
-            "Use `name=[app-name]` to specify the app.")
+    @JkDoc("Updates an app from the given name.\n" +
+            "Use `name=[app-name]` to specify the app name.")
     public void update() {
         final String appName;
         if (JkUtilsString.isBlank(name)) {
@@ -198,21 +213,24 @@ public class AppKBean extends KBean {
             appName = name.trim();
         }
         if (!appManager.installedAppNames().contains(appName)) {
-            JkLog.info("No app named `%s` found.", appName);
+            JkLog.info("No app named `%s` found.", JkAnsi.yellow(appName));
             return;
         }
-        String currentTag = appManager.getCurrentTag(appName);
+        Optional<GitTag> optionalGitTag = appManager.getCurrentTag(appName);
         boolean updated;
 
-        // Tag is not a version (as 'latest', 'dev',....)
+        boolean isVersion = optionalGitTag.map(GitTag::isVersion).orElse(false);
+        if (isVersion) {
+            updated = updateToNewerTag(appName, optionalGitTag.get().value);
+
+        // Tag is not a version (as 'latest', 'dev',....) or there is no tag (last commit)
         // We keep the same tag, but update its content
-        if (new GitTag(currentTag).isLVersion()) {
-            updated = updateToNewerTag(appName, currentTag);
         } else {
-            updated = updateTagContentWorkflow(appName, currentTag);
+            updated = updateTagContentWorkflow(appName, optionalGitTag.orElse(null));
         }
+
         if (updated) {
-            JkLog.info("App %s has been updated.", appName);
+            JkLog.info("App %s has been updated.", JkAnsi.yellow(appName));
         }
     }
 
@@ -296,7 +314,7 @@ public class AppKBean extends KBean {
                 .add("https://github.com/jeka-dev/demo-build-convention-consumer.git", "Server GUI",
                         "A Springboot app with reactJS front-end to manage coffee shops.", nativ)
                 .add("https://github.com/jeka-dev/demo-project-springboot-angular",
-                        "Server UI", "Manage a list of users. Written in Springboot and ReactJs.", nativ)
+                        "Server UI", "Manage a list of users. Written in Springboot and Angular.", nativ)
                 .add("https://github.com/jeka-dev/demo-maven-jeka-quarkus.git",
                         "Server UI", "Manage a basket of fruit. Written with Quarkus, built with Maven.", nativ);
 
@@ -313,6 +331,29 @@ public class AppKBean extends KBean {
         columnText.add("To execute directly without installing",
                 "jeka -r https://github.com/djeang/Calculator-jeka --program");
         System.out.println(columnText);
+    }
+
+    public void demo() {
+        Catalog catalog = Catalog.ofDemo();
+        catalog.print();
+    }
+
+    public void listCatalog() {
+        Catalogs catalogs = Catalogs.of();
+        if (JkUtilsString.isBlank(name)) {
+            catalogs.print();
+            JkLog.info("Run: %s to list apps of a given catalog.",
+                    JkAnsi.yellow("jeka app: listCatalog name=<catalogName>"));
+        } else {
+            Catalog catalog = catalogs.get(name);
+            if (catalog == null) {
+                JkLog.error("Catalog not found: " + JkAnsi.magenta(name));
+                return;
+            }
+            JkLog.info("Apps referenced in catalog %s:", JkAnsi.magenta(name));
+            JkLog.info("");
+            catalog.print();
+        }
     }
 
     private static List<String> systemFiles() {
@@ -338,9 +379,17 @@ public class AppKBean extends KBean {
         return false;
     }
 
-    private boolean updateTagContentWorkflow(String appName, String currentTag) {
-        JkLog.info("Updating content of tag '%s'.", currentTag);
-        AppManager.UpdateStatus status = appManager.getTagCommitStatus(appName, currentTag);
+    /**
+     * @param gitTag Maybe null
+     */
+    private boolean updateTagContentWorkflow(String appName, GitTag gitTag) {
+        if (gitTag == null) {
+            JkLog.info("Updating content to last commit.");
+        } else {
+            JkLog.info("Updating content for tag '%s'.", JkAnsi.magenta(gitTag.value));
+        }
+
+        AppManager.UpdateStatus status = appManager.getTagCommitStatus(appName, gitTag);
         if (status == AppManager.UpdateStatus.TAG_DELETED) {
             JkLog.info("Remote tag `%s' has been delete. Existing tags are:", appName);
             appManager.getRemoteTags(appName).forEach(JkLog::info);
@@ -364,12 +413,20 @@ public class AppKBean extends KBean {
             }
         }
         if (status == AppManager.UpdateStatus.UP_TO_DATE) {
-            JkLog.info("Version %s is up-to-date. No action needed.");
+            if (gitTag != null) {
+                JkLog.info("Version %s is up-to-date. No action needed.", JkAnsi.magenta(gitTag.value));
+            } else {
+                JkLog.info("Up-to-date. No action needed.");
+            }
             return false;
         }
         if (status == AppManager.UpdateStatus.OUTDATED) {
-            appManager.updateWithTag(appName, currentTag);
-            JkLog.info("Updating tag %s content.", currentTag);
+            if (gitTag != null) {
+                appManager.updateWithTag(appName, gitTag.value);
+                JkLog.info("Updating tag '%s' content.", JkAnsi.magenta(gitTag.value));
+            } else {
+                appManager.updateToLastCommit(appName);
+            }
             return true;
         }
         return true;
