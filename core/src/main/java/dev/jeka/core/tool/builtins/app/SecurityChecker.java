@@ -26,11 +26,11 @@ import java.util.List;
 
 class SecurityChecker {
 
-    static final String GIT_TRUSTED_URL_PREFIX_PROP = "jeka.apps.url.trusted";
+    static final String GIT_TRUSTED_URL_PREFIX_PROP = "jeka.app.url.trusted";
 
     private static final String APPROVED_URL_PROP = "github.com/jeka-dev/";
 
-    private static final String URL_SEPARATOR = ", ";
+    private static final String URL_SEPARATOR = " ";
 
     static final Path GLOBAL_PROP_FILE = JkLocator.getGlobalPropertiesFile();
 
@@ -55,7 +55,7 @@ class SecurityChecker {
         PropFile propFile = new PropFile(GLOBAL_PROP_FILE);
         String existing = JkProperties.ofFile(GLOBAL_PROP_FILE).get(GIT_TRUSTED_URL_PREFIX_PROP);
         String newValue = JkUtilsString.nullToEmpty(existing) + URL_SEPARATOR + sanitized;
-        propFile.appendValueToMultiValuedProp(GIT_TRUSTED_URL_PREFIX_PROP, newValue, URL_SEPARATOR, 120);
+        propFile.appendValueToMultiValuedProp(GIT_TRUSTED_URL_PREFIX_PROP, newValue, URL_SEPARATOR);
     }
 
     // non-private for testing

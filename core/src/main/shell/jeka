@@ -73,6 +73,8 @@ declare LOG_DEBUG # DEBUG
 declare DRY_RUN  # Debugging purpose
 declare DEFAULT_BASE_DIR="."
 
+declare REMOTE_URL # Fill only if we run or execute a remote url (git url)
+
 
 #######################################
 # Prints passed arguments on the stderr
@@ -487,6 +489,71 @@ is_remote_arg() {
   fi
 }
 
+#######################################
+# Check if the remote url to execute is whitelisted
+# Arguments:
+#   $1 : a string representing the url
+# Outputs:
+#   result in 'result' global args
+#######################################
+check_url_white_listed() {
+  local url
+  url=$(get_protocol_less_url "$1")
+  local whitelist=${JEKA_APP_URL_TRUSTED}
+
+  if [ -z "$whitelist" ]; then
+    whitelist=$(get_prop_value_from_file "$GLOBAL_PROP_FILE" "jeka.app.url.trusted")
+  fi
+
+  IFS=' ' read -ra trusted_urls <<< "$whitelist"
+  trusted_urls+=("github.com/jeka-dev/")
+  local is_found=false
+
+  for prefix in "${trusted_urls[@]}"; do
+    if [[ "$url" == "$prefix"* ]]; then
+      is_found=true
+      break
+    fi
+  done
+
+  # Optionally, return or echo the result
+  if [ "$is_found" = true ]; then
+    return
+  fi
+
+  #Prompt user
+  read -p "Domain '$url' is not trusted. Add to trusted? [N/y]: " response
+  if [[ "$response" == "y" || "$response" == "Y" ]]; then
+    add_or_append_property_to_file "$GLOBAL_PROP_FILE" "jeka.app.url.trusted" "$url"
+  else
+    echo "Execution aborted by the user."
+    exit 0
+  fi
+}
+
+add_or_append_property_to_file() {
+    local file="$1"   # Path to the properties file
+    local key="$2"    # Property key
+    local value="$3"  # Property value
+    local delimiter=" " # Delimiter for appending values
+
+    # Ensure the file exists
+    touch "$file"
+
+    # Check if the key exists in the file
+    if grep -q "^$key=" "$file"; then
+        # Append the value to the existing key
+        escaped_key=$(printf '%s\n' "$key" | sed 's/[.[\*^$\/&]/\\&/g')
+        escaped_value=$(printf '%s\n' "$value" | sed 's/[.[\*^$\/&]/\\&/g')
+
+        sed -i '' "s/^$escaped_key=\(.*\)/$escaped_key=\1${delimiter}${escaped_value}/" "$file"
+    else
+        # Add a new key-value pair
+        echo "$key=$value" >> "$file"
+    fi
+}
+
+
 # call `get_jdk_home_from_props base_dir JAVA_VERSION`
 get_jdk_home_from_props() {
   local base_dir=$1
@@ -511,14 +578,20 @@ is_git_url() {
 #   The dir location
 #######################################
 get_folder_name_from_git_url() {
-    local url=$1
-    local trimmed_url=$url
-    local protocols=("https://" "ssh://" "git://" "git@")
-    for protocol in "${protocols[@]}"; do
-      trimmed_url="${trimmed_url#$protocol}"
-    done
+    local trimmed_url
+    trimmed_url=$(get_protocol_less_url "$1")
     local folder_name="${trimmed_url//\//_}"  # replace '/' by '_'
     echo "$folder_name"
+}
+
+get_protocol_less_url() {
+  local url=$1
+  local trimmed_url=$url
+  local protocols=("https://" "ssh://" "git://" "git@")
+  for protocol in "${protocols[@]}"; do
+    trimmed_url="${trimmed_url#$protocol}"
+  done
+  echo "$trimmed_url"
 }
 
 assert_dir_exits() {
@@ -562,6 +635,7 @@ compute_base_dir_from_resolved_remote_arg() {
   fi
 
   ## Remote reference a git repo
+  REMOTE_URL=$remote_path
   local git_url
   git_url=$(substring_before_hash "$remote_path")
   local git_tag
@@ -912,6 +986,7 @@ execute_program_if_requested() {
   if [[ $PROGRAM_OPTION_INDEX == -1 ]]; then
     return 0
   fi
+  check_url_white_listed "$REMOTE_URL"
   local -i from_arg_index
   from_arg_index=$((PROGRAM_OPTION_INDEX+1))
   local program_args=("${INTERPOLATED_ARGS[@]:$from_arg_index}")

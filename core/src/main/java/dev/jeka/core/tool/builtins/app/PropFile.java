@@ -106,14 +106,14 @@ class PropFile {
         JkPathFile.of(path).write(newContent, StandardOpenOption.WRITE);
     }
 
-    void appendValueToMultiValuedProp(String propKey, String propValue, String separator, int maxLength) {
+    void appendValueToMultiValuedProp(String propKey, String propValue, String separator) {
         JkProperties props = JkProperties.ofFile(path);
         String fullValue = props.get(propKey);
         if (fullValue == null) {
             this.insertProp(propKey, propValue);
             return;
         }
-        List<String>items = Stream.of(fullValue.split(fullValue))
+        List<String> items = Stream.of(fullValue.split(fullValue))
                 .map(String::trim)
                 .filter(item -> ! JkUtilsString.isBlank(item))
                 .collect(Collectors.toCollection(ArrayList::new));

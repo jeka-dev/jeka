@@ -58,6 +58,7 @@ nav:
         - Basics: tutorials/basics.md
         - Build Base: tutorials/build-base.md
         - Build Projects: tutorials/build-projects.md
+        - Run Remote Apps: tutorials/run-remote-apps.md
     - Reference:
         - KBeans: reference/kbeans.md
         - Bundled KBeans:

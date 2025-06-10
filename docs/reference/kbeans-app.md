@@ -98,7 +98,7 @@ Trusted URL prefixes are stored in the `jeka.apps.url.trusted` property, located
 You can adjust this property later to make it more or less restrictive.  
 The check validates the start of the Git URL after removing the protocol and identifier part.
 
-Example: `jeka.apps.url.trusted=github.com/djeang/` will trust urls formed as:
+Example: `jeka.app.url.trusted=github.com/djeang/` will trust urls formed as:
 
   - https://github.com/djeang/xxx...    
   - https://my-user-name@github.com/djeang/xxx...
