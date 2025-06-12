@@ -87,7 +87,7 @@ public interface JkInternalClasspathScanner {
             // For this library version we need to create a dedicated classloader
             // with child-first strategy.
             JkCoordinateFileProxy classgraphJar = JkCoordinateFileProxy.ofStandardRepos(properties,
-                    "io.github.classgraph:classgraph:4.8.162");
+                    "io.github.classgraph:classgraph:4.8.179");
             ClassLoader parentClassloader = JkInternalClasspathScanner.class.getClassLoader();
             JkInternalChildFirstClassLoader childFirstClassLoader = JkInternalChildFirstClassLoader.of(classgraphJar.get(),
                     parentClassloader);

@@ -33,6 +33,9 @@ public final class JkJavaVersion implements Comparable<JkJavaVersion> {
         if (stringValue.contains(".")) {
             stringValue = JkUtilsString.substringBeforeFirst(stringValue, ".");
         }
+        if (stringValue.contains("-")) {
+            stringValue = JkUtilsString.substringBeforeFirst(stringValue, "-");
+        }
         try {
             int value = Integer.parseInt(stringValue);
             return new JkJavaVersion(value);
