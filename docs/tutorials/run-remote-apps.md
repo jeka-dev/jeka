@@ -34,6 +34,52 @@ jeka.app.url.trusted=github.com/djeang/
 ```
 In this example, we shorten the url, so that any url starting by `github.com/djeang/`will be trusted.
 
+## Run a Specific Version
+You can run a specific version of an application by specifying a tag name in the URL. For example:
+
+```shell
+jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p "Hello JeKa!"
+```
+
+## Run Native Executables
+You can compile a remote application to a native executable. Once compiled, all subsequent runs will execute the native version of the application.
+
+To compile a remote application into a native executable, use the following command:
+
+```jeka
+jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 native: compile
+```
+
+After compilation, run the application as usual.
+
+## Build Docker Image of tha application
+Jeka allow to create Docker images of a remote application.
+
+Create JVM image:
+```shell
+jeka -r https://github.com/jeka-dev/demo-cowsay docker: build
+```
+
+Create native image:
+```shell
+jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
+```
+.
+Then just follow the instruction to run the built docker image.
+
+## Use Shorthands
+Typing and remembering the repository URL of the application for every run can be tedious. You can simplify this by using Jeka's global command shortcut substitution mechanism.
+
+For example, define the following property in your `~/.jeka/global.properties` file:
+
+```properties
+jeka.cmd.cowsay=-r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p
+```
+Now, you can simply invoke the application using the shortcut command:
+```shell
+jeka ::cowsay "Hello World!"
+```
+
 ## Install
 
 Jeka allows you to install an application, enabling you to execute it without invoking `jeka`.
@@ -47,7 +93,7 @@ This command installs the `kill8` application in the user's PATH, allowing you t
 kill8 8081
 ```
 
-Find more details [here](/reference/kbeans-app)
+For more details, refer to the [documentation](/reference/kbeans-app).
 
 
 
