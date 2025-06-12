@@ -53,19 +53,19 @@ jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 native: compile
 After compilation, run the application as usual.
 
 ## Build Docker Image of tha application
-Jeka allow to create Docker images of a remote application.
+Jeka allow creating Docker images of a remote application.
 
-Create JVM image:
+Create a JVM image:
 ```shell
 jeka -r https://github.com/jeka-dev/demo-cowsay docker: build
 ```
 
-Create native image:
+Create a native image:
 ```shell
 jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
 ```
 .
-Then just follow the instruction to run the built docker image.
+Then follow the instruction to run the built docker image.
 
 ## Use Shorthands
 Typing and remembering the repository URL of the application for every run can be tedious. You can simplify this by using Jeka's global command shortcut substitution mechanism.
@@ -75,7 +75,7 @@ For example, define the following property in your `~/.jeka/global.properties` f
 ```properties
 jeka.cmd.cowsay=-r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p
 ```
-Now, you can simply invoke the application using the shortcut command:
+Now, you can invoke the application using the shortcut command:
 ```shell
 jeka ::cowsay "Hello World!"
 ```
