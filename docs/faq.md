@@ -55,8 +55,8 @@ Right-click on the `jeka-src` folder, and a menu entry will allow you to turn th
 
 In your existing Maven/Gradle project, do the following:
 
-1. Execute: `jeka base:scaffold`. This generates the folder/file structure for JeKa.
-2. Execute: `jeka intellij:jekaSrcAsModule` in the root directory.
+1. Execute: `jeka base: scaffold`. This generates the folder/file structure for JeKa.
+2. Execute: `jeka intellij: jekaSrcAsModule` in the root directory.
 
 This will add the property `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` to your *jeka.properties* file.
 

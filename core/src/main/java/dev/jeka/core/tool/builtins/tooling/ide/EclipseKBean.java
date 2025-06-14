@@ -84,7 +84,7 @@ public final class EclipseKBean extends KBean {
             final JkEclipseClasspathGenerator classpathGenerator =
                     JkEclipseClasspathGenerator.of(projectIde);
 
-            classpathGenerator.setDefDependencies(getRunbase().getDependencyResolver(), IdeSupport.classpathAsDependencySet());
+            classpathGenerator.setJekaSrcDependencies(getRunbase().getDependencyResolver(), IdeSupport.classpathAsDependencySet());
             classpathGenerator.setIncludeJavadoc(this.javadoc);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedProjects(importedRunProjects);

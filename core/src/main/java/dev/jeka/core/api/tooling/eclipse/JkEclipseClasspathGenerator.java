@@ -97,7 +97,7 @@ public final class JkEclipseClasspathGenerator {
 
     }
 
-    private boolean hasJekaDefDir() {
+    private boolean hasJekaSrcDir() {
         return Files.exists(ideSupport.getProdLayout().getBaseDir().resolve(JkConstants.JEKA_SRC_DIR));
     }
 
@@ -138,8 +138,8 @@ public final class JkEclipseClasspathGenerator {
     /**
      * If the build script depends on external libraries, you must set the resolver of these dependencies here.
      */
-    public JkEclipseClasspathGenerator setDefDependencies(JkDependencyResolver buildDependencyResolver,
-                                                          JkDependencySet buildDependencies) {
+    public JkEclipseClasspathGenerator setJekaSrcDependencies(JkDependencyResolver buildDependencyResolver,
+                                                              JkDependencySet buildDependencies) {
         this.defDependencyResolver = buildDependencyResolver;
         this.defDependencies = buildDependencies;
         return this;
@@ -215,7 +215,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for jeka-src
-        if (hasJekaDefDir()) {
+        if (hasJekaSrcDir()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -239,7 +239,7 @@ public final class JkEclipseClasspathGenerator {
         writeJre(writer);
 
         // add jeka-src dependencies
-        if (hasJekaDefDir() && defDependencyResolver != null) {
+        if (hasJekaSrcDir() && defDependencyResolver != null) {
             JkQualifiedDependencySet qualifiedDependencies =
                     JkQualifiedDependencySet.ofDependencies(defDependencies.getEntries());
             writeDependenciesEntries(writer, qualifiedDependencies, defDependencyResolver, paths);
@@ -357,7 +357,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(prodLayout.getBaseDir(), fileTree.getRoot()).toString().replace(File.separator, "/");
+            final String path = prodLayout.getBaseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -452,22 +452,20 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeClasspathEl(XMLStreamWriter writer, Path bin, Path source, Properties attributeProps,
+    private void writeClasspathEl(XMLStreamWriter writer, Path jar, Path source, Properties attributeProps,
                                   Properties accesRuleProps, Set<String> paths)
             throws XMLStreamException {
-        String binPath = bin.toAbsolutePath().toString();
+        String binPath = jar.toAbsolutePath().toString();
         if (!paths.add(binPath)) {
             return;
         }
-        boolean usePathVariable = usePathVariables && bin.startsWith(JkLocator.getJekaUserHomeDir());
+        boolean usePathVariable = usePathVariables && jar.startsWith(JkLocator.getJekaUserHomeDir());
         boolean isVar = true;
         if (usePathVariable) {
-            binPath = JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(bin).toString();
-        } else if (usePathVariables && bin.startsWith(JkLocator.getJekaHomeDir())) {
-            binPath = JEKA_HOME + "/" + JkLocator.getJekaHomeDir().relativize(bin).toString();
+            binPath = JEKA_USER_HOME + "/" + JkLocator.getJekaUserHomeDir().relativize(jar);
         } else {
             isVar = false;
-            binPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), bin).toString();
+            binPath = relativePathIfPossible(ideSupport.getProdLayout().getBaseDir(), jar).toString();
         }
         binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");

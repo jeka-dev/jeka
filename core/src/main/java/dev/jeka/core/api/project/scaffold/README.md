@@ -7,22 +7,22 @@ Create jar:
 jeka project: pack
 ```
 
-Clean and create jar:
+Clean, and create jar:
 ```shell
 jeka project: pack --clean
 ```
 
-Run test and create jar:
+Run, test, and create jar:
 ```shell
 jeka project: test pack 
 ```
 
-Run jar
+Run jar:
 ```shell
 jeka project: runJar run.programArgs="" run.jvmOptions=""
 ```
 
-Synchronize IntelliJ
+Synchronize IntelliJ:
 ```shell
 jeka intellij: sync
 ```

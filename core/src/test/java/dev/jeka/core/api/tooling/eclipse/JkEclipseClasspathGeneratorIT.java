@@ -29,7 +29,7 @@ public class JkEclipseClasspathGeneratorIT {
                 .add("org.apache.httpcomponents.client5:httpclient5:5.1.3");
         final JkEclipseClasspathGenerator baseGenerator = JkEclipseClasspathGenerator.of(baseProject.getJavaIdeSupport())
             .setUsePathVariables(true)
-            .setDefDependencies(baseProject.dependencyResolver,
+            .setJekaSrcDependencies(baseProject.dependencyResolver,
                     JkDependencySet.of().and(JkPopularLibs.GUAVA.toCoordinate("21.0").toString()));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
