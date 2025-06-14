@@ -396,13 +396,15 @@ get_prop_value_from_base_dir() {
 #   JEKA_VERSION_PROP_NAME (read)
 # Arguments:
 #   $1 : the base directory from where looking for jeka.properties file
+#   $2 : the name of the property (jeka.java.version)
 # Outputs:
 #   Write JAVA version to stdout
 #######################################
 get_java_version_from_props() {
   local base_dir="$1"
+  local prop_name=${2:-"$JEKA_VERSION_PROP_NAME"}
   local version
-  version=$(get_prop_value_from_base_dir "$base_dir" "$JEKA_VERSION_PROP_NAME")
+  version=$(get_prop_value_from_base_dir "$base_dir" "$prop_name")
   local trimmed_version
   trimmed_version="${version// /}"  # remove spaces
   echo "$trimmed_version"
@@ -923,8 +925,9 @@ compute_JAVA_CMD() {
       ;;
   esac
 
-  # Determines JAVA_HOME
-  JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR")
+  if [[ -z "$JAVA_VERSION" ]]; then
+      JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR" )
+  fi
 
   if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
     JAVA_HOME="$JEKA_JDK_HOME"
@@ -994,7 +997,25 @@ execute_program_if_requested() {
   from_arg_index=$((PROGRAM_OPTION_INDEX+1))
   local program_args=("${INTERPOLATED_ARGS[@]:$from_arg_index}")
   execute_and_exit_native_if_present "${program_args[@]}"
+
+  # if the project kbean declares a distinct java version, it should be run using that one
+  project_java_version=$(get_prop_value_from_base_dir "$BASE_DIR" "@project.javaVersion")
+  recompute_java_cmd="false"
+  original_java_version="$JAVA_VERSION"
+  if [[ -n "$project_java_version" && "$project_java_version" != "$JAVA_VERSION" ]]; then
+      JAVA_VERSION="$project_java_version"
+      JAVA_CMD=""
+      compute_JAVA_CMD
+      recompute_java_cmd=true
+  fi
   execute_and_exit_java_if_present "${program_args[@]}"
+
+
+  if [[ "$recompute_java_cmd" == "true" ]]; then
+    JAVA_VERSION="$original_java_version"
+    JAVA_CMD=""
+    compute_JAVA_CMD
+  fi
 
   if [[ "$RETRY_AFTER_BUILD" == "true" ]]; then
     msg "Cannot find a native or jar executable in $BASE_DIR/jeka-output"
@@ -1003,6 +1024,7 @@ execute_program_if_requested() {
 
   ## If we are here, this means that no native or jar has been found -> build
   debug "Launch a build to generate executable"
+
   compute_JAVA_CMD
   compute_JEKA_DIST_DIR "$BASE_DIR"
   compute_JEKA_CLASSPATH "$JEKA_DIST_DIR"

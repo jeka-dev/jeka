@@ -264,7 +264,7 @@ public final class JkJacoco {
             if (!JkLog.isVerbose()) {
                 args.add("--quiet");
             }
-            JkJavaProcess.ofJavaJar(toolProvider.getCmdLineJar(), null)
+            JkJavaProcess.ofJavaJar(toolProvider.getCmdLineJar())
                     .setFailOnError(true)
                     .setLogCommand(JkLog.isVerbose())
                     .addParams(args)

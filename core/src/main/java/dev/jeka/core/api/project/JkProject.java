@@ -33,6 +33,7 @@ import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
@@ -384,7 +385,14 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
         JkPathSequence classpath = JkPathSequence.of(this.compilation.layout.resolveClassDir())
                 .and(this.packaging.resolveRuntimeDependenciesAsFiles());
-        return JkJavaProcess.ofJava(mainClass)
+        JkJavaProcess javaProcess;
+        if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
+            Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
+            javaProcess = JkJavaProcess.ofJava(jdkPath, mainClass);
+        } else {
+            javaProcess = JkJavaProcess.ofJava(mainClass);
+        }
+        return javaProcess
                 .setClasspath(classpath)
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
@@ -403,7 +411,14 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         if (!Files.exists(artifactPath)) {
             packActions.run();
         }
-        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(artifactPath)
+        JkJavaProcess javaProcess;
+        if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
+            Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
+            javaProcess = JkJavaProcess.ofJavaJar(jdkPath, artifactPath);
+        } else {
+            javaProcess = JkJavaProcess.ofJavaJar(artifactPath);
+        }
+        javaProcess
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setInheritIO(true);

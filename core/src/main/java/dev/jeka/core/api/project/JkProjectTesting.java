@@ -206,8 +206,8 @@ public class JkProjectTesting {
         result
                 .setRepoSetSupplier(() -> project.dependencyResolver.getRepos()) // cannot use lambda cause dependencyResolver may not be present
                 .engineBehavior
-                .setLegacyReportDir(reportDir)
-                .setProgressDisplayer(defaultProgressStyle());
+                    .setLegacyReportDir(reportDir)
+                    .setProgressDisplayer(defaultProgressStyle());
         return result;
     }
 

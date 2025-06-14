@@ -19,6 +19,7 @@ package dev.jeka.core.api.java;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -61,6 +62,8 @@ public final class JkJavaCompilerToolChain {
     private String[] toolParams = new String[0];
 
     private JdkHints jdkHints = JdkHints.ofDefault();
+
+    private String javaDistrib = "temurin";
 
     private JkJavaCompilerToolChain() {
     }
@@ -105,6 +108,15 @@ public final class JkJavaCompilerToolChain {
         JdkHints jdkHints = new JdkHints(jdks, preferInProcess);
         this.jdkHints = jdkHints;
         return this;
+    }
+
+    public JkJavaCompilerToolChain setJavaDistrib(String distrib) {
+        this.javaDistrib = distrib;
+        return this;
+    }
+
+    public String getJavaDistrib() {
+        return javaDistrib;
     }
 
     /**
@@ -289,10 +301,16 @@ public final class JkJavaCompilerToolChain {
         if (specificJavaHome != null) {
             JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, javaVersion);
             return new ToolOrProcess(specificJavaHome);
+        } else {
+            JkLog.verbose("Compile using JDK %s %s...", javaDistrib, javaVersion);
+            try {
+                Path downloadedPath = JkUtilsJdk.getJdk(javaDistrib, javaVersion.toString());
+                return new ToolOrProcess(downloadedPath);
+            } catch (Exception e) {
+                JkLog.warn("Downloading JDK failed. Will use embedded compiler %s.", JkJavaVersion.ofCurrent());
+                return new ToolOrProcess(compileToolOrFail());
+            }
         }
-        JkLog.warn("No JDK path defined for version %s. Will use embedded compiler %s",
-                javaVersion, JkJavaVersion.ofCurrent());
-        return new ToolOrProcess(compileToolOrFail());
     }
 
     private static boolean runOnTool(JkJavaCompileSpec compileSpec, JavaCompiler compiler, String[] toolOptions) {
@@ -314,13 +332,14 @@ public final class JkJavaCompilerToolChain {
     }
 
     private static boolean runOnProcess(JkJavaCompileSpec compileSpec, JkProcess process) {
-        JkLog.info("Fork compile using command " + process.getParamAt(0));
-        JkLog.info("Compile options: " + JkUtilsString.formatOptions(compileSpec.getOptions()));
+        JkLog.verbose("Fork compile using command " + process.getParamAt(0));
+        JkLog.verbose("Compile options: " + JkUtilsString.formatOptions(compileSpec.getOptions()));
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));
         process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
-        JkLog.info(sourcePaths.size() + " files to compile.");
+        JkLog.verbose(sourcePaths.size() + " files to compile.");
+        process.setLogCommand(JkLog.isVerbose());
         return process.exec().hasSucceed();
     }
 

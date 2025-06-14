@@ -57,12 +57,28 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
         this.inheritSystemProperties = other.inheritSystemProperties;
     }
 
+    private JkJavaProcess setJdkHome(Path jdkHome) {
+        this.removeParam(CURRENT_JAVA_EXEC_DIR.resolve("java").toString());
+        this.addParamsAt(0, jdkHome.resolve("bin").resolve("java").toString());
+        return this;
+    }
+
     /**
      * Creates a process launching the current JDK java command on the specified class.
      */
     public static JkJavaProcess ofJava(String className) {
         JkUtilsAssert.argument(className != null, "className cannot be null");
         return new JkJavaProcess().addParams(className);
+    }
+
+    /**
+     * Creates a process launching the current JDK java command on the specified class.
+     */
+    public static JkJavaProcess ofJava(Path jdkHome, String className) {
+        JkUtilsAssert.argument(className != null, "className cannot be null");
+        return new JkJavaProcess()
+                .setJdkHome(jdkHome)
+                .addParams(className);
     }
 
     /**
@@ -74,11 +90,36 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
     }
 
     /**
+     * Creates a JkJavaProcess instance to execute a specified JAR file using a Java runtime
+     * located at the specified javaHome. A fully qualified main class name can also be provided.
+     */
+    public static JkJavaProcess ofJavaJar(Path javaHome, Path jar, String className) {
+        return new JkJavaProcess()
+                .setJdkHome(javaHome)
+                .addParams("-jar", jar.toString(), className);
+    }
+
+    /**
      * Creates a process launching the current JDK java command to execute the specified jar.
      * This method assumes that a main method is specified in the jar manifest.
      */
     public static JkJavaProcess ofJavaJar(Path jar) {
-        return ofJavaJar(jar, null);
+        return ofJavaJar(jar, (String) null);
+    }
+
+    /**
+     * Creates a JkJavaProcess instance to execute a specified JAR file using a Java runtime
+     * located at the specified JDK home. This method assumes that a main method is specified
+     * in the JAR manifest.
+     *
+     * @param JdkHome the path to the Java Development Kit (JDK) home directory, used to locate
+     *                the Java runtime environment
+     * @param jar     the path to the JAR file to be executed
+     * @return a JkJavaProcess instance configured to execute the specified JAR file using
+     *         the Java runtime located at the specified JDK home
+     */
+    public static JkJavaProcess ofJavaJar(Path JdkHome, Path jar) {
+        return ofJavaJar(JdkHome, jar, null);
     }
 
     /**

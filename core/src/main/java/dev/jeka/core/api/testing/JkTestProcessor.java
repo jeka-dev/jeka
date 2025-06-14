@@ -27,10 +27,7 @@ import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsPath;
-import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.*;
 import org.junit.platform.launcher.core.LauncherConfig;
 
 import java.io.Serializable;
@@ -38,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -119,6 +117,10 @@ public final class JkTestProcessor {
 
     public final JkRunnables preActions = JkRunnables.of();
 
+    private String javaDistrib;
+
+    private JkJavaVersion javaVersion;
+
 
     /**
      * Collection of <i>Runnables</i> to be executed after the test processor has run.
@@ -167,9 +169,9 @@ public final class JkTestProcessor {
         return this;
     }
 
-    public JkTestProcessor setToolChain(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
+    public JkTestProcessor setToolChain(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion, String javaDistrib) {
         JkUtilsAssert.argument(jdks != null, "jdks argument cannot be null");
-        this.jvmHints = new JvmHints(jdks, javaVersion);
+        this.jvmHints = new JvmHints(jdks, javaVersion, javaDistrib);
         return this;
     }
 
@@ -448,21 +450,30 @@ public final class JkTestProcessor {
     private static class JvmHints {
         final JkJavaCompilerToolChain.JkJdks jdks;
         final JkJavaVersion javaVersion;
+        final String javaDistrib;
 
-        JvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion) {
+        JvmHints(JkJavaCompilerToolChain.JkJdks jdks, JkJavaVersion javaVersion, String javaDistrib) {
             this.jdks = jdks;
             this.javaVersion = javaVersion;
+            this.javaDistrib = javaDistrib;
         }
 
         static JvmHints ofDefault() {
-            return new JvmHints(JkJavaCompilerToolChain.JkJdks.of(), null);
+            return new JvmHints(JkJavaCompilerToolChain.JkJdks.of(), null, null);
         }
 
         Path javaHome() {
             if (javaVersion == null) {
                 return null;
             }
-            return jdks.getHome(javaVersion);
+            Path result = jdks.getHome(javaVersion);
+            if (result != null) {
+                return result;
+            }
+            if (!javaVersion.equals(JkJavaVersion.ofCurrent())) {
+                return JkUtilsJdk.getJdk(Optional.ofNullable(javaDistrib).orElse("temurin"), javaVersion.toString());
+            }
+            return null;
         }
     }
 

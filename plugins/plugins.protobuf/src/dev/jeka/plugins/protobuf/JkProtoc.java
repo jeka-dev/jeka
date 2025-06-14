@@ -101,7 +101,7 @@ public class JkProtoc {
         JkUtilsAssert.state(!outDirs.isEmpty(), "No output directory has been specified.");
         outDirs.forEach(dir -> JkUtilsPath.createDirectories(dir));
         Path jar = JkCoordinateFileProxy.of(repos, PROTOC_JAR_MODULE + ":" + protocJarVersion).get();
-        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(jar, null)
+        JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(jar)
                 .addParams(protocOptions)
                 .addParams(extraOptions)
                 .setLogCommand(logCommand)

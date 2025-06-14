@@ -62,7 +62,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     @JkDoc("Specifies the Java version used to compile and run the project. " +
             "By default, this is the same as the version used to run Jeka.")
-    @JkPropValue("jeka.java.version")
     @JkSuggest({"17", "21", "25"})
     public String javaVersion;
 
@@ -296,7 +295,6 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
          * @deprecated Use ProjectKBean#javaVersion instead
          */
         @JkDoc("The target JVM version for compiled files.")
-        @JkPropValue("jeka.java.version")
         @Deprecated
         public String javaVersion;
 
@@ -438,8 +436,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             project.flatFacade.setMixResourcesAndSources();
         }
         JkJavaCompilerToolChain compilerToolChain = project.compilerToolChain;
+        String javaDistrib = getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB);
         if (!compilerToolChain.isToolOrProcessSpecified()) {
             compilerToolChain.setJdkHints(jdks(), !compilation.fork);
+            if (!JkUtilsString.isBlank(javaDistrib)) {
+                compilerToolChain.setJavaDistrib(javaDistrib);
+            }
         }
         if (pack.jarType != null) {
             project.flatFacade.setMainArtifactJarType(pack.jarType);
@@ -457,7 +459,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
         // Configure testing
         JkTestProcessor testProcessor = project.test.processor;
-        testProcessor.setToolChain(jdks(), project.getJvmTargetVersion());
+        testProcessor.setToolChain(jdks(), project.getJvmTargetVersion(), javaDistrib);
         if (test.fork) {
             String className = JkTestProcessor.class.getName();
 

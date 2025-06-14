@@ -204,6 +204,11 @@ public final class JkJavaCompileSpec {
      * Set the compiler classpath with the specified files
      */
     public JkJavaCompileSpec setClasspath(Iterable<Path> files) {
+
+        // Otherwise it fails when cp is empty
+        if (!files.iterator().hasNext()) {
+            return this;
+        }
         final String classpath = JkPathSequence.of(files).toPath();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
