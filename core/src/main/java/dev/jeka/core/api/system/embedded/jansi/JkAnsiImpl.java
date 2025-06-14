@@ -17,7 +17,7 @@
 package dev.jeka.core.api.system.embedded.jansi;
 
 import dev.jeka.core.api.system.JkAnsi;
-import org.fusesource.jansi.Ansi;
+import org.jline.jansi.Ansi;
 
 import java.util.Arrays;
 

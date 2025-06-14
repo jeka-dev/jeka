@@ -43,12 +43,8 @@ public interface JkAnsiConsole {
             }
             String IMPL_CLASS = "dev.jeka.core.api.system.embedded.jansi.JkAnsiConsoleImpl";
 
-            // Another version of classGraph may be present on the classpath
-            // Some libraries as org.webjars:webjars-locator-core use it.
-            // For this library version we need to create a dedicated classloader
-            // with child-first strategy.
             JkCoordinateFileProxy jansiJar = JkCoordinateFileProxy.ofStandardRepos(properties,
-                    "org.fusesource.jansi:jansi:2.4.1");
+                    "org.jline:jansi:3.30.4");
             ClassLoader parentClassloader = JkAnsiConsole.class.getClassLoader();
             JkInternalChildFirstClassLoader childFirstClassLoader = JkInternalChildFirstClassLoader.of(jansiJar.get(),
                     parentClassloader);

@@ -118,15 +118,6 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/compile-only/jansi-2.4.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/test/junit-jupiter-engine-5.9.3.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -185,6 +176,18 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/compile-only/jansi-3.30.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/libs/sources/jansi-3.30.4-sources.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/libs/sources/jansi-3.30.4-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>
