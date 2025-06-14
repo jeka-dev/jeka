@@ -60,6 +60,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     @JkDoc("The encoding format used for handling source files within the project.")
     public String sourceEncoding;
 
+    @JkDoc("Specifies the Java version used to compile and run the project. " +
+            "By default, this is the same as the version used to run Jeka.")
+    @JkPropValue("jeka.java.version")
+    @JkSuggest({"17", "21", "25"})
+    public String javaVersion;
+
     /**
      * Options for the packaging tasks (jar creation). These options are injectable from command line.
      */
@@ -286,8 +292,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         @JkDoc("Specify whether to fork the compilation process.")
         public boolean fork;
 
+        /**
+         * @deprecated Use ProjectKBean#javaVersion instead
+         */
         @JkDoc("The target JVM version for compiled files.")
         @JkPropValue("jeka.java.version")
+        @Deprecated
         public String javaVersion;
 
         @JkDoc("Extra arguments to be passed to the compiler (example -Xlint:unchecked).")
@@ -416,6 +426,10 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         project.dependencyResolver.setUseFileSystemCache(true);
         if (!JkUtilsString.isBlank(compilation.javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(compilation.javaVersion);
+            project.setJvmTargetVersion(version);
+        }
+        if (!JkUtilsString.isBlank(javaVersion)) {
+            JkJavaVersion version = JkJavaVersion.of(javaVersion);
             project.setJvmTargetVersion(version);
         }
         applyRepoConfigOn(project);
