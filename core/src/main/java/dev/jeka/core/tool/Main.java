@@ -30,6 +30,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
+import org.jline.jansi.AnsiConsole;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +64,11 @@ public class Main {
 
         // Need to setup a default log decorator to display verbose messages when installing Jansi and Ivy
         JkLog.setDecorator(JkLog.Style.INDENT);
-        JkAnsiConsole.of().systemInstall();
+
+        // Install Jansi emulator for window
+        if (JkUtilsSystem.IS_WINDOWS) {
+            JkAnsiConsole.of().systemInstall();
+        }
 
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
