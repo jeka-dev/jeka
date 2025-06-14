@@ -499,6 +499,9 @@ is_remote_arg() {
 check_url_white_listed() {
   local url
   url=$(get_protocol_less_url "$1")
+  if [ -z "$url" ]; then
+   return
+  fi
   local whitelist=${JEKA_APP_URL_TRUSTED}
 
   if [ -z "$whitelist" ]; then
