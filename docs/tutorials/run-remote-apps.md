@@ -21,6 +21,8 @@ Example:
 ```shell
 jeka --remote https://github.com/djeang/demo-dir-checksum --program -a SHA256
 ```
+you can pass `-Dxxxxx=yyyy` as program argument to set system properties.
+
 When you run it for the first time, Jeka will prompt you to confirm whether you trust the URL `github.com/djeang/demo-dir-checksum`.
 This is to prevent the execution of malicious code.
 

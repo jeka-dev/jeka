@@ -70,6 +70,8 @@ class BaseDirResolver {
   [string]$cacheDir
   [bool]$updateFlag
 
+  static [string[]] $Protocols = @('https://', 'ssh://', 'git://', 'git@')
+
   BaseDirResolver([string]$url, [string]$cacheDir, [bool]$updateFlag) {
     $this.url = $url
     $this.cacheDir = $cacheDir
@@ -107,13 +109,7 @@ class BaseDirResolver {
   }
 
   hidden [bool] IsGitRemote() {
-    $gitUrlRegex = '(https?://*)|^(ssh://*)|^(git://*)|^(git@[^:]+:*)$'
-    $myUrl = $this.url
-    if ($myUrl -match $gitUrlRegex) {
-      return $true;
-    } else {
-      return $false;
-    }
+    return [BaseDirResolver]::IsGitRemote($this.url)
   }
 
   hidden [string] SubstringBeforeHash() {
@@ -125,14 +121,29 @@ class BaseDirResolver {
   }
 
   hidden [string] FolderName() {
-    $protocols = @('https://', 'ssh://', 'git://', 'git@')
-    $trimmedUrl = $this.url
-    foreach ($protocol in $protocols) {
-      $trimmedUrl = $trimmedUrl -replace [regex]::Escape($protocol), ''
-    }
+    $trimmedUrl = [BaseDirResolver]::ProtocolLess($this.url)
+
     # replace '/' by '_'
     $folderName = $trimmedUrl -replace '/', '_'
     return $folderName
+  }
+
+  static [string] ProtocolLess([string]$url) {
+    $trimmedUrl = $url
+    foreach ($protocol in [BaseDirResolver]::Protocols) {
+      $trimmedUrl = $trimmedUrl -replace [regex]::Escape($protocol), ''
+    }
+    return $trimmedUrl
+  }
+
+  static [bool] IsGitRemote([string]$remoteArg) {
+    $gitUrlRegex = '(https?://*)|^(ssh://*)|^(git://*)|^(git@[^:]+:*)$'
+    $myUrl = $remoteArg
+    if ($myUrl -match $gitUrlRegex) {
+      return $true;
+    } else {
+      return $false;
+    }
   }
 
 }
@@ -343,6 +354,28 @@ class Props {
     return $propertyName.ToUpper().Replace(".", "_").Replace("-", "_")
   }
 
+  static addOrAppendProperty([string]$file, [string]$propName, [string]$value) {
+    $lines = Get-Content $file
+    $updated = $false
+
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+      if ($lines[$i] -match "^\s*${propName}\s*=") {
+        $parts = $lines[$i] -split '=', 2
+        $currentValue = $parts[1].Trim()
+        if (-not ($currentValue -match "(^|\s)$([regex]::Escape($value))($|\s)")) {
+          $newValue = "$currentValue $value".Trim()
+          $lines[$i] = "$propName=$newValue"
+        }
+        $updated = $true
+        break
+      }
+    }
+    if (-not $updated) {
+      $lines += "$propName=$value"
+    }
+    Set-Content -Path $file -Value $lines
+  }
+
 }
 
 class Jdks {
@@ -526,11 +559,15 @@ class ZipExtractor {
 
 class ProgramExecutor {
   [string]$folder
-  [array]$cmdLineArgs
+  [array]$cmdLineArgs   # only args passed after -p
+  [string]$url          # to check if url is trusted
+  [string]$globalPropFile
 
-  ProgramExecutor([string]$folder, [array]$cmdLineArgs) {
+  ProgramExecutor([string]$folder, [array]$cmdLineArgs, [string]$url, [string]$globalPropFile) {
     $this.folder = $folder
     $this.cmdLineArgs = $cmdLineArgs
+    $this.url = $url
+    $this.globalPropFile = $globalPropFile
   }
 
   Exec([string]$javaCmd, [string]$progFile) {
@@ -542,6 +579,7 @@ class ProgramExecutor {
   }
 
   [string] FindProg() {
+    $this.CheckTrustedUrl()
     $dir = $this.folder
     if (-not (Test-Path $dir)) {
       return $null
@@ -552,6 +590,47 @@ class ProgramExecutor {
     }
     return $this.findFile(".jar")
   }
+
+  hidden CheckTrustedUrl() {
+    $isGit = [BaseDirResolver]::IsGitRemote($this.url)
+    if ( -not $isGit) {
+      return
+    }
+    $domain = [BaseDirResolver]::ProtocolLess($this.url)
+    if ($domain.StartsWith("github.com/jeka-dev/", [System.StringComparison]::OrdinalIgnoreCase)) {
+      return
+    }
+    $propName = "jeka.app.url.trusted"
+    $trustedUrlProp = [Props]::GetValueFromFile($this.globalPropFile, $propName);
+    $trustedEnVar = $env:JEKA_APP_URL_TRUSTED
+    if ( -not [string]::IsNullOrEmpty($trustedEnVar)) {
+      $trustedUrlProp = $trustedEnVar
+    }
+    $trustedUrls = $trustedUrlProp.Trim() -split '\s+'
+    $found = $false
+    foreach ($prefix in $trustedUrls) {
+      if ([string]::IsNullOrWhiteSpace($prefix)) {
+        continue
+      }
+      if ($domain.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        $found = $true
+        break
+      }
+    }
+    if ($found) {   # the url is part of the trusted domains
+      return
+    }
+    Write-Host
+    $response = Read-Host "Domain '$domain' is not trusted. Add to trusted? [N/y]"
+
+    if ($response -match '^[Yy]') {
+      [Props]::addOrAppendProperty($this.globalPropFile, $propName, $domain)
+    } else {
+      Write-Host "Operation aborted by the user."
+      exit 0
+    }
+  }
+
 
   hidden [string] findFile([string]$extension) {
     $files = Get-ChildItem -Path $this.folder -Filter "*$extension"
@@ -644,7 +723,7 @@ function Main {
   if ($cmdLineArgs.IsProgramFlagPresent()) {
     $progArgs = $cmdLineArgs.GetProgramArgs()  # arguments metionned after '-p'
     $progDir = $baseDir + "\jeka-output"
-    $prog = [ProgramExecutor]::new($progDir, $progArgs)
+    $prog = [ProgramExecutor]::new($progDir, $progArgs, $remoteArg, $globalPropFile)
     $progFile = $prog.FindProg()
     if ($progFile -ne '') {
       ExecProg -javaCmd $javaCmd -progFile $progFile -cmdLineArgs $progArgs
