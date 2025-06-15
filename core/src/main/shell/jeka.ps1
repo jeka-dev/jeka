@@ -381,16 +381,22 @@ class Props {
 class Jdks {
   [Props]$Props
   [string]$CacheDir
+  [bool]$forProg
 
   Jdks([Props]$props, [string]$cacheDir) {
     $this.Props = $props
     $this.CacheDir = $cacheDir
+    $this.forProg = $false
   }
 
   [string] GetJavaCmd() {
     $javaHome = $this.JavaHome()
     $javaExe = $this.JavaExe($javaHome)
     return $javaExe
+  }
+
+  SetForProg([bool]$forProg) {
+    $this.forProg = $forProg
   }
 
   hidden Install([string]$distrib, [string]$version, [string]$targetDir) {
@@ -419,6 +425,9 @@ class Jdks {
       return $explicitPath
     }
     $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
+    if ($this.forProg) {
+      $version = ($this.Props.GetValueOrDefault("@project.javaVersion", $version))
+    }
     $distib = ($this.Props.GetValueOrDefault("jeka.java.distrib", "temurin"))
 
     # The jeka.jdk.xx=path has been explicitly specified in properties
@@ -725,8 +734,11 @@ function Main {
     $progDir = $baseDir + "\jeka-output"
     $prog = [ProgramExecutor]::new($progDir, $progArgs, $remoteArg, $globalPropFile)
     $progFile = $prog.FindProg()
+    $progJdk = [Jdks]::new($props, $cacheDir)
+    $progJdk.SetForProg($true)
+    $progJavaCmd = $progJdk.GetJavaCmd()
     if ($progFile -ne '') {
-      ExecProg -javaCmd $javaCmd -progFile $progFile -cmdLineArgs $progArgs
+      ExecProg -javaCmd $progJavaCmd -progFile $progFile -cmdLineArgs $progArgs
       exit $LASTEXITCODE
     }
 
@@ -753,7 +765,7 @@ function Main {
     if ($progFile -eq '') {
       Exit-Error "No program found to be executed in $progDir"
     }
-    ExecProg -javaCmd $javaCmd -progFile $progFile -cmdLineArgs $progArgs
+    ExecProg -javaCmd $progJavaCmd -progFile $progFile -cmdLineArgs $progArgs
     exit $LASTEXITCODE
 
   # Execute Jeke engine
