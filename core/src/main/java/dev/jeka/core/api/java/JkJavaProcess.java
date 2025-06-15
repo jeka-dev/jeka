@@ -74,7 +74,7 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
     /**
      * Creates a process launching the current JDK java command on the specified class.
      */
-    public static JkJavaProcess ofJava(Path jdkHome, String className) {
+    public static JkJavaProcess ofJavaFromJdk(Path jdkHome, String className) {
         JkUtilsAssert.argument(className != null, "className cannot be null");
         return new JkJavaProcess()
                 .setJdkHome(jdkHome)
@@ -93,7 +93,7 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
      * Creates a JkJavaProcess instance to execute a specified JAR file using a Java runtime
      * located at the specified javaHome. A fully qualified main class name can also be provided.
      */
-    public static JkJavaProcess ofJavaJar(Path javaHome, Path jar, String className) {
+    public static JkJavaProcess ofJavaJarFromJdk(Path javaHome, Path jar, String className) {
         return new JkJavaProcess()
                 .setJdkHome(javaHome)
                 .addParams("-jar", jar.toString(), className);
@@ -118,8 +118,8 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
      * @return a JkJavaProcess instance configured to execute the specified JAR file using
      *         the Java runtime located at the specified JDK home
      */
-    public static JkJavaProcess ofJavaJar(Path JdkHome, Path jar) {
-        return ofJavaJar(JdkHome, jar, null);
+    public static JkJavaProcess ofJavaJarFromJdk(Path JdkHome, Path jar) {
+        return ofJavaJarFromJdk(JdkHome, jar, null);
     }
 
     /**

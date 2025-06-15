@@ -388,7 +388,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         JkJavaProcess javaProcess;
         if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
             Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
-            javaProcess = JkJavaProcess.ofJava(jdkPath, mainClass);
+            javaProcess = JkJavaProcess.ofJavaFromJdk(jdkPath, mainClass);
         } else {
             javaProcess = JkJavaProcess.ofJava(mainClass);
         }
@@ -414,7 +414,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         JkJavaProcess javaProcess;
         if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
             Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
-            javaProcess = JkJavaProcess.ofJavaJar(jdkPath, artifactPath);
+            javaProcess = JkJavaProcess.ofJavaJarFromJdk(jdkPath, artifactPath);
         } else {
             javaProcess = JkJavaProcess.ofJavaJar(artifactPath);
         }
