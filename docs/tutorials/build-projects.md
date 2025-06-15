@@ -98,6 +98,10 @@ So we don't need to declare explicit versions for every dependency.
 You can also reference a local JAR by specifying its relative path, such as `mylibs/libs.jar`, 
 instead of using Maven coordinates.
 
+## Specify a Java version for the project.
+By default, the project builds using the same Java version as the one running JeKa (defined in `jeka.java.version`).
+This can be overridden by specifying the `@project.javaVersion property`.
+
 ## Configure JAR Type
 By default, JeKa produces regular JAR files. 
 You can configure it to create a *fat JAR* (JAR that includes all dependencies) 
