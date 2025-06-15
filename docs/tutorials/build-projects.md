@@ -68,24 +68,35 @@ If changes don't appear in IntelliJ, go to the project's root directory, then ru
 
 Dependencies are listed in the *dependencies.txt* file as shown below:
 
-```txt title="dependencies.txt"
-== COMPILE ==
+```toml title="dependencies.txt"
+[version]    # define versions found in declared BOMs
+org.junit:junit-bom:5.12.2@pom
+
+[compile]
 com.google.guava:guava:33.4.0-jre
+com.google.code.gson:gson:2.13.1
+
+
+[compile-only]
 org.projectlombok:lombok:1.18.32
 
-== RUNTIME ==
+[runtime]
 org.postgresql:postgresql:42.7.4
--org.projectlombok:lombok  # indicate to not include lombok in runtime classpath.
 
-== TEST == 
-org.junit.jupiter:junit-jupiter:5.8.1
+[test]
+org.junit.jupiter:junit-jupiter
+org.junit.platform:junit-platform-launcher
 ```
+
+Dependency versions declared in BOM can be imported in using the `@pom` prefix. 
+So we don't need to declare explicit versions for every dependency.
+
+!!! Note
+    When declared in [version] section, BOM applies to all dependencies within the project, including the sub-modules.
+
 
 You can also reference a local JAR by specifying its relative path, such as `mylibs/libs.jar`, 
 instead of using Maven coordinates.
-
-!!! info
-    For a *compile-only* dependency, add it to the `== COMPILE ==` section and remove it from the `== RUNTIME ==` section using the `-` symbol.
 
 ## Configure JAR Type
 By default, JeKa produces regular JAR files. 
