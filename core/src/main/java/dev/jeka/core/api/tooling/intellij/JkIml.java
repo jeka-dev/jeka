@@ -53,7 +53,7 @@ public final class JkIml {
         return this;
     }
 
-    public JkIml setIsForJekaSrc(boolean isForJekaSrc) {
+    public JkIml setIsModuleBaseJekaSrc(boolean isForJekaSrc) {
         this.isForJekaSrc = isForJekaSrc;
         return this;
     }
@@ -211,6 +211,8 @@ public final class JkIml {
 
         public String excludePattern;
 
+        public String url = "file://$MODULE_DIR$";
+
         public Content addSourceFolder(String path, boolean test, String type) {
             return addSourceFolder(moduleDir.resolve(path), test, type);
         }
@@ -245,7 +247,7 @@ public final class JkIml {
         }
 
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
-            JkDomElement el = parent.add("content").attr("url", "file://$MODULE_DIR$");
+            JkDomElement el = parent.add("content").attr("url", url);
             sourceFolders.forEach(sourceFolder -> sourceFolder.append(el, pathUrlResolver));
             excludeFolders.forEach(excludeFolder -> excludeFolder.append(el, pathUrlResolver));
             if (!JkUtilsString.isBlank(excludePattern)) {

@@ -18,12 +18,17 @@ package dev.jeka.core.tool.builtins.tooling.ide;
 
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkJavaVersion;
+import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
 import dev.jeka.core.api.tooling.intellij.JkMiscXml;
+import dev.jeka.core.api.tooling.intellij.JkModulesXml;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -36,6 +41,22 @@ import java.util.function.Consumer;
 @JkDoc("Manages Intellij metadata files.")
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-intellij/")
 public final class IntellijKBean extends KBean {
+
+    /**
+     * Determines which IntelliJ `.iml` file should be synced when there are
+     * two `.iml` files present:
+     *
+     * <ul>
+     *   <li>One for <code>jeka-src</code></li>
+     *   <li>One for the project</li>
+     * </ul>
+     *
+     * The <i>SyncFocus</i> specifies which of these `.iml` files will be prioritized
+     * for synchronization.
+     */
+    public enum SyncFocus {
+        JEKA_SRC, PROJECT
+    }
 
     // Flag for skipping modules.xml creation when testing.
     public static final String IML_SKIP_MODULE_XML_PROP = "jeka.intellij.iml.skip.moduleXml";
@@ -50,13 +71,23 @@ public final class IntellijKBean extends KBean {
     @JkDoc("The path where iml file must be generated. If null, Jeka will decide for a proper place. Mostly used by external tools.")
     public Path imlFile;
 
-    @JkDoc("If mentioned, and jdkName is null, the generated iml will specify this jdkName")
-    private String suggestedJdkName;
+    @JkDoc(hide = false, value = "If mentioned, and jdkName is null, the generated iml will specify this jdkName")
+    @Deprecated
+    public String suggestedJdkName;
 
-    @JkDoc("If mentioned, the generated iml will specify this jdkName")
+    @JkDoc("Experimental: If true, 'jeka-src' will have its own IntelliJ module.")
+    private boolean separateIml;
+
+    @JkDoc("Experimental: If 'jeka-src' is in its own module, the 'sync' action can target it specifically.")
+    private SyncFocus focus = null;
+
+    @JkDoc("If mentioned, the generated for jekaSrc iml will specify this jdkName.")
     private String jdkName;
 
-    @JkDoc("If true, sources will be downloaded will resolving dependencies")
+    @JkDoc("If mentioned, the generated for project iml will specify this jdkName.")
+    private String projectJdkName;
+
+    @JkDoc("If true, sources will be downloaded will resolving dependencies.")
     private boolean downloadSources = false;
 
     private JkImlGenerator imlGeneratorCache ;
@@ -77,7 +108,49 @@ public final class IntellijKBean extends KBean {
         JkLog.startTask("generate-iml");
         Path imlPath = getImlFile();
         adaptMiscXml();
-        generateIml(imlPath);
+        generateSingleIml(imlPath);
+        JkLog.endTask();
+    }
+
+    @JkDoc(hide = false)
+    public void sync2() {
+        JkLog.startTask("generate-iml2");
+        FocusResult result = getFocusResult();
+        Path regularImlPath = getImlFile();
+        Path separatedJekasrcImlPath = getJekaSrcImlFile();
+        JkModulesXml modulesXml = JkModulesXml.of(getBaseDir()).createIfAbsentOrInvalid();
+        if (result.shouldGenerateMergedIml()) {
+            System.out.println("----1");
+            generateSingleIml(regularImlPath);
+            modulesXml.addImlIfNeeded(regularImlPath);
+            modulesXml.removeIfNeeded(separatedJekasrcImlPath);
+            JkUtilsPath.deleteQuietly(separatedJekasrcImlPath, true);
+        } else {
+            if (result.specificJekaSrcIml) {
+                if (result.specificProjectIml) {
+                    System.out.println("----2");
+                    generateJekaSrcOnlyIml(separatedJekasrcImlPath);
+                    generateProjectOnlyIml(regularImlPath);
+                    modulesXml.addImlIfNeeded(regularImlPath);
+                    modulesXml.addImlIfNeeded(separatedJekasrcImlPath);
+                } else  {
+                    System.out.println("----3");
+                    generateJekaSrcOnlyIml(separatedJekasrcImlPath);
+                    modulesXml.addImlIfNeeded(separatedJekasrcImlPath);
+
+                    // Don't remove the regular .iml because it will turn in a single xxx-jeka project in intellij.
+                    // For using with Maven, user may remove it manually, from the 'project settings' menu
+                    // modulesXml.removeIfNeeded(regularImlPath);
+                    // JkUtilsPath.deleteQuietly(regularImlPath, true);
+                }
+            } else  {
+                System.out.println("----4");
+                generateProjectOnlyIml(regularImlPath);
+                modulesXml.addImlIfNeeded(regularImlPath);
+                modulesXml.removeIfNeeded(separatedJekasrcImlPath);
+                JkUtilsPath.deleteQuietly(separatedJekasrcImlPath, true);
+            }
+        }
         JkLog.endTask();
     }
 
@@ -201,25 +274,9 @@ public final class IntellijKBean extends KBean {
                 .setUseVarPath(useVarPath);
         if (!JkUtilsString.isBlank(jdkName) && !JkMiscXml.ofBaseDir(this.getBaseDir()).exists()) {
             imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
-        } else if (!JkUtilsString.isBlank(suggestedJdkName) && !JkMiscXml.ofBaseDir(this.getBaseDir()).exists()) {
-            imlGenerator.configureIml(iml -> iml.component.setJdkName(suggestedJdkName));
         }
         this.imlGeneratorCache = imlGenerator;
         return imlGenerator;
-    }
-
-    private void generateIml(Path imlPath) {
-        // Determine if we are trying to generate an iml for the 'jeka-src' submodule
-        String extensionLessFileName = JkUtilsString.substringBeforeLast(imlPath.getFileName().toString(), ".");
-        boolean isForJekaSrcModule = JkConstants.JEKA_SRC_DIR.equals(extensionLessFileName) ||
-                extensionLessFileName.endsWith("-" + JkConstants.JEKA_SRC_DIR);
-        JkIml iml = imlGenerator().computeIml(isForJekaSrcModule);
-
-        JkPathFile.of(imlPath)
-                .deleteIfExist()
-                .createIfNotExist()
-                .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlPath).normalize());
     }
 
     private void adaptMiscXml() {
@@ -243,7 +300,124 @@ public final class IntellijKBean extends KBean {
     }
 
     private Path getImlFile() {
-        return Optional.ofNullable(imlFile).orElse(JkImlGenerator.getImlFilePath(getBaseDir()));
+        return Optional.ofNullable(imlFile).orElse(findRegularImlFilePath());
+    }
+
+    private boolean hasProjectWithDistinctJavaVersion() {
+        Optional<ProjectKBean> optionalProjectKBean = find(ProjectKBean.class);
+        if (!optionalProjectKBean.isPresent()) {
+            return false;
+        }
+        ProjectKBean projectKBean = optionalProjectKBean.get();
+        JkJavaVersion projectJavaVersion = projectKBean.project.getJvmTargetVersion();
+        if (projectJavaVersion == null) {
+            return false;
+        }
+        System.out.println("project jvm = " + projectJavaVersion);
+        return !JkJavaVersion.ofCurrent().equals(projectJavaVersion);
+    }
+
+    private boolean isIdeSupportPresent() {
+        return find(ProjectKBean.class).isPresent(); // TODO use IdeSupport instead
+    }
+
+    private Path getJekaSrcImlFile() {
+        String baseName = getBaseDir().toAbsolutePath().getFileName().toString();
+        String name =  baseName + "-jeka.iml";
+        return getBaseDir().resolve(".idea").resolve(name);
+    }
+
+    // IML containing both jeka-src and project (or IdeSupport)
+    private void generateSingleIml(Path imlPath) {
+        JkIml iml = imlGenerator().computeIml2(true, true);
+        JkPathFile.of(imlPath)
+                .deleteIfExist()
+                .createIfNotExist()
+                .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
+        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlPath).normalize());
+    }
+
+    private void generateJekaSrcOnlyIml(Path imlFile) {
+        JkImlGenerator imlGenerator = imlGenerator()
+                .setIdeSupport((JkIdeSupport) null);
+        JkIml iml = imlGenerator.computeIml2(true, false);
+        iml.setIsModuleBaseJekaSrc(true);
+        iml.component.getContent().url = "file://$PROJECT_DIR$/jeka-src";
+        iml.setIsModuleBaseJekaSrc(false);
+        JkPathFile.of(imlFile)
+                .deleteIfExist()
+                .createIfNotExist()
+                .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
+        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlFile).normalize());
+    }
+
+    private void generateProjectOnlyIml(Path imlFile) {
+        JkImlGenerator imlGenerator = JkImlGenerator.of();
+        imlGenerator
+                .setBaseDir(this.getBaseDir())
+                .setIdeSupport(() -> IdeSupport.getProjectIde(getRunbase()))
+                .setFailOnDepsResolutionError(this.failOnDepsResolutionError)
+                .setDownloadSources(this.downloadSources)
+                .setUseVarPath(useVarPath);
+        if (!JkUtilsString.isBlank(jdkName) && !JkMiscXml.ofBaseDir(this.getBaseDir()).exists()) {
+            imlGenerator.configureIml(iml -> iml.component.setJdkName(jdkName));
+        }
+        JkIml iml = imlGenerator.computeIml2(false, true);
+        JkPathFile.of(imlFile)
+                .deleteIfExist()
+                .createIfNotExist()
+                .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
+        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlFile).normalize());
+    }
+
+    private FocusResult getFocusResult() {
+        System.out.println("----separateiml=" + separateIml);
+        if (separateIml) {
+            if (isIdeSupportPresent()) {
+                return FocusResult.get(focus);
+            }
+            return new FocusResult(true, false);
+        }
+        if (hasProjectWithDistinctJavaVersion()) {
+            System.out.println("-----distinct java version = true");
+            return FocusResult.get(focus);
+        }
+        return new FocusResult(false, false);
+    }
+
+    private static class FocusResult {
+
+        final boolean specificJekaSrcIml;
+
+        final boolean specificProjectIml;
+
+        private FocusResult(boolean specificJekaSrcIml, boolean specificProjectIml) {
+            this.specificJekaSrcIml = specificJekaSrcIml;
+            this.specificProjectIml = specificProjectIml;
+        }
+
+        static FocusResult get(SyncFocus focus) {
+            if (focus == null) {
+                return new FocusResult(true , true);
+            } else if (focus == SyncFocus.JEKA_SRC) {
+                return new FocusResult(true , false);
+            }
+            return new FocusResult(false, true);
+        }
+
+        boolean shouldGenerateMergedIml() {
+            return !specificJekaSrcIml && !specificProjectIml;
+        }
+
+    }
+
+    public Path findRegularImlFilePath() {
+        Path baseDir = getBaseDir();
+        String fileName = baseDir.toAbsolutePath().getFileName().toString() + ".iml";
+        if (Files.exists(baseDir.resolve(fileName))) {
+            return baseDir.resolve(fileName);
+        }
+        return baseDir.resolve(".idea/" + fileName);
     }
 
 }

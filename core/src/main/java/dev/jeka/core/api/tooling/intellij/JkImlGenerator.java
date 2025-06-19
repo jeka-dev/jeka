@@ -51,7 +51,7 @@ public final class JkImlGenerator {
     // This is used only to download sources, as for bin jar, we relieve on runbase classpath.
     private JkDependencySet runbaseDependencies = JkDependencySet.of();
 
-    /* When true, path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of explicit absolute path. */
+    /* When true, the path will be mentioned with $JEKA_HOME$ and $JEKA_REPO$ instead of an explicit absolute path. */
     private boolean useVarPath = true;
 
     private Supplier<JkIdeSupport> ideSupportSupplier;
@@ -81,6 +81,7 @@ public final class JkImlGenerator {
      * @param moduleRootDir The path of module root dir
      */
     public static Path getImlFilePath(Path moduleRootDir) {
+        JkLog.debug("Getting iml file path for module root dir " + moduleRootDir);
         String fileName = moduleRootDir.getFileName().toString().equals("")
                 ? moduleRootDir.toAbsolutePath().getFileName().toString()
                 : moduleRootDir.getFileName().toString();
@@ -149,7 +150,7 @@ public final class JkImlGenerator {
         JkIdeSupport ideSupport = ideSupport();
         Path dir = ideSupport == null ? baseDir : ideSupport.getProdLayout().getBaseDir();
         JkIml iml = JkIml.of().setModuleDir(dir);
-        iml.setIsForJekaSrc(isForJekaSrc);
+        iml.setIsModuleBaseJekaSrc(isForJekaSrc);
 
         JkLog.verbose("Compute iml jeka-src classpath:%n%s", jekaSrcClasspath.toPathMultiLine("  "));
         if (this.useVarPath) {
@@ -157,7 +158,7 @@ public final class JkImlGenerator {
         }
         JkIml.Content content =  iml.component.getContent();
         content.addJekaStandards();
-        ModulesXml modulesXml = ModulesXml.find(baseDir());
+        JkModulesXml modulesXml = JkModulesXml.find(baseDir());
         if (ideSupport != null) {
             List<Path> sourcePaths = ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles();
 
@@ -205,6 +206,64 @@ public final class JkImlGenerator {
         return iml;
     }
 
+    public JkIml computeIml2(boolean includeJekaSrc, boolean includeProject) {
+        JkIdeSupport ideSupport = ideSupport();
+        JkIml iml = JkIml.of().setModuleDir(baseDir());
+
+        if (this.useVarPath) {
+            iml.pathUrlResolver.setPathSubstitute(JkLocator.getCacheDir());
+        }
+        JkIml.Content content =  iml.component.getContent();
+        if (includeJekaSrc) {
+            content.addJekaStandards();
+        }
+        JkModulesXml modulesXml = JkModulesXml.find(baseDir());
+        if (includeProject) {
+            List<Path> sourcePaths = ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles();
+
+            sourcePaths
+                    .forEach(path -> content.addSourceFolder(path, false, null));
+
+            ideSupport.getProdLayout().resolveResources().getRootDirsOrZipFiles().stream()
+                    .filter(path -> !sourcePaths.contains(path))
+                    .forEach(path -> content.addSourceFolder(path, false, "java-resource"));
+
+            List<Path> testSourcePaths = ideSupport.getTestLayout().resolveSources().getRootDirsOrZipFiles();
+
+            testSourcePaths
+                    .forEach(path -> content.addSourceFolder(path, true, null));
+
+            ideSupport.getTestLayout().resolveResources().getRootDirsOrZipFiles().stream()
+                    .filter(path -> !testSourcePaths.contains(path))
+                    .forEach(path -> content.addSourceFolder(path, false, "java-test-resource"));
+
+            JkDependencyResolver depResolver = ideSupport.getDependencyResolver();
+
+            JkResolutionParameters resolutionParameters = depResolver.getDefaultParams().copy()
+                    .setFailOnDependencyResolutionError(failOnDepsResolutionError);
+
+            JkResolveResult resolveResult = depResolver.resolve(ideSupport.getDependencies(), resolutionParameters);
+            JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
+            if (resolveResult.getErrorReport().hasErrors()) {
+                JkLog.warn("Problem resolving dependency nodes: " + resolveResult.getErrorReport());
+            }
+            if (downloadSources) {
+                downloadSources(depResolver, resolveResult);
+            }
+
+            JkLog.verbose("Dependencies resolved");
+            iml.component.getOrderEntries().addAll(projectOrderEntries(modulesXml, tree));  // too slow
+            for (Path path : ideSupport.getGeneratedSourceDirs()) {
+                content.addSourceFolder(path, false, null);
+            }
+        }
+        if (includeJekaSrc) {
+            iml.component.getOrderEntries().addAll(jekaSrcOrderEntries(baseDir(), modulesXml));
+        }
+        imlConfigurer.accept(iml);
+        return iml;
+    }
+
     private void downloadSources(JkDependencyResolver depResolver, JkResolveResult resolveResult) {
         JkLog.info("Download sources");
 
@@ -246,7 +305,7 @@ public final class JkImlGenerator {
     }
 
     // For jeka-src, we have computed classpath from runtime
-    private List<JkIml.OrderEntry> jekaSrcOrderEntries(Path dir, ModulesXml modulesXml) {
+    private List<JkIml.OrderEntry> jekaSrcOrderEntries(Path dir, JkModulesXml modulesXml) {
         OrderEntries orderEntries = new OrderEntries();
         jekaSrcClasspath.getEntries().stream()
                 .filter(path -> !excludeJekaLib || !JkLocator.getJekaJarPath().equals(path))
@@ -261,7 +320,7 @@ public final class JkImlGenerator {
 
         private final Map<Path, JkIml.ModuleLibraryOrderEntry> cache = new HashMap<>();
 
-        void add(ModulesXml modulesXml, Path entry, JkIml.Scope scope) {
+        void add(JkModulesXml modulesXml, Path entry, JkIml.Scope scope) {
             JkIml.OrderEntry orderEntry;
             if (Files.isDirectory(entry)) {
                 orderEntry = dirAsOrderEntry(modulesXml, entry, scope);
@@ -275,7 +334,7 @@ public final class JkImlGenerator {
         }
     }
 
-    private JkIml.OrderEntry dirAsOrderEntry(ModulesXml modulesXml, Path dir, JkIml.Scope scope) {
+    private JkIml.OrderEntry dirAsOrderEntry(JkModulesXml modulesXml, Path dir, JkIml.Scope scope) {
         String moduleName = modulesXml.findModuleName(dir);
         if (moduleName != null) {
             return JkIml.ModuleOrderEntry.of()
@@ -337,7 +396,7 @@ public final class JkImlGenerator {
         return null;
     }
 
-    private List<JkIml.OrderEntry> projectOrderEntries(ModulesXml modulesXml, JkResolvedDependencyNode tree) {
+    private List<JkIml.OrderEntry> projectOrderEntries(JkModulesXml modulesXml, JkResolvedDependencyNode tree) {
         long t0 = System.currentTimeMillis();
         OrderEntries orderEntries = new OrderEntries();;
         for (final JkResolvedDependencyNode node : tree.toFlattenList()) {
