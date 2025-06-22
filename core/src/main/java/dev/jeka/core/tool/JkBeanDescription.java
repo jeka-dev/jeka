@@ -300,7 +300,7 @@ public final class JkBeanDescription {
                 continue;
             }
             final int modifier = method.getModifiers();
-            if (method.getReturnType().equals(void.class) && method.getParameterTypes().length == 0
+            if (isVoidReturnType(method) && method.getParameterTypes().length == 0
                     && !JkUtilsReflect.isMethodPublicIn(Object.class, method.getName())
                     && !Modifier.isAbstract(modifier) && !Modifier.isStatic(modifier)) {
                 result.add(method);
@@ -308,6 +308,11 @@ public final class JkBeanDescription {
 
         }
         return result;
+    }
+
+    private static boolean isVoidReturnType(Method method) {
+        Class<?> returnType = method.getReturnType();
+        return returnType.equals(void.class);
     }
 
     private static List<NameAndField> nameAndFields(Class<?> clazz, String prefix,

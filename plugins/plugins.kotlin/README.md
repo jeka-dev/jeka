@@ -2,6 +2,8 @@
 
 Add Kotlin compilation capability to `project` KBean.
 
+Kotlin code is expected to be found in the *src/main/kotlin* directory.
+
 **This KBean post-initializes the following KBeans:**
 
 | Post-initialised KBean | Description                                                                 |
@@ -30,7 +32,7 @@ Add Kotlin compilation capability to `project` KBean.
 
 ```properties
 jeka.classpath=dev.jeka:kotlin-plugin
-@kotlin=
+@kotlin=on
 # Optional properties
 @kotlin.sourceDir=src
 @kotlin.testSourceDir=test

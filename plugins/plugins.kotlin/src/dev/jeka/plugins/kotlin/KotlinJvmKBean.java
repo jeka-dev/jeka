@@ -30,7 +30,7 @@ import java.util.Optional;
 @JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.kotlin")
 public class KotlinJvmKBean extends KBean {
 
-    private static final String DEFAULT_VERSION = "1.8.0";
+    private static final String DEFAULT_VERSION = "2.1.21";
 
     @JkDoc("Overrides the Kotlin version for compiling and running defined in 'jeka.kotlin.version' property.")
     private String kotlinVersion;
