@@ -39,8 +39,7 @@ public class SampleCustom extends KBean {
                 .replaceLibByModule("dev.jeka.springboot-plugin.jar", "plugins.springboot")
                 .setModuleAttributes("plugins.springboot", JkIml.Scope.COMPILE, null)
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "core")
-                .setModuleAttributes("core", JkIml.Scope.COMPILE, null)
-                .setSuggestedJdk("17");
+                .setModuleAttributes("core", JkIml.Scope.COMPILE, null);
     }
 
     @JkPostInit(required = true)

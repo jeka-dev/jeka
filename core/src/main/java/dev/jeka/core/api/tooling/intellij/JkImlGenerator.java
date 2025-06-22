@@ -218,7 +218,7 @@ public final class JkImlGenerator {
             content.addJekaStandards();
         }
         JkModulesXml modulesXml = JkModulesXml.find(baseDir());
-        if (includeProject) {
+        if (includeProject && ideSupport != null) {
             List<Path> sourcePaths = ideSupport.getProdLayout().resolveSources().getRootDirsOrZipFiles();
 
             sourcePaths

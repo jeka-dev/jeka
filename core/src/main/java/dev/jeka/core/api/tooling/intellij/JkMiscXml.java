@@ -16,7 +16,12 @@
 
 package dev.jeka.core.api.tooling.intellij;
 
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
+import dev.jeka.core.api.marshalling.xml.JkDomElement;
+import dev.jeka.core.api.marshalling.xml.JkDomXPath;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,12 +35,29 @@ public class JkMiscXml {
 
     private final Path miscXmlPath;
 
+    private static final String PROJECT_ROOT_MANAGER= "ProjectRootManager";
+
     private JkMiscXml(Path miscXmlPath) {
         this.miscXmlPath = miscXmlPath;
     }
 
     public static JkMiscXml ofBaseDir(Path baseDir) {
         return new JkMiscXml(baseDir.resolve(".idea").resolve("misc.xml"));
+    }
+
+    public static JkMiscXml find(Path baseDir) {
+        JkMiscXml candidate = JkMiscXml.ofBaseDir(baseDir);
+        if (Files.exists(candidate.miscXmlPath)) {
+            return candidate;
+        }
+        if (Files.exists(baseDir.resolve("workspace.xml"))) {
+            JkLog.warn("No misc.xml found at " + baseDir);
+            return null;
+        }
+        if (baseDir.getParent() == null) {
+            return null;
+        }
+        return find(baseDir.getParent());
     }
 
     /**
@@ -51,9 +73,59 @@ public class JkMiscXml {
      */
     public void setJdk(String jdkName) {
         JkDomDocument xmlDoc = JkDomDocument.parse(miscXmlPath);
-        xmlDoc.root().get("component")
-                .attr("project-jdk-name", jdkName)
-                .attr("project-jdk-type", "JavaSDK");
+        xmlDoc.root().children("component").stream()
+                .filter(el -> PROJECT_ROOT_MANAGER.equals(el.attr("name")))
+                .findFirst()
+                .ifPresent(el -> {
+                    el.attr("project-jdk-name", jdkName);
+                    el.attr("project-jdk-type", "JavaSDK");
+                });
         xmlDoc.save(miscXmlPath);
     }
+
+    public JkJavaVersion guessProjectJavaVersion() {
+        JkDomDocument xmlDoc;
+        try {
+            xmlDoc = JkDomDocument.parse(miscXmlPath);
+        } catch (RuntimeException e) {
+            return null;
+        }
+
+        JkDomElement el = xmlDoc.root().xPath("/project/component[@name='ProjectRootManager']").stream()
+                .findFirst().orElse(null);
+
+        if (el == null) {
+            return null;
+        }
+        String projectJdkName = el.attr("project-jdk-name");
+        String languageLevel = el.attr("languageLevel");
+
+        JkJavaVersion result = Utils.guessFromJProjectJdkName(projectJdkName);
+        if (result == null) {
+            result = guessFromJLevelLanguage(languageLevel);
+        }
+        return result;
+    }
+
+    private static JkJavaVersion guessFromJLevelLanguage(String languageLevel) {
+        if (languageLevel == null) {
+            return null;
+        }
+        String digits = JkUtilsString.substringAfterLast("JDK_", languageLevel);
+        if ("1.8".equals(digits)) {
+            return JkJavaVersion.V8;
+        }
+        try {
+            int value = Integer.parseInt(digits);
+            if (value > 8 ) {
+                return JkJavaVersion.of(digits);
+            }
+            return null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+
+
 }

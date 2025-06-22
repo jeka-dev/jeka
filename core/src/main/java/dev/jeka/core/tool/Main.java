@@ -366,7 +366,7 @@ public class Main {
             if (propName.contains(".")) {
                 String fieldName = JkUtilsString.substringAfterFirst(propName, ".");
                 Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
-                if (!JkBeanDescription.of(kbeanClass).isContainingField(fieldName)) {
+                if (!JkBeanDescription.of(kbeanClass, true).isContainingField(fieldName)) {
                     throw new IllegalStateException("Property '@" + propName + "' does not match any field in "
                             + beanName + " KBean. Execute 'jeka " + beanName + ": --doc' to see available fields.");
                 }
@@ -408,7 +408,7 @@ public class Main {
         }
         ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath).get();
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
-        String mdDoc = JkBeanDescription.of(defaultKBeanClass).toMdContent().toString();
+        String mdDoc = JkBeanDescription.of(defaultKBeanClass, false).toMdContent().toString();
         System.out.println(mdDoc);
         return true;
     }

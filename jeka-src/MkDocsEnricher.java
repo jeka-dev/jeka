@@ -58,7 +58,7 @@ class MkDocsEnricher {
         JkPathFile docPathFile = JkPathFile.of(docFileName);
         String fileContent = docPathFile.readAsString();
 
-        JkBeanDescription.MdContent genContent = JkBeanDescription.of(clazz).toMdContent();
+        JkBeanDescription.MdContent genContent = JkBeanDescription.of(clazz, false).toMdContent();
         String newFileContent = replace(fileContent, HEADER_PLACE_HOLDER, genContent.header);
         newFileContent = replace(newFileContent, BODY_PLACE_HOLDER, genContent.body);
 

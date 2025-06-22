@@ -61,9 +61,9 @@ public final class JkConstants {
 
     // ------------ Jeka standard properties --------------------------
 
-    public static final String JEKA_JAVA_VERSION = "jeka.java.version";
+    public static final String JEKA_JAVA_VERSION_PROP = "jeka.java.version";
 
-    public static final String JEKA_JAVA_DISTRIB = "jeka.java.distrib";
+    public static final String JEKA_JAVA_DISTRIB_PROP = "jeka.java.distrib";
 
     static final String CMD_PREFIX_PROP = "jeka.cmd.";
 
@@ -94,6 +94,8 @@ public final class JkConstants {
     static final String CMD_SUBSTITUTE_SYMBOL = "::";
 
     // --------------------  Misc ----------------------------------------------
+
+    public static final String DEFAULT_JAVA_DISTRIB = "temurin";
 
     public static final JkPathMatcher PRIVATE_IN_DEF_MATCHER = JkPathMatcher.of("_*", "_*/**");
 

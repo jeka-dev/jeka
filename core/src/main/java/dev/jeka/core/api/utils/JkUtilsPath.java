@@ -28,6 +28,8 @@ import java.nio.file.*;
 import java.nio.file.FileSystem;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -650,6 +652,16 @@ public final class JkUtilsPath {
             return Files.size(path);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void touch(Path path) {
+        if (Files.exists(path)) {
+            try {
+                Files.setLastModifiedTime(path, FileTime.from(Instant.now()));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 

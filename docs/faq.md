@@ -45,28 +45,22 @@ See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-
 
 Nothing prevents using JeKa alongside Maven or Gradle in the same project, except that in an IDE, synchronization may interfere between the two systems.
 
-To avoid this, the `jeka-src` folder should exist in its own IntelliJ module. JeKa provides a simple way to accomplish this.
+To avoid this, the `jeka-src` folder should exist in its own IntelliJ module. JeKa provides a simple way to achieve this.
 
-**Using IntelliJ Plugin:**
+From an existing *Maven/Gradle* project, execute:
+```shell
+jeka base: scaffold
+```
+Edit the `jeka.properties` file, and add:
+```properties
+@intellij.splitModule=true
+```
+Generate the iml file, by synchronize within the IDE, or by running:
+```shell
+jeka intellij: sync
+```
+In intellij, go to `project settings` -> `import module` -> chose *[project dir]/.idea/xxxx-jeka.iml*
 
-Right-click on the `jeka-src` folder, and a menu entry will allow you to turn the `jeka-src` directory into a module.
-
-**Using the Command Line:**
-
-In your existing Maven/Gradle project, do the following:
-
-1. Execute: `jeka base: scaffold`. This generates the folder/file structure for JeKa.
-2. Execute: `jeka intellij: jekaSrcAsModule` in the root directory.
-
-This will add the property `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` to your *jeka.properties* file.
-
-!!! note
-The `jeka-src` folder should now exist in its own IntelliJ module. If your IDE does not reflect this change, close and reopen the project.
-
-Now, the `jeka-src` folder is managed in its own IntelliJ module. Simply execute `jeka intellij:iml` to sync JeKa without affecting Maven/Gradle.
-
-!!! warning
-Do not remove the generated `@intellij.imlFile=jeka-src/.idea/jeka-src.iml` property from the *jeka.properties* file, or you may face synchronization issues.
 
 ### How can I migrate my project from Maven?
 
@@ -121,7 +115,7 @@ org.junit.jupiter:junit-jupiter:5.12.2
 
 ## Misc
 
-### How do I configure projects from code ?
+### How do I configure projects from code?
 
 If you want to configure a project programmatically, either within the project itself or to create a plugin, you should access the `JkProject` instance directly instead of using the `ProjectKBean`.
 
@@ -140,7 +134,7 @@ public class Build extends KBean {
 }
 ```
 
-### How can I use Eclipse compiler in Jeka ?
+### How can I use Eclipse compiler in Jeka?
 
 Jeka can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as :
 

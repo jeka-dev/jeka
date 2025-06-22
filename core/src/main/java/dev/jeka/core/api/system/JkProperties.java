@@ -229,7 +229,7 @@ public final class JkProperties {
      * @return the trimmed property value if it is non-blank, or null otherwise
      */
     public String getTrimmedNonBlank(String propertyName) {
-        String value  = get(propertyName);
+        String value = get(propertyName);
         return JkUtilsString.isBlank(value) ? null : value;
     }
 

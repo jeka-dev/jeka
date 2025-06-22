@@ -71,9 +71,9 @@ public final class JkIml {
 
         private boolean excludeOutput = true;
 
-        private String jdkName;
-
         private Content content = new Content();
+
+        private JkIntellijJdk sdk;
 
         private List<OrderEntry> orderEntries = new LinkedList<>();
 
@@ -96,13 +96,13 @@ public final class JkIml {
             return this;
         }
 
-        public Component setJdkName(String jdkName) {
-            this.jdkName = jdkName;
+        public Component setContent(Content content) {
+            this.content = content;
             return this;
         }
 
-        public Component setContent(Content content) {
-            this.content = content;
+        public Component setSdk(JkIntellijJdk intellijJdk) {
+            this.sdk = intellijJdk;
             return this;
         }
 
@@ -174,7 +174,6 @@ public final class JkIml {
         }
 
         void append(JkDomElement parent, PathUrlResolver pathUrlResolver) {
-            boolean inheritedJdk = JkUtilsString.isBlank(jdkName) || "inheritedJdk".equals(jdkName);
             parent.add("component")
                 .attr("name", "NewModuleRootManager")
                 .attr("inherit-compileRunner-output", "false")
@@ -184,14 +183,22 @@ public final class JkIml {
                             .attr("url", pathUrlResolver.ideaPath(false, moduleDir.resolve(outputTest))))
                     .applyIf(excludeOutput, el -> el.add("exclude-output"))
                     .apply(el -> content.append(el, pathUrlResolver))
-                    .add("orderEntry")
-                    .applyIf(inheritedJdk, e -> e.attr("type", "inheritedJdk"))
-                    .applyIf(!inheritedJdk, e -> e.attr("type", "jdk").attr("jdkType", "JavaSDK").attr("jdkName", jdkName)).__
+                    .apply(this::addSdkEntry)
                     .add("orderEntry")
                         .attr("forTests", "false")
                         .attr("type", "sourceFolder").__
                     .apply(el -> orderEntries.stream()
                             .distinct().forEach(orderEntry -> orderEntry.append(el, pathUrlResolver)));
+        }
+
+        private void addSdkEntry(JkDomElement parentEl) {
+            JkIntellijJdk intellijJdk = Optional.ofNullable(sdk).orElse(JkIntellijJdk.ofInherited());
+            JkDomElement el = parentEl.add("orderEntry");
+            if (intellijJdk.isInherited()) {
+                el.attr("type", "inheritedJdk");
+            } else {
+                el.attr("type", "jdk").attr("jdkType", "JavaSDK").attr("jdkName", intellijJdk.getJdkName());
+            }
         }
     }
 

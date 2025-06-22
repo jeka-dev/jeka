@@ -20,11 +20,14 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.tooling.intellij.JkImlReader;
+import dev.jeka.core.api.tooling.intellij.JkIntellijJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -234,6 +237,39 @@ public final class JkExternalToolApi {
     }
 
     /**
+     * Returns the jeka jdk names used into generated iml, so that Jeka IDE can add
+     * it in its SDK table
+     */
+    public static List<SdkInfo> readJdkInfoFromIml(Path baseDir) {
+        List<Path> imlFiles = JkUtilsPath.listDirectChildren(baseDir).stream()
+                .filter(path -> path.toString().endsWith(".iml"))
+                .collect(Collectors.toCollection(LinkedList::new));
+        JkUtilsPath.listDirectChildren(baseDir.resolve(".idea")).stream()
+                .filter(path -> path.toString().endsWith(".iml"))
+                .forEach(imlFiles::add);
+        return imlFiles.stream()
+                .map(JkImlReader::getJdk)
+                .filter(Objects::nonNull)
+                .filter(JkIntellijJdk::isJekaManaged)
+                .map(intellijJdk -> new SdkInfo(
+                        intellijJdk.getJdkName(),
+                        intellijJdk.getJdkVersion().toString(),
+                        getJavaHome(baseDir, intellijJdk)
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private static Path getJavaHome(Path baseDir, JkIntellijJdk intellijJdk) {
+        if (intellijJdk.isCustom()) {
+            JkProperties properties = getProperties(baseDir);
+            String propName = "jeka.jdk." + intellijJdk.getJdkVersion();
+            return Paths.get(properties.getTrimmedNonBlank(propName));
+        }
+        String distAndVersion = JkUtilsString.substringAfterFirst(intellijJdk.getJdkName(), "jeka-");
+        return JkLocator.getCacheDir().resolve("jdks").resolve(distAndVersion);
+    }
+
+    /**
      * Retrieves the child paths based on the given base directory.
      *
      * @param baseDir the base directory from which to determine child paths
@@ -277,6 +313,21 @@ public final class JkExternalToolApi {
         }
     }
 
+    public static class SdkInfo {
+
+        public final String sdkName;
+
+        public final String sdkVersion;
+
+        public final Path javaHome;
+
+        SdkInfo(String sdkName, String sdkVersion, Path javaHome) {
+            this.sdkName = sdkName;
+            this.sdkVersion = sdkVersion;
+            this.javaHome = javaHome;
+        }
+    }
+
     public static class JdkInfo {
 
         public static final String LOCAL = "local";
@@ -297,13 +348,13 @@ public final class JkExternalToolApi {
 
         static JdkInfo of(Path moduleDir) {
             JkProperties props = JkExternalToolApi.getProperties(moduleDir);
-            String version = props.getTrimmedNonBlank(JkConstants.JEKA_JAVA_VERSION);
+            String version = props.getTrimmedNonBlank(JkConstants.JEKA_JAVA_VERSION_PROP);
             if (JkUtilsString.isBlank(version)) {
                 version = JkJavaVersion.LAST_LTS.toString();
             }
             String specificJdkPathProp = "jeka.jdk." + version.trim();
             String specificLocation = props.getTrimmedNonBlank(specificJdkPathProp);
-            String specifiedDistrib = props.getTrimmedNonBlank(JkConstants.JEKA_JAVA_DISTRIB);
+            String specifiedDistrib = props.getTrimmedNonBlank(JkConstants.JEKA_JAVA_DISTRIB_PROP);
 
             final String effectiveDistrib;
             if (specifiedDistrib != null) {

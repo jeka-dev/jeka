@@ -80,7 +80,7 @@ class CmdLineParser {
         // Add field-injection
 
         // -- Create a PicoCli commandLine to parse
-        JkBeanDescription kBeanDescription = JkBeanDescription.of(kbeanClass);
+        JkBeanDescription kBeanDescription = JkBeanDescription.of(kbeanClass, true);
 
         // -- Construct args to parse only fields
         List<String> availableMethodNames = kBeanDescription.beanMethods.stream()

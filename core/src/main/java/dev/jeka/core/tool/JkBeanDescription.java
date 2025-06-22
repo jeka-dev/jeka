@@ -104,18 +104,18 @@ public final class JkBeanDescription {
         this.docUlr = docUlr;
     }
 
-    public static JkBeanDescription of(Class<? extends KBean> kbeanClass) {
+    public static JkBeanDescription of(Class<? extends KBean> kbeanClass, boolean includeHidden) {
         if (CACHE.containsKey(kbeanClass)) {
             return CACHE.get(kbeanClass);
         }
 
         final List<BeanMethod> methods = new LinkedList<>();
-        for (final Method method : executableMethods(kbeanClass)) {
+        for (final Method method : executableMethods(kbeanClass, includeHidden)) {
             methods.add(BeanMethod.of(method));
         }
         Collections.sort(methods);
         final List<BeanField> beanFields = new LinkedList<>();
-        List<NameAndField> nameAndFields =  nameAndFields(kbeanClass, "", true, null);
+        List<NameAndField> nameAndFields =  nameAndFields(kbeanClass, "", true, null, includeHidden);
         for (final NameAndField nameAndField : nameAndFields) {
             final BeanField beanField = BeanField.of(kbeanClass, nameAndField);
             beanFields.add(beanField);
@@ -247,12 +247,12 @@ public final class JkBeanDescription {
         }
 
         final List<BeanMethod> methods = new LinkedList<>();
-        for (final Method method : executableMethods(kbeanClass)) {
+        for (final Method method : executableMethods(kbeanClass, false)) {
             methods.add(BeanMethod.of(method));
         }
         Collections.sort(methods);
         final List<BeanField> beanFields = new LinkedList<>();
-        List<NameAndField> nameAndFields =  nameAndFields(kbeanClass, "", true, null);
+        List<NameAndField> nameAndFields =  nameAndFields(kbeanClass, "", true, null, false);
         for (final NameAndField nameAndField : nameAndFields) {
             beanFields.add(BeanField.ofWithDefaultValues(kbeanClass, nameAndField, runbase));
         }
@@ -292,11 +292,11 @@ public final class JkBeanDescription {
                 .anyMatch(beanField -> beanField.matchName(fieldName));
     }
 
-    private static List<Method> executableMethods(Class<?> clazz) {
+    private static List<Method> executableMethods(Class<?> clazz, boolean includeHidden) {
         final List<Method> result = new LinkedList<>();
         for (final Method method : clazz.getMethods()) {
             final JkDoc jkDoc = method.getAnnotation(JkDoc.class);
-            if (jkDoc != null && jkDoc.hide()) {
+            if (jkDoc != null && jkDoc.hide() && !includeHidden) {
                 continue;
             }
             final int modifier = method.getModifiers();
@@ -310,11 +310,15 @@ public final class JkBeanDescription {
         return result;
     }
 
-    private static List<NameAndField> nameAndFields(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
+    private static List<NameAndField> nameAndFields(Class<?> clazz, String prefix,
+                                                    boolean root,
+                                                    Class<?> rClass,
+                                                    boolean includeHidden) {
+
         final List<NameAndField> result = new LinkedList<>();
         for (final Field field : getPropertyFields(clazz)) {
             final JkDoc jkDoc = field.getAnnotation(JkDoc.class);
-            if (jkDoc != null && jkDoc.hide()) {
+            if (jkDoc != null && jkDoc.hide() && !includeHidden) {
                 continue;
             }
             final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
@@ -335,13 +339,13 @@ public final class JkBeanDescription {
                             multiValueType,
                             multiPrefix + ".",
                             false,
-                            rootClass);
+                            rootClass, includeHidden);
                     result.addAll(subOpts);
                 }
 
             } else {
                 final List<NameAndField> subOpts = nameAndFields(field.getType(), prefix + field.getName() + ".", false,
-                        rootClass);
+                        rootClass, includeHidden);
                 result.addAll(subOpts);
             }
         }

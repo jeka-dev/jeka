@@ -436,7 +436,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             project.flatFacade.setMixResourcesAndSources();
         }
         JkJavaCompilerToolChain compilerToolChain = project.compilerToolChain;
-        String javaDistrib = getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB);
+        String javaDistrib = getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP);
         if (!compilerToolChain.isToolOrProcessSpecified()) {
             compilerToolChain.setJdkHints(jdks(), !compilation.fork);
             if (!JkUtilsString.isBlank(javaDistrib)) {

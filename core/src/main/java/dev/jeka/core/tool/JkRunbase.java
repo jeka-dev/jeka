@@ -739,7 +739,7 @@ public final class JkRunbase {
 
         Class<? extends KBean> kbeanClass = kbean.getClass();
         List<KBeanAction> result = new LinkedList<>();
-        JkBeanDescription desc = JkBeanDescription.of(kbeanClass);
+        JkBeanDescription desc = JkBeanDescription.of(kbeanClass, true);
 
         List<String> propNames = BeanUtils.extractKBeanPropertyNamesFromProps(kbeanClass, this.properties);
         List<JkBeanDescription.BeanField> beanFields = BeanUtils.enhanceWithMultiValues(desc.beanFields, propNames);

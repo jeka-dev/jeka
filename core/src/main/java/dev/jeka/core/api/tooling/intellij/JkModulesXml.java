@@ -127,8 +127,8 @@ public class JkModulesXml {
 
     private void createEmpty() {
         JkDomDocument domDocument = JkDomDocument.of("project");
-        domDocument.root().make()//.attr("version", "4")
-                .get("component").make()//.attr("name", "ProjectModuleManager")
+        domDocument.root().make().attr("version", "4")
+                .get("component").make().attr("name", "ProjectModuleManager")
                     .get("modules").make();
         domDocument.save(modulesXmlFile);
     }
@@ -179,6 +179,10 @@ public class JkModulesXml {
         return doc.root().get("component").get("modules").children("module").stream()
                 .map(el -> el.attr("filepath"))
                 .collect(Collectors.toList());
+    }
+
+    public void touch() {
+        JkUtilsPath.touch(modulesXmlFile);
     }
 
 }

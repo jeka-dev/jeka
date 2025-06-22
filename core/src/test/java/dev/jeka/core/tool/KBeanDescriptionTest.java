@@ -7,7 +7,7 @@ class KBeanDescriptionTest {
 
     @Test
     public void readNestedElement_ok() {
-        JkBeanDescription desc = JkBeanDescription.of(NestedProp.class);
+        JkBeanDescription desc = JkBeanDescription.of(NestedProp.class, true);
         Assertions.assertEquals(1, desc.beanFields.size());
     }
 
