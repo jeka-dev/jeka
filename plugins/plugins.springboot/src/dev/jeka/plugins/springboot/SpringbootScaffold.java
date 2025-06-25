@@ -59,7 +59,7 @@ class SpringbootScaffold {
         // Add dependencies
         projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
         projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
-        projectScaffold.testDeps.add("org.junit.platform:junit-platform-launcher:1.12.2");
+        projectScaffold.testDeps.add("org.junit.platform:junit-platform-launcher");
         projectScaffold.versionDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom");
 
         // Add sample code

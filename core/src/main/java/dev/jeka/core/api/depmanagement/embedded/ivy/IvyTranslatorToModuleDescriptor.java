@@ -59,6 +59,9 @@ class IvyTranslatorToModuleDescriptor {
         // Add version overwrites for transitive dependencies
         JkVersionProvider versionProvider = dependencies.getVersionProvider();
         for (final JkModuleId jkModuleId : versionProvider.getModuleIds()) {
+            if (jkModuleId.toColonNotation().contains("${")) {
+                throw new IllegalStateException("Invalid module id " + jkModuleId.toColonNotation());
+            }
             final JkVersion version = versionProvider.getVersionOf(jkModuleId);
             result.addDependencyDescriptorMediator(toModuleId(jkModuleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,

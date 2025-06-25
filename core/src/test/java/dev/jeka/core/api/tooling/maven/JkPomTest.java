@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.tooling.maven;
 
+import dev.jeka.core.api.depmanagement.JkRepoSet;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +26,9 @@ class JkPomTest {
     @Test
     void withResolvedProperties() {
         JkPom pom = JkPom.of(JkPomTest.class.getResourceAsStream("pom-sample.xml"));
-        assertEquals("6.1.3", pom.withResolvedProperties().getVersionProvider()
+        assertEquals("6.1.3", pom.withResolvedProperties().getVersionProvider(JkRepoSet.of())
                 .getVersionOf("org.springframework:spring-core"));
     }
+
+
 }

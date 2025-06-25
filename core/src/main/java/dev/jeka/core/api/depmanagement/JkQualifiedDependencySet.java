@@ -36,6 +36,8 @@ public class JkQualifiedDependencySet {
 
     public static final String TEST_SCOPE = "test";  // provided scope for published dependencies
 
+    public static final String IMPORT_SCOPE = "import";
+
     public static final String MASTER_TARGET_CONF = "archives(master)";
 
     public static final String COMPILE_TARGET_CONF = "compile(default)";

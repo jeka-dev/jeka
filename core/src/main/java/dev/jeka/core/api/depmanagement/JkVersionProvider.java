@@ -21,6 +21,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Association between getModuleIds and version.
@@ -225,6 +226,12 @@ public final class JkVersionProvider {
         return Collections.unmodifiableMap(map);
     }
 
+    public List<JkCoordinate> toList() {
+        return map.entrySet().stream()
+                .map(entry -> JkCoordinate.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Returns the java codes that declare these dependencies.
      */
@@ -264,7 +271,8 @@ public final class JkVersionProvider {
                 .distinct()
                 .map(bom -> {
                     JkCoordinateFileProxy bomFile = JkCoordinateFileProxy.of(repos, bom);
-                    return JkPom.of(bomFile.get()).withResolvedProperties().getVersionProvider();
+                    JkPom pom = JkPom.of(bomFile.get());
+                    return pom.withResolvedProperties().getVersionProvider(repos);
                 })
                 .reduce(this, JkVersionProvider::and);
         return new JkVersionProvider(provider.map, new LinkedHashSet<>());

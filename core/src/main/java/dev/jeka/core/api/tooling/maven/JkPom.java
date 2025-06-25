@@ -29,10 +29,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static dev.jeka.core.api.depmanagement.JkQualifiedDependencySet.*;
 
@@ -45,7 +42,7 @@ import static dev.jeka.core.api.depmanagement.JkQualifiedDependencySet.*;
 public final class JkPom {
 
     private static final List<String> KNOWN_SCOPE = JkUtilsIterable.listOf(COMPILE_SCOPE, RUNTIME_SCOPE,
-            PROVIDED_SCOPE, TEST_SCOPE);
+            PROVIDED_SCOPE, TEST_SCOPE, IMPORT_SCOPE);
 
     private final Document pomDoc;
 
@@ -94,6 +91,22 @@ public final class JkPom {
         return JkUtilsXml.directChildText(projectEl(), "groupId");
     }
 
+    public String getParentGroupId() {
+        Element parentEl = JkUtilsXml.directChild(projectEl(), "parent");
+        if (parentEl != null) {
+            return JkUtilsXml.directChildText(parentEl, "groupId");
+        }
+        return null;
+    }
+
+    public String computeGroupId() {
+        return Optional.ofNullable(getGroupId()).orElseGet(this::getParentGroupId);
+    }
+
+    public String computeProjectVersion() {
+        return Optional.ofNullable(getVersion()).orElseGet(this::getParentVersion);
+    }
+
     /**
      * The artifactId for this POM.
      */
@@ -106,6 +119,14 @@ public final class JkPom {
      */
     public String getVersion() {
         return JkUtilsXml.directChildText(projectEl(), "version");
+    }
+
+    public String getParentVersion() {
+        Element parentEl = JkUtilsXml.directChild(projectEl(), "parent");
+        if (parentEl != null) {
+            return JkUtilsXml.directChildText(parentEl, "version");
+        }
+        return null;
     }
 
     /**
@@ -123,7 +144,7 @@ public final class JkPom {
      * The map groupId:ArtifactId -> version provided by the <code>dependencyManagement</code>
      * section of this POM.
      */
-    public JkVersionProvider getVersionProvider() {
+    public JkVersionProvider getVersionProvider(JkRepoSet repos) {
         final List<JkCoordinate> coordinates = new LinkedList<>();
         Element dependencyManagementEl = dependencyManagementEl();
         if (dependencyManagementEl == null) {
@@ -135,12 +156,26 @@ public final class JkPom {
             return JkVersionProvider.of();
         }
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
+
+        List<JkCoordinate> importedBoms = new LinkedList<>();
         for (final JkCoordinateDependency coordinateDependency : scopedDependencies.getCoordinateDependencies()) {
-            final JkCoordinate coordinate = JkCoordinate.of(
-                    coordinateDependency.getCoordinate().getModuleId(),
-                    JkVersion.of(coordinateDependency.getCoordinate().getVersion().getValue()));
-            coordinates.add(coordinate);
+
+            JkCoordinate coordinate = coordinateDependency.getCoordinate();
+            if (!"pom".equals(coordinate.getArtifactSpecification().getType())) {
+                coordinates.add(coordinate);
+            } else {
+                importedBoms.add(coordinate);
+            }
         }
+
+        // Import recursively boms
+        importedBoms.forEach(coordinate -> {
+            JkCoordinateFileProxy bomFile = JkCoordinateFileProxy.of(repos, coordinate);
+            JkPom importedPom = JkPom.of(bomFile.get()).withResolvedProperties();
+            coordinates.addAll(importedPom.getVersionProvider(repos).toList());
+        });
+
+
         return JkVersionProvider.of(coordinates);
     }
 
@@ -149,17 +184,26 @@ public final class JkPom {
      */
     public Map<String, String> getProperties() {
         final Map<String, String> result = new HashMap<>();
-        if (propertiesEl() == null) {
-            return result;
-        }
-        final NodeList nodeList = propertiesEl().getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node node = nodeList.item(i);
-            if (node instanceof Element) {
-                final Element element = (Element) node;
-                result.put(element.getTagName(), element.getTextContent());
+        if (propertiesEl() != null) {
+            final NodeList nodeList = propertiesEl().getChildNodes();
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                final Node node = nodeList.item(i);
+                if (node instanceof Element) {
+                    final Element element = (Element) node;
+                    result.put(element.getTagName(), element.getTextContent());
+                }
             }
         }
+
+        String projectVersion = computeProjectVersion();
+        if (projectVersion != null) {
+            result.put("project.version", projectVersion);
+        }
+        String groupId = computeGroupId();
+        if (groupId != null) {
+            result.put("project.groupId", groupId);
+        }
+
         interpolate(result, 0);
         return result;
     }
