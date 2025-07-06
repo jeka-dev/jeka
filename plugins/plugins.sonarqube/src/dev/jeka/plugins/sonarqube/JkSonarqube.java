@@ -33,6 +33,7 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkException;
+import sun.tools.jar.resources.jar;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -241,7 +242,11 @@ public final class JkSonarqube {
             host =  host + "/";
         }
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + getProperty(TOKEN));
+        String sonarToken = getProperty(JkSonarqube.TOKEN);
+        if (JkUtilsString.isBlank(sonarToken)) {
+            sonarToken = System.getenv("SONAR_TOKEN");
+        }
+        headers.put("Authorization", "Bearer " + sonarToken);
         String taskUrl = host + "api/ce/task?id=" + taskId;
         JkLog.debug("Extracted taskId=%s from sonarqube report.", taskId);
         boolean pending = true;
