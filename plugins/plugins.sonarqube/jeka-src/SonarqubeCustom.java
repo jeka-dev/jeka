@@ -23,7 +23,10 @@ class SonarqubeCustom extends KBean {
         project.flatFacade
                 .setModuleId("dev.jeka:sonarqube-plugin")
                 .setMixResourcesAndSources()
-                .setLayoutStyle(JkCompileLayout.Style.SIMPLE);
+                .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
+                .dependencies.test
+                    .add("org.junit.jupiter:junit-jupiter:5.13.3")
+        ;
         project.flatFacade.dependencies.compile
                     .add(JkLocator.getJekaJarPath());
     }
