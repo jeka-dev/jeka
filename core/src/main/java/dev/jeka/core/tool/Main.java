@@ -62,6 +62,10 @@ public class Main {
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
+        if (cmdArgs.isNoAnsi()) {
+            JkAnsiConsole.of().noAnsi();
+        }
+
         // Need to setup a default log decorator to display verbose messages when installing Jansi and Ivy
         JkLog.setDecorator(JkLog.Style.INDENT);
 
@@ -69,7 +73,6 @@ public class Main {
         if (JkUtilsSystem.IS_WINDOWS) {
             JkAnsiConsole.of().systemInstall();
         }
-
 
         // Handle --help
         // It needs to be fast and safe. Only loads KBeans found in current classpath
@@ -279,6 +282,8 @@ public class Main {
         }
         JkLog.setAcceptAnimation(logAnimation);
         JkLog.setShowTaskDuration(logSettings.duration);
+
+        JkInfo.setLogIvyVerboseMessages(logSettings.logIvyVerbose);
     }
 
     private static void displayDuration(long startTs) {
@@ -387,7 +392,10 @@ public class Main {
                 engine.getRunbase(),
                 System.out);
         if (!found) {
-            System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanDoc);
+            String msg = String.format("No KBean named '%s' found in classpath. Execute `%s` to see available KBeans.",
+                    kbean, JkAnsi.yellow("jeka --doc"));
+            // Don't know why but printf() does not show anything here
+            System.out.println(msg);
         }
         return found;
     }

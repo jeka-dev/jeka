@@ -54,7 +54,7 @@ public class JkModulesXml {
             try {
                 JkDomDocument.parse(modulesXmlFile);
             } catch (RuntimeException e) {
-                JkLog.warn(".idea/module.xml not readable. Recreate it from scratch.");
+                JkLog.warn("%s not readable. Recreate it from scratch.", modulesXmlFile);
                 createEmpty();
             }
         }
@@ -130,6 +130,7 @@ public class JkModulesXml {
         domDocument.root().make().attr("version", "4")
                 .get("component").make().attr("name", "ProjectModuleManager")
                     .get("modules").make();
+        JkUtilsPath.createDirectories(modulesXmlFile.getParent());
         domDocument.save(modulesXmlFile);
     }
 

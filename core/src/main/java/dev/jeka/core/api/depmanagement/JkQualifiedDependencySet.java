@@ -155,6 +155,24 @@ public class JkQualifiedDependencySet {
     }
 
     /**
+     * Finds and returns the explicitly declared version of a dependency for the given module ID.
+     * If no explicitly declared version is found, returns an unspecified version.
+     *
+     * @param moduleId the module ID for which the explicitly declared version is to be retrieved.
+     * @return the explicitly declared version of the dependency, or an unspecified version if none is found.
+     */
+    public JkVersion findExplicitDeclaredVersion(JkModuleId moduleId) {
+        return this.entries.stream()
+                .filter(qDep -> qDep.getDependency() instanceof JkCoordinateDependency)
+                .filter(qDep -> moduleId.equals(qDep.getCoordinateDependency().getCoordinate().getModuleId()))
+                .map(qDep -> qDep.getCoordinateDependency().getCoordinate().getVersion())
+                .filter(version -> !version.isUnspecified())
+                .findFirst().orElse(JkVersion.UNSPECIFIED);
+    }
+
+
+
+    /**
      * Removes the specified {@link JkDependency} from the {@link JkQualifiedDependencySet}.
      */
     public JkQualifiedDependencySet remove(JkDependency dependency) {

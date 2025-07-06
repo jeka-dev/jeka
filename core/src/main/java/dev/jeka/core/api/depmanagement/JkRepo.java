@@ -390,13 +390,13 @@ public final class JkRepo {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("url:").append(url).append(", ");
+        sb.append("url:").append(url);
         if (httpHeaders.containsKey("Authorization")) {
-            sb.append("header Authorization: ***, ");
+            sb.append(" - header Authorization: ***");
         }
         //sb.append("credentials: ").append(credentials).append(", ");
         if (this.publishConfig != null) {
-            sb.append("publish config: ").append(this.publishConfig);
+            sb.append(" - publish config: ").append(this.publishConfig);
         }
         return sb.toString();
     }

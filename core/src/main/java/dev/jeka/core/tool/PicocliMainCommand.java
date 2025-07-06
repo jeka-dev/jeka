@@ -158,6 +158,10 @@ public class PicocliMainCommand {
             arity = "0..1")
     private Boolean logAnimations;
 
+    @Option(names = "--no-ansi",
+            description = "Disable ANSI output")
+    private boolean noAnsi;
+
     @Option(names = {"--stderr"},
             description = "Log on stderr instead of stdout.")
     private boolean logOnStderr;

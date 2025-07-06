@@ -51,8 +51,20 @@ class JkAnsiConsoleImpl implements JkAnsiConsole {
         AnsiConsole.systemUninstall();
     }
 
+    @Override
+    public void noAnsi() {
+        Ansi.setEnabled(false);
+    }
+
+
+
     public JkAnsi ansi() {
         return new JkAnsiImpl(Ansi.ansi());
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Ansi.isEnabled();
     }
 
 }

@@ -40,7 +40,7 @@ class IvyTranslatorToIvy {
         final Ivy ivy = new Ivy();
         ivy.getLoggerEngine().popLogger();
         ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
-        ivy.getLoggerEngine().setShowProgress(JkLog.verbosity() == JkLog.Verbosity.VERBOSE);
+        ivy.getLoggerEngine().setShowProgress(JkLog.isVerbose());
         ivy.getLoggerEngine().clearProblems();
         IvyContext.getContext().setIvy(ivy);
         ivy.setSettings(ivySettings);

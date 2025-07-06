@@ -18,6 +18,7 @@ package dev.jeka.core.tool;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.util.List;
 
@@ -39,7 +40,7 @@ class DefaultKBeanResolver {
         if (defaultKBeanName == null) {
             defaultKBeanName =  properties.get(JkConstants.DEFAULT_KBEAN_PROP);
         }
-        if (defaultKBeanName == null) {
+        if (JkUtilsString.isBlank(defaultKBeanName)) {
             return localKbeanClassNames.stream().findFirst().orElse(null);
         }
         String finalDefaultKBeanName = defaultKBeanName;
@@ -47,8 +48,8 @@ class DefaultKBeanResolver {
                 .filter(className -> KBean.nameMatches(className, finalDefaultKBeanName))
                 .findFirst().orElse(null);
         if (result == null) {
-            throw new JkException("Specified default KBean '%s' not found among KBeans %s", defaultKBeanName,
-                    kbeanClassNames);
+            throw new JkException("Specified default KBean '%s' not found among KBeans:%n %s", defaultKBeanName,
+                    String.join("\n- ", kbeanClassNames));
         } else {
             JkLog.debug("Default KBean Class Name : " + result);
         }

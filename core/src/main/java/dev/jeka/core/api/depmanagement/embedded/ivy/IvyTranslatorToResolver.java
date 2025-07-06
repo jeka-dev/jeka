@@ -75,7 +75,7 @@ class IvyTranslatorToResolver {
             result.setArtroot(repo.getUrl().toString());
             result.setArtpattern(IvyRepResolver.DEFAULT_IVYPATTERN);
             result.setIvypattern(IvyRepResolver.DEFAULT_IVYPATTERN);
-            result.setM2compatible(false);
+            result.setM2compatible(true);
             if (isHttp(repo.getUrl())) {
                 final JkRepo.JkRepoCredentials credentials = repo.getCredentials();
                 if (!CredentialsStore.INSTANCE.hasCredentials(repo.getUrl().getHost()) && credentials != null) {

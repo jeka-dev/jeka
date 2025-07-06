@@ -56,7 +56,7 @@ public class JkProjectCompilation {
     public final JkRunnables preCompileActions;
 
 
-    private final JkRunnables compileActions;
+    public final JkRunnables compileActions;
 
     /**
      * The {@link JkRunnables} to be run after compilation. User can chain its own runnable
@@ -243,7 +243,8 @@ public class JkProjectCompilation {
         }
         JkJavaCompilerToolChain.Status status = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec);
         if (!JkLog.isVerbose() && status == JkJavaCompilerToolChain.Status.SUCCESS) {
-            JkLog.info("Succeed");  // must log something otherwise next task will indent badly
+            int count = compileSpec.getSources().count(Integer.MAX_VALUE, false);
+            JkLog.info("%s Java source files compiled successfully.", count);  // must log something otherwise next task will indent badly
         }
         if (status == JkJavaCompilerToolChain.Status.FAILED) {
             throw new IllegalStateException("Compilation of Java sources failed.");

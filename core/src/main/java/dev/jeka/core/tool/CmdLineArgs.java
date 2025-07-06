@@ -30,6 +30,8 @@ import static dev.jeka.core.tool.JkConstants.*;
 
 class CmdLineArgs {
 
+    private final static List<String> NO_ANSI  = Arrays.asList("--no-ansi", "--no-ansi=true");
+
     private final String[] args;
 
     CmdLineArgs(String ...args) {
@@ -72,6 +74,10 @@ class CmdLineArgs {
 
     boolean isVersionHelpRequested() {
         return args.length > 0 && (args[0].equals("--version") || args[0].equals("-V"));
+    }
+
+    boolean isNoAnsi() {
+        return Arrays.stream(args).anyMatch(NO_ANSI::contains);
     }
 
     /**

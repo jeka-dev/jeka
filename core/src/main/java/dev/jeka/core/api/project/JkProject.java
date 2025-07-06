@@ -254,7 +254,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         packActions = pack.actions;
         packaging = pack;
         dependencyResolver = JkDependencyResolver.of(JkRepo.ofMavenCentral())
-                .setDisplaySpinner(true)
                 .setUseInMemoryCache(true);
         flatFacade = new JkProjectFlatFacade(this);
         this.projectResolver = projectResolver;

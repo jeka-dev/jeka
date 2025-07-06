@@ -141,12 +141,22 @@ public final class JkVersionProvider {
      * The versions present in the specified one will override versions specified in this one.
      */
     public JkVersionProvider and(JkVersionProvider other) {
+        return and(other, true);
+    }
+
+    public JkVersionProvider and(JkVersionProvider other, boolean override) {
         final LinkedHashMap<JkModuleId, JkVersion> newMap = new LinkedHashMap<>(this.map);
-        newMap.putAll(other.map);
+        for (Map.Entry<JkModuleId, JkVersion> entry : other.map.entrySet()) {
+            if (override || !this.map.containsKey(entry.getKey())) {
+                newMap.put(entry.getKey(), entry.getValue());
+            }
+        }
         LinkedHashSet<JkCoordinate> newBoms = new LinkedHashSet<>(this.boms);
         newBoms.addAll(other.boms);
         return new JkVersionProvider(newMap, newBoms);
     }
+
+
 
     /**
      * Returns a {@link JkVersionProvider} that is the union of this provider and the specified one.
@@ -274,7 +284,8 @@ public final class JkVersionProvider {
                     JkPom pom = JkPom.of(bomFile.get());
                     return pom.withResolvedProperties().getVersionProvider(repos);
                 })
-                .reduce(this, JkVersionProvider::and);
+                .reduce(this, (thisVersionProvider, otherVersionProvider)
+                        -> thisVersionProvider.and(otherVersionProvider, false));
         return new JkVersionProvider(provider.map, new LinkedHashSet<>());
     }
 

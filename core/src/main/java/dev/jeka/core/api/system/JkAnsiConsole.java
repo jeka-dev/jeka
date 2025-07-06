@@ -31,6 +31,10 @@ public interface JkAnsiConsole {
 
     void systemUninstall();
 
+    void noAnsi();
+
+    boolean isEnabled();
+
     JkAnsi ansi();
 
     class Cache {

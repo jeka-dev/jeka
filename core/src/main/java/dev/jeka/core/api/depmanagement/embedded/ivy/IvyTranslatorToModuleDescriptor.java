@@ -23,6 +23,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
@@ -62,10 +63,12 @@ class IvyTranslatorToModuleDescriptor {
             if (jkModuleId.toColonNotation().contains("${")) {
                 throw new IllegalStateException("Invalid module id " + jkModuleId.toColonNotation());
             }
+
             final JkVersion version = versionProvider.getVersionOf(jkModuleId);
             result.addDependencyDescriptorMediator(toModuleId(jkModuleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
-                    new OverrideDependencyDescriptorMediator(null, version.getValue()));
+                    new FallbackVersionMediator(version.getValue()));
+
         }
         return result;
     }
@@ -112,6 +115,25 @@ class IvyTranslatorToModuleDescriptor {
             }
         } else {
             return new DefaultModuleDescriptor(moduleRevisionId, "integration", null);
+        }
+    }
+
+    private static class FallbackVersionMediator extends OverrideDependencyDescriptorMediator{
+
+        public FallbackVersionMediator(String version) {
+            super(null, version);
+        }
+
+        public DependencyDescriptor mediate(DependencyDescriptor dd) {
+            ModuleRevisionId mrid = dd.getDependencyRevisionId();
+            String fallbackVersion = getVersion();
+
+            if (fallbackVersion == null || fallbackVersion.equals(mrid.getRevision()) || mrid.getRevision() != null) {
+                return dd;
+            }
+
+            return dd.clone(ModuleRevisionId.newInstance(mrid.getOrganisation(), mrid.getName(),
+                    null, fallbackVersion, mrid.getQualifiedExtraAttributes()));
         }
     }
 

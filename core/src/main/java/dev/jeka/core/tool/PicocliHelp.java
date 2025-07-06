@@ -220,7 +220,7 @@ class PicocliHelp {
         String kbeanClassName = kbeanClassNames.stream()
                 .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
                 .findFirst().orElse(null);
-        if (kbeanClassName == null) {
+        if (kbeanClassName == null) {;
             return null;
         }
         ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();

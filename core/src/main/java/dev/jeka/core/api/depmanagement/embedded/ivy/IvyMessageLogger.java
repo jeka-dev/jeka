@@ -55,7 +55,7 @@ final class IvyMessageLogger extends AbstractMessageLogger {
             break;
         case Message.MSG_DEBUG:
             if (JkInfo.isLogIvyVerboseMessages()) {
-                JkLog.verbose(message);
+                JkLog.debug(message);
             }
             break;
         default:

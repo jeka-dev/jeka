@@ -33,10 +33,20 @@ Kotlin code is expected to be found in the *src/main/kotlin* directory.
 ```properties
 jeka.classpath=dev.jeka:kotlin-plugin
 @kotlin=on
+
 # Optional properties
 @kotlin.sourceDir=src
 @kotlin.testSourceDir=test
 @kotlin.includeStdlib=false
+
+# Add Compiler plugin passing some options
+@kotlin.plugin.0=org.jetbrains.kotlin:kotlin-allopen-compiler-plugin
+@kotlin.pluginOption.0.pluginId=org.jetbrains.kotlin.allopen
+@kotlin.pluginOption.0.key=preset
+@kotlin.pluginOption.0.value=spring
+
+# Or add the equivalent shorthand using predefined 'preset'
+@kotlin.preset.0=SPRING
 ```
 
 ## Programmatic Usage
@@ -48,7 +58,7 @@ Some settings need to be configured programmatically. Below is an example using 
 class Build : KBean() {
     override fun init() {
         // Configure Kotlin compiler
-        load(KotlinJvmKBean::class.java).kotlinJvm.kotlinCompiler
+        load(KotlinKBean::class.java).getKotlinJvm().getKotlinCompiler
             .addPlugin("org.jetbrains.kotlin:kotlin-allopen")
             .addPluginOption("org.jetbrains.kotlin.allopen", "preset", "spring")
     }

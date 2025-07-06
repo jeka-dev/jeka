@@ -21,6 +21,7 @@ import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkAnsi;
+import dev.jeka.core.api.system.JkAnsiConsole;
 import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
@@ -62,8 +63,6 @@ public final class JkDependencyResolver  {
     private boolean useInMemoryCache;
 
     private boolean useFileSystemCache;
-
-    private boolean displaySpinner;
 
     private Path fileSystemCacheDir = Paths.get(JkConstants.JEKA_WORK_PATH).resolve("dep-cache");
 
@@ -144,14 +143,6 @@ public final class JkDependencyResolver  {
      */
     public JkDependencyResolver setFileSystemCacheDir(Path cacheDir) {
         this.fileSystemCacheDir = cacheDir;
-        return this;
-    }
-
-    /**
-     * Sets whether to display a spinner during the resolution process.
-     */
-    public JkDependencyResolver setDisplaySpinner(boolean displaySpinner) {
-        this.displaySpinner = displaySpinner;
         return this;
     }
 
@@ -253,22 +244,15 @@ public final class JkDependencyResolver  {
                 return result.get();
             }
         }
-        AtomicReference<JkResolveResult> result = new AtomicReference<>();
-        /*
-        if (displaySpinner) {
-            JkConsoleSpinner.of("Resolve dependencies")
-                    .setAlternativeMassage(JkLog.isVerbose() ? null : "Resolve dependencies ...")
-                    .run(() -> result.set(doResolve(qualifiedDependencies, params)));
-            result.set(doResolve(qualifiedDependencies, params))
-            return result.get();
-        }
-         */
         String msg = "Resolving dependencies...";
         JkLog.getOutPrintStream().print(msg);
         JkLog.getOutPrintStream().flush();
         JkResolveResult resolveResult = doResolve(qualifiedDependencies, params);
         JkAnsi.eraseAllLine();
         JkAnsi.moveCursorLeft(msg.length());
+        if (!JkAnsiConsole.of().isEnabled()) {
+            JkLog.info("");
+        }
         return resolveResult;
     }
 
@@ -447,7 +431,7 @@ public final class JkDependencyResolver  {
 
     private JkRepoSet effectiveRepos() {
         boolean includeLocalRepo = true;
-        return includeLocalRepo ? repos.and(JkRepo.ofLocal()) : repos;
+        return includeLocalRepo ? repos.and(JkRepo.ofLocal().toReadonly()) : repos;
     }
 
     private JkQualifiedDependencySet replacePomDependencyByVersionProvider(JkQualifiedDependencySet dependencySet) {

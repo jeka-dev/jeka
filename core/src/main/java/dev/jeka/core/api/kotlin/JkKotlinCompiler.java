@@ -58,6 +58,14 @@ public final class JkKotlinCompiler {
 
     private static final String KOTLIN_HOME = "KOTLIN_HOME";
 
+    public static final String ALLOPEN_PLUGIN_COORDINATES = "org.jetbrains.kotlin:kotlin-allopen-compiler-plugin";
+
+    public static final String ALLOPEN_PLUGIN_ID = "org.jetbrains.kotlin.allopen";
+
+    public static final String NOARG_PLUGIN_ID = "org.jetbrains.kotlin.noarg";
+
+    public static final String SERIALIZATION_PLUGIN_ID = "org.jetbrains.kotlin.plugin.serialization";
+
     private boolean failOnError = true;
 
     private boolean logOutput = JkLog.isVerbose();
@@ -418,16 +426,17 @@ public final class JkKotlinCompiler {
             loggedOptions.add(plugin.toOption());
         }
         if (command != null) {
-            JkLog.verbose("Use kotlin compiler : %s with options %s", command, JkUtilsString.formatOptions(loggedOptions));
+            JkLog.verbose("Use kotlinc compiler : %s with options %s", command, JkUtilsString.formatOptions(loggedOptions));
             kotlincProcess = JkProcess.of(command)
                     .addParams(this.jvmOptions.stream()
                             .map(JkKotlinCompiler::toJavaOption)
                             .collect(Collectors.toList()));
         } else {
-            JkLog.verbose("Use Kotlin compiler using jars %s", jarsVersionAndTarget.formattedToString());
+            JkPathSequence kotlincClasspath = jarsVersionAndTarget.jars;
+            JkLog.verbose("Use Java-Kotlin compiler using jars: %n%s", kotlincClasspath.toPathMultiLine("  "));
             JkLog.verbose("Use Kotlin compiler with options %s", JkUtilsString.formatOptions(loggedOptions));
             kotlincProcess = JkJavaProcess.ofJava( "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
-                    .setClasspath(jarsVersionAndTarget.jars)
+                    .setClasspath(kotlincClasspath)
                     .addJavaOptions(this.jvmOptions)
                     .addParams("-no-stdlib", "-no-reflect");
         }
@@ -510,6 +519,12 @@ public final class JkKotlinCompiler {
     private static String toJavaOption(String option) {
         String result = option.startsWith("-") ? option.substring(1) : option;
         return "-J" + result;
+    }
+
+    private List<Path> pluginsCp() {
+        return plugins.stream()
+                .map(Plugin::getJar)
+                .collect(Collectors.toList());
     }
 
     private class Plugin {
