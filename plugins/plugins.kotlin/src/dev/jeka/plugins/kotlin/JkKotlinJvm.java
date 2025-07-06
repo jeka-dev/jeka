@@ -29,7 +29,11 @@ import dev.jeka.core.api.project.JkProjectCompilation;
 import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static dev.jeka.core.api.project.JkProjectCompilation.JAVA_SOURCES_COMPILE_ACTION;
@@ -44,9 +48,9 @@ public class JkKotlinJvm {
 
     private String jvmVersion = JkJavaVersion.ofCurrent().toString();
 
-    private Path kotlinSourceSir;
+    private Path kotlinSourceDir;
 
-    private Path kotlinTestSourceSir;
+    private Path kotlinTestSourceDir;
 
     private JkKotlinJvm(JkKotlinCompiler kotlinCompiler) {
         this.kotlinCompiler = kotlinCompiler;
@@ -84,11 +88,11 @@ public class JkKotlinJvm {
     }
 
     public Path kotlinSourceDir() {
-        return kotlinSourceSir;
+        return kotlinSourceDir;
     }
 
     public Path getKotlinTestSourceDir() {
-        return kotlinTestSourceSir;
+        return kotlinTestSourceDir;
     }
 
     /**
@@ -106,11 +110,10 @@ public class JkKotlinJvm {
             project.test.compilation.compileActions.remove(JAVA_SOURCES_COMPILE_ACTION);
         }
 
-
         JkProjectCompilation prodCompile = project.compilation;
         JkProjectCompilation testCompile = project.test.compilation;
-        this.kotlinSourceSir = kotlinSourceDir;
-        this.kotlinTestSourceSir = kotlinTestSourceDir;
+        this.kotlinSourceDir = kotlinSourceDir;
+        this.kotlinTestSourceDir = kotlinTestSourceDir;
 
         prodCompile.dependencies.addVersionProvider(kotlinVersionProvider());
         JkJavaVersion targetVersion = project.getJvmTargetVersion();
@@ -145,16 +148,14 @@ public class JkKotlinJvm {
             testCompile.dependencies.modify(this::addStdLibsToTestDeps);
         }
 
-        /*
-        project.setJavaIdeSupport(ideSupport -> {
-            ideSupport.getProdLayout().addSource(project.getBaseDir().resolve(kotlinSourceDir));
-            if (kotlinTestSourceDir != null) {
-                ideSupport.getTestLayout().addSource(project.getBaseDir().resolve(kotlinTestSourceDir));
-            }
-            return ideSupport;
-        });
+        project.compilation.layout.addSources(kotlinSourceDir);
+        if (Files.exists(kotlinTestSourceDir)) {
+            project.test.compilation.layout.addSources(kotlinTestSourceDir);
+        }
+    }
 
-         */
+    JkJavaVersion getJvmVersion() {
+        return JkJavaVersion.of(jvmVersion);
     }
 
     private JkVersionProvider kotlinVersionProvider() {

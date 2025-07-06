@@ -107,6 +107,10 @@ public class JkMiscXml {
         return result;
     }
 
+    public Path getPath() {
+        return miscXmlPath;
+    }
+
     private static JkJavaVersion guessFromJLevelLanguage(String languageLevel) {
         if (languageLevel == null) {
             return null;

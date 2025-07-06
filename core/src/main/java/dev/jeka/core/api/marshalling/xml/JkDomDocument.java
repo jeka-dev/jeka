@@ -145,8 +145,16 @@ public final class JkDomDocument {
      * Saves this document in the specified file.
      */
     public void save(Path file) {
-        try (OutputStream os = Files.newOutputStream(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
-            print(os);
+        try (OutputStream os = Files.newOutputStream(file,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING)) {
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            print(baos);
+            // remove the trailing br
+            String xml = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim();
+            os.write(xml.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -32,10 +32,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -292,9 +289,15 @@ public final class JkKotlinCompiler {
      * Adds a plugin option to the Kotlin compiler.
      */
     public JkKotlinCompiler addPluginOption(String pluginId, String name, String value) {
-        addOption("-P");
-        addOption("plugin:" + pluginId + ":" + name + "=" + value);
+        this.options.addAll(toPluginOption(pluginId, name, value));
         return this;
+    }
+
+    List<String> toPluginOption(String pluginId, String name, String value) {
+        List<String> result = new ArrayList<>();
+        result.add("-P");
+        result.add("plugin:" + pluginId + ":" + name + "=" + value);
+        return result;
     }
 
     /**
@@ -397,6 +400,10 @@ public final class JkKotlinCompiler {
             }
         }
         return Collections.unmodifiableList(options);
+    }
+
+    public List<String> getOptions() {
+        return Collections.unmodifiableList(this.options);
     }
 
     private static Path getLibsDir(

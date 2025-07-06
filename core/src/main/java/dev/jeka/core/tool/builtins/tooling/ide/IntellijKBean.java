@@ -90,6 +90,9 @@ public final class IntellijKBean extends KBean {
     @JkDoc("If true, sources will be downloaded will resolving dependencies.")
     private boolean downloadSources = false;
 
+    @JkDoc(hide = true, value="Specifiy the intellij project dir (may be different than module root dir")
+    private Path projectRootDir;
+
     private final JkConsumers<JkIml> imlCustomizers = JkConsumers.of();
 
     /**
@@ -107,7 +110,7 @@ public final class IntellijKBean extends KBean {
         FocusResult result = getFocusResult();
         Path regularImlPath = getImlFile();
         Path separatedJekasrcImlPath = getJekaSrcImlFile();
-        JkModulesXml modulesXml = JkModulesXml.of(getBaseDir());
+        JkModulesXml modulesXml = getModulesXml();
         if (!shouldSkipModulesXml()) {   // only for nor creating modules.xml during tests
             modulesXml.createIfAbsentOrInvalid();
         }
@@ -155,7 +158,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Generates ./idea/modules.xml file by grabbing all .iml files presents " +
             "in root or sub-directory of the project.")
     public void modulesXml() {
-        IntelliJProject intelliJProject = IntelliJProject.of(getBaseDir());
+        IntelliJProject intelliJProject = IntelliJProject.of(projectRootDir(getBaseDir()));
         intelliJProject.regenerateModulesXml();
     }
 
@@ -185,7 +188,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc("Re-init the project by deleting workspace.xml and regenerating .idea/modules.xml")
     public void initProject() {
         iml();
-        IntelliJProject.of(getBaseDir()).deleteWorkspaceXml();
+        IntelliJProject.of(projectRootDir(getBaseDir())).deleteWorkspaceXml();
         modulesXml();
     }
 
@@ -387,6 +390,10 @@ public final class IntellijKBean extends KBean {
 
     }
 
+    public Path getProjectRootDir() {
+        return projectRootDir(getBaseDir());
+    }
+
     public Path findRegularImlFilePath() {
         Path baseDir = getBaseDir();
         String fileName = baseDir.toAbsolutePath().getFileName().toString() + ".iml";
@@ -411,6 +418,25 @@ public final class IntellijKBean extends KBean {
 
     private SdkResolver sdkResolver() {
         return new SdkResolver(rootSdkJavaVersion());
+    }
+
+    private JkModulesXml getModulesXml() {
+        return JkModulesXml.of(projectRootDir(getBaseDir()));
+    }
+
+    private Path projectRootDir(Path fromDir) {
+        if (projectRootDir != null) {
+            return projectRootDir;
+        }
+        if (Files.exists(fromDir.resolve(".idea/misc.xml"))
+                || Files.exists(fromDir.resolve(".idea/workspace.xml"))) {
+            return fromDir;
+        }
+        if (fromDir.getParent().getParent() == null) {
+            // nothing found, use the current dir
+            return Paths.get(".").toAbsolutePath();
+        }
+        return projectRootDir(fromDir.getParent());
     }
 
     private class SdkResolver {

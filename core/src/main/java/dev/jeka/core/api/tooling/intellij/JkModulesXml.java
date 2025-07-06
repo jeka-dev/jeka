@@ -49,6 +49,7 @@ public class JkModulesXml {
 
     public JkModulesXml createIfAbsentOrInvalid() {
         if (!Files.exists(modulesXmlFile)) {
+            JkLog.verbose("Re-creating modules.xml file at " + modulesXmlFile);
             createEmpty();
         } else {
             try {

@@ -19,11 +19,15 @@ package dev.jeka.plugins.kotlin;
 import dev.jeka.core.api.depmanagement.JkCoordinate;
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.kotlin.JkKotlinCompiler;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 @JkDoc("Add Kotlin compilation capability to `project` KBean.")
@@ -47,6 +51,10 @@ public class KotlinKBean extends KBean {
 
     @JkDoc("If true, includes standard lib for compiling")
     public boolean includeStdlib = true;
+
+    @JkDoc("The Kotlin api version. If null, this will be deduced from Kotlin version.")
+    @JkSuggest({"1.8", "1.9", "2.0", "2.1"})
+    public String kotlinApiVersion;
 
     @JkDoc("If true, the project KBean will be automatically configured to use Kotlin.")
     public boolean configureProject = true;
@@ -84,12 +92,33 @@ public class KotlinKBean extends KBean {
         handlePresets();
         handlePlugins();
         handlePluginOptions();
+    }
 
+    @JkDoc("Generates specific .idea/kotlinc.xml with relevant values")
+    @JkPostInit
+    private void postInit(IntellijKBean intellijKBean) {
+        String kotlinVersion = getKotlinVersion();
+        IntelliJKotlincXml intelliJKotlincXml = new IntelliJKotlincXml();
+        intelliJKotlincXml.kotlinVersion = kotlinVersion;
+        JkKotlinJvm kotlinJvm = getKotlinJvm();
+        intelliJKotlincXml.jvmVersion = kotlinJvm.getJvmVersion();
+        String apiVersion = Optional.ofNullable(this.kotlinApiVersion)
+                .orElseGet(() -> JkUtilsString.substringBeforeLast(kotlinVersion, "."));
+        intelliJKotlincXml.apiVersion = apiVersion;
+        List<String> options = new LinkedList<>(kotlinJvm.getKotlinCompiler().getOptions());
+        options.addAll(kotlinJvm.getKotlinCompiler().getPlugins());
+        String args = String.join(" ", options).trim();
+        intelliJKotlincXml.additionalArguments = args;
+
+        Path projectRootDir = intellijKBean.getProjectRootDir();
+        Path kotlincPath = projectRootDir.resolve(".idea/kotlinc.xml");
+
+        intellijKBean.customizeIml(iml -> intelliJKotlincXml.save(kotlincPath));
     }
 
     /**
      * Retrieves the Kotlin JVM project. If the project has already been created, it is returned.
-     * Otherwise, it creates a new Kotlin JVM project using the projectKBean found in runbase..
+     * Otherwise, it creates a new Kotlin JVM project using the projectKBean found in the runbase.
      * If no projectKean is found in the runbase, an IllegalStateException is thrown.
      *
      * @throws IllegalStateException if no projectKean is found in the runbase
