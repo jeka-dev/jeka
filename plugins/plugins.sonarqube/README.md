@@ -54,6 +54,10 @@ sonar.projectDescription=A demo project for showcasing JeKa.
 All properties in `jeka.properties` starting with `sonar.` are taken in account by the Sonar scanner.
 It is also possible to pass system props as `jeka sonatqube: run -Dsonar.token=Xxxxxxxx`.
 
+## Token
+
+The sonar token can be passed using properties `sonar.token` or via the `SONAR_TOKEN` environment variable.
+
 ## Programmatic Usage
 
 We can ru Sonar scanner programmatically as below:
