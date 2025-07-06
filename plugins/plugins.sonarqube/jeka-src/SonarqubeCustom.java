@@ -26,6 +26,7 @@ class SonarqubeCustom extends KBean {
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .dependencies.test
                     .add("org.junit.jupiter:junit-jupiter:5.13.3")
+                .   add("org.junit.platform:junit-platform-launcher:1.13.3")
         ;
         project.flatFacade.dependencies.compile
                     .add(JkLocator.getJekaJarPath());
