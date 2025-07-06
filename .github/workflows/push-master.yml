@@ -22,6 +22,7 @@ jobs:
         java-version: 1.8
 
     - name: Restore JeKa cache
+      if: false
       uses: actions/cache/restore@v4
       with:
         path: ~/.jeka/cache
