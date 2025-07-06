@@ -37,7 +37,8 @@ jobs:
     - name: Sonarqube Analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: jeka -cp=plugins/plugins.sonarqube/jeka-output/classes --stacktrace --inspect
+      run: |
+        jeka -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --stacktrace --inspect
 
     - name: Publish to OSSRH snapshot
       if: false
