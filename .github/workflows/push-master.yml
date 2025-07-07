@@ -28,7 +28,7 @@ jobs:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 
-    - name: Package JeKa (bootstrapped by ANT)
+    - name: Package JeKa (bootstrapped by ANT) and add it to PATH
       env:
         JEKA_RUN_SLOW_TEST: true
       run: |
@@ -37,7 +37,7 @@ jobs:
 
     - name: Run tests with Jacoco coverage
       run: |
-        jeka -cp=plugins/plugins.jacoco/jeka-output/classes -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect    
+        jeka -cp=plugins/plugins.jacoco/jeka-output/classes -D@jacoco=on base: test project: test e2eTest --no-ansi --stacktrace --inspect    
 
     - name: Sonarqube Analysis
       env:
