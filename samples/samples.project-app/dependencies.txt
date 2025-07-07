@@ -1,15 +1,7 @@
-##
-# This file declares some dependencies to be included to the project dependencies.
-#
-# More details : https://jeka-dev.github.io/jeka/reference/api-project/#full-text-description
-##
-
-== COMPILE ==
+[compile]
 com.google.guava:guava:33.3.1-jre
 
-== RUNTIME ==
-
-== TEST ==
+[test]
 org.junit.jupiter:junit-jupiter:5.8.1
 
 

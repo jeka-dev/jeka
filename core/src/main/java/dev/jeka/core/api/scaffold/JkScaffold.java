@@ -142,8 +142,7 @@ public abstract class JkScaffold {
 
     protected List<String> getJUnitDeps() {
         String jupiterModuleId = "org.junit.jupiter:junit-jupiter";
-        String launcherModuleId = "org.junit.platform:junit-platform-launcher";
-        return Arrays.asList(jupiterModuleId, launcherModuleId);
+        return Collections.singletonList(jupiterModuleId);
     }
 
     protected String getJekaVersion() {

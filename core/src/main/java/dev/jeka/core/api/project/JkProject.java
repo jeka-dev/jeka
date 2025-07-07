@@ -502,7 +502,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .add("Test Inclusions", test.selection.getIncludePatterns())
                 .add("Test Exclusions", test.selection.getExcludePatterns())
                 .add("Test Progress Style", test.processor.engineBehavior.getProgressStyle())
-                .add("Junit5 Platform Version", test.processor.getJunitPlatformVersion())
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
                 .add("Pack actions", this.packActions.getRunnableNames())

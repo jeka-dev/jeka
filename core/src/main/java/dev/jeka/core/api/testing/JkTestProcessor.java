@@ -16,10 +16,7 @@
 
 package dev.jeka.core.api.testing;
 
-import dev.jeka.core.api.depmanagement.JkCoordinateFileProxy;
-import dev.jeka.core.api.depmanagement.JkDepSuggest;
-import dev.jeka.core.api.depmanagement.JkRepoProperties;
-import dev.jeka.core.api.depmanagement.JkRepoSet;
+import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.function.JkUnaryOperator;
@@ -85,6 +82,10 @@ public final class JkTestProcessor {
 
     }
 
+    // Using the latest platform versions might break compatibility with older JUnit 5 versions.
+    @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons")
+    private static String DEFAULT_PLATFORM_VERSION = "1.9.3";
+
     private static final String ENGINE_SERVICE = "org.junit.platform.engine.TestEngine";
 
     private static final String PLATFORM_LAUNCHER_CLASS_NAME = "org.junit.platform.launcher.Launcher";
@@ -104,6 +105,8 @@ public final class JkTestProcessor {
 
     private static final String JUNIT_PLATFORM_COMMON_MODULE = "org.junit.platform:junit-platform-commons";
 
+    private static final String PLATFORM_COMMONS_JAR_NAME_PREFIX = "junit-platform-commons-";
+
     private JkJavaProcess forkingProcess = JkJavaProcess
             .ofJava(JkTestProcessor.class.getName())
             .setFailOnError(false)
@@ -117,11 +120,6 @@ public final class JkTestProcessor {
 
     public final JkRunnables preActions = JkRunnables.of();
 
-    private String javaDistrib;
-
-    private JkJavaVersion javaVersion;
-
-
     /**
      * Collection of <i>Runnables</i> to be executed after the test processor has run.
      * <p>
@@ -132,9 +130,7 @@ public final class JkTestProcessor {
      */
     public final JkRunnables postActions = JkRunnables.of();
 
-    // Using the latest platform versions might break compatibility with older JUnit 5 versions.
-    @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons")
-    private String junitPlatformVersion = "1.9.3";
+    private String platformVersionCache;
 
     private JvmHints jvmHints = JvmHints.ofDefault();
 
@@ -184,17 +180,6 @@ public final class JkTestProcessor {
         } else {
             forkingProcess = null;
         }
-        return this;
-    }
-
-    public String getJunitPlatformVersion() {
-        return junitPlatformVersion;
-    }
-
-
-    public JkTestProcessor setJunitPlatformVersion(
-            @JkDepSuggest(versionOnly = true, hint="org.junit.platform:junit-platform-commons") String junitPlatformVersion) {
-        this.junitPlatformVersion = junitPlatformVersion;
         return this;
     }
 
@@ -270,13 +255,13 @@ public final class JkTestProcessor {
 
     private List<Path> computeClasspath(JkPathSequence testClasspath) {
         JkPathSequence result = testClasspath;
+
         JkClassLoader classloader = JkClassLoader.ofCurrent();
 
         result = addIfNeeded(result, classloader, PLATFORM_LAUNCHER_CLASS_NAME, JUNIT_PLATFORM_LAUNCHER_MODULE);
         result = addIfNeeded(result, classloader, PLATFORM_REPORT_CLASS_NAME, JUNIT_PLATFORM_REPORTING_MODULE);
         result = addIfNeeded(result, classloader, ENGINE_SERVICE, JUNIT_PLATFORM_TEST_ENGINE_MODULE);
-
-        result = addIfNeeded(result, classloader, "org.junit.platform.commons.logging.LoggerFactory, ",
+        result = addIfNeeded(result, classloader, "org.junit.platform.commons.logging.LoggerFactory",
                 JUNIT_PLATFORM_COMMON_MODULE);
 
         JkUrlClassLoader ucl = JkUrlClassLoader.of(result, classloader.get());
@@ -309,14 +294,15 @@ public final class JkTestProcessor {
         }
     }
 
-
     private JkPathSequence addIfNeeded(JkPathSequence classpath, JkClassLoader classloader,
                                        String className, String moduleName) {
         JkPathSequence result = classpath;
         if (!classloader.isDefined(className)) {
             if (result.findEntryContainingClass(className) == null) {
-                String dep = moduleName + ":" + this.junitPlatformVersion;
-                Path path = JkCoordinateFileProxy.of(this.repoSetSupplier.get(), dep).get();
+                String platformVersion = guessPlatformVersion(classpath);
+                JkLog.verbose("%s from %s not found in classpath: version %s will be appended to the classpath",
+                        className, moduleName, platformVersion);
+                Path path = resolvePlatformJar(moduleName, platformVersion);
                 result = result.and(path);
             }
         }
@@ -475,6 +461,31 @@ public final class JkTestProcessor {
             }
             return null;
         }
+    }
+
+    private Path resolvePlatformJar(String moduleId, String platformVersion)  {
+        JkCoordinate coordinate = JkModuleId.of(moduleId).toCoordinate(platformVersion);
+        JkCoordinateFileProxy coordinateFileProxy = JkCoordinateFileProxy.of(repoSetSupplier.get(), coordinate);
+        return coordinateFileProxy.get();
+    }
+
+
+    private String guessPlatformVersion(JkPathSequence classpath) {
+        if (platformVersionCache != null) {
+            return platformVersionCache;
+        }
+        platformVersionCache = classpath.getEntries().stream()
+                .filter(path -> path.getFileName().toString().startsWith(PLATFORM_COMMONS_JAR_NAME_PREFIX))
+                .map(path -> path.getFileName().toString().substring(PLATFORM_COMMONS_JAR_NAME_PREFIX.length()))
+                .map(name -> JkUtilsString.substringBeforeLast(name, "."))
+                .findFirst().orElseGet(() -> {
+                    JkLog.warn("Cannot identify junit-platform-common version from the classpath -> use default version :"
+                            + DEFAULT_PLATFORM_VERSION);
+                    JkLog.warn("Provide " + JUNIT_PLATFORM_LAUNCHER_MODULE +
+                            " test dependency in test classpath if the default does not fit.");
+                    return DEFAULT_PLATFORM_VERSION;
+                });
+        return platformVersionCache;
     }
 
 }

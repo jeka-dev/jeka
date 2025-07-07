@@ -9,7 +9,6 @@ import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 import dev.jeka.plugins.springboot.SpringbootKBean;
 
 @JkDep("org.springframework.boot:spring-boot-starter-test")
-
 @JkDep("../../plugins/plugins.springboot/jeka-output/dev.jeka.springboot-plugin.jar")
 class BaseAppCustom extends KBean {
 

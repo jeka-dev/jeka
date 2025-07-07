@@ -4,7 +4,7 @@ import dev.jeka.core.tool.JkDep;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@JkDep("org.springframework.boot:spring-boot-dependencies::pom:3.3.5")
+@JkDep("org.springframework.boot:spring-boot-dependencies:3.5.3@pom")
 @JkDep("org.springframework.boot:spring-boot-starter-web")
 
 @SpringBootApplication

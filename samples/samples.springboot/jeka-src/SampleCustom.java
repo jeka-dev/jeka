@@ -49,15 +49,15 @@ public class SampleCustom extends KBean {
                 .add("org.springframework.boot:spring-boot-starter-data-jpa")
                 .add("com.h2database:h2");
 
-        projectKBean.project.testing.compilation.dependencies
+        projectKBean.project.test.compilation.dependencies
                 .add("org.springframework.boot:spring-boot-starter-test");
 
         projectKBean.project
                 .setModuleId("dev.jeka:samples-springboot")
-                .setVersion("0.0.1-SNAPSHOT");  // Snapshot is necessary otherwise it can not deploy twice in maven local repo
+                .setVersion("0.0.1-SNAPSHOT");  // Snapshot is necessary, otherwise it cannot deploy twice in maven local repo
         JkSpringbootProject.of(projectKBean.project)
                 .configure()
-                .includeParentBom("3.3.4");
+                .includeParentBom("3.5.3");
     }
 
     public void cleanPack() {

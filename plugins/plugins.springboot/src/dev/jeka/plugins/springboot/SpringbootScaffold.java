@@ -59,7 +59,6 @@ class SpringbootScaffold {
         // Add dependencies
         projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
         projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
-        projectScaffold.testDeps.add("org.junit.platform:junit-platform-launcher");
         projectScaffold.versionDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom");
 
         // Add sample code
@@ -82,7 +81,7 @@ class SpringbootScaffold {
 
         baseScaffold.baseScaffoldOption.kind = null; // to generate README.MD
 
-        // Remove build class defined by default
+        // Remove the build class defined by default
         baseScaffold.removeFileEntriesStartingWith(Paths.get(JkConstants.JEKA_SRC_DIR));
 
         String lastSpringbootVersion = baseScaffold.findLatestStableVersion(
@@ -94,8 +93,7 @@ class SpringbootScaffold {
                 "org.springframework.boot:spring-boot-starter-web");
 
         List<String> devDeps = JkUtilsIterable.listOf(
-                "org.springframework.boot:spring-boot-starter-test",
-                "org.junit.platform:junit-platform-launcher:1.12.2");
+                "org.springframework.boot:spring-boot-starter-test");
 
         // Build class code
         String buildClassCode = readSnippet("BaseBuild.java");
