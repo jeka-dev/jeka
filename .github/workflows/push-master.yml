@@ -37,13 +37,13 @@ jobs:
     - name: Run tests with Jacoco coverage
       if: true
       run: |
-        jeka -cp=plugins/plugins.jacoco/jeka-output/classes,core -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect --verbose
+        jeka -cp=plugins/plugins.jacoco/jeka-output/classes,core/libs/compile-only/jansi-3.30.4.jar -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect --verbose
 
     - name: Sonarqube Analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        jeka -Djeka.java.version=21 -cb=core/libs/compile-only/jansi-3.30.4.jar -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --stacktrace --inspect --debug
+        jeka -Djeka.java.version=21 -cb=core -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --stacktrace --inspect --debug
 
     - name: Publish to OSSRH snapshot
       if: false
