@@ -283,7 +283,7 @@ public final class JkSonarqube {
                 .addParamsIf(JkLog.verbosity() == JkLog.Verbosity.DEBUG, "-X")
                 .exec();
         if (!procResult.hasSucceed()) {
-            throw new JkException("SonarScanner command failed. Use--verbose to get more details.");
+            throw new JkException("SonarScanner command failed. Use --debug to get more details.");
         }
     }
 
