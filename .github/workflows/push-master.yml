@@ -28,18 +28,22 @@ jobs:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 
-    - name: Build JeKa bootstrapped by ANT
+    - name: Package JeKa (bootstrapped by ANT)
       env:
         JEKA_RUN_SLOW_TEST: true
       run: |
         ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
 
+    - name: Run tests with Jacoco coverage
+      run: |
+        jeka -cp=plugins/plugins.jacoco/jeka-output/classes -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect    
+
     - name: Sonarqube Analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        jeka -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --stacktrace --inspect
+        jeka -Djeka.java.version=21 -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --stacktrace --inspect
 
     - name: Publish to OSSRH snapshot
       if: false

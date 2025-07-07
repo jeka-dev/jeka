@@ -44,7 +44,7 @@
 			<syspropertyset>
 				<propertyref builtin="commandline"/>
 			</syspropertyset>
-			<arg line="project: build base: test --inspect --stacktrace -Djeka.test.skip=false" />
+			<arg line="project: pack --inspect --stacktrace -Djeka.test.skip=true" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
