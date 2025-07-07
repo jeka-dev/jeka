@@ -75,3 +75,7 @@ Create a release via the [GitHub release mechanism](https://github.com/jeka-dev/
 <p align="center">
     <img src="docs/images/mascot.png" width="420" height="420" />
 </p>
+
+## Sonarqube Analysis
+
+Sonarqube analysis is available [here](https://sonarcloud.io/project/overview?id=dev.jeka.jeka-core)
