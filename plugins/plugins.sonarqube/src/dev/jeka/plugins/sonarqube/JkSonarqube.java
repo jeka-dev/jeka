@@ -220,7 +220,7 @@ public final class JkSonarqube {
         if (pingServer) {
             if (!JkUtilsNet.isStatusOk(hostUrl, JkLog.isVerbose())) {
                 throw new JkException("The Sonarqube url %s is not available.%nCheck server " +
-                        "or disable this ping check (sonarqube: pingServer=false)", hostUrl);
+                        "or disable this ping check with `-D@sonarqube.pingServer=false`", hostUrl);
             }
         }
         JkConsoleSpinner.of("Running Sonarqube").run(this::runOrFail);
@@ -384,7 +384,7 @@ public final class JkSonarqube {
                     .merge(project.pack.runtimeDependencies.get()).getResult();
             libs = project.dependencyResolver.resolve(deps).getFiles();
         }
-        final Path testReportDir = project.test.getReportDir();
+        final Path testReportDir = project.test.getReportDir().toAbsolutePath();
         JkModuleId jkModuleId = project.getModuleId();
         if (jkModuleId == null) {
             String baseDirName = baseDir.getFileName().toString();
@@ -403,14 +403,15 @@ public final class JkSonarqube {
                 .setProperty(VERBOSE, Boolean.toString(JkLog.isVerbose()))
                 .setPathProperty(SOURCES, prodLayout.resolveSources().getRootDirsOrZipFiles())
                 .setPathProperty(TEST, testLayout.resolveSources().getRootDirsOrZipFiles())
-                .setProperty(WORKING_DIRECTORY, workDir(baseDir).toString())
+                .setProperty(WORKING_DIRECTORY,
+                        project.getBaseDir().toAbsolutePath().resolve(JkConstants.JEKA_WORK_PATH).resolve(".sonarscanner").toString())
                 .setProperty(JUNIT_REPORTS_PATH,
-                        baseDir.relativize( testReportDir.resolve("junit")).toString())
+                        testReportDir.resolve("junit").toString())
                 .setProperty(SUREFIRE_REPORTS_PATH,
-                        baseDir.relativize(testReportDir.resolve("junit")).toString())
+                        testReportDir.resolve("junit").toString())
                 .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
                 .setProperty(JACOCO_XML_REPORTS_PATHS,
-                        baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
+                        project.getOutputDir().toAbsolutePath().resolve("jacoco/jacoco.xml").toString())
                 .setPathProperty(JAVA_LIBRARIES, libs);
 
         if (Files.exists(testLayout.getClassDirPath())) {
