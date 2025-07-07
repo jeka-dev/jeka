@@ -23,7 +23,7 @@ It targets a generation of Java developers who prefer simple, Java-centric tools
 or external DSL-based solutions for building their applications.
 
 ## Use Cases
-- **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL. Get rid of JDK installations.
+- **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL. No pre-installed JDK required.
 - **Use Java for scripting:** Write scripts, devOps pipelines or complex applications in Java, runnable directly from source code.
 - **Package Java applications as source:** Publish the source code in a Git repo and execute it instantly from everywhere, in JVM or native mode.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
@@ -65,6 +65,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 ```properties
 jeka.classpath=dev.jeka:jacoco-plugin  dev.jeka:sonarqube-plugin
 
+@project=on
 @project.moduleId=my-org:my-lib
 @project.gitVersioning.enable=true
 @project.pack.jarType=SHADE
@@ -84,13 +85,14 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 class Build extends KBean {
 
     @JkDoc("Deploy Spring-Boot application on remote server")
-    public void deploy() {
+    public void deployFtp() {
         Path jar = load(ProjectKBean.class).project.artifactLocator.getMainArtifactPath();
         this.sendThroughFtp(jar);
         this.sendRestartCommand();
     }
   ...
 ```
+Run directly this method from command line: `jeka build: deployFtp`.
 
 Visit the [documentation](https://jeka-dev.github.io/jeka/), and explore the [examples](https://jeka-dev.github.io/jeka/examples/).
 
