@@ -1,9 +1,7 @@
-# A push on master will build, test and publish Jeka on OSSRH.
-# Besides, it will push the built documentation on the Jeka landing page.
+# A push to the master branch triggers build, test, and publish for Jeka on OSSRH.
+# It also updates Jeka's documentation on the landing page.
 
-# If a tag is present on the last commit, Jeka will publish versioned artifacts according tag name on OSSRH public repo.
-# If no tag is present, the built artifacts will be published to OSSRH snapshot repository.
-# This logic is implemented within the Jeka build.
+# If the last commit has a tag, versioned artifacts will be published to Maven Central using the tag name.
 
 name: Java Build and Publish
 
