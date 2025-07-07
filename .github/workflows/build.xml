@@ -47,7 +47,7 @@
 			<!--
 			<arg line="project: build base: test -i -st -Djeka.test.skip=false" />
 			-->
-			<arg line="project: pack --inspect --stacktrace -Djeka.test.skip=false" />
+			<arg line="project: pack --inspect --stacktrace" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

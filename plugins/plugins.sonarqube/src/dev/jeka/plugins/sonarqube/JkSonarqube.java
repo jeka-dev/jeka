@@ -376,15 +376,15 @@ public final class JkSonarqube {
     public JkSonarqube configureFor(JkProject project, boolean provideProdLibs, boolean provideTestLibs) {
         this.projectBaseDir = project.getBaseDir();
         final JkCompileLayout prodLayout = project.compilation.layout;
-        final JkCompileLayout testLayout = project.testing.compilation.layout;
+        final JkCompileLayout testLayout = project.test.compilation.layout;
         final Path baseDir = project.getBaseDir();
         JkPathSequence libs = JkPathSequence.of();
         if (provideProdLibs) {
             JkDependencySet deps = project.compilation.dependencies.get()
-                    .merge(project.packaging.runtimeDependencies.get()).getResult();
+                    .merge(project.pack.runtimeDependencies.get()).getResult();
             libs = project.dependencyResolver.resolve(deps).getFiles();
         }
-        final Path testReportDir = project.testing.getReportDir();
+        final Path testReportDir = project.test.getReportDir();
         JkModuleId jkModuleId = project.getModuleId();
         if (jkModuleId == null) {
             String baseDirName = baseDir.getFileName().toString();
@@ -411,10 +411,13 @@ public final class JkSonarqube {
                 .setProperty(SOURCE_ENCODING, project.getSourceEncoding())
                 .setProperty(JACOCO_XML_REPORTS_PATHS,
                         baseDir.relativize(project.getOutputDir().resolve("jacoco/jacoco.xml")).toString())
-                .setPathProperty(JAVA_LIBRARIES, libs)
-                .setPathProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+                .setPathProperty(JAVA_LIBRARIES, libs);
+
+        if (Files.exists(testLayout.getClassDirPath())) {
+            this.setPathProperty(JAVA_TEST_BINARIES, testLayout.getClassDirPath());
+        }
         if (provideTestLibs) {
-            JkDependencySet deps = project.testing.compilation.dependencies.get();
+            JkDependencySet deps = project.test.compilation.dependencies.get();
             JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
             this.setPathProperty(JAVA_TEST_LIBRARIES, testLibs);
         }
