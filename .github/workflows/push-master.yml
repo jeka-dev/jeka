@@ -39,7 +39,7 @@ jobs:
     - name: Run tests with Jacoco coverage
       if: false
       run: |
-        jeka -cp=plugins/plugins.jacoco/jeka-output/classes -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect -v
+        jeka -cp=plugins/plugins.jacoco/jeka-output/classes -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect --verbose
 
     - name: Sonarqube Analysis
       env:
