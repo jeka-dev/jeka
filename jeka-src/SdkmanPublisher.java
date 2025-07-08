@@ -26,7 +26,7 @@ import java.util.List;
 
 class SdkmanPublisher {
 
-    private static final long MAX_WAIT_MS = 30 * 60 * 1000;
+    private static final long MAX_WAIT_MS = 120 * 60 * 1000;
 
     private static final long DELAY_MS = 60 * 1000;
 
@@ -54,6 +54,8 @@ class SdkmanPublisher {
         }
         String url = String.format("https://repo1.maven.org/maven2/dev/jeka/jeka-core/%s/jeka-core-%s-sdkman.zip",
                 tag, tag);
+
+        // Wait until the artifact is accessible from MavenCentral
         boolean retry = true;
         long start = System.currentTimeMillis();
         boolean found = false;
