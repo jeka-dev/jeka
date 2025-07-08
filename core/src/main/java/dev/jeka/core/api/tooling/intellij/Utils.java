@@ -20,7 +20,6 @@ import dev.jeka.core.api.java.JkJavaVersion;
 
 class Utils {
 
-
     static JkJavaVersion guessFromJProjectJdkName(String projectJdkName) {
         if (projectJdkName == null) {
             return null;

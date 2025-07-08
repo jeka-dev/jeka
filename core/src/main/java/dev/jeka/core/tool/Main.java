@@ -60,6 +60,9 @@ public class Main {
 
         long startTime = System.currentTimeMillis();
 
+        // Create the global.properties file if not present
+        JkUtilsPath.createFileSafely(JkLocator.getGlobalPropertiesFile());
+
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
         if (cmdArgs.isNoAnsi()) {

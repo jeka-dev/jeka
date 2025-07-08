@@ -26,7 +26,6 @@ import dev.jeka.core.api.tooling.intellij.*;
 import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
@@ -403,7 +402,8 @@ public final class IntellijKBean extends KBean {
         return baseDir.resolve(".idea/" + fileName);
     }
 
-    private JkJavaVersion rootSdkJavaVersion() {
+    // Returns the jeka version mentioned in misc.xml file (project root SDK)
+    private JkJavaVersion miscXmlJavaVersion() {
         JkMiscXml miscXml = JkMiscXml.find(getBaseDir());
         if (miscXml == null) {
             return null;
@@ -417,7 +417,7 @@ public final class IntellijKBean extends KBean {
     }
 
     private SdkResolver sdkResolver() {
-        return new SdkResolver(rootSdkJavaVersion());
+        return new SdkResolver(miscXmlJavaVersion());
     }
 
     private JkModulesXml getModulesXml() {

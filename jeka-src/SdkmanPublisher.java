@@ -19,7 +19,6 @@ import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.marshalling.json.JkJson;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.util.List;
@@ -34,59 +33,79 @@ class SdkmanPublisher {
 
     private static final String DEFAULT_URL = "https://vendors.sdkman.io/default";
 
-    private static final String CONSUMER_KEY = "???";
+    private static final String CONSUMER_KEY_ENV_VAR = "SDKMAN_KEY";
 
-    private static final String TOKEN_ENV_VAR = "??????";
+    private static final String TOKEN_ENV_VAR = "SDKMAN_TOKEN";
+
+    private static final String VERSION_ENV_VAR =  "SDKMAN_CANDIDATE_VERSION";
 
     private static final String CANDIDATE = "jeka";
 
-    static void publish() {
-        List<String> tags = JkGit.of().getTagsOnCurrentCommit();
-        if (tags.isEmpty()) {
-            JkLog.info("No tags on current commit");
+
+
+    static void publishOnVersionTag() {
+        String version = System.getenv(VERSION_ENV_VAR);
+
+        // If the version is not explictly provided, compute it from hit
+        if (version == null) {
+            List<String> tags = JkGit.of().getTagsOnCurrentCommit();
+            if (tags.isEmpty()) {
+                JkLog.info("No tags on current commit: won't publish.");
+                return;
+            }
+            version = tags.get(0);
+        }
+
+        // Check version is semVer
+        JkVersion parsedVersion = JkVersion.of(version);
+        if (!parsedVersion.isDigitsOnly() || parsedVersion.toItems().size() != 3) {
+            JkLog.info("Current tag %s is not a semVer version: won't publish.", version);
             return;
         }
-        String tag = tags.get(0);
-        JkVersion version = JkVersion.of(tag);
-        if (!version.isDigitsOnly() || version.toItems().size() != 3) {
-            JkLog.info("Current tag %s is not a semVer version: won't publish.", tag);
-            return;
-        }
+
         String url = String.format("https://repo1.maven.org/maven2/dev/jeka/jeka-core/%s/jeka-core-%s-sdkman.zip",
-                tag, tag);
+                version, version);
 
         // Wait until the artifact is accessible from MavenCentral
         boolean retry = true;
         long start = System.currentTimeMillis();
         boolean found = false;
         while(retry) {
-            JkUtilsSystem.sleep(DELAY_MS);
+            JkLog.info("Checking presence of %s ...", url);
             found = !JkHttpRequest.of(url, "HEAD").execute().isError();
-            long duration = JkUtilsTime.durationInMillis(start);
-            retry = !found && duration < MAX_WAIT_MS;
+            if (found) {
+                JkLog.info("Found!");
+                retry = false;
+            } else {
+                long duration = JkUtilsTime.durationInMillis(start);
+                retry = duration < MAX_WAIT_MS;
+                if (retry) {
+                    JkLog.info("Not found, Wait %ss before retrying ...", DELAY_MS/1000);
+                }
+            }
         }
         if (!found) {
             JkLog.error("Artifact % not deployed after %min. SdkMan deployment aborted.", url, MAX_WAIT_MS/(1000*60));
             System.exit(1);
         }
-        release(url, tag);
-        setAsDefault(tag);
+        release(url, version);
+        setAsDefault(version);
     }
 
     private static void release(String url, String version) {
-        post(RELEASE_URL, url, version);
+        request("POST", RELEASE_URL, url, version);
     }
 
     private static void setAsDefault(String version) {
-        post(DEFAULT_URL, null, version);
+        request("PUT", DEFAULT_URL, null, version);
     }
 
-    private static void post(String sdkmanUrl, String candidateUrl, String version) {
-        String token = System.getenv(TOKEN_ENV_VAR);
+    private static void request(String method, String sdkmanUrl, String candidateUrl, String version) {
+        JkLog.info("Posting Jeka %s to %s...", version, sdkmanUrl);
         String body = JkJson.of().toJson(new Body(version, candidateUrl));
-        JkHttpRequest.of(sdkmanUrl, "POST")
-                .addHeader("Consumer-Key", CONSUMER_KEY)
-                .addHeader("Consumer-Token", token)
+        JkHttpRequest.of(sdkmanUrl, method)
+                .addHeader("Consumer-Key", System.getenv(CONSUMER_KEY_ENV_VAR))
+                .addHeader("Consumer-Token", System.getenv(TOKEN_ENV_VAR))
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
                 .setBody(body)
