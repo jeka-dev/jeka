@@ -37,7 +37,7 @@ jobs:
     - name: Run tests with Jacoco coverage
       if: true
       run: |
-        jeka -cp=plugins/plugins.jacoco/jeka-output/classes,core/libs/compile-only/* -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect
+        jeka -cp=plugins/plugins.jacoco/jeka-output/classes,core/libs/compile-only/jansi-3.30.4.jar -D@jacoco=on base: test project: test e2eTest --stacktrace --inspect
 
     - name: Sonarqube Analysis
       env:
