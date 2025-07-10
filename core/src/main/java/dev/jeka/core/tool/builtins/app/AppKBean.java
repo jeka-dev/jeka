@@ -37,9 +37,7 @@ public class AppKBean extends KBean {
 
     private static final PropFile GLOBAL_PROP_FILE = new PropFile(JkLocator.getGlobalPropertiesFile());
 
-    private final AppManager appManager = new AppManager(
-            JkLocator.getJekaHomeDir(),
-            JkLocator.getCacheDir().resolve("git").resolve("apps"));
+    private final AppManager appManager =  AppManager.of();
 
     private static final String COLUMN_SEPARATOR = JkUtilsSystem.IS_WINDOWS ? " | " : " │ ";
 
@@ -228,7 +226,8 @@ public class AppKBean extends KBean {
         boolean isNative = find(NativeKBean.class).isPresent();
         appManager.install(appName, repoAndTag, isNative);
 
-        JkLog.info("App has been installed. Run with: %s", JkAnsi.yellow(suggestedAppName));
+        JkLog.info("App has been installed in %s.", appManager.appDir);
+        JkLog.info("Run with: %s", JkAnsi.yellow(suggestedAppName));
     }
 
     @JkDoc("Updates an app from the given name.\n" +
@@ -298,7 +297,7 @@ public class AppKBean extends KBean {
                 .setSeparator(JkAnsi.yellow(COLUMN_SEPARATOR));
 
         JkBusyIndicator.start(JkLog.getOutPrintStream(),"Querying Git repos...");
-        text.add(
+        text.add(  // Can't use ansi color in table, cause ansi chars  will be truncated.
                 "App Name",
                 "Repo",
                 "Version",
@@ -311,7 +310,7 @@ public class AppKBean extends KBean {
                     appInfo.isNative ? "native" : "jvm");
         }
         JkBusyIndicator.stop();
-        JkLog.info("Installed app:");
+        JkLog.info(JkAnsi.magenta("Installed app:"));
         JkLog.info(text.toString());
     }
 

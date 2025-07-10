@@ -151,6 +151,7 @@ install() {
 
   # Downloading and unpack
   local install_dir="$HOME/.jeka/bin"
+  local apps_dir="$HOME/.jeka/apps"
   mkdir -p $install_dir
   touch "$HOME/.jeka/global.properties"
   echo "Installing Jeka Version $LAST_VERSION in $install_dir ..."
@@ -165,7 +166,7 @@ install() {
   echo "" >> "$SHELL_CONFIG_FILE"
   echo "# Setting Jeka HOME" >> "$SHELL_CONFIG_FILE"
   echo "export PATH=\$PATH:$install_dir" >> "$SHELL_CONFIG_FILE"
-  export PATH=$PATH:$install_dir
+  export PATH=$PATH:$install_dir:$apps_dir
 
   if [ "$CHECK" == "true" ]; then
     echo "Checking install with 'jeka --version'. This requires JDK download."

@@ -17,6 +17,9 @@
 package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.file.JkPathFile;
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkAnsi;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.*;
@@ -32,7 +35,7 @@ import java.util.stream.Collectors;
 
 class AppManager {
 
-    private final Path appDir;
+    final Path appDir;
 
     private final Path repoCacheDir;
 
@@ -43,6 +46,22 @@ class AppManager {
     AppManager(Path appDir, Path repoCacheDir) {
         this.appDir = appDir;
         this.repoCacheDir = repoCacheDir;
+    }
+
+    static AppManager of() {
+        Path appDir = JkLocator.getJekaUserHomeDir().resolve("apps").normalize();
+        if (!JkUtilsSystem.getSystemPath().getEntries().contains(appDir)) {
+            JkLog.warn("%s is not in the system PATH.", appDir);
+            JkLog.warn("Apps will be installed directly in the Jeka distribution: %s.", JkLocator.getJekaHomeDir());
+            JkLog.warn("This can cause issues when switching between multiple Jeka distributions (e.g., SDKMAN!).");
+            JkLog.warn("Consider adding %s to your PATH environment variable.", appDir);
+            appDir = JkLocator.getJekaHomeDir();
+        } else {
+            JkUtilsPath.createDirectories(appDir);
+        }
+        return new AppManager(
+                appDir,
+                JkLocator.getCacheDir().resolve("git").resolve("apps"));
     }
 
     void install(String appName, RepoAndTag repoAndTag, boolean isNative) {

@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.utils;
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
 
 import java.io.Console;
@@ -457,6 +458,16 @@ public final class JkUtilsSystem {
             return builder.toString();
         }
 
+    }
+
+    /**
+     * Retrieves the system PATH environment variable as a {@link JkPathSequence}.
+     *
+     * @return the system PATH environment variable represented as a {@link JkPathSequence}.
+     */
+    public static JkPathSequence getSystemPath() {
+        String pathString = System.getenv("PATH");
+        return JkPathSequence.ofPathString(pathString);
     }
 
 }
