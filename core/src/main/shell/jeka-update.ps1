@@ -190,7 +190,7 @@ function install() {
   $extractor = [ZipExtractor]::new($url, $installDir)
   $extractor.ExtractRootContent()
   Add-Path "$installDir"
-  $appsDir = "$jekaHome\apps"
+  $appsDir = "$HOME\.jeka\apps"
   Add-Path "$appsDir"
 }
 
