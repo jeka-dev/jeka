@@ -9,7 +9,7 @@ which includes the `nativeImage` executable used for compiling to native - you d
 It also provides helpful methods to add resources to the native executable.
 
 ```java title="Exemple"
-JkProject poject = ...
+JkProject project = ...
         
 JkNativeCompilation.of(project.asBuildable()
     .setIncludesAllResources(true)

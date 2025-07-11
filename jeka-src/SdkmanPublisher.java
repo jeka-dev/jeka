@@ -41,8 +41,6 @@ class SdkmanPublisher {
 
     private static final String CANDIDATE = "jeka";
 
-
-
     static void publishOnVersionTag() {
         String version = System.getenv(VERSION_ENV_VAR);
 

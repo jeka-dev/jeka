@@ -1,8 +1,8 @@
 # Quick Start
 
 ## Install JeKa
-  
-- Install [Jeka CLI](installation.md) 
+
+- Install [Jeka CLI](installation.md). You can also use SDKMAN!: `sdk install jeka`
 - or Install [IntelliJ Plugin for JeKa](https://plugins.jetbrains.com/plugin/24505-jeka)
 
 !!! note

@@ -1,19 +1,18 @@
-# Installation
+# CLI Installation
 
-## IntelliJ Plugin
+## Windows
 
-For a pure IDE experience, you don't need to install CLI, just install the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka).
-
-## CLI for Windows
-
-The CLI lets you run remote apps/scripts and create new projects.
-
-Execute in PowerShell :
 ```shell
 iex "& { $(iwr -useb https://jeka.dev/install.ps1) } install check"
 ```
 
-## CLI for MacOS and Linux
+## SDKMAN!
+
+```shell
+sdk install jeka
+```
+
+## MacOS and Linux
 
 Execute :
 ```shell
@@ -21,23 +20,23 @@ curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
 
 !!! note
-    JeKa requires *bash*, *curl*, and *unzip*, usually available on macOS and Linux.
+JeKa requires *bash*, *curl*, and *unzip*, usually available on macOS and Linux.
 
     On Ubuntu, install missing tools with: `apt-get update && apt-get install -y curl unzip git gcc zlib1g-dev@ `.
 
 
-## Manual CLI installation
+## Manual installation
 
 The manual installation is straightforward and may help when script installation fails.
 
 - Download latest JeKa distrib from [maven central](https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions)
   and download file named *jeka-core-xxx-distrib.zip*.
-- Unzip the content of the zip file and copy the content of 'bin' directory to an arbitrary directory ([USER HOME]/.jeka/bin for instance)
-- Add this directory to your PATH environment variable.
+- Unzip the content of the zip file and copy the content of the 'bin' in *[USER HOME]/.jeka/bin* dir. 
+- Add *[USER HOME]/.jeka/bin* and *[USER HOME]/.jeka/apps* to your `PATH` environment variable.
 
 ## Post Install
 
-Installation via script may include a sanity check that triggers a JDK download (cause of the 'check' argument passed to the install script)
+Installation via scripts may include a sanity check that triggers a JDK download (cause of the 'check' argument passed to the install script)
 
 Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
 the application to run.
