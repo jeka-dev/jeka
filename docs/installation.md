@@ -14,7 +14,6 @@ sdk install jeka
 
 ## MacOS and Linux
 
-Execute :
 ```shell
 curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
