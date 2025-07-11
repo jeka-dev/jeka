@@ -298,7 +298,7 @@ public final class JkUtilsPath {
     }
 
     public static void deleteQuietly(Path path, boolean ignoreDeleteError) {
-        if (!Files.exists(path)) {
+        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
             return;
         }
         if (Files.isDirectory(path)) {
@@ -437,8 +437,15 @@ public final class JkUtilsPath {
     }
 
     public static List<Path> listDirectChildren(Path path) {
-        try (Stream stream = Files.list(path)) {
-            return (List<Path>) stream.collect(Collectors.toList());
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            List<Path> result = new LinkedList<>();
+            for (Path child : stream) {
+                result.add(child);
+            }
+            if (path.getFileName().toString().startsWith(".bin")) {
+                System.out.println("---direct child of " + path + ": " + result);
+            }
+            return result;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
