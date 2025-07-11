@@ -4,6 +4,7 @@ theme:
     highlight_theme: dracula
     logo: images/logo-plain-white.svg
     favicon: images/logo-plain-gradient.svg
+    edit_url: https://github.com/jeka-dev/jeka/main/docs/
     font:
       text: 'Inter'
       code: 'Fire Code'
