@@ -11,7 +11,7 @@
 
 ## Follow the Guide
 
-This quick-start guide covers muliple use cases:
+This quick-start guide covers multiple use cases:
  
 - [Create scripts in Java](#create-scripts) and execute from command line.
 - [Create a Base Application or Library](#create-a-base-app-or-library).
@@ -23,7 +23,7 @@ This quick-start guide covers muliple use cases:
 
     If you are coding in IntelliJ IDEA, after scaffolding or modifying dependencies, execute the following command to synchronize:
     ```
-    jeka intellij: iml
+    jeka intellij: sync
     ```
 
 ## Create Scripts
@@ -100,12 +100,11 @@ This will display the following text on the console:
 
 --------------------------------------------------------------------------------
 ```
-Note that:
-
-- You can define multiple script methods in `Script.java`. These methods must be public, non-static, have no arguments, and return void.
-- `Script.java` can be renamed to any name and placed in any package you prefer.
-- There can be multiple script classes. When invoking a specific script, you can specify the class name, for example: `jeka script2: hi`.
-- You can also [use the classes bundled with JeKa](reference/api-intro.md) without requiring explicit declarations.
+Note:
+- You can define multiple script methods in `Script.java`. These methods must be public, non-static, take no arguments, and return `void`.
+- You can rename `Script.java` to any name and place it in any package.
+- You can create multiple script classes. To run a specific script, use the class name, e.g., `jeka script2: hi`.
+- You can also [use classes provided by JeKa](reference/api-intro.md) without explicitly declaring them.
 
 #### KBeans
 

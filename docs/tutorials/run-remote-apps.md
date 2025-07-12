@@ -84,18 +84,86 @@ jeka ::cowsay "Hello World!"
 
 ## Install
 
-Jeka allows you to install an application, enabling you to execute it without invoking `jeka`.
+JeKa lets you install apps for direct execution (no need to use `jeka`). Example:
 
-Example:
 ```shell
 jeka app: install repo=github.com/djeang/kill8
 ```
-This command installs the `kill8` application in the user's PATH, allowing you to simply invoke the application by name to run it:
+For faster cold start, install the native version:
+```shell
+jeka app: install repo=github.com/djeang/kill8 native=
+```
+
+These commands install the `kill8` application in the user's PATH, allowing you to simply invoke the application by name to run it:
 ```shell
 kill8 8081
 ```
 
 For more details, refer to the [documentation](/reference/kbeans-app).
+
+## Write Applications for Direct Run/Installation.
+
+Applications built with *Jeka* are normally automatically made *source runnable" by default.
+
+When Running a remote application for the first time, *Jeka* clones the directory then build it with `jeka base: pack` 
+or `jeka project: pack` if a project is detected.
+
+Then it looks in the jeka *jeka-output* dir to run the native or jar file.
+
+### Set a Custom Build Command
+
+If your project needs a specific build command or uses a tool like *Maven*, you can set the Jeka command for building.
+
+The command must be a *Jeka* KBean command, not a shell command. 
+For example, to build with *Maven*, you need to write a `Custom` Kbean defining the build method, and mention it in *jeka.properties* file.
+
+```properties
+jeka.program.build=custom: build
+
+## you can also specify the command for native builds
+jeka.program.build.native=custom: build
+```
+
+
+```java
+class Custom extends KBean {
+
+    @JkDoc("Build application and copy result in jeka-output in order to be run with '-p' option")
+    public void build() {
+        mvn("clean package -DskipTests -Pnative");
+        copyToJekaOutput();
+    }
+    
+    private void mvn(String mvnArguments) {
+        JkLog.info("Executing mvn " + mvnArguments);
+        String distrib = getRunbase().getProperties().get("jeka.java.distrib", "graalvm");
+        String javaVersion = getRunbase().getProperties().get("jeka.java.version", "22");
+        String distribFolder = distrib + "-" + javaVersion;
+        Path graalvmHome = JkLocator.getCacheDir().resolve("jdks").resolve(distribFolder);
+        String newPath =  graalvmHome.resolve("bin") + File.pathSeparator + System.getenv("PATH");
+        JkProcess.ofWinOrUx("mvnw.cmd", "./mvnw")
+                .addParamsAsCmdLine(mvnArguments)
+                .addParamsIf(System.getProperties().containsKey("jeka.test.skip"), "-Dmaven.test.skip=true")
+                .setWorkingDir(getBaseDir())
+                .setEnv("JAVA_HOME", graalvmHome.toString())
+                .setEnv("GRAALVM_HOME", graalvmHome.toString())
+                .setEnv("PATH", newPath)
+                .setInheritIO(true)
+                .exec();
+    }
+
+    private void copyToJekaOutput() {
+        JkPathTree.of(getBaseDir().resolve("target")).andMatching("*.jar", "*-runner")
+                .copyTo(getBaseDir().resolve(JkConstants.OUTPUT_PATH), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+}
+```
+
+The main point is to keep the build portable, like using the *Maven* wrapper.
+
+
+
 
 
 
