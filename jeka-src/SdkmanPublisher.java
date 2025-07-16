@@ -19,6 +19,8 @@ import dev.jeka.core.api.http.JkHttpRequest;
 import dev.jeka.core.api.marshalling.json.JkJson;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
+import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 
 import java.util.List;
@@ -66,7 +68,7 @@ class SdkmanPublisher {
 
         // Wait until the artifact is accessible from MavenCentral
         boolean retry = true;
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         boolean found = false;
         while(retry) {
             JkLog.info("Checking presence of %s ...", url);
@@ -76,14 +78,16 @@ class SdkmanPublisher {
                 retry = false;
             } else {
                 long duration = JkUtilsTime.durationInMillis(start);
+                JkLog.verbose("Wait duration %sms.", duration);
                 retry = duration < MAX_WAIT_MS;
                 if (retry) {
-                    JkLog.info("Not found, Wait %ss before retrying ...", DELAY_MS/1000);
+                    JkLog.info("Not found. Wait %ss before retrying ...", DELAY_MS/1000);
+                    JkUtilsSystem.sleep(DELAY_MS);
                 }
             }
         }
         if (!found) {
-            JkLog.error("Artifact % not deployed after %min. SdkMan deployment aborted.", url, MAX_WAIT_MS/(1000*60));
+            JkLog.error("Artifact %s not deployed after %s min. SdkMan deployment aborted.", url, MAX_WAIT_MS/(1000*60));
             System.exit(1);
         }
         release(url, version);

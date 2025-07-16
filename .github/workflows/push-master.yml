@@ -108,6 +108,14 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
 
+    - name: Publish to SDKMAN!
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+      env:
+        SDKMAN_KEY: ${{ secrets.SDKMAN_CONSUMER_KEY }}
+        SDKMAN_TOKEN: ${{ secrets.SDKMAN_CONSUMER_TOKEN }}
+      run: |
+        jeka build: publishSdkman
+
     - name: Save JeKa cache
       uses: actions/cache/save@v4
       with:
