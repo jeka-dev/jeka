@@ -18,9 +18,9 @@ package dev.jeka.core.api.tooling.maven;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsObject;
-import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -64,6 +64,19 @@ public final class JkPom {
         return new JkPom(document);
     }
 
+    /**
+     * Creates an effective POM representation for the specified Maven coordinate using the provided repository set.
+     *
+     * @param coordinate the Maven coordinate for which to generate the effective POM
+     * @param repoSet the set of repositories to use for resolving dependencies and inheritance
+     * @return a {@code JkPom} instance representing the effective POM of the specified coordinate
+     */
+    public static JkPom ofEffectivePom(JkCoordinate coordinate, JkRepoSet repoSet) {
+        Path pomFile = JkCoordinateFileProxy.of(repoSet, coordinate).get();
+        Document pomDoc = new PomResolver(repoSet).effectivePom(coordinate);
+        return new JkPom(pomDoc);
+    }
+
     private Element propertiesEl() {
         return JkUtilsXml.directChild(projectEl(), "properties");
     }
@@ -99,14 +112,6 @@ public final class JkPom {
         return null;
     }
 
-    public String computeGroupId() {
-        return Optional.ofNullable(getGroupId()).orElseGet(this::getParentGroupId);
-    }
-
-    public String computeProjectVersion() {
-        return Optional.ofNullable(getVersion()).orElseGet(this::getParentVersion);
-    }
-
     /**
      * The artifactId for this POM.
      */
@@ -140,11 +145,25 @@ public final class JkPom {
         return dependencies(dependenciesEl, getProperties());
     }
 
+
     /**
-     * The map groupId:ArtifactId -> version provided by the <code>dependencyManagement</code>
-     * section of this POM.
+     * Converts the current POM representation into a {@link JkVersionProvider}, which manages
+     * version information for dependencies within the POM, including those defined in its
+     * dependency management section. If there is no dependency management section, an empty
+     * version provider is returned. Dependencies with a type of "pom" are identified as imported
+     * BOMs and are not included in the returned provider.
+     * <p>
+     * Important: Ensure to use this method on an effectivePom (obtained with #toEffectivePom) to
+     * get full resolution.
+     *
+     * @return a {@link JkVersionProvider} containing the versions of dependencies defined in the
+     *         dependency management section of the POM, or an empty provider if no such section exists.
      */
-    public JkVersionProvider getVersionProvider(JkRepoSet repos) {
+    public JkVersionProvider toVersionProvider(JkRepoSet repos) {
+        return toVersionProvider(repos, new HashSet<>());
+    }
+
+    private JkVersionProvider toVersionProvider(JkRepoSet repos, Set<JkCoordinate> resolvedCoordinates) {
         final List<JkCoordinate> coordinates = new LinkedList<>();
         Element dependencyManagementEl = dependencyManagementEl();
         if (dependencyManagementEl == null) {
@@ -169,12 +188,17 @@ public final class JkPom {
         }
 
         // Import recursively boms
-        importedBoms.forEach(coordinate -> {
-            JkCoordinateFileProxy bomFile = JkCoordinateFileProxy.of(repos, coordinate);
-            JkPom importedPom = JkPom.of(bomFile.get()).withResolvedProperties();
-            coordinates.addAll(importedPom.getVersionProvider(repos).toList());
+        importedBoms.forEach(pomCoordinate -> {
+            pomCoordinate = pomCoordinate.withType("pom");
+            Document resolvedImportedBomDoc = new PomResolver(repos).effectivePom(pomCoordinate);
+            if (resolvedCoordinates.contains(pomCoordinate)) {
+                return;
+            }
+            resolvedCoordinates.add(pomCoordinate);
+            JkLog.debug("Resolving bom: " + pomCoordinate);
+            JkPom resolvedImportedBom = new JkPom(resolvedImportedBomDoc);;
+            coordinates.addAll(resolvedImportedBom.toVersionProvider(repos, resolvedCoordinates).toList());
         });
-
 
         return JkVersionProvider.of(coordinates);
     }
@@ -194,38 +218,10 @@ public final class JkPom {
                 }
             }
         }
-
-        String projectVersion = computeProjectVersion();
-        if (projectVersion != null) {
-            result.put("project.version", projectVersion);
-        }
-        String groupId = computeGroupId();
-        if (groupId != null) {
-            result.put("project.groupId", groupId);
-        }
-
-        interpolate(result, 0);
         return result;
     }
 
-    private static void interpolate(Map<String, String> map, int count) {
-        boolean found = false;
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String value = entry.getValue();
-            for (String key : map.keySet()) {
-                String token = "${" + key + "}";
-                if (value.contains(token)) {
-                    found = true;
-                    String interpolatedValue = map.get(key);
-                    String newValue = value.replace(token, interpolatedValue);
-                    map.put(entry.getKey(), newValue);
-                }
-            }
-        }
-        if (count < 10 && found) {
-            interpolate(map, count+1);
-        }
-    }
+
 
     /**
      * The {@link DependencyExclusions} instance provided by the <code>dependencyManagement</code>
@@ -265,9 +261,33 @@ public final class JkPom {
         return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
-    public JkPom withResolvedProperties() {
-        Map<String, String> properties = getProperties();
-        return resolvedWithProps(properties);
+    /**
+     * Converts the current POM to its effective form, resolving any inherited or external dependencies
+     * using the specified repository set.
+     *
+     * @param repos the set of repositories to use for resolving dependencies and external properties
+     * @return the effective POM representation as a {@code JkPom} instance
+     */
+    public JkPom toEffectivePom(JkRepoSet repos) {
+        JkCoordinate coordinate = getCoordinate();
+        Document effectivePom;
+        try {
+            effectivePom = new PomResolver(repos).effectivePom(coordinate);
+        } catch (final IllegalStateException e) {
+            JkLog.debug("POM not found for " + coordinate);
+            effectivePom = (Document) pomDoc.cloneNode(true);
+            new PomResolver(repos).resolve(effectivePom);
+        }
+        return new JkPom(effectivePom);
+    }
+
+    /**
+     * Converts the current instance's underlying POM document into a DOM {@code Document}.
+     *
+     * @return a deep-cloned {@code Document} representation of the POM.
+     */
+    public Document toDocument() {
+        return (Document) pomDoc.cloneNode(true);
     }
 
     private JkQualifiedDependencySet dependencies(Element dependenciesEl, Map<String, String> props) {
@@ -281,7 +301,7 @@ public final class JkPom {
     private JkQualifiedDependency scopedDep(Element mvnDependency, Map<String, String> props) {
         final String groupId = JkUtilsXml.directChildText(mvnDependency, "groupId");
         final String artifactId = JkUtilsXml.directChildText(mvnDependency, "artifactId");
-        final String version = resolveProps(JkUtilsXml.directChildText(mvnDependency, "version"), props);
+        final String version = JkUtilsXml.directChildText(mvnDependency, "version");
         JkCoordinate coordinate = JkCoordinate.of(groupId, artifactId, version);
         final String type = JkUtilsXml.directChildText(mvnDependency, "type");
         final String classifier = JkUtilsXml.directChildText(mvnDependency, "classifier");
@@ -309,20 +329,6 @@ public final class JkPom {
 
     }
 
-    private static String resolveProps(String value, Map<String, String> props) {
-        if (JkUtilsString.isBlank(value)) {
-            return value;
-        }
-        if (value.startsWith("${") && value.endsWith("}")) {
-            String varName = value.substring(2, value.length()-1);
-            String varValue = props.get(varName);
-            if (varValue != null) {
-                return varValue;
-            }
-        }
-        return value;
-    }
-
     static String toScope(String candidate)  {
         if (candidate == null) {
             return null;
@@ -334,14 +340,25 @@ public final class JkPom {
         return null;
     }
 
-    private JkPom resolvedWithProps(Map<String, String> props) {
-        String xml = JkDomDocument.of(pomDoc).toXml();
-        for (final Map.Entry<String, String> entry : props.entrySet()) {
-            String placeholder = "${" + entry.getKey() + "}";
-            xml = xml.replace(placeholder, entry.getValue());
+    private JkCoordinate getCoordinate() {
+        JkCoordinate parentCoordinate = getParentCoordinate();
+        String groupId = Optional.ofNullable(getGroupId())
+                .orElseGet(() -> parentCoordinate.getModuleId().getGroup());
+        String artifactId = getArtifactId();
+        String versionId = Optional.ofNullable(getVersion())
+                .orElseGet(() -> parentCoordinate.getVersion().toString());
+        return JkCoordinate.of(groupId, artifactId, versionId);
+    }
+
+    private JkCoordinate getParentCoordinate() {
+        Element parentEl = JkUtilsXml.directChild(projectEl(), "parent");
+        if (parentEl == null) {
+            return null;
         }
-        Document newDoc = JkDomDocument.parse(xml).getW3cDocument();
-        return new JkPom(newDoc);
+        String groupId = JkUtilsXml.directChildText(parentEl, "groupId");
+        String artifactId = JkUtilsXml.directChildText(parentEl, "artifactId");
+        String version = JkUtilsXml.directChildText(parentEl, "version");
+        return JkCoordinate.of(groupId, artifactId, version);
     }
 
 }

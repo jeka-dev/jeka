@@ -280,9 +280,8 @@ public final class JkVersionProvider {
         JkVersionProvider provider = boms.stream()
                 .distinct()
                 .map(bom -> {
-                    JkCoordinateFileProxy bomFile = JkCoordinateFileProxy.of(repos, bom);
-                    JkPom pom = JkPom.of(bomFile.get());
-                    return pom.withResolvedProperties().getVersionProvider(repos);
+                    JkPom pom = JkPom.ofEffectivePom(bom, repos);
+                    return pom.toVersionProvider(repos);
                 })
                 .reduce(this, (thisVersionProvider, otherVersionProvider)
                         -> thisVersionProvider.and(otherVersionProvider, false));

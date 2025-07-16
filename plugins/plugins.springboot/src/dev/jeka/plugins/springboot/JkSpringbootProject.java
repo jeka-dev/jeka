@@ -164,7 +164,6 @@ public final class JkSpringbootProject {
         JkPathTree classTree = JkPathTree.of(project.compilation.layout.resolveClassDir());
         if (!classTree.exists()) {
             project.compilation.runIfNeeded();
-            project.test.runIfNeeded();
         }
         JkDependencyResolver dependencyResolver = project.dependencyResolver;
         final List<Path> embeddedJars = project.pack.resolveRuntimeDependenciesAsFiles();

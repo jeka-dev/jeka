@@ -33,7 +33,8 @@ class JkPomIT {
         JkCoordinateFileProxy fileProxy = JkCoordinateFileProxy.of(repoSet,
                 "org.springframework.boot:spring-boot-dependencies:3.5.3@pom");
         JkPom pom = JkPom.of(fileProxy.get());
-        JkVersionProvider versionProvider = pom.withResolvedProperties().getVersionProvider(repoSet);
+        JkPom effectivePom = pom.toEffectivePom(repoSet);
+        JkVersionProvider versionProvider = effectivePom.toVersionProvider(repoSet);
         assertEquals("1.12.2", versionProvider.getVersionOf("org.junit.platform:junit-platform-launcher"));
     }
 }

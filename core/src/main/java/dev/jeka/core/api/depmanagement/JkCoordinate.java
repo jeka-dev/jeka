@@ -230,6 +230,11 @@ public final class JkCoordinate {
         return new JkCoordinate(moduleId, version, JkArtifactSpecification.of(classifiers, type));
     }
 
+    public JkCoordinate withType(String type) {
+        return new JkCoordinate(moduleId, version,
+                JkArtifactSpecification.of(this.artifactSpecification.classifier, type));
+    }
+
     /**
      * @see #withClassifierAndType(String, String)
      */

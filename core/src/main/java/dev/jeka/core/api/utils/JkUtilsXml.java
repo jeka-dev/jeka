@@ -185,4 +185,25 @@ public final class JkUtilsXml {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
+
+    /**
+     * Finds and returns the first direct child element within the provided NodeList
+     * that matches the specified tag name.
+     *
+     * @param nodeList the NodeList to iterate through for searching direct child elements
+     * @param tagName the name of the tag to search for among the elements within the NodeList
+     * @return the first Element with the matching tag name if found, otherwise null
+     */
+    public static Element findDirectChild(NodeList nodeList, String tagName) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            final Node node = nodeList.item(i);
+            if (node instanceof Element) {
+                final Element element = (Element) node;
+                if (element.getTagName().equals(tagName)) {
+                    return element;
+                }
+            }
+        }
+        return null;
+    }
 }
