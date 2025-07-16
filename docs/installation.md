@@ -23,7 +23,7 @@ curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
     JeKa requires *bash*, *curl*, and *unzip*, usually available on macOS and Linux.
     On Ubuntu, install tools with: 
     ```shell
-    apt-get update && apt-get install -y curl unzip git gcc zlib1g-dev@
+    apt-get update && apt-get install -y curl unzip git gcc zlib1g-dev
     ```
 
 
