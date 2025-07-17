@@ -253,13 +253,15 @@ You'll end up with the following code layout:
 #### Modify Dependencies
 The dependencies are generated with the latest Spring-Boot version:
 ```ada title="dependencies.txt"
-== COMPILE ==
-org.springframework.boot:spring-boot-dependencies::pom:3.4.1
+[version]
+org.springframework.boot:spring-boot-dependencies:3.4.1@pom
+
+[compile]
 org.springframework.boot:spring-boot-starter-web
 
-== RUNTIME ==
+[runtime]
 
-== TEST ==
+[test]
 org.springframework.boot:spring-boot-starter-test
 ```
 You can start from here for modifying, adding code, tests and dependencies.
@@ -269,8 +271,10 @@ You can start from here for modifying, adding code, tests and dependencies.
 These are the most useful commands for developping Spring-Boot applications.
 
 ``` title="Common Commands"
-jeka project: pack       <- Compiles, tests and creates Bootable Jar
+jeka project: test       <- Compiles and run tests
+jeka project: pack       <- Compiles and creates Bootable Jar
 jeka project: runJar     <- Run bootable jar
+jeka project: build      <- All-in-one to compile, test, pack, run analysis and end-to-end test
 jeka project: depTree    <- Displays dependency tree
 
 jeka docker: build       <- Creates Docker image containing the Spring-Boot application
