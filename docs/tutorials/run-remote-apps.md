@@ -66,7 +66,6 @@ Create a native image:
 ```shell
 jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
 ```
-.
 Then follow the instruction to run the built docker image.
 
 ## Use Shorthands
@@ -87,11 +86,16 @@ jeka ::cowsay "Hello World!"
 JeKa lets you install apps for direct execution (no need to use `jeka`). Example:
 
 ```shell
-jeka app: install repo=github.com/djeang/kill8
+jeka app: install repo=https://github.com/djeang/kill8
 ```
-For faster cold start, install the native version:
+Or
 ```shell
-jeka app: install repo=github.com/djeang/kill8 native=
+jeka app: install repo=kill8@djeang
+```
+
+For a faster cold start, install the native version:
+```shell
+jeka app: install repo=kill8@djeang native:
 ```
 
 These commands install the `kill8` application in the user's PATH, allowing you to simply invoke the application by name to run it:
