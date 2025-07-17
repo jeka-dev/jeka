@@ -54,7 +54,7 @@ jeka app: catalog
 
 Display application registered in a given catalog:
 ```shell
-jeka app:  name=demo 
+jeka app: name=demo 
 ```
 
 To add a catalog, add the following lines to your `~/.jeka/global.properties` file.
