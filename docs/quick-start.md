@@ -252,14 +252,12 @@ You'll end up with the following code layout:
 
 #### Modify Dependencies
 The dependencies are generated with the latest Spring-Boot version:
-```ada title="dependencies.txt"
+```toml title="dependencies.txt"
 [version]
 org.springframework.boot:spring-boot-dependencies:3.4.1@pom
 
 [compile]
 org.springframework.boot:spring-boot-starter-web
-
-[runtime]
 
 [test]
 org.springframework.boot:spring-boot-starter-test
