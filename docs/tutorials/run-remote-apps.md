@@ -103,7 +103,7 @@ These commands install the `kill8` application in the user's PATH, allowing you 
 kill8 8081
 ```
 
-For more details, refer to the [documentation](/reference/kbeans-app).
+For more details, refer to the [documentation](/jeka/reference/kbeans-app).
 
 ## Write Applications for Direct Run/Installation.
 
