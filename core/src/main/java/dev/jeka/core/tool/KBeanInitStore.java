@@ -16,8 +16,10 @@
 
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,7 +63,7 @@ class KBeanInitStore {
         properties.put("involved", String.join(",", involvedKBeanClassNames));
         Path storeFile = storeFile(baseDir);
         if (!Files.exists(storeFile)) {    // the store file may not exist when scaffolding projects
-            return;
+            JkPathFile.of(storeFile).createIfNotExist();
         }
         try (OutputStream out = Files.newOutputStream(storeFile)) {
             properties.store(out, "KBean init store");
