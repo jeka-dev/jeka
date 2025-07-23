@@ -29,6 +29,7 @@ import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.testing.JkTestSelection;
 import dev.jeka.core.api.text.Jk2ColumnsText;
@@ -47,6 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -244,7 +246,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
     private final Function<Path, JkProject> projectResolver;
 
-    private JkProject(Function<Path, JkProject> projectResolver) {
+    private final Map<String, String> properties;
+
+    private JkProject(Function<Path, JkProject> projectResolver, Map<String, String> properties) {
         artifactLocator = artifactLocator();
         compilerToolChain = JkJavaCompilerToolChain.of();
         compilation = JkProjectCompilation.ofProd(this);
@@ -257,16 +261,17 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .setUseInMemoryCache(true);
         flatFacade = new JkProjectFlatFacade(this);
         this.projectResolver = projectResolver;
+        this.properties = properties;
     }
 
-    public static JkProject of(Function<Path, JkProject> projectPathMapper) {
-        return new JkProject(projectPathMapper);
+    public static JkProject of(Function<Path, JkProject> projectPathMapper, Map<String, String> properties) {
+        return new JkProject(projectPathMapper, properties);
     }
     /**
      * Creates a new project having the current working directory as base dir.
      */
     public static JkProject of() {
-        return new JkProject(path -> null);
+        return new JkProject(path -> null, JkProperties.ofSysPropsThenEnv().getAll());
     }
 
     /**
@@ -695,8 +700,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 baseDir.resolve(PROJECT_LIBS_DIR));
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(DEPENDENCIES_TXT_FILE), baseDir, projectResolver)
-                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl, baseDir, projectResolver);
+                baseDir.resolve(DEPENDENCIES_TXT_FILE), baseDir, projectResolver, properties)
+                : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl, baseDir, projectResolver, properties);
 
         cachedTextAndLocalDeps = localDeps.and(textDeps);
         return cachedTextAndLocalDeps;

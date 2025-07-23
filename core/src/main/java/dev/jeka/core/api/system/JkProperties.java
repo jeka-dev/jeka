@@ -311,6 +311,10 @@ public final class JkProperties {
         return propName.toUpperCase().replace('.', '_').replace('-', '_');
     }
 
+    public Map<String,String> getAll() {
+        return getAllStartingWith("", true);
+    }
+
     public Map<String,String> getAllStartingWith(String prefix, boolean keepPrefix) {
         Map<String, String> result = new HashMap<>();
         for (String key : find(prefix)) {

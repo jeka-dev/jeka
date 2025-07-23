@@ -74,8 +74,9 @@ public class JkDependenciesTxt {
                 .collect(Collectors.toList());
     }
 
-    static JkDependenciesTxt parse(Path dependenciesXmlPath, Path baseDir, Function<Path, JkProject> projectResolver) {
-        Map<String, JkDependencySet> raw = parseFile(dependenciesXmlPath, baseDir, projectResolver);
+    static JkDependenciesTxt parse(Path dependenciesXmlPath, Path baseDir, Function<Path, JkProject> projectResolver,
+                                   Map<String, String> properties) {
+        Map<String, JkDependencySet> raw = parseFile(dependenciesXmlPath, baseDir, projectResolver, properties);
 
         // Manage Version provider
         JkVersionProvider versionProvider = JkVersionProvider.of();
@@ -103,7 +104,8 @@ public class JkDependenciesTxt {
 
         Path parent = dependenciesXmlPath.getParent().getParent().resolve("dependencies.txt");
         if (Files.exists(parent)) {
-            JkDependenciesTxt parsedDependenciesTxt = JkDependenciesTxt.parse(parent, baseDir, projectResolver);
+            JkDependenciesTxt parsedDependenciesTxt = JkDependenciesTxt.parse(parent, baseDir, projectResolver,
+                    properties);
             versionProvider = parsedDependenciesTxt.versionProvider.and(versionProvider);
         }
 
@@ -135,9 +137,11 @@ public class JkDependenciesTxt {
     }
 
     private static Map<String, JkDependencySet> parseFile(Path dependenciesXmlPath,
-                                                          Path baseDir, Function<Path, JkProject> projectResolver) {
+                                                          Path baseDir,
+                                                          Function<Path, JkProject> projectResolver,
+                                                          Map<String, String> properties) {
         Map<String, JkDependencySet> result = new LinkedHashMap<>();
-        Map<String, List<String>> sectionLines = parseToStrings(dependenciesXmlPath);
+        Map<String, List<String>> sectionLines = parseToStrings(dependenciesXmlPath, properties);
         sectionLines.forEach((key, value) -> {
             JkDependencySet dependencySet = JkDependencySet.of();
             for (String line : value) {
@@ -148,12 +152,14 @@ public class JkDependenciesTxt {
         return result;
     }
 
-    private static Map<String, List<String>> parseToStrings(Path path) {
+    private static Map<String, List<String>> parseToStrings(Path path, Map<String, String> properties) {
         Map<String, List<String>> sections = new LinkedHashMap<>();
         List<String> currentList = null;
         String currentSection;
 
         for (String line : JkUtilsPath.readAllLines(path)) {
+            line = JkUtilsString.interpolate(line, properties::get);
+
             line = line.trim();
             if (line.isEmpty() || line.startsWith("#")) {
                 continue;

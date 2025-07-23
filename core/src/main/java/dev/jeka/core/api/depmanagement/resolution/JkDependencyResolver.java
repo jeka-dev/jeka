@@ -247,11 +247,15 @@ public final class JkDependencyResolver  {
         String msg = "Resolving dependencies...";
         JkLog.getOutPrintStream().print(msg);
         JkLog.getOutPrintStream().flush();
-        JkResolveResult resolveResult = doResolve(qualifiedDependencies, params);
-        JkAnsi.eraseAllLine();
-        JkAnsi.moveCursorLeft(msg.length());
-        if (!JkAnsiConsole.of().isEnabled()) {
-            JkLog.info("");
+        JkResolveResult resolveResult;
+        try {
+            resolveResult = doResolve(qualifiedDependencies, params);
+        } finally {
+            JkAnsi.eraseAllLine();
+            JkAnsi.moveCursorLeft(msg.length());
+            if (!JkAnsiConsole.of().isEnabled()) {
+                JkLog.info("");
+            }
         }
         return resolveResult;
     }

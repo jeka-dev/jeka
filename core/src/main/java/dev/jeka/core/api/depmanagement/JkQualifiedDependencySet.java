@@ -405,8 +405,11 @@ public class JkQualifiedDependencySet {
                         dep.getCoordinate().getModuleId()).isUnspecified())
                 .filter(dep -> dep.getCoordinate().getVersion().isUnspecified())
                 .collect(Collectors.toList());
-        JkUtilsAssert.state(unspecifiedVersionModules.isEmpty(), "Following module does not specify version : "
-                + unspecifiedVersionModules);
+        if (!unspecifiedVersionModules.isEmpty()) {
+            StringBuilder message = new StringBuilder("Following modules do not specify version : ");
+            unspecifiedVersionModules.forEach(moduleId -> message.append("\n  ").append(moduleId));
+            throw new IllegalStateException(message.toString());
+        }
         return this;
     }
 

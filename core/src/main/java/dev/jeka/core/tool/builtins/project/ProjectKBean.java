@@ -49,7 +49,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
     // The underlying project managed by this KBean
     @JkDoc(hide = true)
-    public final JkProject project = JkProject.of(this::getExternalProject);
+    public final JkProject project = JkProject.of(this::getExternalProject, this.getRunbase().getProperties().getAll());
 
     @JkDoc("Version of the project. Can be used by a CI/CD tool to inject version.")
     public String version;

@@ -63,6 +63,15 @@ public class Main {
         // Create the global.properties file if not present
         JkUtilsPath.createFileSafely(JkLocator.getGlobalPropertiesFile());
 
+        // Set platform properties
+        if (JkUtilsSystem.IS_WINDOWS) {
+            System.setProperty(JkConstants.JEKA_PLATFORM_OS, "windows");
+        } else if (JkUtilsSystem.IS_MACOS) {
+            System.setProperty(JkConstants.JEKA_PLATFORM_OS, "mac");
+        } else if (JkUtilsSystem.IS_LINUX) {
+            System.setProperty(JkConstants.JEKA_PLATFORM_OS, "linux");
+        }
+
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
 
         if (cmdArgs.isNoAnsi()) {

@@ -12,17 +12,19 @@
 
 ## Standard Properties
 
-| Property Name         | Default Value                       | Description                                                                                                                                                                            |
-|-----------------------|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Property Name         | Default Value                       | Description                                                                                                                                                                           |
+|-----------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | jeka.version          |                                     | The Jeka version to use. It will be fetched from the repository specified in the `jeka.distrib.repo` property. Use `jeka.version=.` to force the use of the locally installed version. |
-| jeka.distrib.location |                                     | The exact location (directory) to get the JeKa distribution. If set, both `jeka.version` and `jeka.distrib.repo` will be ignored.                                                      |
-| jeka.java.version     |                                     | The version of the JDK used to compile and run Java code                                                                                                                               |
-| jeka.java.distrib     | temurin                             | The distribution of JDK to fetch when `jeka.java.version` is mentioned                                                                                                                 |
-| jeka.repos.download   | local, mavenCentral                 | Comma separated string of repositories to fetch Maven dependencies. More details [here](reference-guide/execution-engine-properties/#repositories)                                     |
-| jeka.repos.publish    |                                     | Comma separated string of repository to publish Maven artifacts. More details [here](reference-guide/execution-engine-properties/#repositories)                                        |
-| jeka.program.build    | project: pack -Djeka.test.skip=true | Cmd line to execute to build project when exec files are absents                                                                                                                       |
-| jeka.kbean.default    |                                     | Name or class name of the KBean to use as default (when none is specified)                                                                                                             |
-| jeka.test.skip        |                                     | Skip tests when building projects or code bases.                                                                                                                                       |
+| jeka.distrib.location |                                     | The exact location (directory) to get the JeKa distribution. If set, both `jeka.version` and `jeka.distrib.repo` will be ignored.                                                     |
+| jeka.java.version     |                                     | The version of the JDK used to compile and run Java code                                                                                                                              |
+| jeka.java.distrib     | temurin                             | The distribution of JDK to fetch when `jeka.java.version` is mentioned                                                                                                                |
+| jeka.repos.download   | local, mavenCentral                 | Comma separated string of repositories to fetch Maven dependencies. More details [here](reference-guide/execution-engine-properties/#repositories)                                    |
+| jeka.repos.publish    |                                     | Comma separated string of repository to publish Maven artifacts. More details [here](reference-guide/execution-engine-properties/#repositories)                                       |
+| jeka.program.build    | project: pack -Djeka.test.skip=true | Cmd line to execute to build project when exec files are absents                                                                                                                      |
+| jeka.kbean.default    |                                     | Name or class name of the KBean to use as default (when none is specified)                                                                                                            |
+| jeka.test.skip        |                                     | Skip tests when building projects or code bases.                                                                                                                                      |
+| jeka.platform.os      | *linux*, *windows* or *mac*         | Provides the os of the running machine  |
+|
 
 ## JDK Selection Rules
 1. If `JEKA_JDK_HOME` is set, use this JDK

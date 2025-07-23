@@ -110,4 +110,5 @@ public final class JkConstants {
     static final String KBEAN_CLASS_NAMES_CACHE_FILE = "jeka-kbean-classes.txt";
 
     static final String KBEAN_CLASSPATH_CACHE_FILE =  "jeka-kbean-classpath.txt";
+    public static final String JEKA_PLATFORM_OS = "jeka.platform.os";
 }

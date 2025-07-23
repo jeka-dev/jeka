@@ -19,7 +19,6 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.io.IOException;
 import java.io.OutputStream;

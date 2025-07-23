@@ -126,14 +126,17 @@ Example:
 [version]
 org.junit:junit-bom:5.12.1@pom    # use this pom as a version provider for all junit dependencies
 org.postgresql:postgresql:42.5.0
+org.glassfish.jaxb:jaxb-*:4.0.5   # use joker to specify version according a pattern
 
 [compile]
 om.google.guava:guava:33.4.8-jre
 org.lwjgl:lwjgl:natives-linux:3.3.6  # specify the 'natives-linux' classifier for lwjgl
+org.glassfish.jaxb:jaxb-runtime      # version for org.glassfish.jaxb:jaxb-* is specified above
 ../module-utils                      # specify a project directory located on file system
 
 [compile-only]
 org.projectlombok:lombok:1.18.36
+org.openjfx:javafx-base:${jeka.platform.os}:2.0.18  # properties are interpolated
 
 [runitme]
 org.postgresql:postgresql

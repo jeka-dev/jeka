@@ -674,4 +674,59 @@ public final class JkUtilsString {
         }
         return sb.toString();
     }
+
+    /**
+     * Tests if a string matches a given pattern using '*' as a wildcard joker.
+     * The '*' character matches any sequence of characters (including empty sequence).
+     *
+     * @param text the string to test
+     * @param pattern the pattern with '*' wildcards
+     * @return true if the text matches the pattern, false otherwise
+     */
+    public static boolean matchesPattern(String text, String pattern) {
+        if (text == null || pattern == null) {
+            return text == pattern;
+        }
+
+        return matchesPatternRecursive(text, 0, pattern, 0);
+    }
+
+    private static boolean matchesPatternRecursive(String text, int textIndex,
+                                                   String pattern, int patternIndex) {
+        // If we've reached the end of the pattern
+        if (patternIndex == pattern.length()) {
+            return textIndex == text.length();
+        }
+
+        // If we've reached the end of the text but not the pattern
+        if (textIndex == text.length()) {
+            // Check if remaining pattern consists only of '*'
+            for (int i = patternIndex; i < pattern.length(); i++) {
+                if (pattern.charAt(i) != '*') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        char patternChar = pattern.charAt(patternIndex);
+
+        if (patternChar == '*') {
+            // Try matching '*' with empty string, or with one or more characters
+            // First try empty match (skip the '*')
+            if (matchesPatternRecursive(text, textIndex, pattern, patternIndex + 1)) {
+                return true;
+            }
+            // Then try matching one or more characters
+            return matchesPatternRecursive(text, textIndex + 1, pattern, patternIndex);
+        } else {
+            // Regular character matching
+            if (text.charAt(textIndex) == patternChar) {
+                return matchesPatternRecursive(text, textIndex + 1, pattern, patternIndex + 1);
+            } else {
+                return false;
+            }
+        }
+    }
+
 }
