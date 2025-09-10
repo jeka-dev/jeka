@@ -76,7 +76,7 @@ For this, execute :
 
     `[JEKA ARGUMENTS]` 
     
-    Stands for regular jeka arguments you would pass to jeka command line as `project: back' or '--help'.
+    Stands for regular jeka arguments you would pass to jeka command line as `project: pack' or '--help'.
 
 
 

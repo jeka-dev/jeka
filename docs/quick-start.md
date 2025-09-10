@@ -100,11 +100,11 @@ This will display the following text on the console:
 
 --------------------------------------------------------------------------------
 ```
-Note:
-- You can define multiple script methods in `Script.java`. These methods must be public, non-static, take no arguments, and return `void`.
-- You can rename `Script.java` to any name and place it in any package.
-- You can create multiple script classes. To run a specific script, use the class name, e.g., `jeka script2: hi`.
-- You can also [use classes provided by JeKa](reference/api-intro.md) without explicitly declaring them.
+!!! notes
+    - You can define multiple script methods in `Script.java`. These methods must be public, non-static, take no arguments, and return `void`.
+    - You can rename `Script.java` to any name and place it in any package.
+    - You can create multiple script classes. To run a specific script, use the class name, e.g., `jeka script2: hi`.
+    - You can also [use classes provided by JeKa](reference/api-intro.md) without explicitly declaring them.
 
 #### KBeans
 

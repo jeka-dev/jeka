@@ -32,7 +32,7 @@ or external DSL-based solutions for building their applications.
 ## Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration or JDK installation required. 
 - **Java-Based Configuration:** Customize builds with simple properties or fine-tune with plain Java code — no XML, No DSL.
-- **Full Portability:** Automatically downloads required JDK versions and tools — no pre-installed JDK needed.
+- **Fully Portable builds:** Automatically downloads required JDK versions and tools — no pre-installed JDK or Jeka needed.
 - **Cloud-Native Ready:** Effortless native compilation and Docker image creation — no setup or configuration needed.
 - **Run Java/Kotlin Scripts:** Execute simple scripts or full applications directly from source code — no compilation and dep management needed.
 - **Instant App Deployment:** Push application code to Git, and it's ready to run — no pipeline required.
