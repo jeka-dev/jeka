@@ -34,10 +34,10 @@ jeka base: scaffold
 ```
 This generates a structure as:
 ```
-.
-├── jeka-src             <- Source root directory
+.                        <- Project root directory
+├── jeka-src             <- Source dir for Jeka scripts and configuration code
 │   └── Script.java     
-└── jeka.properties      <- Configuration (Java and jeka version, default parameters...)
+└── jeka.properties      <- Jeka configuration (Java and jeka version, default parameters...)
 ```
 Ths script class looks like:
 ```java

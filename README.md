@@ -25,7 +25,7 @@ or external DSL-based solutions for building their applications.
 ## Use Cases
 - **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL. No pre-installed JDK required.
 - **Use Java for scripting:** Write scripts, devOps pipelines or complex applications in Java, runnable directly from source code.
-- **Package Java applications as source:** Publish the source code in a Git repo and execute it instantly from everywhere, in JVM or native mode.
+- **Package-less Java:** Run applications directly from Git-hosted source code in JVM or native mode without traditional packaging or deployment.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
 - **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating heavy tools.
 

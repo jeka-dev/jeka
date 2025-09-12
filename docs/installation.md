@@ -54,8 +54,7 @@ jeka --help
 
 ## Docker Image - Zero Install
 
-JeKa can be executed using the Docker image [jekadev/jeka](https://hub.docker.com/r/jekadev/jeka). This can be useful to force build execution on a 
-Linux host, which is mandatory to produce Java native image for Linux and containers.
+JeKa can be executed using the Docker image [jekadev/jeka](https://hub.docker.com/r/jekadev/jeka).
 
 For this, execute : 
 
