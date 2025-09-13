@@ -8,7 +8,7 @@ Execute:
 ```shell
 jeka project: build centralportal: publish
 ```
-The credentials and signing keys are expected to be found in the following environment variable:
+The credentials and signing keys are expected to be found in the following environment variables:
 
 - `JEKA_CENTRAL_PORTAL_USERNAME`: The username to connect to *Central Portal*.
 - `JEKA_CENTRAL_PORTAL_PASSWORD`: The password to connect to *Central Portal*.
@@ -23,7 +23,7 @@ The string key should contain *-----BEGIN PGP PRIVATE KEY BLOCK-----* header and
 
 ## Configuration
 
-Only Maven metadata for the published artifact are required.
+Only Maven metadata for the published artifacts are required.
 
 Example:
 ```properties
