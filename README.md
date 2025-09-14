@@ -61,6 +61,8 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 - Display help on console: `jeka --help`
 - Display docs on KBeans: `jeka --doc`.
 
+## Configure
+
 **Configure builds using properties**
 ```properties
 jeka.classpath=dev.jeka:jacoco-plugin  dev.jeka:sonarqube-plugin
