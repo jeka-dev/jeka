@@ -27,7 +27,7 @@ or external DSL-based solutions for building their applications.
 - **Use Java for scripting:** Write scripts, devOps pipelines or complex applications in Java, runnable directly from source code.
 - **Package-less Java:** Run applications directly from Git-hosted source code, in JVM or native mode, without needing packaging or deployment process.
 - **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
-- **Make Java more attractive:** Learn Java effortlessly, without complex XML or intimidating heavy tools.
+
 
 ## Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration or JDK installation required. 
@@ -45,10 +45,10 @@ or external DSL-based solutions for building their applications.
 ## Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 
-## Usage (Examples)
+## CommandLine Usage (Examples)
 
 **Execute build methods**
-- **Compile, test, and create JAR**: `jeka project: test pack`
+- **Compile, test, and create JAR**: `jeka project: test pack` or `jeka project: build`
 - **Compile to native executable**: `jeka native: compile`
 - **Create a JVM-based Docker image**: `jeka docker: build`
 - **Create a native-based Docker image**: `jeka docker: buildNative`
@@ -59,7 +59,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 
 **Help**
 - Display help on console: `jeka --help`
-- Display docs on KBeans: `jeka --doc`
+- Display docs on KBeans: `jeka --doc`.
 
 **Configure builds using properties**
 ```properties
@@ -74,6 +74,8 @@ jeka.classpath=dev.jeka:jacoco-plugin  dev.jeka:sonarqube-plugin
 @sonarqube=on
 @sonarqube.gate=true
 ```
+> The `@` symbol identifies a KBean, such as `@project` for the `project` KBean.  
+> This configures KBeans for Git-based versioning, and sets up Sonar and Jacoco analysis for the project.
 
 **Create specific tasks with Java code**
 
@@ -92,16 +94,17 @@ class Build extends KBean {
     }
   ...
 ```
-Run directly this method from command line: `jeka build: deployFtp`.
+> Java sources in *jeka-src* can be executed directly from the command line, with third-party libraries automatically resolved.  
+> To run this method, execute: `jeka build: deployFtp`.
 
 Visit the [documentation](https://jeka-dev.github.io/jeka/), and explore the [examples](https://jeka-dev.github.io/jeka/examples/).
 
 
 ## External Plugins
 
-External plugins must be explicitly imported and are hosted as JAR files on Maven Central.
+External plugins must be explicitly imported and are provided as JAR files on Maven Central.  
 
-The following plugins are part of JeKa’s monorepo and are released together, so their version does not need to be specified when importing:
+The following plugins are included in JeKa's monorepo and are released together, so their version is automatically managed and does not need to be specified during import:
 - [Spring Boot Plugin](plugins/plugins.springboot)
 - [SonarQube Plugin](plugins/plugins.sonarqube)
 - [JaCoCo Plugin](plugins/plugins.jacoco)
