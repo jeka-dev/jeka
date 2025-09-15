@@ -23,11 +23,9 @@ It targets a generation of Java developers who prefer simple, Java-centric tools
 or external DSL-based solutions for building their applications.
 
 ## Use Cases
-- **Replace Maven or Gradle:** Use simple and powerful properties/Java instead of XML or complex DSL. No pre-installed JDK required.
-- **Use Java for scripting:** Write scripts, devOps pipelines or complex applications in Java, runnable directly from source code.
-- **Package-less Java:** Run applications directly from Git-hosted source code, in JVM or native mode, without needing packaging or deployment process.
-- **Handle complex build scenarios gracefully:** Encapsulate build logic using intuitive Java mechanisms.
-
+- **Replace Maven or Gradle:** Build Java projects with simple properties or Java code instead of XML or complex DSLs. No pre-installed JDK needed.
+- **Enhance Maven or Gradle:** Integrate full portability and Java scripting into your existing Maven or Gradle build, enabling scripts, DevOps pipelines, or deployment logic in full Java code, runnable directly from source.
+- **Enable package-less Java:** Run applications from Git-hosted source code in JVM or native mode without packaging or deployment process. Register in a catalog for a source-based application management system.
 
 ## Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration or JDK installation required. 
