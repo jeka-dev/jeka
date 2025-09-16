@@ -304,7 +304,7 @@ public final class IntellijKBean extends KBean {
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
         iml.component.setSdk(resolver.computeImlJdk(imlPath, false));
         imlCustomizers.accept(iml);
-        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlPath).normalize());
+        JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlPath.toAbsolutePath()).normalize());
     }
 
     private void generateJekaSrcOnlyIml(Path imlFile, SdkResolver resolver, boolean applyCustomizers) {
