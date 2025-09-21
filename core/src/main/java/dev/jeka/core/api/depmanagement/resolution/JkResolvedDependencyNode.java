@@ -70,16 +70,16 @@ public class JkResolvedDependencyNode {
         return new JkResolvedDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
     }
 
-    JkResolvedDependencyNode mergeNonModules(List<? extends JkDependency> dependencies) {
+    JkResolvedDependencyNode mergeNonModules(List<JkQualifiedDependency> qualifiedDependencies) {
         final List<JkResolvedDependencyNode> result = new LinkedList<>();
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
         for (final JkResolvedDependencyNode node : this.children) {
                     if (node.isModuleNode()) {
-                        addFileDepsToTree(dependencies, result, addedFileDeps, node.getModuleId());
+                        addFileDepsToTree(qualifiedDependencies, result, addedFileDeps, node.getModuleId());
                 result.add(node);
             }
         }
-        addFileDepsToTree(dependencies, result, addedFileDeps, null);
+        addFileDepsToTree(qualifiedDependencies, result, addedFileDeps, null);
         return new JkResolvedDependencyNode(this.nodeInfo,result);
     }
 
@@ -209,12 +209,14 @@ public class JkResolvedDependencyNode {
         return new JkResolvedDependencyNode(this.nodeInfo, resultChildren);
     }
 
-    private static void addFileDepsToTree(List<? extends JkDependency> dependencies, List<JkResolvedDependencyNode> result,
+    private static void addFileDepsToTree(List<JkQualifiedDependency> qualifiedDependencies, List<JkResolvedDependencyNode> result,
                                           Set<JkFileDependency> addedFileDeps, JkModuleId jkModuleId) {
-        for (final JkDependency dependency : depsUntilLast(dependencies, jkModuleId)) {
-            final JkFileDependency fileDep = (JkFileDependency) dependency;
+        for (final JkQualifiedDependency qualifiedDependency : depsUntilLast(qualifiedDependencies, jkModuleId)) {
+            final JkFileDependency fileDep = (JkFileDependency) qualifiedDependency.getDependency();
             if (!addedFileDeps.contains(fileDep)) {
-                final JkResolvedDependencyNode fileNode = JkResolvedDependencyNode.ofFileDep(fileDep, Collections.emptySet());
+                String qualifier = qualifiedDependency.getQualifier();
+                Set<String> configurations = qualifier == null ? Collections.emptySet() : Collections.singleton(qualifier);
+                final JkResolvedDependencyNode fileNode = JkResolvedDependencyNode.ofFileDep(fileDep, configurations);
                 addedFileDeps.add(fileDep);
                 result.add(fileNode);
             }
@@ -462,10 +464,12 @@ public class JkResolvedDependencyNode {
 
     }
 
-    private static List<JkDependency> depsUntilLast(List<? extends JkDependency> dependencies, JkModuleId to) {
-        final List<JkDependency> result = new LinkedList<>();
-        final List<JkDependency> partialResult = new LinkedList<>();
-        for (final JkDependency dependency : dependencies) {
+    private static List<JkQualifiedDependency> depsUntilLast(List<JkQualifiedDependency> qualifiedDependencies,
+                                                             JkModuleId to) {
+        final List<JkQualifiedDependency> result = new LinkedList<>();
+        final List<JkQualifiedDependency> partialResult = new LinkedList<>();
+        for (final JkQualifiedDependency qualifiedDependency : qualifiedDependencies) {
+            JkDependency dependency = qualifiedDependency.getDependency();
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 final JkModuleId jkModuleId = coordinateDependency.getCoordinate().getModuleId();
@@ -474,7 +478,7 @@ public class JkResolvedDependencyNode {
                     partialResult.clear();
                 }
             } else {
-                partialResult.add(dependency);
+                partialResult.add(qualifiedDependency);
             }
         }
         if (to == null) {

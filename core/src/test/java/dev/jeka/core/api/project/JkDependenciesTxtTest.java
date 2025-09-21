@@ -80,10 +80,4 @@ class JkDependenciesTxtTest {
         assertEquals(1, paths.size());
     }
 
-
-
-
-
-
-
 }

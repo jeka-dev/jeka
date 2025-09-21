@@ -24,7 +24,7 @@ or external DSL-based solutions for building their applications.
 
 ## Use Cases
 - **Replace Maven or Gradle:** Build Java projects with simple properties or Java code instead of XML or complex DSLs. No pre-installed JDK needed.
-- **Enhance Maven or Gradle:** Integrate full portability and Java scripting into your existing Maven or Gradle build, enabling scripts, DevOps pipelines, or deployment logic in full Java code, runnable directly from source.
+- **Complement Maven or Gradle:** Integrate full portability and Java scripting into your existing Maven or Gradle build, enabling scripts, JDK download, DevOps pipelines, or deployment logic in full Java code, runnable directly from source.
 - **Enable package-less Java:** Run applications from Git-hosted source code in JVM or native mode without packaging or deployment process. Register in a catalog for a source-based application management system.
 
 ## Features

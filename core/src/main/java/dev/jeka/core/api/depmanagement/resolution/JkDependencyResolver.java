@@ -266,7 +266,6 @@ public final class JkDependencyResolver  {
         JkQualifiedDependencySet bomResolvedDependencies = replacePomDependencyByVersionProvider(qualifiedDependencies);
 
         // Translate dependencies to qualified-dependencies
-        List<JkDependency> allDependencies = bomResolvedDependencies.getDependencies();
         JkQualifiedDependencySet moduleQualifiedDependencies = bomResolvedDependencies
                 .withCoordinateDependenciesOnly()
                 .withResolvedBoms(effectiveRepos())
@@ -305,7 +304,7 @@ public final class JkDependencyResolver  {
             resolveResult = JkResolveResult.ofRoot(moduleHolder);
         }
         final JkResolvedDependencyNode mergedNode = resolveResult.getDependencyTree().mergeNonModules(
-                allDependencies);
+                bomResolvedDependencies.getEntries());
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.getErrorReport());
 
         // Logs result readably

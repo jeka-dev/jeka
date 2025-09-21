@@ -157,10 +157,9 @@ public class JkDependenciesTxt {
         List<String> currentList = null;
         String currentSection;
 
-        for (String line : JkUtilsPath.readAllLines(path)) {
-            line = JkUtilsString.interpolate(line, properties::get);
+        for (String rawLine : JkUtilsPath.readAllLines(path)) {
+           String line = JkUtilsString.interpolate(rawLine, properties::get).trim();
 
-            line = line.trim();
             if (line.isEmpty() || line.startsWith("#")) {
                 continue;
             }

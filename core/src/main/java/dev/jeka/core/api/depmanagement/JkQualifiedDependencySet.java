@@ -214,7 +214,7 @@ public class JkQualifiedDependencySet {
      * Adds a new qualified dependency to the existing dependencies. The qualifier is used to
      * differentiate between multiple dependencies with the same module coordinates.
      */
-    public JkQualifiedDependencySet and(String qualifier, String moduleDependencyDescriptor) {
+    public JkQualifiedDependencySet and(String qualifier, @JkDepSuggest String moduleDependencyDescriptor) {
         return and(qualifier, JkCoordinateDependency.of(moduleDependencyDescriptor));
     }
 

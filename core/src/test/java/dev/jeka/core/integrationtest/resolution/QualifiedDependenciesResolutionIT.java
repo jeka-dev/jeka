@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static dev.jeka.core.api.depmanagement.JkPopularLibs.GUAVA;
 import static dev.jeka.core.api.depmanagement.JkPopularLibs.JAVAX_SERVLET_API;
@@ -167,6 +165,36 @@ class QualifiedDependenciesResolutionIT {
                 System.out.println(file);
             }
         }
+    }
+
+    @Test
+    void resolve_qualifiedDepFiles_keepConfiguration() throws URISyntaxException {
+        JkCoordinate holder = JkCoordinate.of("mygroup:myname:myversion");
+        Path dep0File = Paths.get(QualifiedDependenciesResolutionIT.class.getResource("dep0").toURI());
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
+                .and(JkQualifiedDependencySet.PROVIDED_SCOPE, JkFileSystemDependency.of(dep0File))
+                .and(JkQualifiedDependencySet.PROVIDED_SCOPE, "com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0")
+                .and(JkQualifiedDependencySet.TEST_SCOPE, "junit:junit:4.13.2");
+        JkDependencyResolver resolver = JkDependencyResolver.of()
+                .addRepos(JkRepo.ofMavenCentral())
+                .setModuleHolder(holder);
+        JkResolvedDependencyNode tree = resolver.resolve(deps, JkResolutionParameters.of()).getDependencyTree();
+
+        System.out.println(tree.toStringTree());
+
+        JkResolvedDependencyNode.JkModuleNodeInfo root = tree.getModuleInfo();
+        assertTrue(root.getDeclaredConfigurations().isEmpty());
+        assertEquals(holder.getModuleId(), tree.getModuleInfo().getModuleId());
+        assertEquals(3, tree.getChildren().size());
+
+        JkResolvedDependencyNode file0Node = tree.getChildren().get(0);
+        Set<String> confs = file0Node.getNodeInfo().getDeclaredConfigurations();
+        assertEquals(Collections.singleton(JkQualifiedDependencySet.PROVIDED_SCOPE), confs);
+
+        // com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0 is ranked at index 2
+        JkResolvedDependencyNode node2 = tree.getChildren().get(2);
+        confs = node2.getNodeInfo().getDeclaredConfigurations();
+        assertEquals(Collections.singleton(JkQualifiedDependencySet.PROVIDED_SCOPE), confs);
     }
 
 
