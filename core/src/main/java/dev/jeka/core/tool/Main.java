@@ -127,6 +127,7 @@ public class Main {
             // Compile jeka-src and resolve the dependencies and kbeans
             // Using rocket emoji cause issue because it is caused on 2 chars, but when
             // erasing line, there is one excessive back-delete.
+
             JkConsoleSpinner.of("Booting JeKa...").run(engine::resolveKBeans);
             if (LogSettings.INSTANCE.inspect) {
                 logRuntimeInfoBase(engine, props);
@@ -134,6 +135,9 @@ public class Main {
 
             // Resolve KBeans
             KBeanResolution kBeanResolution = engine.getKbeanResolution();
+            if (!kBeanResolution.compilationSuccess && BehaviorSettings.INSTANCE.forceMode) {
+                JkLog.warn("Compilation jeka-src failed. Running in best effort (force mode).");
+            }
             Engine.ClasspathSetupResult classpathSetupResult = engine.getClasspathSetupResult();
             Engines.registerMaster(engine);
             JkLog.debug("Found KBeans : %s" , String.join("\n  ", kBeanResolution.allKbeanClassNames));

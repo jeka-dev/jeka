@@ -265,7 +265,8 @@ class Engine {
 
         // Find all KBean class available for this
         List<String> kbeanClassNames = findKBeanClassNames();
-        this.kbeanResolution = KBeanResolution.of(isMaster, this.properties, baseDir, kbeanClassNames);
+        this.kbeanResolution = KBeanResolution.of(isMaster, this.properties, baseDir, kbeanClassNames,
+                classpathSetupResult.compileSuccess);
         return kbeanResolution;
     }
 
@@ -480,18 +481,18 @@ class Engine {
         final JkPathSequence kbeanClasspath;
         final JkPathSequence exportedClasspath;
         final JkDependencySet exportedDependencies;
-        final boolean compileResult;
+        final boolean compileSuccess;
         final JkDependencySet fullDependencies;
         final List<Engine> subEngines;
 
-        ClasspathSetupResult(boolean compileResult,
+        ClasspathSetupResult(boolean compileSuccess,
                              JkPathSequence runClasspath,  // The full classpath to run Jeka upon
                              JkPathSequence kbeanClasspath, // The classpath to find in KBeans
                              JkPathSequence exportedClasspath,
                              JkDependencySet exportedDependencies,
                              List<Engine> subEngines,
                              JkDependencySet fullDependencies) {
-            this.compileResult = compileResult;
+            this.compileSuccess = compileSuccess;
             this.runClasspath = runClasspath;
             this.kbeanClasspath = kbeanClasspath;  // does not contain jeka-src-classes
             this.exportedClasspath = exportedClasspath;

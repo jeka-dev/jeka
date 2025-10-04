@@ -21,7 +21,10 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.utils.JkUtilsString.blankToNull;
 import static dev.jeka.core.api.utils.JkUtilsString.nullToEmpty;
@@ -298,8 +301,19 @@ public final class JkCoordinate {
             return classifier;
         }
 
+        public List<String> getClassifiers() {
+            return Arrays.asList(JkUtilsString.nullToEmpty(classifier).split(",")).stream()
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        }
+
         public String getType() {
             return type;
+        }
+
+        public JkArtifactSpecification withAdditionalClassifier(String classifier) {
+            String newClassifier = JkUtilsString.nullToEmpty(this.classifier) + "," + classifier.trim();
+            return JkArtifactSpecification.of(newClassifier, type);
         }
 
         @Override

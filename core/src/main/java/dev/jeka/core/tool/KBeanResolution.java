@@ -46,23 +46,28 @@ class KBeanResolution {
     //fqn of default KBean class. Can be null.
     final String defaultKbeanClassName;
 
+    final boolean compilationSuccess;
+
     KBeanResolution(List<String> allKbeanClassNames,
                     List<String> localKBeanClassNames,
-                    String defaultKbeanClassName) {
+                    String defaultKbeanClassName,
+                    boolean compileSuccess) {
         this.allKbeanClassNames = allKbeanClassNames;
         this.localKBeanClassNames = localKBeanClassNames;
         this.defaultKbeanClassName = defaultKbeanClassName;
+        this.compilationSuccess = compileSuccess;
     }
 
     static KBeanResolution of(boolean isMaster, JkProperties properties,
                               Path baseDir,
-                              List<String> allKbeanClassNames) {
+                              List<String> allKbeanClassNames,
+                              boolean compileSuccess) {
 
         List<String> localKbeanClassNames = localKBean(baseDir, allKbeanClassNames);
         String defaultKBeanClassName = DefaultKBeanResolver.get(isMaster, properties,
                 allKbeanClassNames, localKbeanClassNames);
 
-        return new KBeanResolution(allKbeanClassNames, localKbeanClassNames, defaultKBeanClassName);
+        return new KBeanResolution(allKbeanClassNames, localKbeanClassNames, defaultKBeanClassName, compileSuccess);
     }
 
     Optional<String> findKbeanClassName(String kbeanName) {

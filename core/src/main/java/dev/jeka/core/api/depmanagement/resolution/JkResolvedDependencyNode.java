@@ -65,9 +65,17 @@ public class JkResolvedDependencyNode {
         return new JkResolvedDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
     }
 
+    public static JkResolvedDependencyNode ofRoot(List<JkResolvedDependencyNode> children) {
+        return ofModuleDep(JkModuleNodeInfo.ofAnonymousRoot(), children);
+    }
+
     public static JkResolvedDependencyNode ofFileDep(JkFileDependency dependency, Set<String> configurations) {
         final JkNodeInfo moduleInfo = JkFileNodeInfo.of(configurations, dependency);
         return new JkResolvedDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
+    }
+
+    public static JkResolvedDependencyNode ofFileDep(JkFileNodeInfo fileNodeInfo) {
+        return new JkResolvedDependencyNode(fileNodeInfo, Collections.emptyList());
     }
 
     JkResolvedDependencyNode mergeNonModules(List<JkQualifiedDependency> qualifiedDependencies) {
