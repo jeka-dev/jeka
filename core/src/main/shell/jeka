@@ -1130,7 +1130,25 @@ execute_and_exit_java_if_present() {
   local -a regular_params
   filter_out_sysProp "$@"
   regular_params=("${returned[@]}")
-  exec "$JAVA_CMD" "${sysProp_params[@]}" -jar "$jar_file" "${regular_params[@]}"
+
+  # Read JVM options from file
+  local -a jvm_options
+  local -a jvm_options=()
+  local jvm_options_file="$BASE_DIR/jeka-output/run.jvmoptions"
+  if [ -f "$jvm_options_file" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      # Skip empty lines and comments (lines starting with #)
+      if [[ -n "$line" && ! "$line" =~ ^[[:space:]]*# ]]; then
+        # Trim whitespace
+        line=$(echo "$line" | xargs)
+        if [[ -n "$line" ]]; then
+          jvm_options+=("$line")
+        fi
+      fi
+    done < "$jvm_options_file"
+  fi
+
+  exec "$JAVA_CMD" "${jvm_options[@]}" "${sysProp_params[@]}" -jar "$jar_file" "${regular_params[@]}"
   exit $?
 }
 

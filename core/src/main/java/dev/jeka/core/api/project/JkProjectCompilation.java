@@ -18,8 +18,10 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySetModifier;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkResourceProcessor;
+import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
 import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
@@ -35,11 +37,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
- * Handles project compilation step. Users can configure inner phases by chaining runnables.
- * They also can modify {@link JkJavaCompilerToolChain} and {@link JkJavaCompileSpec} to use.
+ * This class handles the compilation phase for a project, including source generation, resource
+ * processing, dependency resolution, and Java source compilation. It provides a structured way to
+ * customize and extend the compilation process through configurable actions, source generators,
+ * and compiler options.
  */
 public class JkProjectCompilation {
 
@@ -74,6 +79,15 @@ public class JkProjectCompilation {
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
     private final List<JkProjectSourceGenerator> sourceGenerators = new LinkedList<>();
+
+    /**
+     * Adds a customizer to modify the resolution parameters used during the project compilation process.
+     * This allows to programmatically adjust the dependency resolution settings.
+     *
+     * @param customizer a {@link UnaryOperator} that takes a {@link JkResolutionParameters} instance
+     *                   and returns a modified {@link JkResolutionParameters} instance
+     */
+    public final JkConsumers<JkResolutionParameters> resolutionParameterCustomizer = JkConsumers.of();
 
     private boolean done;
 
@@ -160,7 +174,9 @@ public class JkProjectCompilation {
     }
 
     public List<Path> resolveDependenciesAsFiles() {
-        return project.dependencyResolver.resolveFiles(dependencies.get());
+        JkResolutionParameters resolutionParameters = project.dependencyResolver.parameters.copy();
+        resolutionParameterCustomizer.accept(resolutionParameters);
+        return project.dependencyResolver.resolveFiles(dependencies.get(), resolutionParameters);
     }
 
     /**
@@ -224,6 +240,7 @@ public class JkProjectCompilation {
                         layout.resolveGeneratedSourceDir().resolve(sourceGenerator.getDirName()))
                 .collect(Collectors.toList());
     }
+
 
     boolean isCompilationForked() {
         return project.compilerToolChain.isCompilationForked(project.getJvmTargetVersion(), compileSpec());

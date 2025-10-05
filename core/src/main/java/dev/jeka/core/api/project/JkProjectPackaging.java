@@ -20,7 +20,9 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySetModifier;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
+import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathMatcher;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Responsible to create binary, Javadoc and Source jars.
@@ -108,12 +111,23 @@ public class JkProjectPackaging {
 
     private JkResolveResult cachedJkResolveResult;
 
+    /**
+     * Adds a customizer to modify the resolution parameters used during the project compilation process.
+     * This allows to programmatically adjust the dependency resolution settings.
+     *
+     * @param customizer a {@link UnaryOperator} that takes a {@link JkResolutionParameters} instance
+     *                   and returns a modified {@link JkResolutionParameters} instance
+     */
+    public final JkConsumers<JkResolutionParameters> resolutionParameterCustomizer = JkConsumers.of();
+
     JkProjectPackaging(JkProject project) {
         this.project = project;
         this.javadocProcessor = JkJavadocProcessor.of();
         this.mainClassFinder = this::findMainClass;
-        actions.append(CREATE_JAR_ACTION,
-                () -> jarMaker.accept(project.artifactLocator.getMainArtifactPath()));
+        actions.append(CREATE_JAR_ACTION, () -> {
+            jarMaker.accept(project.artifactLocator.getMainArtifactPath());
+            writeJavaOptions();
+        });
     }
 
     /**
@@ -333,8 +347,10 @@ public class JkProjectPackaging {
         if (cachedJkResolveResult != null) {
             return cachedJkResolveResult;
         }
+        JkResolutionParameters resolutionParameters = project.dependencyResolver.parameters.copy();
+        resolutionParameterCustomizer.accept(resolutionParameters);
         cachedJkResolveResult = project.dependencyResolver.resolve(runtimeDependencies.get()
-                .normalised(project.getDuplicateConflictStrategy()));
+                .normalised(project.getDuplicateConflictStrategy()), resolutionParameters);
         return cachedJkResolveResult;
     }
 
@@ -342,7 +358,9 @@ public class JkProjectPackaging {
      * Retrieves the runtime dependencies as a sequence of files.
      */
     public List<Path> resolveRuntimeDependenciesAsFiles() {
-        return project.dependencyResolver.resolveFiles(runtimeDependencies.get());
+        JkResolutionParameters resolutionParameters = project.dependencyResolver.parameters.copy();
+        resolutionParameterCustomizer.accept(resolutionParameters);
+        return project.dependencyResolver.resolveFiles(runtimeDependencies.get(), resolutionParameters);
     }
 
     /**
@@ -408,6 +426,16 @@ public class JkProjectPackaging {
         }
         javadocProcessor.make(classpath, sources, getJavadocDir());
         return true;
+    }
+
+    private void writeJavaOptions() {
+        List<String> options = project.getRunJavaOptions();
+        if (options.isEmpty()) {
+            return;
+        }
+        String line = String.join("\n", options);
+        Path file = project.getOutputDir().resolve("run.jvmoptions");
+        JkPathFile.of(file).deleteIfExist().write(line);
     }
 
 }

@@ -320,14 +320,12 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
 
         void runJar() {
             project.prepareRunJar(JkProject.RuntimeDeps.of(useRuntimeDepsForClasspath))
-                    .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
                     .addParams(JkUtilsString.parseCommandline(programArgs))
                     .exec();
         }
 
         void runMain() {
             project.prepareRunMain()
-                    .addJavaOptions(JkUtilsString.parseCommandline(jvmOptions))
                     .addParams(JkUtilsString.parseCommandline(programArgs))
                     .exec();
         }
@@ -429,6 +427,10 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         if (!JkUtilsString.isBlank(javaVersion)) {
             JkJavaVersion version = JkJavaVersion.of(javaVersion);
             project.setJvmTargetVersion(version);
+        }
+        if (!JkUtilsString.isBlank(run.jvmOptions)) {
+            project.runJavaOptionCustomizer.append(options ->
+                    options.addAll(JkUtilsString.parseCommandlineAsList(run.jvmOptions)));
         }
         applyRepoConfigOn(project);
         project.flatFacade.setLayoutStyle(layout.style);
