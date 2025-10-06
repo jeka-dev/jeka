@@ -109,7 +109,7 @@ class EngineWrapper {
         List<String> jekaSrcKBeans = Arrays.stream(jekaSrcKBeanClasses).map(Class::getName).collect(Collectors.toList());
         String defaultKBeanClassName = engine.defaultKBeanClassName(allKBeans, jekaSrcKBeans);
 
-        return new KBeanResolution(allKBeans, jekaSrcKBeans, defaultKBeanClassName);
+        return new KBeanResolution(allKBeans, jekaSrcKBeans, defaultKBeanClassName, true);
     }
 
     private KBeanAction.Container parse(String[] args, JkProperties props, KBeanResolution kBeanResolution) {
