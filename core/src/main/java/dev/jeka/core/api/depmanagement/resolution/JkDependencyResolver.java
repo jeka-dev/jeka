@@ -255,9 +255,12 @@ public final class JkDependencyResolver  {
         JkResolveResult resolveResult;
         try {
             resolveResult = doResolve(qualifiedDependencies, params);
+
+            // Customize resolution according customizers
             for (UnaryOperator<JkResolveResult> customizer : params.getResolveResultCustomizers()) {
                 resolveResult = customizer.apply(resolveResult);
             }
+
         } finally {
             JkAnsi.eraseAllLine();
             JkAnsi.moveCursorLeft(msg.length());

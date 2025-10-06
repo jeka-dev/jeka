@@ -18,6 +18,7 @@ package dev.jeka.core.api.project;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactLocator;
+import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.depmanagement.resolution.JkDependencyResolver;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.depmanagement.resolution.JkResolveResult;
@@ -54,27 +55,69 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Represents a project in Jeka, which is a build automation tool. This class encapsulates the entire
- * lifecycle of a software project, from compiling and testing to packaging and deploying artifacts.
- * It provides methods to configure and retrieve project properties, as well as utilities to manage
- * dependencies, build outputs, versioning, and integration with IDEs.
+ * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven <i>POM</i> but
+ * it also holds methods to actually perform builds.<br/>
+ * A complete overview is available <a href="https://jeka-dev.github.io/jeka/reference-guide/build-library-project-build/#project-api">here</a>.
+ * <p/>
  *
- * The class offers a variety of configurable settings such as base directory, output directory,
- * Java version, source encoding, and dependency conflict strategies. It supports creation of
- * custom tasks, dependency management, artifact generation, and interaction with external tools like
- * Maven or Ivy.
- *
- * The project structure can include specific modules and dependencies, which can be resolved either
- * locally or from remote repositories. This class provides APIs for runtime dependency inclusion,
- * generating dependency trees, managing multi-module projects, and preparing Java processes.
- *
- * Customization is also supported through the use of functional interfaces, enabling users to apply
- * custom behaviors for tasks such as packaging or artifact handling. Special operations are allowed,
- * such as handling IDE integration and cleaning build outputs.
- *
- * This class is designed for advanced developers using Jeka to automate large-scale Java-based
- * projects and supports complex requirements like version resolution via a supplier function,
- * module ID assignment, and managing fat jar creation.
+ * A <code>JkProject</code> consists in 4 main parts : <ul>
+ *    <li>{@link JkProjectCompilation} : responsible to generate compile production sources</li>
+ *    <li>{@link JkProjectTesting} : responsible to compile test sources and run tests </li>
+ *    <li>{@link JkProjectPackaging} : responsible to creates javadoc, sources and jars</li>
+ *    <li>{@link JkMavenPublication} : responsible to publish the artifacts on Maven repositories</li>
+ * </ul>
+ * The {@link JkProject#pack()} method is supposed to generates the artifacts
+ * (or simply perform actions as deploying docker image) locally. By default, it generates
+ * a regular binary jar, but it can be customized for your needs.
+ * <p>
+ * The following represents a tree of the JkProject API.
+ * <pre><code>
+ * project
+ * +- baseDir
+ * +- outputDir (generally values to ${baseDir}/jeka-output dir)
+ * +- artifactLocator (define paths of created artifact files -jar files- )
+ * |  +- methods: getArtifactPath(), getMainArtifactPath(), ....
+ * +- duplicateDependencyConflictStrategy
+ * +- jvmTargetVersion
+ * +- sourceEncoding
+ * +- javaCompileToolChain
+ * +- dependencyResolver
+ * +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
+ * |  +- layout (where are located sources, resources and compiled classes)
+ * |  +- source generators (plugin mechanism for generating source files)
+ * |  +- dependencies   (stands for compile dependencies)
+ * |  +- preCompileActions (including resources processing)
+ * |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
+ * |  +- postCompileActions
+ * |  +- methods : resolveDependencies(), run()
+ * +- test
+ * |  +- testCompilation (same as for 'prod' compilation but configured for tests purpose)
+ * |  +- breakOnFailure (true/false)
+ * |  +- skipped (true/false)
+ * |  +- testProcessor
+ * |  |  +- forkedProcess (configured the forked process who will run tests)
+ * |  |  +- preActions
+ * |  |  +- postActions
+ * |  |  +- engineBehavior
+ * |  |  |  +- testReportDir
+ * |  |  |  +- progressDisplayer
+ * |  |  |  +- launcherConfiguration (based on junit5 platform API)
+ * |  |  +- testSelection
+ * |  |  |  +- includePatterns
+ * |  |  |  +- includeTags
+ * |  +- method : run()
+ * +- packaging (produces javadoc and source jar and bin jars)
+ * |  +- javadocConfiguration
+ * |  +- runtimeDependencies
+ * |  +- manifest
+ * |  +- fatJar (customize produced fat/uber jar if any)
+ * |  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
+ * +- e2eTest
+ * |  +- methods : add(), run()
+ * +- qualityCheck
+ * |  +- methods : add(), run()
+ * + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()
+ * </code></pre>
  */
 public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Supplier {
 
@@ -210,8 +253,6 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     private final Function<Path, JkProject> projectResolver;
 
     private final Map<String, String> properties;
-
-    private final List<String> runMainJavaOptions = new LinkedList<>();
 
     private JkProject(Function<Path, JkProject> projectResolver, Map<String, String> properties) {
         artifactLocator = artifactLocator();
@@ -499,9 +540,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * Displays the resolved dependency tree on the console.
      */
     public void displayDependencyTree() {
-        displayDependencyTree("compile", compilation.dependencies.get(), compilation.resolutionParameterCustomizer);
-        displayDependencyTree("runtime", packaging.runtimeDependencies.get(), compilation.resolutionParameterCustomizer);
-        displayDependencyTree("test", testing.compilation.dependencies.get(), test.compilation.resolutionParameterCustomizer);
+        displayDependencyTree("compile", compilation.dependencies.get());
+        displayDependencyTree("runtime", packaging.runtimeDependencies.get());
+        displayDependencyTree("test", testing.compilation.dependencies.get());
     }
 
     /**
@@ -662,7 +703,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     public List<String> getRunJavaOptions() {
-        List<String> javaOptions = new LinkedList<>(this.runMainJavaOptions);
+        List<String> javaOptions = new LinkedList<>();
         runJavaOptionCustomizer.accept(javaOptions);
         return javaOptions;
     }
@@ -704,11 +745,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         return element;
     }
 
-    private void displayDependencyTree(String purpose, JkDependencySet deps,
-                                       JkConsumers<JkResolutionParameters> resolutionParameterCustomizer) {
-        JkResolutionParameters resolutionParameters = dependencyResolver.parameters.copy();
-        resolutionParameterCustomizer.accept(resolutionParameters);
-        final JkResolveResult resolveResult = dependencyResolver.resolve(deps, resolutionParameters);
+    private void displayDependencyTree(String purpose, JkDependencySet deps) {
+        final JkResolveResult resolveResult = dependencyResolver.resolve(deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info("------------------------------------------------------------");
         JkLog.info("Dependency tree for " + purpose + " : ");

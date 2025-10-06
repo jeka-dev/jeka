@@ -111,14 +111,6 @@ public class JkProjectPackaging {
 
     private JkResolveResult cachedJkResolveResult;
 
-    /**
-     * Adds a customizer to modify the resolution parameters used during the project compilation process.
-     * This allows to programmatically adjust the dependency resolution settings.
-     *
-     * @param customizer a {@link UnaryOperator} that takes a {@link JkResolutionParameters} instance
-     *                   and returns a modified {@link JkResolutionParameters} instance
-     */
-    public final JkConsumers<JkResolutionParameters> resolutionParameterCustomizer = JkConsumers.of();
 
     JkProjectPackaging(JkProject project) {
         this.project = project;
@@ -347,10 +339,8 @@ public class JkProjectPackaging {
         if (cachedJkResolveResult != null) {
             return cachedJkResolveResult;
         }
-        JkResolutionParameters resolutionParameters = project.dependencyResolver.parameters.copy();
-        resolutionParameterCustomizer.accept(resolutionParameters);
         cachedJkResolveResult = project.dependencyResolver.resolve(runtimeDependencies.get()
-                .normalised(project.getDuplicateConflictStrategy()), resolutionParameters);
+                .normalised(project.getDuplicateConflictStrategy()));
         return cachedJkResolveResult;
     }
 
@@ -358,9 +348,7 @@ public class JkProjectPackaging {
      * Retrieves the runtime dependencies as a sequence of files.
      */
     public List<Path> resolveRuntimeDependenciesAsFiles() {
-        JkResolutionParameters resolutionParameters = project.dependencyResolver.parameters.copy();
-        resolutionParameterCustomizer.accept(resolutionParameters);
-        return project.dependencyResolver.resolveFiles(runtimeDependencies.get(), resolutionParameters);
+        return project.dependencyResolver.resolveFiles(runtimeDependencies.get());
     }
 
     /**

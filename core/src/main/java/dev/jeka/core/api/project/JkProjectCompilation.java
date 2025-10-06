@@ -80,15 +80,6 @@ public class JkProjectCompilation {
 
     private final List<JkProjectSourceGenerator> sourceGenerators = new LinkedList<>();
 
-    /**
-     * Adds a customizer to modify the resolution parameters used during the project compilation process.
-     * This allows to programmatically adjust the dependency resolution settings.
-     *
-     * @param customizer a {@link UnaryOperator} that takes a {@link JkResolutionParameters} instance
-     *                   and returns a modified {@link JkResolutionParameters} instance
-     */
-    public final JkConsumers<JkResolutionParameters> resolutionParameterCustomizer = JkConsumers.of();
-
     private boolean done;
 
     JkProjectCompilation(JkProject project) {
@@ -174,9 +165,8 @@ public class JkProjectCompilation {
     }
 
     public List<Path> resolveDependenciesAsFiles() {
-        JkResolutionParameters resolutionParameters = project.dependencyResolver.parameters.copy();
-        resolutionParameterCustomizer.accept(resolutionParameters);
-        return project.dependencyResolver.resolveFiles(dependencies.get(), resolutionParameters);
+
+        return project.dependencyResolver.resolveFiles(dependencies.get());
     }
 
     /**

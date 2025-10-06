@@ -18,6 +18,7 @@ package dev.jeka.core.api.depmanagement.resolution;
 
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.system.JkAnsi;
+import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
@@ -109,6 +110,14 @@ public class JkResolvedDependencyNode {
      */
     public boolean isModuleNode() {
         return this.nodeInfo instanceof JkModuleNodeInfo;
+    }
+
+    /**
+     * Convenient method to get the ModuleNodeInfo when this dependency node is a module.
+     */
+    public JkModuleNodeInfo getModuleNodeInfo() {
+        JkUtilsAssert.state(this.isModuleNode(), "JkResolvedDependencyNode can only be used on module nodes");
+        return (JkModuleNodeInfo) this.nodeInfo;
     }
 
     /**
