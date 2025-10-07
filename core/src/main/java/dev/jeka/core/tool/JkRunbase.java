@@ -516,8 +516,12 @@ public final class JkRunbase {
                     List<String> allRelPaths = childRunbases.stream()
                             .map(JkRunbase::toRelPathName)
                             .collect(Collectors.toList());
-                    if (!childBaseFilter.equals(".") && !allRelPaths.contains(childBaseFilter)) {
-                        throw new JkException("No child base found at location %s", childBaseFilter);
+                    if (!BehaviorSettings.INSTANCE.forceMode
+                            && !childBaseFilter.equals(".")
+                            && !allRelPaths.contains(childBaseFilter)) {
+                        throw new JkException("No child base found at location %s. Declared child bases are %s",
+                                childBaseFilter, allRelPaths);
+
                     }
                 }
                 needSplit = splitContainers.size() > 1;

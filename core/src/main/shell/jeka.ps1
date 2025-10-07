@@ -640,7 +640,6 @@ class ProgramExecutor {
     }
   }
 
-
   hidden [string] findFile([string]$extension) {
     $files = Get-ChildItem -Path $this.folder -Filter "*$extension"
     if ($files) {
@@ -669,10 +668,23 @@ function ExecJekaEngine {
   & "$javaCmd" $jekaOpts "$baseDirProp" -cp "$classpath" "dev.jeka.core.tool.Main" $cmdLineArgs
 }
 
+function ReadJvmOptions{
+  param(
+      [string]$progDir
+  )
+  $filePath = $progDir + "\run.jvmoptions"
+  if (Test-Path $FilePath -PathType Leaf) {
+    return Get-Content -Path $FilePath
+  } else {
+    return @()
+  }
+}
+
 function ExecProg {
   param(
     [string]$javaCmd,
     [string]$progFile,
+    [string]$progDir,
     [array]$cmdLineArgs
   )
 
@@ -684,8 +696,10 @@ function ExecProg {
     $cmdLineArgs = [CmdLineArgs]::new($cmdLineArgs)
     $sypPropArgs = $cmdLineArgs.FilterInSysProp()
     $sanitizedProgArgs = $cmdLineArgs.FilterOutSysProp()
+    [array]$jvmOptions = ReadJvmOptions -progDir $progDir
     Write-Verbose "Run Java program $progFile with args $argLine"
-    & "$javaCmd" -jar "$sypPropArgs" "$progFile" $sanitizedProgArgs
+
+    & "$javaCmd" $jvmOptions -jar "$sypPropArgs" "$progFile" $sanitizedProgArgs
   }
 }
 
@@ -738,7 +752,7 @@ function Main {
     $progJdk.SetForProg($true)
     $progJavaCmd = $progJdk.GetJavaCmd()
     if ($progFile -ne '') {
-      ExecProg -javaCmd $progJavaCmd -progFile $progFile -cmdLineArgs $progArgs
+      ExecProg -javaCmd $progJavaCmd -progFile $progFile -progDir $progDir -cmdLineArgs $progArgs
       exit $LASTEXITCODE
     }
 
@@ -765,7 +779,7 @@ function Main {
     if ($progFile -eq '') {
       Exit-Error "No program found to be executed in $progDir"
     }
-    ExecProg -javaCmd $progJavaCmd -progFile $progFile -cmdLineArgs $progArgs
+    ExecProg -javaCmd $progJavaCmd -progFile $progFile -progDir $progDir -cmdLineArgs $progArgs
     exit $LASTEXITCODE
 
   # Execute Jeke engine
