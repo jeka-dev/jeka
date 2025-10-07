@@ -516,10 +516,14 @@ public final class JkRunbase {
                     List<String> allRelPaths = childRunbases.stream()
                             .map(JkRunbase::toRelPathName)
                             .collect(Collectors.toList());
+
+                    // Some IDE tools attempt to build all Jeka modules, including those not declared
+                    // as children of the root module. We warn about this instead of throwing an
+                    // exception to maintain IDE compatibility
                     if (!BehaviorSettings.INSTANCE.forceMode
                             && !childBaseFilter.equals(".")
                             && !allRelPaths.contains(childBaseFilter)) {
-                        throw new JkException("No child base found at location %s. Declared child bases are %s",
+                        JkLog.warn("No child base found at location %s. Declared child bases are %s",
                                 childBaseFilter, allRelPaths);
 
                     }
