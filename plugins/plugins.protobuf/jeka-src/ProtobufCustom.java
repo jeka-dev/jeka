@@ -21,7 +21,7 @@ class ProtobufCustom extends KBean {
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
+        project.flatFacade
                 .setModuleId("dev.jeka:protobuf-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .dependencies.compile.add(JkLocator.getJekaJarPath());

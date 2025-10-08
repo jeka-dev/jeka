@@ -47,15 +47,15 @@ class SamplesTest {
     @Test
     void baseapp_testPackDockerbuild_ok() {
         // Run Self-App
-        run("samples.baseapp", "-Djeka.java.version=17 base: test pack -c");
+        run("samples.baseapp", "-Djeka.java.version=25 base: test pack -c");
         if (JkDocker.of().isPresent()) {
-            run("samples.baseapp", "-Djeka.java.version=17 docker: build -c");
+            run("samples.baseapp", "-Djeka.java.version=25 docker: build -c");
         }
     }
 
     @Test
     void projectApp_testRunJar_ok() {
-        run("samples.project-app", "-c -Djeka.java.version=17 project: test runJar run.programArgs=oo");
+        run("samples.project-app", "-c -Djeka.java.version=25 project: test runJar run.programArgs=oo");
     }
 
     @Test
@@ -73,7 +73,7 @@ class SamplesTest {
     @Test
     void springboot_ok() {
         run("samples.springboot",
-                "-c -cw project: pack runJar run.programArgs=auto-close -Djeka.java.version=17");
+                "-c -cw project: pack runJar run.programArgs=auto-close -Djeka.java.version=25");
     }
 
     @Test
@@ -81,7 +81,7 @@ class SamplesTest {
         Path sonarqubePluginJar = fromPlugins("plugins.sonarqube/jeka-output/dev.jeka.sonarqube-plugin.jar");
         run("samples.sonarqube", "-cw -i -v " +
                 "-cp=" + sonarqubePluginJar +
-                " project: info pack sonarqube: -Djeka.java.version=17");
+                " project: info pack sonarqube: -Djeka.java.version=25");
     }
 
     @Test

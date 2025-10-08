@@ -21,7 +21,6 @@ class KotlinCustom extends KBean {
     private void postInit(ProjectKBean projectKBean) {
         projectKBean.project.flatFacade
                 .setModuleId("dev.jeka:kotlin-plugin")
-                .setJvmTargetVersion(JkJavaVersion.V8)
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .setMixResourcesAndSources()
                 .dependencies.compile.add(JkLocator.getJekaJarPath());

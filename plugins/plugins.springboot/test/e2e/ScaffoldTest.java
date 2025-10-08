@@ -24,9 +24,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsNet;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -103,7 +101,7 @@ class ScaffoldTest {
     private static String withJavaVersionArgs(String original)  {
 
         // Needed to force starting springboot process with java 17
-        return original + " -Djeka.java.version=17";
+        return original + " -Djeka.java.version=25";
     }
 
     private class RunChecker {

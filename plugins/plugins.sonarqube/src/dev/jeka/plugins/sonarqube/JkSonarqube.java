@@ -33,7 +33,6 @@ import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.JkException;
-import sun.tools.jar.resources.jar;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
