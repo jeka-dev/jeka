@@ -114,8 +114,9 @@ The following plugins are included in JeKa's monorepo and are released together,
 - [Nexus Plugin](plugins/plugins.nexus)
 - [Central Portal Plugin](plugins/plugins.centralportal)
 
-The following plugin is maintained in a separate repository:
+The following plugins are maintained in their own repository:
 - [OpenAPI Plugin](https://github.com/jeka-dev/openapi-plugin)
+- [JavaFX Plugin](https://github.com/jeka-dev/javafx-plugin)
 
 ## Community
 
