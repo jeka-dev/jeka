@@ -22,7 +22,6 @@ public class SpringbootCustom extends KBean {
     private void postInit(ProjectKBean projectBean) {
         JkProject project = projectBean.project;
         project.setModuleId("dev.jeka:springboot-plugin");
-        project.setJvmTargetVersion(JkJavaVersion.V8);
         project.flatFacade.setLayoutStyle(JkCompileLayout.Style.SIMPLE);
         project.flatFacade.dependencies.compile.add(JkLocator.getJekaJarPath());
         project.flatFacade.dependencies.runtime.add(JkLocator.getJekaJarPath());

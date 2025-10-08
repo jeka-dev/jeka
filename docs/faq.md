@@ -152,8 +152,6 @@ public class Build extends KBean {
     project.compilation.addJavaCompilerOptions(...);
 }
 ```
-This works out-of-the-box when using Java 8. Using Java 11+ may require specific 
-options to pass to the compiler.
 
 ### How can I sync Eclipse/IntelliJ without using `ProjectKBean`?
 

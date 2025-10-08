@@ -59,7 +59,7 @@ class ScaffoldTest {
     @Test
     void scaffoldBase_script_ok() {
         jeka("base: scaffold scaffold.jekaVersion=NO");
-        jeka("hello base: info -v -Djeka.java.version=17");
+        jeka("hello base: info -v -Djeka.java.version=25");
     }
 
     @Test

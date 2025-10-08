@@ -78,8 +78,8 @@ jeka.java.distrib=corretto
 ```
 If you don't want JeKa manage distribution for you, you can choose explicitly the SDK location:
 ```properties
-jeka.java.version=17
-jeka.sdk.17=/my/jdks/17-corretto
+jeka.java.version=22
+jeka.sdk.17=/my/jdks/22-corretto
 ```
 !!! note
     The properties can also be set by using *system properties* or *OS Environment variables*.

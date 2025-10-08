@@ -35,7 +35,7 @@ class NexusCustom extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
-        projectKBean.project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
+        projectKBean.project.flatFacade
                 .setModuleId("dev.jeka:nexus-plugin")
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .dependencies.compile.add(JkLocator.getJekaJarPath());

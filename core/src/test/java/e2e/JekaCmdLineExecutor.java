@@ -78,8 +78,7 @@ final class JekaCmdLineExecutor {
         }
         boolean showOutput = JkLog.isVerbose();
         //boolean showOutput = true;
-        String javaVersion = (JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64()) ?
-                "11" : "8";
+        String javaVersion = "25";
         JkProcess process = JkProcess.of(cmd.toString())
                 .setWorkingDir(baseDir)
                 .setDestroyAtJvmShutdown(true)

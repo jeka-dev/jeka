@@ -21,7 +21,7 @@ public class NodeJsCustom extends KBean {
     @JkPostInit(required = true)
     private void postInit(ProjectKBean projectKBean) {
         JkProject project = projectKBean.project;
-        project.setJvmTargetVersion(JkJavaVersion.V8).flatFacade
+        project.flatFacade
                 .setModuleId("dev.jeka:nodejs-plugin")
                 .setMixResourcesAndSources()
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
