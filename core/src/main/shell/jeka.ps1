@@ -382,6 +382,7 @@ class Jdks {
   [Props]$Props
   [string]$CacheDir
   [bool]$forProg
+  [string]$cachedJavaVersion
 
   Jdks([Props]$props, [string]$cacheDir) {
     $this.Props = $props
@@ -397,6 +398,17 @@ class Jdks {
 
   SetForProg([bool]$forProg) {
     $this.forProg = $forProg
+  }
+
+  [string] getDeclaredJavaVersion() {
+      if (![string]::IsNullOrEmpty($this.cachedJavaVersion)) {
+          return $this.cachedJavaVersion
+      }
+      $this.cachedJavaVersion = ($this.Props.GetValueOrDefault("jeka.java.version", "21"));
+      if ($this.cachedJavaVersion.StartsWith(".")) {
+          Exit-Error "Invalid jeka.java.version: cannot be '.'. Please, change it in jeka.properties file."
+      }
+      return $this.cachedJavaVersion
   }
 
   hidden Install([string]$distrib, [string]$version, [string]$targetDir) {
@@ -424,10 +436,11 @@ class Jdks {
     if (![string]::IsNullOrEmpty($explicitPath)) {
       return $explicitPath
     }
-    $version = ($this.Props.GetValueOrDefault("jeka.java.version", "21"))
+    $version = ($this.getDeclaredJavaVersion())
     if ($this.forProg) {
       $version = ($this.Props.GetValueOrDefault("@project.javaVersion", $version))
     }
+
     $distib = ($this.Props.GetValueOrDefault("jeka.java.distrib", "temurin"))
 
     # The jeka.jdk.xx=path has been explicitly specified in properties
@@ -447,6 +460,8 @@ class Jdks {
     }
     return $cachedJdkDir
   }
+
+
 }
 
 class JekaDistrib {
@@ -784,6 +799,18 @@ function Main {
 
   # Execute Jeke engine
   } else {
+
+      ## Check java version > 21
+      $theJavaVersion = ($jdks.getDeclaredJavaVersion())
+      if (-not [string]::IsNullOrEmpty($theJavaVersion)) {
+          try {
+              $ver = [int]($theJavaVersion.Split('.')[0].Split('-')[0])
+              if ($ver -lt 21) {
+                  Write-Warning "jeka.java.version is set to $theJavaVersion but 21 or greater is required since JeKa 0.11.56."
+              }
+          } catch { }
+      }
+
     ExecJekaEngine -javaCmd $javaCmd -baseDir $baseDir -cacheDir $cacheDir -props $props -cmdLineArgs $cmdLineArgs.args
     exit $LASTEXITCODE
   }
