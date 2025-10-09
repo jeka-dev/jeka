@@ -1211,6 +1211,19 @@ execute_program_if_requested
 
 compute_JAVA_CMD
 
+## Check java version
+if [[ -n "$JAVA_VERSION" ]]; then
+  JAVA_VERSION_MAJOR=$(echo "$JAVA_VERSION" | cut -d'.' -f1)
+
+  # Proceed only if the major version is numeric
+  if [[ "$JAVA_VERSION_MAJOR" =~ ^[0-9]+$ ]]; then
+    if [[ "$JAVA_VERSION_MAJOR" -lt 21 ]]; then
+      echo "Warning: jeka.java.version is set to $JAVA_VERSION but 21 or greater is required since JeKa 0.11.56."
+    fi
+  fi
+fi
+
+
 ## When debugging we don't want to execute Jeka
 if [ -z "$DRY_RUN" ]; then
   compute_JEKA_DIST_DIR "$BASE_DIR"
