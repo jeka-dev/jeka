@@ -9,6 +9,7 @@ You can find some examples in below to learn more about _Jeka_:
 
 - [Cow-Say Command-line App](https://github.com/jeka-dev/demo-cowsay)
 - [Calculator GUI App](https://github.com/djeang/Calculator-jeka)
+- [A collection of developer utilities in a single JavaFX application](https://github.com/djeang/devtools)
 
 ### Builds and Pipelines
 
