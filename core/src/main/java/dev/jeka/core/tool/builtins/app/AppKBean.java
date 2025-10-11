@@ -29,9 +29,10 @@ import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 import java.util.List;
 import java.util.Optional;
 
-@JkDoc("Provides a way to install, update, or remove applications from the user PATH.\n" +
-        "Applications are installed from a Git repository and built by the client before installation.\n" +
-        "Applications can be installed as executable JARs or native apps.")
+@JkDoc("""
+        Provides a way to install, update, or remove applications from the user PATH.
+        Applications are installed from a Git repository and built by the client before installation.
+        Applications can be installed as executable JARs or native apps.""")
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-app/")
 public class AppKBean extends KBean {
 
@@ -53,9 +54,10 @@ public class AppKBean extends KBean {
     @JkDoc("Specifies the url to trust.")
     public String url;
 
-    @JkDoc("Builds and installs the app to make it available in PATH.\n" +
-            "Use `repo=[Git URL]` to set the source repository.\n" +
-            "Use `native:` argument to install as a native app.")
+    @JkDoc("""
+            Builds and installs the app to make it available in PATH.
+            Use `repo=[Git URL]` to set the source repository.
+            Use `native:` argument to install as a native app.""")
     public void install() {
         String gitUrl = this.repo;
         if (JkUtilsString.isBlank(gitUrl)) {
@@ -128,7 +130,7 @@ public class AppKBean extends KBean {
 
             // 1 tag available
         } else if (tagBucket.tags.size() == 1) {
-            String tag = tagBucket.tags.get(0).getName();
+            String tag = tagBucket.tags.getFirst().getName();
             JkLog.info("Found one tag '%s' in the remote Git repository.", JkAnsi.magenta(tag));
             String response = JkPrompt.ask("Do you want to install the tag '%s' or last commit on branch %s:? " +
                     "[%s = last commit, %s = '%s' tag]:",
@@ -316,9 +318,10 @@ public class AppKBean extends KBean {
         JkLog.info(text.toString());
     }
 
-    @JkDoc("Adds permanently the url to the trusted list.\n" +
-            "The urls starting with the specified prefix will be automatically trusted.\n" +
-            "Use 'url=my.host/my.path/' to specify the prefix.")
+    @JkDoc("""
+            Adds permanently the url to the trusted list.
+            The urls starting with the specified prefix will be automatically trusted.
+            Use 'url=my.host/my.path/' to specify the prefix.""")
     public void trustUrl() {
         SecurityChecker.addTrustedUrl(url);
     }
@@ -384,18 +387,20 @@ public class AppKBean extends KBean {
             while (!ok) {
                 String userResponse = JkPrompt.ask("Do you want to abort (A), update on the last commit of default branch (D)," +
                         " or choose a tag (T)?").trim().toUpperCase();
-                if ("A".equals(userResponse)) {
-                    JkLog.info("Update aborted by user.");
-                    return false;
-                }
-                if ("D".equals(userResponse)) {
-                    appManager.updateWithTag(appName, null);
-                    return true;
-                }
-                if ("T".equals(userResponse)) {
-                    String tag = JkPrompt.ask("Choose a tag from the list above:").trim();
-                    appManager.updateWithTag(appName, tag);
-                    return true;
+                switch (userResponse) {
+                    case "A" -> {
+                        JkLog.info("Update aborted by user.");
+                        return false;
+                    }
+                    case "D" -> {
+                        appManager.updateWithTag(appName, null);
+                        return true;
+                    }
+                    case "T" -> {
+                        String tag = JkPrompt.ask("Choose a tag from the list above:").trim();
+                        appManager.updateWithTag(appName, tag);
+                        return true;
+                    }
                 }
             }
         }

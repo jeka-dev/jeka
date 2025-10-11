@@ -45,7 +45,7 @@ class Catalog {
     }
 
     static Catalog of(String url) {
-        try (InputStream inputStream = new URL(url).openStream()) {
+        try (InputStream inputStream = JkUtilsIO.toUrl(url).openStream()) {
             Properties properties = new Properties();
             properties.load(inputStream);
             JkProperties props = JkProperties.ofProperties(properties);
@@ -91,7 +91,7 @@ class Catalog {
                 .map(key -> JkUtilsString.substringBeforeFirst(key, "."))
                 .filter(candidate -> !JkUtilsString.isBlank(candidate))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         Map<String, AppInfo> result = new TreeMap<>();
         for (String appName : appNames) {
             Map<String, String> map = JkProperties.ofMap(appPros).getAllStartingWith(appName + ".", false);

@@ -19,12 +19,10 @@ package dev.jeka.core.tool.builtins.app;
 import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 class Catalogs {
 
@@ -84,7 +82,7 @@ class Catalogs {
         List<String> catalogNames = map.keySet().stream()
                 .map(key -> JkUtilsString.substringBeforeFirst(key, "."))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         Map<String, CatalogInfo> result = new LinkedHashMap<>();
         catalogNames.forEach(name -> {
             String repo = map.get(name + ".repo");

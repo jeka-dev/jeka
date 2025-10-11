@@ -77,22 +77,20 @@ class AppBuilder {
     }
 
     private static Path createBatFile(Path baseDir, Path jarPath) {
-        final StringBuilder shellContent = new StringBuilder();
-        shellContent.append("@echo off").append("\n");
-        shellContent.append("jeka -r \"").append(baseDir).append("\" -p %*\n");
+        String shellContent = "@echo off" + "\n" +
+                "jeka -r \"" + baseDir + "\" -p %*\n";
         String fileName = jarPath.getFileName().toString().replace(".jar", ".bat");
         Path batFile = jarPath.resolveSibling(fileName);
-        return JkPathFile.of(batFile).write(shellContent.toString()).get();
+        return JkPathFile.of(batFile).write(shellContent).get();
     }
 
     private static Path createShellFile(Path baseDir, Path jarPath) {
-        final StringBuilder shellContent = new StringBuilder();
-        shellContent.append(SHE_BANG).append("\n");
-        shellContent.append("jeka -r \"").append(baseDir).append("\" -p $@\n");
+        String shellContent = SHE_BANG + "\n" +
+                "jeka -r \"" + baseDir + "\" -p $@\n";
         String fileName = jarPath.getFileName().toString().replace(".jar", ".sh");
         Path shellFile = jarPath.resolveSibling(fileName);
         return JkPathFile.of(shellFile)
-                .write(shellContent.toString())
+                .write(shellContent)
                 .setPosixExecPermissions()
                 .get();
     }

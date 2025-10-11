@@ -104,7 +104,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         return this.copy()
                 .setCollectStdout(true)
                 .setLogWithJekaDecorator(false)
-                .addParams("remote", "get-url", "origin").exec().getStdoutAsMultiline().get(0);
+                .addParams("remote", "get-url", "origin").exec().getStdoutAsMultiline().getFirst();
     }
 
     public boolean isOnGitRepo() {
@@ -224,7 +224,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         if (messageLines.isEmpty()) {
             return null;
         }
-        String[] words = messageLines.get(0).split(" ");
+        String[] words = messageLines.getFirst().split(" ");
         for (String word : words) {
             if (word.startsWith(prefix)) {
                 return word.substring(prefix.length());
@@ -294,7 +294,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         boolean dirty;
         tags = getTagsOnCurrentCommit().stream()
                 .filter(tag -> tag.startsWith(prefix))
-                .collect(Collectors.toList());
+                .toList();
         branch = getCurrentBranch();
         dirty = isWorkspaceDirty();
         if (branch == null) {   // detached Head
@@ -309,7 +309,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         if (tags.isEmpty() || dirty) {
             return branch + "-SNAPSHOT";
         } else {
-            return tags.get(tags.size() - 1).substring(prefix.length());
+            return tags.getLast().substring(prefix.length());
         }
     }
 
@@ -361,7 +361,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setCollectStdout(true)
                 .execAndCheck()
                 .getStdoutAsMultiline();
-        return tags.isEmpty() ? null : tags.get(0);
+        return tags.isEmpty() ? null : tags.getFirst();
     }
 
     /**
@@ -452,7 +452,7 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .addParams("ls-remote", "--tags", repoUrl).exec().getStdoutAsMultiline().stream()
                 .map(Tag::ofGitCmdlineResult)
                 .collect(Collectors.toList());
-        if (result.size() == 1 && JkUtilsString.isBlank(result.get(0).name)) {
+        if (result.size() == 1 && JkUtilsString.isBlank(result.getFirst().name)) {
             return Collections.emptyList();
         }
         return result;
@@ -468,11 +468,11 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .setCollectStdout(true)
                 .setLogWithJekaDecorator(false)
                 .addParams("ls-remote", "--symref", repoUrl).exec().getStdoutAsMultiline();
-        if (lines.isEmpty() || !lines.get(0).contains(REFS_HEADS)) {
+        if (lines.isEmpty() || !lines.getFirst().contains(REFS_HEADS)) {
             JkLog.debug("No default branch found in  %s. Returns null.", repoUrl);
             return null;
         }
-        String partial = JkUtilsString.substringAfterFirst(lines.get(0).replace("\t", " "), REFS_HEADS);
+        String partial = JkUtilsString.substringAfterFirst(lines.getFirst().replace("\t", " "), REFS_HEADS);
         return JkUtilsString.substringBeforeFirst(partial, " ");
 
     }

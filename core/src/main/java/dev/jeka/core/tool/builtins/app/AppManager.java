@@ -303,7 +303,7 @@ class AppManager {
             JkLog.debug("No repo tags found on local repo %s.", repoDir);
             return Optional.empty();
         }
-        return Optional.of(new GitTag(currentTags.get(0)));
+        return Optional.of(new GitTag(currentTags.getFirst()));
     }
 
     private Path repoDir(String appName) {
