@@ -27,10 +27,7 @@ import dev.jeka.core.api.utils.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class AppManager {
@@ -138,10 +135,15 @@ class AppManager {
 
     AppInfo getAppInfo(String appName) {
         Path repoDir = repoDir(appName);
+        boolean isNative = isNative(findAppFile(appName));
+
         JkLog.debug("Resolve app %s git local repo to: %s", appName, repoDir);
         JkGit git = JkGit.of(repoDir);
+        if (!Files.exists(repoDir) || !git.isOnGitRepo())  {
+            return AppInfo.ofRepoMissing(appName, isNative);
+        }
         String remoteRepoUrl = git.getRemoteUrl();
-        boolean isNative = isNative(findAppFile(appName));
+
         Optional<GitTag> optionalTag = getTag(repoDir);
         boolean isVersion = optionalTag.map(GitTag::isVersion).orElse(false);
         String status;
@@ -169,7 +171,7 @@ class AppManager {
         }
         String tagValue = optionalTag.map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");
         RepoAndTag repoAndTag = new RepoAndTag(remoteRepoUrl, tagValue);
-        return new AppInfo(appName, repoAndTag, isNative, status);
+        return AppInfo.of(appName, repoAndTag, isNative, status);
     }
 
     Optional<GitTag> getCurrentTag(String appName) {
@@ -238,11 +240,13 @@ class AppManager {
             Path repoDir = repoDir(appName);
             JkGit git = JkGit.of(repoDir);
             JkUtilsPath.createDirectories(repoDir);
-            String remoteRepoUrl = git.getRemoteUrl();
-            if (remoteRepoUrl.equals(repoUrl)) {
-                String tag = getTag(repoDir).map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");
-                boolean isNative = isNative(findAppFile(appName));
-                result.add(new AppVersion(appName, tag, isNative));
+            if (git.isOnGitRepo()) {
+                String remoteRepoUrl = git.getRemoteUrl();
+                if (Objects.equals(remoteRepoUrl, repoUrl)) {
+                    String tag = getTag(repoDir).map(GitTag::toString).orElse("<" + git.getCurrentBranch() + ">");
+                    boolean isNative = isNative(findAppFile(appName));
+                    result.add(new AppVersion(appName, tag, isNative));
+                }
             }
         }
         return result;

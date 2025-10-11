@@ -25,6 +25,7 @@ import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkException;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -107,12 +108,29 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     }
 
     public boolean isOnGitRepo() {
+        if (!hasDotGitDirOrInParent(this.getWorkingDir().toAbsolutePath().normalize())) {
+            return false;
+        }
         String result = this.copy()
-                .addParams("rev-parse ", "--is-inside-work-tree")
+                .addParams("rev-parse", "--is-inside-work-tree")
                 .setCollectStdout(true)
+                .setLogWithJekaDecorator(false)
                 .exec()
                 .getStdoutAsString();
-        return "true".equals(result);
+        JkLog.debug("%s>git  rev-parse --is-inside-work-tree  -> '%s'", this.getWorkingDir(), result);
+        return "true".equals(result.replace("\n", ""));
+    }
+
+    private boolean hasDotGitDirOrInParent(Path dir) {
+        if (Files.exists(dir.resolve(".git"))) {
+            JkLog.debug("Found .git dir in %s", dir);
+            return true;
+        }
+        JkLog.debug("No .git dir found in %s", dir);
+        if (dir.getParent() == null) {
+            return false;
+        }
+        return hasDotGitDirOrInParent(dir.getParent());
     }
 
     /**

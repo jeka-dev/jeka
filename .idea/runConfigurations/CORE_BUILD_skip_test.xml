@@ -1,5 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="CORE BUILD skip test" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="jeka-temurin-21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="dev.jeka.core.tool.Main" />
     <module name="core" />
     <option name="PROGRAM_PARAMETERS" value="project: pack --inspect --clean --stacktrace" />

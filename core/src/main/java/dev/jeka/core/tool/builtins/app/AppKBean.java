@@ -306,8 +306,10 @@ public class AppKBean extends KBean {
         for (String appName : installedAppNames) {
             AppInfo appInfo = appManager.getAppInfo(appName);
             String update = appInfo.updateInfo;
-            text.add(appName, appInfo.repoAndTag.repoUrl, appInfo.repoAndTag.tag, update,
-                    appInfo.isNative ? "native" : "jvm");
+            String repoUrl = appInfo.isRepoMissing ? "!!Missing"
+                    : appInfo.repoAndTag.repoUrl;
+            String tag = appInfo.isRepoMissing ? "" : appInfo.repoAndTag.tag;
+            text.add(appName, repoUrl, tag, update, appInfo.isNative ? "native" : "jvm");
         }
         JkBusyIndicator.stop();
         JkLog.info(JkAnsi.magenta("Installed app:"));

@@ -26,11 +26,22 @@ class AppInfo {
 
     final String updateInfo;
 
-    AppInfo(String name, RepoAndTag repoAndTag, boolean isNative, String outDatedStatus) {
+    final boolean isRepoMissing;
+
+    private AppInfo(String name, RepoAndTag repoAndTag, boolean isNative, String outDatedStatus, boolean isRepoMissing) {
         this.name = name;
         this.repoAndTag = repoAndTag;
         this.isNative = isNative;
         this.updateInfo = outDatedStatus;
+        this.isRepoMissing = isRepoMissing;
+    }
+
+    public static AppInfo of(String name, RepoAndTag repoAndTag, boolean isNative, String outDatedStatus) {
+        return new AppInfo(name, repoAndTag, isNative, outDatedStatus, false);
+    }
+
+    public static AppInfo ofRepoMissing(String name, boolean isNative) {
+        return new AppInfo(name, null, isNative, null, true);
     }
 
 
