@@ -50,7 +50,7 @@ Adopt the existing style:
 - Keep classes `public` only when necessary, prefixed with `Jk` to maintain IDE clarity.
 - Prefer fluent APIs.
 - Avoid third-party dependencies unless critical.
-- Ensure compatibility with JDK 8.
+- Ensure compatibility with JDK 21.
 
 Contributions range from improving JeKa itself to creating plugins for better integration with popular tools.
 
@@ -65,8 +65,6 @@ For full builds with SonarQube analysis:
 ```shell
 ant -f .github\workflows\build.xml -Dsonar.host.url=...
 ```
-
-> Requires JDK 11+ due to SonarQube.
 
 ## Releasing
 
