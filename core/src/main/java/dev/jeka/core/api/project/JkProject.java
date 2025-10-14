@@ -223,6 +223,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      */
     public final JkConsumers<List<String>> runJavaOptionCustomizer = JkConsumers.of();
 
+    public final JpmsModules jpmsModules = new JpmsModules();
+
     /**
      * Convenient facade for configuring the project.
      */
@@ -253,6 +255,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     private final Function<Path, JkProject> projectResolver;
 
     private final Map<String, String> properties;
+
+
 
     private JkProject(Function<Path, JkProject> projectResolver, Map<String, String> properties) {
         artifactLocator = artifactLocator();
@@ -704,6 +708,16 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
     public List<String> getRunJavaOptions() {
         List<String> javaOptions = new LinkedList<>();
+        JkPathSequence modulePath = jpmsModules.getModulePaths();
+        if (!modulePath.getEntries().isEmpty()) {
+            javaOptions.add("--module-path");
+            javaOptions.add(modulePath.toPath());
+        }
+        List<String> addModules = jpmsModules.getAddModules();
+        if (!addModules.isEmpty()) {
+            javaOptions.add("--add-modules");
+            javaOptions.add(String.join(",", addModules));
+        }
         runJavaOptionCustomizer.accept(javaOptions);
         return javaOptions;
     }
@@ -961,4 +975,27 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
 
     }
+
+    public final static class JpmsModules {
+
+        private JpmsModules() {}
+
+        public final JkConsumers<List<Path>> modulePathCustomizer = JkConsumers.of();
+
+        public final JkConsumers<List<String>> addModulesCustomizer = JkConsumers.of();
+
+        public final JkPathSequence getModulePaths() {
+            List<Path> paths = new LinkedList<>();
+            modulePathCustomizer.accept(paths);
+            return JkPathSequence.of(paths);
+        }
+
+        public final List<String> getAddModules() {
+            List<String> modules = new LinkedList<>();
+            addModulesCustomizer.accept(modules);
+            return modules;
+        }
+    }
+
+
 }

@@ -156,14 +156,27 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
 
     /**
      * Returns this sequence as a list.
+     * @deprecated Use {@link #toList()} instead.
      */
+    @Deprecated
     public List<Path> getEntries() {
         return entries;
     }
 
+    public List<Path> toList() {
+        return entries;
+    }
+
+    public Path getElement(int index) {
+        return entries.get(index);
+    }
+
+    /**
+     * @deprecated Use {@link #getElement(int)} instead.
+     */
+    @Deprecated
     public Path getEntry(int index) {
         return entries.get(index);
-
     }
 
     @Override

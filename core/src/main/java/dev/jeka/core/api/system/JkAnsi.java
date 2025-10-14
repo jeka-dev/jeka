@@ -42,6 +42,10 @@ public interface JkAnsi {
         System.out.print(of().eraseLine(EraseKind.ALL).toString());
     }
 
+    static void moveCursorUp(int count) {
+        System.out.print(of().cursorUp(count).toString());
+    }
+
     static void moveCursorLeft(int count) {
         System.out.print(of().cursorLeft(count).toString());
     }

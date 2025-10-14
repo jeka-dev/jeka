@@ -105,6 +105,10 @@ public class PicocliMainCommand {
             description = "Try to keep running JeKa even if jeka-src compilation fails.")
     private boolean forceMode;
 
+    @Option(names = {"--strict"},
+            description = "Throw an error if any declared KBean property does not match an existing one.")
+    private boolean strict;
+
     @Option(names = { "-i", "--inspect"},
             description = "Display information about runtime setup (versions, properties, locations, classpaths, kbeans...")
     private boolean runtimeInfo;
@@ -209,7 +213,8 @@ public class PicocliMainCommand {
                 cleanOutput,
                 forceMode,
                 skipCompile,
-                childBase);
+                childBase,
+                strict);
     }
 
     JkDependencySet dependencies() {

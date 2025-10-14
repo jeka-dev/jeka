@@ -35,19 +35,39 @@ class BehaviorSettings {
 
     final String childBase;
 
+    final boolean strict;
 
-    BehaviorSettings(String defaultKbeanName, boolean cleanWork, boolean cleanOutput, boolean forceMode,
-                     boolean skipCompile, String childBase) {
+
+    BehaviorSettings(String defaultKbeanName,
+                     boolean cleanWork,
+                     boolean cleanOutput,
+                     boolean forceMode,
+                     boolean skipCompile,
+                     String childBase,
+                     boolean strict) {
         this.defaultKbeanName = Optional.ofNullable(defaultKbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
         this.forceMode = forceMode;
         this.skipCompile = skipCompile;
         this.childBase = childBase;
+        this.strict = strict;
     }
 
     static BehaviorSettings ofDefault() {
-        return new BehaviorSettings(null, false, false, false, false, null);
+        return new BehaviorSettings(null, false, false, false, false, null, false);
+    }
+
+    static void setForceMode() {
+        BehaviorSettings forceLodeSettinfgs = new BehaviorSettings(
+                INSTANCE.defaultKbeanName.orElse(null),
+                INSTANCE.cleanWork,
+                INSTANCE.cleanOutput,
+                true,
+                INSTANCE.skipCompile,
+                INSTANCE.childBase,
+                INSTANCE.strict);
+        INSTANCE = forceLodeSettinfgs;
     }
 
 }

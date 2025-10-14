@@ -66,5 +66,9 @@ public final class JkCoordinateFileProxy {
         return result;
     }
 
+    public boolean exists() {
+        Path result = coordinate.cachePath();
+        return Files.exists(result) || repoSet.get(coordinate) != null;
+    }
 
 }

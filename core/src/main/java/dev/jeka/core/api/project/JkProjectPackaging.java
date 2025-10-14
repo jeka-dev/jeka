@@ -117,8 +117,8 @@ public class JkProjectPackaging {
         this.javadocProcessor = JkJavadocProcessor.of();
         this.mainClassFinder = this::findMainClass;
         actions.append(CREATE_JAR_ACTION, () -> {
-            jarMaker.accept(project.artifactLocator.getMainArtifactPath());
             writeJavaOptions();
+            jarMaker.accept(project.artifactLocator.getMainArtifactPath());
         });
     }
 

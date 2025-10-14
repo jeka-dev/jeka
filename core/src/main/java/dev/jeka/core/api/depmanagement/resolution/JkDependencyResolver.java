@@ -249,25 +249,20 @@ public final class JkDependencyResolver  {
                 return result.get();
             }
         }
-        String msg = "Resolving dependencies...";
-        JkLog.getOutPrintStream().print(msg);
-        JkLog.getOutPrintStream().flush();
+        JkLog.info("Resolving dependencies...");
         JkResolveResult resolveResult;
-        try {
-            resolveResult = doResolve(qualifiedDependencies, params);
 
-            // Customize resolution according customizers
-            for (UnaryOperator<JkResolveResult> customizer : params.getResolveResultCustomizers()) {
-                resolveResult = customizer.apply(resolveResult);
-            }
+        resolveResult = doResolve(qualifiedDependencies, params);
 
-        } finally {
-            JkAnsi.eraseAllLine();
-            JkAnsi.moveCursorLeft(msg.length());
-            if (!JkAnsiConsole.of().isEnabled()) {
-                JkLog.info("");
-            }
+        // Customize resolution according customizers
+        for (UnaryOperator<JkResolveResult> customizer : params.getResolveResultCustomizers()) {
+            resolveResult = customizer.apply(resolveResult);
         }
+
+        // Erase the last line
+        JkAnsi.moveCursorUp(1);
+        JkAnsi.eraseAllLine();
+
         return resolveResult;
     }
 

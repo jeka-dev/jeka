@@ -160,6 +160,9 @@ public class Main {
                 JkAnsiConsole.of().systemUninstall();
                 System.exit(0);
             }
+            if (docKbeanName != null) {           // when jeka kbean: doc, should run in force mode
+                BehaviorSettings.setForceMode();
+            }
 
             // Validate KBean properties
             if (!BehaviorSettings.INSTANCE.forceMode) {
@@ -381,15 +384,23 @@ public class Main {
                 }
             }
             if (kbeanClassName == null) {
-                throw new IllegalStateException("Property '@" + propName + "' does not match to any KBean. " +
-                        "Execute `jeka --doc' to see available KBeans.");
+                String msg = "Property '@" + propName + "' does not match to any KBean. " +
+                        "Execute `jeka --doc' to see available KBeans.";
+                if (BehaviorSettings.INSTANCE.strict) {
+                    throw new IllegalStateException(msg);
+                }
+                JkLog.warn(msg);
             }
             if (propName.contains(".")) {
                 String fieldName = JkUtilsString.substringAfterFirst(propName, ".");
                 Class<? extends KBean> kbeanClass = JkClassLoader.ofCurrent().load(kbeanClassName);
                 if (!JkBeanDescription.of(kbeanClass, true).isContainingField(fieldName)) {
-                    throw new IllegalStateException("Property '@" + propName + "' does not match any field in "
-                            + beanName + " KBean. Execute 'jeka " + beanName + ": --doc' to see available fields.");
+                    String msg = "Property '@" + propName + "' does not match any field in "
+                            + beanName + " KBean. Execute 'jeka " + beanName + ": --doc' to see available fields.";
+                    if (BehaviorSettings.INSTANCE.strict) {
+                        throw new IllegalStateException(msg);
+                    }
+                    JkLog.warn(msg);
                 }
 
             }

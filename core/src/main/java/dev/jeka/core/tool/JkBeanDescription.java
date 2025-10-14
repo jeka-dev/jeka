@@ -21,6 +21,7 @@ import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.builtins.app.AppKBean;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
+import dev.jeka.core.tool.builtins.project.BundleKBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.setup.SetupKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
@@ -49,10 +50,11 @@ public final class JkBeanDescription {
             AppKBean.class,
             BaseKBean.class,
             ProjectKBean.class,
-            MavenKBean.class,
-            GitKBean.class,
-            DockerKBean.class,
+            BundleKBean.class,
             NativeKBean.class,
+            DockerKBean.class,
+            GitKBean.class,
+            MavenKBean.class,
             IntellijKBean.class,
             EclipseKBean.class
     );
