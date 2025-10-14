@@ -101,14 +101,14 @@ Visit the [documentation](https://jeka-dev.github.io/jeka/), and explore the [ex
 
 ## Comparison
 
-|                           | Maven                         | Jeka                          | Gradle                         |
-|---------------------------|-------------------------------|-------------------------------|--------------------------------|
-| Declarative Configuration | 🟢 XML                        | 🟢 Properties                 | 🟠 DSL                         |
-| Scriptability             | 🔴 None                       | 🟢 Plain Java or Kotlin       | 🟢 Kotlin or Groovy DSL        |
-| Full Portability          | 🔴 Requires JDK installed     | 🟢 Zero installation required | 🔴 Requires JDK installed      |
-| IDE Support               | 🟢 All Mainstream IDEs        | 🟢 IntelliJ  🟠 Eclipse       | 🟢 All Mainstream IDEs         |
+|                           | Maven                         | Jeka                          | Gradle                          |
+|---------------------------|-------------------------------|-------------------------------|---------------------------------|
+| Declarative Configuration | 🟢 XML                        | 🟢 Properties                 | 🟠 DSL                          |
+| Scriptability             | 🔴 None                       | 🟢 Plain Java or Kotlin       | 🟢 Kotlin or Groovy DSL         |
+| Full Portability          | 🔴 Requires JDK installed     | 🟢 Zero installation required | 🔴 Requires JDK installed       |
+| IDE Support               | 🟢 All Mainstream IDEs        | 🟢 IntelliJ  🟠 Eclipse       | 🟢 All Mainstream IDEs          |
 | Runs project from sources | 🟠 Slow. Not from remote Git. | 🟢 Fast. Natively supported   | 🟠 Slow. Not natively supported |
-| 3rd Party Tech Support    | 🟢Almost all tech             | 🟠 Only popular tech          | 🟢Almost all tech              |
+| 3rd Party Tech Support    | 🟢 Almost all tech            | 🟠 Only popular tech          | 🟢 Almost all tech              |
 
 **Benchmark:** Visit [this benchmark](https://github.com/djeang/benchmark-jeka-maven-gradle) for more details.
 
