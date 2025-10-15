@@ -15,19 +15,18 @@ _____
 
 **The Next-Gen Build Tool for Java & Co**
 
-## Description
 
 JeKa is a modern Java build tool designed for simplicity, combining ease of use with robust handling of complex scenarios.
 
 It targets a generation of Java developers who prefer simple, Java-centric tools over complex XML-based 
 or external DSL-based solutions for building their applications.
 
-## Use Cases
+## 🛒 Use Cases
 - **Replace Maven or Gradle:** Build Java projects with simple properties or Java code instead of XML or complex DSLs. No pre-installed JDK needed.
 - **Complement Maven or Gradle:** Integrate full portability and Java scripting into your existing Maven or Gradle build, enabling scripts, JDK download, DevOps pipelines, or deployment logic in full Java code, runnable directly from source.
 - **Enable package-less Java:** Run applications from Git-hosted source code in JVM or native mode without packaging or deployment process. Register in a catalog for a source-based application management system.
 
-## Features
+## ✨ Features
 - **Zero-Config Builds:** Build Java projects with zero setup — no configuration or JDK installation required. 
 - **Java-Based Configuration:** Customize builds with simple properties or fine-tune with plain Java code — no XML, No DSL.
 - **Fully Portable builds:** Automatically downloads required JDK versions and tools — no pre-installed JDK or Jeka needed.
@@ -39,7 +38,7 @@ or external DSL-based solutions for building their applications.
 - **Multi-Module Project Support:** Enables configuration of multi-module projects with minimal configuration required.
 - **Supported Technologies:** Java, Kotlin, Git, Docker, GraalVM, Spring-Boot, Node.js, OpenAPI, Jacoco, SonarQube, Protobuf, Maven, and more.
 
-## Comparison
+## ⚖️ Comparison
 
 |                           | Maven                         | Jeka                          | Gradle                          |
 |---------------------------|-------------------------------|-------------------------------|---------------------------------|
@@ -52,10 +51,28 @@ or external DSL-based solutions for building their applications.
 
 **Benchmark:** Visit [this benchmark](https://github.com/djeang/benchmark-jeka-maven-gradle) for more details.
 
-## Installation
+## 🔌 External Plugins
+
+External plugins must be explicitly imported and are provided as JAR files on Maven Central.  
+
+The following plugins are included in JeKa's monorepo and are released together, so their version is automatically managed and does not need to be specified during import:
+- [Spring Boot Plugin](plugins/plugins.springboot)
+- [SonarQube Plugin](plugins/plugins.sonarqube)
+- [JaCoCo Plugin](plugins/plugins.jacoco)
+- [Node.js Plugin](plugins/plugins.nodejs)
+- [Kotlin Plugin](plugins/plugins.kotlin)
+- [Protobuf Plugin](plugins/plugins.protobuf)
+- [Nexus Plugin](plugins/plugins.nexus)
+- [Central Portal Plugin](plugins/plugins.centralportal)
+
+The following plugins are maintained in their own repository:
+- [OpenAPI Plugin](https://github.com/jeka-dev/openapi-plugin)
+- [JavaFX Plugin](https://github.com/jeka-dev/javafx-plugin)
+
+## 📦 Installation
 Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 
-## CommandLine Usage (Examples)
+## 💡 CommandLine Usage (Examples)
 
 **Execute build methods**
 - **Compile, test, and create JAR**: `jeka project: test pack` or `jeka project: build`
@@ -71,7 +88,7 @@ Visit the [installation page](https://jeka-dev.github.io/jeka/installation/).
 - Display help on console: `jeka --help`
 - Display docs on KBeans: `jeka --doc`.
 
-## Configure
+## ⚙️ Configure
 
 **Configure builds using properties**
 ```properties
@@ -111,25 +128,11 @@ class Build extends KBean {
 
 Visit the [documentation](https://jeka-dev.github.io/jeka/), and explore the [examples](https://jeka-dev.github.io/jeka/examples/).
 
-## External Plugins
+## 🏷️ Versioning
 
-External plugins must be explicitly imported and are provided as JAR files on Maven Central.  
+JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 
-The following plugins are included in JeKa's monorepo and are released together, so their version is automatically managed and does not need to be specified during import:
-- [Spring Boot Plugin](plugins/plugins.springboot)
-- [SonarQube Plugin](plugins/plugins.sonarqube)
-- [JaCoCo Plugin](plugins/plugins.jacoco)
-- [Node.js Plugin](plugins/plugins.nodejs)
-- [Kotlin Plugin](plugins/plugins.kotlin)
-- [Protobuf Plugin](plugins/plugins.protobuf)
-- [Nexus Plugin](plugins/plugins.nexus)
-- [Central Portal Plugin](plugins/plugins.centralportal)
-
-The following plugins are maintained in their own repository:
-- [OpenAPI Plugin](https://github.com/jeka-dev/openapi-plugin)
-- [JavaFX Plugin](https://github.com/jeka-dev/javafx-plugin)
-
-## Community
+## 👥 Community
 
 - **Contribute:** [Contribution Guide](https://github.com/jeka-dev/jeka/blob/master/CONTRIBUTING.md)
 - **Issues:** [Report or track issues](https://github.com/jeka-dev/jeka/issues)
@@ -143,11 +146,8 @@ This project is supported by the OW2 Consortium.
   <img src="docs/images/ow2.svg" alt="OW2 Logo" width="80" />
 </a>
 
-## Versioning
 
-JeKa follows [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
-
-## Roadmap
+## 🗺️ Roadmap
 
 - Improve documentation
 - Enhance existing functionality based on user feedback.
