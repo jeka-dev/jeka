@@ -48,6 +48,7 @@ or external DSL-based solutions for building their applications.
 | IDE Support               | 🟢 All Mainstream IDEs        | 🟢 IntelliJ  🟠 Eclipse       | 🟢 All Mainstream IDEs          |
 | Runs project from sources | 🟠 Slow. Not from remote Git. | 🟢 Fast. Natively supported   | 🟠 Slow. Not natively supported |
 | 3rd Party Tech Support    | 🟢 Almost all tech            | 🟠 Only popular tech          | 🟢 Almost all tech              |
+| Distrib Size              | 🟢 8.8 MB                     | 🟢 2.2 MB                     | 🔴 129 MB                       |
 
 **Benchmark:** Visit [this benchmark](https://github.com/djeang/benchmark-jeka-maven-gradle) for more details.
 
