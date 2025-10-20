@@ -10,11 +10,13 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.*;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @JkDoc("""
@@ -23,8 +25,7 @@ import java.util.stream.Stream;
         This plugin creates a self-contained app and allows configuring the jpackage and jlink tools.
        
         This integrates with ProjectKBean for project-specific setups, handles file
-        system operations to prepare input directories, and invokes jpackage
-        and jlink tools.
+        system operations to prepare input directories, and invokes jpackage and jlink tools.
         """)
 public final class BundleKBean extends KBean {
 
@@ -33,6 +34,9 @@ public final class BundleKBean extends KBean {
 
     @JkDoc("If true, creates a bundled application along with the regular JAR when executing 'project: pack'.")
     public boolean projectPack;
+
+    @JkDoc("It true, the runtimes libs will be added in the packaged application, which may be not necessary whe using FAT jars.")
+    public boolean includeRuntimeLibs = true;
 
     @JkDoc
     public final JpackageConfig jpackage = new JpackageConfig();
@@ -49,54 +53,60 @@ public final class BundleKBean extends KBean {
 
     @Override
     protected void init() {
+
+        // Fill jpackage and jlink options with user setup properties
         jpackageOptions.addAll(jpackage.options.toOptions());
         jlinkOptions.addAll(jlink.options.toOptions());
     }
 
+    @JkDoc("Adds the bundled application to 'project: pack' actions, if 'projectPack=true'.")
+    @JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         if (this.projectPack) {
-            projectKBean.project.pack.actions.append(this::pack);
+            projectKBean.project.pack.actions.append("Bundling in a self-contained app", this::pack);
         }
     }
 
     @JkDoc("Packages the application into a bundle.")
     public void pack() {
-        JkJpackage jkPackage = JkJpackage.of();
+        JkJpackage jpackage = jpackage();
 
         // Set Project options
-        setProjectOptions(jkPackage);
+        setProjectOptions(jpackage);
 
         // Add extra options
-        jpackageOptions.forEach(jkPackage::addOptions);
+        jpackageOptions.forEach(jpackage::addOptions);
 
         if (customJre) {
 
             // Create custom JRE
-            JkJlink jkJlink = JkJlink.of();
+            JkJlink jkJlink = jlink();
             fillJklinkOptions(jkJlink);
             jlinkOptions.forEach(jkJlink::addOptions);
             JkUtilsPath.deleteQuietly(customJrePath(), false);
             jkJlink.run();
 
-            jkPackage.addOptions("--runtime-image", customJrePath().toString());
+            jpackage.addOptions("--runtime-image", customJrePath().toString());
         }
 
         // Run jpackage
-        jkPackage.run();
+        jpackage.prepareOutputDir();
+        jpackage.run();
     }
 
+    @JkDoc("Prints JPMS module dependencies on the console.")
     public void showModuleDeps() {
-        System.out.println(JkJdeps.of().getModuleDeps(mainJar()));
+        jdeps().getModuleDeps(mainJar(), projectKBean.project.jpmsModules.getModulePaths());
     }
 
-    @JkDoc("Print jpackage help on the console.")
+    @JkDoc("Prints jpackage help on the console.")
     public void jpackageHelp() {
-        JkJpackage.of().printHelp();
+        jpackage().printHelp();
     }
 
-    @JkDoc("Print jlink help on the console.")
+    @JkDoc("Prints jlink help on the console.")
     public void jlinkHelp() {
-        JkJlink.of().printHelp();
+        jlink().printHelp();
     }
 
     /**
@@ -204,9 +214,12 @@ public final class BundleKBean extends KBean {
     }
 
     private void fillJklinkOptions(JkJlink jkJlink) {
-        List<String> moduleDeps = JkJdeps.of().getModuleDeps(mainJar());
+        JkProject.JpmsModules jpmsModules = projectKBean.project.jpmsModules;
+        List<String> moduleDeps = jpmsModules.getAddModules();
+        JkPathSequence modulePath = jpmsModules.getModulePaths();
         jkJlink
                 .addOptions("--add-modules", String.join(",", moduleDeps))
+                .addOptions("--module-path", String.join(",", modulePath.toPath()))
                 .addOptions("--output", customJrePath().toString());
     }
 
@@ -233,26 +246,27 @@ public final class BundleKBean extends KBean {
         Path inputDir = projectKBean.getOutputDir().resolve("jpackage-input");
         createInputDir(inputDir);
 
-        Path outputDir = project.getOutputDir();
-
         String mainClass = project.pack.getOrFindMainClass();
         Path mainJar = project.artifactLocator.getMainArtifactPath().getFileName();
+        if (!Files.exists(mainJar)) {
+            project.pack.run();
+        }
 
         String appName = JkUtilsString.substringBeforeLast(mainJar.toString(), ".jar");
 
         jkPackage
                 .addOptions("--input", inputDir.toString())
-                .addOptions("--dest", outputDir.toString())
+                .addOptions("--dest", outputDir().toString())
                 .addOptions("--main-class", mainClass)
                 .addOptions("--main-jar", mainJar.toString())
                 .addOptions("--name", appName);
 
         JkPathSequence modulePath = project.jpmsModules.getModulePaths();
-        if (!modulePath.toList().isEmpty()) {
+        if (!modulePath.toList().isEmpty() && !customJre) {
             jkPackage.addOptions("--module-path", modulePath.toPath());
         }
-        List<String> addModules = project.jpmsModules.getAddModules();
-        if (!addModules.isEmpty()) {
+        List<String> addModules = jdeps().getModuleDeps(project.artifactLocator.getMainArtifactPath(), modulePath);
+        if (!addModules.isEmpty() && !customJre) {
             jkPackage.addOptions("--add-modules", String.join(",", addModules));
         }
     }
@@ -262,16 +276,45 @@ public final class BundleKBean extends KBean {
 
         JkProject project = projectKBean.project;
         Path jar = project.artifactLocator.getMainArtifactPath();
+
+        if (!Files.exists(jar)) {
+            project.pack.run();
+        }
         JkUtilsPath.createDirectories(inputDir);
 
         // Copy main jar
         JkUtilsPath.copy(jar, inputDir.resolve(jar.getFileName()), StandardCopyOption.REPLACE_EXISTING);
 
         // Copy libs
-        Path libDir = inputDir.resolve("lib");
-        JkUtilsPath.createDirectories(libDir);
-        project.pack.resolveRuntimeDependenciesAsFiles().forEach(file ->
-                JkUtilsPath.copy(file, libDir.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING));
+        if (includeRuntimeLibs) {
+            Path libDir = inputDir.resolve("lib");
+            JkUtilsPath.createDirectories(libDir);
+            project.pack.resolveRuntimeDependenciesAsFiles().forEach(file ->
+                    JkUtilsPath.copy(file, libDir.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING));
+        }
     }
+
+    private Path outputDir() {
+        return projectKBean.project.getOutputDir();
+    }
+
+    private JkJpackage jpackage() {
+        String distribution = Optional.ofNullable(getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP))
+                .orElse("temurin");
+        return JkJpackage.ofJavaVersion(projectKBean.project.getEffectiveJavaVersion(), distribution);
+    }
+
+    private JkJlink jlink() {
+        String distribution = Optional.ofNullable(getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP))
+                .orElse("temurin");
+        return JkJlink.ofJavaVersion(projectKBean.project.getEffectiveJavaVersion(), distribution);
+    }
+
+    private JkJdeps jdeps() {
+        String distribution = Optional.ofNullable(getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP))
+                .orElse("temurin");
+        return JkJdeps.ofJavaVersion(projectKBean.project.getEffectiveJavaVersion(), distribution);
+    }
+
 
 }

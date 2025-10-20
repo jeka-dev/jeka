@@ -709,7 +709,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     public List<String> getRunJavaOptions() {
         List<String> javaOptions = new LinkedList<>();
         JkPathSequence modulePath = jpmsModules.getModulePaths();
-        if (!modulePath.getEntries().isEmpty()) {
+        if (!modulePath.toList().isEmpty()) {
             javaOptions.add("--module-path");
             javaOptions.add(modulePath.toPath());
         }
@@ -720,6 +720,13 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
         runJavaOptionCustomizer.accept(javaOptions);
         return javaOptions;
+    }
+
+    /**
+     *  Returns the Java version effectively used for compiling and running.
+     */
+    public String getEffectiveJavaVersion() {
+        return Optional.of(this.jvmTargetVersion).orElse(JkJavaVersion.ofCurrent()).toString();
     }
 
     LocalAndTxtDependencies textAndLocalDeps() {
@@ -752,7 +759,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     private Element xmlDeps(Document document, String purpose, JkDependencySet deps) {
-        JkResolveResult resolveResult = dependencyResolver.resolve(deps);
+        JkResolveResult resolveResult = dependencyResolver.resolve(purpose, deps);
         JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         Element element = tree.toDomElement(document, true);
         element.setAttribute("purpose", purpose);
@@ -760,7 +767,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     private void displayDependencyTree(String purpose, JkDependencySet deps) {
-        final JkResolveResult resolveResult = dependencyResolver.resolve(deps);
+        final JkResolveResult resolveResult = dependencyResolver.resolve(purpose, deps);
         final JkResolvedDependencyNode tree = resolveResult.getDependencyTree();
         JkLog.info("------------------------------------------------------------");
         JkLog.info("Dependency tree for " + purpose + " : ");

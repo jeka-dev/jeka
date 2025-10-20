@@ -45,7 +45,7 @@ import java.util.List;
 @JkDoc("""
         Manages the build and execution of a JVM project.
         
-        It contains all information and methods for resolving dependencies, compiling, testing and packaging as JARs")
+        It contains all information and methods for resolving dependencies, compiling, testing and packaging as JARs.
         """)
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-project/")
 public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, JkBuildable.Supplier {

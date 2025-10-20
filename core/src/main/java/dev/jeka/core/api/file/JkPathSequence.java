@@ -171,6 +171,10 @@ public final class JkPathSequence implements Iterable<Path>, Serializable {
         return entries.get(index);
     }
 
+    public boolean isEmpty() {
+        return entries.isEmpty();
+    }
+
     /**
      * @deprecated Use {@link #getElement(int)} instead.
      */

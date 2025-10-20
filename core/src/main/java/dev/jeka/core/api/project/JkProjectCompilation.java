@@ -165,8 +165,7 @@ public class JkProjectCompilation {
     }
 
     public List<Path> resolveDependenciesAsFiles() {
-
-        return project.dependencyResolver.resolveFiles(dependencies.get());
+        return project.dependencyResolver.resolveFiles(this.purpose(), dependencies.get());
     }
 
     /**

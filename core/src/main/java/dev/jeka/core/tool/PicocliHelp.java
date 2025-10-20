@@ -104,17 +104,22 @@ class PicocliHelp {
 
         // -- Case defaultKBean is present
         if (defaultKBeanClassName != null) {
-            synopsis.add(String.format("Default KBean @|yellow %s:|@ (%s)",
+            synopsis.add(String.format("@|magenta Default KBean|@ @|yellow %s:|@ %s",
                     KBean.name(defaultKBeanClassName), defaultKBeanClassName));
             if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
                 synopsis.add("Description  : " + beanDescription.synopsisHeader);
             }
-            synopsis.add("\nFields");
+            if (!beanDescription.beanFields.isEmpty()) {
+                synopsis.add(JkAnsi.magenta("\nFields"));
+            }
+
         }
         main.usageMessage()
                 .autoWidth(true)
-                .customSynopsis(synopsis.toArray(new String[0]))
-                .commandListHeading("Methods\n");
+                .customSynopsis(synopsis.toArray(new String[0]));
+        if (beanDescription != null && !beanDescription.beanMethods.isEmpty()) {
+            main.usageMessage().commandListHeading(JkAnsi.magenta("Methods\n"));
+        }
 
         // Add section for Standard KBeans
         Map<String, String> stdKBeans = new LinkedHashMap<>();
@@ -125,7 +130,7 @@ class PicocliHelp {
         }
         CommandLine commandLine = new CommandLine(main);
         commandLine.getHelpSectionMap().put(SECTION_STD_KBEANS_HEADING,
-                help -> help.createHeading("\nStandard KBeans\n"));
+                help -> help.createHeading(JkAnsi.magenta("\nStandard KBeans\n")));
         commandLine.getHelpSectionMap().put(SECTION_STD_KBEANS_DETAILS,
                 help -> help.createTextTable(stdKBeans).toString());
         List<String> keys = new ArrayList<>(commandLine.getHelpSectionKeys());
@@ -137,7 +142,8 @@ class PicocliHelp {
         // Add section for other KBeans
         List<String> others = new LinkedList<>(kbeanResolution.allKbeanClassNames);
         List<String> stdKbeanClassNames = JkBeanDescription.STANDARD_KBEAN_CLASSES.stream()
-                        .map(Class::getName).collect(Collectors.toList());
+                .map(Class::getName)
+                .toList();
         others.removeAll(stdKbeanClassNames);
         others.remove(defaultKBeanClassName);
         if (!others.isEmpty()) {
@@ -161,7 +167,7 @@ class PicocliHelp {
         Map<String, String> shorthands = cmdShortHand(props);
         if (!shorthands.isEmpty()) {
             commandLine.getHelpSectionMap().put(SECTION_SHORTHANDS_HEADING,
-                    help -> help.createHeading("\nShorthands\n"));
+                    help -> help.createHeading(JkAnsi.magenta("\nShorthands\n")));
             commandLine.getHelpSectionMap().put(SECTION_SHORTHANDS_DETAILS,
                     help -> help.createTextTable(shorthands).toString());
             index = keys.indexOf(dev.jeka.core.tool.CommandLine.Model.UsageMessageSpec.SECTION_KEY_FOOTER_HEADING);
@@ -171,7 +177,7 @@ class PicocliHelp {
         }
 
         String msg = JkAnsi.of()
-                .a("Execute ")
+                .fg(JkAnsi.Color.MAGENTA).a("Execute ").reset()
                 .fg(JkAnsi.Color.YELLOW).a("jeka <kbean>: --doc").reset()
                 .a(" (as ")
                 .a(JkAnsi.Attribute.ITALIC).a("jeka docker: --doc").reset()
@@ -193,9 +199,11 @@ class PicocliHelp {
         List<String> synopsis = new LinkedList<>();
         String kbeanClassName = beanDescription.kbeanClass.getName();
         String shortName = KBean.name(kbeanClassName);
-        synopsis.add(String.format("KBean @|yellow %s:|@ (%s)",
+        synopsis.add(String.format("@|magenta KBean|@ @|yellow %s:|@ %s",
                     KBean.name(shortName), beanDescription.kbeanClass.getName()));
         synopsis.add("");
+
+        // KBean description (class level JkDoc)
         if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
             String header = beanDescription.synopsisHeader.trim();
             header = header.endsWith(".") ? header : header + ".";
@@ -203,13 +211,33 @@ class PicocliHelp {
             List<String> descLines = Arrays.asList(beanDescription.synopsisDetail.split("\n"));
             synopsis.addAll(descLines);
         }
+
+        // Pre Init
+        if (!beanDescription.preInitInfos.isEmpty()) {
+            synopsis.add("\n" + JkAnsi.magenta("On activation: Pre-initialize"));
+            beanDescription.preInitInfos.forEach(
+                    info -> synopsis.add("      "
+                            + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
+                            + info.description));
+        }
+
+        // PostInit
+        if (!beanDescription.postInitInfos.isEmpty()) {
+            synopsis.add("\n" + JkAnsi.magenta("On activation: Post-initialize"));
+            beanDescription.postInitInfos.forEach(
+                    info -> synopsis.add("      "
+                            + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
+                            + info.description));
+        }
+
+        // Fields
         if (!beanDescription.beanFields.isEmpty()) {
-            synopsis.add("Fields");
+            synopsis.add("\n" + JkAnsi.magenta("Fields"));
         }
         main.usageMessage()
                 .autoWidth(true)
                 .customSynopsis(synopsis.toArray(new String[0]))
-                .commandListHeading("Methods\n");
+                .commandListHeading(JkAnsi.magenta("Methods") + "\n");
         return new CommandLine(main).setUsageHelpAutoWidth(true);
     }
 
@@ -220,7 +248,7 @@ class PicocliHelp {
         String kbeanClassName = kbeanClassNames.stream()
                 .filter(clazzName -> KBean.nameMatches(clazzName, kbeanName))
                 .findFirst().orElse(null);
-        if (kbeanClassName == null) {;
+        if (kbeanClassName == null) {
             return null;
         }
         ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
@@ -232,7 +260,7 @@ class PicocliHelp {
     private static Map<String, Class<? extends KBean>> beanNameClassMap(ClassLoader classLoader,
                                                                         List<String> kbeanClasses) {
         Map<String, Class<? extends KBean>> result = new LinkedHashMap<>();
-        kbeanClasses.stream().forEach(className -> {
+        kbeanClasses.forEach(className -> {
 
             // A class being in the .jeka-work cache might no longer exist.
             try {
@@ -251,7 +279,8 @@ class PicocliHelp {
                 .options     (dev.jeka.core.tool.CommandLine.Help.Ansi.Style.fg_yellow)                // yellow foreground color
                 .parameters  (dev.jeka.core.tool.CommandLine.Help.Ansi.Style.fg_yellow)
                 .optionParams(dev.jeka.core.tool.CommandLine.Help.Ansi.Style.italic)
-                .errors      (dev.jeka.core.tool.CommandLine.Help.Ansi.Style.fg_red, dev.jeka.core.tool.CommandLine.Help.Ansi.Style.bold)
+                .errors      (dev.jeka.core.tool.CommandLine.Help.Ansi.Style.fg_red,
+                                dev.jeka.core.tool.CommandLine.Help.Ansi.Style.bold)
                 .stackTraces (dev.jeka.core.tool.CommandLine.Help.Ansi.Style.italic)
                 .applySystemProperties() // optional: allow end users to customize
                 .build();

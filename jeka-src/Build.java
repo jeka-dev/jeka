@@ -19,8 +19,7 @@ class Build extends KBean {
         });
     }
 
-    @JkDoc("Publish the sdkman version based on the current git tag." +
-            "Wait until ")
+    @JkDoc("Publish the sdkman version based on the current git tag.")
     public void publishSdkman() {
         SdkmanPublisher.publishOnVersionTag();
     }

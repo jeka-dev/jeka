@@ -381,7 +381,7 @@ public final class JkSonarqube {
         if (provideProdLibs) {
             JkDependencySet deps = project.compilation.dependencies.get()
                     .merge(project.pack.runtimeDependencies.get()).getResult();
-            libs = project.dependencyResolver.resolve(deps).getFiles();
+            libs = project.dependencyResolver.resolve("production libs", deps).getFiles();
         }
         final Path testReportDir = project.test.getReportDir().toAbsolutePath();
         JkModuleId jkModuleId = project.getModuleId();
@@ -418,7 +418,7 @@ public final class JkSonarqube {
         }
         if (provideTestLibs) {
             JkDependencySet deps = project.test.compilation.dependencies.get();
-            JkPathSequence testLibs = project.dependencyResolver.resolve(deps).getFiles();
+            JkPathSequence testLibs = project.dependencyResolver.resolve("test libs (Sonarqube)", deps).getFiles();
             this.setPathProperty(JAVA_TEST_LIBRARIES, testLibs);
         }
         return this;
@@ -500,7 +500,8 @@ public final class JkSonarqube {
         dependencyResolver
                 .getDefaultParams()
                     .setFailOnDependencyResolutionError(false);
-        JkResolveResult resolveResult = dependencyResolver.resolve(JkDependencySet.of().and(coordinateDependency));
+        JkResolveResult resolveResult = dependencyResolver.resolve("fetching sonar-scanner cli",
+                JkDependencySet.of().and(coordinateDependency));
         if (resolveResult.getErrorReport().hasErrors()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Cannot find dependency " + coordinate + "\n");

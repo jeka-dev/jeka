@@ -20,13 +20,11 @@ import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.file.JkPathTree;
-import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.system.JkAnsi;
-import dev.jeka.core.api.system.JkAnsiConsole;
-import dev.jeka.core.api.system.JkConsoleSpinner;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkConstants;
 
 import java.lang.ref.SoftReference;
@@ -34,9 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.utils.JkUtilsString.pluralize;
 
@@ -212,34 +208,69 @@ public final class JkDependencyResolver  {
 
     /**
      * Resolves the specified coordinate dependency using the given resolution parameters.
+     * @param purpose Label for logging.
+     */
+    public JkResolveResult resolve(String purpose,
+                                   JkCoordinateDependency coordinateDependency,
+                                   JkResolutionParameters params) {
+        return resolve(purpose, JkDependencySet.of(coordinateDependency), params);
+    }
+
+    /**
+     * Resolves the specified coordinate dependency using the given resolution parameters.
      */
     public JkResolveResult resolve(JkCoordinateDependency coordinateDependency, JkResolutionParameters params) {
-        return resolve(JkDependencySet.of(coordinateDependency), params);
+        return resolve(null, coordinateDependency, params);
+    }
+
+    /**
+     * Resolves the specified dependencies and returns the resolve result with default params.
+     *
+     * @param purpose Label for logging.
+     */
+    public JkResolveResult resolve(String purpose, JkDependencySet dependencies) {
+        return resolve(purpose, dependencies, parameters);
     }
 
     /**
      * Resolves the specified dependencies and returns the resolve result with default params.
      */
     public JkResolveResult resolve(JkDependencySet dependencies) {
-        return resolve(dependencies, parameters);
+        return resolve(null, dependencies, parameters);
+    }
+
+    /**
+     * Resolves the specified dependencies and returns the resolve result with default params.
+     *
+     * @param purpose Label for logging
+     */
+    public JkResolveResult resolve(String purpose, JkDependencySet dependencies, JkResolutionParameters params) {
+        JkDependencySet normalizedDeps = dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL);
+        JkDependencySet mergedDeps = normalizedDeps.mergeLocalProjectExportedDependencies();
+        return resolve(purpose, JkQualifiedDependencySet.of(mergedDeps), params);
     }
 
     /**
      * Resolves the specified dependencies with specified resolution params.
      */
     public JkResolveResult resolve(JkDependencySet dependencies, JkResolutionParameters params) {
-        return resolve(JkQualifiedDependencySet.of(
-                dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL)
-                            .mergeLocalProjectExportedDependencies()), params);
+        return resolve(null, JkQualifiedDependencySet.of(dependencies), params);
     }
 
     /**
      * Resolves the specified qualified dependencies. The qualification stands for dependency 'scope' or 'configuration'.
      *
-     * @param qualifiedDependencies the dependencies to resolve.
+     * @param qualifiedDependencies the dependencies to resolve
      * @return a result consisting in a dependency tree for modules and a set of files for non-module.
      */
-    public JkResolveResult resolve(JkQualifiedDependencySet qualifiedDependencies, JkResolutionParameters params) {
+    public JkResolveResult resolve(
+            JkQualifiedDependencySet qualifiedDependencies,
+            JkResolutionParameters params) {
+        return resolve(null, qualifiedDependencies, params);
+    }
+
+
+    private JkResolveResult resolve(String purpose, JkQualifiedDependencySet qualifiedDependencies, JkResolutionParameters params) {
         if (qualifiedDependencies.getEntries().isEmpty()) {
             return JkResolveResult.ofRoot(moduleHolder);
         }
@@ -249,7 +280,8 @@ public final class JkDependencyResolver  {
                 return result.get();
             }
         }
-        JkLog.info("Resolving dependencies...");
+        String msgSuffix = JkUtilsString.isBlank(purpose) ? "" : " for " + purpose;
+        JkLog.info("Resolving dependencies%s...", msgSuffix);
         JkResolveResult resolveResult;
 
         resolveResult = doResolve(qualifiedDependencies, params);
@@ -292,10 +324,10 @@ public final class JkDependencyResolver  {
         JkLog.verboseStartTask("resolve-dependencies");
         int dependencyCount = bomResolvedDependencies.getDependencies().size();
         if (dependencyCount == 1) {
-            JkLog.verbose("Unique dependency %s to resolve.", bomResolvedDependencies.getDependencies().get(0));
+            JkLog.verbose("Unique dependency %s to resolve.", bomResolvedDependencies.getDependencies().getFirst());
         } else {
             JkLog.verbose("%s dependencies to resolve:", dependencyCount);
-            bomResolvedDependencies.getEntries().forEach(
+            bomResolvedDependencies.toResolvedModuleVersions().getEntries().forEach(
                     dependency -> JkLog.verbose("   %s", dependency));;
         }
 
@@ -316,7 +348,7 @@ public final class JkDependencyResolver  {
         // Logs result readably
         if (JkLog.isVerbose()) {
             int moduleCount = resolveResult.getInvolvedCoordinates().size();
-            int fileCount = resolveResult.getFiles().getEntries().size();
+            int fileCount = resolveResult.getFiles().toList().size();
             JkLog.verbose("->  Resolved to %s, resulting in %s.",
                     pluralize(moduleCount, "coordinate"),
                     pluralize(fileCount, "file"));
@@ -347,15 +379,16 @@ public final class JkDependencyResolver  {
     /**
      * Resolves the specified qualified dependencies and returns a sequence of resolved files.
      * <p>
-     * This methods can leverage of direct resolution caching, while <code>resolve</code> methods can not.
+     * This method can leverage of direct resolution caching, while <code>resolve</code> methods can not.
      */
     public List<Path> resolveFiles(
+            String purpose,
             JkQualifiedDependencySet qualifiedDependencies,
             JkResolutionParameters params) {
 
         // If there's some resolution customizer, we cannot cache resolution.
         if (!useFileSystemCache || !params.getResolveResultCustomizers().isEmpty()) {
-            return resolve(qualifiedDependencies, params).getFiles().getEntries();
+            return resolve(purpose, qualifiedDependencies, params).getFiles().toList();
         }
 
         Path cacheFile = this.fileSystemCacheDir.resolve(qualifiedDependencies.md5() + ".txt");
@@ -366,12 +399,12 @@ public final class JkDependencyResolver  {
             }
             JkPathSequence cachedPathSequence =
                     JkPathSequence.ofPathString(JkPathFile.of(cacheFile).readAsString());
-            String cachedCpMsg = cachedPathSequence.getEntries().isEmpty() ? "[empty]" :
+            String cachedCpMsg = cachedPathSequence.toList().isEmpty() ? "[empty]" :
                     "\n" + cachedPathSequence.toPathMultiLine("  ");
             JkLog.debug("Cached resolved classpath :%s", cachedCpMsg);
             List<Path> missingEntries = cachedPathSequence.getNonExistingFiles();
             if (missingEntries.isEmpty()) {
-                return cachedPathSequence.getEntries();
+                return cachedPathSequence.toList();
             } else {
                 JkLog.debug(450, "Cached resolved-classpath %s has non existing entries %s on local file system" +
                         ": need resolving.", cacheFile, missingEntries);
@@ -380,27 +413,41 @@ public final class JkDependencyResolver  {
             JkLog.debug(150, "Cached resolved-classpath %s not found : need resolving %s", cacheFile,
                     qualifiedDependencies);
         }
-        JkPathSequence result =  this.resolve(qualifiedDependencies, params).getFiles();
+        JkPathSequence result = this.resolve(purpose, qualifiedDependencies, params).getFiles();
         JkLog.debug("Creating resolved-classpath %s for storing dep resolution.", cacheFile);
         JkUtilsPath.createFileSafely(cacheFile);  // On Jeka-ide JkPathFile.createifNotExist throw a "file already exist exception"
         JkPathFile.of(cacheFile).write(result.toPath().replace('\\', '/'));
-        return result.getEntries();
+        return result.toList();
     }
 
     /**
      * Resolves the specified qualified dependencies and returns a sequence of resolved files.
      * <p>
-     * This methods can leverage of direct resolution caching, while <code>resolve</code> methods can not.
+     * This method can leverage of direct resolution caching, while <code>resolve</code> methods can not.
      */
     public List<Path> resolveFiles(
+            String purpose,
             JkDependencySet dependencies,
             JkResolutionParameters params) {
         if (dependencies.getEntries().isEmpty()) {
             return Collections.emptyList();
         }
-        return resolveFiles(JkQualifiedDependencySet.of(
+        return resolveFiles(purpose, JkQualifiedDependencySet.of(
                 dependencies.normalised(JkCoordinate.ConflictStrategy.FAIL)
                         .mergeLocalProjectExportedDependencies()), params);
+    }
+
+    public List<Path> resolveFiles(
+            JkDependencySet dependencies,
+            JkResolutionParameters params) {
+        return resolveFiles(null, dependencies, params);
+    }
+
+    /**
+     * Resolves the specified dependencies and returns a sequence of resolved files.
+     */
+    public List<Path> resolveFiles(String purpose, JkDependencySet dependencies) {
+        return resolveFiles(purpose, dependencies, this.parameters);
     }
 
     /**
@@ -440,8 +487,7 @@ public final class JkDependencyResolver  {
     }
 
     private JkRepoSet effectiveRepos() {
-        boolean includeLocalRepo = true;
-        return includeLocalRepo ? repos.and(JkRepo.ofLocal().toReadonly()) : repos;
+        return repos.and(JkRepo.ofLocal().toReadonly());
     }
 
     private JkQualifiedDependencySet replacePomDependencyByVersionProvider(JkQualifiedDependencySet dependencySet) {
@@ -449,8 +495,7 @@ public final class JkDependencyResolver  {
         JkQualifiedDependencySet result = dependencySet;
         for (JkQualifiedDependency qualifiedDependency : dependencies) {
             JkDependency dependency = qualifiedDependency.getDependency();
-            if (dependency instanceof JkCoordinateDependency) {
-                JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
+            if (dependency instanceof JkCoordinateDependency coordinateDependency) {
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
                 JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
 

@@ -273,7 +273,7 @@ public final class JkImlGenerator {
         // resolve runbase dependencies
         JkDependencySet runbaseCSourceDeps = JkDependencySet.of();
         if (this.runbaseDependencies.hasModules()) {
-            JkResolveResult runbaseResolve = depResolver.resolve(runbaseDependencies, resolutionParameters);
+            JkResolveResult runbaseResolve = depResolver.resolve("base", runbaseDependencies, resolutionParameters);
             runbaseCSourceDeps = collectSourceDeps(runbaseResolve);
         }
 

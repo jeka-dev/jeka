@@ -19,6 +19,7 @@ package dev.jeka.core.api.java.tools;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Path;
@@ -34,13 +35,25 @@ public final class JkJlink {
 
     private static final Path EXEC_PATH = Paths.get(System.getProperty("java.home")).resolve("bin").resolve(EXEC_NAME);
 
+    private final Path execPath;
+
     private final List<Supplier<List<String>>> options =  new ArrayList<>();
 
-    private JkJlink() {
+    private JkJlink(Path execPath) {
+        this.execPath = execPath;
     }
 
     public static JkJlink of() {
-        return new JkJlink();
+        return new JkJlink(EXEC_PATH);
+    }
+
+    public static JkJlink of(Path execPath) {
+        return new JkJlink(execPath);
+    }
+
+    public static JkJlink ofJavaVersion(String javaVersion, String distribution) {
+        Path jdkPath = JkUtilsJdk.getJdk(distribution, javaVersion);
+        return new JkJlink(jdkPath.resolve("bin").resolve(EXEC_NAME));
     }
 
     private List<String> toOptions() {
@@ -57,14 +70,14 @@ public final class JkJlink {
     public void run() {
         JkLog.info("Running jlink with options:");
         options.forEach(option -> JkLog.info(String.join(" ", option.get())));
-        JkProcess.of(EXEC_PATH)
+        JkProcess.of(execPath)
                 .addParams(toOptions())
                 .setInheritIO(true)
                 .exec();
     }
 
     public void printHelp() {
-        JkProcess.of(EXEC_PATH)
+        JkProcess.of(execPath)
                 .addParams("--help")
                 .setInheritIO(true)
                 .exec();

@@ -279,12 +279,21 @@ public final class JkBeanDescription {
             }
         }
         List<InitMethodInfo> preInitInfos = InitMethodInfo.preInitMethodsOf(kbeanClass);
-        List<InitMethodInfo> postInitInfos = InitMethodInfo.preInitMethodsOf(kbeanClass);
+        List<InitMethodInfo> postInitInfos = InitMethodInfo.postInitMethodsOf(kbeanClass);
         JkDocUrl jkDocUrl = kbeanClass.getAnnotation(JkDocUrl.class);
         String docUlr = jkDocUrl == null ? null : jkDocUrl.value();
 
-        JkBeanDescription result = new JkBeanDescription(kbeanClass, header, detail, methods, beanFields,
-                initDescription, true, preInitInfos, postInitInfos, docUlr);
+        JkBeanDescription result = new JkBeanDescription(
+                kbeanClass,
+                header,
+                detail,
+                methods,
+                beanFields,
+                initDescription,
+                true,
+                preInitInfos,
+                postInitInfos,
+                docUlr);
         CACHE.put(kbeanClass, result);
         return result;
     }

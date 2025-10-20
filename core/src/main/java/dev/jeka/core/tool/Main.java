@@ -187,7 +187,7 @@ public class Main {
                 JkAnsiConsole.of().systemUninstall();
                 System.exit(success ? 0 : 1);
             }
-            // Handle 'jeka kbean: --doc.md''
+            // Handle 'jeka kbean: --doc-md''
             docKbeanName = cmdArgs.kbeanDoc("--doc-md");
             if (!JkUtilsString.isBlank(docKbeanName)) {
                 boolean success = performDocMdKBean(engine, docKbeanName);

@@ -19,14 +19,14 @@ package dev.jeka.core.api.java.tools;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsJdk;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Supplier;
+import java.util.*;
 
 public final class JkJpackage {
 
@@ -34,48 +34,120 @@ public final class JkJpackage {
 
     private static final Path EXEC_PATH = Paths.get(System.getProperty("java.home")).resolve("bin").resolve(EXEC_NAME);
 
-    private final List<Supplier<List<String>>> options =  new ArrayList<>();
+    private final Path execPath;
 
-    private JkJpackage() {
+    private final List<OptionGroup> options =  new ArrayList<>();
+
+    private JkJpackage(Path execPath) {
+        this.execPath = execPath;
     }
 
     public static JkJpackage of() {
-        return new JkJpackage();
+        return new JkJpackage(EXEC_PATH);
     }
+
+    public static JkJpackage of(Path execPath) {
+        return new JkJpackage(execPath);
+    }
+
+    public static JkJpackage ofJavaVersion(String javaVersion, String distribution) {
+        Path jdkPath = JkUtilsJdk.getJdk(distribution, javaVersion);
+        return new JkJpackage(jdkPath.resolve("bin").resolve(EXEC_NAME));
+    }
+
+
 
     private List<String> toOptions() {
         return options.stream()
-                .flatMap(supplier -> supplier.get().stream())
+                .flatMap(optionGroup -> optionGroup.toList().stream())
                 .toList();
     }
 
     public JkJpackage addOptions(String... options) {
-        this.options.add(new ArrayOpts(options));
+        this.options.add(OptionGroup.of(options));
         return this;
     }
 
     public void run() {
-        JkLog.info("Running jpackage with options:");
-        options.forEach(option -> JkLog.info(String.join(" ", option.get())));
-        JkProcess.of(EXEC_PATH)
+        JkLog.info("Running jpackage %s with options:", execPath);
+        options.forEach(option -> JkLog.info(String.join(" ", option.toList())));
+        JkProcess.of(execPath)
                 .addParams(toOptions())
                 .setInheritIO(true)
                 .exec();
     }
 
+    /**
+     * Returns the values passed with the specified options. Returns an optional with empty array if the
+     * option was specified without any value. Returns an empty optional if the option is not present.
+     *
+     *
+     * @param optionName The option name, as "--dest'.
+     *
+     */
+    public Optional<List<String>> findOptionValues(String optionName) {
+        return options.stream()
+                .filter(optionGroup -> optionName.equals(optionGroup.name))
+                .map(OptionGroup::values)
+                .findFirst();
+    }
+
     public void printHelp() {
-        JkProcess.of(EXEC_PATH)
+        JkProcess.of(execPath)
+                .setLogCommand(JkLog.isVerbose())
                 .addParams("--help")
                 .setInheritIO(true)
                 .exec();
     }
 
 
-    private record ArrayOpts(String[] opts) implements Supplier<List<String>> {
+    private record OptionGroup(String name, List<String> values) {
 
-        @Override
-        public List<String> get() {
-            return Arrays.asList(opts);
+        static OptionGroup of(String... args) {
+            if (args.length == 1) {
+                return new OptionGroup(args[0], List.of());
+            }
+            return new OptionGroup(args[0], Arrays.asList(args).subList(1, args.length));
+        }
+
+        List<String> toList() {
+            List<String> result = new LinkedList<>();
+            result.add(name);
+            result.addAll(values);
+            return result;
         }
     }
+
+    /**
+     * For some packaging formats (such as --type=app-image), the output directory must be empty.
+     * This method removes the directory so the packaged app can be created safely.
+     */
+    public void prepareOutputDir() {
+        String typeOption = getOptionValue("--type");
+
+        // On macOs the destination folder for the package app is expected to not already exist.
+        if ("app-image".equals(typeOption)) {
+            Path dest = getOptionValue("--dest") == null ? Paths.get("") : Paths.get(getOptionValue("--dest"));
+            String appName = getOptionValue("--name");
+            if (appName == null) {
+                JkLog.warn("jpackage --name option not specified");
+                return;
+            }
+            Path destAppDir = dest.resolve(appName + ".app");
+            if (Files.exists(destAppDir)) {
+                JkLog.verbose("Clean %s app directory", destAppDir);
+                JkUtilsPath.deleteQuietly(destAppDir, true);
+            }
+        }
+    }
+
+    private String getOptionValue(String optionName) {
+        return findOptionValues(optionName)
+                .filter(list -> !list.isEmpty())
+                .map(List::getFirst)
+                .orElse(null);
+    }
+
+
+
 }

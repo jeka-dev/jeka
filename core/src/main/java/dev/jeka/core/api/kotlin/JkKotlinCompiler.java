@@ -132,7 +132,7 @@ public final class JkKotlinCompiler {
         } else {
             JkLog.startTask("Downloading Kotlin compiler " + kotlinVersion);
             kotlincFiles= JkDependencyResolver.of(repos)
-                    .resolve(JkDependencySet.of()
+                    .resolve("fetching Kotlin compiler", JkDependencySet.of()
                             .and("org.jetbrains.kotlin:kotlin-compiler:" + kotlinVersion)
                     )
                     .assertNoError()

@@ -31,6 +31,7 @@ import java.util.Optional;
 
 @JkDoc("""
         Provides a way to install, update, or remove applications from the user PATH.
+        
         Applications are installed from a Git repository and built by the client before installation.
         Applications can be installed as executable JARs or native apps.""")
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-app/")

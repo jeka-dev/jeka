@@ -47,13 +47,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@JkDoc(
-        "Manages the build and execution of code located in 'jeka-src' directory.\n" +
-        "The code stands for neither an application nor a library.\n" +
-        "For applications, code should contain a class including a main method to:\n\n" +  // double \n needed to proper display in mkdocs
-        "  - Run application\n" +
-        "  - Create bootable jar\n" +
-        "  - Create bootable fat jar, and create Docker images."
+@JkDoc("""
+        Manages the build and execution of code located in 'jeka-src' directory.
+        
+        The code stands for neither an application nor a library.
+        For applications, code should contain a class including a main method to:
+        
+          - Run application
+          - Create bootable jar
+          - Create bootable fat jar, and create Docker images
+        """
 )
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-base/")
 public final class BaseKBean extends KBean implements JkBuildable.Supplier {
@@ -198,7 +201,7 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
     public void depTree() {
         JkDependencySet deps = getRunbase().getExportedDependencies()
                 .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
-        String output = getRunbase().getDependencyResolver().resolve(deps)
+        String output = getRunbase().getDependencyResolver().resolve("base", deps)
                 .getDependencyTree().toStringTree();
         JkLog.info(output);
     }
@@ -484,10 +487,8 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
             public JkResolveResult resolveRuntimeDependencies() {
                 JkDependencySet deps = getRunbase().getExportedDependencies()
                         .andVersionProvider(JkConstants.JEKA_VERSION_PROVIDER);
-                return getRunbase().getDependencyResolver().resolve(deps);
+                return getRunbase().getDependencyResolver().resolve("base runtime", deps);
             }
-
-
 
             @Override
             public List<Path> getRuntimeDependenciesAsFiles() {

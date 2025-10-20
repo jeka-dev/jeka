@@ -339,7 +339,7 @@ public class JkProjectPackaging {
         if (cachedJkResolveResult != null) {
             return cachedJkResolveResult;
         }
-        cachedJkResolveResult = project.dependencyResolver.resolve(runtimeDependencies.get()
+        cachedJkResolveResult = project.dependencyResolver.resolve("runtime", runtimeDependencies.get()
                 .normalised(project.getDuplicateConflictStrategy()));
         return cachedJkResolveResult;
     }
@@ -348,7 +348,7 @@ public class JkProjectPackaging {
      * Retrieves the runtime dependencies as a sequence of files.
      */
     public List<Path> resolveRuntimeDependenciesAsFiles() {
-        return project.dependencyResolver.resolveFiles(runtimeDependencies.get());
+        return project.dependencyResolver.resolveFiles("runtime", runtimeDependencies.get());
     }
 
     /**
@@ -356,7 +356,7 @@ public class JkProjectPackaging {
      */
     public void copyManifestInClassDir() {
         project.compilation.runIfNeeded();
-        project.testing.runIfNeeded();
+        project.test.runIfNeeded();
         Path classDir = project.compilation.layout.resolveClassDir();
         if (!Files.exists(classDir)) {
             JkLog.warn("No class dir found.");
@@ -407,7 +407,7 @@ public class JkProjectPackaging {
     private boolean createJavadocFiles() {
         JkProjectCompilation compilation = project.compilation;
         Iterable<Path> classpath = project.dependencyResolver
-                .resolve(compilation.dependencies.get().normalised(project.getDuplicateConflictStrategy())).getFiles();
+                .resolve("compilation (Javadoc)", compilation.dependencies.get().normalised(project.getDuplicateConflictStrategy())).getFiles();
         JkPathTreeSet sources = compilation.layout.resolveSources();
         if (!sources.containFiles()) {
             return false;

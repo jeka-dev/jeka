@@ -23,7 +23,6 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.testing.JkTestProcessor;
 import dev.jeka.core.api.tooling.docker.JkDockerBuild;
 import dev.jeka.core.api.utils.JkUtilsAssert;
-import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.base.BaseKBean;
@@ -31,7 +30,7 @@ import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
-import java.nio.file.Files;
+import javax.swing.*;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -43,13 +42,17 @@ import java.util.function.Consumer;
  *  Inspired from :
  *     - https://github.com/spring-projects/spring-boot/tree/main/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/main/java/org/springframework/boot/maven
  */
-@JkDoc(
-        "Adapt `project` or `base` KBean for Spring-Boot:\n" +
-        "- Produce bootable jars\n" +
-        "- Customize .war file for projectKBean\n" +
-        "- Adapt scaffolding\n" +
-        "- Include Spring Maven repositories for resolution\n" +
-        "- Adapt Docker image generator to include port exposure"
+@JkDoc("""
+       Adapts `project` or `base` KBean for Spring Boot.
+       
+       This plugin:
+       
+         - Produces bootable JARs
+         - Customizes WAR files for the 'projectKBean
+         - Adapts scaffolding for creating Spring-Boot projects
+         - Includes Spring Maven repositories for dependency resolution
+         - Adapts Docker image generator to expose ports
+       """
 )
 @JkDocUrl("https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.springboot/README.md")
 public final class SpringbootKBean extends KBean {
@@ -84,17 +87,16 @@ public final class SpringbootKBean extends KBean {
         return runbase.getBuildableKBeanClass();
     }
 
-    @JkDoc("Sets test progress style to PLAIN to display JVM messages gracefully.")
+    @JkDoc("Sets test progress style to PLAIN in order to display JVM messages gracefully.")
     @JkPreInit
     private static void initProjectKbean(ProjectKBean projectKBean) {
-        projectKBean.project.testing.testProcessor.engineBehavior
+        projectKBean.project.test.processor.engineBehavior
                 .setProgressDisplayer(JkTestProcessor.JkProgressStyle.STEP);
     }
 
-    @JkDoc("Adapts project: " +
-            "creates Bootable JAR on #pack, " +
+    @JkDoc("Adapts project: creates Bootable JAR on #pack, " +
             "adds Springboot Maven repositories to dependency resolutions, " +
-            "forces tests to run in separated process")
+            "and forces tests to run in separated process.")
     @JkPostInit
     private void postInit(ProjectKBean projectKBean) {
         projectKBean.getProjectScaffold().addCustomizer(SpringbootScaffold::customize);
@@ -109,7 +111,7 @@ public final class SpringbootKBean extends KBean {
     @JkDoc("Adapts base KBean: " +
             "creates Bootable JAR on #pack, " +
             "adds Springboot Maven repositories to dependency resolutions, " +
-            "forces tests to run in separated process")
+            "forces tests to run in separated process.")
     @JkPostInit
     private void postInit(BaseKBean baseKBean) {
         if (find(ProjectKBean.class).isPresent()) {
@@ -129,14 +131,14 @@ public final class SpringbootKBean extends KBean {
         );
     }
 
-    @JkDoc("Adds exposed ports to the built images")
+    @JkDoc("Adds exposed ports to the built images.")
     @JkPostInit
     private void postInit(DockerKBean dockerKBean) {
         dockerKBean.customizeJvmImage(this::customizeDockerBuild);
         dockerKBean.customizeNativeImage(this::customizeDockerBuild);
     }
 
-    @JkDoc("Adds Springboot AOT step when building native executable")
+    @JkDoc("Adds Springboot AOT step when building native executable.")
     @JkPostInit
     private void postInit(NativeKBean nativeKBean) {
         nativeKBean.includeMainClassArg = false;

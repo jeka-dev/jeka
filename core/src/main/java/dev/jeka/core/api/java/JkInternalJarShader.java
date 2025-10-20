@@ -52,7 +52,7 @@ public interface JkInternalJarShader {
                     .and("org.apache.maven.plugins:maven-shade-plugin:3.6.0")
                         .withLocalExclusions("org.slf4j:slf4j-simple")
                     .and("org.apache.maven:maven-plugin-api:3.9.8");
-            List<Path> classpath = dependencyResolver.resolveFiles(dependencies);
+            List<Path> classpath = dependencyResolver.resolveFiles("shading jar", dependencies);
 
             ClassLoader classLoader = JkInternalChildFirstClassLoader.of(classpath,
                     JkInternalJarShader.class.getClassLoader());

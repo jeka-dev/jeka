@@ -17,8 +17,10 @@
 package dev.jeka.core.api.java.tools;
 
 
+import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import java.nio.file.Path;
@@ -35,15 +37,26 @@ public final class JkJdeps {
 
     private static final Path EXEC_PATH = Paths.get(System.getProperty("java.home")).resolve("bin").resolve(EXEC_NAME);
 
+    private final Path execPath;
+
     private final List<String> options =  new LinkedList<>();
 
-    private JkJdeps() {
+    private JkJdeps(Path execPath) {
+        this.execPath = execPath;
     }
 
     public static JkJdeps of() {
-        return new JkJdeps();
+        return new JkJdeps(EXEC_PATH);
     }
 
+    public static JkJdeps of(Path execPath) {
+        return new JkJdeps(execPath);
+    }
+
+    public static JkJdeps ofJavaVersion(String javaVersion, String distribution) {
+        Path jdkPath = JkUtilsJdk.getJdk(distribution, javaVersion);
+        return new JkJdeps(jdkPath.resolve("bin").resolve(EXEC_NAME));
+    }
 
     public JkJdeps addOptions(String... options) {
         this.options.addAll(Arrays.asList(options));
@@ -52,27 +65,33 @@ public final class JkJdeps {
 
     public void run() {
         options.forEach(JkLog::info);
-        JkProcess.of(EXEC_PATH)
+        JkProcess.of(execPath)
                 .addParams(options)
                 .setInheritIO(true)
                 .exec();
     }
 
-    public List<String> getModuleDeps(Path jar) {
-        JkLog.info("Running jpackage with options:");
-        options.forEach(JkLog::info);
-        return Arrays.stream(JkProcess.of(EXEC_PATH)
+    public List<String> getModuleDeps(Path jar, JkPathSequence modulePaths) {
+        JkLog.verbose("Running jdeps with options:");
+        options.forEach(JkLog::verbose);
+        return Arrays.stream(JkProcess.of(execPath)
+                .addParamsIf(!JkLog.isVerbose(), "-quiet")
+                .addParams("--ignore-missing-deps")
+                .addParamsIf(!modulePaths.isEmpty(), "--module-path", modulePaths.toPath())
+                .addParamsIf(!modulePaths.isEmpty(), "--class-path", modulePaths.toPath())
                 .addParams("--print-module-deps", jar.toString())
+                .setLogCommand(JkLog.isVerbose())
+                .setCollectStdout(JkLog.isVerbose())
                 .setCollectStdout(true)
                 .exec()
                 .getStdoutAsString().split(","))
                 .toList().stream()
-                .map(item -> item.replace("\n", ""))
-                .toList();
+                    .map(item -> item.replace("\n", ""))
+                    .toList();
     }
 
     public void printHelp() {
-        JkProcess.of(EXEC_PATH)
+        JkProcess.of(execPath)
                 .addParams("--help")
                 .setInheritIO(true)
                 .exec();
