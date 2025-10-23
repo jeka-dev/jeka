@@ -29,6 +29,8 @@ import java.util.stream.Stream;
         """)
 public final class BundleKBean extends KBean {
 
+    public static final String JPACKAGE_TEMP_DIR_NAME = "jpackage-input";
+
     @JkDoc("If true, a custom JRE is created including only Java modules used by the application.")
     public boolean customJre;
 
@@ -243,7 +245,7 @@ public final class BundleKBean extends KBean {
     private void setProjectOptions(JkJpackage jkPackage) {
         JkProject project = projectKBean.project;
 
-        Path inputDir = projectKBean.getOutputDir().resolve("jpackage-input");
+        Path inputDir = projectKBean.getOutputDir().resolve(JPACKAGE_TEMP_DIR_NAME);
         createInputDir(inputDir);
 
         String mainClass = project.pack.getOrFindMainClass();

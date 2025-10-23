@@ -40,10 +40,6 @@ class Catalog {
         this.apps = apps;
     }
 
-    static Catalog ofBuiltin() {
-        return ofInputStream(() -> Catalog.class.getResourceAsStream("demo-catalog.properties"));
-    }
-
     static Catalog of(String url) {
         try (InputStream inputStream = JkUtilsIO.toUrl(url).openStream()) {
             Properties properties = new Properties();
@@ -72,9 +68,22 @@ class Catalog {
             System.out.println("Desc: " + appInfo.description);
             System.out.println("Repo: " + appInfo.repo);
             System.out.println("Run : " + JkAnsi.yellow("jeka -r " + appInfo.repo + " -p"));
-            System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo="
-                    + appName + "@" + catalogName));
-            //System.out.println("Inst: " + JkAnsi.yellow("jeka app: install repo=" + appName + "@" + catalogName ));
+            int longestMsg = "Install as java cmd-line".length();
+            if (appInfo.nativable) {
+                longestMsg = "Install as native command-line".length();
+            }
+            String javaMsg = JkUtilsString.padEnd("Install as java cmd-line", longestMsg, ' ');
+
+            System.out.println(javaMsg+ ": " + JkAnsi.yellow("jeka app: install repo=" + appName + "@" + catalogName));
+            if (appInfo.nativable) {
+                System.out.println("Install as native command-line: " + JkAnsi.yellow("jeka app: install repo="
+                        + appName + "@" + catalogName + " native:"));
+            }
+            if (appInfo.bundable) {
+                String bundableMsg = JkUtilsString.padEnd("Install as app bundle", longestMsg, ' ');
+                System.out.println(bundableMsg + ": " + JkAnsi.yellow("jeka app: install repo="
+                        + appName + "@" + catalogName + " bundle:"));
+            }
             System.out.println();
         }
     }
@@ -95,7 +104,12 @@ class Catalog {
         Map<String, AppInfo> result = new TreeMap<>();
         for (String appName : appNames) {
             Map<String, String> map = JkProperties.ofMap(appPros).getAllStartingWith(appName + ".", false);
-            AppInfo appInfo = new AppInfo(map.get("desc"), map.get("repo"), map.get("type"));
+            AppInfo appInfo = new AppInfo(
+                    map.get("desc"),
+                    map.get("repo"),
+                    map.get("type"),
+                    map.get("native"),
+                    map.get("bundle"));
             result.put(appName, appInfo);
         }
         return result;
@@ -103,10 +117,12 @@ class Catalog {
 
     static class AppInfo {
 
-        public AppInfo(String description, String repo, String type) {
+        public AppInfo(String description, String repo, String type, String nativable, String bundable) {
             this.description = description;
             this.repo = repo;
             this.type = type;
+            this.nativable = "true".equals(nativable);
+            this.bundable = "true".equals(bundable);
         }
 
         public final String description;
@@ -115,12 +131,11 @@ class Catalog {
 
         public final String type;
 
-        private String shortenRepoUrl() {
-            if (repo.startsWith(GITHUB_URL)) {
-                return repo.substring(GITHUB_URL.length());
-            }
-            return repo;
-        }
+        public final boolean nativable;
+
+        public final boolean bundable;
+
+
     }
 
 

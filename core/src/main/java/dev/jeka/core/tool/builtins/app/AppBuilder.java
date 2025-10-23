@@ -38,8 +38,8 @@ class AppBuilder {
 
     static final String SHE_BANG = "#!/bin/sh";
 
-    static Path build(Path baseDir, boolean isNative) {
-        String[] buildArgs = buildArgs(baseDir, isNative);
+    static Path build(Path baseDir, boolean isNative, boolean isBundle) {
+        String[] buildArgs = buildArgs(baseDir, isNative, isBundle);
         JkLog.verbose("Use commands: %s", String.join(" ", buildArgs));
         JkProcess.ofWinOrUx("jeka.bat", "jeka")
                 .setWorkingDir(baseDir)
@@ -95,7 +95,7 @@ class AppBuilder {
                 .get();
     }
 
-    private static String[] buildArgs(Path base, boolean nativeCompile) {
+    private static String[] buildArgs(Path base, boolean nativeCompile, boolean bundle) {
         Path jekaProperties = base.resolve(JkConstants.PROPERTIES_FILE);
         List<String> args = new LinkedList<>();
         if (Files.exists(jekaProperties)) {
@@ -118,7 +118,10 @@ class AppBuilder {
                     args.add("base:");
                     args.add("pack");
                 }
-
+            }
+            if (bundle) {
+                args.add("bundle:");
+                args.add("pack");
             }
         }
         args.add("-Djeka.test.skip=true");

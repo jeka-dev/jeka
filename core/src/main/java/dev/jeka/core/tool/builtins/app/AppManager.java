@@ -23,6 +23,8 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.*;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.builtins.project.BundleKBean;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,7 +63,7 @@ class AppManager {
                 JkLocator.getCacheDir().resolve("git").resolve("apps"));
     }
 
-    void install(String appName, RepoAndTag repoAndTag, boolean isNative) {
+    void install(String appName, RepoAndTag repoAndTag, boolean isNative, boolean isBundle) {
         Path repoDir = repoDir(appName);
         JkUtilsPath.deleteQuietly(repoDir, false);
         JkUtilsPath.createDirectories(repoDir);
@@ -72,7 +74,7 @@ class AppManager {
                 .addParams(repoAndTag.repoUrl, repoDir.toString())
                 .exec();
         JkLog.info("Build app...");
-        buildAndInstall(appName, isNative, repoDir);
+        buildAndInstall(appName, isNative, repoDir, isBundle);
     }
 
     void updateWithTag(String appName, String tag) {
@@ -89,7 +91,7 @@ class AppManager {
 
         boolean isNative = isNative(appFile);
         JkLog.info("Re-building the app...");
-        buildAndInstall(appName, isNative, repoDir);
+        buildAndInstall(appName, isNative, repoDir, isBundle());
     }
 
     void updateToLastCommit(String appName) {
@@ -107,7 +109,8 @@ class AppManager {
 
         boolean isNative = isNative(appFile);
         JkLog.info("Re-building the app...");
-        buildAndInstall(appName, isNative, repoDir);
+
+        buildAndInstall(appName, isNative, repoDir, isBundle());
 
         JkLog.endTask();
     }
@@ -277,10 +280,10 @@ class AppManager {
         return name.matches("[a-zA-Z0-9\\-]+");
     }
 
-    private void buildAndInstall(String appName, boolean isNative, Path repoDir) {
+    private void buildAndInstall(String appName, boolean isNative, Path repoDir, boolean isBundle) {
         Path artefact;
         try {
-            artefact = AppBuilder.build(repoDir, isNative);
+            artefact = AppBuilder.build(repoDir, isNative, isBundle());
         } catch (RuntimeException e) {
             JkGit git = JkGit.of(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
@@ -345,6 +348,11 @@ class AppManager {
         }
         String content = JkPathFile.of(appFile).readAsString();
         return !content.trim().startsWith(AppBuilder.SHE_BANG);
+    }
+
+    private boolean isBundle() {
+        return Files.exists(
+                this.repoCacheDir.resolve(JkConstants.OUTPUT_PATH).resolve(BundleKBean.JPACKAGE_TEMP_DIR_NAME));
     }
 
     static class AppVersion {

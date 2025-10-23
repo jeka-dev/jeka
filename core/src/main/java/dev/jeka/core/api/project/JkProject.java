@@ -726,7 +726,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      *  Returns the Java version effectively used for compiling and running.
      */
     public String getEffectiveJavaVersion() {
-        return Optional.of(this.jvmTargetVersion).orElse(JkJavaVersion.ofCurrent()).toString();
+        return Optional.ofNullable(this.jvmTargetVersion).orElse(JkJavaVersion.ofCurrent()).toString();
     }
 
     LocalAndTxtDependencies textAndLocalDeps() {

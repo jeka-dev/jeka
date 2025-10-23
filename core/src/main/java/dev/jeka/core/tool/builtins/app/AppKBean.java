@@ -24,6 +24,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.BundleKBean;
 import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.util.List;
@@ -227,7 +228,8 @@ public class AppKBean extends KBean {
 
         // Install built app in target folder
         boolean isNative = find(NativeKBean.class).isPresent();
-        appManager.install(appName, repoAndTag, isNative);
+        boolean bundle = find(BundleKBean.class).isPresent();
+        appManager.install(appName, repoAndTag, isNative, bundle);
 
         JkLog.info("App has been installed in %s.", appManager.appDir);
         JkLog.info("Run with: %s", JkAnsi.yellow(suggestedAppName));
