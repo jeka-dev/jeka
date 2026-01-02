@@ -72,7 +72,7 @@ class ScaffoldTest {
     @Test
     void scaffold_base_ok() {
         RunChecker runChecker = new RunChecker();
-        runChecker.scaffoldCmd = scaffoldArgs("base: scaffold springboot: -Djeka.version=.");
+        runChecker.scaffoldCmd = scaffoldArgs("springboot: base: scaffold.jekaVersion=NO scaffold");
         runChecker.buildCmd = withJavaVersionArgs("base: test pack");
         runChecker.cleanup = false;
         Path baseDir = runChecker.run();
