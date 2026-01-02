@@ -158,15 +158,15 @@ public final class BundleKBean extends KBean {
         public JkMultiValue<String> all = JkMultiValue.of(String.class);
 
         @JkDoc("Extra options to pass to jpackage only when running on Windows. (e.g. 'options.windows--icon=media/icon.ico)")
-        @JkSuggest({"--icon","--type", "--add-launcher"})
+        @JkSuggest(value = {"--icon","--type", "--add-launcher"}, multiValues = {"app-image", "exe", "msi"})
         public JkMultiValue<String> windows = JkMultiValue.of(String.class);
 
         @JkDoc("Extra options to pass to jpackage only when running on Linux. (e.g. 'options.linux--icon=media/icon.png)")
-        @JkSuggest({"--icon","--type"})
+        @JkSuggest(value = {"--icon","--type"}, multiValues = {"app-image", "deb", "rpm"})
         public JkMultiValue<String> linux = JkMultiValue.of(String.class);
 
         @JkDoc("Extra options to pass to jpackage only when running on MacOS. (e.g. 'mac.options.--icon=media/icon.icns)")
-        @JkSuggest({"--icon","--type"})
+        @JkSuggest(value = {"--icon","--type"}, multiValues = {"app-image", "dmg", "pkg"})
         public JkMultiValue<String> mac = JkMultiValue.of(String.class);
 
         private List<String[]> toOptions() {

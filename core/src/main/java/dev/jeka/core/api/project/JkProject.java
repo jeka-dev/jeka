@@ -521,6 +521,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .add("Test Inclusions", test.selection.getIncludePatterns())
                 .add("Test Exclusions", test.selection.getExcludePatterns())
                 .add("Test Progress Style", test.processor.engineBehavior.getProgressStyle())
+                .add("Jmps module path", jpmsModules.getModulePaths())
+                .add("Jmps add modules", jpmsModules.getAddModules())
                 .add("Download Repositories", dependencyResolver.getRepos().getRepos().stream()
                         .map(repo -> repo.getUrl()).collect(Collectors.toList()))
                 .add("Pack actions", this.packActions.getRunnableNames())
@@ -991,13 +993,13 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
         public final JkConsumers<List<String>> addModulesCustomizer = JkConsumers.of();
 
-        public final JkPathSequence getModulePaths() {
+        public JkPathSequence getModulePaths() {
             List<Path> paths = new LinkedList<>();
             modulePathCustomizer.accept(paths);
             return JkPathSequence.of(paths);
         }
 
-        public final List<String> getAddModules() {
+        public List<String> getAddModules() {
             List<String> modules = new LinkedList<>();
             addModulesCustomizer.accept(modules);
             return modules;
