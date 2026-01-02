@@ -102,9 +102,9 @@ import java.util.stream.Stream;
  */
 public class JkNativeCompilation {
 
-    public static final String DEFAULT_GRAALVM_VERSION = "23";;
+    public static final String DEFAULT_GRAALVM_VERSION = "25";;
 
-    public static final String DEFAULT_REPO_VERSION =  "0.10.3";
+    public static final String DEFAULT_REPO_VERSION =  "0.11.3";
 
     private static final String JEKA_GRAAALVM_HOME = "JEKA_GRAAALVM_HOME";
 

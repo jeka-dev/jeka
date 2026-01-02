@@ -18,9 +18,7 @@ package dev.jeka.plugins.springboot;
 
 import dev.jeka.core.api.depmanagement.JkDepSuggest;
 import dev.jeka.core.api.project.scaffold.JkProjectScaffold;
-import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.builtins.base.JkBaseScaffold;
 
@@ -30,7 +28,7 @@ import java.util.List;
 class SpringbootScaffold {
 
     @JkDepSuggest(versionOnly = true, hint = "org.springframework.boot:spring-boot-dependencies:")
-    private static final String DEFAULT_SPRINGBOOT_VERSION = "3.5.0";
+    private static final String DEFAULT_SPRINGBOOT_VERSION = "4.0.1";
 
     public static void customize(JkProjectScaffold projectScaffold) {
 
@@ -57,8 +55,8 @@ class SpringbootScaffold {
         }
 
         // Add dependencies
-        projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-web");
-        projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-test");
+        projectScaffold.compileDeps.add("org.springframework.boot:spring-boot-starter-webmvc");
+        projectScaffold.testDeps.add("org.springframework.boot:spring-boot-starter-webmvc-test");
         projectScaffold.versionDeps.add(JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom");
 
         // Add sample code
@@ -88,12 +86,12 @@ class SpringbootScaffold {
                 JkSpringModules.Boot.STARTER_PARENT.toColonNotation(),
                 DEFAULT_SPRINGBOOT_VERSION);
 
-        List<String> deps = JkUtilsIterable.listOf(
+        List<String> deps = List.of(
                 JkSpringbootProject.BOM_COORDINATE + lastSpringbootVersion + "@pom",
-                "org.springframework.boot:spring-boot-starter-web");
+                "org.springframework.boot:spring-boot-starter-webmvc");
 
-        List<String> devDeps = JkUtilsIterable.listOf(
-                "org.springframework.boot:spring-boot-starter-test");
+        List<String> devDeps = List.of(
+                "org.springframework.boot:spring-boot-starter-webmvc-test");
 
         // Build class code
         String buildClassCode = readSnippet("BaseBuild.java");
