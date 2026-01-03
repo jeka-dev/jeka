@@ -244,7 +244,7 @@ final class BcGpgDoer implements JkInternalGpgDoer {
             }
             while (keyIter.hasNext()) {
                 PGPSecretKey key = keyIter.next();
-                JkLog.verbose("Reading key %n", JkUtilsIterable.listOf(key.getUserIDs()));
+                JkLog.verbose("Reading key %n", List.of(key.getUserIDs()));
                 if (key.isSigningKey()) {
                     return key;
                 }

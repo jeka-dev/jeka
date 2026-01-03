@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  */
 public final class JkBeanDescription {
 
-    public static final List<Class<? extends KBean>> STANDARD_KBEAN_CLASSES = JkUtilsIterable.listOf(
+    public static final List<Class<? extends KBean>> STANDARD_KBEAN_CLASSES = List.of(
             SetupKBean.class,
             AppKBean.class,
             BaseKBean.class,

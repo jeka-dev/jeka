@@ -531,8 +531,8 @@ public final class JkRepo {
         private final List<String> ivyPatterns;
 
         private JkRepoIvyConfig() {
-            this.artifactPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_ARTIFACT_PATTERN));
-            this.ivyPatterns = new LinkedList<>(JkUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN));
+            this.artifactPatterns = new LinkedList<>(List.of(DEFAULT_IVY_ARTIFACT_PATTERN));
+            this.ivyPatterns = new LinkedList<>(List.of(DEFAULT_IVY_IVY_PATTERN));
         }
 
         public List<String> artifactPatterns() {

@@ -171,8 +171,7 @@ class LocalAndTxtDependencies {
         private static final String GLOBAL_EXCLUDE_SYMBOL = "@@";
 
 
-        private static final List<String> KNOWN_QUALIFIER = JkUtilsIterable.listOf(COMPILE,
-                RUNTIME, TEST);
+        private static final List<String> KNOWN_QUALIFIER = List.of(COMPILE, RUNTIME, TEST);
 
         private static LocalAndTxtDependencies inspectFileStructure(Path baseDir) {
             final JkPathTree libDir = JkPathTree.of(baseDir);

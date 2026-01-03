@@ -324,7 +324,7 @@ class AppManager {
     }
 
     private static List<String> systemFiles() {
-        return JkUtilsIterable.listOf("jeka", "jeka.bat", "jeka-update");
+        return List.of("jeka", "jeka.bat", "jeka-update");
     }
 
     private Path findAppFile(String appName) {

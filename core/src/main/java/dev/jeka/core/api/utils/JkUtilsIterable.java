@@ -52,6 +52,7 @@ public final class JkUtilsIterable {
      * @see #listOf(Iterable)
      */
     @SafeVarargs
+    @Deprecated
     public static <T> List<T> listOf(T... items) {
         return Arrays.asList(items);
     }

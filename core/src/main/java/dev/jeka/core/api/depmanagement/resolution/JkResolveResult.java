@@ -166,7 +166,7 @@ public final class JkResolveResult {
         private final boolean hasErrors;
 
         public static JkErrorReport allFine() {
-            return new JkErrorReport(JkUtilsIterable.listOf(), false);
+            return new JkErrorReport(List.of(), false);
         }
 
         public static JkErrorReport failure(List<JkModuleDepProblem> missingArtifacts) {

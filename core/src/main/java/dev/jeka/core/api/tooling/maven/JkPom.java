@@ -41,8 +41,12 @@ import static dev.jeka.core.api.depmanagement.JkQualifiedDependencySet.*;
  */
 public final class JkPom {
 
-    private static final List<String> KNOWN_SCOPE = JkUtilsIterable.listOf(COMPILE_SCOPE, RUNTIME_SCOPE,
-            PROVIDED_SCOPE, TEST_SCOPE, IMPORT_SCOPE);
+    private static final List<String> KNOWN_SCOPE = List.of(
+            COMPILE_SCOPE,
+            RUNTIME_SCOPE,
+            PROVIDED_SCOPE,
+            TEST_SCOPE,
+            IMPORT_SCOPE);
 
     private final Document pomDoc;
 

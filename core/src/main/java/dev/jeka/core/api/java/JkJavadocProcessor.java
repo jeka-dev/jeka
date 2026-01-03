@@ -94,7 +94,7 @@ public final class JkJavadocProcessor {
         DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
         try (StandardJavaFileManager fm = tool.getStandardFileManager(null, null, null)) {
             Files.createDirectories(outputDir);
-            fm.setLocation(DocumentationTool.Location.DOCUMENTATION_OUTPUT, JkUtilsIterable.listOf(outputDir.toFile()));
+            fm.setLocation(DocumentationTool.Location.DOCUMENTATION_OUTPUT, List.of(outputDir.toFile()));
             Writer writer = new PrintWriter(new OutputStreamWriter(JkLog.getOutPrintStream(), StandardCharsets.UTF_8));
             List<String> options = computeOptions(classpath, srcDirs, outputDir);
             DocumentationTool.DocumentationTask task = tool.getTask(writer, fm, null, null,

@@ -362,11 +362,11 @@ public final class JkImlGenerator {
         final String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
         final String ext = JkUtilsString.substringAfterLast(name, ".");
         final String sourceName = nameWithoutExt + "-sources." + ext;
-        final List<Path> folders = JkUtilsIterable.listOf(
+        final List<Path> folders = List.of(
                 binary.resolve("..").normalize(),
                 binary.resolve("../sources").normalize(),
                 binary.resolve("../../sources").normalize());
-        final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-sources.zip");
+        final List<String> names = List.of(sourceName, nameWithoutExt + "-sources.zip");
         return lookFileHere(folders, names);
     }
 
@@ -375,12 +375,12 @@ public final class JkImlGenerator {
         final String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
         final String ext = JkUtilsString.substringAfterLast(name, ".");
         final String sourceName = nameWithoutExt + "-javadoc." + ext;
-        final List<Path> folders = JkUtilsIterable.listOf(
+        final List<Path> folders = List.of(
                 binary.resolve("..").normalize(),
                 binary.resolve("../../../libs-javadoc").normalize(),
                 binary.resolve("../../libs-javadoc").normalize(),
                 binary.resolve("../libs-javadoc").normalize());
-        final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-javadoc.zip");
+        final List<String> names = List.of(sourceName, nameWithoutExt + "-javadoc.zip");
         return lookFileHere(folders, names);
     }
 

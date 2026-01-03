@@ -50,7 +50,7 @@ public class  JkTransitivity {
      */
     public static final JkTransitivity RUNTIME = new JkTransitivity("RUNTIME");
 
-    private static final List<JkTransitivity> ORDER = JkUtilsIterable.listOf(NONE, COMPILE, RUNTIME);
+    private static final List<JkTransitivity> ORDER = List.of(NONE, COMPILE, RUNTIME);
 
     public static JkTransitivity ofDeepest(JkTransitivity left, JkTransitivity right) {
         if (left == null) {

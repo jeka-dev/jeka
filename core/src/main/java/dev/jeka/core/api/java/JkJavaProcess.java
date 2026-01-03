@@ -42,8 +42,13 @@ public class JkJavaProcess extends JkAbstractProcess<JkJavaProcess> {
 
     public static final Path CURRENT_JAVA_EXEC_DIR = CURRENT_JAVA_HOME.resolve("bin");
 
-    private static final List<String> PROXY_PROPS = listOf("http.proxyHost", "http.proxyPort",
-            "https.proxyHost", "https.proxyPort", "http.nonProxyHosts", "java.net.useSystemProxies");
+    private static final List<String> PROXY_PROPS = List.of(
+            "http.proxyHost",
+            "http.proxyPort",
+            "https.proxyHost",
+            "https.proxyPort",
+            "http.nonProxyHosts",
+            "java.net.useSystemProxies");
 
     private boolean inheritSystemProperties = false;
 

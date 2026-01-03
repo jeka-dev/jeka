@@ -57,7 +57,7 @@ public class JkDependencySet {
         } else {
             dependency = JkFileSystemDependency.of(Paths.get(coordinateOrFile));
         }
-        return of(JkUtilsIterable.listOf(dependency));
+        return of(List.of(dependency));
     }
 
     public static JkDependencySet of() {
@@ -72,7 +72,7 @@ public class JkDependencySet {
     }
 
     public static JkDependencySet of(JkDependency dependency) {
-        return of(JkUtilsIterable.listOf(dependency));
+        return of(List.of(dependency));
     }
 
     /**
@@ -219,7 +219,7 @@ public class JkDependencySet {
     }
 
     public JkDependencySet minus(JkDependency dependency) {
-        List<JkDependency> list = JkUtilsIterable.listOf(dependency);
+        List<JkDependency> list = List.of(dependency);
         return minus(list);
     }
 
