@@ -71,6 +71,7 @@ nav:
             - docker: reference/kbeans-docker.md
             - git: reference/kbeans-git.md
             - app: reference/kbeans-app.md
+            - bundle: reference/kbeans-bundle.md
             - setup: reference/kbeans-setup.md
         - Properties: reference/properties.md
         - Multi-Module: reference/multi-modules.md
