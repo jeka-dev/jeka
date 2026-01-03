@@ -214,7 +214,7 @@ class PicocliHelp {
 
         // Pre Init
         if (!beanDescription.preInitInfos.isEmpty()) {
-            synopsis.add("\n" + JkAnsi.magenta("On activation: Pre-initialize"));
+            synopsis.add("\n" + JkAnsi.magenta("Pre-initialize (on activation)"));
             beanDescription.preInitInfos.forEach(
                     info -> synopsis.add("      "
                             + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
@@ -223,7 +223,7 @@ class PicocliHelp {
 
         // PostInit
         if (!beanDescription.postInitInfos.isEmpty()) {
-            synopsis.add("\n" + JkAnsi.magenta("On activation: Post-initialize"));
+            synopsis.add("\n" + JkAnsi.magenta("Post-initialize (on activation)"));
             beanDescription.postInitInfos.forEach(
                     info -> synopsis.add("      "
                             + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
