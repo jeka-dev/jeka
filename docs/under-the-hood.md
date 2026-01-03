@@ -1,10 +1,10 @@
-# Under The Hood
+# Under the Hood
 
-Jeka consists of a single zero-dependency JAR file, along with two shell scripts (one Powershell script for Windows and one Bash script for Linux/macOS).
+JeKa consists of a single zero-dependency JAR file, along with two shell scripts (one PowerShell script for Windows and one Bash script for Linux/macOS).
 
-## Inside the Jeka JAR
+## Inside the JeKa JAR
 
-The Jeka JAR is structured as follows:
+The JeKa JAR is structured as follows:
 
 - `dev.jeka.core.tool` package:
 
@@ -12,11 +12,11 @@ The Jeka JAR is structured as follows:
 
 - `dev.jeka.core.tool.builtin` package: 
 
-     Contains *KBeans* bundled with JeKa, as `ProjectKBean`, `DockerKBean` or `NativeKBean`.
+     Contains *KBeans* bundled with JeKa, such as `ProjectKBean`, `DockerKBean` or `NativeKBean`.
 
 - `dev.jeka.core.api` package:
 
-  Includes libraries for building projects. These classes can be easily used outside Jeka and embedded in your product.    
+  Includes libraries for building projects. These classes can be easily used outside JeKa and embedded in your product.    
 
 ```mermaid
 graph TD

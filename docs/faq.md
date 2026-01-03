@@ -1,10 +1,10 @@
-# Frequented Asked Questions
+# Frequently Asked Questions
 
 ## Network - Security
 
 ### My organization prevents access to Maven Central. What can I do?
 
-You can [configure Maven repositories](reference/properties.md/#repositories) in a central place by editing the *[USER HOME]/.jeka/global.properties* file.
+You can [configure Maven repositories](reference/properties.md#repositories) in a central place by editing the `[USER HOME]/.jeka/global.properties` file.
 
 ```properties
 jeka.repos.download=https://my.company/repo
@@ -18,7 +18,7 @@ jeka.repos.download.headers.Authorization=Basic hKXhhtggjREfg4P=
 ```
 
 To fetch JeKa distributions, specify the `jeka.distrib.location` property, pointing to a folder. 
-This property is better placed in the *jeka.properties* file, as it may vary from one project to another.
+This property is better placed in the `jeka.properties` file, as it may vary from one project to another.
 
 ### My organization prevents downloading JDKs. What can I do?
 
@@ -28,14 +28,14 @@ jeka.jdk.11=/my/path/to/jdk11/home
 jeka.jdk.17=/my/path/to/jdk17/home
 ...
 ```
-This information can be stored in the project's jeka.properties file, in [USER HOME]/.jeka/global.properties, or passed as environment variables.
+This information can be stored in the project's `jeka.properties` file, in `[USER HOME]/.jeka/global.properties`, or passed as environment variables.
 
-### I'm behind a proxy, how should I configure Jeka ?
+### I'm behind a proxy, how should I configure JeKa?
 
-JeKa just leverages the standard Java mechanism to handle proxy. For example, You can :
+JeKa just leverages the standard Java mechanism to handle proxies. For example, you can:
 
-- Set the `JAVA_TOOL_OPTIONS` environment variable as `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
-- Or specify proxy properties to the jeka command line, as :  `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`
+- Set the `JAVA_TOOL_OPTIONS` environment variable to `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`.
+- Or specify proxy properties to the JeKa command line, such as: `-Dhttps.proxyHost=my.proxy.host -Dhttps.proxyPort=8888`.
 
 See [here](https://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be-used-by-the-jvm) for more details on arguments.
 
@@ -47,40 +47,40 @@ Nothing prevents using JeKa alongside Maven or Gradle in the same project, excep
 
 To avoid this, the `jeka-src` folder should exist in its own IntelliJ module. JeKa provides a simple way to achieve this.
 
-From an existing *Maven/Gradle* project, execute:
-```shell
+From an existing *Maven*/*Gradle* project, execute:
+```bash
 jeka base: scaffold
 ```
 Edit the `jeka.properties` file, and add:
 ```properties
 @intellij.splitModule=true
 ```
-Generate the iml file, by synchronize within the IDE, or by running:
-```shell
+Generate the `.iml` file by synchronizing within the IDE, or by running:
+```bash
 jeka intellij: sync
 ```
-In intellij, go to `project settings` -> `import module` -> chose *[project dir]/.idea/xxxx-jeka.iml*
+In IntelliJ, go to `Project Settings` -> `Modules` -> `Import Module` -> choose `[project dir]/.idea/xxxx-jeka.iml`.
 
 
 ### How can I migrate my project from Maven?
 
-_JeKa_ helps translate all dependencies declared in a _Maven_ project into the equivalent _Java_ code.
+*JeKa* helps translate all dependencies declared in a *Maven* project into the equivalent *Java* code.
 
-Assuming _Maven_ is already installed and there is a _pom.xml_ file at the root of the project, 
-execute `jeka maven: migrateDeps` to display _Java_ code/configuration to 
-copy-paste in a build class or *dependencies.txt* file.
+Assuming *Maven* is already installed and there is a `pom.xml` file at the root of the project, 
+execute `jeka maven: migrateDeps` to display the *Java* code/configuration to 
+copy-paste into a build class or `dependencies.txt` file.
 
 ## Performance—Caching
 
-### How to cache downloaded dependencies in _dev.Github-actions?
+### How to cache downloaded dependencies in GitHub Actions?
 
-_JeKa_ caches downloaded dependencies (JDKs, JeKa distros, Maven artifacts, NodeJs exe,...) in a single 
-directory at *[USER HOME]/.jeka/cache*.
+*JeKa* caches downloaded dependencies (JDKs, JeKa distributions, Maven artifacts, Node.js executables, etc.) in a single 
+directory at `[USER HOME]/.jeka/cache`.
 
-When running as *_dev.Github Action* this directory is empty at the start of the build. We need to save/restore it in 
+When running as a *GitHub Action*, this directory is empty at the start of the build. We need to save/restore it in 
 order to make it persist from one build to another.
 
-For this, we can use [cache action](https://github.com/actions/cache) as follow:
+For this, we can use the [cache action](https://github.com/actions/cache) as follows:
 ```yaml
     - name: Restore JeKa cache
       uses: actions/cache/restore@v4
@@ -100,13 +100,13 @@ For this, we can use [cache action](https://github.com/actions/cache) as follow:
 
 ## Errors
 
-### Junit platform
+### JUnit Platform
 
 I see this error message when I launch tests. What can I do?
-```
+```text
 OutputDirectoryProvider not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.
 ```
-You can explicitly declare the JUNIT component versions in dependencies.txt as:
+You can explicitly declare the JUnit component versions in `dependencies.txt` as:
 ```ini
 [test]
 org.junit.platform:junit-platform-launcher:1.12.2
@@ -122,21 +122,20 @@ If you want to configure a project programmatically, either within the project i
 The `ProjectKBean` initializes the project and configures it with its own settings in its `init` method. After that, it should not be modified. If you change the `ProjectKBean` instance in your code, the underlying `JkProject` instance will already have been configured by the `ProjectKBean`, meaning your changes will have no effect.
 
 ```java
-
 public class Build extends KBean {
 
     JkProject project = load(ProjectKBean.class).project;
     
-    void init() {
+    @Override
+    protected void init() {
         project.testing.testProcessor.engineBehavior.setProgressDisplayer(STEP);
-        ...
     }
 }
 ```
 
-### How can I use Eclipse compiler in Jeka?
+### How can I use the Eclipse compiler in JeKa?
 
-Jeka can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as :
+JeKa can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as follows:
 
 ```java
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
@@ -144,12 +143,14 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 @JkDep("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class Build extends KBean {
 
-    JkProject project = load(ProjectKBean.class).project;
-    ...
-    project.compilerToolChain.setCompileTool(new EclipseCompiler());
-    
-    // You may pass additional options to the compiler
-    project.compilation.addJavaCompilerOptions(...);
+    @Override
+    protected void init() {
+        JkProject project = load(ProjectKBean.class).project;
+        project.compilerToolChain.setCompileTool(new EclipseCompiler());
+        
+        // You may pass additional options to the compiler
+        project.compilation.addJavaCompilerOptions("-nowarn");
+    }
 }
 ```
 
@@ -159,7 +160,7 @@ public class Build extends KBean {
 
 If you use a different structure to build your project, simply let your `KBean` implement `JkJavaIdeSupport` and implement the required method to provide the information necessary to generate IDE metadata files.
 
-For synchronization, just execute `jeka intellij:iml` as usual.
+For synchronization, just execute `jeka intellij: sync` as usual.
 
 
 

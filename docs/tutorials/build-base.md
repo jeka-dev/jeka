@@ -2,11 +2,11 @@
 
 In this tutorial, we'll use the `base` KBean to build a Java application or library. 
 
-This mode provides a layout between a single-file style like _JBang_ and a full _Maven/Gradle_ [project](build-projects.md).
+This mode provides a layout between a single-file style like *JBang* and a full *Maven*/*Gradle* [project](build-projects.md).
 
-Visit [this repository](https://github.com/jeka-dev/demo-base-application) to have a concrete example.
+Visit [this repository](https://github.com/jeka-dev/demo-base-application) to see a concrete example.
 
-**Prerequisite:** Jeka must be [installed](../installation.md).
+**Prerequisite:** JeKa must be [installed](../installation.md).
 
 !!! tip
     Run `jeka base: --doc` to see all available options.
@@ -22,19 +22,19 @@ You’ll get the following project structure:
 │   ├── _dev             <- Optional package containing all non-prod (build and test)
 │   │   ├── test
 │   │   └── Custom.java  
-│   └── app              <- Sugested base package for production code/resources
+│   └── app              <- Suggested base package for production code/resources
 │       └── App.java     
-├── jeka-output          <- Generated dir where artifacts as jars, classes, reports or doc are generated
-├── jeka.properties      <- Build configuration  (Java and jeka version, kben configurations, ...)
+├── jeka-output          <- Generated dir where artifacts such as jars, classes, reports or doc are generated
+├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
 └── README.md            <- Describes available build commands
 ```
 
-All your Java code is supposed to be in the *jeka-src* folder.
+All your Java code is supposed to be in the `jeka-src` folder.
 
 `_dev` is a special package for source code and dependencies used only for development (e.g., tests, builds).
 If you're new to Java, you can ignore or delete it.
 
-The scaffolded example includes an *App* class in the *app* package.  
+The scaffolded example includes an `App` class in the `app` package.  
 You can add or modify classes in any package you like.
 
 ## Sync with IntelliJ
@@ -44,16 +44,13 @@ If changes don't appear in IntelliJ, go to the project's root directory, then ru
 
 ## Add Dependencies
 
-The *App.java* class declares a `@JkDep` annotation to reference a library. You can add as many libraries as needed.
+The `App.java` class declares a `@JkDep` annotation to reference a library. You can add as many libraries as needed.
 A good practice is to declare all libraries in the same base class.
 
 ```java
 @JkDep("com.github.lalyos:jfiglet:0.0.9")
-@JkDep("com.fasterxml.jackson:jackson-bom::pom:2.18.2")
-@JkDep("com.fasterxml.jackson.core:jackson-core")
-@JkDep("com.fasterxml.jackson.core:jackson-annotations")
+@JkDep("com.fasterxml.jackson.core:jackson-core:2.18.2")
 public class App {
-    ...
 }
 ```
 
@@ -66,45 +63,42 @@ Additionally, you can copy-paste JAR files into the following directory to autom
 
 *Declare non-prod dependencies*
 
-Declare dependency on any class under `_dev` package, to add dependency with embedding them 
+Declare dependencies on any class under the `_dev` package to add dependencies without embedding them 
 in production.
 
 ```java
-import sun.lwawt.macosx.CWarningWindow;
-
 @JkDep("org.junit.jupiter:junit-jupiter:5.11.4")
 @JkDep("org.mockito:mockito-junit-jupiter:5.15.2")
 class Custom extends KBean {
-    ...
 }
 ```
 
-!!! reminder
+!!! note
     Don't forget to run `jeka intellij: iml` once you have modified the dependencies.
 
 ## Run your Application
 
 The application can be run using: 
-```shell
+```bash
 jeka --program arg0 args1 ... # or `jeka -p` for short
 ```
-To clean compilation before starting, use `--clean` option (`-c` for short).
+To clean compilation before starting, use the `--clean` option (`-c` for short).
 
-If ths source code is hosted in a Git repo, the application can be directly executed by referencing the repo as:
-```shell
+If the source code is hosted in a Git repo, the application can be directly executed by referencing the repo as:
+```bash
 jeka --remote [git repo url] --program arg0 arg1 ... # or jeka -r [git repo url] -p
 ```
 
 ## Make it Native
 
-To compile in native, execute:
-```
+To compile to native, execute:
+```bash
 jeka native: compile
 ```
 When done, execution of `jeka --program ...` will run the native version instead of the Java one.
 
-!!! notes
-    You may set this properties if your application needs some resources to run
+!!! note
+    You may set these properties if your application needs some resources to run:
     ```properties
     @native.includeAllResources=true
     ```
@@ -118,20 +112,20 @@ jeka.program.build=native: compile
 ## Dockerize
 
 If you want to create a Docker image of your application, execute:
-```shell
+```bash
 jeka docker: build
 ```
-This creates a Docker image based and registers it on your local Docker daemon. 
+This creates a Docker image and registers it on your local Docker daemon. 
 The console output explains how to execute it.
 
-To create a Docker image based on native executable, execute:
-```shell
+To create a Docker image based on a native executable, execute:
+```bash
 jeka docker: buildNative
 ```
 
 ## Pre-defined Build Commands
 
-``` title="From *base* KBean"
+```text title="From *base* KBean"
 jeka base: test       # Runs tests
 jeka base: pack       # Runs tests + creates jars
 jeka base: runJar     # Runs the jar generated by the above command
@@ -143,17 +137,17 @@ See [here](/tutorials/build-projects/#pre-defined-build-commands) for extra comm
 
 ## Create a Library
 
-If you want to write a library, instead of an application, you need to declare 
+If you want to write a library instead of an application, you need to declare 
 both *moduleId* and versioning.
 
-The settings are similar for [project building](/tutorials/build-projects/#handle-versioning). Use 'base' instead of 'project', like this:
+The settings are similar to [project building](/tutorials/build-projects/#handle-versioning). Use `base` instead of `project`, like this:
 
-```property
+```properties
 @base.moduleId=org.example:my-lib
 @base.version=1.0.0-SNAPSHOT
 ```
 
 Now, you can publish your library by executing:
-```shell
+```bash
 jeka maven: publish
 ```

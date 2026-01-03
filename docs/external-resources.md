@@ -1,3 +1,3 @@
-You can find some resources in below to learn more about _Jeka_:
+You can find some resources below to learn more about JeKa:
 
-- [Dev.to serie about "Jeka: The simplest way to..."](https://dev.to/djeang/series/29940)
+- [Dev.to series about "JeKa: The simplest way to..."](https://dev.to/djeang/series/29940)

@@ -34,7 +34,7 @@ The `JkProject` instance offers methods to customize or extend behavior, allowin
 
 **Example for getting information about source files:**
 
-```Java
+```java
 class MyBuild extends KBean {
 
   private List<Path> allSourceFiles;
@@ -42,19 +42,18 @@ class MyBuild extends KBean {
   @JkPostInit
   private void postInit(ProjectKBean projectKBean) {
       allSourceFiles = projectKBean.project.compilation.layout.resolveSources().getFiles();
-      ...
   }
 }
 ```
 
-**Example taken from JeKa:**
+**Examples taken from JeKa:**
 
 - [Jacoco KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.jacoco/src/dev/jeka/plugins/jacoco/JacocoKBean.java): 
-A KBean that reads te underlying `JkProject` and modifies its testing behavior.
+A KBean that reads the underlying `JkProject` and modifies its testing behavior.
 - [Sonarqube KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.sonarqube/src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java):
-A KBean that reads te underlying `JkProject` to extract information.
+A KBean that reads the underlying `JkProject` to extract information.
 - [Protobuf KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java):
-  A KBean that adds a Proto-buffer code generation to the underlying `JkProject`.
+  A KBean that adds Proto-buffer code generation to the underlying `JkProject`.
 
 ## Annotation Processors
 
@@ -67,7 +66,7 @@ org.mapstruct:mapstruct-processor:1.6.3
 org.projectlombok:lombok:1.18.38
 ```
 
-Annotation processors that generate source files will output them to the *jeka-output/generated-sources/annotation-processors* directory.
+Annotation processors that generate source files will output them to the `jeka-output/generated-sources/annotation-processors` directory.
 
 That's it!
 

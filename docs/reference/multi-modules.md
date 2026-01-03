@@ -33,13 +33,13 @@ project-root
 │   └── ...
 └── module-Xxxx ...
 ```
-To be recognized as a parent project, *jeka.properties* file must specify the `_jeka.child-bases` property 
-indicating where are located child modules.
+To be recognized as a parent project, the *jeka.properties* file must specify the `_jeka.child-bases` property 
+indicating where the child modules are located.
 
 You can set it as `_jeka.child-bases=module1, module2, ...` or `_jeka.child-bases=*`.  
 If you use `*`, Jeka will scan child directories and include any with a Jeka structure.
 
-It's also possible to use hierarchical structures as:
+It's also possible to use hierarchical structures such as:
 ```
 parent-project
 ├── jeka.properties
@@ -93,9 +93,9 @@ _@maven.pub.moduleId=dev.jeka:bom
 _@maven.pub.parentBom=true
 
 ```
-Child modules inherit from the properties defined in their parent dir *jeka.properties* files recursively.
+Child modules inherit from the properties defined in their parent directory's *jeka.properties* files recursively.
 
-To make a property non transmitted to the chidren, we need to prefix it with `_`
+To make a property non-transmitted to the children, we need to prefix it with `_`.
 
 ### Typical *jeka.properties* for child module
 
@@ -118,7 +118,7 @@ In this example, `-g -Xlint:none` will be passed to the compiler options.
 
 When executing a JeKa command on a parent project, the specified actions are delegated to all child modules, then to the parent one.
 
-If a module is not concerned with a given KBean, it should declare it in its *jeka.properties* file, as `@project=off`.
+If a module is not concerned with a given KBean, it should declare it in its `jeka.properties` file, as `@project=off`.
 
 If we run the following command on the above example:
 
@@ -126,16 +126,16 @@ If we run the following command on the above example:
 jeka project: pack maven: publish
 ```
 This will first run `project: test pack` method on all child modules. Parent module won't execute these actions 
-cause it does not declare explicitly project KBean (`@project=on` is absent).
+because it does not explicitly declare the project KBean (`@project=on` is absent).
 
-The the `maven: publish` action is invoked on all child modules and the parent module as it declares it explicitly (`@maven=on`).
+Then the `maven: publish` action is invoked on all child modules and the parent module as it declares it explicitly (`@maven=on`).
 
-If a child module is not concerned by a specific KBean, it should explicitly disabled if (e.g. `@maven=off`).
+If a child module is not concerned by a specific KBean, it should be explicitly disabled (e.g. `@maven=off`).
 This could be the case if *plugin-common* should not be published as a Maven artifact.
 
 ### Running child module
 
-If you need to run some Jeka command for a child modules, you have 3 options:
+If you need to run some Jeka command for a child module, you have 3 options:
 
 1. Use `-cb` (alias `--child-base`) option
    ```properties
@@ -143,15 +143,15 @@ If you need to run some Jeka command for a child modules, you have 3 options:
    ```
 
 2. Execute actions from child module directory:
-   ```properties
+   ```shell
    cd plugins/plugin-1
    jeka project: test pack
    ```
-   This approach works well, but code in `jeka-src` declared in parent module won't be taken in account.
+   This approach works well, but code in `jeka-src` declared in parent module won't be taken into account.
 
 ## Managing dependencies.txt
 
-In multi-module project, we often need to define centrally the versions of the libaries we want to use accross all
+In a multi-module project, we often need to define centrally the versions of the libraries we want to use across all
 the modules.
 
 Example:
@@ -181,23 +181,23 @@ org.junit.platform:junit-platform-launcher
 
 ## Programmatic Approach
 
-With combining multi-module and programmatic approach,you can:
+By combining multi-module and programmatic approach, you can:
 
-- Use *jeka-src* code from one module in another module that depends on it.
+- Use `jeka-src` code from one module in another module that depends on it.
 - Import a run base (or any `KBean`) from one module into another.
 
-### Using *jeka-src* Code from Another Module
+### Using `jeka-src` Code from Another Module
 
 You may need to share build code between multiple modules.  
 This is easy to do using the `@JkDep` annotation, which lets you import code from another module.
 
 **Example:**
 
-Let’s say there’s a central set of dependencies in the *jeka-src* folder of the `plugin-common` module.  
+Let’s say there’s a central set of dependencies in the `jeka-src` folder of the `plugin-common` module.  
 These dependencies can be defined as constants in a class, like a `PluginCommon` class, so they can be reused in other modules.
 
 ```java title="plugins/plugin-common/jeka-src/PluginCommon.java"
-class Plugin1Common {
+class PluginCommon {
 
     static final JkDependencySet LOG_LIBS = JkDependencySet.of()
             .and("ch.qos.logback:logback:0.5")
@@ -206,7 +206,7 @@ class Plugin1Common {
 }
 ```
 
-We can reuse the code in *jeka-src* of plugin-1 module, for instance, as below:
+We can reuse the code in `jeka-src` of plugin-1 module, for instance, as below:
 
 ```java title="plugins/plugin-1/jeka-src/Plugin1Custom.java"
 import dev.jeka.core.api.depmanagement.JkDependencySet;
@@ -223,7 +223,7 @@ The specified path is relative to the module declaring the annotation.
 
 ### Import KBeans from other modules
 
-You may use some KBeans from another modules. For example you want run kbean action for a given list of child modules.
+You may use some KBeans from other modules. For example you want to run kbean action for a given list of child modules.
 
 ```java
 class Custom extends KBean {
@@ -237,8 +237,7 @@ class Custom extends KBean {
     public void doXxxx() {
         coreProjectKBean.pack();
         pluginCommonProjectKBean.pack();
-        Path coreClasses = coreProjectKBean.project.compile.layout.resolveClassDir();
-        ...
+        Path coreClasses = coreProjectKBean.project.compilation.layout.resolveClassDir();
     }
 
     @JkPostInit
@@ -255,7 +254,7 @@ class Custom extends KBean {
 
 ### Import runbases from other modules
 
-In similar way, we can import runbases from aother modules.
+In similar way, we can import runbases from other modules.
 
 ```java
 class Custom extends KBean {
@@ -267,7 +266,6 @@ class Custom extends KBean {
         JkProject coreProject = coreRunbase.load(ProjectKBean.class).project;
         coreProject.test.run();
         coreProject.pack.run();
-        ...
     }
     
 }
@@ -275,7 +273,7 @@ class Custom extends KBean {
 
 ### Discover child modules
 
-From a parent module we can programmatically access to the child modules.
+From a parent module we can programmatically access the child modules.
 
 ```java
 class MasterBuild extends KBean {
@@ -286,6 +284,7 @@ class MasterBuild extends KBean {
         this.getRunbase().getChildRunbases().stream()
                 .map(runbase -> runbase.find(ProjectKBean.class))
                 .filter(Optional::isPresent)
+                .map(Optional::get)
                 .forEach(this::make);
         this.getRunbase().getChildRunbases().stream()
                 .map(runbase -> runbase.load(MavenKBean.class))

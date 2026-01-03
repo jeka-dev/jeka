@@ -1,4 +1,4 @@
-You can find some examples in below to learn more about _Jeka_:
+You can find some examples below to learn more about JeKa:
 
 ### Zero-Configuration Build and Run
 
@@ -7,41 +7,41 @@ You can find some examples in below to learn more about _Jeka_:
 
 ### Run from Git
 
-- [Cow-Say Command-line App](https://github.com/jeka-dev/demo-cowsay)
+- [Cowsay Command-Line App](https://github.com/jeka-dev/demo-cowsay)
 - [Calculator GUI App](https://github.com/djeang/Calculator-jeka)
 - [A collection of developer utilities in a single JavaFX application](https://github.com/djeang/devtools)
 
 ### Builds and Pipelines
 
 - [Publish a Java Lib on Maven Central](https://github.com/djeang/vincer-dom)
-- [SpringBoot App](https://github.com/jeka-dev/demo-springboot-simple)
-- [SpringBoot App - Java configuration](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
-- [SpringBoot - Agular - Sonarqube - Docker - E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
+- [Spring Boot App](https://github.com/jeka-dev/demo-springboot-simple)
+- [Spring Boot App - Java configuration](https://github.com/jeka-dev/demo-springboot-simple/tree/code-config)
+- [Spring Boot - Angular - SonarQube - Docker - E2E testing](https://github.com/jeka-dev/demo-project-springboot-angular)
 
 ### Multi-module Projects
 - [Core and plugin modules in a single project](https://github.com/jeka-dev/demo-multi-module)
 
-### Reuse Build-Conventions
+### Reuse Build Conventions
 
-- [SpringBoot - ReactJs - built with only 3 lines of configuration](https://github.com/jeka-dev/demo-build-conventions-consumer)
+- [Spring Boot - ReactJS - built with only 3 lines of configuration](https://github.com/jeka-dev/demo-build-conventions-consumer)
 
 ### Combine with Maven
 
-- [Jeka wrapping a Quarkus native app Maven build](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
-- [Jeka wrapping a Spring-Boot native Maven build](https://github.com/jeka-dev/demo-maven-springboot-native)
+- [JeKa wrapping a Quarkus native app Maven build](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
+- [JeKa wrapping a Spring Boot native Maven build](https://github.com/jeka-dev/demo-maven-springboot-native)
 
 ### Native and Docker Images
 
-- [SpringBoot Docker Native Images](https://github.com/jeka-dev/demo-project-springboot-headless)
-- [Kotlin SpringBoot ReactJS Docker Native Image](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
+- [Spring Boot Docker Native Images](https://github.com/jeka-dev/demo-project-springboot-headless)
+- [Kotlin Spring Boot ReactJS Docker Native Image](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
   
 ### Kotlin and ReactJS
-- [Kotlin SpringBoot ReactJS App](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
+- [Kotlin Spring Boot ReactJS App](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
 
 
 ### Others
 
-* [Samples](https://github.com/jerkar/jeka/tree/master/samples) are used for testing _Jeka_
+* [Samples](https://github.com/jeka-dev/jeka/tree/master/samples) are used for testing JeKa.
 
-* [Miscellaneous examples](https://github.com/jerkar/working-examples) are more complex use case demos
+* [Miscellaneous examples](https://github.com/jeka-dev/working-examples) are more complex use case demos.
 

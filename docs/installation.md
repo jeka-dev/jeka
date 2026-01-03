@@ -33,22 +33,22 @@ The manual installation is straightforward and may help when script installation
 
 - Download latest JeKa distrib from [maven central](https://central.sonatype.com/artifact/dev.jeka/jeka-core/versions)
   and download file named *jeka-core-xxx-distrib.zip*.
-- Unzip the content of the zip file and copy the content of the 'bin' in *[USER HOME]/.jeka/bin* dir. 
-- Add *[USER HOME]/.jeka/bin* and *[USER HOME]/.jeka/apps* to your `PATH` environment variable.
+- Unzip the content of the zip file and copy the content of the `bin` directory to `[USER HOME]/.jeka/bin`. 
+- Add `[USER HOME]/.jeka/bin` and `[USER HOME]/.jeka/apps` to your `PATH` environment variable.
 
 ## Post Install
 
-Installation via scripts may include a sanity check that triggers a JDK download (cause of the 'check' argument passed to the install script)
+Installation via scripts may include a sanity check that triggers a JDK download (because of the `check` argument passed to the install script).
 
 Once installed, you will rarely need to upgrade, as JeKa will execute the JeKa version specified in
 the application to run.
 However, you'll be able to upgrade your base install by executing:
-```
+```bash
 jeka-update
 ```
 
 Open a new terminal session and execute the following command to access JeKa help:
-```
+```bash
 jeka --help
 ```
 
@@ -56,26 +56,26 @@ jeka --help
 
 JeKa can be executed using the Docker image [jekadev/jeka](https://hub.docker.com/r/jekadev/jeka).
 
-For this, execute : 
+To do this, execute: 
 
-- Linux/Macos        : `docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jekadev/jeka [JEKA ARGUMENTS]`
-- Windows Powershell : `docker run -v ${HOME}\.jeka\cache4c:/cache -v ${PWD}:/workdir jekadev/jeka [JEKA ARGUMENTS]`
-- Windows cmd        : `docker run -v %USERPROFILE%\.jeka\cache4c:/cache -v %cd%:/workdir jekadev/jeka [JEKA ARGUMENTS]`
+- Linux/macOS: `docker run -v $HOME/.jeka/cache4c:/cache -v .:/workdir jekadev/jeka [JEKA ARGUMENTS]`
+- Windows PowerShell: `docker run -v ${HOME}\.jeka\cache4c:/cache -v ${PWD}:/workdir jekadev/jeka [JEKA ARGUMENTS]`
+- Windows cmd: `docker run -v %USERPROFILE%\.jeka\cache4c:/cache -v %cd%:/workdir jekadev/jeka [JEKA ARGUMENTS]`
 
-!!! notes
+!!! note
 
     `-v $HOME/.jeka/cache4c:/cache` 
     
-    Tells jeka to use a specific cache when running with container, as JDK or other tools 
-    cached by Jeka may differ from the ones used by the host system.
+    Tells JeKa to use a specific cache when running with a container, as JDK or other tools 
+    cached by JeKa may differ from the ones used by the host system.
     
-    `-v .:/workdir jeka --version` 
+    `-v .:/workdir` 
     
-    Lets Jeka operate in the current directory of the host machine
+    Lets JeKa operate in the current directory of the host machine.
 
     `[JEKA ARGUMENTS]` 
     
-    Stands for regular jeka arguments you would pass to jeka command line as `project: pack' or '--help'.
+    Stands for regular JeKa arguments you would pass to JeKa command line such as `project: pack` or `--help`.
 
 
 

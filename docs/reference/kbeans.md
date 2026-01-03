@@ -14,10 +14,10 @@ _KBean_ classes share the following characteristics:
 
 ## Simple Example
 
-The following KBeans expose the `hello` and `bye` methods. The rendering can be configured 
-through `nema` and `uppercase` attributes.
+The following KBean exposes the `hello` and `bye` methods. The rendering can be configured 
+through `name` and `uppercase` attributes.
 
-```Java
+```java
 @JkDoc("Displays greeting messages")
 public class Greeting extends KBean {
 
@@ -64,28 +64,39 @@ Methods
 
 ## Location
 
-KBeans can exists as source code in the local project *jeka-src* folder, at root or any package,  or 
-as class in the Jeka classpath.
+KBeans can exist as source code in the local project *jeka-src* folder (at the root or in any package), or 
+as a class in the JeKa classpath.
 
 **Multiple KBeans in jeka-src**
 
-Many KBeans may coexist in a single *jeka-src* dir. In this case, use KBean names to precise on 
-which bean to invoke, as:
+Many KBeans may coexist in a single *jeka-src* directory. In this case, use KBean names to specify 
+which bean to invoke, for example:
 
 ```bash
 jeka greeting: hello bye other: foo
 ```
-In the above example, three methods coming from 2 distinct KBean are invoked.
+In the above example, three methods from two distinct KBeans are invoked.
 
 **Classpath KBeans**
 
-Jeka bundles a collection of KBeans for building projects, creating Docker images, performing Git operations, and more.
+JeKa bundles a collection of KBeans for building projects, creating Docker images, performing Git operations, and more.
+
+- [Project KBean](kbeans-project.md): The standard KBean for building JVM-based projects.
+- [Base KBean](kbeans-base.md): For building simpler JVM-based projects without a standard Maven/Gradle layout.
+- [Maven KBean](kbeans-maven.md): For publishing artifacts to Maven repositories.
+- [Docker KBean](kbeans-docker.md): For creating Docker images.
+- [Native KBean](kbeans-native.md): For compiling code to native executables.
+- [App KBean](kbeans-app.md): For installing/uninstalling applications locally.
+- [Git KBean](kbeans-git.md): For performing Git operations.
+- [IntelliJ KBean](kbeans-intellij.md): For generating IntelliJ IDEA project files.
+- [Eclipse KBean](kbeans-eclipse.md): For generating Eclipse project files.
+- [Setup KBean](kbeans-setup.md): For global JeKa configuration.
 
 For example, running:
 ```bash
 jeka project: compile
 ```
-will compile the source code located in the *src/main/java* directory, using dependencies specified in the *dependencies.txt* file.
+will compile the source code located in the `src/main/java` directory, using dependencies specified in the `dependencies.txt` file.
 
 To display the documentation for the `project` KBean, run:
 ```bash
@@ -98,9 +109,9 @@ jeka --doc
 ```
 
 KBeans can be added to the classpath like any third-party dependency.  
-This can be done by setting the `jeka.inject.classpath` property in the *jeka.properties* file as follows:
+This can be done by setting the `jeka.inject.classpath` property in the `jeka.properties` file as follows:
 ```properties
-jeka.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
+jeka.inject.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
 ```
 
 KBeans can also be included directly in the source code using the `@JkDep` annotation:
@@ -110,7 +121,7 @@ import dev.jeka.core.tool.JkDep;
 @JkDep("dev.jeka:springboot-plugin")
 @JkDep("dev.jeka:openapi-plugin:0.11.8-1")
 class Custom extends KBean {
-...
+}
 ```
 
 Additionally, KBeans can be dynamically added from the command line like this:
@@ -136,7 +147,7 @@ Additionally, it can be a non-public field annotated with `@JkDoc`.
 
 Fields can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ into the field.
 
-We can also inject value using *jeka.properties
+We can also inject value using `jeka.properties` file.
 
 For more details on field accepted types, see the `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
 
@@ -285,7 +296,6 @@ class Custom extends KBean {
 
     @JkPostInit(required = true)
     private void postInit(MavenKBean mavenKBean) {
-        ...
     }
 }
 ```
@@ -467,7 +477,7 @@ sequenceDiagram
     IT->>RK:  Register KBean
     RB->>PO:  Register KBean post-init methods
     RB->>PO:  Post-initialize all initialized KBeans
-    RB-->>AK:  
+    RB-->>AK: done
 ```
 
 ```mermaid

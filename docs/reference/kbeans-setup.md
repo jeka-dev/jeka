@@ -2,8 +2,8 @@
 
 <!-- header-autogen-doc -->
 
-Provides convenient methods to perform global configuration tasks as editing *global.properties* file or updating 
-embedded jeka boot scripts.
+Provides convenient methods to perform global configuration tasks such as editing the *global.properties* file or updating 
+embedded JeKa boot scripts.
 
 ## Summary
 

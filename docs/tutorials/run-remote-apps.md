@@ -1,29 +1,29 @@
 # Run Remote Applications
 
-JeKa allows running or installing applications directly from their source code hosted on Git repository.
+JeKa allows running or installing applications directly from their source code hosted on a Git repository.
 
 ## Run
 
 You can have a look at the application catalog by executing:
-```shell
+```bash
 jeka app: catalog
 ```
 
-To run directly an application, execute:
-```shell
-jeka --remote <git-url> --program <program arguments>
+To run an application directly, execute:
+```bash
+jeka --remote GIT_URL --program PROGRAM_ARGUMENTS
 ```
 or
-```shell
-jeka -r <git-url> -p <program arguments>
+```bash
+jeka -r GIT_URL -p PROGRAM_ARGUMENTS
 ```
 Example:
-```shell
+```bash
 jeka --remote https://github.com/djeang/demo-dir-checksum --program -a SHA256
 ```
-you can pass `-Dxxxxx=yyyy` as program argument to set system properties.
+You can pass `-Dxxxxx=yyyy` as a program argument to set system properties.
 
-When you run it for the first time, Jeka will prompt you to confirm whether you trust the URL `github.com/djeang/demo-dir-checksum`.
+When you run it for the first time, JeKa will prompt you to confirm whether you trust the URL `github.com/djeang/demo-dir-checksum`.
 This is to prevent the execution of malicious code.
 
 If you accept, the application will build before running. On subsequent runs, it will execute directly, as the binaries are cached.
@@ -34,12 +34,12 @@ Example:
 ```properties
 jeka.app.url.trusted=github.com/djeang/
 ```
-In this example, we shorten the url, so that any url starting by `github.com/djeang/`will be trusted.
+In this example, we shorten the URL, so that any URL starting with `github.com/djeang/` will be trusted.
 
 ## Run a Specific Version
 You can run a specific version of an application by specifying a tag name in the URL. For example:
 
-```shell
+```bash
 jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p "Hello JeKa!"
 ```
 
@@ -48,28 +48,28 @@ You can compile a remote application to a native executable. Once compiled, all 
 
 To compile a remote application into a native executable, use the following command:
 
-```jeka
+```bash
 jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 native: compile
 ```
 
 After compilation, run the application as usual.
 
-## Build Docker Image of tha application
-Jeka allow creating Docker images of a remote application.
+## Build Docker Image of the application
+JeKa allows creating Docker images of a remote application.
 
 Create a JVM image:
-```shell
+```bash
 jeka -r https://github.com/jeka-dev/demo-cowsay docker: build
 ```
 
 Create a native image:
-```shell
+```bash
 jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
 ```
-Then follow the instruction to run the built docker image.
+Then follow the instructions to run the built Docker image.
 
 ## Use Shorthands
-Typing and remembering the repository URL of the application for every run can be tedious. You can simplify this by using Jeka's global command shortcut substitution mechanism.
+Typing and remembering the repository URL of the application for every run can be tedious. You can simplify this by using JeKa's global command shortcut substitution mechanism.
 
 For example, define the following property in your `~/.jeka/global.properties` file:
 
@@ -77,7 +77,7 @@ For example, define the following property in your `~/.jeka/global.properties` f
 jeka.cmd.cowsay=-r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p
 ```
 Now, you can invoke the application using the shortcut command:
-```shell
+```bash
 jeka ::cowsay "Hello World!"
 ```
 
@@ -85,41 +85,41 @@ jeka ::cowsay "Hello World!"
 
 JeKa lets you install apps for direct execution (no need to use `jeka`). Example:
 
-```shell
+```bash
 jeka app: install repo=https://github.com/djeang/kill8
 ```
 Or
-```shell
+```bash
 jeka app: install repo=kill8@djeang
 ```
 
 For a faster cold start, install the native version:
-```shell
+```bash
 jeka app: install repo=kill8@djeang native:
 ```
 
 These commands install the `kill8` application in the user's PATH, allowing you to simply invoke the application by name to run it:
-```shell
+```bash
 kill8 8081
 ```
 
-For more details, refer to the [documentation](/jeka/reference/kbeans-app).
+For more details, refer to the [documentation](../reference/kbeans-app.md).
 
 ## Write Applications for Direct Run/Installation.
 
-Applications built with *Jeka* are normally automatically made *source runnable" by default.
+Applications built with *JeKa* are normally automatically made "source runnable" by default.
 
-When Running a remote application for the first time, *Jeka* clones the directory then build it with `jeka base: pack` 
+When running a remote application for the first time, *JeKa* clones the directory then builds it with `jeka base: pack` 
 or `jeka project: pack` if a project is detected.
 
-Then it looks in the jeka *jeka-output* dir to run the native or jar file.
+Then it looks in the JeKa `jeka-output` directory to run the native or jar file.
 
 ### Set a Custom Build Command
 
-If your project needs a specific build command or uses a tool like *Maven*, you can set the Jeka command for building.
+If your project needs a specific build command or uses a tool like *Maven*, you can set the JeKa command for building.
 
-The command must be a *Jeka* KBean command, not a shell command. 
-For example, to build with *Maven*, you need to write a `Custom` Kbean defining the build method, and mention it in *jeka.properties* file.
+The command must be a *JeKa* KBean command, not a shell command. 
+For example, to build with *Maven*, you need to write a `Custom` KBean defining the build method, and mention it in the `jeka.properties` file.
 
 ```properties
 jeka.program.build=custom: build
@@ -141,7 +141,7 @@ class Custom extends KBean {
     private void mvn(String mvnArguments) {
         JkLog.info("Executing mvn " + mvnArguments);
         String distrib = getRunbase().getProperties().get("jeka.java.distrib", "graalvm");
-        String javaVersion = getRunbase().getProperties().get("jeka.java.version", "22");
+        String javaVersion = getRunbase().getProperties().get("jeka.java.version", "23");
         String distribFolder = distrib + "-" + javaVersion;
         Path graalvmHome = JkLocator.getCacheDir().resolve("jdks").resolve(distribFolder);
         String newPath =  graalvmHome.resolve("bin") + File.pathSeparator + System.getenv("PATH");

@@ -2,7 +2,7 @@
 
 <!-- header-autogen-doc -->
 
-[`NativeKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/nativ/NativeKBean.java) enables native compilation for *project* and *base* KBeans.
+[`NativeKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/nativ/NativeKBean.java) enables native compilation for the `project` and `base` KBeans.
 
 **Key Features**
 
@@ -11,7 +11,7 @@
 - Simplifies resource inclusion.
 - Handles static linkage with minimal configuration.
 
-**Example of Configuration in jeka.properties:**
+**Example of configuration in `jeka.properties`:**
 ```properties
 @native.includeAllResources=true
 @native.staticLink=MUSL

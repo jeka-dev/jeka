@@ -1,20 +1,20 @@
 # Properties
 
-_Properties_ are pairs of String _key-value_ that are used across Jeka. They typically carry urls, local paths,
+_Properties_ are pairs of String _key-values_ that are used across JeKa. They typically carry URLs, local paths,
 tool versions, or credentials. 
 
-_Properties_ can be defined at different levels, in order of precedence :
+_Properties_ can be defined at different levels, in order of precedence:
 
 * System properties: Properties can be defined using system properties as `-DpropertyName=value`. System properties can
-  be injected from the Jeka command line.
+  be injected from the JeKa command line.
 * OS environment variables: Properties can also be defined as OS environment variables.
 * Project: Defined in _[Project Root]/jeka.properties_. Typically used to store tool versions (e.g. `jeka.kotlin.version=1.5.21`).
-* Global: Defined in the _[User Home]/.jeka/global.properties_ file. Typically used to define urls, local paths, and credentials.
+* Global: Defined in the _[User Home]/.jeka/global.properties_ file. Typically used to define URLs, local paths, and credentials.
 
 
-_Properties_ inherit from project _properties_ defined in project parent folders (if extant). 
+_Properties_ inherit from project _properties_ defined in project parent folders (if they exist). 
 
-Here, project2 will inherit properties defined in _project1/jeka/local.properties_ :
+Here, project2 will inherit properties defined in _project1/jeka.properties_:
 ```
 project1
    + jeka.properties
@@ -23,9 +23,9 @@ project1
 ```
 
 !!! info
-    _Properties_ support interpolation via `${}`tokens. 
+    _Properties_ support interpolation via `${}` tokens. 
     
-    For example, if we define the following properties :
+    For example, if we define the following properties:
     `foo=fooValue` and `bar=bar ${foo}` then `JkProperties.get("bar")` will return 'bar fooValue'.
 
 ### Standard properties
@@ -38,16 +38,16 @@ project1
    We can specify many dependencies separated by `<space>`.
    It can be either Maven coordinates or file paths. If a file path is relative, it is resolved 
    upon project base dir (could be distinct from working dir).
-   Example: `jeka.inject..classpath=dev.jeka:springboot-plugin  com.google.guava:guava:31.1-jre ../other-project/jeka/output/other-project.jar`
+   Example: `jeka.inject.classpath=dev.jeka:springboot-plugin  com.google.guava:guava:31.1-jre ../other-project/jeka/output/other-project.jar`
 * `jeka.kbean.default`: The KBean to use when omitting mentioning KBean prefix (or using `kb#` prefix) in command or field assignment.
-   Example: declaring `jeka.kbean.default=myBean`, makes the following expressions equivalent : `myBean#run`, `#run`, and `kb#run`.
+   Example: declaring `jeka.kbean.default=myBean`, makes the following expressions equivalent: `myBean#run`, `#run`, and `kb#run`.
 
 ### Command shorthands
 
 * `jeka.cmd.xxx=` define an alias that can be substituted for its value in the command line using the `:` symbol.
-    Example : `jeka.cmd.myBuild=${jeka.cmd.build} sonarqube#run jacoco#` allows you to simply execute `jeka :myBuild`.
+    Example: `jeka.cmd.myBuild=${jeka.cmd.build} sonarqube#run jacoco#` allows you to simply execute `jeka :myBuild`.
 *  `jeka.cmd._append=` will append the argument to every Jeka execution command.
-   Example : `jeka.cmd._append=@dev.jeka:springboot-plugin` will add springboot plugin to Jeka classpath for each execution.
+   Example: `jeka.cmd._append=@dev.jeka:springboot-plugin` will add springboot plugin to Jeka classpath for each execution.
    This property can be split when the argument line becomes too long. In fact, every property starting with `jeka.cmd._append` will 
    be taken in account to assemble the extra command line arguments. For example, we can define `jeka.cmd._append.0=`, `jeka.cmd._append.1=`, and so on.
 
@@ -60,13 +60,13 @@ project1
 The repositories used to download and publish artifacts can be defined using _properties_.
 The download repositories are set using the `jeka.repos.download` property, while the publish repository is defined using `jeka.repos.publish`.
 
-Use [JkRepoFromProperties class](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkRepoFromProperties.java)
+Use the [JkRepoFromProperties class](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkRepoFromProperties.java)
 to get the repositories defined by _properties_.
 
 !!! Note
-    By default, when no repository is configured, artifacts are downloaded on _Maven Central_ repo.
+    By default, when no repository is configured, artifacts are downloaded from the _Maven Central_ repo.
 
-Using single repo
+Using a single repo
 ```
 jeka.repos.download=https://my.company/repo
 ```
@@ -76,14 +76,14 @@ Using multiple repos
 jeka.repos.download=https://my.company/repo1, file://path/to/a/local/repo 
 ```
 
-Using single repo with credentials
+Using a single repo with credentials
 ```
 jeka.repos.download=https://my.company/repo
 jeka.repos.download.username=myUsername
 jeka.repos.download.password=myPassword
 ```
 
-Specifying http headers to include in each request towards the repo
+Specifying HTTP headers to include in each request towards the repo
 ```
 jeka.repos.download.headers.my-header-name=myHeaderValue
 jeka.repos.download.headers.another-header-name=anotherHeaderValue
@@ -92,12 +92,12 @@ jeka.repos.download.headers.another-header-name=anotherHeaderValue
 Same for the publish repo
 ```properties
 jeka.repos.publish=https://my.company/myrepo
-eka.repos.publish.username=myUsername
+jeka.repos.publish.username=myUsername
 jeka.repos.publish.password=myPassword
 jeka.repos.download.headers.Authorization=Bearer:: XHrU8hHKJHJ454==67g
 ```
 
-For convenience, we can define multiple repositories and reference them using aliases
+For convenience, we can define multiple repositories and reference them using aliases:
 ```
 jeka.repos.myRepo1=https://my.company/repo
 jeka.repos.myRepo1.username=myUsername
@@ -111,7 +111,7 @@ jeka.repos.download=myRepo1, myRepo2
 jeka.repos.publish=myRepo2
 ```
 
-Aliases are predefined for _Maven Central_ and Jeka GitHub Repos
+Aliases are predefined for _Maven Central_ and JeKa GitHub Repos:
 ```
 jeka.repos.download=https://my.company/repo1, mavenCentral, jekaGithub
 jeka.repos.jekaGithub.username=myGithubAccountName
@@ -123,7 +123,7 @@ jeka.repos.jekaGithub.password=myGithubPersonalAccessToken
 If a property is named as `xxx#yyyyy` then Jeka will try to inject its value 
 in public field `yyyyy` of KBean `xxx`. 
 
-examples:
+Examples:
 ```
 @springboot.springbootVersion=2.4.7
 @project.test.skip=true
@@ -138,7 +138,7 @@ examples:
 
 ### Multivalue fields
 
-*Multi-value* let to use *map-like* structures in KBean objects.
+*Multi-value* fields allow using *map-like* structures in KBean objects.
 
 Example:
 
@@ -156,14 +156,14 @@ class MyBean extends KBean {
       }
  }
 ```
-`JkMultivalue` is a like-map structure that let access value according a give `key`.
+`JkMultiValue` is a map-like structure that allows access to values according to a given `key`.
 
 ```java
 Address mainAddress = myBean.addresses.get("main");
 String gsmNum = myBean.phones.get("gsm");
 ```
 
-These values can be set using *jeka.properties* files or command-line argument as:
+These values can be set using *jeka.properties* files or command-line arguments as:
 ```properties
 @myBean.phones.gsm=0978765432
 @myBean.phones.home=0111334455
