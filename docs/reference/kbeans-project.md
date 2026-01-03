@@ -71,4 +71,6 @@ Annotation processors that generate source files will output them to the *jeka-o
 
 That's it!
 
+## Summary
+
 <!-- body-autogen-doc -->

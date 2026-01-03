@@ -106,6 +106,8 @@ Example: `jeka.app.url.trusted=github.com/djeang/` will trust urls formed as:
   - git@github.com:my-user-name/djeang/xxx..
   - ...
 
+## Summary
+
 <!-- body-autogen-doc -->
 
 

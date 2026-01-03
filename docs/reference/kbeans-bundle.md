@@ -17,6 +17,8 @@ you need to specify the following property in *jeka.properties*.
 @bundle.projectPack=true
 ```
 
+## Summary
+
 <!-- body-autogen-doc -->
 
 

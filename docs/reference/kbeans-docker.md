@@ -49,4 +49,6 @@ This will display details about the built image, including the generated Dockerf
 You can also visit the generated Docker build directory, 
 which contains all the Docker context needed to build the image with a Docker client.
 
+## Summary
+
 <!-- body-autogen-doc -->

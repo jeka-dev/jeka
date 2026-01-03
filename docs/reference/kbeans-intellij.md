@@ -16,5 +16,7 @@ private void postInit(IntellijKBean intellijKBean) {
 
 ```
 
+## Summary
+
 <!-- body-autogen-doc -->
 

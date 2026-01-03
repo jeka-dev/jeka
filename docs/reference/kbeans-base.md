@@ -20,4 +20,6 @@
 
 - [Base Application](https://github.com/jeka-dev/demo-base-application): The `BaseKBean` is set as the default KBean in `jeka.properties`. The accompanying `README.md` file details the available `base:` methods that can be invoked.
 
+## Summary
+
 <!-- body-autogen-doc -->

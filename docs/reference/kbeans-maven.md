@@ -14,4 +14,6 @@ It also provides convenient mean to migrate from Maven prajects.
 - property or programmatic configuration for published POM metadata and dependencies
 - property or programmatic configuration for publication repository
 
+## Summary
+
 <!-- body-autogen-doc -->
