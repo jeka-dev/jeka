@@ -15,7 +15,7 @@ test_structure() {
   
   # This is your fix logic
   local bin_dir
-  bin_dir=$(find "." -maxdepth 3 -type d -name "bin" | head -n 1)
+  bin_dir=$(find "." -maxdepth 4 -type d -name "bin" | head -n 1)
   
   if [ -z "$bin_dir" ]; then
     echo "❌ FAIL: Could not find bin directory"

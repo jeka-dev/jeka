@@ -862,7 +862,9 @@ if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
     bin_dir=$(find "." -type d -path "*/Contents/Home/bin" | head -n 1)
   else
     # For other OS, find bin directory at any depth (up to 3 levels)
-    bin_dir=$(find "." -maxdepth 3 -type d -name "bin" | head -n 1)
+    bin_dir=$(find "." -maxdepth 6 -type f -path "*/bin/javac" | head -n 1)
+    bin_dir=$(dirname "$bin_dir")
+
   fi
   
   if [ -z "$bin_dir" ]; then
@@ -890,7 +892,7 @@ if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
     mv "$jdk_cache_dir"/"${jdk_root#./}"/* "$temp_dir"
     rm -rf "$jdk_cache_dir"/*
     mv "$temp_dir"/* "$jdk_cache_dir"
-    rmdir "$temp_dir"
+    rm -rf "$temp_dir"
   fi
 fi
   fi
