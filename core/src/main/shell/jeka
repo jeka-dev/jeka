@@ -851,18 +851,48 @@ get_or_download_jdk() {
     local download_url="https://api.foojay.io/disco/v3.0/directuris?distro=$JDK_DOWNLOAD_DISTRIB&javafx_bundled=false&libc_type=$JDK_DOWNLOAD_LIBC_TYPE&archive_type=$JDK_DOWNLOAD_FILE_TYPE&operating_system=$JDK_DOWNLOAD_OS&package_type=jdk&version=$JAVA_VERSION&architecture=$JDK_DOWNLOAD_ARCH&latest=available"
     info "Downloading JDK $JDK_DOWNLOAD_DISTRIB $JAVA_VERSION to $jdk_cache_dir. It may take a while..."
     download_and_unpack "$download_url" "$jdk_cache_dir" "$JDK_DOWNLOAD_FILE_TYPE"
-    if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
-      pushd "$jdk_cache_dir" > /dev/null 2>&1
-      local nested_dir
-      nested_dir=$(find "." -mindepth 1 -maxdepth 1 -type d | head -n 1 | cut -c 3-)
-      popd > /dev/null 2>&1
-      temp_dir=$(mktemp -d)
-      if [ "$JDK_DOWNLOAD_OS" = "mac" ]; then
-          nested_dir+="/Contents/Home"
-      fi
-      mv "$jdk_cache_dir"/"$nested_dir"/* "$temp_dir"
-      mv "$temp_dir"/* "$jdk_cache_dir"
-    fi
+if [ "tar.gz" == "$JDK_DOWNLOAD_FILE_TYPE" ]; then
+  pushd "$jdk_cache_dir" > /dev/null 2>&1
+  
+  # Find the bin directory to handle various JDK archive structures
+  # Some distributions (e.g., Azul 8) include extra directory levels
+  local bin_dir
+  if [ "$JDK_DOWNLOAD_OS" = "mac" ]; then
+    # macOS JDKs have a special structure: jdk-dir/Contents/Home/bin
+    bin_dir=$(find "." -type d -path "*/Contents/Home/bin" | head -n 1)
+  else
+    # For other OS, find bin directory at any depth (up to 3 levels)
+    bin_dir=$(find "." -maxdepth 3 -type d -name "bin" | head -n 1)
+  fi
+  
+  if [ -z "$bin_dir" ]; then
+    popd > /dev/null 2>&1
+    msg "Error: Could not locate bin directory in downloaded JDK"
+    exit 1
+  fi
+  
+  # Get the JDK root directory (parent of bin)
+  local jdk_root
+  jdk_root=$(dirname "$bin_dir")
+  
+  # Verify this is a valid JDK by checking for javac
+  if [ ! -f "$jdk_root/bin/javac" ]; then
+    popd > /dev/null 2>&1
+    msg "Error: Invalid JDK structure - javac not found in $jdk_root/bin"
+    exit 1
+  fi
+  
+  popd > /dev/null 2>&1
+  
+  # Move JDK contents to cache root if needed
+  if [ "$jdk_root" != "." ]; then
+    temp_dir=$(mktemp -d)
+    mv "$jdk_cache_dir"/"${jdk_root#./}"/* "$temp_dir"
+    rm -rf "$jdk_cache_dir"/*
+    mv "$temp_dir"/* "$jdk_cache_dir"
+    rmdir "$temp_dir"
+  fi
+fi
   fi
   DOWNLOAD_JDK_DIR=$jdk_cache_dir
 }
