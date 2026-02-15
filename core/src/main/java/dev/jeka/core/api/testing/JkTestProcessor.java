@@ -474,7 +474,7 @@ public final class JkTestProcessor {
         if (platformVersionCache != null) {
             return platformVersionCache;
         }
-        platformVersionCache = classpath.getEntries().stream()
+        platformVersionCache = classpath.toList().stream()
                 .filter(path -> path.getFileName().toString().startsWith(PLATFORM_COMMONS_JAR_NAME_PREFIX))
                 .map(path -> path.getFileName().toString().substring(PLATFORM_COMMONS_JAR_NAME_PREFIX.length()))
                 .map(name -> JkUtilsString.substringBeforeLast(name, "."))
