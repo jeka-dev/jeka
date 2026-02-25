@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,8 @@ public abstract class KBean {
     private static final String JKBEAN_CLASS_SIMPLE_NAME = KBean.class.getSimpleName();
 
     private static final String CLASS_SUFFIX = KBean.class.getSimpleName();
+
+    static final List<String> ADMIN_KBEAN_NAMES = Arrays.asList("app", "setup");
 
     private final JkRunbase runbase;
 
@@ -189,6 +192,11 @@ public abstract class KBean {
             return true;
         }
         return field.getAnnotation(JkDoc.class) != null;
+    }
+
+
+    public @interface JkDirAgnostic {
+
     }
 
 }

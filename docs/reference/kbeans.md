@@ -86,11 +86,11 @@ JeKa bundles a collection of KBeans for building projects, creating Docker image
 - [Maven KBean](kbeans-maven.md): For publishing artifacts to Maven repositories.
 - [Docker KBean](kbeans-docker.md): For creating Docker images.
 - [Native KBean](kbeans-native.md): For compiling code to native executables.
-- [App KBean](kbeans-app.md): For installing/uninstalling applications locally.
+- [App KBean](kbeans-app.md): For installing/uninstalling applications locally. _(Admin KBean)_
 - [Git KBean](kbeans-git.md): For performing Git operations.
 - [IntelliJ KBean](kbeans-intellij.md): For generating IntelliJ IDEA project files.
 - [Eclipse KBean](kbeans-eclipse.md): For generating Eclipse project files.
-- [Setup KBean](kbeans-setup.md): For global JeKa configuration.
+- [Setup KBean](kbeans-setup.md): For global JeKa configuration. _(Admin KBean)_
 
 For example, running:
 ```bash
@@ -107,6 +107,39 @@ To list all available KBeans in the classpath, execute:
 ```bash
 jeka --doc
 ```
+
+**Admin KBeans**
+
+_Admin KBeans_ are special KBeans designed to operate independently of the current project structure.
+They run in _admin mode_, which means:
+
+- No compilation of the *jeka-src* directory is performed
+- No dependency resolution is executed
+- No child modules are traversed in multi-module projects
+- They are agnostic to the current working directory
+
+JeKa automatically enters admin mode when only admin KBeans are specified on the command line.
+
+Currently, JeKa includes two admin KBeans:
+
+- **app**: For installing, updating, and managing applications globally
+- **setup**: For global JeKa configuration tasks
+
+Examples:
+```bash
+# Install an application (runs in admin mode)
+jeka app: install repo=https://github.com/djeang/kill8 name=kill8
+
+# Configure global JeKa settings (runs in admin mode)
+jeka setup: editGlobalProperties
+
+# Mixed usage is not allowed - this will fail
+jeka app: list project: pack
+```
+
+!!! note
+    Admin KBeans cannot be mixed with regular KBeans in a single command. If you need to run both,
+    execute them in separate commands.
 
 KBeans can be added to the classpath like any third-party dependency.  
 This can be done by setting the `jeka.inject.classpath` property in the `jeka.properties` file as follows:

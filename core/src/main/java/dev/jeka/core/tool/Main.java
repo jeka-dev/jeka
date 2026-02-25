@@ -102,7 +102,9 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = PropertiesHandler.constructRunbaseProperties(baseDir);
+        JkProperties props = cmdArgs.containsAdminKBeanOnly() ?
+                PropertiesHandler.constructRunbaseProperties(baseDir) :
+                JkProperties.ofSysPropsThenEnv();
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
 
         Engine engine = null;
@@ -115,6 +117,9 @@ public class Main {
             commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
             LogSettings.INSTANCE = mainCommand.logSettings();
             BehaviorSettings.INSTANCE = mainCommand.behaviorSettings();
+            if (interpolatedArgs.containsAdminKBeanOnly()) {
+                BehaviorSettings.setAdminMode();
+            }
             JkDependencySet dependencies = mainCommand.dependencies();
 
             // setup logging

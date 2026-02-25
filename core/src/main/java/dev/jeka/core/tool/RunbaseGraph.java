@@ -50,7 +50,7 @@ class RunbaseGraph {
         // child bases
         List<Node> children = getChildPaths(runbase).stream()
                 .map(Node::getOrCreate)
-                .collect(Collectors.toList());
+                .toList();
 
         // injected bases for root node
         List<Node> rootInjectedNodes = getInjectedPaths(parentKBean, runbase).stream()
@@ -68,6 +68,14 @@ class RunbaseGraph {
         Node root = new Node(runbase, rootInjectedNodes);
         return new RunbaseGraph(root, sortedChildren);
     }
+
+    // Flat rungraph to use when running in admin mode
+    static RunbaseGraph ofAdmin(JkRunbase runbase) {
+        Node root = new Node(runbase, List.of());
+        return new RunbaseGraph(root, List.of());
+    }
+
+
 
     List<JkRunbase> getChildren() {
         return children.stream().map(Node::getRunbase).collect(Collectors.toList());

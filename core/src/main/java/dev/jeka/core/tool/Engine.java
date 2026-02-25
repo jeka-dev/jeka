@@ -161,6 +161,11 @@ class Engine {
             return classpathSetupResult;
         }
 
+        if (BehaviorSettings.INSTANCE.adminMode) {
+            this.classpathSetupResult = ClasspathSetupResult.ofEmpty();
+            return classpathSetupResult;
+        }
+
         JkLog.debugStartTask("Resolve classpath for jeka-src");
 
         if (BehaviorSettings.INSTANCE.cleanWork) {
@@ -500,7 +505,20 @@ class Engine {
             this.subEngines = subEngines;
             this.fullDependencies = fullDependencies;
         }
+
+        static ClasspathSetupResult ofEmpty() {
+            return new ClasspathSetupResult(
+                    true,
+                    JkPathSequence.of(),
+                    JkPathSequence.of(JkLocator.getJekaJarPath()),
+                    JkPathSequence.of(),
+                    JkDependencySet.of(),
+                    List.of(),
+                    JkDependencySet.of());
+        }
     }
+
+
 
     // For test-purpose only
     void setKBeanResolution(KBeanResolution kbeanResolution) {

@@ -380,7 +380,9 @@ public final class JkRunbase {
         // Add default KBean
         Class<? extends KBean> defaultKBeanClass = kbeanResolution.findDefaultBeanClass();
 
-        if (master) {
+        if (BehaviorSettings.INSTANCE.adminMode) {
+            runbaseGraph = RunbaseGraph.ofAdmin(this);
+        } else if (master) {
             runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
         }
 

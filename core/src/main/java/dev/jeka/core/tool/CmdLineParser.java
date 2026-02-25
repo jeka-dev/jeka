@@ -57,7 +57,7 @@ class CmdLineParser {
         }
         String kbeanName = args.findKbeanName();
         String kbeanClassName = resolution.findKbeanClassName(kbeanName).orElse(resolution.defaultKbeanClassName);
-        final String[] methodOrFieldArgs = args.trunkKBeanRef().get();
+        final String[] methodOrFieldArgs = args.truncatedKBeanRef().get();
 
         if (kbeanClassName == null) {
             CommandLine cmdLine = allKBeanCommandLine(resolution.allKbeanClassNames, source);

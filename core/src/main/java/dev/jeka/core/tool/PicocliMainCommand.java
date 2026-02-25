@@ -214,7 +214,8 @@ public class PicocliMainCommand {
                 forceMode,
                 skipCompile,
                 childBase,
-                strict);
+                strict,
+                false);
     }
 
     JkDependencySet dependencies() {

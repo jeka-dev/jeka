@@ -20,10 +20,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsString;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.tool.JkConstants.*;
@@ -95,7 +92,7 @@ class CmdLineArgs {
     /**
      * Returns same args without leading kbean name arg, if any.
      */
-    CmdLineArgs trunkKBeanRef() {
+    CmdLineArgs truncatedKBeanRef() {
         if (args.length == 0) {
             return this;
         }
@@ -120,6 +117,28 @@ class CmdLineArgs {
         }
         result.add(new CmdLineArgs(currentArgs));
         return result;
+    }
+
+    boolean containsAdminKBeanOnly() {
+        List<String> adminKBeans = splitByKbeanContext().stream()
+                .map(CmdLineArgs::findKbeanName)
+                .filter(KBean.ADMIN_KBEAN_NAMES::contains)
+                .toList();
+        List<String> nonAdminKBeans = splitByKbeanContext().stream()
+                .map(CmdLineArgs::findKbeanName)
+                .filter(kbeanName -> !adminKBeans.contains(kbeanName))
+                .toList();
+        if (!adminKBeans.isEmpty() && !nonAdminKBeans.isEmpty()) {
+            String msg = String.format("Admin KBeans %s can not be used in conjunction with non-admin KBeans %s.%n" +
+                    "Please, use admin KBeans in a separated command.", KBean.ADMIN_KBEAN_NAMES, nonAdminKBeans);
+            if (LogSettings.INSTANCE.stackTrace || LogSettings.INSTANCE.verbose) {
+                throw new JkException(msg);
+            } else {
+                System.out.println(msg);
+                System.exit(1);
+            }
+        }
+        return !adminKBeans.isEmpty();
     }
 
     private static boolean isKbeanRef(String arg) {

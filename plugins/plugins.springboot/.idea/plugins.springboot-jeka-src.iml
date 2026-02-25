@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+    <component inherit-compileRunner-output="false" name="NewModuleRootManager">
+        <output url="file://$MODULE_DIR$/.idea/output/production"/>
+        <output-test url="file://$MODULE_DIR$/.idea/output/test"/>
+        <exclude-output/>
+        <content url="file://$MODULE_DIR$">
+            <sourceFolder isTestSource="true" url="file://$MODULE_DIR$/jeka-src"/>
+            <excludeFolder url="file://$MODULE_DIR$/jeka-output"/>
+            <excludeFolder url="file://$MODULE_DIR$/.jeka-work"/>
+            <excludeFolder url="file://$MODULE_DIR$/.idea/output"/>
+        </content>
+        <orderEntry type="inheritedJdk"/>
+        <orderEntry forTests="false" type="sourceFolder"/>
+        <orderEntry exported="" module-name="core" scope="COMPILE" type="module"/>
+    </component>
+</module>

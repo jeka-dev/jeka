@@ -33,10 +33,11 @@ class BehaviorSettings {
 
     final boolean skipCompile;
 
-    final String childBase;
+    final String childBase; // in case user has specified to run the command on a child project
 
     final boolean strict;
 
+    final boolean adminMode; // To run specific KBeans as 'app' or 'setup' which are agnostic to current dir (no need to compile or traverse children)
 
     BehaviorSettings(String defaultKbeanName,
                      boolean cleanWork,
@@ -44,7 +45,8 @@ class BehaviorSettings {
                      boolean forceMode,
                      boolean skipCompile,
                      String childBase,
-                     boolean strict) {
+                     boolean strict,
+                     boolean adminMode) {
         this.defaultKbeanName = Optional.ofNullable(defaultKbeanName);
         this.cleanWork = cleanWork;
         this.cleanOutput = cleanOutput;
@@ -52,22 +54,35 @@ class BehaviorSettings {
         this.skipCompile = skipCompile;
         this.childBase = childBase;
         this.strict = strict;
+        this.adminMode = adminMode;
     }
 
     static BehaviorSettings ofDefault() {
-        return new BehaviorSettings(null, false, false, false, false, null, false);
+        return new BehaviorSettings(null, false, false, false, false, null, false, false);
     }
 
     static void setForceMode() {
-        BehaviorSettings forceLodeSettinfgs = new BehaviorSettings(
+        INSTANCE = new BehaviorSettings(
                 INSTANCE.defaultKbeanName.orElse(null),
                 INSTANCE.cleanWork,
                 INSTANCE.cleanOutput,
                 true,
                 INSTANCE.skipCompile,
                 INSTANCE.childBase,
-                INSTANCE.strict);
-        INSTANCE = forceLodeSettinfgs;
+                INSTANCE.strict,
+                INSTANCE.adminMode);
+    }
+
+    static void setAdminMode() {
+        INSTANCE = new BehaviorSettings(
+                null,
+                false,
+                false,
+                true,
+                true,
+                null,
+                false,
+                true);
     }
 
 }
