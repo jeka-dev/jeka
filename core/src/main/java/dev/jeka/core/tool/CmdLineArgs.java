@@ -119,26 +119,10 @@ class CmdLineArgs {
         return result;
     }
 
-    boolean containsAdminKBeanOnly() {
-        List<String> adminKBeans = splitByKbeanContext().stream()
+    boolean containsAdminKBeans() {
+        return splitByKbeanContext().stream()
                 .map(CmdLineArgs::findKbeanName)
-                .filter(KBean.ADMIN_KBEAN_NAMES::contains)
-                .toList();
-        List<String> nonAdminKBeans = splitByKbeanContext().stream()
-                .map(CmdLineArgs::findKbeanName)
-                .filter(kbeanName -> !adminKBeans.contains(kbeanName))
-                .toList();
-        if (!adminKBeans.isEmpty() && !nonAdminKBeans.isEmpty()) {
-            String msg = String.format("Admin KBeans %s can not be used in conjunction with non-admin KBeans %s.%n" +
-                    "Please, use admin KBeans in a separated command.", KBean.ADMIN_KBEAN_NAMES, nonAdminKBeans);
-            if (LogSettings.INSTANCE.stackTrace || LogSettings.INSTANCE.verbose) {
-                throw new JkException(msg);
-            } else {
-                System.out.println(msg);
-                System.exit(1);
-            }
-        }
-        return !adminKBeans.isEmpty();
+                .anyMatch(KBean.ADMIN_KBEAN_NAMES::contains);
     }
 
     private static boolean isKbeanRef(String arg) {

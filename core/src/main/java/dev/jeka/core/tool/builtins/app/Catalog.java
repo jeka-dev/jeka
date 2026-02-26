@@ -25,10 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 class Catalog {
 
@@ -66,32 +64,25 @@ class Catalog {
             AppInfo appInfo = entry.getValue();
             System.out.println("Type: " + appInfo.type);
             System.out.println("Desc: " + appInfo.description);
-            System.out.println("Repo: " + appInfo.repo);
             System.out.println("Run : " + JkAnsi.yellow("jeka -r " + appInfo.repo + " -p"));
             int longestMsg = "Install as java cmd-line".length();
-            if (appInfo.nativable) {
+            if (appInfo.supportsNative) {
                 longestMsg = "Install as native command-line".length();
             }
-            String javaMsg = JkUtilsString.padEnd("Install as java cmd-line", longestMsg, ' ');
+            String javaMsg = JkUtilsString.padEnd("Install as java command-line", longestMsg, ' ');
 
             System.out.println(javaMsg+ ": " + JkAnsi.yellow("jeka app: install repo=" + appName + "@" + catalogName));
-            if (appInfo.nativable) {
+            if (appInfo.supportsNative) {
                 System.out.println("Install as native command-line: " + JkAnsi.yellow("jeka app: install repo="
-                        + appName + "@" + catalogName + " native:"));
+                        + appName + "@" + catalogName + " runtime=NATIVE"));
             }
-            if (appInfo.bundable) {
+            if (appInfo.supportsBundle) {
                 String bundableMsg = JkUtilsString.padEnd("Install as app bundle", longestMsg, ' ');
                 System.out.println(bundableMsg + ": " + JkAnsi.yellow("jeka app: install repo="
-                        + appName + "@" + catalogName + " bundle:"));
+                        + appName + "@" + catalogName + " runtime=BUNDLE"));
             }
             System.out.println();
         }
-    }
-
-    private static Catalog ofInputStream(Supplier<InputStream> inputStreamSupplier) {
-        JkProperties props = JkProperties.load(inputStreamSupplier);
-        Map<String, AppInfo> entries = appEntries(props);
-        return new Catalog(entries);
     }
 
     private static Map<String, AppInfo> appEntries(JkProperties properties) {
@@ -117,12 +108,12 @@ class Catalog {
 
     static class AppInfo {
 
-        public AppInfo(String description, String repo, String type, String nativable, String bundable) {
+        public AppInfo(String description, String repo, String type, String supportsNative, String supportsBundle) {
             this.description = description;
             this.repo = repo;
             this.type = type;
-            this.nativable = "true".equals(nativable);
-            this.bundable = "true".equals(bundable);
+            this.supportsNative = "true".equals(supportsNative);
+            this.supportsBundle = "true".equals(supportsBundle);
         }
 
         public final String description;
@@ -131,9 +122,9 @@ class Catalog {
 
         public final String type;
 
-        public final boolean nativable;
+        public final boolean supportsNative;
 
-        public final boolean bundable;
+        public final boolean supportsBundle;
 
 
     }

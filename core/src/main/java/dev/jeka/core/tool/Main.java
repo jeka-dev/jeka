@@ -30,7 +30,6 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.api.utils.JkUtilsTime;
 import dev.jeka.core.tool.CommandLine.Model.CommandSpec;
-import org.jline.jansi.AnsiConsole;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -102,7 +101,7 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = cmdArgs.containsAdminKBeanOnly() ?
+        JkProperties props = cmdArgs.containsAdminKBeans() ?
                 PropertiesHandler.constructRunbaseProperties(baseDir) :
                 JkProperties.ofSysPropsThenEnv();
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
@@ -117,7 +116,7 @@ public class Main {
             commandLine.parseArgs(interpolatedArgs.withOptionsOnly().get());
             LogSettings.INSTANCE = mainCommand.logSettings();
             BehaviorSettings.INSTANCE = mainCommand.behaviorSettings();
-            if (interpolatedArgs.containsAdminKBeanOnly()) {
+            if (interpolatedArgs.containsAdminKBeans()) {
                 BehaviorSettings.setAdminMode();
             }
             JkDependencySet dependencies = mainCommand.dependencies();

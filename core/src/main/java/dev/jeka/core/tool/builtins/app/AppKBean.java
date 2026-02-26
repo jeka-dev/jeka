@@ -18,23 +18,24 @@ package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.JkColumnText;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.project.BundleKBean;
-import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.util.List;
 import java.util.Optional;
 
 @JkDoc("""
         Provides a way to install, update, or remove applications from the user PATH.
-        
+
         Applications are installed from a Git repository and built by the client before installation.
-        Applications can be installed as executable JARs or native apps.""")
+
+        Runtime modes:
+        - JVM: Runs on a Jeka-managed JDK, installed in ~/.jeka/apps
+        - NATIVE: Compiled as a native executable
+        - BUNDLE: Runs with a tailored JRE bundled with the app, installed where the user decides""")
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-app/")
 public class AppKBean extends KBean {
 
@@ -57,9 +58,17 @@ public class AppKBean extends KBean {
     public String url;
 
     @JkDoc("""
+            Runtime mode for app installation:
+            - JVM (default): Runs on a Jeka-managed JDK, installed in ~/.jeka/apps (on your PATH)
+            - NATIVE: Compiled as a native executable, installed in ~/.jeka/apps (on your PATH)
+            - BUNDLE: Bundled with a tailored JRE, installed in a user-specified location
+            """)
+    public RuntimeMode runtime = RuntimeMode.JVM;
+
+    @JkDoc("""
             Builds and installs the app to make it available in PATH.
             Use `repo=[Git URL]` to set the source repository.
-            Use `native:` argument to install as a native app.""")
+            Use `runtime=JVM|NATIVE|BUNDLE` to specify the runtime mode.""")
     public void install() {
         String gitUrl = this.repo;
         if (JkUtilsString.isBlank(gitUrl)) {
@@ -182,7 +191,7 @@ public class AppKBean extends KBean {
         }
 
         // Ask for name
-        boolean nameOk = !shouldAskAppName && !systemFiles().contains(name);
+        boolean nameOk = !shouldAskAppName && (name == null || !systemFiles().contains(name));
         boolean retry = false;
         while(!nameOk) {
             String response;
@@ -227,9 +236,7 @@ public class AppKBean extends KBean {
         String appName = suggestedAppName;
 
         // Install built app in target folder
-        boolean isNative = find(NativeKBean.class).isPresent();
-        boolean bundle = find(BundleKBean.class).isPresent();
-        appManager.install(appName, repoAndTag, isNative, bundle);
+        appManager.install(appName, repoAndTag, runtime);
 
         JkLog.info("App has been installed in %s.", appManager.appDir);
         JkLog.info("Run with: %s", JkAnsi.yellow(suggestedAppName));

@@ -74,7 +74,14 @@ class Catalogs {
             JkLog.warn("Failed to load builtin catalogs from %s", builtinCatalog.url());
         }
         result.putAll(read(JkProperties.ofStandardProperties().sub("jeka.")));
-        return result;
+
+        // Sort by catalogInfo.repo
+        Map<String, CatalogInfo> sortedResult = new LinkedHashMap<>();
+        result.entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getValue().repo))
+                .forEach(entry -> sortedResult.put(entry.getKey(), entry.getValue()));
+
+        return sortedResult;
     }
 
     private static Map<String, CatalogInfo> read(JkProperties properties) {
@@ -144,9 +151,4 @@ class Catalogs {
             }
         }
     }
-
-
-
-
-
 }

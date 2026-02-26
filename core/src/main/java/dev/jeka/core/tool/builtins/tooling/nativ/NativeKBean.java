@@ -35,9 +35,9 @@ import java.util.function.Supplier;
 
 @JkDoc("""
         Creates native executables.
-        
-        A native images is an executable file created from Java bytecode.
-        This KBean allows to create native images from executable jars generated from the project.
+
+        A native image is an executable file created from Java bytecode.
+        This KBean allows creating native images from executable jars generated from the project.
         """)
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-eclipse/")
 public class NativeKBean extends KBean {
@@ -47,13 +47,13 @@ public class NativeKBean extends KBean {
     @JkDoc("Extra arguments to pass to native-image compiler.")
     public String args;
 
-    @JkDoc("Tell if the generated executable must by statically linked with native libs")
+    @JkDoc("Specifies whether the generated executable must be statically linked with native libs")
     public JkNativeCompilation.StaticLink staticLink = JkNativeCompilation.StaticLink.NONE;
 
-    @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
+    @JkDoc("Uses predefined exploratory AOT metadata defined in the standard repository")
     public boolean useMetadataRepo = true;
 
-    @JkDoc("Use predefined exploratory aot metadata defined in standard repo")
+    @JkDoc("Version of the predefined exploratory AOT metadata repository")
     @JkDepSuggest(versionOnly = true, hint = "org.graalvm.buildtools:graalvm-reachability-metadata")
     public String metadataRepoVersion = JkNativeCompilation.DEFAULT_REPO_VERSION;
 

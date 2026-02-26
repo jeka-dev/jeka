@@ -27,6 +27,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkRunbase;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -104,9 +105,10 @@ public class JkNativeCompilation {
 
     public static final String DEFAULT_GRAALVM_VERSION = "25";;
 
-    public static final String DEFAULT_REPO_VERSION =  "0.11.3";
+    @JkDepSuggest(versionOnly = true, hint = "org.graalvm.buildtools:graalvm-reachability-metadata")
+    public static final String DEFAULT_REPO_VERSION =  "0.11.4";
 
-    private static final String JEKA_GRAAALVM_HOME = "JEKA_GRAAALVM_HOME";
+    private static final String JEKA_GRAALVM_HOME = "JEKA_GRAALVM_HOME";
 
     private static final String DOWNLOAD_ = "DOWNLOAD_";
 
@@ -203,10 +205,7 @@ public class JkNativeCompilation {
                     JkUtilsTime.now("HH:mm:ss"));
         }
         process = process
-                .addParams("--no-fallback")
-                .addParamsIf(!JkUtilsString.isBlank(mainClass), "-H:Class=" + mainClass)
-                .addParams("-o",  outputFile.toString())
-                .setLogCommand(JkLog.isDebug())
+                .setLogCommand(JkLog.isVerbose())
                 .setInheritIO(false)
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setDestroyAtJvmShutdown(true);
@@ -217,6 +216,11 @@ public class JkNativeCompilation {
 
     public List<String> getNativeImageParams(String outputFile, String classpathAsString) {
         List<String> params = new LinkedList<>();
+
+        params.add("--no-fallback");
+        params.add("-H:+UnlockExperimentalVMOptions");
+        params.add("--emit");
+        params.add("build-report");
 
         if (!JkUtilsString.isBlank(classpathAsString)) {
             params.add("-classpath");
@@ -229,7 +233,6 @@ public class JkNativeCompilation {
         } else if (staticLink == StaticLink.MOSTLY) {
             params.add("--static-nolibc");
         }
-        params.add("--no-fallback");
         if (JkLog.isDebug()) {
             params.add("--verbose");
         }
@@ -282,13 +285,13 @@ public class JkNativeCompilation {
                 String version = envValue.substring(DOWNLOAD_.length());
                 Path graalvmHome = JkUtilsJdk.getJdk("graalvm", version);
                 JkLog.verbose("Honor environment variable %s=%s by downloading GraalVM from the internet, " +
-                                "if not present in cache.", JEKA_GRAAALVM_HOME, envValue);
+                                "if not present in cache.", JEKA_GRAALVM_HOME, envValue);
                 return toolPath(graalvmHome);
             }
             Path result = toolPath(Paths.get(envValue));
             JkUtilsAssert.state(Files.exists(result), "Can't find %s executable from %s. Fix the value of " +
-                    "%s environment variable.", result.getFileName(), envValue, JEKA_GRAAALVM_HOME);
-            JkLog.verbose("Honor environment variable %s=%s by using GraalVM home: %s.", JEKA_GRAAALVM_HOME, envValue,
+                    "%s environment variable.", result.getFileName(), envValue, JEKA_GRAALVM_HOME);
+            JkLog.verbose("Honor environment variable %s=%s by using GraalVM home: %s.", JEKA_GRAALVM_HOME, envValue,
                     envValue);
             return result;
         }
@@ -301,8 +304,8 @@ public class JkNativeCompilation {
         }
 
         // Download from internet in last resort
+        JkLog.verbose("Use GraalVM default version %s.", DEFAULT_GRAALVM_VERSION);
         Path graalvmHome = JkUtilsJdk.getJdk("graalvm", DEFAULT_GRAALVM_VERSION);
-        JkLog.verbose("Download GraalVM default version %s, if nor already in cache.", DEFAULT_GRAALVM_VERSION);
         return toolPath(graalvmHome);
     }
 

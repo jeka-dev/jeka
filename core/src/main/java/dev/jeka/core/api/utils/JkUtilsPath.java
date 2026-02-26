@@ -442,9 +442,6 @@ public final class JkUtilsPath {
             for (Path child : stream) {
                 result.add(child);
             }
-            if (path.getFileName().toString().startsWith(".bin")) {
-                System.out.println("---direct child of " + path + ": " + result);
-            }
             return result;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

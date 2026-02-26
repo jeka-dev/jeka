@@ -63,7 +63,7 @@ class AppManager {
                 JkLocator.getCacheDir().resolve("git").resolve("apps"));
     }
 
-    void install(String appName, RepoAndTag repoAndTag, boolean isNative, boolean isBundle) {
+    void install(String appName, RepoAndTag repoAndTag, RuntimeMode runtimeMode) {
         Path repoDir = repoDir(appName);
         JkUtilsPath.deleteQuietly(repoDir, false);
         JkUtilsPath.createDirectories(repoDir);
@@ -74,7 +74,7 @@ class AppManager {
                 .addParams(repoAndTag.repoUrl, repoDir.toString())
                 .exec();
         JkLog.info("Build app...");
-        buildAndInstall(appName, isNative, repoDir, isBundle);
+        buildAndInstall(appName, repoDir, runtimeMode);
     }
 
     void updateWithTag(String appName, String tag) {
@@ -89,9 +89,9 @@ class AppManager {
         git.execCmd("pull");
         git.execCmd("checkout", tag);
 
-        boolean isNative = isNative(appFile);
+        RuntimeMode runtimeMode = guessRuntimeMode(appFile);
         JkLog.info("Re-building the app...");
-        buildAndInstall(appName, isNative, repoDir, isBundle());
+        buildAndInstall(appName, repoDir, runtimeMode);
     }
 
     void updateToLastCommit(String appName) {
@@ -110,7 +110,8 @@ class AppManager {
         boolean isNative = isNative(appFile);
         JkLog.info("Re-building the app...");
 
-        buildAndInstall(appName, isNative, repoDir, isBundle());
+        RuntimeMode runtimeMode = guessRuntimeMode(appFile);
+        buildAndInstall(appName, repoDir, runtimeMode);
 
         JkLog.endTask();
     }
@@ -280,10 +281,14 @@ class AppManager {
         return name.matches("[a-zA-Z0-9\\-]+");
     }
 
-    private void buildAndInstall(String appName, boolean isNative, Path repoDir, boolean isBundle) {
+    private void buildAndInstall(String appName, Path repoDir, RuntimeMode runtimeMode) {
         Path artefact;
         try {
-            artefact = AppBuilder.build(repoDir, isNative, isBundle());
+            RuntimeMode effectiveRuntimeMode = runtimeMode;
+            if (isBundle() && runtimeMode == RuntimeMode.JVM) {
+                effectiveRuntimeMode = RuntimeMode.BUNDLE;
+            }
+            artefact = AppBuilder.build(repoDir, effectiveRuntimeMode);
         } catch (RuntimeException e) {
             JkGit git = JkGit.of(repoDir);
             String remoteRepoUrl = git.getRemoteUrl();
@@ -294,7 +299,7 @@ class AppManager {
             throw e;
         }
 
-        String fileName = (JkUtilsSystem.IS_WINDOWS && !isNative) ? appName + ".bat" : appName;
+        String fileName = (JkUtilsSystem.IS_WINDOWS && runtimeMode != RuntimeMode.NATIVE) ? appName + ".bat" : appName;
         JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -336,6 +341,18 @@ class AppManager {
             }
         }
         return appDir.resolve(fileName);
+    }
+
+    private RuntimeMode guessRuntimeMode(Path appFile) {
+        RuntimeMode runtimeMode;
+        if (isBundle()) {
+            runtimeMode = RuntimeMode.BUNDLE;
+        }  else if (isNative(appFile)) {
+            runtimeMode = RuntimeMode.NATIVE;
+        } else {
+            runtimeMode = RuntimeMode.JVM;
+        }
+        return runtimeMode;
     }
 
     private boolean isNative(Path appFile) {

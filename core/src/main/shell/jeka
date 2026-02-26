@@ -929,6 +929,13 @@ compute_JAVA_CMD() {
       JAVA_VERSION=$(get_java_version_from_props "$BASE_DIR" )
   fi
 
+  # Validate that JAVA_VERSION starts with a digit
+  if [[ -n "$JAVA_VERSION" ]] && [[ ! "$JAVA_VERSION" =~ ^[0-9] ]]; then
+    msg "Error: jeka.java.version='$JAVA_VERSION' must start with a digit."
+    msg "Please check your jeka.properties file."
+    exit 1
+  fi
+
   if [ -n "$JEKA_JDK_HOME" ]; then # We can enforce usage of a specific JDK by setting JEKA_JDK_HOME env var
     JAVA_HOME="$JEKA_JDK_HOME"
 

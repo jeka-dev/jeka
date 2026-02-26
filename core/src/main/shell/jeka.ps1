@@ -408,6 +408,9 @@ class Jdks {
       if ($this.cachedJavaVersion.StartsWith(".")) {
           Exit-Error "Invalid jeka.java.version: cannot be '.'. Please, change it in jeka.properties file."
       }
+      if ($this.cachedJavaVersion -notmatch '^[0-9]') {
+          Exit-Error "Error: jeka.java.version='$($this.cachedJavaVersion)' must start with a digit. Please check your jeka.properties file."
+      }
       return $this.cachedJavaVersion
   }
 

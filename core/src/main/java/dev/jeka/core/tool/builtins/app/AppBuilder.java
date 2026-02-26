@@ -38,8 +38,8 @@ class AppBuilder {
 
     static final String SHE_BANG = "#!/bin/sh";
 
-    static Path build(Path baseDir, boolean isNative, boolean isBundle) {
-        String[] buildArgs = buildArgs(baseDir, isNative, isBundle);
+    static Path build(Path baseDir, RuntimeMode runtimeMode) {
+        String[] buildArgs = buildArgs(baseDir, runtimeMode);
         JkLog.verbose("Use commands: %s", String.join(" ", buildArgs));
         JkProcess.ofWinOrUx("jeka.bat", "jeka")
                 .setWorkingDir(baseDir)
@@ -52,7 +52,7 @@ class AppBuilder {
         Path buildDir = baseDir.resolve("jeka-output");
 
         // Find the executable or jar built artefact
-        if (isNative) {
+        if (runtimeMode == RuntimeMode.NATIVE) {
             if (JkUtilsSystem.IS_WINDOWS) {
                 return JkUtilsPath.listDirectChildren(buildDir).stream()
                         .filter(path -> path.toString().endsWith(".exe"))
@@ -95,17 +95,19 @@ class AppBuilder {
                 .get();
     }
 
-    private static String[] buildArgs(Path base, boolean nativeCompile, boolean bundle) {
+    private static String[] buildArgs(Path base, RuntimeMode runtimeMode) {
         Path jekaProperties = base.resolve(JkConstants.PROPERTIES_FILE);
         List<String> args = new LinkedList<>();
+        boolean isNative = runtimeMode == RuntimeMode.NATIVE;
         if (Files.exists(jekaProperties)) {
-            String buildCmd = chooseSpecificBuildCommand(JkProperties.ofFile(jekaProperties), nativeCompile);
+
+            String buildCmd = chooseSpecificBuildCommand(JkProperties.ofFile(jekaProperties), isNative);
             if (!JkUtilsString.isBlank(buildCmd)) {
                 args.addAll(JkUtilsString.parseCommandlineAsList(buildCmd));
             }
         }
         if (args.isEmpty()) {
-            if (nativeCompile) {
+            if (runtimeMode == RuntimeMode.NATIVE) {
                 args.add("native:");
                 args.add("compile");
             } else {
@@ -119,7 +121,7 @@ class AppBuilder {
                     args.add("pack");
                 }
             }
-            if (bundle) {
+            if (runtimeMode == RuntimeMode.BUNDLE) {
                 args.add("bundle:");
                 args.add("pack");
             }
