@@ -139,6 +139,27 @@ public class JkMavenProject {
         return JkMvn.of(baseDir);
     }
 
+    /**
+     * Retrieves the project's final file name by executing a Maven command.
+     * The method evaluates the Maven expression "project.build.finalName" and extracts
+     * its value using the standard output from the executed process. <b/>
+     * The build file name is generally formatted as <i>groupId-artifactId-version</i>.
+     *
+     * @return The final file name of the Maven project as a string.
+     */
+    public String getBuildFileName() {
+        return mvn().addParams("-q", "-DforceStdout", "help:evaluate", "-Dexpression=project.build.finalName")
+                .setCollectStdout(true)
+                .setInheritIO(false)
+                .setLogWithJekaDecorator(false)
+                .exec()
+                .getStdoutAsString();
+    }
+
+    public Path getTargetDir() {
+        return baseDir.resolve("target");
+    }
+
     /*
      * Creates a {@link JkDependencySet} from file describing dependencies the following way :
      * <pre>

@@ -45,11 +45,15 @@ class AppBuilder {
                 .setWorkingDir(baseDir)
                 .addParams(buildArgs)
                 .addParamsIf(JkLog.isVerbose(), "--verbose")
-                //.addParamsIf(JkLog.isDebug(),"--debug")
+                .addParamsIf(JkLog.isDebug(),"--debug")
                 .setInheritIO(true)
                 .exec();
 
         Path buildDir = baseDir.resolve("jeka-output");
+        if (!Files.exists(buildDir)) {
+            throw new IllegalStateException("Build directory does not exist: " + buildDir
+                    + ". Make sure that the application build has been executed successfully.");
+        }
 
         // Find the executable or jar built artefact
         if (runtimeMode == RuntimeMode.NATIVE) {

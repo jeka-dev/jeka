@@ -20,19 +20,22 @@ import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkBuildable;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
+import dev.jeka.core.api.tooling.maven.JkMvn;
 import dev.jeka.core.api.utils.JkUtilsString;
-import dev.jeka.core.tool.JkDoc;
-import dev.jeka.core.tool.JkRequire;
-import dev.jeka.core.tool.JkRunbase;
-import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 
+import java.io.File;
+import java.nio.file.CopyOption;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +65,13 @@ public final class MavenKBean extends KBean {
     @JkDoc("Indentation size for 'showPomDeps' output.")
     public int codeIndent = 4;
 
+    @JkDoc("Arguments to pass to mvn command while building. Examples 'clean test', '-Pnative -X'")
+    public String args = "";
+
+    @JkDoc("In multi-module projects, the module containing the application to build. " +
+            "Defaults to root module if not specified.")
+    public String appModule;
+
     @JkDoc
     private final JkPublicationOptions pub = new JkPublicationOptions();
 
@@ -85,6 +95,45 @@ public final class MavenKBean extends KBean {
     @JkDoc("Publishes the Maven publication on the local M2 repository. This is the local repository of Maven.")
     public void publishLocalM2() {
         getPublication().publishLocalM2();
+    }
+
+    @JkDoc("Runs Maven from Jeka using arguments from 'args' field.")
+    public void wrap() {
+        doWrap(JkMavenProject.of(getBaseDir()));
+    }
+
+    @JkDoc("Calls Maven 'package' from Jeka and copy produced artifacts to jeka-output.")
+    public void wrapPackage() {
+        JkMavenProject mvnRootModule = JkMavenProject.of(getBaseDir());
+        JkMavenProject mvnAppModule = mvnRootModule;
+        if (!JkUtilsString.isBlank(appModule)) {
+            mvnAppModule = JkMavenProject.of(getBaseDir().resolve(appModule));
+        }
+        doWrap(mvnRootModule, "clean", "package", "-Dmaven.test.skip=true");
+        String baseFileName = mvnAppModule.getBuildFileName();
+        var outputFilesTree = JkPathTree.of(mvnAppModule.getTargetDir())
+                .andMatching(baseFileName + "*");
+        if (!outputFilesTree.containFiles()) {
+            throw new IllegalStateException("No output files found after Maven package execution. " +
+                    "Check Maven configuration.");
+        }
+        if (JkLog.isVerbose()) {
+            outputFilesTree.stream().forEach(outputFile ->
+                JkLog.verbose("Copying file: " + outputFile)
+            );
+        }
+        outputFilesTree.copyTo(this.getOutputDir(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private void doWrap(JkMavenProject mavenProject, String... arguments) {
+        String newPath =  JkJavaProcess.CURRENT_JAVA_EXEC_DIR + File.pathSeparator + System.getenv("PATH");
+        JkMvn jkMvn = mavenProject.mvn()
+                .setEnv("PATH", newPath)
+                .setEnv("JAVA_HOME", JkJavaProcess.CURRENT_JAVA_HOME.toString())
+                .setEnv("GRAALVM_HOME", JkJavaProcess.CURRENT_JAVA_HOME.toString()) // might use in the case of native compiler
+                .addParams(arguments)
+                .addParamsAsCmdLine(args);
+        jkMvn.exec();
     }
 
     @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")

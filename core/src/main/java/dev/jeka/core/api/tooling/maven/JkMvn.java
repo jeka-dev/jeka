@@ -39,8 +39,6 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
 
-    private static String cached_mvn_cmd;
-
     /**
      * Path to the local Maven repository dir containing user configuration and local repo.
      */
@@ -84,7 +82,7 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
         return new JkMvn(this);
     }
 
-    private JkProcess process() {
+    public JkProcess mvnProcess() {
         return JkProcess.of(mvnCmd(this.getWorkingDir()))
                 .setLogCommand(true)
                 .setLogWithJekaDecorator(true);
@@ -93,13 +91,21 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
     // TODO handle mvn wrapper
     private static String mvnCmd(Path workingDir) {
         if (JkUtilsSystem.IS_WINDOWS) {
+            if (Files.exists(workingDir.resolve("mvnw.cmd"))) {
+                return "mvnw.cmd";
+            }
             if (exist("mvn.bat")) {
                 return "mvn.bat";
-            } else if (exist("mvn.cmd")) {
-                return "mvn.cmd";
-            } else {
-                return null;
             }
+            if (exist("mvn.cmd")) {
+                return "mvn.cmd";
+            }
+            return null;
+        }
+
+        // non windows
+        if (Files.exists(workingDir.resolve("mvnw"))) {
+            return "./mvnw";
         }
         if (exist("mvn")) {
             return "mvn";
@@ -107,8 +113,8 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
         return null;
     }
 
-    private static boolean exist(String cmd) {
-        String command = cmd + " -version";
+    private static boolean exist(String mvnCmd) {
+        String command = mvnCmd + " -version";
         try {
             final int result = Runtime.getRuntime().exec(command).waitFor();
             return result == 0;
@@ -117,7 +123,5 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
             return false;
         }
     }
-
-
 
 }
