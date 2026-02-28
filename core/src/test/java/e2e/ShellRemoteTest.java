@@ -35,7 +35,7 @@ class ShellRemoteTest  {
 
     private static final String COWSAY_VERSION = "0.0.6";
 
-    private static final String COW_SAY_URL = "https://github.com/jeka-dev/demo-cowsay#" + COWSAY_VERSION;
+    private static final String COW_SAY_URL = "https://github.com/jeka-dev/demo-cowsay"; //#" + COWSAY_VERSION;
 
     private final JekaCmdLineExecutor executor = new JekaCmdLineExecutor();
 
@@ -116,11 +116,12 @@ class ShellRemoteTest  {
     }
 
     @Test
+    //@Disabled("Re-enable after release")
     void cowsay_dockerBuildNative_ok() {
         if (isDockerAbsent()) {
             return;
         }
-        prepareJeka("-ru %s -Djeka.java.version=21 docker: buildNative", COW_SAY_URL).exec();
+        prepareJeka("-v -ru %s -Djeka.java.version=21 docker: buildNative", COW_SAY_URL).exec();
     }
 
     private JkProcess prepareJeka(String cmdLine, String... tokens) {

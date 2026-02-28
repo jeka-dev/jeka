@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
  */
 public class JkDockerNativeBuild extends JkDockerBuild {
 
+    private static final String GRAALVM_IMAGE_VERSION = "25.0.2";
+
     public enum PopularBaseImage {
 
         UBUNTU("ubuntu"),
@@ -135,9 +137,9 @@ public class JkDockerNativeBuild extends JkDockerBuild {
 
     private String buildImage() {
         if (JkNativeCompilation.StaticLink.MUSL == nativeCompilation.getStaticLinkage()) {
-            return "ghcr.io/graalvm/native-image-community:23-muslib";
+            return "ghcr.io/graalvm/native-image-community:" + GRAALVM_IMAGE_VERSION + "-muslib";
         } else {
-            return "ghcr.io/graalvm/native-image-community:23.0.0";
+            return "ghcr.io/graalvm/native-image-community:" + GRAALVM_IMAGE_VERSION;
         }
     }
 
