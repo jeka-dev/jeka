@@ -53,42 +53,53 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 
 nav:
-    - Installation: installation.md
-    - Quick Start: quick-start.md
-    - Tutorials:
+    - Home: index.md
+    - Getting Started:
+        - Installation: installation.md
+        - Quick Start: quick-start.md
+        - Examples: examples.md
+    - Core Concepts:
         - Basics: tutorials/basics.md
-        - Build Base: tutorials/build-base.md
-        - Build Projects: tutorials/build-projects.md
-        - Run Remote Apps: tutorials/run-remote-apps.md
-    - Reference:
         - KBeans: reference/kbeans.md
-        - Bundled KBeans:
-            - base: reference/kbeans-base.md
-            - project: reference/kbeans-project.md
-            - intellij: reference/kbeans-intellij.md
-            - eclipse: reference/kbeans-eclipse.md
-            - native: reference/kbeans-native.md
-            - docker: reference/kbeans-docker.md
-            - git: reference/kbeans-git.md
-            - app: reference/kbeans-app.md
-            - bundle: reference/kbeans-bundle.md
-            - setup: reference/kbeans-setup.md
         - Properties: reference/properties.md
+    - Build Modes:
+        - Base Mode: tutorials/build-base.md
+        - Project Mode: tutorials/build-projects.md
         - Multi-Module: reference/multi-modules.md
-        - Build Library:
-            - Intro : reference/api-intro.md
-            - Files : reference/api-files.md
-            - Native: reference/api-native.md
-            - Docker: reference/api-docker.md
-            - Git: reference/api-git.md
-            - Dependency Management: reference/api-dependency-management.md
-            - Project: reference/api-project.md
-    - Cheat Sheet: cheat-sheet.md
-    - FAQ: faq.md
-    - Examples: examples.md
-    - External Resources: external-resources.md
-    - Javadoc: javadoc/
-    - Under The Hood: under-the-hood.md
+    - Features:
+        - Run Remote Apps: tutorials/run-remote-apps.md
+        - Native Compilation: reference/kbeans-native.md
+        - Docker Images: reference/kbeans-docker.md
+        - IDE Integration:
+            - IntelliJ IDEA: reference/kbeans-intellij.md
+            - Eclipse: reference/kbeans-eclipse.md
+        - Version Control: reference/kbeans-git.md
+    - KBeans Reference:
+        - base: reference/kbeans-base.md
+        - project: reference/kbeans-project.md
+        - native: reference/kbeans-native.md
+        - docker: reference/kbeans-docker.md
+        - maven: reference/kbeans-maven.md
+        - git: reference/kbeans-git.md
+        - app: reference/kbeans-app.md
+        - bundle: reference/kbeans-bundle.md
+        - setup: reference/kbeans-setup.md
+        - intellij: reference/kbeans-intellij.md
+        - eclipse: reference/kbeans-eclipse.md
+    - API Reference:
+        - Overview: reference/api-intro.md
+        - Files: reference/api-files.md
+        - Dependency Management: reference/api-dependency-management.md
+        - Project: reference/api-project.md
+        - Native: reference/api-native.md
+        - Docker: reference/api-docker.md
+        - Git: reference/api-git.md
+    - Resources:
+        - Cheat Sheet: cheat-sheet.md
+        - FAQ: faq.md
+        - External Resources: external-resources.md
+        - Javadoc: javadoc/
+        - Under The Hood: under-the-hood.md
 
 repo_url: https://github.com/jeka-dev/jeka
 

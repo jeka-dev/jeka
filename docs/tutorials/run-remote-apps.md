@@ -124,12 +124,12 @@ Add a `jeka.properties` file to your Maven project root:
 
 ```properties
 jeka.java.version=21
+jeka.java.distrib=graalvm
 
 # Delegate build to Maven wrapper
 jeka.program.build=maven: wrapPackage
 
 # For native builds (requires GraalVM)
-jeka.java.distrib=graalvm
 jeka.program.build.native=maven: wrapPackage args="-Pnative"
 ```
 
