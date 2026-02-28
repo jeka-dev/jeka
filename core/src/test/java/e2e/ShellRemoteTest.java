@@ -116,7 +116,7 @@ class ShellRemoteTest  {
     }
 
     @Test
-    //@Disabled("Re-enable after release")
+    @Disabled("Re-enable after release")
     void cowsay_dockerBuildNative_ok() {
         if (isDockerAbsent()) {
             return;

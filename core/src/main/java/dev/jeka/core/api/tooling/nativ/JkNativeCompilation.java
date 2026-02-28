@@ -103,6 +103,7 @@ import java.util.stream.Stream;
  */
 public class JkNativeCompilation {
 
+    // When changing this default version, don't forget to change the version mentioned in JkDockerNativeBuild as well.
     public static final String DEFAULT_GRAALVM_VERSION = "25";;
 
     @JkDepSuggest(versionOnly = true, hint = "org.graalvm.buildtools:graalvm-reachability-metadata")
