@@ -29,14 +29,14 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled
+
 class ShellRemoteTest  {
 
     private static final String GIT_URL = "https://github.com/jeka-dev/sample-for-integration-test.git#0.0.1";
 
-    private static final String COWSAY_VERSION = "0.0.6";
+    private static final String COWSAY_VERSION = "0.0.9";
 
-    private static final String COW_SAY_URL = "https://github.com/jeka-dev/demo-cowsay"; //#" + COWSAY_VERSION;
+    private static final String COW_SAY_URL = "https://github.com/jeka-dev/demo-cowsay#" + COWSAY_VERSION;
 
     private final JekaCmdLineExecutor executor = new JekaCmdLineExecutor();
 
@@ -117,7 +117,6 @@ class ShellRemoteTest  {
     }
 
     @Test
-    @Disabled("Re-enable after release")
     void cowsay_dockerBuildNative_ok() {
         if (isDockerAbsent()) {
             return;
