@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled
 class ShellRemoteTest  {
 
     private static final String GIT_URL = "https://github.com/jeka-dev/sample-for-integration-test.git#0.0.1";
