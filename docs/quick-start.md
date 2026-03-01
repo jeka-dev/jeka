@@ -1,27 +1,26 @@
 # Quick Start
 
-## Install JeKa
+Welcome to JeKa! This guide will help you get up and running in minutes.
 
-- Install [Jeka CLI](installation.md). You can also use SDKMAN!: `sdk install jeka`
-- or install the [IntelliJ Plugin for JeKa](https://plugins.jetbrains.com/plugin/24505-jeka).
+## Installation
 
-!!! note
-    Using the [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka) is the fastest way to get started. 
-    It provides a wizard for creating various types of projects, ranging from simple scripts to full-fledged Spring Boot applications.
+You can get JeKa in two ways:
 
-## Follow the Guide
+- **IntelliJ Plugin (Recommended)**: Install the [JeKa Plugin](https://plugins.jetbrains.com/plugin/24505-jeka). It's the fastest way to start, providing wizards for scripts, apps, and Spring Boot projects.
+- **CLI**: [Install JeKa CLI](installation.md) manually or via SDKMAN!: `sdk install jeka`.
 
-This quick-start guide covers multiple use cases:
- 
-- [Create scripts in Java](#create-scripts) and execute from command line.
-- [Create a Base Application or Library](#create-a-base-app-or-library).
-- [Create a Java Project](#create-a-java-project).
-- [Create a workable Spring Boot Project](#create-a-spring-boot-project) in seconds.
+## Choose Your Path
+
+This guide covers several use cases:
+
+- [Create scripts in Java](#create-scripts) to automate your tasks.
+- [Create a Base Application or Library](#create-a-base-application-or-library) for simple, pure Java projects.
+- [Create a Java Project](#create-a-java-project) for more complex, standard layouts.
+- [Create a Spring Boot Project](#create-a-spring-boot-project) with a pre-configured setup.
 
   
-!!! note
-
-    If you are coding in IntelliJ IDEA, after scaffolding or modifying dependencies, execute the following command to synchronize:
+!!! tip "IntelliJ IDEA Users"
+    After scaffolding or modifying dependencies, synchronize your project by executing:
     ```bash
     jeka intellij: sync
     ```
@@ -39,7 +38,7 @@ This generates a structure as:
 │   └── Script.java     
 └── jeka.properties      <- JeKa configuration (Java and JeKa version, default parameters...)
 ```
-Ths script class looks like:
+This script class looks like:
 ```java
 @JkDoc("Minimalist script for demo purpose.")
 class Script extends KBean {
@@ -121,35 +120,37 @@ jeka.java.version=23
 ```
 This will automatically download Java 23 (if not already installed) on the next method run.
 
-#### Run remotely
+#### Source-Runnable Applications
 
 Run `hello` from another directory:
 ```bash
 jeka -r /path/to/script/root-dir hello
 ```
 
-Run `hello` from remote git repo:
+Run `hello` from a remote Git repository:
 ```bash
-jeka -r https://my.githost/my-repo.git hello
+jeka -r https://github.com/jeka-dev/demo-base hello
 ```
 
-#### Common Options/Commands:
+JeKa acts as an application source manager, allowing you to run or install applications directly from their source code.
+For more details, see the [Source-Runnable Applications tutorial](tutorials/source-runnable-apps.md).
+
+#### Common Options & Commands
+
 ```bash
-jeka --help          <- Displays help message
---doc                <- Displays documentation on available scripts
---inspect            <- Displays details about JeKa setup
-jeka base: depTree   <- Show dependency tree
+jeka --help          # Displays help message
+jeka --doc           # Displays documentation on available KBeans
+jeka --inspect       # Displays details about JeKa setup and properties
+jeka base: depTree   # Show dependency tree
 ```
 
 #### Resources
 - [Basics Tutorial](tutorials/basics.md)
 - [Write Scripts in Java Video](https://youtu.be/r-PUX6amBrw)
 
-## Create a Base App or Library
+## Create a Base Application or Library
 
-JeKa provides a *base* mode, which simplifies the creation of pure Java applications or libraries by avoiding the complexity of a traditional project structure.  
-
-Despite its simplicity, this structure supports full build configuration, automated testing, native compilation, Maven publication, and Docker image creation.
+JeKa's *base* mode is the simplest way to build pure Java applications or libraries. It avoids the complexity of traditional Maven/Gradle structures while supporting full-featured builds, testing, native compilation, and Docker packaging.
 
 To create a new code structure, run the following command:
 ```bash
@@ -164,7 +165,7 @@ This creates a structure like this:
 │   │   └── Build.java  
 │   └── app              <- Suggested base package for production code/resources
 │       └── App.java     
-├── jeka-output          <- Generated dir where artifacts as jars, classes, reports or doc are generated
+├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
 └── README.md            <- Describes available build commands
 ```
@@ -173,7 +174,7 @@ Follow the [tutorial](tutorials/build-base.md) for more details.
 
 ## Create a Java Project
 
-In this mode, you can create a fully-fledged project similar to *Maven* or *Gradle*.
+For more complex needs, *Project* mode provides a standard layout similar to Maven or Gradle, supporting multi-module builds and advanced dependency management.
 
 To create a new project structure, execute:
 ```bash
@@ -191,7 +192,7 @@ This generates a project structure as:
 │       └── resources 
 ├── jeka-src             <- Optional Java (or Kotlin) code for building the project
 │   └── Build.java      
-├── jeka-output          <- Generated dir where artifacts as jars, classes, reports or doc are generated
+├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
 ├── dependencies.txt     <- Dependency lists for compile, runtime and testing
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
 ├── jeka.ps              <- Optional PowerShell script to boot JeKa on Windows
@@ -215,17 +216,17 @@ This generates the following project structure:
 │   ├── main             
 │   │   ├── java
 │   │   │   └── app
-│   │   │       ├── Application.java.     <- Spring Boot app class
-│   │   │       └── Controller.java.      <- REST controller
+│   │   │       ├── Application.java      <- Spring Boot app class
+│   │   │       └── Controller.java       <- REST controller
 │   │   └── resources    
 │   └── test             
 │       ├── java
 │       │   └── app
-│       │       └── ControllerIt.java     <- Integration Test for REST controller 
+│       │       └── ControllerIT.java     <- Integration Test for REST controller 
 │       └── resources 
 ├── jeka-src             
-│   └── Build.java       <- Empty build class - in case of.
-├── jeka-output         
+│   └── Build.java       <- Optional build class (if needed)
+├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
 ├── dependencies.txt     <- Spring Boot and extra dependencies
 ├── jeka.properties      <- Build configuration 
 ├── jeka.ps              
@@ -266,14 +267,14 @@ You can start from here for modifying, adding code, tests and dependencies.
 These are the most useful commands for developing Spring Boot applications.
 
 ```text title="Common Commands"
-jeka project: test       <- Compiles and run tests
-jeka project: pack       <- Compiles and creates Bootable Jar
-jeka project: runJar     <- Run bootable jar
-jeka project: build      <- All-in-one to compile, test, pack, run analysis and end-to-end test
-jeka project: depTree    <- Displays dependency tree
+jeka project: test       # Compiles and run tests
+jeka project: pack       # Compiles and creates Bootable Jar
+jeka project: runJar     # Runs the bootable JAR
+jeka project: build      # All-in-one: compile, test, pack, and verification
+jeka project: depTree    # Displays the dependency tree
 
-jeka docker: build       <- Creates Docker image containing the Spring Boot application
-jeka docker: buildNative <- Creates Docker image containing the Spring Boot application compiled to native.
+jeka docker: build       # Creates Docker image containing the Spring Boot application
+jeka docker: buildNative # Creates Docker image for the native-compiled application
 ```
 
 #### Customize Docker File
@@ -286,11 +287,11 @@ To reduce a Docker native image size, use a distroless base image. The native ex
 
 #### What Next?
 
-Now that you're here, you can explore the following resources to enhance your project.
-Learn how to include SonarQube analysis, add a ReactJS web client, perform end-to-end testing, or implement a delivery pipeline in Java:
+Explore more advanced topics and real-world examples:
 
-- [Example using Spring Boot + Angular + SonarQube + JaCoCo + Docker + end-to-end testing](https://github.com/jeka-dev/demo-project-springboot-angular)
-- [Example using Kotlin + Spring Boot + ReactJS + SonarQube/JaCoCo](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
-- [Video on JeKa + Spring Boot + Docker + GraalVM](https://youtu.be/yfmaAwAjJ2w)
-- [Documentation](https://jeka-dev.github.io/jeka/)
+- **[Source-Runnable Applications](tutorials/source-runnable-apps.md)**: Run or install apps directly from Git.
+- **[Spring Boot + Angular + SonarQube Example](https://github.com/jeka-dev/demo-project-springboot-angular)**: A complete full-stack example.
+- **[Kotlin + Spring Boot + ReactJS Example](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)**: Using Kotlin with modern web frameworks.
+- **[JeKa + Spring Boot + GraalVM Video](https://youtu.be/yfmaAwAjJ2w)**: Watch JeKa in action.
+- **[Basics Tutorial](tutorials/basics.md)**: Deep dive into JeKa core concepts.
 
