@@ -1,0 +1,2347 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../tutorials/source-runnable-apps/">
+      
+      
+        <link rel="next" href="../kbeans-project/">
+      
+      
+      <link rel="icon" href="../../images/logo-plain-gradient.svg">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
+    
+    
+      
+        <title>KBeans - JeKa Build Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bcfcd587.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CFire+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Fire Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function n(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],n("js",new Date),n("config","UA-103449580-2"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){this.value&&n("event","search",{search_term:this.value})}),document$.subscribe(function(){var a=document.forms.feedback;if(void 0!==a)for(var e of a.querySelectorAll("[type=submit]"))e.addEventListener("click",function(e){e.preventDefault();var t=document.location.pathname,e=this.getAttribute("data-md-value");n("event","feedback",{page:t,data:e}),a.firstElementChild.disabled=!0;e=a.querySelector(".md-feedback__note [data-md-value='"+e+"']");e&&(e.hidden=!1)}),a.hidden=!1}),location$.subscribe(function(e){n("config","UA-103449580-2",{page_path:e.pathname})})});var e=document.createElement("script");e.async=!0,e.src="https://www.googletagmanager.com/gtag/js?id=UA-103449580-2",document.getElementById("__analytics").insertAdjacentElement("afterEnd",e)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#simple-example" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="JeKa Build Tool" class="md-header__button md-logo" aria-label="JeKa Build Tool" data-md-component="logo">
+      
+  <img src="../../images/logo-plain-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JeKa Build Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              KBeans
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jeka-dev/jeka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JeKa Build Tool" class="md-nav__button md-logo" aria-label="JeKa Build Tool" data-md-component="logo">
+      
+  <img src="../../images/logo-plain-white.svg" alt="logo">
+
+    </a>
+    JeKa Build Tool
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jeka-dev/jeka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../comparison/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    For Maven/Gradle Users
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/build-base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Build Base-Mode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/build-projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Build Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/source-runnable-apps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Source-Runnable Applications
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    KBeans
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    KBeans
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#simple-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#location" class="md-nav__link">
+    <span class="md-ellipsis">
+      Location
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kbean-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      KBean Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kbean-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      KBean Fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#naming-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming KBeans
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Document KBeans
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invoke-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invoke KBeans
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invoke KBeans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      From the Command Line
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-intellij-jeka-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      From IntelliJ Jeka Plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-a-plain-ide-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      From a Plain IDE Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-kbean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default KBean
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kbean-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      KBean Initialization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invoke-kbean-from-another-kbean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invoke KBean from another KBean
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invoke KBean from another KBean">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-jkinject" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using @JkInject
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-load-and-find-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using #load and #find methods
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-a-kbean-from-another-kbean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure a Kbean from another KBean.
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure a Kbean from another KBean.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-initialize-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-initialize KBeans
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-initialize-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-initialize KBeans
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lifecycle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-initialisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post initialisation.
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-project-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Project setup
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Bundled KBeans
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Bundled KBeans
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_1" id="__nav_5_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Core
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_2" id="__nav_5_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    DevOps
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            DevOps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    git
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    native
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-bundle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    bundle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_3" id="__nav_5_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    IDE Support
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            IDE Support
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-intellij/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    intellij
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-eclipse/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    eclipse
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_4" id="__nav_5_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Admin & Management
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Admin & Management
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-app/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../properties/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Properties
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-modules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multi-Module
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Build Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_5">
+            <span class="md-nav__icon md-icon"></span>
+            Build Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-intro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Native
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-dependency-management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependency Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cheat-sheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cheat Sheet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../external-resources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    External Resources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../javadoc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Javadoc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../under-the-hood/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Under The Hood
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#simple-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#location" class="md-nav__link">
+    <span class="md-ellipsis">
+      Location
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kbean-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      KBean Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kbean-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      KBean Fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#naming-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming KBeans
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Document KBeans
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invoke-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invoke KBeans
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invoke KBeans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      From the Command Line
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-intellij-jeka-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      From IntelliJ Jeka Plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-a-plain-ide-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      From a Plain IDE Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-kbean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default KBean
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kbean-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      KBean Initialization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invoke-kbean-from-another-kbean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invoke KBean from another KBean
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invoke KBean from another KBean">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-jkinject" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using @JkInject
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-load-and-find-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using #load and #find methods
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-a-kbean-from-another-kbean" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure a Kbean from another KBean.
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure a Kbean from another KBean.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-initialize-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-initialize KBeans
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-initialize-kbeans" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-initialize KBeans
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lifecycle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-initialisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post initialisation.
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-project-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Project setup
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>KBeans</h1>
+
+<p><em>KBean</em> is the central concept of the execution engine. <em>KBeans</em> are classes with declared executable methods.<br />
+There is only one <em>KBean</em> instance per <em>KBean</em> class in any given Jeka base directory.</p>
+<p><em>KBean</em> classes share the following characteristics:</p>
+<ul>
+<li>They extend the <code>KBean</code> class.</li>
+<li>They may declare <code>public void</code> methods without arguments. All these methods can be invoked from the command line.</li>
+<li>They may declare <code>public</code> fields <em>(also known as KBean properties)</em>. These field values can be injected from the command line.<br />
+  Additionally, they can have non-public fields annotated with <code>@JkDoc</code>.</li>
+<li>They must provide a no-argument constructor.</li>
+<li>They may override the <code>init()</code> method.</li>
+<li>They must be instantiated by the execution engine and not by user code.</li>
+</ul>
+<h2 id="simple-example">Simple Example<a class="headerlink" href="#simple-example" title="Permanent link">&para;</a></h2>
+<p>The following KBean exposes the <code>hello</code> and <code>bye</code> methods. The rendering can be configured 
+through <code>name</code> and <code>uppercase</code> attributes.</p>
+<p><div class="language-java highlight"><pre><span></span><code><span id="__span-0-1"><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;Displays greeting messages&quot;</span><span class="p">)</span>
+</span><span id="__span-0-2"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Greeting</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-3">
+</span><span id="__span-0-4"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Bob&quot;</span><span class="p">;</span>
+</span><span id="__span-0-5">
+</span><span id="__span-0-6"><span class="w">    </span><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;If true, the message is shown in upper case.&quot;</span><span class="p">)</span>
+</span><span id="__span-0-7"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">uppercase</span><span class="p">;</span>
+</span><span id="__span-0-8">
+</span><span id="__span-0-9"><span class="w">    </span><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;Prints a hello message.&quot;</span><span class="p">)</span>
+</span><span id="__span-0-10"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">hello</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-11"><span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">formatMessage</span><span class="p">(</span><span class="s">&quot;Hello &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="p">));</span>
+</span><span id="__span-0-12"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-13">
+</span><span id="__span-0-14"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">bye</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-15"><span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">formatMessage</span><span class="p">(</span><span class="s">&quot;Goodbye &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="p">));</span>
+</span><span id="__span-0-16"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-17">
+</span><span id="__span-0-18"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">formatMessage</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">message</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-19"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">uppercase</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">message</span><span class="p">.</span><span class="na">toUpperCase</span><span class="p">()</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">message</span><span class="p">;</span>
+</span><span id="__span-0-20"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-21"><span class="p">}</span>
+</span></code></pre></div>
+To execute a method from the command line, run the following example:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1">jeka<span class="w"> </span>hello<span class="w"> </span><span class="nv">name</span><span class="o">=</span>Alice<span class="w"> </span><span class="nv">uppercase</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+To show help for this KBean, run:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1">jeka<span class="w"> </span>greeting:<span class="w"> </span>--doc
+</span></code></pre></div>
+This will display:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1">Displays greeting messages.
+</span><span id="__span-3-2">
+</span><span id="__span-3-3">Fields
+</span><span id="__span-3-4">      name=&lt;String&gt;   No description.
+</span><span id="__span-3-5">                        Default: Bob
+</span><span id="__span-3-6">      uppercase       If true, the message is shown in upper case.
+</span><span id="__span-3-7">                        Default: false
+</span><span id="__span-3-8">Methods
+</span><span id="__span-3-9">  bye    No Description.
+</span><span id="__span-3-10">  hello  Prints a hello message.
+</span></code></pre></div></p>
+<h2 id="location">Location<a class="headerlink" href="#location" title="Permanent link">&para;</a></h2>
+<p>KBeans can exist as source code in the local project <em>jeka-src</em> folder (at the root or in any package), or 
+as a class in the JeKa classpath.</p>
+<p><strong>Multiple KBeans in jeka-src</strong></p>
+<p>Many KBeans may coexist in a single <em>jeka-src</em> directory. In this case, use KBean names to specify 
+which bean to invoke, for example:</p>
+<p><div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1">jeka<span class="w"> </span>greeting:<span class="w"> </span>hello<span class="w"> </span>bye<span class="w"> </span>other:<span class="w"> </span>foo
+</span></code></pre></div>
+In the above example, three methods from two distinct KBeans are invoked.</p>
+<p><strong>Classpath KBeans</strong></p>
+<p>JeKa bundles a collection of KBeans for building projects, creating Docker images, performing Git operations, and more.</p>
+<ul>
+<li><a href="../kbeans-project/">Project KBean</a>: The standard KBean for building JVM-based projects.</li>
+<li><a href="../kbeans-base/">Base KBean</a>: For building simpler JVM-based projects without a standard Maven/Gradle layout.</li>
+<li><a href="../kbeans-maven/">Maven KBean</a>: For publishing artifacts to Maven repositories.</li>
+<li><a href="../kbeans-docker/">Docker KBean</a>: For creating Docker images.</li>
+<li><a href="../kbeans-native/">Native KBean</a>: For compiling code to native executables.</li>
+<li><a href="../kbeans-app/">App KBean</a>: For installing/uninstalling applications locally. <em>(Admin KBean)</em></li>
+<li><a href="../kbeans-git/">Git KBean</a>: For performing Git operations.</li>
+<li><a href="../kbeans-intellij/">IntelliJ KBean</a>: For generating IntelliJ IDEA project files.</li>
+<li><a href="../kbeans-eclipse/">Eclipse KBean</a>: For generating Eclipse project files.</li>
+<li><a href="../kbeans-setup/">Setup KBean</a>: For global JeKa configuration. <em>(Admin KBean)</em></li>
+</ul>
+<p>For example, running:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1">jeka<span class="w"> </span>project:<span class="w"> </span>compile
+</span></code></pre></div>
+will compile the source code located in the <code>src/main/java</code> directory, using dependencies specified in the <code>jeka.project.deps</code> file.</p>
+<p>To display the documentation for the <code>project</code> KBean, run:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1">jeka<span class="w"> </span>project:<span class="w"> </span>--doc
+</span></code></pre></div></p>
+<p>To list all available KBeans in the classpath, execute:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1">jeka<span class="w"> </span>--doc
+</span></code></pre></div></p>
+<p><strong>Admin KBeans</strong></p>
+<p><em>Admin KBeans</em> are special KBeans designed to operate independently of the current project structure.
+They run in <em>admin mode</em>, which means:</p>
+<ul>
+<li>No compilation of the <em>jeka-src</em> directory is performed</li>
+<li>No dependency resolution is executed</li>
+<li>No child modules are traversed in multi-module projects</li>
+<li>They are agnostic to the current working directory</li>
+</ul>
+<p>JeKa automatically enters admin mode when only admin KBeans are specified on the command line.</p>
+<p>Currently, JeKa includes two admin KBeans:</p>
+<ul>
+<li><strong>app</strong>: For installing, updating, and managing applications globally</li>
+<li><strong>setup</strong>: For global JeKa configuration tasks</li>
+</ul>
+<p>Examples:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><span class="c1"># Install an application (runs in admin mode)</span>
+</span><span id="__span-8-2">jeka<span class="w"> </span>app:<span class="w"> </span>install<span class="w"> </span><span class="nv">repo</span><span class="o">=</span>https://github.com/djeang/kill8<span class="w"> </span><span class="nv">name</span><span class="o">=</span>kill8
+</span><span id="__span-8-3">
+</span><span id="__span-8-4"><span class="c1"># Configure global JeKa settings (runs in admin mode)</span>
+</span><span id="__span-8-5">jeka<span class="w"> </span>setup:<span class="w"> </span>editGlobalProperties
+</span><span id="__span-8-6">
+</span><span id="__span-8-7"><span class="c1"># Mixed usage is not allowed - this will fail</span>
+</span><span id="__span-8-8">jeka<span class="w"> </span>app:<span class="w"> </span>list<span class="w"> </span>project:<span class="w"> </span>pack
+</span></code></pre></div></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Admin KBeans cannot be mixed with regular KBeans in a single command. If you need to run both,
+execute them in separate commands.</p>
+</div>
+<p>KBeans can be added to the classpath like any third-party dependency.<br />
+This can be done by setting the <code>jeka.inject.classpath</code> property in the <code>jeka.properties</code> file as follows:
+<div class="language-properties highlight"><pre><span></span><code><span id="__span-9-1"><span class="na">jeka.inject.classpath</span><span class="o">=</span><span class="s">dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1</span>
+</span></code></pre></div></p>
+<p>KBeans can also be included directly in the source code using the <code>@JkDep</code> annotation:
+<div class="language-java highlight"><pre><span></span><code><span id="__span-10-1"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.JkDep</span><span class="p">;</span>
+</span><span id="__span-10-2">
+</span><span id="__span-10-3"><span class="nd">@JkDep</span><span class="p">(</span><span class="s">&quot;dev.jeka:springboot-plugin&quot;</span><span class="p">)</span>
+</span><span id="__span-10-4"><span class="nd">@JkDep</span><span class="p">(</span><span class="s">&quot;dev.jeka:openapi-plugin:0.11.8-1&quot;</span><span class="p">)</span>
+</span><span id="__span-10-5"><span class="kd">class</span> <span class="nc">Custom</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-10-6"><span class="p">}</span>
+</span></code></pre></div></p>
+<p>Additionally, KBeans can be dynamically added from the command line like this:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1">jeka<span class="w"> </span>--classpath<span class="o">=</span>dev.jeka:openapi-plugin:0.11.8-1<span class="w"> </span>openapi:--doc
+</span></code></pre></div></p>
+<p>Jeka discovers KBeans automatically by scanning the classpath.</p>
+<h2 id="kbean-methods">KBean Methods<a class="headerlink" href="#kbean-methods" title="Permanent link">&para;</a></h2>
+<p>A <em>KBean method</em> is a specific method defined in a KBean class, designed to be executable from the command line interface. For successful recognition as a <em>command</em>, the method must adhere to the following criteria:</p>
+<ul>
+<li>It must be designated as <code>public</code>.</li>
+<li>It must be an instance method, not static or abstract.</li>
+<li>It must not require any arguments upon invocation.</li>
+<li>It must not return any value, as indicated by a <code>void</code> return type.</li>
+</ul>
+<h2 id="kbean-fields">KBean Fields<a class="headerlink" href="#kbean-fields" title="Permanent link">&para;</a></h2>
+<p>A <em>KBean field</em> is a <code>public</code> instance field of a KBean class. Its value can be injected from the command line or from a property file.<br />
+Additionally, it can be a non-public field annotated with <code>@JkDoc</code>.</p>
+<p>Fields can be annotated with <code>@JkInjectProperty("my.prop.name")</code> to inject the value of a <em>property</em> into the field.</p>
+<p>We can also inject value using <code>jeka.properties</code> file.</p>
+<p>For more details on field accepted types, see the <code>dev.jeka.core.tool.FieldInjector#parse</code> <a href="https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java">method</a>.</p>
+<p><em>KBean fields</em> can also represent nested composite objects. See the example in the <code>ProjectKBean#pack</code> <a href="https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java">field</a>.</p>
+<h2 id="naming-kbeans">Naming KBeans<a class="headerlink" href="#naming-kbeans" title="Permanent link">&para;</a></h2>
+<p>To be referenced conveniently, <em>KBeans</em> can be identified by specific names. For any given <em>KBean</em> class, the accepted names are:</p>
+<ol>
+<li>Fully qualified class name.</li>
+<li>Uncapitalized simple class name (e.g., <code>myBuild</code> matches <code>org.example.MyBuild</code>).</li>
+<li>Uncapitalized simple class name without the <code>KBean</code> suffix (e.g., <code>project</code> matches <code>dev.jeka.core.tool.builtin.project.ProjectKBean</code>).</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Execute <code>jeka</code> at the root of a project to display the <em>KBeans</em> available on the <em>Jeka classpath</em>.</p>
+</div>
+<h2 id="document-kbeans">Document KBeans<a class="headerlink" href="#document-kbeans" title="Permanent link">&para;</a></h2>
+<p><em>KBean</em> classes, methods, and attributes can include the <code>@JkDoc</code> annotation to provide self-documentation.<br />
+The text from these annotations is displayed when running the command:
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-12-1">jeka<span class="w"> </span>&lt;kbeanName&gt;:<span class="w"> </span>--doc
+</span></code></pre></div>
+To display documentation for the default KBean, simply run:
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-13-1">jeka<span class="w"> </span>--doc
+</span></code></pre></div></p>
+<p>Use the <code>@JkDocUrl</code> annotation to indicate that a KBean has online documentation.
+This URL will be displayed in the output of the <code>--doc</code> command.</p>
+<p>To document your KBean, you can use the following command:
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-14-1">jeka<span class="w"> </span>&lt;kbeanName&gt;:<span class="w"> </span>--doc-md
+</span></code></pre></div>
+This command generates a markdown-formatted document of the specified KBean.
+You can copy and paste the output directly into your online documentation.</p>
+<h2 id="invoke-kbeans">Invoke KBeans<a class="headerlink" href="#invoke-kbeans" title="Permanent link">&para;</a></h2>
+<h3 id="from-the-command-line">From the Command Line<a class="headerlink" href="#from-the-command-line" title="Permanent link">&para;</a></h3>
+<p><em>KBean</em> methods can be executed directly from the command line using the syntax:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-15-1">jeka<span class="w"> </span>&lt;kbeanName&gt;:<span class="w"> </span><span class="o">[</span>methodName...<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="nv">attributeName</span><span class="o">=</span>xxx...<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Example:</strong> 
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-16-1">jeka<span class="w"> </span>project:<span class="w"> </span>info<span class="w"> </span>pack<span class="w"> </span>tests.fork<span class="o">=</span><span class="nb">false</span><span class="w"> </span>pack.jarType<span class="o">=</span>FAT<span class="w"> </span>sonarqube:<span class="w"> </span>run
+</span></code></pre></div></p>
+<p>You can call multiple methods and set multiple fields in a single command.</p>
+<h3 id="from-intellij-jeka-plugin">From IntelliJ Jeka Plugin<a class="headerlink" href="#from-intellij-jeka-plugin" title="Permanent link">&para;</a></h3>
+<p>The <a href="https://plugins.jetbrains.com/plugin/24505-jeka">IntelliJ Jeka Plugin</a> enables invoking KBean methods directly from the IDE, 
+either from the code editor or the project explorer tool window.</p>
+<h3 id="from-a-plain-ide-setup">From a Plain IDE Setup<a class="headerlink" href="#from-a-plain-ide-setup" title="Permanent link">&para;</a></h3>
+<p><em>KBean</em> methods can also be launched or debugged in an IDE by invoking the <code>dev.jeka.core.tool.Main</code> method and passing the corresponding command-line arguments.</p>
+<p><strong>Example:</strong><br />
+Invoking the <code>dev.jeka.core.tool.Main</code> method with arguments <code>project:</code> and <code>compile</code> will instantiate the <code>ProjectKBean</code> class and invoke its <code>compile</code> method.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Ensure that the <em>main</em> method is launched with the <strong>module directory</strong> set as the <strong>working directory</strong>.<br />
+In IntelliJ, the default working directory is the <em>project directory</em>, which may cause issues.</p>
+<p>To update IntelliJ defaults:<br />
+- Navigate to <strong>Run | Edit Configurations... | Application | Working Directory</strong><br />
+- Set the value to <code>$MODULE_DIR$</code>.</p>
+</div>
+<h2 id="default-kbean">Default KBean<a class="headerlink" href="#default-kbean" title="Permanent link">&para;</a></h2>
+<p>When invoking Kbean methods or fields, we generally specify to which KBean this applies:</p>
+<p>Examples:
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-17-1">jeka<span class="w"> </span>project:<span class="w"> </span>pack
+</span><span id="__span-17-2">jeka<span class="w"> </span>myBean:<span class="w"> </span>foo<span class="w"> </span><span class="nv">bar</span><span class="o">=</span><span class="m">1</span>
+</span></code></pre></div></p>
+<p>If the target KBean is the <em>default KBean</em>, then this we don't need to mention the KBean name.</p>
+<p>By default, the <em>default KBean</em> is the first KBean found in <em>jeka-src</em> dir.  For instance, if you have a single KBean 
+<code>MyBean</code> in <em>jeka-src</em>, then you can invoke directly the methods and fields as following:
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-18-1">jeka<span class="w"> </span>foo<span class="w"> </span><span class="nv">bar</span><span class="o">=</span><span class="m">1</span>
+</span></code></pre></div>
+If you need to invoke methods of other KBean, in between, you can use the <code>:</code> symbol as:
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-19-1">jeka<span class="w"> </span>project:<span class="w"> </span>pack<span class="w"> </span>:<span class="w"> </span>foo<span class="w"> </span><span class="nv">bar</span><span class="o">=</span><span class="m">1</span>
+</span></code></pre></div>
+The above example invokes the <code>ProjectKBean#pack</code> method, then the  <code>MyBean#foo</code> method.</p>
+<p>You can select a specific default KBean, by setting the following property in <em>jeka-src</em> or as command-line argument:
+<div class="language-properties highlight"><pre><span></span><code><span id="__span-20-1"><span class="na">jeka.kbean.default</span><span class="o">=</span><span class="s">project</span>
+</span></code></pre></div></p>
+<p>You can also mention the default KBean using <code>--kbean=</code> option.</p>
+<p>The default KBean always participate in the runbase initialisation.</p>
+<p>This is quite frequent for project builds to use such setting as it shortens command line and prone usage of 
+<code>ProjectKBean</code> standard methods.</p>
+<h2 id="kbean-initialization">KBean Initialization<a class="headerlink" href="#kbean-initialization" title="Permanent link">&para;</a></h2>
+<p>During startup, JeKa initializes these KBeans:</p>
+<ul>
+<li>The default KBean</li>
+<li>KBeans specified with <code>@myKbean=on</code> in <em>jeka.properties</em></li>
+</ul>
+<p>After identifying these initial KBeans, JeKa performs a discovery phase to find additional KBeans that need initialization:</p>
+<ul>
+<li>KBeans referenced as parameters in methods annotated with <code>@JkPostInit(required = true)</code></li>
+<li>KBeans returned by static methods annotated with <code>@JkRequire</code></li>
+</ul>
+<p>This discovery mechanism allows dynamic addition of KBeans to the initialization list.</p>
+<p><strong>Example:</strong></p>
+<p>If you have a <code>Custom</code> KBean located in the <em>jeka-src</em> directory, its class will be inspected under two conditions:</p>
+<ol>
+<li>It is set as the default KBean</li>
+<li>It is enabled with <code>@custom=on</code> in the <em>jeka.properties</em> file</li>
+</ol>
+<p>Then it will be inspected to discover other KBeans to initialize.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-21-1"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.JkPostInit</span><span class="p">;</span>
+</span><span id="__span-21-2"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.tooling.maven.MavenKBean</span><span class="p">;</span>
+</span><span id="__span-21-3">
+</span><span id="__span-21-4"><span class="kd">class</span> <span class="nc">Custom</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-5">
+</span><span id="__span-21-6"><span class="w">    </span><span class="nd">@JkRequire</span>
+</span><span id="__span-21-7"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">require</span><span class="p">(</span><span class="n">JkRunbase</span><span class="w"> </span><span class="n">runbase</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-8"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runbase</span><span class="p">.</span><span class="na">getBuildableClass</span><span class="p">();</span>
+</span><span id="__span-21-9"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-21-10">
+</span><span id="__span-21-11"><span class="w">    </span><span class="nd">@JkPostInit</span><span class="p">(</span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-21-12"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postInit</span><span class="p">(</span><span class="n">MavenKBean</span><span class="w"> </span><span class="n">mavenKBean</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-13"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-21-14"><span class="p">}</span>
+</span></code></pre></div>
+<p>In this example, the <code>MavenKBean</code> will be included in the initialized KBeans.</p>
+<p>The <code>require(JkRunbase)</code> method will be invoked to know which KBean should be initialized too (either <a href="../kbeans-project/"><code>ProjectKBean</code></a> nor <a href="../kbeans-base/"><code>BaseKBean</code></a>.)</p>
+<h2 id="invoke-kbean-from-another-kbean">Invoke KBean from another KBean<a class="headerlink" href="#invoke-kbean-from-another-kbean" title="Permanent link">&para;</a></h2>
+<h3 id="using-jkinject">Using @JkInject<a class="headerlink" href="#using-jkinject" title="Permanent link">&para;</a></h3>
+<p><div class="language-Java highlight"><pre><span></span><code><span id="__span-22-1"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.project.ProjectKBean</span><span class="p">;</span>
+</span><span id="__span-22-2"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.tooling.maven.MavenKBean</span><span class="p">;</span>
+</span><span id="__span-22-3"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.JkInject</span><span class="p">;</span>
+</span><span id="__span-22-4">
+</span><span id="__span-22-5"><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;A simple example to illustrate KBean concept.&quot;</span><span class="p">)</span>
+</span><span id="__span-22-6"><span class="kd">class</span> <span class="nc">Build</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-22-7">
+</span><span id="__span-22-8"><span class="w">    </span><span class="nd">@JkInject</span>
+</span><span id="__span-22-9"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">ProjectKBean</span><span class="w"> </span><span class="n">projectKBean</span><span class="p">;</span>
+</span><span id="__span-22-10">
+</span><span id="__span-22-11"><span class="w">    </span><span class="nd">@JkInject</span>
+</span><span id="__span-22-12"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">MavenKBean</span><span class="w"> </span><span class="n">mavenKBean</span><span class="p">;</span>
+</span><span id="__span-22-13">
+</span><span id="__span-22-14"><span class="w">    </span><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;Clean, compile, test, create jar files, and publish them.&quot;</span><span class="p">)</span>
+</span><span id="__span-22-15"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">packPublish</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-22-16"><span class="w">        </span><span class="n">projectKBean</span><span class="p">.</span><span class="na">clean</span><span class="p">();</span>
+</span><span id="__span-22-17"><span class="w">        </span><span class="n">projectKBean</span><span class="p">.</span><span class="na">pack</span><span class="p">();</span>
+</span><span id="__span-22-18"><span class="w">        </span><span class="n">mavenKBean</span><span class="p">.</span><span class="na">publishLocal</span><span class="p">();</span>
+</span><span id="__span-22-19"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-22-20">
+</span><span id="__span-22-21"><span class="p">}</span>
+</span></code></pre></div>
+Both <code>ProjectKBean</code> and <code>MavenKBean</code> are created and injected into the <code>Build</code> KBean during initialization.</p>
+<h3 id="using-load-and-find-methods">Using #load and #find methods<a class="headerlink" href="#using-load-and-find-methods" title="Permanent link">&para;</a></h3>
+<p>As we saw earlier, you can dynamically retrieve a <code>KBean</code> using the <code>KBean#load(Class)</code> method.<br />
+This method forces the initialization of the <code>KBean</code> if it is not already present.<br />
+It is useful when you need a specific <code>KBean</code> only within certain methods.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-23-1"><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;Compiles application to native executable&quot;</span><span class="p">)</span>
+</span><span id="__span-23-2"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createNativeExec</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-23-3"><span class="w">    </span><span class="n">load</span><span class="p">(</span><span class="n">NativeKBean</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">compile</span><span class="p">();</span>
+</span><span id="__span-23-4"><span class="p">}</span>
+</span></code></pre></div>
+<p>On the other hand, the <code>KBean#find(Class)</code> method returns an <code>Optional&lt;? extends KBean&gt;</code>,<br />
+which is empty if the specified <code>KBean</code> is not initialized.<br />
+This is helpful for performing conditional tasks based on the presence of a <code>KBean</code>.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-24-1"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.tooling.docker.DockerKBean</span><span class="p">;</span>
+</span><span id="__span-24-2">
+</span><span id="__span-24-3"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-4"><span class="w">    </span><span class="n">find</span><span class="p">(</span><span class="n">DockerKBean</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">dockerKBean</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-5"><span class="w">        </span><span class="c1">// Do something</span>
+</span><span id="__span-24-6"><span class="w">    </span><span class="p">});</span>
+</span><span id="__span-24-7"><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="configure-a-kbean-from-another-kbean">Configure a Kbean from another KBean.<a class="headerlink" href="#configure-a-kbean-from-another-kbean" title="Permanent link">&para;</a></h2>
+<p>Whether you want to create a JeKa plugin or simply configure a build, the approach is the same: 
+create a <code>KBean</code> and configure an existing one.</p>
+<p>For example, to configure a build, you can create a <code>Build</code> class as follows:</p>
+<p><div class="language-java highlight"><pre><span></span><code><span id="__span-25-1"><span class="kd">class</span> <span class="nc">Build</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-25-2">
+</span><span id="__span-25-3"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">skipIT</span><span class="p">;</span>
+</span><span id="__span-25-4">
+</span><span id="__span-25-5"><span class="w">    </span><span class="nd">@JkPreInit</span>
+</span><span id="__span-25-6"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">preInit</span><span class="p">(</span><span class="n">ProjectKBean</span><span class="w"> </span><span class="n">projectKBean</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-25-7"><span class="w">        </span><span class="n">projectKBean</span><span class="p">.</span><span class="na">tests</span><span class="p">.</span><span class="na">progress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkTestProcessor</span><span class="p">.</span><span class="na">JkProgressStyle</span><span class="p">.</span><span class="na">PLAIN</span><span class="p">;</span>
+</span><span id="__span-25-8"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-25-9">
+</span><span id="__span-25-10"><span class="w">    </span><span class="nd">@JkPostInit</span><span class="p">(</span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-25-11"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postInit</span><span class="p">(</span><span class="n">ProjectKBean</span><span class="w"> </span><span class="n">projectKBean</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-25-12"><span class="w">        </span><span class="n">JkProject</span><span class="w"> </span><span class="n">project</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">projectKBean</span><span class="p">.</span><span class="na">project</span><span class="p">;</span>
+</span><span id="__span-25-13"><span class="w">        </span><span class="n">project</span><span class="p">.</span><span class="na">flatFacade</span><span class="p">.</span><span class="na">dependencies</span><span class="p">.</span><span class="na">compile</span>
+</span><span id="__span-25-14"><span class="w">                </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava:33.3.1-jre&quot;</span><span class="p">)</span>
+</span><span id="__span-25-15"><span class="w">                </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;org.openjfx:javafx-base:21&quot;</span><span class="p">);</span>
+</span><span id="__span-25-16"><span class="w">        </span><span class="n">project</span><span class="p">.</span><span class="na">flatFacade</span><span class="p">.</span><span class="na">dependencies</span><span class="p">.</span><span class="na">test</span>
+</span><span id="__span-25-17"><span class="w">                </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;org.junit.jupiter:junit-jupiter:5.8.1&quot;</span><span class="p">);</span>
+</span><span id="__span-25-18"><span class="w">        </span><span class="n">project</span><span class="p">.</span><span class="na">flatFacade</span>
+</span><span id="__span-25-19"><span class="w">                </span><span class="p">.</span><span class="na">addTestExcludeFilterSuffixedBy</span><span class="p">(</span><span class="s">&quot;IT&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">skipIT</span><span class="p">);</span>
+</span><span id="__span-25-20"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-25-21">
+</span><span id="__span-25-22"><span class="w">    </span><span class="nd">@JkPostInit</span>
+</span><span id="__span-25-23"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postInit</span><span class="p">(</span><span class="n">MavenKBean</span><span class="w"> </span><span class="n">mavenKBean</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-25-24">
+</span><span id="__span-25-25"><span class="w">        </span><span class="c1">// Customize the published pom dependencies</span>
+</span><span id="__span-25-26"><span class="w">        </span><span class="n">mavenKBean</span><span class="p">.</span><span class="na">getMavenPublication</span><span class="p">().</span><span class="na">customizeDependencies</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-25-27"><span class="w">                </span><span class="p">.</span><span class="na">withTransitivity</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">JkTransitivity</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+</span><span id="__span-25-28"><span class="w">                </span><span class="p">.</span><span class="na">minus</span><span class="p">(</span><span class="s">&quot;org.openjfx:javafx&quot;</span><span class="p">)</span>
+</span><span id="__span-25-29"><span class="w">        </span><span class="p">);</span>
+</span><span id="__span-25-30"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-25-31">
+</span><span id="__span-25-32"><span class="p">}</span>
+</span></code></pre></div>
+This KBean defines a <code>Build</code> class that customizes the <code>project</code> and <code>maven</code> KBeans. </p>
+<h3 id="pre-initialize-kbeans">Pre-initialize KBeans<a class="headerlink" href="#pre-initialize-kbeans" title="Permanent link">&para;</a></h3>
+<p>The <code>preInit</code> methods are invoked before the KBean is instantiated; therefore, they must be declared as <code>static</code>.<br />
+These methods are applied to the target KBean immediately after it is instantiated but before it is initialized.<br />
+This means they are executed prior to the injection of properties or command-line values.</p>
+<p>The sole purpose of <code>preInit</code> methods is to provide default values, which can later be overridden by properties or command-line arguments.<br />
+They should not perform further configuration, as the target KBean has not yet been fully initialized when these methods are invoked.</p>
+<h3 id="post-initialize-kbeans">Post-initialize KBeans<a class="headerlink" href="#post-initialize-kbeans" title="Permanent link">&para;</a></h3>
+<p>The <code>postInit</code> methods are invoked only if their respective <code>KBean</code> is fully initialized. 
+This occurs after its properties and command-line values have been injected, and its <code>init()</code> method has been executed.</p>
+<p>The <code>required = true</code> attribute, means that the KBean project must be instantiated by JeKa, if not already setup.</p>
+<p>For example, when executing <code>jeka project: pack</code>, the <code>ProjectKBean</code> will be initialized with the settings provided by 
+command-line arguments and <code>@project...=</code> properties defined in the <em>jeka.properties</em> file. 
+The instance will then be passed to the <code>postInit</code> method before invoking the <code>pack</code> method.</p>
+<p>When executing <code>jeka maven: publish</code>, the <code>project</code> KBean will be implicitly loaded and configured, 
+followed by the same process for the <code>maven</code> KBean, before invoking the <code>publish</code> method.</p>
+<h2 id="lifecycle">Lifecycle<a class="headerlink" href="#lifecycle" title="Permanent link">&para;</a></h2>
+<p>Before Kbean methods are executed, Kbeans are configured as described in the detailed sequence:</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant RB as Run Base
+    participant IN as Init class resolver
+    participant IT as Instantiater
+    participant KB as KBean
+    participant PR as Pre-initializer
+    participant PO as Post-initializer
+    participant RK as Registered KBeans
+
+    RB-&gt;&gt;IN:  Discover classes to init
+    RB-&gt;&gt;PR:  Register pre-init methods
+    RB-&gt;&gt;IT:  Instantiate classes to init
+    IT-&gt;&gt;KB:  New
+    IT-&gt;&gt;RK:  Register Kbean instance
+    IT-&gt;&gt;PR:  Pre-initialise KBean
+    IT-&gt;&gt;KB:  Inject fields annotated with @JkInject
+    IT-&gt;&gt;KB:  Inject values from properties
+    IT-&gt;&gt;KB:  Inject values from Command-line
+    IT-&gt;&gt;KB:  Init()
+    IT-&gt;&gt;PO:  Register KBean post-init methods
+    RB-&gt;&gt;PO:  Post-initialize all initialized KBeans</code></pre>
+<h3 id="post-initialisation">Post initialisation.<a class="headerlink" href="#post-initialisation" title="Permanent link">&para;</a></h3>
+<p>One all the KBean has been initialized, bean already initialized or extra one can be invoked from the KBean methods.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant AK as A KBean
+    participant RB as Run Base
+    participant IT as Instantiater
+    participant KB as KBean
+    participant PR as Pre-initializer
+    participant PO as Post-initializer
+    participant RK as Registered KBeans
+
+    AK-&gt;&gt;RB:  Load a KBean 
+    RB-&gt;&gt;RK:  Find if KBean is already instantiated
+    RB--&gt;&gt;AK:  Returns Kbean instance if found
+    RB-&gt;&gt;IT:  Initialise KBean
+    IT-&gt;&gt;RK:  Register KBean
+    RB-&gt;&gt;PO:  Register KBean post-init methods
+    RB-&gt;&gt;PO:  Post-initialize all initialized KBeans
+    RB--&gt;&gt;AK: done</code></pre>
+<pre class="mermaid"><code>classDiagram
+    class JkRunBase {
+        +Path baseDir
+        +KBean initKBean
+        +KBean defaultKBean
+        +JkProperties properties
+        +List dependencies
+
+        +KBean load()
+        +KBean find()
+        +List getKBeans()
+
+    }
+
+    class KBean {
+        +JkRunbase runbase
+    }
+
+    JkRunBase "1" &lt;--&gt; "0..*" KBean
+    JkRunBase --&gt; "0..*" BaseDir: Imported Base Dirs (multi-modules)
+
+    note for JkRunBase "There is only one JkRunBase per base folder.&lt;br/&gt;The base folder is the project root.&lt;br/&gt;In multi-module projects, usually one JkRunBase exists per module."
+    note for BaseDir "This class doesn’t exist. It represents the base directory &lt;br/&gt;of another runbase in a multi-module project."
+</code></pre>
+<h2 id="multi-project-setup">Multi-Project setup<a class="headerlink" href="#multi-project-setup" title="Permanent link">&para;</a></h2>
+<p>In multi-project scenarios, it is common for a <em>KBean</em> in one project to access a <em>KBean</em> instance from another project. This can be achieved in a statically typed manner:</p>
+<ol>
+<li>In the <strong>master</strong> <em>KBean</em>, declare a field of type <code>KBean</code> (e.g., <code>KBean importedBuild;</code>). This field does not need to be public.</li>
+<li>Annotate the field, by specifying the relative path of the imported project (e.g., <code>@JkInjectRunbase("../anotherModule")</code>).</li>
+<li>Run the command <code>jeka intellij: iml</code> or <code>jeka eclipse: files</code> to refresh project metadata.</li>
+<li>Change the declared field type from <code>KBean</code> to the concrete type of the imported <em>KBean</em>.</li>
+<li>The master <em>KBean</em> can now access the imported <em>KBean</em> in a type-safe manner.</li>
+<li>For an example, see <a href="https://github.com/jeka-dev/jeka/blob/master/dev.jeka.master/jeka-src/MasterBuild.java">this implementation</a>.</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Ensure that the imported <em>KBean</em> uses <code>KBean#getBaseDir</code> for handling file paths. This practice ensures safe execution from any working directory.</p>
+</div>
+<p>For multi-module projects, use <code>JkInject</code> to access sub-module KBeans.</p>
+<p><div class="language-java highlight"><pre><span></span><code><span id="__span-26-1"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.project.ProjectKBean</span><span class="p">;</span>
+</span><span id="__span-26-2"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.tooling.maven.MavenKBean</span><span class="p">;</span>
+</span><span id="__span-26-3"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.JkInject</span><span class="p">;</span>
+</span><span id="__span-26-4">
+</span><span id="__span-26-5"><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+</span><span id="__span-26-6">
+</span><span id="__span-26-7"><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;A simple example to illustrate KBean concept.&quot;</span><span class="p">)</span>
+</span><span id="__span-26-8"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MasterBuild</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-26-9">
+</span><span id="__span-26-10"><span class="w">    </span><span class="nd">@JkInject</span><span class="p">(</span><span class="s">&quot;./foo&quot;</span><span class="p">)</span>
+</span><span id="__span-26-11"><span class="w">    </span><span class="n">ProjectKBean</span><span class="w"> </span><span class="n">fooProject</span><span class="p">;</span>
+</span><span id="__span-26-12">
+</span><span id="__span-26-13"><span class="w">    </span><span class="nd">@JkInject</span><span class="p">(</span><span class="s">&quot;./bar&quot;</span><span class="p">)</span>
+</span><span id="__span-26-14"><span class="w">    </span><span class="n">ProjectKBean</span><span class="w"> </span><span class="n">barProject</span><span class="p">;</span>
+</span><span id="__span-26-15">
+</span><span id="__span-26-16"><span class="w">    </span><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;For all sub-modules: clean, compile, test, create jar files, and publish them.&quot;</span><span class="p">)</span>
+</span><span id="__span-26-17"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">buildAll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-26-18"><span class="w">        </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">fooProject</span><span class="p">,</span><span class="w"> </span><span class="n">barProject</span><span class="p">).</span><span class="na">forEach</span><span class="p">(</span><span class="n">projectKbean</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-26-19"><span class="w">            </span><span class="n">projectKbean</span><span class="p">.</span><span class="na">clean</span><span class="p">();</span>
+</span><span id="__span-26-20"><span class="w">            </span><span class="n">projectKbean</span><span class="p">.</span><span class="na">pack</span><span class="p">();</span>
+</span><span id="__span-26-21"><span class="w">            </span><span class="n">MavenKBean</span><span class="w"> </span><span class="n">mavenKBean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">projectKbean</span><span class="p">.</span><span class="na">load</span><span class="p">(</span><span class="n">MavenKBean</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+</span><span id="__span-26-22"><span class="w">            </span><span class="n">mavenKBean</span><span class="p">.</span><span class="na">publishLocal</span><span class="p">();</span>
+</span><span id="__span-26-23"><span class="w">        </span><span class="p">});</span>
+</span><span id="__span-26-24"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-26-25"><span class="p">}</span>
+</span></code></pre></div>
+In this example, JeKa initializes KBeans from the sub-modules <em>./foo</em> and <em>./bar</em>, then injects them into the <code>MasterBuild</code> KBean.</p>
+<p>We can create or load a KBean on the fly using the <code>KBean#load</code> method.
+This means we only need to declare one KBean per sub-module.</p>
+<p>Another option is to inject <code>JkRunbase</code> and make all calls through it:</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-27-1"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.JkRunbase</span><span class="p">;</span>
+</span><span id="__span-27-2"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.project.ProjectKBean</span><span class="p">;</span>
+</span><span id="__span-27-3"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.builtins.tooling.maven.MavenKBean</span><span class="p">;</span>
+</span><span id="__span-27-4"><span class="kn">import</span><span class="w"> </span><span class="nn">dev.jeka.core.tool.JkInject</span><span class="p">;</span>
+</span><span id="__span-27-5">
+</span><span id="__span-27-6"><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+</span><span id="__span-27-7">
+</span><span id="__span-27-8"><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;A simple example to illustrate KBean concept.&quot;</span><span class="p">)</span>
+</span><span id="__span-27-9"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MasterBuild</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">KBean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-27-10">
+</span><span id="__span-27-11"><span class="w">    </span><span class="nd">@JkInject</span><span class="p">(</span><span class="s">&quot;./foo&quot;</span><span class="p">)</span>
+</span><span id="__span-27-12"><span class="w">    </span><span class="n">JkRunbase</span><span class="w"> </span><span class="n">foo</span><span class="p">;</span>
+</span><span id="__span-27-13">
+</span><span id="__span-27-14"><span class="w">    </span><span class="nd">@JkInject</span><span class="p">(</span><span class="s">&quot;./bar&quot;</span><span class="p">)</span>
+</span><span id="__span-27-15"><span class="w">    </span><span class="n">JkRunbase</span><span class="w"> </span><span class="n">bar</span><span class="p">;</span>
+</span><span id="__span-27-16">
+</span><span id="__span-27-17"><span class="w">    </span><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;For all sun-modules: clean, compile, test, create jar files, and publish them.&quot;</span><span class="p">)</span>
+</span><span id="__span-27-18"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">buildAll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-27-19"><span class="w">        </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span><span class="p">).</span><span class="na">forEach</span><span class="p">(</span><span class="n">runbase</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-27-20"><span class="w">            </span><span class="n">ProjectKBean</span><span class="w"> </span><span class="n">projectKBean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">runbase</span><span class="p">.</span><span class="na">load</span><span class="p">(</span><span class="n">ProjectKBean</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+</span><span id="__span-27-21"><span class="w">            </span><span class="n">projectKbean</span><span class="p">.</span><span class="na">clean</span><span class="p">();</span>
+</span><span id="__span-27-22"><span class="w">            </span><span class="n">projectKbean</span><span class="p">.</span><span class="na">pack</span><span class="p">();</span>
+</span><span id="__span-27-23"><span class="w">            </span><span class="n">MavenKBean</span><span class="w"> </span><span class="n">mavenKBean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">runbase</span><span class="p">.</span><span class="na">load</span><span class="p">(</span><span class="n">MavenKBean</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+</span><span id="__span-27-24"><span class="w">            </span><span class="n">mavenKBean</span><span class="p">.</span><span class="na">publishLocal</span><span class="p">();</span>
+</span><span id="__span-27-25"><span class="w">        </span><span class="p">});</span>
+</span><span id="__span-27-26"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-27-27"><span class="p">}</span>
+</span></code></pre></div>
+<p>For larger sub-project structures, use <code>KBean#getImportedKBeans()</code> to list all sub-modules, either recursively or not.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-28-1"><span class="nd">@JkDoc</span><span class="p">(</span><span class="s">&quot;For all sub-modules: compile, test, create jar files, and publish them.&quot;</span><span class="p">)</span>
+</span><span id="__span-28-2"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">buildAll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-28-3"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="na">getImportedKBeans</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">ProjectKBean</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">).</span><span class="na">forEach</span><span class="p">(</span><span class="n">ProjectKBean</span><span class="p">::</span><span class="n">pack</span><span class="p">);</span>
+</span><span id="__span-28-4"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="na">getImportedKBeans</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">MavenKBean</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">).</span><span class="na">forEach</span><span class="p">(</span><span class="n">MavenKBean</span><span class="p">::</span><span class="n">publish</span><span class="p">);</span>
+</span><span id="__span-28-5"><span class="p">}</span>
+</span></code></pre></div>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.1e8ae164.min.js"></script>
+      
+    
+  </body>
+</html>

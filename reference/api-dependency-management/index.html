@@ -1,0 +1,1953 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../api-git/">
+      
+      
+        <link rel="next" href="../api-project/">
+      
+      
+      <link rel="icon" href="../../images/logo-plain-gradient.svg">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
+    
+    
+      
+        <title>Dependency Management - JeKa Build Tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bcfcd587.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CFire+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Fire Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function n(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],n("js",new Date),n("config","UA-103449580-2"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){this.value&&n("event","search",{search_term:this.value})}),document$.subscribe(function(){var a=document.forms.feedback;if(void 0!==a)for(var e of a.querySelectorAll("[type=submit]"))e.addEventListener("click",function(e){e.preventDefault();var t=document.location.pathname,e=this.getAttribute("data-md-value");n("event","feedback",{page:t,data:e}),a.firstElementChild.disabled=!0;e=a.querySelector(".md-feedback__note [data-md-value='"+e+"']");e&&(e.hidden=!1)}),a.hidden=!1}),location$.subscribe(function(e){n("config","UA-103449580-2",{page_path:e.pathname})})});var e=document.createElement("script");e.async=!0,e.src="https://www.googletagmanager.com/gtag/js?id=UA-103449580-2",document.getElementById("__analytics").insertAdjacentElement("afterEnd",e)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#types-of-dependency" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="JeKa Build Tool" class="md-header__button md-logo" aria-label="JeKa Build Tool" data-md-component="logo">
+      
+  <img src="../../images/logo-plain-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JeKa Build Tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dependency Management
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jeka-dev/jeka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JeKa Build Tool" class="md-nav__button md-logo" aria-label="JeKa Build Tool" data-md-component="logo">
+      
+  <img src="../../images/logo-plain-white.svg" alt="logo">
+
+    </a>
+    JeKa Build Tool
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jeka-dev/jeka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../comparison/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    For Maven/Gradle Users
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/build-base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Build Base-Mode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/build-projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Build Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/source-runnable-apps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Source-Runnable Applications
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    KBeans
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Bundled KBeans
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Bundled KBeans
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_1" id="__nav_5_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Core
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_2" id="__nav_5_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    DevOps
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            DevOps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    git
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    native
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-bundle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    bundle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_3" id="__nav_5_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    IDE Support
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            IDE Support
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-intellij/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    intellij
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-eclipse/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    eclipse
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2_4" id="__nav_5_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Admin & Management
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Admin & Management
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-app/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kbeans-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../properties/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Properties
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-modules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multi-Module
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Build Library
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_5">
+            <span class="md-nav__icon md-icon"></span>
+            Build Library
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-intro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Native
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Dependency Management
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Dependency Management
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Dependency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of Dependency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coordinate-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coordinate dependency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Coordinate dependency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-notation" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Notation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bom" class="md-nav__link">
+    <span class="md-ellipsis">
+      BOM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transitivity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-system-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      File System Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#computed-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Computed Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependency Set
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transitivity_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transitivity
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolve-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolve Dependencies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publication
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Publication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#publish-on-a-maven-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publish on a Maven repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publish-to-a-ivy-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publish to a Ivy repository
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Classes
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cheat-sheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cheat Sheet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../external-resources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    External Resources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../javadoc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Javadoc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../under-the-hood/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Under The Hood
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Dependency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of Dependency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coordinate-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coordinate dependency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Coordinate dependency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-notation" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Notation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bom" class="md-nav__link">
+    <span class="md-ellipsis">
+      BOM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transitivity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-system-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      File System Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#computed-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Computed Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependency Set
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transitivity_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transitivity
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolve-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolve Dependencies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publication
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Publication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#publish-on-a-maven-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publish on a Maven repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publish-to-a-ivy-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publish to a Ivy repository
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Classes
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Dependency Management</h1>
+
+<p>For Jeka, a <em>dependency</em> is something that can be resolved to a set of files by a <code>JkDependencyResolver</code>.
+Generally a dependency resolves to 1 file (or folder) but it can also be 0 or many.</p>
+<p>Compared to mainstream build tools, Jeka offers a simpler and more flexible model to deal with multiple dependency configurations required to build a project.</p>
+<h2 id="types-of-dependency">Types of Dependency<a class="headerlink" href="#types-of-dependency" title="Permanent link">&para;</a></h2>
+<p>A dependency is always an instance of <code>JkDependency</code>.</p>
+<p>Jeka distinguishes between 3 main types of dependency :</p>
+<ul>
+<li><strong>Arbitrary files</strong> located on the file system (represented by <code>JkFileSystemDependency</code> class). These files are assumed to be present on the file system while the build is running.</li>
+<li><strong>Files produced by a computation</strong> (represented by <code>JkComputedDependency</code> class). These files may be present on file system, or not. If they are not present, the computation is run in order to produce the missing files. Usually the computation stands for the build of an external project.</li>
+<li><strong>Coordinate pointing to a remote artifact</strong> (represented by <code>JkCoordinateDependency</code>) hosted in a binary repository (Ivy or Maven for instance) : Jeka can consume and transitively resolve any artifact located in a repository as you would do with Maven, Ivy, or Gradle.</li>
+</ul>
+<p>Lastly, Jeka uses <em>Ivy 2.5.1</em> under the hood.
+Jeka jar embeds Ivy and executes it in a dedicated classloader to be hidden for client code.</p>
+<p><strong>Dependency type hierarchy:</strong>
+<pre class="mermaid"><code>graph TD
+
+    JkCoordinateDependency --&gt; JkDependency
+    JkFileDependency --&gt; JkDependency
+
+    JkComputedDependency --&gt; JkFileDependency
+    JkFileSystemDependency --&gt; JkFileDependency
+    JkLocalProjectDependency --&gt; JkFileDependency</code></pre></p>
+<h3 id="coordinate-dependency">Coordinate dependency<a class="headerlink" href="#coordinate-dependency" title="Permanent link">&para;</a></h3>
+<p>This type of dependency is represented by a <code>JkCoordinateDependency</code> class.
+It stands for a Maven/Ivy dependency expressed with coordinates (e.g. <em>group:module:version</em>).</p>
+<p>This is for declaring a dependency on a module hosted in the <em>Maven</em> or <em>Ivy</em> repositories. 
+Basically you instantiate a <code>JkCoordinateDependency</code> from its group, name, and version.</p>
+<h4 id="string-notation">String Notation<a class="headerlink" href="#string-notation" title="Permanent link">&para;</a></h4>
+<p>The string representation follows the <a href="https://docs.gradle.org/current/userguide/dependency_versions.html">Gradle short notation</a>, 
+and accept the similar <a href="https://ant.apache.org/ivy/history/2.1.0/settings/version-matchers.html">Ivy versioning</a>.</p>
+<p>Additionally, the Jeka notation allow to express extensions, classifiers and BOMs.
+Many string formats are accepted to specify a module coordinate :</p>
+<ul>
+<li><em>group</em>:<em>name</em></li>
+<li><em>group</em>:<em>name</em>:<em>version</em></li>
+<li><em>group</em>:<em>name</em>:<em>classifier</em>:<em>version</em></li>
+<li><em>group</em>:<em>name</em>:<em>classifier</em>:<em>extension</em>:<em>version</em></li>
+</ul>
+<p>Examples:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1">org.slf4j:slf4j-api:2.0.16                       &lt;-- Declares an exact version
+</span><span id="__span-0-2">org.slf4j:slf4j-api:2.0.16+                      &lt;-- Declares a lower bound version
+</span><span id="__span-0-3">org.slf4j:slf4j-api:[2.0.0,2.0.16[               &lt;-- Declares a bounded version
+</span><span id="__span-0-4">
+</span><span id="__span-0-5">org.mock-server:mockserver-netty:shaded:5.15.0   &lt;-- Declare a dependency on the -shaded- classifier
+</span><span id="__span-0-6">org.lwjgl:lwjgl:natives_linux:3.1.0              &lt;-- Declare a dependency on the natives_linux classifier
+</span><span id="__span-0-7">org.slf4j:slf4j-bom::pom:2.0.16                  &lt;-- Declare a bom dependency 
+</span></code></pre></div></p>
+<h4 id="bom">BOM<a class="headerlink" href="#bom" title="Permanent link">&para;</a></h4>
+<p>To mention a <em>BOM</em> dependency, we just need to reference the <em>POM</em> extension of this dependency.
+For example, Springboot defines a <em>BOM</em> in <code>org.springframework.boot:spring-boot-dependencies</code> Maven module.</p>
+<p>To reference this BOM in our dependencies, we just need to specify the POM extension as in
+<code>org.springframework.boot:spring-boot-dependencies::pom:3.3.6</code>.</p>
+<h4 id="transitivity">Transitivity<a class="headerlink" href="#transitivity" title="Permanent link">&para;</a></h4>
+<p>By default, dependencies specifying a classifier or an extension are not considered to be transitive. 
+Although, transitivity can be explicitly defined programmatically.</p>
+<p>By default, <em>Jeka</em> uses the most relevant transitivity according to the declaration context, so users don't need to specify it
+unless they want a specific one.</p>
+<p>Example of programmatic instantiation of a coordinate dependency:
+<div class="language-java highlight"><pre><span></span><code><span id="__span-1-1"><span class="kd">var</span><span class="w"> </span><span class="n">dep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkCoordinateDependency</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;group:name:version&quot;</span><span class="p">)</span>
+</span><span id="__span-1-2"><span class="w">                                </span><span class="p">.</span><span class="na">withTransitivity</span><span class="p">(</span><span class="n">JkTransitivity</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">);</span>
+</span></code></pre></div></p>
+<p>See <a href="#transitivity">later</a> for more details about <em>transitivity</em>.</p>
+<h3 id="file-system-dependencies">File System Dependencies<a class="headerlink" href="#file-system-dependencies" title="Permanent link">&para;</a></h3>
+<p>This type of dependency is represented by the <code>JkFileSystemDependency</code> class.</p>
+<p>Just mention the path of one or several files. If one of the files does not exist at the time of resolution (when the dependency is actually retrieved), build fails.</p>
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-2-1"><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">().</span><span class="na">andFiles</span><span class="p">(</span><span class="s">&quot;libs/my.jar&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;libs/my.testingtool.jar&quot;</span><span class="p">);</span>
+</span></code></pre></div>
+<h3 id="computed-dependencies">Computed Dependencies<a class="headerlink" href="#computed-dependencies" title="Permanent link">&para;</a></h3>
+<p>This type of dependency is represented by the <code>JkComputedDependency</code> class.</p>
+<p>It is typically used for <em>multi-modules</em> or <em>multi-techno</em> projects.</p>
+<p>The principle is that if the specified files are not present, the computation is run in order to generate the missing files.
+If some files still missing after the computation has run, the build fails.</p>
+<p>This mechanism is quite simple yet powerful as it addresses the following use cases :</p>
+<ul>
+<li>Dependencies on files produced by an artifact producer (<code>JkArtifactProducer</code>). A <code>JkProject</code> is an artifact producer.</li>
+<li>Dependencies on files produced by external build tools (Ant, Maven, Gradle, SBT, Android SDK, Make, npm ...).</li>
+<li>... In other words, files produced by any means.</li>
+</ul>
+<p>The generic way is to construct this kind of dependency using a <code>java.lang.Runnable</code>.</p>
+<p>The following snippet constructs a set of dependencies on two external projects : one is built with Maven, the other with
+<em>Jeka</em>.
+<div class="language-Java highlight"><pre><span></span><code><span id="__span-3-1"><span class="n">Path</span><span class="w"> </span><span class="n">mavenProject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;../a-maven-project&quot;</span><span class="p">);</span>
+</span><span id="__span-3-2"><span class="n">Path</span><span class="w"> </span><span class="n">mavenProjectJar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mavenProject</span><span class="p">.</span><span class="na">resolve</span><span class="p">(</span><span class="s">&quot;target/maven-project.jar&quot;</span><span class="p">);</span>
+</span><span id="__span-3-3"><span class="n">Path</span><span class="w"> </span><span class="n">externalProject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Paths</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;../a-jeka-project&quot;</span><span class="p">);</span>
+</span><span id="__span-3-4">
+</span><span id="__span-3-5"><span class="n">JkProcess</span><span class="w"> </span><span class="n">mavenBuild</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkProcess</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;mvn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clean&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;install&quot;</span><span class="p">).</span><span class="na">withWorkingDir</span><span class="p">(</span><span class="n">mavenProject</span><span class="p">);</span>
+</span><span id="__span-3-6">
+</span><span id="__span-3-7"><span class="n">JkJavaProject</span><span class="w"> </span><span class="n">externalProject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkJavaProject</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">externalProject</span><span class="p">);</span><span class="w"> </span>
+</span><span id="__span-3-8">
+</span><span id="__span-3-9"><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-3-10"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">JkComputedDependency</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">mavenBuild</span><span class="p">,</span><span class="w"> </span><span class="n">mavenProjectJar</span><span class="p">))</span>
+</span><span id="__span-3-11"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">externalProject</span><span class="p">);</span>
+</span></code></pre></div></p>
+<h2 id="dependency-set">Dependency Set<a class="headerlink" href="#dependency-set" title="Permanent link">&para;</a></h2>
+<p>A <em>dependency set</em> (<code>JkDependencySet</code>) is an ordered bunch of dependencies used for a given purpose (compilation,
+war packaging, testing, ...). It can contain any kind of <code>JkDependency</code>. See <a href="https://github.com/jerkar/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java">here</a></p>
+<p><em>dependencySet</em> also defines :</p>
+<ul>
+<li>A version provider to define which version of a module should be used in case it is not explicitly mentioned. </li>
+<li>A set of transitive dependency exclusion rules.</li>
+</ul>
+<p>It is designed as an immutable object where we can apply set theory operations for adding, removing, or
+merging with other dependencies and <em>dependencySet</em>.</p>
+<div class="language-java highlight"><span class="filename">Example.java</span><pre><span></span><code><span id="__span-4-1"><span class="p">...</span>
+</span><span id="__span-4-2"><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-4-3"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.google.guava&quot;</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-4-4"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.slf4j:slf4j-simple&quot;</span><span class="p">)</span>
+</span><span id="__span-4-5"><span class="w">    </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.orientechnologies:orientdb-client:2.0.8&quot;</span><span class="p">)</span>
+</span><span id="__span-4-6"><span class="w">    </span><span class="p">.</span><span class="na">andFile</span><span class="p">(</span><span class="s">&quot;../libs.myjar&quot;</span><span class="p">)</span>
+</span><span id="__span-4-7"><span class="w">    </span><span class="p">.</span><span class="na">withVersionProvider</span><span class="p">(</span><span class="n">myVersionProvider</span><span class="p">);</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li>Module versions can be omitted when declaring dependencies. Versions can be provided by a <code>JkVersionProvider</code> or a <em>BOM</em> dependency.</li>
+<li>Instances of <code>JkDependencySet</code> can be combined in order to construct a large <em>dependencySet</em> from smaller ones.</li>
+</ul>
+</div>
+<h2 id="transitivity_1">Transitivity<a class="headerlink" href="#transitivity_1" title="Permanent link">&para;</a></h2>
+<p>For each dependency, mainstream build tools use a single concept (<em>scope</em> or <em>configuration</em>) to determine :</p>
+<ol>
+<li>which part of the build needs the dependency</li>
+<li>which transitive dependencies to fetch along the dependency</li>
+<li>with which transitivity the dependency must be published</li>
+</ol>
+<p>This confusion leads to dependency management systems that are bloated, difficult to reason with, and not quite flexible.
+Gradle comes with a proliferation of 'configurations' to cover most use case combinations,
+while Maven narrows 'scopes' to a smaller number, but with limitations and not-so-clear transitivity/publish rules.</p>
+<p>In the opposite, Jeka distinguishes clearly the following three purposes :</p>
+<ol>
+<li>Jeka uses distinct <em>dependencySet</em> instances for each part of the build (compile, runtime, test,...). Each can be
+   defined relatively to another using set theory operations.</li>
+<li>For each dependency, we can decide its transitivity, that is, the transitive dependencies fetched along the dependency.</li>
+<li>For publishing, we can optionally re-define a specific <em>dependencySet</em>, exposing exactly what we want.</li>
+</ol>
+<p>Jeka defines by default, three levels of transitivity :</p>
+<ul>
+<li>NONE : Not transitive</li>
+<li>COMPILE : Also fetches transitive dependencies declared with scope 'compile' in the dependency published pom.</li>
+<li>RUNTIME : Also fetches transitive dependencies declared with any scope in the dependency published pom.</li>
+</ul>
+<div class="admonition notes">
+<p class="admonition-title">Notes</p>
+<p>On Maven repositories, published poms can declare only two scopes for transitive dependencies : 'compile' and 'runtime'.</p>
+</div>
+<p>For Ivy repositories, it is possible to declare a specific transitivity that maps to a slave 'configuration'.</p>
+<p>The below example shows a JkJavaProject declaration using explicit transitivity.</p>
+<p><div class="language-Java highlight"><pre><span></span><code><span id="__span-5-1"><span class="n">JkJavaProject</span><span class="p">.</span><span class="na">of</span><span class="p">().</span><span class="na">simpleFacade</span><span class="p">()</span>
+</span><span id="__span-5-2"><span class="w">    </span><span class="p">.</span><span class="na">configureCompileDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-5-3"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava:23.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">JkTransitivity</span><span class="p">.</span><span class="na">NONE</span><span class="p">)</span>
+</span><span id="__span-5-4"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;javax.servlet:javax.servlet-api:4.0.1&quot;</span><span class="p">))</span>
+</span><span id="__span-5-5"><span class="w">    </span><span class="p">.</span><span class="na">configureRuntimeDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-5-6"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.postgresql:postgresql:42.2.19&quot;</span><span class="p">)</span>
+</span><span id="__span-5-7"><span class="w">            </span><span class="p">.</span><span class="na">withTransitivity</span><span class="p">(</span><span class="s">&quot;com.google.guava:guava&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">JkTransitivity</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+</span><span id="__span-5-8"><span class="w">            </span><span class="p">.</span><span class="na">minus</span><span class="p">(</span><span class="s">&quot;javax.servlet:javax.servlet-api&quot;</span><span class="p">))</span>
+</span><span id="__span-5-9"><span class="w">    </span><span class="p">.</span><span class="na">configureTestDeps</span><span class="p">(</span><span class="n">deps</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">deps</span>
+</span><span id="__span-5-10"><span class="w">            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">Hint</span><span class="p">.</span><span class="na">first</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;org.mockito:mockito-core:2.10.0&quot;</span><span class="p">)</span>
+</span><span id="__span-5-11"><span class="w">    </span><span class="p">)</span>
+</span></code></pre></div>
+It results in :
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1">Declared Compile Dependencies : 2 elements.
+</span><span id="__span-6-2">  com.google.guava:guava:23.0 transitivity:NONE
+</span><span id="__span-6-3">  javax.servlet:javax.servlet-api:4.0.1
+</span><span id="__span-6-4">
+</span><span id="__span-6-5">Declared Runtime Dependencies : 2 elements.
+</span><span id="__span-6-6">  com.google.guava:guava:23.0 transitivity:RUNTIME
+</span><span id="__span-6-7">  org.postgresql:postgresql:42.2.19
+</span><span id="__span-6-8">
+</span><span id="__span-6-9">Declared Test Dependencies : 4 elements.
+</span><span id="__span-6-10">  org.mockito:mockito-core:2.10.0
+</span><span id="__span-6-11">  com.google.guava:guava:23.0 transitivity:RUNTIME
+</span><span id="__span-6-12">  org.postgresql:postgresql:42.2.19
+</span><span id="__span-6-13">  javax.servlet:javax.servlet-api:4.0.1
+</span></code></pre></div>
+Dependencies without any transitivity specified will take default transitivity for
+their purpose, namely COMPILE for compile dependencies, and RUNTIME for runtime and test dependencies.</p>
+<p>The API allows you to redefine the transitivity declared in a upper dependency set.</p>
+<p>Note that transitivity can only apply to <code>JkModuleDependency</code> (like <i>com.google.guava:guava:23.0</i>)
+and <code>JkLocalProjectDependency</code>.</p>
+<h2 id="resolve-dependencies">Resolve Dependencies<a class="headerlink" href="#resolve-dependencies" title="Permanent link">&para;</a></h2>
+<p>The <code>JkDependencyResolver</code> class is responsible JkDependencyResolver.of(JkRepo.ofMavenCentral());to resolve dependencies by returning <code>JkResolveResult</code> from a
+<code>JkdependencySet</code>.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-7-1"><span class="n">JkDependencySet</span><span class="w"> </span><span class="n">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JkDependencySet</span><span class="p">.</span><span class="na">of</span><span class="p">()</span>
+</span><span id="__span-7-2"><span class="w">                            </span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="s">&quot;org.apache.httpcomponents:httpclient:4.5.3&quot;</span><span class="p">)</span>
+</span><span id="__span-7-3"><span class="w">                            </span><span class="p">.</span><span class="na">andFile</span><span class="p">(</span><span class="s">&quot;libs/my.jar&quot;</span><span class="p">);</span>
+</span><span id="__span-7-4">
+</span><span id="__span-7-5"><span class="c1">// Here, module dependencies are fetched from Maven central repo</span>
+</span><span id="__span-7-6"><span class="n">JkDependencyResolver</span><span class="w"> </span><span class="n">resolver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>
+</span><span id="__span-7-7"><span class="w">        </span><span class="n">JkDependencyResolver</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">JkRepo</span><span class="p">.</span><span class="na">ofMavenCentral</span><span class="p">());</span><span class="w">  </span>
+</span><span id="__span-7-8"><span class="n">JkResolveResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resolver</span><span class="p">().</span><span class="na">resolve</span><span class="p">(</span><span class="n">deps</span><span class="p">);</span>
+</span></code></pre></div>
+<p>From the result you can :</p>
+<ul>
+<li>Navigate in the resolved dependency tree as :</li>
+</ul>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-8-1"><span class="n">JkDependencyNode</span><span class="w"> </span><span class="n">slfjApiNodeDep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getDependencyTree</span><span class="p">()</span>
+</span><span id="__span-8-2"><span class="w">        </span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">JkModuleId</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;org.slf4j:slf4j-api&quot;</span><span class="p">));</span>
+</span><span id="__span-8-3"><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">slfjApiNode</span><span class="p">.</span><span class="na">getModuleInfo</span><span class="p">().</span><span class="na">getResolvedVersion</span><span class="p">());</span>
+</span></code></pre></div>
+<ul>
+<li>Get the direct list of artifact files</li>
+</ul>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-9-1"><span class="n">JkPathSequence</span><span class="w"> </span><span class="n">sequence</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getFiles</span><span class="p">();</span><span class="w">  </span>
+</span><span id="__span-9-2"><span class="n">sequence</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">::</span><span class="n">println</span><span class="p">);</span><span class="w"> </span><span class="c1">// print each files part of the result</span>
+</span></code></pre></div>
+<h2 id="publication">Publication<a class="headerlink" href="#publication" title="Permanent link">&para;</a></h2>
+<p>Jeka is able to publish on both the Maven and Ivy repositories. This includes repositories such as <a href="http://www.sonatype.org/nexus/">Sonatype Nexus</a>.</p>
+<p>Maven and Ivy have different publication models, so Jeka proposes specific APIs according to whether you want to publish on a Maven or Ivy repository.</p>
+<h3 id="publish-on-a-maven-repository">Publish on a Maven repository<a class="headerlink" href="#publish-on-a-maven-repository" title="Permanent link">&para;</a></h3>
+<p>Jeka proposes a complete API to pubish on Maven repository. POM files will be generated by Jeka according to
+provided elements.</p>
+<p>Find an example <a href="https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/AntStyleJkBean.java">here</a></p>
+<p>Notice that Jeka allows you to :</p>
+<ul>
+<li>Publish more than one artifact.</li>
+<li>Produce &amp; publish checksum files for each published artifact.</li>
+<li>Mention using unique snapshots (<a href="http://stackoverflow.com/questions/1243574/how-to-stop-maven-artifactory-from-keeping-snapshots-with-timestamps">What is it ?</a>).</li>
+<li>Feed generated pom with data necessary to publish on <a href="https://maven.apache.org/guides/mini/guide-central-repository-upload.html">central repository</a>.</li>
+<li>Sign published artifacts with PGP</li>
+<li>Publish to multiple repositories by creating the publisher using a <code>JkRepoSet</code> instead of a <code>JkRepo</code>.</li>
+</ul>
+<p>To sign with PGP, there is no need to have PGP installed on Jeka machine. Jeka uses <a href="https://www.bouncycastle.org/">Bouncy Castle</a> internally to sign artifacts.</p>
+<h3 id="publish-to-a-ivy-repository">Publish to a Ivy repository<a class="headerlink" href="#publish-to-a-ivy-repository" title="Permanent link">&para;</a></h3>
+<p>Publishing on Ivy repo is pretty similar to publishing on Maven, though there are options specific to Ivy.</p>
+<p>See also <a href="https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/AntStyleJkBean.java">here</a></p>
+<h2 id="common-classes">Common Classes<a class="headerlink" href="#common-classes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p><code>JkRepo</code> and <code>JkRepoSet</code> represent both download and upload repositories. </p>
+</li>
+<li>
+<p><code>JkRepoFromProperties</code>provides configured repositories according to global or project scopes <em>properties</em>.</p>
+</li>
+<li>
+<p><code>JkDependencySet</code> represents a set of dependencies.</p>
+</li>
+<li>
+<p><code>JkDependencyResolver</code> resolves dependencies to classpaths and resolution results that allow resolution exploration.</p>
+</li>
+<li>
+<p><code>JkModuleFileProxy</code> provides an smart way to get a file from its coordinates.</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.1e8ae164.min.js"></script>
+      
+    
+  </body>
+</html>
