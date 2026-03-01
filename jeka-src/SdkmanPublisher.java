@@ -81,7 +81,7 @@ class SdkmanPublisher {
                 JkLog.verbose("Wait duration %sms.", duration);
                 retry = duration < MAX_WAIT_MS;
                 if (retry) {
-                    JkLog.info("Not found. Wait %ss before retrying ...", DELAY_MS/1000);
+                    JkLog.info("Still not present on Maven Central. Wait %ss before retrying ...", DELAY_MS/1000);
                     JkUtilsSystem.sleep(DELAY_MS);
                 }
             }

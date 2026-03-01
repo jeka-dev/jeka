@@ -88,8 +88,8 @@ jeka.sdk.22=/my/jdks/22-corretto
 
 ## Define JeKa version
 
-Your script may depend on some unstable JeKa APIs. To make sure your script will always work, 
-whatever JeKa version is installed at client/user side, mention the following property in 
+Your script may depend on unstable JeKa APIs. To ensure it always works, 
+regardless of the JeKa version installed, add the following property to 
 `jeka.properties`:
 ```properties
 jeka.version=0.11.24

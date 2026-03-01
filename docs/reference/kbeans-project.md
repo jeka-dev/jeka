@@ -1,9 +1,10 @@
-# Project KBean
+# Project KBean - The JeKa "Java Plugin"
 
 <!-- header-autogen-doc -->
 
 
 [`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
+is the JeKa equivalent of the **Java Plugin** found in Maven or Gradle. It
 acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
 This _KBean_ provides core methods for fundamental build tasks, including **compiling**, **testing**, and **packaging**.
 

@@ -55,24 +55,29 @@ markdown_extensions:
 nav:
     - Installation: installation.md
     - Quick Start: quick-start.md
+    - For Maven/Gradle Users: reference/comparison.md
     - Tutorials:
         - Basics: tutorials/basics.md
         - Build Base: tutorials/build-base.md
         - Build Projects: tutorials/build-projects.md
-        - Run Remote Apps: tutorials/run-remote-apps.md
+        - Source-Runnable Applications: tutorials/source-runnable-apps.md
     - Reference:
         - KBeans: reference/kbeans.md
         - Bundled KBeans:
-            - base: reference/kbeans-base.md
-            - project: reference/kbeans-project.md
-            - intellij: reference/kbeans-intellij.md
-            - eclipse: reference/kbeans-eclipse.md
-            - native: reference/kbeans-native.md
-            - docker: reference/kbeans-docker.md
-            - git: reference/kbeans-git.md
-            - app: reference/kbeans-app.md
-            - bundle: reference/kbeans-bundle.md
-            - setup: reference/kbeans-setup.md
+            - Core:
+                - project: reference/kbeans-project.md
+                - base: reference/kbeans-base.md
+            - DevOps:
+                - docker: reference/kbeans-docker.md
+                - git: reference/kbeans-git.md
+                - native: reference/kbeans-native.md
+                - bundle: reference/kbeans-bundle.md
+            - IDE Support:
+                - intellij: reference/kbeans-intellij.md
+                - eclipse: reference/kbeans-eclipse.md
+            - Admin & Management:
+                - app: reference/kbeans-app.md
+                - setup: reference/kbeans-setup.md
         - Properties: reference/properties.md
         - Multi-Module: reference/multi-modules.md
         - Build Library:
