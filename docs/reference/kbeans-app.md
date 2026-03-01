@@ -2,6 +2,18 @@
 
 <!-- header-autogen-doc -->
 
+[`AppKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/app/AppKBean.java) manages the installation, update, and discovery of applications from remote repositories or catalogs.
+
+For a practical guide on running and installing applications from source, see the [Source-Runnable Applications tutorial](../tutorials/source-runnable-apps.md).
+
+**Key Features**
+
+- Installs applications from remote Git repositories.
+- Supports JVM, Native, and Bundle runtime modes.
+- Manages application updates and uninstallation.
+- Facilitates application discovery via catalogs.
+- Provides security through trusted source verification.
+
 ## Install Applications
 
 ```shell

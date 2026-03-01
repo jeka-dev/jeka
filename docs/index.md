@@ -6,7 +6,7 @@
 Java is evolving to become more developer-friendly and cloud-native ready. Developers no longer want to deal with heavy tools, 
 verbose XML configurations, or external DSLs. JeKa aligns with this vision by offering:
 
-- **Simplicity at its Core**: Configure with properties or pure Java—no XML, no YAML, no DSL.
+- **Simplicity at its Core**: Configure with properties or pure Java—no XML, no DSL.
 - **No Setup Hassle**: Start building regular or cloud-native applications immediately, with minimal configuration and requirements.
 - **Gradual Complexity**: Handle advanced scenarios using intuitive mechanisms without unnecessary complexity.
 - **DevOps Bridge**: Implement complex pipeline logic with robust Java and share it across your teams.
