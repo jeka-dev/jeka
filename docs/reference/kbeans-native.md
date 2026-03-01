@@ -2,7 +2,7 @@
 
 <!-- header-autogen-doc -->
 
-[`NativeKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/nativ/NativeKBean.java) enables native compilation for the `project` and `base` KBeans.
+[`NativeKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/nativ/NativeKBean.java) enables native compilation for the [`project`](kbeans-project.md) and [`base` KBeans](kbeans-base.md).
 
 **Key Features**
 
@@ -13,7 +13,7 @@
 
 ## Usage
 
-The `NativeKBean` works with either `project` or `base` KBeans to compile your Java application into a native executable using GraalVM native-image.
+The `NativeKBean` works with either [`project`](kbeans-project.md) or [`base` KBeans](kbeans-base.md) to compile your Java application into a native executable using GraalVM native-image.
 
 ### Basic Invocation
 
@@ -79,7 +79,7 @@ The KBean automatically handles AOT (Ahead-Of-Time) metadata required for reflec
 ### Requirements
 
 - GraalVM is automatically downloaded if not already available
-- The `project` or `base` KBean must be present in your build
+- The [`project`](kbeans-project.md) or [`base` KBean](kbeans-base.md) must be present in your build
 
 See [native API](api-native.md) for low-level API details.
 

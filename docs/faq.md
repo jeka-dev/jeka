@@ -156,7 +156,7 @@ public class Build extends KBean {
 
 ### How can I sync Eclipse/IntelliJ without using `ProjectKBean`?
 
-`ProjectKBean` and `BaseKBean` provide IDE synchronization out-of-the-box, but you may prefer not to use them.
+[`ProjectKBean`](reference/kbeans-project.md) and [`BaseKBean`](reference/kbeans-base.md) provide IDE synchronization out-of-the-box, but you may prefer not to use them.
 
 If you use a different structure to build your project, simply let your `KBean` implement `JkJavaIdeSupport` and implement the required method to provide the information necessary to generate IDE metadata files.
 

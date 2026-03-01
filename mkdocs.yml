@@ -58,7 +58,7 @@ nav:
     - For Maven/Gradle Users: reference/comparison.md
     - Tutorials:
         - Basics: tutorials/basics.md
-        - Build Base: tutorials/build-base.md
+        - Build Base-Mode: tutorials/build-base.md
         - Build Projects: tutorials/build-projects.md
         - Source-Runnable Applications: tutorials/source-runnable-apps.md
     - Reference:

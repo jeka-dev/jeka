@@ -335,7 +335,7 @@ class Custom extends KBean {
 
 In this example, the `MavenKBean` will be included in the initialized KBeans.
 
-The `require(JkRunbase)` method will be invoked to know which KBean should be initialized too (either `ProjectKBean` nor `BaseKBean`.)
+The `require(JkRunbase)` method will be invoked to know which KBean should be initialized too (either [`ProjectKBean`](kbeans-project.md) nor [`BaseKBean`](kbeans-base.md).)
 
 
 ## Invoke KBean from another KBean

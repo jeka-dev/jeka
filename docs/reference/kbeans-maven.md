@@ -4,7 +4,7 @@
 
 
 [`MavenKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/tooling/maven/MavenKBean.java) provides the ability to publish artifacts to a 
-Maven repository. The artifacts are those produced by the `project` or `base` KBeans. 
+Maven repository. The artifacts are those produced by the [`project`](kbeans-project.md) or [`base` KBeans](kbeans-base.md). 
 It also provides convenient means to migrate from Maven projects.
 
 **Key Features:**

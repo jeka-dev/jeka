@@ -1,65 +1,71 @@
-# Project KBean - The JeKa "Java Plugin"
+# Project KBean - The Java Build Engine
 
 <!-- header-autogen-doc -->
 
-
 [`ProjectKBean`](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java) 
-is the JeKa equivalent of the **Java Plugin** found in Maven or Gradle. It
-acts as a wrapper around a [`JkProject`](api-project.md) to facilitate the building of JVM-based code hosted in a project structure.
-This _KBean_ provides core methods for fundamental build tasks, including **compiling**, **testing**, and **packaging**.
+is the core KBean for building JVM projects in JeKa. It acts as the equivalent of the **Java Plugin** in Maven or Gradle, 
+wrapping a [`JkProject`](api-project.md) instance to provide high-level build automation.
 
-To work effectively with this KBean, it's helpful to have an [overview](api-project.md) of the capabilities offered by the `JkProject` object.
+## Key Features
 
-**Key Features**
+- **Standardized Build Lifecycle**: Methods for `compile`, `test`, `pack`, and more out-of-the-box.
+- **Dependency Management**: Automated resolution for compile, runtime, and test classpaths.
+- **Artifact Creation**: Generates regular, fat (uber), shaded, source, and Javadoc JARs.
+- **Project Introspection**: Displays detailed dependency trees and project configurations.
+- **Git Integration**: Automatically infers project versions from Git tags/metadata.
+- **Extensibility**: Foundation for other KBeans to extend the build process (e.g., Docker, Jacoco, Sonarqube).
 
-- Resolves dependencies, compiles code, and runs tests.
-- Creates various types of JAR files out-of-the-box, including regular, fat, shaded, source, and Javadoc JARs.
-- Infers project versions from Git metadata.
-- Executes packaged JARs.
-- Displays dependency trees and project setups.
-- Scaffolds skeletons for new projects.
+## Core Methods
 
-Additionally, `ProjectKBean` serves as a central point of interaction for other KBeans, enabling them to access project details and extend or enhance the build process.
+`ProjectKBean` exposes several methods to automate your build process from the command line:
 
-It offers standardized methods that cover the whole build life-cycle:
+| Method | Description |
+| :--- | :--- |
+| `scaffold` | Creates a new project structure and build script skeleton. |
+| `clean` | Deletes the `jeka-output` directory. |
+| `compile` | Compiles source code and processes resources. |
+| `test` | Compiles and executes unit tests (e.g., JUnit 5). |
+| `pack` | Creates the project's JAR artifacts. |
+| `build` | Complete cycle: `clean` -> `compile` -> `test` -> `pack` -> `checkQuality` -> `e2eTest`. |
+| `info` | Displays project metadata (version, module ID, layout, etc.). |
+| `depTree` | Prints the resolved dependency tree to the console. |
+| `runJar` | Executes the generated JAR file. |
 
-- `scaffold`: Creates new project structure from scratch
-- `generateSources`: Generates source code
-- `compile`: Compiles source code
-- `test`: Compiles and run test code
-- `pack`: Creates packaged artifacts as JAR files
-- `checkQuality`: Runs quality checkers and quality gates
-- `e2eTest`: Runs end-to-end test on a deployed version of the application
+## Common Options
 
-The `JkProject` instance offers methods to customize or extend behavior, allowing seamless integration of third-party extensions.
+These properties can be set via command line (e.g., `project: javaVersion=17`) or in `jeka.properties` (e.g., `@project.javaVersion=17`).
 
-**Example for getting information about source files:**
+| Property | Description                                | Default |
+| :--- |:-------------------------------------------| :--- |
+| `javaVersion` | Target JVM version (e.g., `21`, `25`).     | Same as JeKa runtime |
+| `test.skip` | If `true`, tests are not executed.         | `false` |
+| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`). | `REGULAR` |
+| `version` | Hardcode the project version.              | Inferred from Git |
+| `moduleId` | Maven coordinates (`group:name`).          | `null` |
+
+## Programmatic Customization
+
+Access the underlying `JkProject` for deep customization, typically within `@JkPostInit`.
 
 ```java
 class MyBuild extends KBean {
 
-  private List<Path> allSourceFiles;
-
-  @JkPostInit
-  private void postInit(ProjectKBean projectKBean) {
-      allSourceFiles = projectKBean.project.compilation.layout.resolveSources().getFiles();
-  }
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
+        
+        // Example: Add a custom compiler option
+        project.compilation.addJavaCompilerOptions("-Xlint:unchecked");
+        
+        // Example: Customize the JAR manifest
+        project.pack.manifest.addMainAttribute("Author", "JeKa Team");
+    }
 }
 ```
 
-**Examples taken from JeKa:**
-
-- [Jacoco KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.jacoco/src/dev/jeka/plugins/jacoco/JacocoKBean.java): 
-A KBean that reads the underlying `JkProject` and modifies its testing behavior.
-- [Sonarqube KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.sonarqube/src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java):
-A KBean that reads the underlying `JkProject` to extract information.
-- [Protobuf KBean](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java):
-  A KBean that adds Proto-buffer code generation to the underlying `JkProject`.
-
 ## Annotation Processors
 
-To use an annotation processor (like **Lombok** or **MapStruct**), add the dependency coordinates
-to the `compile-only` section in your `dependencies.txt` file.
+Enable processors like **Lombok** by adding them as `compile-only` dependencies in `dependencies.txt`:
 
 ```ini
 [compile-only]
@@ -67,9 +73,16 @@ org.mapstruct:mapstruct-processor:1.6.3
 org.projectlombok:lombok:1.18.38
 ```
 
-Annotation processors that generate source files will output them to the `jeka-output/generated-sources/annotation-processors` directory.
+Output directory: `jeka-output/generated-sources/annotation-processors`.
 
-That's it!
+## Extending with Plugins
+
+`ProjectKBean` is designed to be extensible. Many JeKa plugins interact with it to add specific capabilities:
+
+- **[Jacoco](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.jacoco/src/dev/jeka/plugins/jacoco/JacocoKBean.java)**: Collects code coverage during the `test` phase.
+- **[Sonarqube](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.sonarqube/src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java)**: Exports project data for static analysis.
+- **[Protobuf](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java)**: Integrates Protocol Buffers compilation.
+- **[Docker](kbeans-docker.md)**: Packages your project as a Docker image.
 
 ## Summary
 

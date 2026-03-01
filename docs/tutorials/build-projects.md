@@ -1,264 +1,243 @@
-# Build Projects
+# Building Java Projects
 
 In this tutorial, we'll use the `project` KBean to build a Java application or library. 
 This KBean provides build methods and a project layout similar to those of *Maven* and *Gradle*.
 
-If you prefer a lighter structure, you can use the [Build Base](build-base.md) tutorial.
+If you prefer a lighter structure without the standard `src/main/java` layout, see the [Build Base](build-base.md) tutorial.
 
 **Prerequisite:** JeKa must be [installed](../installation.md).
 
 !!! tip
-    Run `jeka project: --doc` to see all available options.
+    Run `jeka project: --doc` to see all available options and methods.
 
 ## Scaffold a New Project
 
-Run `jeka project: scaffold` to create a standard project structure, ready for you to start coding right away.
+Run the following command to create a standard project structure, ready for coding:
 
-You’ll get the following project structure:
+```bash
+jeka project: scaffold
 ```
+
+You'll get the following project structure:
+```text
 .
 ├── src                  
 │   ├── main             <- Java code and resources
 │   │   ├── java
 │   │   └── resources    
-│   └── test             <- Java code and resources for tests
+│   └── test             <- Unit tests and test resources
 │       ├── java
 │       └── resources 
-├── jeka-src             <- Optional Java (or Kotlin) code for building the project
+├── jeka-src             <- Java (or Kotlin) code for build customization
 │   └── Custom.java      
-├── jeka-output          <- Generated dir where artifacts such as jars, classes, reports or doc are generated
-├── dependencies.txt     <- Dependency lists for compile, runtime and testing
-├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
-├── jeka.ps              <- Optional PowerShell script to boot JeKa on Windows
-├── jeka                 <- Optional bash script to boot JeKa on Linux/macOS
-└── README.md            <- Describes available build commands for building the project
+├── jeka-output          <- Generated artifacts (JARs, classes, reports)
+├── dependencies.txt     <- Project dependencies
+├── jeka.properties      <- Build configuration and properties
+├── jeka.ps              <- PowerShell wrapper (optional)
+├── jeka                 <- Bash wrapper (optional)
+└── README.md            <- Project overview and build instructions
 ```
 
-The `jeka.ps` and `jeka` OS scripts are needed only if you want to build your project on a machine where JeKa is not installed.  
-`Build.java` can also be removed if you don't need advanced settings.  
+The `jeka` and `jeka.ps` scripts allow building the project on machines where JeKa is not globally installed.  
+You can delete `jeka-src/Custom.java` if you don't need programmatic customization.
 
-You can choose a simpler code layout structure by setting the following properties:
+### Simple Layout
+
+If you prefer a flatter structure, you can enable the `SIMPLE` style:
+
 ```properties title="jeka.properties"
 @project.layout.style=SIMPLE
 @project.layout.mixSourcesAndResources=true
 ```
-You'll end up with the following code layout:
-```
+
+This results in a simpler layout:
+```text
 .
-├── src       <- Contains both Java code and resources    
-├── test      <- Contains both Java code and resources for testing
+├── src       <- Java code and resources mixed
+├── test      <- Test code and resources mixed
 ```
 
-Additionally, you can copy-paste JAR files into the following directory structure to automatically include them as dependencies:
-```
+### Local JAR Dependencies
+
+You can also include local JARs by placing them in the `libs` directory:
+
+```text
 .
 ├── libs                  
-│   ├── compile          <- Jars included in compile, runtime and test classpaths 
-│   ├── compile-only     <- Jars included in compile and test classpaths
-│   ├── runtime          <- Jars included in runtime and test classpaths
-│   └── test             <- Jars included in test classpath
+│   ├── compile          <- JARs for compile, runtime, and test classpaths
+│   ├── compile-only     <- JARs for compile and test classpaths only
+│   ├── runtime          <- JARs for runtime and test classpaths
+│   └── test             <- JARs for test classpath only
 ```
 
-## Sync with IntelliJ
+## IDE Integration
 
-Run: `jeka intellij: iml --force` to sync the project with IntelliJ.  
-If changes don't appear in IntelliJ, go to the project's root directory, then run: `jeka intellij: initProject`.
+To synchronize your project with **IntelliJ IDEA**, run:
 
-## Add Dependencies
+```bash
+jeka intellij: iml --force
+```
 
-Dependencies are listed in the `dependencies.txt` file as shown below:
+If the project is not yet recognized as a JeKa project, use:
+```bash
+jeka intellij: initProject
+```
+
+## Dependency Management
+
+Dependencies are declared in `dependencies.txt`. JeKa supports Maven coordinates and BOMs.
 
 ```ini title="dependencies.txt"
-[version]    # define versions found in declared BOMs
+[version]    # Define versions or import BOMs
 org.junit:junit-bom:5.12.2@pom
 
-[compile]
+[compile]    # Main dependencies
 com.google.guava:guava:33.4.0-jre
 com.google.code.gson:gson:2.13.1
 
-
-[compile-only]
+[compile-only] # Only needed for compilation (e.g., Lombok)
 org.projectlombok:lombok:1.18.32
 
-[runtime]
+[runtime]    # Only needed at runtime
 org.postgresql:postgresql:42.7.4
 
-[test]
+[test]       # Only needed for testing
 org.junit.jupiter:junit-jupiter
 org.junit.platform:junit-platform-launcher
 ```
 
-Dependency versions declared in a BOM can be imported using the `@pom` prefix. 
-So we don't need to declare explicit versions for every dependency.
+| Section | Description |
+| :--- | :--- |
+| `[version]` | Versions and BOM imports (using `@pom`). |
+| `[compile]` | Included in compile, runtime, and test classpaths. |
+| `[compile-only]` | Included in compile and test, but NOT runtime. |
+| `[runtime]` | Included in runtime and test, but NOT compile. |
+| `[test]` | Included in the test classpath only. |
 
-!!! note
-    When declared in the `[version]` section, a BOM applies to all dependencies within the project, including sub-modules.
+You can also reference local files: `libs/my-local-lib.jar`.
 
+## Java Version
 
-You can also reference a local JAR by specifying its relative path, such as `mylibs/libs.jar`, 
-instead of using Maven coordinates.
+By default, the project uses the same Java version as the JeKa runtime (see `jeka.java.version` in `~/.jeka/jeka.properties`). 
+To target a specific version, set:
 
-## Specify a Java version for the project.
-By default, the project builds using the same Java version as the one running JeKa (defined in `jeka.java.version`).
-This can be overridden by specifying the `@project.javaVersion` property.
+```properties title="jeka.properties"
+@project.javaVersion=17
+```
 
-## Configure JAR Type
-By default, JeKa produces regular JAR files. 
-You can configure it to create a *fat JAR* (JAR that includes all dependencies) 
-or a *shade JAR* (same as a fat JAR but with relocated packages to avoid classpath collisions).
+## JAR Packaging
 
-To configure, edit `jeka.properties` and add:
+JeKa creates a **Regular JAR** by default. You can change this to a **Fat JAR** (includes all dependencies) or a **Shaded JAR** (fat JAR with relocated packages).
+
 ```properties title="jeka.properties"
 @project.pack.jarType=FAT
 ```
-This configures the project to create a single JAR, also known as a *fat JAR*.  
-This is ideal for bundling applications. This property accepts `REGULAR`, `FAT`, and `SHADE` values.
 
-If you are bundling a library, you may prefer to create an additional *shade* JAR, in addition to the regular one, so consumers 
-can choose which one to pick.
+### Multiple Artifacts
 
-To do this, edit `jeka.properties` and add:
+For libraries, you might want to produce both a regular JAR and an extra shaded JAR:
+
 ```properties title="jeka.properties"
-# Create an extra jar suffixed with 'all'
+# Produce an extra shaded jar suffixed with '-all'
 @project.pack.shadeJarClassifier=all
 
-# Instruct Maven plugin to publish it as well.
+# Ensure the extra artifact is published to Maven
 @maven.publication.extraArtifacts=all
 ```
 
-## Handle Versioning
+## Versioning and Git
 
-Setting a version or group/moduleId is optional.  
-To set a specific version, add `@project.version=1.0-SNAPSHOT` to `jeka.properties`.
+You can hardcode the version in `jeka.properties`:
+
 ```properties title="jeka.properties"
-@project.moduleId=org.mygroup:my-module-id
+@project.moduleId=com.example:my-app
 @project.version=1.0.0-SNAPSHOT
 ```
-You can override any property by passing a command-line argument, for example: `-D@project.version=1.0.0`.
 
-A better approach might be to infer the version from Git. The version will be set to `[TAG NAME]` if the workspace is on a tag, or `[BRANCH]-SNAPSHOT` if it is not.
+### Automatic Git Versioning
 
-The Manifest file will also include Git information (commit, dirty, branch, etc.). To enable this, use the following property:
+The recommended approach is to let JeKa infer the version from Git:
+
 ```properties title="jeka.properties"
 @project.gitVersioning.enable=true
 ```
 
-## Pre-defined Build Commands
+- If you are on a **Tag**: The version is the tag name (e.g., `1.2.3`).
+- If you are on a **Branch**: The version is `[branch]-SNAPSHOT` (e.g., `master-SNAPSHOT`).
+- **Metadata**: The JAR manifest will automatically include Git commit ID, branch, and "dirty" state.
 
-```text title="Common Options"
---clean (-c)      # Deletes jeka-output dir prior to running
---verbose (-v)    # Displays verbose traces
-```
+## Essential Build Commands
 
-```bash title="Run Code Directly"
-jeka --program (-p) arg0 arg1 ...  # Runs the first native executable or jar found in jeka-output, executes a build prior if nothing found.
-```
+### Common Flags
+- `-c` or `--clean`: Deletes `jeka-output` before running.
+- `-v` or `--verbose`: Shows detailed logs.
+- `-p` or `--program`: Runs the generated application.
 
-```bash title="From *project* KBean"
-jeka project: compile    # Compiles sources
-jeka project: test       # Compiles sources + runs tests
-jeka project: pack       # Compiles sources + runs tests + creates jars
-jeka project: runJar     # Runs the jar generated by the above command
-jeka project: info       # Displays project configuration info
-jeka project: depTree    # Displays dependency trees 
-```
+### Project Lifecycle
+| Command | Description |
+| :--- | :--- |
+| `jeka project: compile` | Compiles source code. |
+| `jeka project: test` | Runs unit tests (e.g., JUnit). |
+| `jeka project: pack` | Packages the project into a JAR. |
+| `jeka project: build` | Full cycle: clean, compile, test, pack, quality checks. |
+| `jeka project: runJar` | Executes the generated JAR. |
+| `jeka project: info` | Displays project setup and properties. |
+| `jeka project: depTree` | Prints the full dependency tree. |
 
-```bash title="From *native* KBean"
-jeka native: compile     # Compiles to native executable
-```
+### Extensions (Optional)
+- `jeka native: compile`: Compiles to a GraalVM native executable.
+- `jeka docker: build`: Creates a Docker image.
+- `jeka maven: publishLocal`: Publishes to the local Maven repository.
 
-```bash title="From *docker* KBean"
-jeka docker: build          # Builds a Docker image for the project
-jeka docker: info           # Displays info about generated image.
-jeka docker: buildNative    # Builds a Docker image containing the native executable
-jeka docker: infoNative     # Displays info about generated native image 
-```
+## Quality & Coverage (Plugins)
 
-```bash title="From *maven* KBean"
-jeka maven: publishLocal      # Publish artifacts in the local repository
-jeka maven: publish           # Publish in the defined Maven repository
-```
-
-## Perform static analysis using SonarQube and JaCoCo
-
-JaCoCo and SonarQube are not included in the JeKa distribution but are available as separate plugins.  
-To use them, we need to add them to the classpath from Maven Central.
-
-!!! note
-    We don't need to specify the plugin versions because JeKa can automatically select the correct one.
+JeKa plugins like **JaCoCo** and **SonarQube** can be added via `jeka.properties`.
 
 ```properties title="jeka.properties"
+# Inject plugins into the build classpath
 jeka.inject.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
+
+# Activate JaCoCo for the project
 @jacoco=
 
-jeka.cmd.pack-quality=project: pack sonarqube: run
-
+# Configure SonarQube
 sonar.host.url=http://localhost:9000
+
+# Create a shortcut command for full build + quality check
+jeka.cmd.quality=project: pack sonarqube: run
 ```
 
-- `@jacoco=` initializes the JaCoCo KBean to be run when project tests are run.
-- `sonar.host.url=http://localhost:9000` SonarQube can be configured simply by setting the `sonar.*` properties.
+Run with: `jeka quality`.
 
-Build and run the project by running: `jeka project: pack sonarqube: run`
+## Programmatic Customization
 
-## Configure Programmatically
-By configuring the project programmatically, you gain full control: adding logic, extra tasks, or detailed configurations.  
-The configuration can depend on any Java library by specifying its coordinates in a `@JkDep` annotation.
+For complex logic, use `jeka-src/Custom.java`. This allows you to hook into the build lifecycle using `@JkPostInit`.
 
-!!! note
-    Programmatic configuration complements properties-based configuration, rather than replacing it. Properties configurations 
-    are still effective until they are overridden by programmatic configuration.
+```java title="jeka-src/Custom.java"
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.JkPostInit;
 
-```java title="jeka-src/Build.java"
-@JkDep("org.apache.pdfbox:pdfbox:3.0.3")
-class Custom extends KBean {
+public class Custom extends KBean {
 
-    @JkDoc("If true, the generated doc will include PDF documents")
-    public boolean includePdfDoc;
-
-    @JkDoc("If true, the produced jar will include a JDBC driver")
-    public boolean includeJdbcDriver;
-
-    @JkInject
-    private ProjectKBean projectKBean;
-
-    @JkDoc("Performs...")
-    public void extraAction() {
-        // Perform an arbitrary action
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        // Customize compiler options
+        projectKBean.project.compilation.addJavaCompilerOptions("-Xlint:unchecked");
+        
+        // Add a custom resource to the JAR
+        projectKBean.project.pack.runtimeDependencies.add("org.postgresql:postgresql:42.7.4");
     }
 
-    // Configure MavenKBean to publish a 'doc' artifact and modify published dependencies
-    @JkPostInit
-    private void postInit(MavenKBean mavenKBean) {
-        mavenKBean.customizePublication(publication -> {
-            publication.putArtifact(JkArtifactId.of("doc", "zip"), this::generateDoc);
-            if (includeJdbcDriver) {
-                projectKBean.project.packaging.runtimeDependencies.add("org.postgresql:postgresql:42.7.4");
-            }
-        });
+    @JkDoc("Custom action that can be called from CLI")
+    public void myAction() {
+        System.out.println("Hello from Custom KBean!");
     }
-
-    private void generateDoc(File targetZipFile) {
-        Path docDir = getBaseDir().resolve("doc");
-        if (includePdfDoc) {
-            // Create docs using pdf library...
-        }
-        JkPathTree.of(docDir).zipTo(targetZipFile);
-    }
-
 }
 ```
 
-The `init()` method is designed for configuring the `JkProject` instance.
-
-The command `jeka extraAction includePdfDoc=true project: pack maven: publish` does:
-
-- Executes the `extraAction` method.
-- Creates a JAR.
-- Publishes *javadoc*, *sources*, and *binary* JARs along with the *doc* ZIP file containing PDF docs.
-  The *javadoc* and *sources* artifacts are automatically generated before publishing if not already present.  
-  The *doc* artifact is also created during publication, as it is explicitly registered.
+Run your custom action with: `jeka myAction`.
 
 !!! note
-    The `JkProject` class represents everything needed to build a JVM project. It is a large object model that includes both configuration and methods to *build* the project. [See Reference](../reference/api-project.md)
+    The `JkProject` object is the heart of the `project` KBean. It provides a rich API for every aspect of the build. [See API Reference](../reference/api-project.md).
  
