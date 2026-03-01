@@ -139,6 +139,12 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     @Deprecated
     public static final String CREATE_JAR_ACTION = JkProjectPackaging.CREATE_JAR_ACTION;
 
+    public static final String PROJECT_DEPENDENCIES_FILE = "jeka.project.deps";
+
+    /**
+     * @deprecated Use {@link #PROJECT_DEPENDENCIES_FILE} instead.
+     */
+    @Deprecated
     public static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
 
     public static final String PROJECT_LIBS_DIR = "libs";
@@ -609,14 +615,14 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
     }
 
     /**
-     * Returns if the project dependencies include those mentioned in <i>jeka/project-dependencies.txt</i> flat file.
+     * Returns if the project dependencies include those mentioned in <i>jeka.project.deps</i> flat file.
      */
     public boolean isIncludeTextAndLocalDependencies() {
         return includeTextAndLocalDependencies;
     }
 
     /**
-     * Specifies if the project dependencies should include those mentioned in <i>jeka/project-dependencies.txt</i> flat file.
+     * Specifies if the project dependencies should include those mentioned in <i>jeka.project.deps</i> flat file.
      * Values <code>true</code> by default.
      */
     public JkProject setIncludeTextAndLocalDependencies(boolean includeTextAndLocalDependencies) {
@@ -737,9 +743,14 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
         LocalAndTxtDependencies localDeps = LocalAndTxtDependencies.ofLocal(
                 baseDir.resolve(PROJECT_LIBS_DIR));
+        Path projectDepsFile = baseDir.resolve(PROJECT_DEPENDENCIES_FILE);
+        if (!Files.exists(projectDepsFile)) {
+            projectDepsFile = baseDir.resolve(DEPENDENCIES_TXT_FILE);
+            JkLog.warn("dependencies.txt file name is deprecated. Please, rename it to '%s'.", PROJECT_DEPENDENCIES_FILE);
+        }
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(
-                baseDir.resolve(DEPENDENCIES_TXT_FILE), baseDir, projectResolver, properties)
+                projectDepsFile, baseDir, projectResolver, properties)
                 : LocalAndTxtDependencies.ofTextDescription(dependencyTxtUrl, baseDir, projectResolver, properties);
 
         cachedTextAndLocalDeps = localDeps.and(textDeps);

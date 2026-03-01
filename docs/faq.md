@@ -68,7 +68,7 @@ In IntelliJ, go to `Project Settings` -> `Modules` -> `Import Module` -> choose 
 
 Assuming *Maven* is already installed and there is a `pom.xml` file at the root of the project, 
 execute `jeka maven: migrateDeps` to display the *Java* code/configuration to 
-copy-paste into a build class or `dependencies.txt` file.
+copy-paste into a build class or `jeka.project.deps` file.
 
 ## Performance—Caching
 
@@ -106,7 +106,7 @@ I see this error message when I launch tests. What can I do?
 ```text
 OutputDirectoryProvider not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.
 ```
-You can explicitly declare the JUnit component versions in `dependencies.txt` as:
+You can explicitly declare the JUnit component versions in `jeka.project.deps` as:
 ```ini
 [test]
 org.junit.platform:junit-platform-launcher:1.12.2

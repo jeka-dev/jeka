@@ -96,7 +96,7 @@ For example, running:
 ```bash
 jeka project: compile
 ```
-will compile the source code located in the `src/main/java` directory, using dependencies specified in the `dependencies.txt` file.
+will compile the source code located in the `src/main/java` directory, using dependencies specified in the `jeka.project.deps` file.
 
 To display the documentation for the `project` KBean, run:
 ```bash

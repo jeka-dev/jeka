@@ -9,7 +9,7 @@ If you are coming from Maven or Gradle, this guide will help you map your existi
 | **Configuration**  | XML (`pom.xml`)  | Groovy/Kotlin DSL   | Properties (`jeka.properties`) or Java Code |
 | **Extensibility**  | Plugins          | Plugins / Tasks     | KBeans (Java classes similar to JavaBeans)  |
 | **Build Logic**    | Rigid Lifecycle  | Task Graph          | Method Invocations                          |
-| **Dependencies**   | XML Declarations | DSL Declarations    | Text based(`dependencies.txt`)              |
+| **Dependencies**   | XML Declarations | DSL Declarations    | Text based(`jeka.project.deps`)      |
 
 ## Concept Mapping
 
@@ -76,7 +76,7 @@ implementation("org.threeten:threeten-extra:1.8.0")
 test("org.mockito:mockito-core:5.22.0")
 ```
 
-**JeKa (dependencies.txt):**
+**JeKa (jeka.project.deps):**
 ```ini
 [compile]
 com.google.guava:guava:31.1-jre

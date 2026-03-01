@@ -12,7 +12,7 @@ class LocalAndTxtDependenciesTest {
 
     @Test
     void testFromDescription()  {
-        URL url = LocalAndTxtDependenciesTest.class.getResource("dependencies.txt");
+        URL url = LocalAndTxtDependenciesTest.class.getResource(JkDependenciesTxt.PROJECT_DEPENDENCIES_FILE);
         LocalAndTxtDependencies commonDeps = LocalAndTxtDependencies.ofTextDescription(url, null, null, new HashMap<>());
         assertEquals(4, commonDeps.getCompile().getEntries().size());
         assertEquals(6, commonDeps.getRuntime().getEntries().size());
@@ -23,14 +23,14 @@ class LocalAndTxtDependenciesTest {
 
     @Test
     void legacyFormat_isDetected() {
-        URL url = LocalAndTxtDependenciesTest.class.getResource("dependencies.txt");
+        URL url = LocalAndTxtDependenciesTest.class.getResource(JkDependenciesTxt.PROJECT_DEPENDENCIES_FILE);
         String content = JkUtilsIO.read(url);
         assertTrue(LocalAndTxtDependencies.isLegacyFormat(content));
     }
 
     @Test
     void newFormat_isDetected() {
-        URL url = LocalAndTxtDependenciesTest.class.getResource("dependencies-ini.txt");
+        URL url = LocalAndTxtDependenciesTest.class.getResource("jeka.project.deps-ini");
         String content = JkUtilsIO.read(url);
         assertFalse(LocalAndTxtDependencies.isLegacyFormat(content));
     }

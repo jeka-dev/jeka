@@ -371,7 +371,7 @@ public class JkProjectPackaging {
     /*
      * Returns the base dependencies upon which to construct runtime deps.
      * It includes compile dependencies + dependencies declared as runtime
-     * in both dependencies.txt and file located in conventional dir.
+     * in both jeka.project.deps and file located in conventional dir.
      */
     private JkDependencySet baseDependencies() {
         JkDependencySet baseDependencies = project.compilation.dependencies.get();

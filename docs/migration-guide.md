@@ -22,7 +22,7 @@ Also, the entire wrapper is contained inside shell scripts, so the `jeka/wrapper
 - `jeka/local.properties` -> `jeka.properties`
 - `jekaw.bat` -> `jeka.ps1`
 - `jekaw` -> `jeka`
-- `jeka/project-dependencies.txt` -> `dependencies.txt`
+- `jeka/project-dependencies.txt` -> `jeka.project.deps`
 - `jeka/project-libs` directory -> `libs`
 
 

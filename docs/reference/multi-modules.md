@@ -19,14 +19,14 @@ project-root
 ├── jeka-src (optional)
 ├── module-1
 │   ├── jeka.properties
-│   ├── dependencies.txt
+│   ├── jeka.project.deps
 │   ├── src
 │   │   ├── main
 │   │   └── test
 │   └── ...
 ├── module-2
 │   ├── jeka.properties
-│   ├── dependencies.txt
+│   ├── jeka.project.deps
 │   ├── src
 │   │   ├── main
 │   │   └── test
@@ -46,24 +46,24 @@ parent-project
 ├── jeka-src (optional)
 ├── core
 │   ├── jeka.properties
-│   ├── dependencies.txt
+│   ├── jeka.project.deps
 │   ├── src
 │   │   ├── main
 │   │   └── test
 │   └── ...
 └─── plugins
      ├── jeka.properties
-     ├── dependencies.txt
+     ├── jeka.project.deps
      ├── plugin-common
-     │   ├── dependencies.txt
+     │   ├── jeka.project.deps
      │   ├── jeka.properties
      │   └── src
      ├── plugin-1
-     │   ├── dependencies.txt
+     │   ├── jeka.project.deps
      │   ├── jeka.properties
      │   └── src
      ├── plugin-2
-     │   ├── dependencies.txt
+     │   ├── jeka.project.deps
      │   ├── jeka.properties
      │   └── src
      └── ...
@@ -149,24 +149,24 @@ If you need to run some Jeka command for a child module, you have 3 options:
    ```
    This approach works well, but code in `jeka-src` declared in parent module won't be taken into account.
 
-## Managing dependencies.txt
+## Managing jeka.project.deps
 
 In a multi-module project, we often need to define centrally the versions of the libraries we want to use across all
 the modules.
 
 Example:
-```ini title="plugins/dependencies.txt"
+```ini title="plugins/jeka.project.deps"
 [version]
 com.google.guava:guava:33.4.7-jre
 org.projectlombok:lombok:1.18.38
 org.junit:junit-bom:5.12.2@pom  # Use versions defined in this BOM
 ```
 
-Child module `dependencies.txt` files inherit the `version` section from the parent directory's `dependencies.txt`, if present.
+Child module `jeka.project.deps` files inherit the `version` section from the parent directory's `jeka.project.deps`, if present.
 
 Module interdependency can be defined using the module's relative path.
 
-```ini title="plugins/plugin-1/dependencies.txt"
+```ini title="plugins/plugin-1/jeka.project.deps"
 [compile]
 ../plugin-common 
 com.google.guava:guava

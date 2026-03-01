@@ -31,7 +31,7 @@ You'll get the following project structure:
 ├── jeka-src             <- Java (or Kotlin) code for build customization
 │   └── Custom.java      
 ├── jeka-output          <- Generated artifacts (JARs, classes, reports)
-├── dependencies.txt     <- Project dependencies
+├── jeka.project.deps    <- Project dependencies
 ├── jeka.properties      <- Build configuration and properties
 ├── jeka.ps              <- PowerShell wrapper (optional)
 ├── jeka                 <- Bash wrapper (optional)
@@ -85,9 +85,9 @@ jeka intellij: initProject
 
 ## Dependency Management
 
-Dependencies are declared in `dependencies.txt`. JeKa supports Maven coordinates and BOMs.
+Dependencies are declared in `jeka.project.deps`. JeKa supports Maven coordinates and BOMs.
 
-```ini title="dependencies.txt"
+```ini title="jeka.project.deps"
 [version]    # Define versions or import BOMs
 org.junit:junit-bom:5.12.2@pom
 

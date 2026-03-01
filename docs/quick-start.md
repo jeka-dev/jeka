@@ -193,7 +193,7 @@ This generates a project structure as:
 ├── jeka-src             <- Optional Java (or Kotlin) code for building the project
 │   └── Build.java      
 ├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
-├── dependencies.txt     <- Dependency lists for compile, runtime and testing
+├── jeka.project.deps   <- Dependency lists for compile, runtime and testing
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
 ├── jeka.ps              <- Optional PowerShell script to boot JeKa on Windows
 ├── jeka                 <- Optional bash script to boot JeKa on Linux/MacOS
@@ -227,7 +227,7 @@ This generates the following project structure:
 ├── jeka-src             
 │   └── Build.java       <- Optional build class (if needed)
 ├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
-├── dependencies.txt     <- Spring Boot and extra dependencies
+├── jeka.project.deps   <- Spring Boot and extra dependencies
 ├── jeka.properties      <- Build configuration 
 ├── jeka.ps              
 ├── jeka                 
@@ -250,7 +250,7 @@ You'll end up with the following code layout:
 
 #### Modify Dependencies
 The dependencies are generated with the latest Spring Boot version:
-```ini title="dependencies.txt"
+```ini title="jeka.project.deps"
 [version]
 org.springframework.boot:spring-boot-dependencies:3.4.1@pom
 

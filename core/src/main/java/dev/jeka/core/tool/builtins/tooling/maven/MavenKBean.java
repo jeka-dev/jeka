@@ -145,7 +145,7 @@ public final class MavenKBean extends KBean {
         System.out.println(JkUtilsString.repeat(separator, repeat));
         JkLog.info(JkMavenProject.of(getBaseDir()).getDependencyAsJeKaCode(codeIndent));
         System.out.println(JkUtilsString.repeat(separator, repeat));
-        System.out.println("dependencies.txt");
+        System.out.println(JkProject.PROJECT_DEPENDENCIES_FILE);
         System.out.println(JkUtilsString.repeat(separator, repeat));
         JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
     }

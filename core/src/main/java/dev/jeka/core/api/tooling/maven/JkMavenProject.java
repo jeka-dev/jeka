@@ -103,7 +103,7 @@ public class JkMavenProject {
 
     /**
      * Returns the dependencies of this Maven project as a formatted string suitable to be copy/pasted
-     * in <i>jeka/project-dependencies.txt</i> file.
+     * in <i>jeka.project.deps</i> file.
      */
     public String getDependenciesAsTxt()  {
         StringBuilder sb = new StringBuilder();

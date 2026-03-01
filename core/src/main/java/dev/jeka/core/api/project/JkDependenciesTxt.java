@@ -40,7 +40,9 @@ public class JkDependenciesTxt {
 
     private static final String VERSION = "version";
 
-    private static final String FILE_NAME = "dependencies.txt";
+    static final String PROJECT_DEPENDENCIES_FILE = "jeka.project.deps";
+
+    private static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
 
     private static final String LOCAL_EXCLUDE_SYMBOL = "!";
 
@@ -56,11 +58,14 @@ public class JkDependenciesTxt {
     }
 
     public static List<Path> getModuleDependencies(Path baseDir) {
-        Path dependenciesTxtFile = baseDir.resolve(FILE_NAME);
-        if (!Files.exists(dependenciesTxtFile)) {
+        Path projectDepsFile = baseDir.resolve(PROJECT_DEPENDENCIES_FILE);
+        if (!Files.exists(projectDepsFile)) {
+            projectDepsFile = baseDir.resolve(DEPENDENCIES_TXT_FILE);
+        }
+        if (!Files.exists(projectDepsFile)) {
             return Collections.emptyList();
         }
-        return JkUtilsPath.readAllLines(dependenciesTxtFile).stream()
+        return JkUtilsPath.readAllLines(projectDepsFile).stream()
                 .map(String::trim)
                 .filter(line -> !line.startsWith("#"))
                 .filter(line -> !line.startsWith("-"))
@@ -102,7 +107,10 @@ public class JkDependenciesTxt {
             }
         }
 
-        Path parent = dependenciesXmlPath.getParent().getParent().resolve("dependencies.txt");
+        Path parent = dependenciesXmlPath.getParent().getParent().resolve(PROJECT_DEPENDENCIES_FILE);
+        if (!Files.exists(parent)) {
+            parent = dependenciesXmlPath.getParent().getParent().resolve(DEPENDENCIES_TXT_FILE);
+        }
         if (Files.exists(parent)) {
             JkDependenciesTxt parsedDependenciesTxt = JkDependenciesTxt.parse(parent, baseDir, projectResolver,
                     properties);

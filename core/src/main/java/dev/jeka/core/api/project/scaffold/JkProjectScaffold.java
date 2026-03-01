@@ -29,8 +29,10 @@ import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -146,7 +148,7 @@ public final class JkProjectScaffold extends JkScaffold {
         postConfigureScaffold();
         super.run();
         generateProjectStructure();
-        generateDependencyTxt();
+        generateProjectDeps();
         if (generateLibsFolders) {
             generateLibsFolders();
         }
@@ -247,8 +249,9 @@ public final class JkProjectScaffold extends JkScaffold {
         return this;
     }
 
-    private void generateDependencyTxt() {
-        List<String> lines = JkUtilsIO.readAsLines(JkProjectScaffold.class.getResourceAsStream("dependencies.txt"));
+    private void generateProjectDeps() {
+        InputStream inputStream = JkProjectScaffold.class.getResourceAsStream(JkProject.PROJECT_DEPENDENCIES_FILE);
+        List<String> lines = inputStream == null ? Collections.emptyList() : JkUtilsIO.readAsLines(inputStream);
         StringBuilder sb = new StringBuilder();
         if (testDeps.isEmpty()) {
             testDeps.addAll(getJUnitDeps());
@@ -273,7 +276,7 @@ public final class JkProjectScaffold extends JkScaffold {
             }
         }
         String content = sb.toString();
-        JkPathFile.of(project.getBaseDir().resolve(JkProject.DEPENDENCIES_TXT_FILE))
+        JkPathFile.of(project.getBaseDir().resolve(JkProject.PROJECT_DEPENDENCIES_FILE))
                 .createIfNotExist()
                 .write(content);
     }

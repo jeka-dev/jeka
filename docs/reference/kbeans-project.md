@@ -65,7 +65,7 @@ class MyBuild extends KBean {
 
 ## Annotation Processors
 
-Enable processors like **Lombok** by adding them as `compile-only` dependencies in `dependencies.txt`:
+Enable processors like **Lombok** by adding them as `compile-only` dependencies in `jeka.project.deps`:
 
 ```ini
 [compile-only]

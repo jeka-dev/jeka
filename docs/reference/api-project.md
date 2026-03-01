@@ -115,10 +115,10 @@ To import a *bill-of-materials* (BOM), declare a dependency as: `group:module::p
 Using the programmatic api, you can also declare filesystem dependencies, meaning jar files located in 
 the project code base.
 
-<a href="#dependencies_txt"></a>
-#### dependencies.txt
+<a href="#jeka.project.deps"></a>
+#### jeka.project.deps
 
-Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/dependencies.txt* file.
+Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/jeka.project.deps* file.
 
 
 Example:
@@ -153,7 +153,7 @@ As shown in the example above, we can use the `@` and `@@` symbols to specify de
 `[version]`  
 Specifies the versions of dependencies to use when not explicitly defined.  
 You can include all versions defined in a *BOM* by referencing its coordinates and appending `@pom`.  
-The versions section inherits definitions from the *version* section in the `dependencies.txt` file located in the parent directory.
+The versions section inherits definitions from the *version* section in the `jeka.project.deps` file located in the parent directory.
 
 `[compile]`  
 Specifies dependencies required for both compiling and running the project.

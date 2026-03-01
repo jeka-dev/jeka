@@ -79,8 +79,8 @@ class ScaffoldTest {
     void scaffoldProject_layoutSimple_ok() {
         jeka("project: scaffold.kind=REGULAR scaffold.jekaVersion=NO layout.style=SIMPLE scaffold");
         jeka("test pack --verbose");
-        Assertions.assertTrue(Files.exists(runDir.resolve(JkProject.DEPENDENCIES_TXT_FILE)),
-                "dependencies.txt has not been generated");
+        Assertions.assertTrue(Files.exists(runDir.resolve(JkProject.PROJECT_DEPENDENCIES_FILE)),
+                JkProject.PROJECT_DEPENDENCIES_FILE + " has not been generated");
     }
 
     @Test
