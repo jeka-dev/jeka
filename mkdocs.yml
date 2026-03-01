@@ -64,14 +64,15 @@ nav:
     - Reference:
         - KBeans: reference/kbeans.md
         - Bundled KBeans:
-            - Core:
+            - Build:
                 - project: reference/kbeans-project.md
                 - base: reference/kbeans-base.md
+                - native: reference/kbeans-native.md
+                - bundle: reference/kbeans-bundle.md
             - DevOps:
                 - docker: reference/kbeans-docker.md
                 - git: reference/kbeans-git.md
-                - native: reference/kbeans-native.md
-                - bundle: reference/kbeans-bundle.md
+                - maven: reference/kbeans-maven.md
             - IDE Support:
                 - intellij: reference/kbeans-intellij.md
                 - eclipse: reference/kbeans-eclipse.md
