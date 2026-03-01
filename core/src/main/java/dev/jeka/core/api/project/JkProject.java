@@ -746,7 +746,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         Path projectDepsFile = baseDir.resolve(PROJECT_DEPENDENCIES_FILE);
         if (!Files.exists(projectDepsFile)) {
             projectDepsFile = baseDir.resolve(DEPENDENCIES_TXT_FILE);
-            JkLog.warn("dependencies.txt file name is deprecated. Please, rename it to '%s'.", PROJECT_DEPENDENCIES_FILE);
+            JkLog.warn("'dependencies.txt' file name is deprecated. Please, rename it to '%s'.", PROJECT_DEPENDENCIES_FILE);
         }
         LocalAndTxtDependencies textDeps = dependencyTxtUrl == null
                 ? LocalAndTxtDependencies.ofOptionalTextDescription(

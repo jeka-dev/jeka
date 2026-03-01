@@ -1,6 +1,6 @@
 # JeKa for Maven and Gradle Users
 
-If you are coming from Maven or Gradle, this guide will help you map your existing knowledge to JeKa concepts.
+If you are coming from *Maven* or *Gradle*, this guide will help you map your existing knowledge to JeKa concepts.
 
 ## Core Philosophies
 
@@ -35,17 +35,18 @@ If you are coming from Maven or Gradle, this guide will help you map your existi
 
 ## Key Differences
 
-### 1. Unified Model for Plugins and Build Logic
-Whether writing custom build logic or creating a reusable plugin, you use the same simple Java model: KBeans. They are similar to JavaBeans.
+### 1. No XML no DSL
+Use properties for configuration and Java code for logic.
 
-### 2. Pure Java Build Logic
-Instead of learning a specific DSL (Domain Specific Language) like Gradle's Groovy/Kotlin, you use **standard Java**. If you can write a Java method, you can write a build task.
+### 2. Unified Model for Plugins and Build Logic
+Whether writing custom build logic or creating a reusable plugin, you use the same simple Java model: KBeans. 
+They are similar to JavaBeans.
 
 ### 3. Immediate Feedback
 JeKa compiles and runs your build logic on-the-fly. There is no "configuring" phase that takes several seconds before the build starts.
 
-### 4. No XML or YAML
-Use properties for configuration and Java code for logic.
+### 4. Highly Portable
+Builds run on any machine, even without Java installed.
 
 ## Example: Adding a Dependency 
 
@@ -86,4 +87,7 @@ org.threeten:threeten-extra:1.8.0
 org.mockito:mockito-core:5.22.0
 ```
 
+## Benchmark
+
+See [this benchmark](https://github.com/djeang/benchmark-jeka-maven-gradle) for performance and configuration comparisons.
 

@@ -15,6 +15,7 @@
 - Executes packaged JARs.
 - Displays dependency trees and project setups.
 - Scaffolds skeletons for new projects.
+- **Plugin Development**: Particularly well-suited for developing reusable JeKa plugins (KBeans), as it allows you to write your plugin code directly in `jeka-src` and test it immediately.
 
 **Example**
 

@@ -2,6 +2,8 @@
 
 The `base` mode is a "best of both worlds" approach, sitting between single-file scripts like *JBang* and full-featured *Maven* or *Gradle* [projects](build-projects.md). 
 
+It is particularly well-suited for developing reusable JeKa plugins (KBeans), as it allows you to write your plugin code directly in `jeka-src` and test it immediately.
+
 In this tutorial, we'll use the [`base` KBean](../reference/kbeans-base.md) to build a Java application or library with minimal configuration.
 
 Visit the [demo-base-application](https://github.com/jeka-dev/demo-base-application) repository to see a concrete example.
