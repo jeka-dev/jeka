@@ -5,6 +5,7 @@ import dev.jeka.core.api.java.tools.JkJdeps;
 import dev.jeka.core.api.java.tools.JkJlink;
 import dev.jeka.core.api.java.tools.JkJpackage;
 import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -71,22 +72,34 @@ public final class BundleKBean extends KBean {
 
     @JkDoc("Packages the application into a bundle.")
     public void pack() {
+
+        // Create jar if not exist
+        Path jar = projectKBean.project.artifactLocator.getMainArtifactPath();
+        if (!Files.exists(jar)) {
+            JkLog.verbose("Jar %s not yet created: force creation to place it in bundle input dir ", jar);
+            projectKBean.project.pack.run();
+        }
+
+        JkLog.startTask("create-bundled-application");
         JkJpackage jpackage = jpackage();
 
         // Set Project options
-        setProjectOptions(jpackage);
+        setProjectOptions(jpackage, jar);
 
         // Add extra options
         jpackageOptions.forEach(jpackage::addOptions);
 
+
         if (customJre) {
 
             // Create custom JRE
+            JkLog.startTask("custom-jre");
             JkJlink jkJlink = jlink();
             fillJklinkOptions(jkJlink);
             jlinkOptions.forEach(jkJlink::addOptions);
             JkUtilsPath.deleteQuietly(customJrePath(), false);
             jkJlink.run();
+            JkLog.endTask();
 
             jpackage.addOptions("--runtime-image", customJrePath().toString());
         }
@@ -94,6 +107,7 @@ public final class BundleKBean extends KBean {
         // Run jpackage
         jpackage.prepareOutputDir();
         jpackage.run();
+        JkLog.endTask();
     }
 
     @JkDoc("Prints JPMS module dependencies on the console.")
@@ -242,25 +256,22 @@ public final class BundleKBean extends KBean {
                         .toList();
     }
 
-    private void setProjectOptions(JkJpackage jkPackage) {
+    private void setProjectOptions(JkJpackage jkPackage, Path jar) {
         JkProject project = projectKBean.project;
 
         Path inputDir = projectKBean.getOutputDir().resolve(JPACKAGE_TEMP_DIR_NAME);
-        createInputDir(inputDir);
+        createInputDir(inputDir, jar);
 
         String mainClass = project.pack.getOrFindMainClass();
-        Path mainJar = project.artifactLocator.getMainArtifactPath().getFileName();
-        if (!Files.exists(mainJar)) {
-            project.pack.run();
-        }
+        String mainJarFileName = project.artifactLocator.getMainArtifactPath().getFileName().toString();
 
-        String appName = JkUtilsString.substringBeforeLast(mainJar.toString(), ".jar");
+        String appName = JkUtilsString.substringBeforeLast(mainJarFileName, ".jar");
 
         jkPackage
                 .addOptions("--input", inputDir.toString())
                 .addOptions("--dest", outputDir().toString())
                 .addOptions("--main-class", mainClass)
-                .addOptions("--main-jar", mainJar.toString())
+                .addOptions("--main-jar", mainJarFileName)
                 .addOptions("--name", appName);
 
         JkPathSequence modulePath = project.jpmsModules.getModulePaths();
@@ -273,15 +284,11 @@ public final class BundleKBean extends KBean {
         }
     }
 
-    private void createInputDir(Path inputDir) {
+    private void createInputDir(Path inputDir, Path jar) {
         JkUtilsPath.createDirectories(inputDir);
 
         JkProject project = projectKBean.project;
-        Path jar = project.artifactLocator.getMainArtifactPath();
 
-        if (!Files.exists(jar)) {
-            project.pack.run();
-        }
         JkUtilsPath.createDirectories(inputDir);
 
         // Copy main jar
