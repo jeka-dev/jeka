@@ -1,7 +1,5 @@
 # JeKa Basics
 
-**Prerequisite:** JeKa must be [installed](../installation.md).
-
 JeKa is not just a build tool; it's a powerful companion for Java development that allows you to run Java code as scripts with zero ceremony. This tutorial will walk you through the core concepts of JeKa by creating and running simple scripts.
 
 ## Create a basic script

@@ -93,6 +93,12 @@ Once installed, you can simply call the application by name:
 kill8 8081
 ```
 
+If the application is a GUI, you can install it as a standalone desktop application.
+```bash
+jeka app: install repo=kill8@djeang runtime=BUNDLE
+```
+This will create a .dmg (macOS) or .exe (Windows) installer that you can use to install the application on your desktop.
+
 For more details on application management, see the [App KBean Reference](../reference/kbeans-app.md).
 
 ## Creating Source-Runnable Applications
@@ -126,6 +132,7 @@ jeka.program.build=maven: wrapPackage appModule=app
 ```
 
 **Requirements:**
+
 1. **Maven wrapper**: Include `mvnw` / `mvnw.cmd` in your repository (to make the build fully portable)
 2. **Fat JAR plugin**: Configure `maven-shade-plugin` to create executable JARs.
 3. **Native support (optional)**: Add `native-maven-plugin` in a Maven profile.

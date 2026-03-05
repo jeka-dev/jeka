@@ -5,8 +5,6 @@ This KBean provides build methods and a project layout similar to those of *Mave
 
 If you prefer a lighter structure without the standard `src/main/java` layout, see the [Build Base](build-base.md) tutorial.
 
-**Prerequisite:** JeKa must be [installed](../installation.md).
-
 !!! tip
     Run `jeka project: --doc` to see all available options and methods.
 

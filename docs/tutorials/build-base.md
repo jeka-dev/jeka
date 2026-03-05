@@ -8,8 +8,6 @@ In this tutorial, we'll use the [`base` KBean](../reference/kbeans-base.md) to b
 
 Visit the [demo-base-application](https://github.com/jeka-dev/demo-base-application) repository to see a concrete example.
 
-**Prerequisite:** JeKa must be [installed](../installation.md).
-
 !!! tip
     Run `jeka base: --doc` to see all available options and commands for the [base KBean](../reference/kbeans-base.md).
 
