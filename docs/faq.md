@@ -51,6 +51,8 @@ From an existing *Maven*/*Gradle* project, execute:
 ```bash
 jeka base: scaffold
 ```
+This will generate a `jeka-src` folder,along with a `jeka.properties` file.
+
 Edit the `jeka.properties` file, and add:
 ```properties
 @intellij.splitModule=true
