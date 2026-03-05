@@ -310,11 +310,11 @@ public class AppKBean extends KBean {
 
         JkBusyIndicator.start(JkLog.getOutPrintStream(),"Querying Git repos...");
         text.add(  // Can't use ansi color in table, cause ansi chars  will be truncated.
-                "App Name",
-                "Repo",
-                "Version",
-                "Status",
-                "Runtime");
+                "APP NAME",
+                "REPO",
+                "VERSION",
+                "STATUS",
+                "RUNTIME");
         for (String appName : installedAppNames) {
             AppInfo appInfo = appManager.getAppInfo(appName);
             String update = appInfo.updateInfo;
@@ -324,8 +324,10 @@ public class AppKBean extends KBean {
             text.add(appName, repoUrl, tag, update, appInfo.isNative ? "native" : "jvm");
         }
         JkBusyIndicator.stop();
-        JkLog.info(JkAnsi.magenta("Installed app:"));
+        JkLog.info(JkAnsi.magenta("Installed apps:"));
         JkLog.info(text.toString());
+        String msg = " Bundled applications are not listed here since they are installed outside of JeKa's management.";
+        JkLog.info(JkAnsi.yellow("*") + JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(msg).toString());
     }
 
     @JkDoc("""

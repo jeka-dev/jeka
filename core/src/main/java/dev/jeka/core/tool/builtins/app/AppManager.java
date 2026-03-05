@@ -26,10 +26,13 @@ import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 import dev.jeka.core.tool.builtins.project.BundleKBean;
 
+import java.awt.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 class AppManager {
@@ -299,8 +302,24 @@ class AppManager {
             throw e;
         }
 
-        String fileName = (JkUtilsSystem.IS_WINDOWS && runtimeMode != RuntimeMode.NATIVE) ? appName + ".bat" : appName;
-        JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        if (runtimeMode == RuntimeMode.BUNDLE) {
+            if (JkUtilsSystem.IS_MACOS) {
+                try {
+                    Desktop.getDesktop().open(artefact.toFile());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (JkUtilsSystem.IS_WINDOWS) {
+                // TODO
+            } else {
+                throw new IllegalStateException("Unsupported OS for bundling");
+            }
+
+        } else {
+            String fileName = (JkUtilsSystem.IS_WINDOWS && runtimeMode != RuntimeMode.NATIVE) ? appName + ".bat" : appName;
+            JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        }
+
     }
 
 
@@ -391,5 +410,7 @@ class AppManager {
             return appName + " " + version + (isNative ? "  native" : " jvm");
         }
     }
+
+
 
 }

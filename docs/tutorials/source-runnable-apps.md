@@ -1,6 +1,6 @@
 # Source-Runnable Applications
 
-With JeKa, you don't need to create and publish binaries to publish your application. JeKa acts as an application source manager, enabling you to run applications directly from their Git (remote) repository or to install them on a user's desktop by building them at installation time.
+With JeKa, distributing software doesn't require creating and publishing binaries. JeKa acts as a source-based application manager, letting you run programs directly from their remote Git repository or install them on a user's desktop by building them at installation time.
 
 ## Running Applications from Remote Repositories
 

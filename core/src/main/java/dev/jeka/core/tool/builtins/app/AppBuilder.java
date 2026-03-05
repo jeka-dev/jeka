@@ -56,28 +56,45 @@ class AppBuilder {
         }
 
         // Find the executable or jar built artefact
+        final Path result;
         if (runtimeMode == RuntimeMode.NATIVE) {
             if (JkUtilsSystem.IS_WINDOWS) {
-                return JkUtilsPath.listDirectChildren(buildDir).stream()
-                        .filter(path -> path.toString().endsWith(".exe"))
-                        .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
-            }
-            return JkUtilsPath.listDirectChildren(buildDir).stream()
+                result = findFirst(buildDir, ".exe");
+            } else {
+                result = JkUtilsPath.listDirectChildren(buildDir).stream()
                         .filter(Files::isRegularFile)
                         .filter(path -> !path.toString().endsWith(".jar"))
                         .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
-        }
+            }
 
-        // Create shell/bat wrapper files
-        Path jarFile = JkUtilsPath.listDirectChildren(buildDir).stream()
-                .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith(".jar"))
-                .findFirst().orElseThrow(() ->
-                        new IllegalStateException("Cannot find jar file in directory " + buildDir));
-        if (JkUtilsSystem.IS_WINDOWS) {
-            return createBatFile(baseDir, jarFile);
+        } else if (runtimeMode == RuntimeMode.BUNDLE) {
+            if (JkUtilsSystem.IS_MACOS) {
+                result = findFirst(buildDir, ".dmg");
+            } else if (JkUtilsSystem.IS_WINDOWS) {
+                result = findFirst(buildDir, ".exe");
+            } else  {
+                throw new IllegalStateException("Cannot manage bundle on this system (only Windows or MACOS)");
+            }
+
+            // runtimeMode = JVM
+        } else {
+            // Create shell/bat wrapper files
+            Path jarFile = findFirst(buildDir, ".jar");
+            if (JkUtilsSystem.IS_WINDOWS) {
+                result = createBatFile(baseDir, jarFile);
+            } else {
+                result = createShellFile(baseDir, jarFile);
+            }
         }
-        return createShellFile(baseDir, jarFile);
+        return result;
+    }
+
+    private static Path findFirst(Path dir, String ext) {
+        return JkUtilsPath.listDirectChildren(dir).stream()
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(ext))
+                .findFirst().orElseThrow(() ->
+                        new IllegalStateException("Cannot find " + ext + " file in directory " + dir));
     }
 
     private static Path createBatFile(Path baseDir, Path jarPath) {
