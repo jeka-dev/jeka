@@ -30,7 +30,7 @@ import java.util.stream.Stream;
         """)
 public final class BundleKBean extends KBean {
 
-    private static final String JDEPS = "jdeps:compute";
+    private static final String JDEPS = "JDEPS-COMPUTE";
 
     public static final String JPACKAGE_TEMP_DIR_NAME = "jpackage-input";
 
@@ -172,7 +172,7 @@ public final class BundleKBean extends KBean {
         @JkDoc("Extra options to pass to jpackage (e.g. 'options.all=--name=myapp)")
         @JkSuggest(value = {"--add-modules", "--java-options", "--name", "--runtime-image", "--vendor", "--description",
                 "--verbose"},
-                    multiValues = {JDEPS, "app-image", "deb", "exe", "msi", "rpm", "pkg", "dmg", })
+                    multiValues = {"ALL-MODULE-PATH", JDEPS, "app-image" })
 
         public JkMultiValue<String> all = JkMultiValue.of(String.class);
 
