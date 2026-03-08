@@ -238,8 +238,10 @@ public class AppKBean extends KBean {
         // Install built app in target folder
         appManager.install(appName, repoAndTag, runtime);
 
-        JkLog.info("App has been installed in %s.", appManager.appDir);
-        JkLog.info("Run with: %s", JkAnsi.yellow(suggestedAppName));
+        if (!RuntimeMode.BUNDLE.equals(runtime)) {
+            JkLog.info("App has been installed in %s.", appManager.appDir);
+            JkLog.info("Run with: %s", JkAnsi.yellow(suggestedAppName));
+        }
     }
 
     @JkDoc("Updates an app from the given name.\n" +
