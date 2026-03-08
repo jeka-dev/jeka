@@ -112,8 +112,8 @@ public final class BundleKBean extends KBean {
         JkLog.endTask();
     }
 
-    @JkDoc("Prints JPMS module dependencies on the console.")
-    public void showModuleDeps() {
+    @JkDoc("Prints JPMS module dependencies computed by jdeps.")
+    public void computeModuleDeps() {
         jdeps().getModuleDeps(mainJar(), projectKBean.project.jpmsModules.getModulePaths());
     }
 
