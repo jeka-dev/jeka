@@ -55,7 +55,7 @@ class AppBuilder {
                     + ". Make sure that the application build has been executed successfully.");
         }
 
-        // Find the executable or jar built artefact
+        // Find the executable or jar built artifact
         final Path result;
         if (runtimeMode == RuntimeMode.NATIVE) {
             if (JkUtilsSystem.IS_WINDOWS) {
@@ -71,7 +71,7 @@ class AppBuilder {
             if (JkUtilsSystem.IS_MACOS) {
                 result = findFirst(buildDir, ".dmg");
             } else if (JkUtilsSystem.IS_WINDOWS) {
-                result = findFirst(buildDir, ".exe");
+                result = findExecutableParent(baseDir);
             } else  {
                 throw new IllegalStateException("Cannot manage bundle on this system (only Windows or MACOS)");
             }
@@ -145,6 +145,11 @@ class AppBuilder {
             if (runtimeMode == RuntimeMode.BUNDLE) {
                 args.add("bundle:");
                 args.add("pack");
+                if (JkUtilsSystem.IS_WINDOWS) {
+
+                    // The default type requires specific installation tools present on the local machine.
+                    args.add("jpackage.options.windows.--type=app-image");
+                }
             }
         }
         args.add("-Djeka.test.skip=true");
@@ -172,6 +177,15 @@ class AppBuilder {
             }
         }
         return null;
+    }
+
+    private static Path findExecutableParent(Path baseDir) {
+        return JkUtilsPath.walk(baseDir)
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".exe"))
+                .map(Path::getParent)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Cannot find any .exe file in " + baseDir));
     }
 
 }

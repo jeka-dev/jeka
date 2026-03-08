@@ -303,14 +303,12 @@ class AppManager {
         }
 
         if (runtimeMode == RuntimeMode.BUNDLE) {
-            if (JkUtilsSystem.IS_MACOS) {
+            if (JkUtilsSystem.IS_MACOS || JkUtilsSystem.IS_WINDOWS) {
                 try {
                     Desktop.getDesktop().open(artefact.toFile());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (JkUtilsSystem.IS_WINDOWS) {
-                // TODO
             } else {
                 throw new IllegalStateException("Unsupported OS for bundling");
             }
@@ -319,10 +317,7 @@ class AppManager {
             String fileName = (JkUtilsSystem.IS_WINDOWS && runtimeMode != RuntimeMode.NATIVE) ? appName + ".bat" : appName;
             JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
         }
-
     }
-
-
 
     private Optional<GitTag> getTag(Path repoDir) {
         List<String> currentTags = JkGit.of(repoDir).getTagsOnCurrentCommit();
