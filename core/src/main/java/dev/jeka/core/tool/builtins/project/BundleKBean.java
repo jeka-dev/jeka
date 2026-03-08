@@ -30,6 +30,8 @@ import java.util.stream.Stream;
         """)
 public final class BundleKBean extends KBean {
 
+    private static final String JDEPS = "jdeps:compute";
+
     public static final String JPACKAGE_TEMP_DIR_NAME = "jpackage-input";
 
     @JkDoc("If true, a custom JRE is created including only Java modules used by the application.")
@@ -168,7 +170,10 @@ public final class BundleKBean extends KBean {
         private JpackageOptions() {}
 
         @JkDoc("Extra options to pass to jpackage (e.g. 'options.all=--name=myapp)")
-        @JkSuggest({"--add-modules", "--java-options", "--name","--runtime-image", "--vendor", "--description", "--verbose"})
+        @JkSuggest(value = {"--add-modules", "--java-options", "--name", "--runtime-image", "--vendor", "--description",
+                "--verbose"},
+                    multiValues = {JDEPS, "app-image", "deb", "exe", "msi", "rpm", "pkg", "dmg", })
+
         public JkMultiValue<String> all = JkMultiValue.of(String.class);
 
         @JkDoc("Extra options to pass to jpackage only when running on Windows. (e.g. 'options.windows--icon=media/icon.ico)")
@@ -185,14 +190,20 @@ public final class BundleKBean extends KBean {
 
         private List<String[]> toOptions() {
             List<String[]> options = new LinkedList<>(toOptionArray(all));
-            if (JkUtilsSystem.IS_WINDOWS) {
-                options.addAll(toOptionArray(windows));
-            } else if (JkUtilsSystem.IS_MACOS) {
-                options.addAll(toOptionArray(mac));
-            } else {
-                options.addAll(toOptionArray(linux));
-            }
+            JkMultiValue<String> osOptions = getCurrentOsOptions();
+            options.addAll(toOptionArray(osOptions));
             return options;
+        }
+
+        private JkMultiValue<String> getCurrentOsOptions() {
+            return JkUtilsSystem.IS_WINDOWS ? windows
+                    : JkUtilsSystem.IS_MACOS ? mac
+                    : linux;
+        }
+
+        private String getEffectiveOption(String optionName) {
+            return Optional.ofNullable(getCurrentOsOptions().get(optionName))
+                    .orElse(all.get(optionName));
         }
     }
 
@@ -274,22 +285,26 @@ public final class BundleKBean extends KBean {
                 .addOptions("--main-jar", mainJarFileName)
                 .addOptions("--name", appName);
 
-        JkPathSequence modulePath = project.jpmsModules.getModulePaths();
-        JkLog.debug("Module path from project.jpmsModules: " + modulePath);
-        if (!modulePath.toList().isEmpty() && !customJre) {
-            jkPackage.addOptions("--module-path", modulePath.toPath());
+        JkPathSequence projectModulePath = project.jpmsModules.getModulePaths();
+        JkLog.debug("Module path from project.jpmsModules: " + projectModulePath);
+        if (!projectModulePath.toList().isEmpty()
+                && !customJre
+                && this.jpackage.options.getEffectiveOption("--module-path") == null) {
+            jkPackage.addOptions("--module-path", projectModulePath.toPath());
         }
-        List<String> addModules = jdeps().getModuleDeps(project.artifactLocator.getMainArtifactPath(), modulePath);
 
-        if (JkLog.isDebug()) {
-            JkLog.debug("Detected Modules by JDeps:", addModules);
-            JkLog.debug("List of modules present in JDK:");
-            ModuleLayer.boot()
-                    .modules()
-                    .forEach(m -> JkLog.debug(m.getName()));
-        }
-        if (!addModules.isEmpty() && !customJre) {
-            //jkPackage.addOptions("--add-modules", String.join(",", addModules));
+        if (JDEPS.equals(jpackage.options.getEffectiveOption("--add-modules"))
+                && !customJre) {
+            List<String> addModules = jdeps().getModuleDeps(project.artifactLocator.getMainArtifactPath(), projectModulePath);
+
+            if (JkLog.isDebug()) {
+                JkLog.debug("Detected Modules by JDeps:", addModules);
+                JkLog.debug("List of modules present in JDK:");
+                ModuleLayer.boot()
+                        .modules()
+                        .forEach(m -> JkLog.debug(m.getName()));
+            }
+            jkPackage.addOptions("--add-modules", String.join(",", addModules));
         }
     }
 
