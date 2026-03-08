@@ -111,14 +111,18 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         if (!hasDotGitDirOrInParent(this.getWorkingDir().toAbsolutePath().normalize())) {
             return false;
         }
-        String result = this.copy()
+        JkProcResult result = this.copy()
                 .addParams("rev-parse", "--is-inside-work-tree")
                 .setCollectStdout(true)
                 .setLogWithJekaDecorator(false)
-                .exec()
-                .getStdoutAsString();
+                .setFailOnError(false)
+                .exec();
+        if (result.getExitCode() != 0) {
+            return false;
+        }
+        String resultStr = result.getStdoutAsString();
         JkLog.debug("%s>git  rev-parse --is-inside-work-tree  -> '%s'", this.getWorkingDir(), result);
-        return "true".equals(result.replace("\n", ""));
+        return "true".equals(resultStr.replace("\n", ""));
     }
 
     private boolean hasDotGitDirOrInParent(Path dir) {

@@ -275,12 +275,21 @@ public final class BundleKBean extends KBean {
                 .addOptions("--name", appName);
 
         JkPathSequence modulePath = project.jpmsModules.getModulePaths();
+        JkLog.debug("Module path from project.jpmsModules: " + modulePath);
         if (!modulePath.toList().isEmpty() && !customJre) {
             jkPackage.addOptions("--module-path", modulePath.toPath());
         }
         List<String> addModules = jdeps().getModuleDeps(project.artifactLocator.getMainArtifactPath(), modulePath);
+
+        if (JkLog.isDebug()) {
+            JkLog.debug("Detected Modules by JDeps:", addModules);
+            JkLog.debug("List of modules present in JDK:");
+            ModuleLayer.boot()
+                    .modules()
+                    .forEach(m -> JkLog.debug(m.getName()));
+        }
         if (!addModules.isEmpty() && !customJre) {
-            jkPackage.addOptions("--add-modules", String.join(",", addModules));
+            //jkPackage.addOptions("--add-modules", String.join(",", addModules));
         }
     }
 
