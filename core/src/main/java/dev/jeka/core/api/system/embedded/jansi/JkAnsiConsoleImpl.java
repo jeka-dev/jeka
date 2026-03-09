@@ -39,6 +39,7 @@ class JkAnsiConsoleImpl implements JkAnsiConsole {
                     .system(true)
                     .dumb(true)
                     .jansi(true)
+                    .type("xterm-256color")
                     .build();
         } catch (IOException e) {
             throw new UncheckedIOException(e);

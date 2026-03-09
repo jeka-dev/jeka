@@ -236,6 +236,7 @@ public class AppKBean extends KBean {
         String appName = suggestedAppName;
 
         // Install built app in target folder
+
         appManager.install(appName, repoAndTag, runtime);
 
         if (RuntimeMode.BUNDLE.equals(runtime)) {
@@ -331,7 +332,7 @@ public class AppKBean extends KBean {
         JkLog.info(JkAnsi.magenta("Installed apps:"));
         JkLog.info(text.toString());
         String msg = " Bundled applications are not listed here since they are installed outside of JeKa's management.";
-        JkLog.info(JkAnsi.yellow("*") + JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(msg).toString());
+        JkLog.info(JkAnsi.yellow("*") + JkAnsi.of().a(JkAnsi.Attribute.INTENSITY_FAINT).a(msg).reset().toString());
     }
 
     @JkDoc("""

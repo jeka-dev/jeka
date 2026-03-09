@@ -21,6 +21,7 @@ import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.system.JkAnsi;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
 import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
@@ -68,14 +69,19 @@ class AppManager {
 
     void install(String appName, RepoAndTag repoAndTag, RuntimeMode runtimeMode) {
         Path repoDir = repoDir(appName);
+        JkLog.info("Cloning to %s...", repoDir);
+        if (Files.exists(repoDir) && JkUtilsSystem.IS_WINDOWS) {
+            // We need to use this command on windows otherwise java file deletion fails on git indexes.
+            JkProcess.of("cmd", "/c", "rmdir", "/s", "/q", repoDir.toString()).run();
+        }
         JkUtilsPath.deleteQuietly(repoDir, false);
         JkUtilsPath.createDirectories(repoDir);
-        JkLog.info("Cloning to %s...", repoDir);
         JkGit.of(repoDir)
-                .addParams("clone", "--quiet", "-c", "advice.detachedHead=false", "--depth", "1")
-                .addParamsIf(repoAndTag.hasTag(), "--branch", repoAndTag.tag)
-                .addParams(repoAndTag.repoUrl, repoDir.toString())
-                .exec();
+            .addParams("clone", "--quiet", "-c", "advice.detachedHead=false", "--depth", "1")
+            .addParamsIf(repoAndTag.hasTag(), "--branch", repoAndTag.tag)
+            .addParams(repoAndTag.repoUrl, repoDir.toString())
+            .exec();
+
         JkLog.info("Build app...");
         buildAndInstall(appName, repoDir, runtimeMode);
     }
@@ -312,7 +318,6 @@ class AppManager {
             } else {
                 throw new IllegalStateException("Unsupported OS for bundling");
             }
-
         } else {
             String fileName = (JkUtilsSystem.IS_WINDOWS && runtimeMode != RuntimeMode.NATIVE) ? appName + ".bat" : appName;
             JkUtilsPath.move(artefact, appDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
