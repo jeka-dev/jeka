@@ -458,6 +458,16 @@ public final class JkUtilsSystem {
             return builder.toString();
         }
 
+        public String toMavenArch() {
+            if (type == Type.AARCH_64) {
+                return "aarch_64";
+            }
+            if (type == Type.X86) {
+                return arch == Arch.BIT_64 ? "x86_64" : "x86";
+            }
+            return arch.label.toLowerCase();
+        }
+
     }
 
     /**

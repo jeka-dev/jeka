@@ -137,6 +137,8 @@ org.glassfish.jaxb:jaxb-runtime      # version for org.glassfish.jaxb:jaxb-* is 
 [compile-only]
 org.projectlombok:lombok:1.18.36
 org.openjfx:javafx-base:${jeka.platform.os}:2.0.18  # properties are interpolated
+org.openjfx:javafx-base:${maven.classifier.os}:2.0.18  # properties are interpolated
+com.github.tjake:jlama-native:${maven.classifier.os}-${maven.classifier.arch}:: # specify classifier without specifying version
 
 [runitme]
 org.postgresql:postgresql

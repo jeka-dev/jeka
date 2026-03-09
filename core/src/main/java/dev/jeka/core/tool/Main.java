@@ -65,10 +65,18 @@ public class Main {
         // Set platform properties
         if (JkUtilsSystem.IS_WINDOWS) {
             System.setProperty(JkConstants.JEKA_PLATFORM_OS, "windows");
+            System.setProperty("maven.classifier.os", "windows");
         } else if (JkUtilsSystem.IS_MACOS) {
             System.setProperty(JkConstants.JEKA_PLATFORM_OS, "mac");
+            System.setProperty("maven.classifier.os", "osx");
         } else if (JkUtilsSystem.IS_LINUX) {
             System.setProperty(JkConstants.JEKA_PLATFORM_OS, "linux");
+            System.setProperty("maven.classifier.os", "linux");
+        }
+        JkUtilsSystem.Processor processor = JkUtilsSystem.getProcessor();
+        if (processor != null) {
+            System.setProperty(JkConstants.JEKA_PLATFORM_ARCH, processor.getArch().getLabel());
+            System.setProperty("maven.classifier.arch", processor.toMavenArch());
         }
 
         CmdLineArgs cmdArgs = new CmdLineArgs(args);
