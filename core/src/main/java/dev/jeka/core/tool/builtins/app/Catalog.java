@@ -77,7 +77,7 @@ class Catalog {
                         + appName + "@" + catalogName + " runtime=NATIVE"));
             }
             if (appInfo.supportsBundle) {
-                String bundableMsg = JkUtilsString.padEnd("Install as app bundle", longestMsg, ' ');
+                String bundableMsg = JkUtilsString.padEnd("Install as desktop app:", longestMsg, ' ');
                 System.out.println(bundableMsg + ": " + JkAnsi.yellow("jeka app: install repo="
                         + appName + "@" + catalogName + " runtime=BUNDLE"));
             }
