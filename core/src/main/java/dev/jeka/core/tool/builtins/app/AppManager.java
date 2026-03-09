@@ -311,6 +311,7 @@ class AppManager {
         if (runtimeMode == RuntimeMode.BUNDLE) {
             if (JkUtilsSystem.IS_MACOS || JkUtilsSystem.IS_WINDOWS) {
                 try {
+                    JkLog.info("Opening the folder where the application is installed...");
                     Desktop.getDesktop().open(artefact.toFile());
                 } catch (IOException e) {
                     throw new RuntimeException(e);

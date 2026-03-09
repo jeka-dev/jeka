@@ -239,9 +239,7 @@ public class AppKBean extends KBean {
 
         appManager.install(appName, repoAndTag, runtime);
 
-        if (RuntimeMode.BUNDLE.equals(runtime)) {
-            JkLog.info("Opened the installation directory in a separate file explorer window.");
-        } else {
+        if (!RuntimeMode.BUNDLE.equals(runtime)) {
             JkLog.info("App has been installed in %s.", appManager.appDir);
             JkLog.info("Run with: %s", JkAnsi.yellow(suggestedAppName));
         }
