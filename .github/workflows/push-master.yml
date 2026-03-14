@@ -44,7 +44,7 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        jeka -Djeka.java.version=21 -cb=core -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --verbose --inspect
+        jeka -Djeka.java.version=21 -cb=core -cp=plugins/plugins.sonarqube/jeka-output/classes sonarqube: run --inspect
 
     - name: Publish to OSSRH snapshot
       if: false
@@ -81,7 +81,7 @@ jobs:
         jeka build: enrichMkDocs
 
     - name: Deploy MkDocs
-      # if: startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/')
       uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
         CONFIG_FILE: jeka-output/mkdocs/mkdocs.yml

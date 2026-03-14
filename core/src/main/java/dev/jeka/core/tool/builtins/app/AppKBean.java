@@ -191,49 +191,52 @@ public class AppKBean extends KBean {
         }
 
         // Ask for name
-        boolean nameOk = !shouldAskAppName && (name == null || !systemFiles().contains(name));
-        boolean retry = false;
-        while(!nameOk) {
-            String response;
-            if (appManager.installedAppNames().contains(suggestedAppName)) {
-                if (!retry) {
-                    JkLog.info("An application named '%s' is already installed.", JkAnsi.yellow(suggestedAppName));
+        if (runtime != RuntimeMode.BUNDLE) {
+            boolean nameOk = !shouldAskAppName && (name == null || !systemFiles().contains(name));
+            boolean retry = false;
+            while (!nameOk) {
+                String response;
+                if (appManager.installedAppNames().contains(suggestedAppName)) {
+                    if (!retry) {
+                        JkLog.info("An application named '%s' is already installed.", JkAnsi.yellow(suggestedAppName));
+                    }
+                    response = JkPrompt.ask("Choose a new name for the application:").trim();
+                } else {
+                    String suggestName = appManager.suggestName(suggestedAppName);
+                    response = JkPrompt.ask("Choose a name for this application. Press %s to select '%s':",
+                                    JkAnsi.yellow("<ENTER>"),
+                                    JkAnsi.yellow(suggestName))
+                            .trim();
+                    if (response.isEmpty()) {
+                        response = suggestName;
+                    }
                 }
-                response = JkPrompt.ask("Choose a new name for the application:").trim();
-            } else {
-                String suggestName = appManager.suggestName(suggestedAppName);
-                response = JkPrompt.ask("Choose a name for this application. Press %s to select '%s':",
-                        JkAnsi.yellow("<ENTER>"),
-                        JkAnsi.yellow(suggestName))
-                        .trim();
-                if (response.isEmpty()) {
-                    response = suggestName;
+                retry = true;
+                if (!AppManager.isAppNameValid(response)) {
+                    JkLog.info("Sorry, application name should only contain alphanumeric characters or '-'.");
+                    continue;
                 }
+                if (response.length() > 32) {
+                    JkLog.info("Sorry, application name should contain between 0 and 32 characters.");
+                    continue;
+                }
+                if (systemFiles().contains(response)) {
+                    JkLog.info("Sorry, application name should not be a jeka system name as %s.",
+                            JkAnsi.yellow(systemFiles().toString()));
+                    continue;
+                }
+                if (appManager.installedAppNames().contains(response)) {
+                    JkLog.info("Sorry, the application name `%s` is already used by another app", JkAnsi.yellow(response));
+                    JkLog.info("Installed programs are:");
+                    appManager.installedAppNames().forEach(JkLog::debug);
+                    continue;
+                }
+                suggestedAppName = response;
+                nameOk = true;
             }
-            retry = true;
-            if (!AppManager.isAppNameValid(response)) {
-                JkLog.info("Sorry, application name should only contain alphanumeric characters or '-'.");
-                continue;
-            }
-            if (response.length() > 32) {
-                JkLog.info("Sorry, application name should contain between 0 and 32 characters.");
-                continue;
-            }
-            if (systemFiles().contains(response)) {
-                JkLog.info("Sorry, application name should not be a jeka system name as %s.",
-                        JkAnsi.yellow(systemFiles().toString()));
-                continue;
-            }
-            if (appManager.installedAppNames().contains(response)) {
-                JkLog.info("Sorry, the application name `%s` is already used by another app", JkAnsi.yellow(response));
-                JkLog.info("Installed programs are:");
-                appManager.installedAppNames().forEach(JkLog::debug);
-                continue;
-            }
-            suggestedAppName = response;
-            nameOk = true;
         }
         String appName = suggestedAppName;
+
 
         // Install built app in target folder
 

@@ -36,8 +36,15 @@ class AppBuilder {
 
     private  static final String PROGRAM_BUILD_NATIVE_PROP = "jeka.program.build.native";
 
+    private  static final String PROGRAM_BUILD_BUNDLE_PROP = "jeka.program.build.bundle";
+
+    private  static final String PROGRAM_BUNDLE_DIST_PROP = "jeka.program.bundle.dist";
+
     static final String SHE_BANG = "#!/bin/sh";
 
+    /**
+     * @param bundleDistDir can be null
+     */
     static Path build(Path baseDir, RuntimeMode runtimeMode) {
         String[] buildArgs = buildArgs(baseDir, runtimeMode);
         JkLog.verbose("Use commands: %s", String.join(" ", buildArgs));
@@ -68,7 +75,12 @@ class AppBuilder {
             }
 
         } else if (runtimeMode == RuntimeMode.BUNDLE) {
-            if (JkUtilsSystem.IS_MACOS) {
+            Path propertyFile= baseDir.resolve(JkConstants.PROPERTIES_FILE);
+            String dist = JkProperties.ofFile(propertyFile).get(PROGRAM_BUNDLE_DIST_PROP);
+            if (!JkUtilsString.isBlank(dist)) {
+                Path distDir = baseDir.resolve(dist);
+                result = findFirst(distDir, ".dmg");
+            } else if (JkUtilsSystem.IS_MACOS) {
                 result = findFirst(buildDir, ".dmg");
             } else if (JkUtilsSystem.IS_WINDOWS) {
                 result = findExecutableParent(baseDir);
@@ -119,10 +131,9 @@ class AppBuilder {
     private static String[] buildArgs(Path base, RuntimeMode runtimeMode) {
         Path jekaProperties = base.resolve(JkConstants.PROPERTIES_FILE);
         List<String> args = new LinkedList<>();
-        boolean isNative = runtimeMode == RuntimeMode.NATIVE;
         if (Files.exists(jekaProperties)) {
 
-            String buildCmd = chooseSpecificBuildCommand(JkProperties.ofFile(jekaProperties), isNative);
+            String buildCmd = chooseSpecificBuildCommand(JkProperties.ofFile(jekaProperties), runtimeMode);
             if (!JkUtilsString.isBlank(buildCmd)) {
                 args.addAll(JkUtilsString.parseCommandlineAsList(buildCmd));
             }
@@ -159,8 +170,8 @@ class AppBuilder {
         return args.toArray(new String[0]);
     }
 
-    private static String chooseSpecificBuildCommand(JkProperties properties, boolean nativeCompile) {
-        if (nativeCompile) {
+    private static String chooseSpecificBuildCommand(JkProperties properties, RuntimeMode runtimeMode) {
+        if (runtimeMode == RuntimeMode.NATIVE) {
             String buildNative = properties.get(PROGRAM_BUILD_NATIVE_PROP);
             if (!JkUtilsString.isBlank(buildNative)) {
                 return buildNative;
@@ -169,6 +180,14 @@ class AppBuilder {
                 if (!JkUtilsString.isBlank(build)) {
                     return build + " native: compile";
                 }
+            }
+        } else if (runtimeMode == RuntimeMode.BUNDLE) {
+            String build = properties.get(PROGRAM_BUILD_BUNDLE_PROP);
+            if (JkUtilsString.isBlank(build)) {
+                build = properties.get(PROGRAM_BUILD_PROP);
+            }
+            if (!JkUtilsString.isBlank(build)) {
+                return build;
             }
         } else {
             String build = properties.get(PROGRAM_BUILD_PROP);
