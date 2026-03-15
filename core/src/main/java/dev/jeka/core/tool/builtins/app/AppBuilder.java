@@ -77,13 +77,17 @@ class AppBuilder {
         } else if (runtimeMode == RuntimeMode.BUNDLE) {
             Path propertyFile= baseDir.resolve(JkConstants.PROPERTIES_FILE);
             String dist = JkProperties.ofFile(propertyFile).get(PROGRAM_BUNDLE_DIST_PROP);
-            if (!JkUtilsString.isBlank(dist)) {
-                Path distDir = baseDir.resolve(dist);
+
+            if (JkUtilsSystem.IS_MACOS) {
+                Path distDir = JkUtilsString.isBlank(dist) ? buildDir : baseDir.resolve(dist);
                 result = findFirst(distDir, ".dmg");
-            } else if (JkUtilsSystem.IS_MACOS) {
-                result = findFirst(buildDir, ".dmg");
+
             } else if (JkUtilsSystem.IS_WINDOWS) {
-                result = findExecutableParent(baseDir);
+                if (!JkUtilsString.isBlank(dist)) {
+                    result = baseDir.resolve(dist);
+                } else {
+                    result = findExecutableParent(baseDir);
+                }
             } else  {
                 throw new IllegalStateException("Cannot manage bundle on this system (only Windows or MACOS)");
             }
