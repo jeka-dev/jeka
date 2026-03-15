@@ -83,8 +83,7 @@ public final class JkExternalToolApi {
      */
     public static JkRepoSet getDownloadRepos(Path baseDir) {
         JkProperties properties = PropertiesHandler.constructRunbaseProperties(baseDir);
-        JkRepoSet result = JkRepoProperties.of(properties).getDownloadRepos();
-        return result;
+        return JkRepoProperties.of(properties).getDownloadRepos();
     }
 
     /**
@@ -99,6 +98,9 @@ public final class JkExternalToolApi {
             return true;
         }
         if (Files.isRegularFile(candidate.resolve(JkProject.DEPENDENCIES_TXT_FILE))) {
+            return true;
+        }
+        if (Files.isRegularFile(candidate.resolve(JkProject.PROJECT_DEPENDENCIES_FILE))) {
             return true;
         }
         if (Files.isDirectory(candidate.resolve(JkProject.PROJECT_LIBS_DIR))) {
@@ -131,8 +133,8 @@ public final class JkExternalToolApi {
                 .getAllStartingWith(JkConstants.CMD_PREFIX_PROP, false);
         List<String> keys = new LinkedList<>(result.keySet());
         keys.stream().filter(key -> key.startsWith(JkConstants.CMD_APPEND_SUFFIX_PROP))
-                        .forEach(key -> result.remove(key));
-        return new TreeMap(result);
+                        .forEach(result::remove);
+        return new TreeMap<>(result);
     }
 
     /**
@@ -154,7 +156,7 @@ public final class JkExternalToolApi {
      */
     public static List<Path> getDefDependenciesClasspath(Path projectDir) {
         return new EngineClasspathCache(projectDir).readCachedResolvedClasspath(EngineClasspathCache.Scope.ALL)
-                .getEntries();
+                .toList();
     }
 
     /**

@@ -76,6 +76,9 @@ public interface JkInternalClasspathScanner {
 
         private static JkInternalClasspathScanner CACHED_INSTANCE;
 
+        private Cache() {
+        }
+
         private static JkInternalClasspathScanner get(JkProperties properties) {
             if (CACHED_INSTANCE != null) {
                 return CACHED_INSTANCE;

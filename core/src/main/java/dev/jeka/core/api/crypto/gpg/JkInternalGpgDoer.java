@@ -44,6 +44,9 @@ public interface JkInternalGpgDoer {
 
     class Cache {
 
+        private Cache() {
+        }
+
         private static JkInternalGpgDoer CACHED_INSTANCE;
 
         private static JkInternalGpgDoer get(JkProperties properties) {

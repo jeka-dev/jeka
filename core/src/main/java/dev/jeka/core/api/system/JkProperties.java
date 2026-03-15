@@ -353,9 +353,9 @@ public final class JkProperties {
 
     @Override
     public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append("== " + source + " ==").append("\n");
-        props.forEach( (key, val) -> result.append("  " + key +  "=" + val + "\n"));
+        StringBuilder result = new StringBuilder();
+        result.append("== ").append(source).append(" ==").append("\n");
+        props.forEach( (key, val) -> result.append("  ").append(key).append("=").append(val).append("\n"));
         if (fallback != null) {
             result.append(fallback);
         }
