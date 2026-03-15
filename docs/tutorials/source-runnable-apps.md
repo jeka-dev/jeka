@@ -1,6 +1,6 @@
 # Source-Runnable Applications
 
-With JeKa, distributing software doesn't require creating and publishing binaries. JeKa acts as a source-based application manager, letting you run programs directly from their remote Git repository or install them on a user's desktop by building them at installation time.
+With JeKa, distributing software doesn't require creating and publishing binaries. JeKa acts as a source-based application manager, letting you run programs directly from their remote Git repository or install them on a user's machine by building them at installation time.
 
 ## Running Applications from Remote Repositories
 
@@ -24,10 +24,16 @@ You can pass `-Dxxxxx=yyyy` as a program argument to set system properties.
 
 ### Browsing the Catalog
 
-You can see a list of available applications by executing:
+You can see a list of available application catalogs by executing:
 ```bash
 jeka app: catalog
 ```
+
+To see applications within a specific catalog:
+```bash
+jeka app: catalog name=demo
+```
+This will list the application names, descriptions, and commands to run or install them.
 
 ### Running Specific Versions
 
@@ -73,7 +79,7 @@ jeka ::cowsay "Hello World!"
 
 ## Desktop Installation
 
-JeKa lets you install applications for direct execution from your terminal, without needing to call `jeka` explicitly.
+JeKa lets you install applications for direct execution from your terminal, making them available in your system `PATH`.
 
 ```bash
 jeka app: install repo=https://github.com/djeang/kill8
@@ -83,7 +89,7 @@ Or use a shorthand for known repositories:
 jeka app: install repo=kill8@djeang
 ```
 
-For faster startup, you can install the native version:
+For faster startup, you can install the native version (requires GraalVM):
 ```bash
 jeka app: install repo=kill8@djeang runtime=NATIVE
 ```
@@ -92,6 +98,25 @@ Once installed, you can simply call the application by name:
 ```bash
 kill8 8081
 ```
+
+### Managing Installed Applications
+
+To list all applications installed on your system via JeKa:
+```bash
+jeka app: list
+```
+
+To update an application to its latest version (highest semantic tag or latest commit):
+```bash
+jeka app: update name=kill8
+```
+
+To remove an application from your system:
+```bash
+jeka app: uninstall name=kill8
+```
+
+### Desktop GUI Applications
 
 If the application is a GUI, you can install it as a standalone desktop application.
 ```bash
@@ -107,7 +132,18 @@ For more details on application management, see the [App KBean Reference](../ref
 
 Applications built with JeKa are "source-runnable" by default. 
 
-When running a remote application, JeKa clones the repository and builds it using `jeka base: pack` (or `jeka project: pack` if a project is detected). It then looks in the `jeka-output` directory to run the resulting JAR or native binary.
+When running or installing a remote application, JeKa clones the repository and builds it:
+
+1. It tries to execute the command specified in the `jeka.program.build` property from the project's `jeka.properties`.
+2. If this property is missing, it runs `jeka project: pack pack.jarType=FAT pack.detectMainClass=true` (for Java projects with a `src` directory).
+3. Otherwise, it runs `jeka base: pack`.
+
+For native execution (or when `runtime=NATIVE`), JeKa:
+1. Tries to execute the command specified in `jeka.program.build.native`.
+2. If missing, it uses `jeka.program.build` followed by `native: compile`.
+3. If both are missing, it runs `native: compile`.
+
+JeKa then looks in the `jeka-output` directory to run the resulting JAR or native binary.
 
 
 ### Maven Projects
@@ -129,6 +165,12 @@ jeka.program.build.native=maven: wrapPackage args="-Pnative"
 For multi-module projects, specify which module contains the application:
 ```properties
 jeka.program.build=maven: wrapPackage appModule=app
+```
+
+For desktop applications (installed using `runtime=BUNDLE`), specify the *Maven* command and the location of the distribution:
+```properties
+jeka.program.build.bundle=maven: wrapPackage args="-Pjpackage"
+jeka.program.bundle.dist=target/dist
 ```
 
 **Requirements:**
@@ -207,6 +249,12 @@ jeka -r https://github.com/jeka-dev/demo-cowsay docker: build
 ```bash
 jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
 ```
+
+## Examples
+
+- [Command line application, built with Jeka, supporting native mode](https://github.com/djeang/kill8)
+- [Desktop application, bundled as standalone app](https://github.com/djeang/Calculator-jeka)
+- [JFX Desktop application, built with Maven, bundled as standalone app](https://github.com/djeang/devtools-maven)
 
 ## See Also
 
