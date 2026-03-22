@@ -157,9 +157,8 @@ jeka.java.version=21
 # Delegate build to Maven wrapper
 jeka.program.build=maven: wrapPackage
 
-# For native builds (requires GraalVM)
-jeka.java.distrib=graalvm
-jeka.program.build.native=maven: wrapPackage args="-Pnative"
+# Optional: use this for native builds. Set the GraalVM version used to build the native executable.
+jeka.program.build.native=maven: wrapPackage args="-Pnative" -Djeka.java.distrib=graalvm -Djeka.java.version=25
 ```
 
 For multi-module projects, specify which module contains the application:
