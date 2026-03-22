@@ -254,6 +254,7 @@ jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
 
 - [CLI app with Native mode (Jeka)](https://github.com/djeang/kill8)
 - [Desktop app bundled as standalone (Jeka)](https://github.com/djeang/Calculator-jeka)
+- [CLI app with Maven in JVM or Native mode](https://github.com/jeka-dev/demo-cowsay-maven)
 - [JavaFX Desktop app bundled as standalone (Maven)](https://github.com/djeang/devtools-maven)
 - [Same JavaFX app but using Jeka](https://github.com/djeang/devtools) - *Simpler configuration than Maven*
 
