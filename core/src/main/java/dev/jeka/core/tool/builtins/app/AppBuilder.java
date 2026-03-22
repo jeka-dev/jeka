@@ -71,7 +71,8 @@ class AppBuilder {
                 result = JkUtilsPath.listDirectChildren(buildDir).stream()
                         .filter(Files::isRegularFile)
                         .filter(path -> !path.toString().endsWith(".jar"))
-                        .findFirst().orElseThrow(() -> new IllegalStateException("Cannot find exe in directory"));
+                        .findFirst().orElseThrow(() -> new IllegalStateException(
+                                "Cannot find executable file in " + baseDir));
             }
 
         } else if (runtimeMode == RuntimeMode.BUNDLE) {

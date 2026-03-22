@@ -20,6 +20,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.*;
 import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.project.JkBuildable;
@@ -28,6 +29,7 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.git.JkVersionFromGit;
 import dev.jeka.core.api.tooling.maven.JkMavenProject;
 import dev.jeka.core.api.tooling.maven.JkMvn;
+import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -35,6 +37,8 @@ import dev.jeka.core.tool.builtins.tooling.git.JkGitVersioning;
 
 import java.io.File;
 import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
@@ -110,19 +114,18 @@ public final class MavenKBean extends KBean {
             mvnAppModule = JkMavenProject.of(getBaseDir().resolve(appModule));
         }
         doWrap(mvnRootModule, "clean", "package", "-Dmaven.test.skip=true");
-        String baseFileName = mvnAppModule.getBuildFileName();
-        var outputFilesTree = JkPathTree.of(mvnAppModule.getTargetDir())
-                .andMatching(baseFileName + "*");
+        var outputFilesTree = JkPathTree.of(mvnAppModule.getTargetDir()).andMatching("*");
         if (!outputFilesTree.containFiles()) {
             throw new IllegalStateException("No output files found after Maven package execution. " +
                     "Check Maven configuration.");
         }
-        if (JkLog.isVerbose()) {
-            outputFilesTree.stream().forEach(outputFile ->
-                JkLog.verbose("Copying file: " + outputFile)
-            );
-        }
-        outputFilesTree.copyTo(this.getOutputDir(), StandardCopyOption.REPLACE_EXISTING);
+
+        outputFilesTree.getFiles().stream()
+                .filter(Files::isRegularFile)
+                .forEach(file -> {
+                    JkLog.verbose("Copying file %s to %s ", file, getOutputDir());
+                    JkPathFile.of(file).copyToDir(this.getOutputDir(), StandardCopyOption.REPLACE_EXISTING);
+                });
     }
 
     private void doWrap(JkMavenProject mavenProject, String... arguments) {

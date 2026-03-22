@@ -4,12 +4,12 @@ If you are coming from *Maven* or *Gradle*, this guide will help you map your ex
 
 ## Core Philosophies
 
-| Feature            | Maven            | Gradle              | JeKa                                        |
-|:-------------------|:-----------------|:--------------------|:--------------------------------------------|
-| **Configuration**  | XML (`pom.xml`)  | Groovy/Kotlin DSL   | Properties (`jeka.properties`) or Java Code |
-| **Extensibility**  | Plugins          | Plugins / Tasks     | KBeans (Java classes similar to JavaBeans)  |
-| **Build Logic**    | Rigid Lifecycle  | Task Graph          | Method Invocations                          |
-| **Dependencies**   | XML Declarations | DSL Declarations    | Text based(`jeka.project.deps`)      |
+| Feature            | Maven            | Gradle              | JeKa                                                  |
+|:-------------------|:-----------------|:--------------------|:------------------------------------------------------|
+| **Configuration**  | XML (`pom.xml`)  | Groovy/Kotlin DSL   | Properties (`jeka.properties`) or Java Code           |
+| **Extensibility**  | Plugins          | Plugins / Tasks     | KBeans (Java classes similar to JavaBeans)            |
+| **Build Logic**    | Rigid Lifecycle  | Task Graph          | Method Invocations                                    |
+| **Dependencies**   | XML Declarations | DSL Declarations    | Text based(`jeka.project.deps`). Java code if needed. |
 
 ## Concept Mapping
 

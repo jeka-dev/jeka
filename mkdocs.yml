@@ -55,7 +55,7 @@ markdown_extensions:
 nav:
     - Installation: installation.md
     - Quick Start: quick-start.md
-    - For Maven/Gradle Users: reference/comparison.md
+    - For Maven/Gradle Users: comparison.md
     - Tutorials:
         - Basics: tutorials/basics.md
         - Build Projects: tutorials/build-projects.md
