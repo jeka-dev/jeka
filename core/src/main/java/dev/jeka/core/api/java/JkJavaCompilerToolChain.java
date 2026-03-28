@@ -349,9 +349,9 @@ public final class JkJavaCompilerToolChain {
         @Override
         public void report(Diagnostic diagnostic) {
             if (!diagnostic.getKind().equals(Diagnostic.Kind.ERROR)) {
-                JkLog.info(diagnostic.toString());
+                JkLog.warn(diagnostic.toString());
             } else {
-                System.out.println(diagnostic);
+                System.err.println(diagnostic);
             }
         }
     }

@@ -76,6 +76,9 @@ public class JkProjectCompilation {
     public final JkDependencySetModifier dependencies = JkDependencySetModifier.of()
             .modify(deps -> baseDependencies());
 
+    public final JkDependencySetModifier procDependencies = JkDependencySetModifier.of()
+            .modify(deps -> baseProcessorDependencies());
+
     private final LinkedList<String> extraJavaCompilerOptions = new LinkedList<>();
 
     private final List<JkProjectSourceGenerator> sourceGenerators = new LinkedList<>();
@@ -164,8 +167,13 @@ public class JkProjectCompilation {
         return this;
     }
 
+
     public List<Path> resolveDependenciesAsFiles() {
         return project.dependencyResolver.resolveFiles(this.purpose(), dependencies.get());
+    }
+
+    public List<Path> resolveProcessorPathAsFiles() {
+        return project.dependencyResolver.resolveFiles("processor", procDependencies.get());
     }
 
     /**
@@ -258,13 +266,18 @@ public class JkProjectCompilation {
     }
 
     private JkJavaCompileSpec compileSpec() {
-        return JkJavaCompileSpec.of()
+        JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
             .setEncoding(project.getSourceEncoding())
             .setClasspath(classpath())
+            .setProcessorPath(processorPath())
             .setSources(layout.resolveSources().and(getGeneratedSourceDirs().toArray(new Path[0])))
             .addOptions(extraJavaCompilerOptions)
             .addOptions("-s", getGeneratedSourcesForAnnoProcessors().toString())
             .setOutputDir(layout.resolveClassDir());
+        if (JkLog.isDebug()) {
+            compileSpec.addOptions("-verbose");
+        }
+        return compileSpec;
     }
 
     private Path getGeneratedSourcesForAnnoProcessors() {
@@ -284,9 +297,20 @@ public class JkProjectCompilation {
         return JkPathSequence.of(resolveDependenciesAsFiles());
     }
 
+    protected JkPathSequence processorPath() {
+        return JkPathSequence.of(resolveProcessorPathAsFiles());
+    }
+
     protected JkDependencySet baseDependencies() {
         if (project.isIncludeTextAndLocalDependencies()) {
             return project.textAndLocalDeps().getCompile();
+        }
+        return JkDependencySet.of();
+    }
+
+    private JkDependencySet baseProcessorDependencies() {
+        if (project.isIncludeTextAndLocalDependencies()) {
+            return project.textAndLocalDeps().getProcessor();
         }
         return JkDependencySet.of();
     }

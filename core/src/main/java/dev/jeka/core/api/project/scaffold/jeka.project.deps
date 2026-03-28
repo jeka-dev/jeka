@@ -1,4 +1,4 @@
-# Syntax : https://jeka-dev.github.io/jeka/reference/api-project/#jeka.project.deps
+# Syntax : https://jeka-dev.github.io/jeka/reference/api-project/#jekaprojectdeps
 [version]
 
 [compile]
@@ -8,3 +8,5 @@
 [runtime]
 
 [test]
+
+[processor]

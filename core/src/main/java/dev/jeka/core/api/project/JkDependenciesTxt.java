@@ -40,6 +40,8 @@ public class JkDependenciesTxt {
 
     private static final String VERSION = "version";
 
+    private static final String PROCESSOR = "processor";
+
     static final String PROJECT_DEPENDENCIES_FILE = "jeka.project.deps";
 
     private static final String DEPENDENCIES_TXT_FILE = "dependencies.txt";
@@ -142,6 +144,10 @@ public class JkDependenciesTxt {
 
     public JkDependencySet computeTestDeps() {
         return dependencySets.getOrDefault(TEST, JkDependencySet.of()).and(computeRuntimeDeps());
+    }
+
+    public JkDependencySet computeProcessorDeps() {
+        return dependencySets.getOrDefault(PROCESSOR, JkDependencySet.of()).andVersionProvider(versionProvider);
     }
 
     private static Map<String, JkDependencySet> parseFile(Path dependenciesXmlPath,

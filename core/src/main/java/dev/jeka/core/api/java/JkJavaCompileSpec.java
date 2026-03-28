@@ -46,6 +46,8 @@ public final class JkJavaCompileSpec {
 
     public static final String PROCESSOR_OPTS = "-processor";
 
+    public static final String PROCESSORPATH_OPTS = "-processorpath";
+
     public static  final String ENCODING_OPTS = "-encoding";
 
     private static final String CLASSPATH_OPTS = "-cp";
@@ -219,6 +221,46 @@ public final class JkJavaCompileSpec {
         while (it.hasNext() && value == null) {
             String option = it.next();
             if (option.equals(CLASSPATH_OPTS)) {
+                if (it.hasNext()) {
+                    value = it.next();
+                }
+            }
+        }
+        if (value == null) {
+            return JkPathSequence.of();
+        }
+        if (value.startsWith("\"")) {
+            value = value.substring(1);
+        }
+        if (value.endsWith("\"")) {
+            value = value.substring(0, value.length()-1);
+        }
+        return JkPathSequence.of(Arrays.asList(value.split(File.pathSeparator)).stream()
+                .map(Paths::get)
+                .collect(Collectors.toList()));
+    }
+
+    // ------------------ processorPath ----------------------------
+
+    /**
+     * Set the compiler processorpath with the specified files
+     */
+    public JkJavaCompileSpec setProcessorPath(Iterable<Path> files) {
+
+        // Otherwise it fails when cp is empty
+        if (!files.iterator().hasNext()) {
+            return this;
+        }
+        final String processorpath = JkPathSequence.of(files).toPath();
+        return this.setOption(PROCESSORPATH_OPTS, processorpath);
+    }
+
+    public JkPathSequence getProcessorPath() {
+        Iterator<String> it = options.iterator();
+        String value = null;
+        while (it.hasNext() && value == null) {
+            String option = it.next();
+            if (option.equals(PROCESSORPATH_OPTS)) {
                 if (it.hasNext()) {
                     value = it.next();
                 }

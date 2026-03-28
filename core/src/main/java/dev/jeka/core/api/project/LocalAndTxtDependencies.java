@@ -20,7 +20,6 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -44,17 +43,21 @@ class LocalAndTxtDependencies {
     // Equals to Maven 'test' scope
     private final JkDependencySet test;
 
+    private final JkDependencySet processor;
+
     private LocalAndTxtDependencies(JkDependencySet compile,
                                     JkDependencySet runtime,
-                                    JkDependencySet test) {
+                                    JkDependencySet test,
+                                    JkDependencySet processor) {
         this.compile = compile;
         this.runtime = runtime;
         this.test = test;
+        this.processor = processor;
     }
 
     static LocalAndTxtDependencies of() {
         return new LocalAndTxtDependencies(JkDependencySet.of(),
-                JkDependencySet.of(), JkDependencySet.of());
+                JkDependencySet.of(), JkDependencySet.of(), JkDependencySet.of());
     }
 
     /**
@@ -93,8 +96,11 @@ class LocalAndTxtDependencies {
         } else {
             Path path = JkUtilsPath.fromUrl(url);
             JkDependenciesTxt dependenciesTxt = JkDependenciesTxt.parse(path, baseDir, projectResolver, properties);
-            return new LocalAndTxtDependencies(dependenciesTxt.computeCompileDeps(),
-                    dependenciesTxt.computeRuntimeDeps(), dependenciesTxt.computeTestDeps());
+            return new LocalAndTxtDependencies(
+                    dependenciesTxt.computeCompileDeps(),
+                    dependenciesTxt.computeRuntimeDeps(),
+                    dependenciesTxt.computeTestDeps(),
+                    dependenciesTxt.computeProcessorDeps());
         }
     }
 
@@ -112,12 +118,17 @@ class LocalAndTxtDependencies {
         return test;
     }
 
+    public JkDependencySet getProcessor() {
+        return processor;
+    }
+
 
     public LocalAndTxtDependencies and(LocalAndTxtDependencies other) {
         return new LocalAndTxtDependencies(
                 compile.and(other.compile),
                 runtime.and(other.runtime),
-                test.and(other.test)
+                test.and(other.test),
+                processor.and(other.processor)
         );
     }
 
@@ -152,7 +163,7 @@ class LocalAndTxtDependencies {
      * </pre>
      */
     private static LocalAndTxtDependencies ofTextDescription(String description) {
-        return Parser.parseTxt(description);
+        return Parser.parseLegacyTxt(description);
     }
 
     private static class Parser {
@@ -162,6 +173,8 @@ class LocalAndTxtDependencies {
         private static final String RUNTIME = "runtime";
 
         private static final String TEST = "test";
+
+        private static final String PROCESSOR = "processor";
 
         private static final String MINUS_SYMBOL = "-";
 
@@ -186,14 +199,17 @@ class LocalAndTxtDependencies {
                     .andFiles(libDir.andMatching(true, "*.jar", RUNTIME + "/*.jar").getFiles());
             JkDependencySet test = JkDependencySet.of()
                     .andFiles(libDir.andMatching(true, "*.jar", TEST + "/*.jar").getFiles());
+            JkDependencySet processor = JkDependencySet.of()
+                    .andFiles(libDir.andMatching(true, "*.jar", PROCESSOR + "/*.jar").getFiles());
 
             return new LocalAndTxtDependencies(
                     compile.and(compileOnly),
                     compile.and(runtimeOnly),
-                    test.and(compile).and(compileOnly).and(runtimeOnly));
+                    test.and(compile).and(compileOnly).and(runtimeOnly),
+                    processor);
         }
 
-        static LocalAndTxtDependencies parseTxt(String description) {
+        static LocalAndTxtDependencies parseLegacyTxt(String description) {
             final String[] lines = description.split(System.lineSeparator());
             List<String> compileEntries = new LinkedList<>();
             List<String> runtimeEntries = new LinkedList<>();
@@ -238,7 +254,7 @@ class LocalAndTxtDependencies {
             }
 
 
-            return new LocalAndTxtDependencies(compile, runtime, test);
+            return new LocalAndTxtDependencies(compile, runtime, test, JkDependencySet.of());
         }
 
         private static JkDependencySet apply(String line, JkDependencySet current) {
