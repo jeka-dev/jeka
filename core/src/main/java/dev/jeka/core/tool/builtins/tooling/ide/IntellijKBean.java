@@ -89,8 +89,12 @@ public final class IntellijKBean extends KBean {
     @JkDoc("If true, sources will be downloaded will resolving dependencies.")
     private boolean downloadSources = false;
 
+    @JkDoc
+    private final CompilerOptions compilerOptions = new CompilerOptions();
+
     @JkDoc(hide = true, value="Specifiy the intellij project dir (may be different than module root dir")
     private Path projectRootDir;
+
 
     private final JkConsumers<JkIml> imlCustomizers = JkConsumers.of();
 
@@ -124,11 +128,18 @@ public final class IntellijKBean extends KBean {
             JkUtilsPath.deleteQuietly(separatedJekasrcImlPath, true);
 
             // sync compiler.xml
-            JkIdeSupport ideSupport = IdeSupport.getProjectIde(getRunbase());
             var compiler = JkIjCompilerXml.ofProjectDir(this.getBaseDir())
-                    .setProcessorPath(ideSupport.getProcessorPath())
-                    .putJavaecOptions(this.getBaseDir().getFileName().toString(), ideSupport.getCompilerOptions());
-            if (compiler.needsUpdate()) {
+                    .handleOptions(compilerOptions.syncJavacOptions)
+                    .handleProcessors(compilerOptions.syncProcessorPaths)
+                    .setUseVarPath(useVarPath);
+
+            JkIdeSupport ideSupport = IdeSupport.getProjectIde(getRunbase());
+            if (ideSupport != null) {
+                compiler.setProcessorPath(ideSupport.getProcessorPath())
+                        .putJavacOptions(this.getBaseDir().getFileName().toString(), ideSupport.getCompilerOptions());
+            }
+
+            if (compiler.needsUpdate() && compilerOptions.sync) {
                 JkLog.info("update %s", compiler.getFilePath().getFileName());
                 compiler.updateFile();
             }
@@ -518,6 +529,18 @@ public final class IntellijKBean extends KBean {
             return JkJavaVersion.of(javaVersion);
         }
 
+    }
+
+    public static class CompilerOptions {
+
+        @JkDoc("If true, the compiler.xml file will be generated according settings declared in Jeka.")
+        public boolean sync = true;
+
+        @JkDoc("If true, and sync=true, the generated compiler.xml will include annotation processors declared in Jeka")
+        public boolean syncProcessorPaths = true;
+
+        @JkDoc("If true, and sync=true, the generated compiler.xml will include javac options declared in Jeka")
+        public boolean syncJavacOptions = true;
     }
 
 }

@@ -65,15 +65,16 @@ class MyBuild extends KBean {
 
 ## Annotation Processors
 
-Enable processors like **Lombok** by adding them as `compile-only` dependencies in `jeka.project.deps`:
+Annotation processors (e.g. **Lombok**, **MapStruct**) should be declared in the dedicated `[processor]` section of `jeka.project.deps`:
 
 ```ini
-[compile-only]
+[processor]
 org.mapstruct:mapstruct-processor:1.6.3
 org.projectlombok:lombok:1.18.38
 ```
 
-Output directory: `jeka-output/generated-sources/annotation-processors`.
+Dependencies in `[processor]` are passed to the compiler via `-processorpath`, keeping them off the compile and runtime classpaths.
+Generated sources are written to: `jeka-output/generated-sources/annotation-processors`.
 
 ## Extending with Plugins
 

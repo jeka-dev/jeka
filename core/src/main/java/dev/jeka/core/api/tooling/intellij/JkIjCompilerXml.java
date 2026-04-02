@@ -19,6 +19,7 @@ package dev.jeka.core.api.tooling.intellij;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomElement;
+import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 
 import java.nio.file.Path;
@@ -37,6 +38,12 @@ public class JkIjCompilerXml {
 
     private List<Path> processorPath = new ArrayList<>();
 
+    private boolean handleProcessors = true;
+
+    private boolean handleOptions = true;
+
+    private boolean useVarPath = true;
+
     private Map<String, List<String>> javacOptions = new HashMap<>(); // key represents module name
 
     private JkIjCompilerXml(Path filePath) {
@@ -51,13 +58,28 @@ public class JkIjCompilerXml {
         return of(dir.resolve(".idea/compiler.xml"));
     }
 
-    public JkIjCompilerXml putJavaecOptions(String moduleName, List<String> options) {
+    public JkIjCompilerXml putJavacOptions(String moduleName, List<String> options) {
         javacOptions.put(moduleName, options);
         return this;
     }
 
     public JkIjCompilerXml setProcessorPath(List<Path> processorPath) {
         this.processorPath = processorPath;
+        return this;
+    }
+
+    public JkIjCompilerXml handleProcessors(boolean handleProcessors) {
+        this.handleProcessors = handleProcessors;
+        return this;
+    }
+
+    public JkIjCompilerXml handleOptions(boolean handleOptions) {
+        this.handleOptions = handleOptions;
+        return this;
+    }
+
+    public JkIjCompilerXml setUseVarPath(boolean useVarPath) {
+        this.useVarPath = useVarPath;
         return this;
     }
 
@@ -73,14 +95,14 @@ public class JkIjCompilerXml {
     private JkDomDocument toXml() {
         var doc = JkDomDocument.of("project");
         doc.root().attr("version", "4");
-        if (!this.processorPath.isEmpty()) {
+        if (!this.processorPath.isEmpty() && handleProcessors) {
             var profileEl = doc.root()
                 .add("component").attr("name", "CompilerConfiguration")
                     .add("annotationProcessing")
                         .add("profile").attr("default", "true").attr("name", "default").attr("enabled", "true");
             this.fillProcessorEl(profileEl);
         }
-        if (this.hasJavacOptions()) {
+        if (this.hasJavacOptions() && handleOptions) {
             fillJavacSettings(doc.root());
         }
         return doc;
@@ -88,9 +110,17 @@ public class JkIjCompilerXml {
 
     private void fillProcessorEl(JkDomElement profileEl) {
         var processorPathEl = profileEl.add("processorPath").attr("useClasspath", "false");
+        String cachePath = JkLocator.getJekaRepositoryCache().toString();
+        if (cachePath.endsWith("/")) {
+            cachePath = cachePath.substring(0, cachePath.length() - 1);
+        }
         for (Path entry : processorPath) {
             JkLog.debug("Adding processor %s to compiler processor paths.", entry.getFileName());
-            processorPathEl.add("entry").attr("name", entry.toString());
+            String processorPath = entry.toString();
+            if (useVarPath) {
+                processorPath = processorPath.replace(cachePath, "$JEKA_CACHE_DIR$/repo");
+            }
+            processorPathEl.add("entry").attr("name", processorPath);
         }
     }
 

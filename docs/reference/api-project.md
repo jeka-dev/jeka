@@ -28,6 +28,7 @@ project
 │  ├─ layout (where are located source and resource files)
 │  ├─ source generators (plugin mechanism for generating source files)
 │  ├─ dependencies   (stands for compile dependencies)
+│  ├─ procDependencies  (stands for annotation-processor dependencies, passed as -processorpath)
 │  ├─ preCompileActions (including resources processing)
 │  ├─ compileActions (including java sources compilation. Compilation for other languages can be added here)
 │  ├─ postCompileActions
@@ -149,6 +150,10 @@ org.junit.platform:junit-platform-launcher
 org.fluentlenium:fluentlenium-junit:3.2.0
     !org.apache.httpcomponents:httpclient  # exclude http-client from 'fluentlenium-junit' transitive dependencies
 !!net.sourceforge.htmlunit:htmlunit        # exclude htmlunit from all transitive dependencies
+
+[processor]
+org.projectlombok:lombok:1.18.38
+org.mapstruct:mapstruct-processor:1.6.3
 ```
 
 As shown in the example above, we can use the `@` and `@@` symbols to specify dependency exclusions.
@@ -166,11 +171,16 @@ Specifies dependencies required only for compiling the project, which are exclud
 `[runtime]`  
 Specifies dependencies required only for running the project.
 
-`[test]`  
-Specifies dependencies for the *test* classpath.  
+`[test]`
+Specifies dependencies for the *test* classpath.
 This includes dependencies from the *compile*, *compile-only*, and *runtime* sections, along with those specified in the *test* section.
 
-!!! tip  
+`[processor]`
+Specifies annotation-processor dependencies (e.g. Lombok, MapStruct).
+These are passed to the compiler via `-processorpath` and are **not** added to the compile or runtime classpaths.
+Generated sources are written to `jeka-output/generated-sources/annotation-processors`.
+
+!!! tip
     If you're using the Jeka plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
 
 **Resolve Dependencies Programmatically**
@@ -216,7 +226,8 @@ This class is used for both production and test code compilation.
 It offers configuration methods for defining:
 
 - The locations of source files and compiled classes.
-- Dependencies required for compilation.
+- Dependencies required for compilation (`dependencies`).
+- Annotation-processor dependencies passed as `-processorpath` (`procDependencies`).
 - The compiler and compilation options.
 - Source code generators attached to the compilation task.
 - Additional `pre` and `post` actions tied to the compilation phase.
