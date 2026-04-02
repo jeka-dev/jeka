@@ -573,7 +573,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
             .setTestLayout(testing.compilation.layout)
             .setGeneratedSourceDirs(compilation.getGeneratedSourceDirs())
             .setDependencies(qualifiedDependencies)
-            .setDependencyResolver(dependencyResolver);
+            .setDependencyResolver(dependencyResolver)
+            .setCompilerOptions(compilation.getExtraJavaCompilerOptions())
+            .setProcessorPath(compilation.resolveProcessorPathAsFiles());
         return ideSupportModifier.apply(ideSupport);
     }
 
@@ -831,6 +833,9 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
+                if (JkProject.this.compilation.isCompilationForked()) {
+                    compileSpec.addCompilerModuleExportOptions();
+                }
                 return JkProject.this.compilerToolChain.compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;
             }
 

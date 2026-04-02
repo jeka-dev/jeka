@@ -65,6 +65,8 @@ public final class JkJavaCompilerToolChain {
 
     private String javaDistrib = "temurin";
 
+    private boolean addCompilerModuleExportOptions = true;
+
     private JkJavaCompilerToolChain() {
     }
 
@@ -112,6 +114,17 @@ public final class JkJavaCompilerToolChain {
 
     public JkJavaCompilerToolChain setJavaDistrib(String distrib) {
         this.javaDistrib = distrib;
+        return this;
+    }
+
+    /**
+     * Configures whether additional compiler module export options should be added during the Java compilation process.
+     *
+     * @param add Set to true to enable additional compiler module export options, or false to disable them.
+     * @return The current instance of {@link JkJavaCompilerToolChain} with updated module export options.
+     */
+    public JkJavaCompilerToolChain setAddCompilerModuleExportOptions(boolean add) {
+        this.addCompilerModuleExportOptions = add;
         return this;
     }
 
@@ -177,7 +190,6 @@ public final class JkJavaCompilerToolChain {
         JkJavaVersion effectiveJavaVersion = Optional.ofNullable(targetVersion)
                 .orElse(compileSpec.minJavaVersion());
         final boolean result = runCompiler(effectiveJavaVersion, compileSpec);
-        JkLog.verbose("Compilation " + (result ? "completed successfully" : "failed"));
         JkLog.verboseEndTask();
         return result ? Status.SUCCESS : Status.FAILED;
     }
@@ -246,8 +258,6 @@ public final class JkJavaCompilerToolChain {
         }
         return items[0];
     }
-
-
 
     private static JavaCompiler compileToolOrFail() {
         JavaCompiler result = ToolProvider.getSystemJavaCompiler();
@@ -337,9 +347,10 @@ public final class JkJavaCompilerToolChain {
         final List<String> sourcePaths = new LinkedList<>();
         List<Path> sourceFiles = compileSpec.getSources().andMatcher(JAVA_SOURCE_MATCHER).getFiles();
         sourceFiles.forEach(file -> sourcePaths.add(file.toString()));
-        process.addParams(compileSpec.getOptions()).addParams(sourcePaths);
-        JkLog.verbose(sourcePaths.size() + " files to compile.");
-        process.setLogCommand(JkLog.isVerbose());
+        process
+                .addParams(compileSpec.getOptions())
+                .addParams(sourcePaths);
+        process.setPrintDetailsOnError(!JkLog.isVerbose()); // When verbose details are already printed
         return process.exec().hasSucceed();
     }
 
@@ -401,6 +412,9 @@ public final class JkJavaCompilerToolChain {
              if (compileTool != null) {
                  return runOnTool(compileSpec, compileTool, toolParams);
              } else if (compileProcess != null) {
+                 if (JkJavaCompilerToolChain.this.addCompilerModuleExportOptions) {
+                     compileSpec.addCompilerModuleExportOptions();
+                 }
                  return runOnProcess(compileSpec, compileProcess);
              } else {
                  throw new IllegalStateException("Neither compilation tool or process has been specified.");

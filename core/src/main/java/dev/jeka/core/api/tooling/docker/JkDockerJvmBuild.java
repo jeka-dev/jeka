@@ -44,9 +44,9 @@ public class JkDockerJvmBuild extends JkDockerBuild {
 
     public enum PopularBaseImage {
 
-        TEMURIN_JRE_MINIMAL_IMAGE ("eclipse-temurin:23-jre-ubi9-minimal"),
+        TEMURIN_JRE_MINIMAL_IMAGE ("eclipse-temurin:25-jre-ubi10-minimal"),
 
-        TEMURIN_JRE_ALPINE_IMAGE("eclipse-temurin:23-jre-alpine");
+        TEMURIN_JRE_ALPINE_IMAGE("eclipse-temurin:25-jre-alpine");
 
         public final String imageName;
 

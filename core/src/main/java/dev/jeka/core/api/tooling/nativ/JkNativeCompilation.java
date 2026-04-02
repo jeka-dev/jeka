@@ -205,8 +205,8 @@ public class JkNativeCompilation {
                     JkAnsi.yellow("--verbose"),
                     JkUtilsTime.now("HH:mm:ss"));
         }
+        JkLog.verbose(JkUtilsString.formatOptions(params));
         process = process
-                .setLogCommand(JkLog.isVerbose())
                 .setInheritIO(false)
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .setDestroyAtJvmShutdown(true);

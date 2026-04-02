@@ -46,7 +46,7 @@ public class ThirdPartyDependenciesKBean extends KBean {
         JkProject project = projectKBean.project;
         project.setModuleId("dev.jeka.samples:war-project")
                 .setVersion("1.0-SNAPSHOT")
-                .setJvmTargetVersion(JkJavaVersion.V8)
+                .setJvmTargetVersion(JkJavaVersion.V17)
                 .compilation.layout.emptySources().addSources("src/main/javaweb");
         project.testing.setSkipped(true);
 

@@ -43,6 +43,10 @@ public class JkIdeSupport {
 
     private List<Path> generatedSourceDirs = new LinkedList<>();
 
+    private List<Path> processorPath = new LinkedList<>();
+
+    private List<String> compilerOptions = new LinkedList<>();
+
     private JkIdeSupport(Path baseDir) {
         this.prodLayout = JkCompileLayout.of().setBaseDir(baseDir);
         this.testLayout = JkCompileLayout.of()
@@ -82,6 +86,12 @@ public class JkIdeSupport {
         return generatedSourceDirs;
     }
 
+    public List<Path> getProcessorPath() {
+        return processorPath;
+    }
+
+
+
     public JkIdeSupport setProdLayout(JkCompileLayout prodLayout) {
         this.prodLayout = prodLayout;
         return this;
@@ -116,6 +126,21 @@ public class JkIdeSupport {
 
     public JkIdeSupport setGeneratedSourceDirs(List<Path> generatedSourceDirs) {
         this.generatedSourceDirs = generatedSourceDirs;
+        return this;
+    }
+
+
+    public JkIdeSupport setProcessorPath(List<Path> processorPath) {
+        this.processorPath = processorPath;
+        return this;
+    }
+
+    public List<String> getCompilerOptions() {
+        return compilerOptions;
+    }
+
+    public JkIdeSupport setCompilerOptions(List<String> compilerOptions) {
+        this.compilerOptions = compilerOptions;
         return this;
     }
 }

@@ -410,6 +410,7 @@ class Engine {
                 .setClasspath(classpath.and(jekaSrcClassDir)) // for handling compiled kotlin code
                 .setOutputDir(jekaSrcClassDir)
                 .setSources(jekaSource.toSet())
+                .addOptions("-proc:full")
                 .addOptions(compileOptions);
         if (javaCompileSpec.getSources().containFiles() && ToolProvider.getSystemJavaCompiler() == null) {
             throw new JkException(NO_JDK_MSG);

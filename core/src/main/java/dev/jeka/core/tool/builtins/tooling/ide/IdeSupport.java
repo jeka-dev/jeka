@@ -40,7 +40,7 @@ final class IdeSupport {
         List<JkIdeSupportSupplier> suppliers = runbase.getBeans().stream()
                 .filter(JkIdeSupportSupplier.class::isInstance)
                 .map(JkIdeSupportSupplier.class::cast)
-                .collect(Collectors.toList());
+                .toList();
         return suppliers.stream()
                 .map(supplier -> {
                     JkIdeSupport ideSupport = supplier.getJavaIdeSupport();

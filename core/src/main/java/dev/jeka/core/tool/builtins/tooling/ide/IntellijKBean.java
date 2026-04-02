@@ -122,10 +122,21 @@ public final class IntellijKBean extends KBean {
             }
             modulesXml.removeIfNeeded(separatedJekasrcImlPath);
             JkUtilsPath.deleteQuietly(separatedJekasrcImlPath, true);
+
+            // sync compiler.xml
+            JkIdeSupport ideSupport = IdeSupport.getProjectIde(getRunbase());
+            var compiler = JkIjCompilerXml.ofProjectDir(this.getBaseDir())
+                    .setProcessorPath(ideSupport.getProcessorPath())
+                    .putJavaecOptions(this.getBaseDir().getFileName().toString(), ideSupport.getCompilerOptions());
+            if (compiler.needsUpdate()) {
+                JkLog.info("update %s", compiler.getFilePath().getFileName());
+                compiler.updateFile();
+            }
+
         } else {
             if (result.specificJekaSrcIml) {
                 if (result.specificProjectIml) {
-                    JkLog.debug("Intellij sync mode é");
+                    JkLog.debug("Intellij sync mode 2");
                     generateJekaSrcOnlyIml(separatedJekasrcImlPath, sdkResolver, false);
                     generateProjectOnlyIml(regularImlPath, sdkResolver);
                     modulesXml.addImlIfNeeded(regularImlPath);

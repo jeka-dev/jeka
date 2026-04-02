@@ -292,7 +292,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     public static class JkCompilationOptions {
 
         @JkDoc("Specify whether to fork the compilation process.")
-        public boolean fork;
+        public boolean fork = true;
 
         /**
          * @deprecated Use ProjectKBean#javaVersion instead
@@ -304,6 +304,10 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         @JkDoc("Extra arguments to be passed to the compiler (example -Xlint:unchecked).")
         @JkDepSuggest(versionOnly = true, hint = "-Xlint,-Xlint:deprecation,-Xlint:unchecked")
         public String compilerOptions;
+
+        @JkDoc("If true, compiler module export options will be added to the compiler classpath, " +
+                "allowing for better compile plugin compatibility.")
+        public boolean addCompilerModuleExportOptions = true;
 
     }
 
@@ -447,6 +451,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
             if (!JkUtilsString.isBlank(javaDistrib)) {
                 compilerToolChain.setJavaDistrib(javaDistrib);
             }
+        }
+        if (!"8".equals(javaVersion) && !"1.8".equals(javaVersion)) {
+            compilerToolChain.setAddCompilerModuleExportOptions(compilation.addCompilerModuleExportOptions);
         }
         if (pack.jarType != null) {
             project.flatFacade.setMainArtifactJarType(pack.jarType);

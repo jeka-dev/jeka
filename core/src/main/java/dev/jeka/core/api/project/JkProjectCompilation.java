@@ -252,11 +252,8 @@ public class JkProjectCompilation {
         JkJavaVersion javaVersion = project.getJvmTargetVersion() == null ? JkJavaVersion.ofCurrent()
                 : project.getJvmTargetVersion();
         JkJavaCompileSpec compileSpec = compileSpec();
-        if (javaVersion.isEqualOrGreaterThan(21) && !compileSpec.getOptions().contains("-proc:full")) {
-            compileSpec.addOptions("-proc:full");
-        }
-        JkJavaCompilerToolChain.Status status = project.compilerToolChain.compile(project.getJvmTargetVersion(), compileSpec);
-        if (!JkLog.isVerbose() && status == JkJavaCompilerToolChain.Status.SUCCESS) {
+        JkJavaCompilerToolChain.Status status = project.compilerToolChain.compile(javaVersion, compileSpec);
+        if (status == JkJavaCompilerToolChain.Status.SUCCESS) {
             int count = compileSpec.getSources().count(Integer.MAX_VALUE, false);
             JkLog.info("%s Java source files compiled successfully.", count);  // must log something otherwise next task will indent badly
         }

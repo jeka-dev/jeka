@@ -62,14 +62,14 @@ public class SimpleProjectKBean extends KBean {
         project.flatFacade
                 .addTestExcludeSuffixIf(skipIT, "IT");
         project
-                .setJvmTargetVersion(JkJavaVersion.V8);
+                .setJvmTargetVersion(JkJavaVersion.V17);
         project
                 .dependencyResolver
                     .getDefaultParams()
                         .setConflictResolver(JkResolutionParameters.JkConflictResolver.STRICT);
         project
-                .testing
-                    .testProcessor
+                .test
+                    .processor
                         .setForkingProcess(false)
                     .engineBehavior
                         .setProgressDisplayer(JkTestProcessor.JkProgressStyle.FULL);

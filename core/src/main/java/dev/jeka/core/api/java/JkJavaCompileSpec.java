@@ -334,6 +334,27 @@ public final class JkJavaCompileSpec {
         return findValueAfter(optionName);
     }
 
+    /**
+     * Configures the compiler options to add module export declarations for the `jdk.compiler` package.
+     * Each export declaration allows access to specific internal packages of the `jdk.compiler` module
+     * by unnamed modules.
+     * This is necessary to work with some compiler plugin as <i>ErrorProne</i>.
+     *
+     * @return the current {@link JkJavaCompileSpec} instance with updated compiler options to allow module exports.
+     */
+    public JkJavaCompileSpec addCompilerModuleExportOptions() {
+        return this.addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+                .addOptions("-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED");
+    }
+
     private String findValueAfter(String optionName) {
         final Iterator<String> it = options.iterator();
         while (it.hasNext()) {

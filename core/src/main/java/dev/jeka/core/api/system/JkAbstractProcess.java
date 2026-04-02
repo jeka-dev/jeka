@@ -60,6 +60,8 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
     // By default, streams are redirected with gobbler mechanism to not bypass JkLog decorator.
     private boolean inheritIO = false;
 
+    private boolean printDetailsOnError = true;
+
     protected JkAbstractProcess() {}
 
     protected JkAbstractProcess(JkAbstractProcess<?> other) {
@@ -74,6 +76,7 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         this.redirectErrorStream = other.redirectErrorStream;
         this.collectStdout = other.collectStdout;
         this.collectStderr = other.collectStderr;
+        this.printDetailsOnError = other.printDetailsOnError;
     }
 
     protected T copy() {
@@ -228,6 +231,17 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
      */
     public T setFailOnError(boolean fail) {
         this.failOnError = fail;
+        return (T) this;
+    }
+
+    /**
+     * Sets the flag to indicate whether detailed information should be printed when an error occurs.
+     *
+     * @param print a boolean value indicating whether to print details on error (true to enable, false to disable)
+     * @return the current instance with the updated configuration
+     */
+    public T setPrintDetailsOnError(boolean print) {
+        this.printDetailsOnError = print;
         return (T) this;
     }
 
@@ -486,29 +500,31 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
             errorStreamGobbler.join();
         }
         if (exitCode != 0 && failOnError) {
-            JkLog.error("Process exited with error code %s", exitCode);
-            printContextualInfo();
-            if (collectStdout) {
-                ByteArrayOutputStream collectedStdout = (ByteArrayOutputStream) collectStdoutStream;
-                JkLog.error("Std out was ===============================================");
-                System.out.println(JkAnsi.of().fgBright(JkAnsi.Color.BLACK));
-                JkUtilsIO.write(JkLog.getOutPrintStream(), collectedStdout.toByteArray());
-                System.out.println(JkAnsi.of().reset());
-                if (!collectStderr) {
-                    JkLog.error("===========================================================");
+            if (printDetailsOnError) {
+                JkLog.error("Process exited with error code %s", exitCode);
+                printContextualInfo();
+                if (collectStdout) {
+                    ByteArrayOutputStream collectedStdout = (ByteArrayOutputStream) collectStdoutStream;
+                    JkLog.error("Std out was ===============================================");
+                    System.out.println(JkAnsi.of().fgBright(JkAnsi.Color.BLACK));
+                    JkUtilsIO.write(JkLog.getOutPrintStream(), collectedStdout.toByteArray());
+                    System.out.println(JkAnsi.of().reset());
+                    if (!collectStderr) {
+                        JkLog.error("===========================================================");
+                    }
+                    JkLog.getOutPrintStream().flush();
+
                 }
-                JkLog.getOutPrintStream().flush();
+                if (collectStderr) {
+                    ByteArrayOutputStream collectedStdErr = (ByteArrayOutputStream) collectStderrStream;
+                    JkLog.error("Std err was ===============================================");
+                    System.out.println(JkAnsi.of().fgBright(JkAnsi.Color.BLACK));
+                    JkUtilsIO.write(JkLog.getOutPrintStream(), collectedStdErr.toByteArray());
+                    System.out.println(JkAnsi.of().reset());
+                    JkLog.error("===========================================================");
+                    JkLog.getErrPrintStream().flush();
 
-            }
-            if (collectStderr) {
-                ByteArrayOutputStream collectedStdErr = (ByteArrayOutputStream) collectStderrStream;
-                JkLog.error("Std err was ===============================================");
-                System.out.println(JkAnsi.of().fgBright(JkAnsi.Color.BLACK));
-                JkUtilsIO.write(JkLog.getOutPrintStream(), collectedStdErr.toByteArray());
-                System.out.println(JkAnsi.of().reset());
-                JkLog.error("===========================================================");
-                JkLog.getErrPrintStream().flush();
-
+                }
             }
 
             throw new IllegalStateException("Process has returned with error code " + exitCode);
@@ -561,16 +577,12 @@ public abstract class JkAbstractProcess<T extends JkAbstractProcess> implements 
         String workingDirName = this.workingDir == null ? "." : workingDir.toString();
         JkLog.info("working dir   : %s", workingDirName);
         String cmdPath = processParams.isEmpty() ? "" : processParams.get(0);
-        String cmdArgs = JkUtilsString.substringAfterFirst(fullCmdLine(), cmdPath).trim();
-        String formattedCmdArgs = formatOptions(cmdArgs);
+        String formattedCmdArgs = JkUtilsString.formatOptions(processParams.subList(1, this.processParams.size()));
         JkLog.info("command path  : %s", cmdPath);
         JkLog.info("command args  : %s", formattedCmdArgs);
         JkLog.getOutPrintStream().flush();
     }
 
-    private static String formatOptions(String optionLine) {
-        List<String> options = Arrays.asList(JkUtilsString.parseCommandline(optionLine));
-        return JkUtilsString.formatOptions(options);
-    }
+
 
 }
