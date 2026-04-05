@@ -555,6 +555,23 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         displayDependencyTree("compile", compilation.dependencies.get());
         displayDependencyTree("runtime", packaging.runtimeDependencies.get());
         displayDependencyTree("test", testing.compilation.dependencies.get());
+        displayDependencyTree("processor", compilation.procDependencies.get());
+    }
+
+    public void displayDependencyTree(String scope) {
+        if ("compile".equals(scope)) {
+            displayDependencyTree("compile", compilation.dependencies.get());
+        } else if ("runtime".equals(scope)) {
+            displayDependencyTree("runtime", packaging.runtimeDependencies.get());
+        } else if ("test".equals(scope)) {
+            displayDependencyTree("test", testing.compilation.dependencies.get());
+        } else  if ("processor".equals(scope)) {
+            displayDependencyTree("processor", compilation.procDependencies.get());
+        } else {
+            throw new IllegalArgumentException("Unknown scope: " + scope);
+        }
+
+
     }
 
     /**

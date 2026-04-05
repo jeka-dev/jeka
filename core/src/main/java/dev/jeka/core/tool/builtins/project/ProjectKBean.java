@@ -50,6 +50,11 @@ import java.util.List;
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-project/")
 public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, JkBuildable.Supplier {
 
+
+    public enum DepScope {
+        COMPILE, RUNTIME, TEST, PROCESSOR,
+    }
+
     // The underlying project managed by this KBean
     @JkDoc(hide = true)
     public final JkProject project = JkProject.of(this::getExternalProject, this.getRunbase().getProperties().getAll());
@@ -110,6 +115,9 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
     @JkDoc("The output file for the xml dependency description.")
     public Path outputFile;
 
+    @JkDoc("Combine with `depTree` to narrow the dependency analysis.")
+    public DepScope scope;
+
     public final JkGitVersioning gitVersioning = JkGitVersioning.of();
 
     private JkProjectScaffold projectScaffold;
@@ -147,9 +155,13 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         project.pack.run();
     }
 
-    @JkDoc("Displays resolved dependency trees on console.")
+    @JkDoc("Displays resolved dependency trees on console. Combine with 'scope' to narrow analysis.")
     public void depTree() {
-        project.displayDependencyTree();
+        if (scope == null) {
+            project.displayDependencyTree();
+        } else {
+            project.displayDependencyTree(scope.name().toLowerCase());
+        }
     }
 
     @JkDoc("Displays resolved dependency trees as xml, on console.")

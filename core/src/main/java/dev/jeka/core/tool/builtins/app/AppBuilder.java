@@ -42,9 +42,6 @@ class AppBuilder {
 
     static final String SHE_BANG = "#!/bin/sh";
 
-    /**
-     * @param bundleDistDir can be null
-     */
     static Path build(Path baseDir, RuntimeMode runtimeMode) {
         String[] buildArgs = buildArgs(baseDir, runtimeMode);
         JkLog.verbose("Use commands: %s", String.join(" ", buildArgs));

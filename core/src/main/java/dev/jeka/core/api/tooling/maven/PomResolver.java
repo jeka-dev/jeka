@@ -96,11 +96,10 @@ class PomResolver {
         }
 
         // Resolve parent pom
-        JkCoordinateFileProxy coordinateFileProxy = JkCoordinateFileProxy.of(repos, parentCoordinate);
+        JkCoordinateFileProxy coordinateFileProxy = JkCoordinateFileProxy.of(repos, parentCoordinate.withType("pom"));
         try {
             return JkDomDocument.parse(coordinateFileProxy.get()).getW3cDocument();
         } catch (IllegalStateException e) {
-            coordinateFileProxy = JkCoordinateFileProxy.of(repos, parentCoordinate.withType("pom"));
             try {
                 return JkDomDocument.parse(coordinateFileProxy.get()).getW3cDocument();
             } catch (IllegalStateException e2) {
