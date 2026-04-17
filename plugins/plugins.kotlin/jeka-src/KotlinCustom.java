@@ -1,7 +1,6 @@
-import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkCompileLayout;
 import dev.jeka.core.api.system.JkLocator;
-import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.api.tooling.intellij.JkIntellijIml;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -14,7 +13,7 @@ class KotlinCustom extends KBean {
     private void postInit(IntellijKBean intellijKBean) {
         intellijKBean
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "core")
-                .setModuleAttributes("core", JkIml.Scope.COMPILE, null);
+                .setModuleAttributes("core", JkIntellijIml.Scope.COMPILE, null);
     }
 
     @JkPostInit(required = true)

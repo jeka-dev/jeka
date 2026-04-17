@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JkIjCompilerXml {
+public class JkIntellijCompilerXml {
 
     public Path getFilePath() {
         return filePath;
@@ -46,39 +46,39 @@ public class JkIjCompilerXml {
 
     private Map<String, List<String>> javacOptions = new HashMap<>(); // key represents module name
 
-    private JkIjCompilerXml(Path filePath) {
+    private JkIntellijCompilerXml(Path filePath) {
         this.filePath = filePath;
     }
 
-    public static JkIjCompilerXml of(Path filePath) {
-        return new JkIjCompilerXml(filePath);
+    public static JkIntellijCompilerXml of(Path filePath) {
+        return new JkIntellijCompilerXml(filePath);
     }
 
-    public static JkIjCompilerXml ofProjectDir(Path dir) {
+    public static JkIntellijCompilerXml ofProjectDir(Path dir) {
         return of(dir.resolve(".idea/compiler.xml"));
     }
 
-    public JkIjCompilerXml putJavacOptions(String moduleName, List<String> options) {
+    public JkIntellijCompilerXml putJavacOptions(String moduleName, List<String> options) {
         javacOptions.put(moduleName, options);
         return this;
     }
 
-    public JkIjCompilerXml setProcessorPath(List<Path> processorPath) {
+    public JkIntellijCompilerXml setProcessorPath(List<Path> processorPath) {
         this.processorPath = processorPath;
         return this;
     }
 
-    public JkIjCompilerXml handleProcessors(boolean handleProcessors) {
+    public JkIntellijCompilerXml handleProcessors(boolean handleProcessors) {
         this.handleProcessors = handleProcessors;
         return this;
     }
 
-    public JkIjCompilerXml handleOptions(boolean handleOptions) {
+    public JkIntellijCompilerXml handleOptions(boolean handleOptions) {
         this.handleOptions = handleOptions;
         return this;
     }
 
-    public JkIjCompilerXml setUseVarPath(boolean useVarPath) {
+    public JkIntellijCompilerXml setUseVarPath(boolean useVarPath) {
         this.useVarPath = useVarPath;
         return this;
     }

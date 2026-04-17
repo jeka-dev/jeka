@@ -19,7 +19,6 @@ package dev.jeka.core.api.tooling.intellij;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.marshalling.xml.JkDomDocument;
 import dev.jeka.core.api.marshalling.xml.JkDomElement;
-import dev.jeka.core.api.marshalling.xml.JkDomXPath;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -31,22 +30,22 @@ import java.nio.file.Path;
  * Provides methods to verify the existence of the file and set the JDK configuration
  * for a project.
  */
-public class JkMiscXml {
+public class JkIntellijMiscXml {
 
     private final Path miscXmlPath;
 
     private static final String PROJECT_ROOT_MANAGER= "ProjectRootManager";
 
-    private JkMiscXml(Path miscXmlPath) {
+    private JkIntellijMiscXml(Path miscXmlPath) {
         this.miscXmlPath = miscXmlPath;
     }
 
-    public static JkMiscXml ofBaseDir(Path baseDir) {
-        return new JkMiscXml(baseDir.resolve(".idea").resolve("misc.xml"));
+    public static JkIntellijMiscXml ofBaseDir(Path baseDir) {
+        return new JkIntellijMiscXml(baseDir.resolve(".idea").resolve("misc.xml"));
     }
 
-    public static JkMiscXml find(Path baseDir) {
-        JkMiscXml candidate = JkMiscXml.ofBaseDir(baseDir);
+    public static JkIntellijMiscXml find(Path baseDir) {
+        JkIntellijMiscXml candidate = JkIntellijMiscXml.ofBaseDir(baseDir);
         if (Files.exists(candidate.miscXmlPath)) {
             return candidate;
         }
@@ -71,12 +70,14 @@ public class JkMiscXml {
      * Sets the JDK configuration in the `misc.xml` file for an IntelliJ IDEA project.
      * Updates the `project-jdk-name` and `project-jdk-type` attributes within the document.
      */
-    public void setJdk(String jdkName) {
+    public void setJdk(String jdkName, String languageLevel) {
         JkDomDocument xmlDoc = JkDomDocument.parse(miscXmlPath);
         xmlDoc.root().children("component").stream()
                 .filter(el -> PROJECT_ROOT_MANAGER.equals(el.attr("name")))
                 .findFirst()
                 .ifPresent(el -> {
+                    el.attr("default", "true");
+                    el.attr("languageLevel", languageLevel);
                     el.attr("project-jdk-name", jdkName);
                     el.attr("project-jdk-type", "JavaSDK");
                 });

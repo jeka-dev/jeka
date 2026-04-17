@@ -4,17 +4,23 @@ import dev.jeka.core.tool.JkPreInit;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
+/*
+ * Class to configure the build in code.
+ * Any KBean can be configured here.
+ * Add public void no-arg methods to create tasks you can run from the command line.
+ * Add @JkDep class annotations to use third-party libraries in jeka-src code.
+ */
 class Custom extends KBean {
 
     /*
-     * Use this method to set ProjectKBean public fields without overriding values injected from props or command-line.
+     * Sets ProjectKBean fields without overriding values from properties or command-line.
      */
     @JkPreInit
     private static void preInit(ProjectKBean projectKBean) {
     }
 
     /*
-     * Use this method to fine-tune 'project' KBean after its initialization.
+     * Fine-tunes 'project' KBean after initialization.
      */
     @JkPostInit
     private void postInit(ProjectKBean projectKBean) {

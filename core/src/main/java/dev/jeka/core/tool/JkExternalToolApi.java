@@ -20,14 +20,12 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathSequence;
-import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
-import dev.jeka.core.api.tooling.intellij.JkImlReader;
-import dev.jeka.core.api.tooling.intellij.JkIntellijJdk;
+import dev.jeka.core.api.tooling.intellij.*;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 
@@ -121,7 +119,7 @@ public final class JkExternalToolApi {
 
 
     private static Path getImlFile(Path moduleDir, boolean inJekaSubDir) {
-        return JkImlGenerator.getImlFilePath(moduleDir);
+        return JkIntelliJImlGenerator.getImlFilePath(moduleDir);
     }
 
     /**
@@ -239,6 +237,25 @@ public final class JkExternalToolApi {
     }
 
     /**
+     * Updates the misc.xml file in the specified project directory with the provided SDK name.
+     * This method locates the misc.xml file in the project base directory, and if found, updates
+     * the JDK configuration with the given SDK name.
+     *
+     * @param projectBaseDir the root directory of the project where the misc.xml file is located
+     * @param sdkName the name of the SDK to be set in the misc.xml file
+     */
+    public static void setMiscXmlWithSdk(Path projectBaseDir, String sdkName, String languageLevel) {
+        JkIntellijMiscXml miscXml = JkIntellijMiscXml.find(projectBaseDir);
+        if (miscXml != null) {
+            miscXml.setJdk(sdkName, languageLevel);
+        }
+    }
+
+    public static boolean isJekaManagingIntelliJRootSdk(Path projectBaseDir) {
+        return !"false".equals(getProperties(projectBaseDir).getTrimmedNonBlank("@intellij.manageRootSdk"));
+    }
+
+    /**
      * Returns the jeka jdk names used into generated iml, so that Jeka IDE can add
      * it in its SDK table
      */
@@ -250,7 +267,7 @@ public final class JkExternalToolApi {
                 .filter(path -> path.toString().endsWith(".iml"))
                 .forEach(imlFiles::add);
         return imlFiles.stream()
-                .map(JkImlReader::getJdk)
+                .map(JkIntellijImlReader::getJdk)
                 .filter(Objects::nonNull)
                 .filter(JkIntellijJdk::isJekaManaged)
                 .map(intellijJdk -> new SdkInfo(
@@ -259,6 +276,10 @@ public final class JkExternalToolApi {
                         getJavaHome(baseDir, intellijJdk)
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public static void installJdk(String version, String distrib) {
+        JkUtilsJdk.getJdk(distrib, version);
     }
 
     private static Path getJavaHome(Path baseDir, JkIntellijJdk intellijJdk) {

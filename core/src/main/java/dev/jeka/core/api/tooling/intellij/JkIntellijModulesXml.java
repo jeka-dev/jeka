@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JkModulesXml {
+public class JkIntellijModulesXml {
 
     private static final String MODULES_XML_PATH = ".idea/modules.xml";
 
@@ -38,16 +38,16 @@ public class JkModulesXml {
 
     private final Path modulesXmlFile;
 
-    private JkModulesXml(Path projectBaseDir) {
+    private JkIntellijModulesXml(Path projectBaseDir) {
         this.projectBaseDir = projectBaseDir.toAbsolutePath().normalize();
         this.modulesXmlFile = projectBaseDir.resolve(MODULES_XML_PATH);
     }
 
-    public static JkModulesXml of(Path baseDir) {
-        return new JkModulesXml(baseDir);
+    public static JkIntellijModulesXml of(Path baseDir) {
+        return new JkIntellijModulesXml(baseDir);
     }
 
-    public JkModulesXml createIfAbsentOrInvalid() {
+    public JkIntellijModulesXml createIfAbsentOrInvalid() {
         if (!Files.exists(modulesXmlFile)) {
             JkLog.verbose("Re-creating modules.xml file at " + modulesXmlFile);
             createEmpty();
@@ -62,7 +62,7 @@ public class JkModulesXml {
         return this;
     }
 
-    static JkModulesXml find(Path moduleBaseDir) {
+    static JkIntellijModulesXml find(Path moduleBaseDir) {
         moduleBaseDir = moduleBaseDir.toAbsolutePath();
         if (Files.exists(moduleBaseDir.resolve(MODULES_XML_PATH))) {
             return of(moduleBaseDir);

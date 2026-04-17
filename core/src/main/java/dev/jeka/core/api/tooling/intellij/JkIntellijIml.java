@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Object model for IntelliJ iml files.
  */
-public final class JkIml {
+public final class JkIntellijIml {
 
     private Path moduleDir = Paths.get("");
 
@@ -41,19 +41,19 @@ public final class JkIml {
 
     final PathUrlResolver pathUrlResolver = new PathUrlResolver();
 
-    private JkIml() {
+    private JkIntellijIml() {
     }
 
-    public static JkIml of() {
-        return new JkIml();
+    public static JkIntellijIml of() {
+        return new JkIntellijIml();
     }
 
-    public JkIml setModuleDir(Path path) {
+    public JkIntellijIml setModuleDir(Path path) {
         this.moduleDir = path;
         return this;
     }
 
-    public JkIml setIsModuleBaseJekaSrc(boolean isForJekaSrc) {
+    public JkIntellijIml setIsModuleBaseJekaSrc(boolean isForJekaSrc) {
         this.isForJekaSrc = isForJekaSrc;
         return this;
     }
@@ -526,7 +526,7 @@ public final class JkIml {
         private final Map<String, Path> substitutes = new LinkedHashMap<>();
 
         void setPathSubstitute(Path jekaCacheDir) {
-            substitutes.put("MODULE_DIR", JkIml.this.moduleDir);
+            substitutes.put("MODULE_DIR", JkIntellijIml.this.moduleDir);
             substitutes.put("JEKA_CACHE_DIR", jekaCacheDir);
         }
 

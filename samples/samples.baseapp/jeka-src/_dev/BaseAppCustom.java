@@ -1,6 +1,6 @@
 package _dev;
 
-import dev.jeka.core.api.tooling.intellij.JkIml;
+import dev.jeka.core.api.tooling.intellij.JkIntellijIml;
 import dev.jeka.core.tool.JkDep;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
@@ -24,9 +24,9 @@ class BaseAppCustom extends KBean {
     private void postInit(IntellijKBean intellijKBean) {
         intellijKBean
                 .replaceLibByModule("dev.jeka.jeka-core.jar", "core")
-                .setModuleAttributes("core", JkIml.Scope.COMPILE, null)
+                .setModuleAttributes("core", JkIntellijIml.Scope.COMPILE, null)
                 .replaceLibByModule("springboot-plugin-SNAPSHOT.jar", "plugins.springboot")
-                .setModuleAttributes("plugins.springboot", JkIml.Scope.COMPILE, null);
+                .setModuleAttributes("plugins.springboot", JkIntellijIml.Scope.COMPILE, null);
     }
 
     @JkPostInit

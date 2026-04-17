@@ -20,8 +20,7 @@ import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.testing.JkTestProcessor;
-import dev.jeka.core.api.tooling.intellij.JkIml;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.tooling.intellij.JkIntelliJImlGenerator;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.tool.*;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
@@ -108,7 +107,7 @@ public class SimpleProjectKBean extends KBean {
     // For debugging purpose
     public void printIml() {
         ProjectKBean projectKBean = load(ProjectKBean.class);
-        JkImlGenerator imlGenerator = JkImlGenerator.of().setIdeSupport(projectKBean::getJavaIdeSupport);
+        JkIntelliJImlGenerator imlGenerator = JkIntelliJImlGenerator.of().setIdeSupport(projectKBean::getJavaIdeSupport);
         String iml = imlGenerator.computeIml().toDoc().toXml();
         System.out.println(iml);
     }

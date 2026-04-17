@@ -23,16 +23,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class JkImlReader {
+public class JkIntellijImlReader {
 
     private final JkDomDocument doc;
 
-    private JkImlReader(JkDomDocument doc) {
+    private JkIntellijImlReader(JkDomDocument doc) {
         this.doc = doc;
     }
 
     public static JkIntellijJdk getJdk(Path imlFile) {
-        JkImlReader imlReader = JkImlReader.of(imlFile);
+        JkIntellijImlReader imlReader = JkIntellijImlReader.of(imlFile);
         if (imlReader == null) {
             return null;
         }
@@ -40,12 +40,12 @@ public class JkImlReader {
 
     }
 
-    public static JkImlReader of(Path imlFile) {
+    public static JkIntellijImlReader of(Path imlFile) {
         if (!Files.exists(imlFile)) {
             return null;
         }
         try {
-            return new JkImlReader(JkDomDocument.parse(imlFile));
+            return new JkIntellijImlReader(JkDomDocument.parse(imlFile));
         } catch (RuntimeException e) {
             return null;
         }

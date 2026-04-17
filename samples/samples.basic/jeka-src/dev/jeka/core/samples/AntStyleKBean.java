@@ -15,12 +15,9 @@ import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.*;
 import dev.jeka.core.api.project.JkIdeSupport;
 import dev.jeka.core.api.project.JkIdeSupportSupplier;
-import dev.jeka.core.api.tooling.intellij.JkIml;
 import dev.jeka.core.tool.JkInit;
 import dev.jeka.core.tool.JkDep;
-import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.KBean;
-import dev.jeka.core.tool.builtins.tooling.ide.IntellijKBean;
 
 import java.nio.file.Path;
 import java.util.List;

@@ -5,7 +5,7 @@ import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.tooling.eclipse.JkEclipseClasspathGeneratorIT;
-import dev.jeka.core.api.tooling.intellij.JkImlGenerator;
+import dev.jeka.core.api.tooling.intellij.JkIntelliJImlGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ class JkImlGeneratorIT {
             .setBaseDir(base);
         baseProject.compilation.dependencies
             .add(JkPopularLibs.APACHE_HTTP_CLIENT.toCoordinate("4.5.6"));
-        final JkImlGenerator baseGenerator = JkImlGenerator.of()
+        final JkIntelliJImlGenerator baseGenerator = JkIntelliJImlGenerator.of()
                 .setIdeSupport(baseProject.getJavaIdeSupport());
         final String result0 = baseGenerator.computeIml().toDoc().toXml();
         System.out.println("\nbase .classpath");
@@ -53,7 +53,7 @@ class JkImlGeneratorIT {
                 .testing
                     .testProcessor
                         .setForkingProcess(true);
-        final JkImlGenerator coreGenerator = JkImlGenerator.of()
+        final JkIntelliJImlGenerator coreGenerator = JkIntelliJImlGenerator.of()
                 .setIdeSupport(coreProject.getJavaIdeSupport());
         final String result1 = coreGenerator.computeIml().toDoc().toXml();
         System.out.println("\ncore .classpath");
@@ -66,7 +66,7 @@ class JkImlGeneratorIT {
             .apply(this::configureEmptyTestCompileLayout)
             .setBaseDir(desktop);
         desktopProject.compilation.dependencies.add(coreProject.toDependency());
-        final JkImlGenerator desktopGenerator = JkImlGenerator.of()
+        final JkIntelliJImlGenerator desktopGenerator = JkIntelliJImlGenerator.of()
                 .setIdeSupport(desktopProject.getJavaIdeSupport());
         final String result2 = desktopGenerator.computeIml().toDoc().toXml();
         System.out.println("\ndesktop .classpath");
