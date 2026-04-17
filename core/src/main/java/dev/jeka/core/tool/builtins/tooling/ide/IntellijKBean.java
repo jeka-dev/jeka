@@ -419,7 +419,11 @@ public final class IntellijKBean extends KBean {
         Path baseDir = getBaseDir();
 
         // Find existing iml file
-        Path file = findRegularImlFilePath(baseDir.resolve(".idea"));
+        Path file = null;
+        Path ideaDir = baseDir.resolve(".idea");
+        if (Files.exists(ideaDir)) {
+            file = findRegularImlFilePath(ideaDir);
+        }
         if (file == null) {
             file = findRegularImlFilePath(baseDir);
         }
