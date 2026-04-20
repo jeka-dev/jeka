@@ -396,6 +396,10 @@ public final class JkExternalToolApi {
             }
             return new JdkInfo(version, effectiveDistrib, distribPath);
         }
+
+        public String getSdkName() {
+            return "jeka-" + distribName + "-" + version;
+        }
     }
 
     private static class EngineClasspathCache {

@@ -7,19 +7,24 @@ Create jar:
 jeka project: pack
 ```
 
-Clean, and create jar:
+Clean and create a jar:
 ```shell
 jeka project: pack --clean
 ```
 
-Run, test, and create jar:
+Run the JAR (build it first if it doesn’t exist). Pass JVM properties as program arguments using `-Dxxx=xx`.
 ```shell
-jeka project: test pack 
+jeka -p <PROGRAM ARGS...>
 ```
 
-Run jar:
+Clean the output dir, create a jar and run it.
 ```shell
-jeka project: runJar run.programArgs="" run.jvmOptions=""
+jeka -c -p <PROGRAM ARGS...>
+```
+
+Full build, including static analysis and end-to-end tests if present.
+```shell
+jeka project: build
 ```
 
 Synchronize IntelliJ:
@@ -34,12 +39,12 @@ Create image:
 jeka docker: build
 ```
 
-Show info about image:
+Show info about the Docker image:
 ```shell
 jeka docker: info
 ```
 
-Create native image:
+Create a native image:
 ```shell
 jeka docker: buildNative
 ```
@@ -49,7 +54,7 @@ Show info about native image:
 jeka docker: infoNative
 ```
 
-Create minimalist Docker image:
+Create a minimalist Docker image:
 ```shell
 jeka docker: buildNative nativeBaseImage=gcr.io/distroless/static-debian12:nonroot native: staticLink=MUSL
 ```

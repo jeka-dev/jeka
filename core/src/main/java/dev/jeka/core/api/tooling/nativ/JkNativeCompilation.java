@@ -107,7 +107,7 @@ public class JkNativeCompilation {
     public static final String DEFAULT_GRAALVM_VERSION = "25";;
 
     @JkDepSuggest(versionOnly = true, hint = "org.graalvm.buildtools:graalvm-reachability-metadata")
-    public static final String DEFAULT_REPO_VERSION =  "0.11.4";
+    public static final String DEFAULT_REPO_VERSION =  "1.0.0";
 
     private static final String JEKA_GRAALVM_HOME = "JEKA_GRAALVM_HOME";
 

@@ -5,10 +5,11 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 /*
- * Class to configure the build in code.
- * Any KBean can be configured here.
- * Add public void no-arg methods to create tasks you can run from the command line.
- * Add @JkDep class annotations to use third-party libraries in jeka-src code.
+ * Class to configure the build programmatically.
+ * Any KBean can be configured here:
+ *   - Add public void no-arg methods to create tasks you can run from the command line.
+ *   - Add @JkDep class annotations to use third-party libraries in jeka-src code.
+ * This class is optional. You can remove it and the `jeka-src` directory.
  */
 class Custom extends KBean {
 
