@@ -34,6 +34,7 @@ You can find some examples below to learn more about JeKa:
 
 - [Spring Boot Docker Native Images](https://github.com/jeka-dev/demo-project-springboot-headless)
 - [Kotlin Spring Boot ReactJS Docker Native Image](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
+- [Micronaut Web App](https://github.com/djeang/micronaut-jeka-template/blob/master/jeka.project.deps)
   
 ### Kotlin and ReactJS
 - [Kotlin Spring Boot ReactJS App](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs)
