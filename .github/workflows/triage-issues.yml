@@ -29,7 +29,7 @@ jobs:
 
       - name: Install JeKa
         run: |
-          curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
+          curl -sL https://jeka.dev/install.sh | bash -s - install check
           echo "$HOME/.jeka/bin" >> $GITHUB_PATH
 
       - name: Run triage agent
