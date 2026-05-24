@@ -46,7 +46,7 @@ class SdkmanPublisher {
     static void publishOnVersionTag() {
         String version = System.getenv(VERSION_ENV_VAR);
 
-        // If the version is not explictly provided, compute it from hit
+        // If the version is not explicitly provided, compute it from hit
         if (version == null) {
             List<String> tags = JkGit.of().getTagsOnCurrentCommit();
             if (tags.isEmpty()) {

@@ -1,0 +1,44 @@
+# .github/workflows/triage-issues.yml
+#
+# Triggered on every new GitHub issue opened on jeka-dev/jeka.
+# Builds and runs the Java triage agent (via JeKa itself!),
+# which classifies the issue, adds labels, and posts a first response.
+
+name: AI Issue Triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write     # post comments + add labels
+      contents: read    # read repo files
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Install JeKa
+        run: |
+          wget -qO- https://raw.githubusercontent.com/jeka-dev/jeka/master/install/setup.sh | bash
+          echo "$HOME/.jeka/bin" >> $GITHUB_PATH
+
+      - name: Run triage agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER:      ${{ github.event.issue.number }}
+          ISSUE_TITLE:       ${{ github.event.issue.title }}
+          ISSUE_BODY:        ${{ github.event.issue.body }}
+          ISSUE_AUTHOR:      ${{ github.event.issue.user.login }}
+          REPO:              ${{ github.repository }}
+        run: jeka triage#run

@@ -8,13 +8,12 @@ import dev.jeka.core.tool.KBean;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 
 /*
- * Include inferred documentation (from @JkDoc, @JkPostInt,...)  in KBeans MkDocs.
+ * Include inferred documentation (from @JkDoc, @JkPostInt,...) in KBeans MkDocs.
  */
 class MkDocsEnricher {
 
@@ -67,7 +66,7 @@ class MkDocsEnricher {
 
     private static String replace(String original, String placeHolder, String replacement) {
         List<String> result = new LinkedList<>();
-        List<String> lines = Arrays.asList(original.split("\n"));
+        String[] lines = original.split("\n");
         for (String line : lines) {
             if (line.trim().equals(placeHolder)) {
                 result.add(replacement);

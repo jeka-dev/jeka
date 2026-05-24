@@ -58,7 +58,7 @@ import java.util.function.Consumer;
 public final class SpringbootKBean extends KBean {
 
     @JkDoc("If true, create a bootable jar artifact.")
-    private final boolean createBootJar = true;
+    private boolean createBootJar = true;
 
     @JkDoc("If true, create original jar artifact for publication (jar without embedded dependencies")
     private boolean createOriginalJar;
