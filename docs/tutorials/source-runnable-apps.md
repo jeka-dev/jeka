@@ -180,6 +180,55 @@ jeka.program.bundle.dist=target/dist
 
 See a complete example at [demo-maven-multimodule](https://github.com/jeka-dev/demo-maven-multimodule).
 
+### Gradle Projects
+
+Gradle projects can be made source-runnable using the `gradle:` KBean from the [Gradle plugin](../../plugins/plugins.gradle/README.md).
+Add a `jeka.properties` file to your Gradle project root:
+
+```properties
+jeka.java.version=21
+
+jeka.classpath=dev.jeka:gradle-plugin
+jeka.program.build=gradle: wrapBuild
+```
+
+For multi-module projects, specify which sub-module contains the application:
+```properties
+jeka.program.build=gradle: wrapBuild appModule=app
+```
+
+For native execution (requires GraalVM), add `jeka.program.build.native`:
+```properties
+jeka.program.build.native=gradle: wrapNative appModule=app -Djeka.java.distrib=graalvm -Djeka.java.version=21
+```
+
+**Requirements:**
+
+1. **Gradle wrapper**: Include `gradlew` / `gradlew.bat` in your repository (to make the build fully portable).
+2. **Fat JAR**: Configure the `jar` task to produce an executable fat JAR with `Main-Class` in the manifest:
+
+```groovy
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.example.app.App'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+```
+
+3. **Native support (optional)**: Add the GraalVM Native Build Tools plugin in the application module:
+
+```groovy
+plugins {
+    id 'org.graalvm.buildtools.native' version '0.10.3'
+}
+```
+
+See a complete example at [plugins/plugins.gradle/sample](../../plugins/plugins.gradle/sample).
+
 ### Custom Build Commands
 
 For other build tools or custom requirements, you can create a custom KBean to handle the build process:

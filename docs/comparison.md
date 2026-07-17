@@ -74,7 +74,7 @@ Builds run on any machine, even without Java installed.
 ```kotlin
 implementation("com.google.guava:guava:31.1-jre")
 implementation("org.threeten:threeten-extra:1.8.0")
-test("org.mockito:mockito-core:5.22.0")
+testImplementation("org.mockito:mockito-core:5.22.0")
 ```
 
 **JeKa (jeka.project.deps):**

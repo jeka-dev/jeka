@@ -73,7 +73,7 @@ You can also include local JARs by placing them in the `libs` directory:
 To synchronize your project with **IntelliJ IDEA**, run:
 
 ```bash
-jeka intellij: iml --force
+jeka intellij: sync
 ```
 
 If the project is not yet recognized as a JeKa project, use:

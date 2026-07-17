@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="EntryPointsManager">
-    <list size="2">
-      <item index="0" class="java.lang.String" itemvalue="dev.jeka.core.tool.JkDoc" />
-      <item index="1" class="java.lang.String" itemvalue="dev.jeka.core.tool.JkInjectClasspath" />
-    </list>
-    <writeAnnotations>
-      <writeAnnotation name="dev.jeka.core.tool.JkInjectProject" />
-      <writeAnnotation name="dev.jeka.core.tool.JkDoc" />
-    </writeAnnotations>
-  </component>
-  <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jeka-temurin-21" project-jdk-type="JavaSDK" />
-  <component name="ProjectType">
-    <option name="id" value="jpab" />
-  </component>
-  <component name="SuppressKotlinCodeStyleNotification">
-    <option name="disableForAll" value="true" />
-  </component>
+    <component name="EntryPointsManager">
+        <list size="2">
+            <item class="java.lang.String" index="0" itemvalue="dev.jeka.core.tool.JkDoc"/>
+            <item class="java.lang.String" index="1" itemvalue="dev.jeka.core.tool.JkInjectClasspath"/>
+        </list>
+        <writeAnnotations>
+            <writeAnnotation name="dev.jeka.core.tool.JkInjectProject"/>
+            <writeAnnotation name="dev.jeka.core.tool.JkDoc"/>
+        </writeAnnotations>
+    </component>
+    <component enabled="true" name="ExternalStorageConfigurationManager"/>
+    <component default="true" languageLevel="JDK_21"
+        name="ProjectRootManager" project-jdk-name="jeka-temurin-21"
+        project-jdk-type="JavaSDK" version="2"/>
+    <component name="ProjectType">
+        <option name="id" value="jpab"/>
+    </component>
+    <component name="SuppressKotlinCodeStyleNotification">
+        <option name="disableForAll" value="true"/>
+    </component>
 </project>

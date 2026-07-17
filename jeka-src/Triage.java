@@ -17,8 +17,7 @@ import java.time.Duration;
  * JeKa KBean — AI triage agent for GitHub issues.
  *
  * Reads a newly opened issue via environment variables (injected by
- * GitHub Actions), classifies it with Claude API, applies labels,
- * and posts a tailored first response.
+ * GitHub Actions), classifies it with Claude API, and applies labels.
  *
  * Run locally:
  *   ANTHROPIC_API_KEY=sk-ant-... GITHUB_TOKEN=ghp_... \
@@ -28,7 +27,7 @@ import java.time.Duration;
  */
 class Triage extends KBean {
 
-    @JkDoc("Classify the issue, add labels, and post a first response.")
+    @JkDoc("Classify the issue and add labels.")
     public void run() {
         JkLog.info("=== JeKa AI Issue Triage ===");
 
@@ -47,10 +46,6 @@ class Triage extends KBean {
         GitHubClient github = new GitHubClient(issue.repo());
         github.addLabel(issue.number(), triage.githubLabel());
         JkLog.info("Label applied: " + triage.githubLabel());
-
-        // 4. Post first response
-        github.postComment(issue.number(), triage.response());
-        JkLog.info("Comment posted successfully.");
 
         JkLog.info("=== Triage complete ===");
     }
@@ -113,12 +108,10 @@ record IssueContext(
  *
  * @param category    One of: bug | feature_request | question | documentation | other
  * @param confidence  One of: high | medium | low
- * @param response    Ready-to-post Markdown comment for the issue
  */
 record TriageResult(
         String category,
-        String confidence,
-        String response
+        String confidence
 ) {
 
     /** Maps the category to the corresponding GitHub label slug. */
@@ -147,9 +140,6 @@ class ClaudeTriageClient {
     private static final String MODEL       = "claude-sonnet-4-20250514";
     private static final String API_VERSION = "2023-06-01";
 
-    private static final String JEKA_DOCS     = "https://jeka-dev.github.io/jeka/";
-    private static final String JEKA_EXAMPLES = "https://github.com/jeka-dev/jeka/tree/master/samples";
-
     // ── Public API ────────────────────────────────────────────────────────────
 
     /** Classify {@code issue} and return a {@link TriageResult}. */
@@ -172,19 +162,9 @@ class ClaudeTriageClient {
                 JSON schema (respond with ONLY this, no markdown, no explanation):
                 {
                   "category":   "<bug|feature_request|question|documentation|other>",
-                  "confidence": "<high|medium|low>",
-                  "response":   "<ready-to-post Markdown comment in English>"
+                  "confidence": "<high|medium|low>"
                 }
-
-                Rules for the response field:
-                - Greet the author by their GitHub handle (@%s).
-                - Be friendly, technical, and concise.
-                - For bugs: ask for JeKa version, OS, and a minimal reproduction.
-                - For questions: answer if possible or point to %s or %s.
-                - For feature requests: thank them and ask for a use-case description.
-                - Always end with: "A maintainer will follow up shortly."
-                - Never make up API details you are unsure about.
-                """.formatted(issue.toPromptSnippet(), issue.author(), JEKA_DOCS, JEKA_EXAMPLES);
+                """.formatted(issue.toPromptSnippet());
     }
 
     // ── HTTP call ─────────────────────────────────────────────────────────────
@@ -243,8 +223,7 @@ class ClaudeTriageClient {
         String clean = text.replaceAll("(?s)```json\\s*|```", "").trim();
         return new TriageResult(
                 extractJsonString(clean, "category"),
-                extractJsonString(clean, "confidence"),
-                extractJsonString(clean, "response")
+                extractJsonString(clean, "confidence")
         );
     }
 
@@ -313,12 +292,6 @@ class GitHubClient {
         this.http  = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
-    }
-
-    /** Post a Markdown comment on the given issue. */
-    void postComment(int issueNumber, String markdownBody) {
-        String url  = "%s/repos/%s/issues/%d/comments".formatted(API_BASE, repo, issueNumber);
-        post(url, "{\"body\": %s}".formatted(jsonString(markdownBody)), 201);
     }
 
     /** Add a label to the given issue (label must already exist in the repo). */

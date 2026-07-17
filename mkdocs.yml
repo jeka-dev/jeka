@@ -1,13 +1,11 @@
 site_name: JeKa Build Tool
 theme:
     name: material
-    highlight_theme: dracula
     logo: images/logo-plain-white.svg
     favicon: images/logo-plain-gradient.svg
-    edit_url: https://github.com/jeka-dev/jeka/main/docs/
     font:
       text: 'Inter'
-      code: 'Fire Code'
+      code: 'Fira Code'
     palette :
       # Palette toggle for light mode
       # Palette toggle for dark mode
@@ -24,12 +22,12 @@ theme:
           name: Switch to light mode
         primary: 'deep purple'
         accent: 'purple'
-        favicon: images/knight-color-logo.svg
 
     features:
         - navigation.instant
         - navigation.tracking
         - content.code.copy
+        - content.action.edit
 extra:
     analytics:
         provider: google
@@ -40,7 +38,6 @@ markdown_extensions:
   - toc:
       permalink: true
   - pymdownx.snippets
-  - pymdownx.superfences
   - pymdownx.inlinehilite
   - pymdownx.highlight:
       use_pygments: true
@@ -94,9 +91,17 @@ nav:
     - Examples: examples.md
     - External Resources: external-resources.md
     - Javadoc: javadoc/
+    - Migration Guide: migration-guide.md
     - Under The Hood: under-the-hood.md
 
 repo_url: https://github.com/jeka-dev/jeka
+edit_uri: edit/main/docs/
+
+not_in_nav: |
+  adrs/**
+
+plugins:
+  - search
 
 extra_css:
   - stylesheets/extra.css
