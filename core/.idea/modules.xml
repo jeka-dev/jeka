@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <component>
+        <modules>
+            <module filepath="$PROJECT_DIR$/.idea/core.iml" fileurl="file://$PROJECT_DIR$/.idea/core.iml"/>
+            <module filepath="$PROJECT_DIR$/.idea/core-jeka-src.iml" fileurl="file://$PROJECT_DIR$/.idea/core-jeka-src.iml"/>
+        </modules>
+    </component>
+</project>

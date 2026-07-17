@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <component>
+        <modules>
+            <module filepath="$PROJECT_DIR$/plugins.jacoco.iml" fileurl="file://$PROJECT_DIR$/plugins.jacoco.iml"/>
+            <module
+                filepath="$PROJECT_DIR$/.idea/plugins.jacoco-jeka-src.iml" fileurl="file://$PROJECT_DIR$/.idea/plugins.jacoco-jeka-src.iml"/>
+        </modules>
+    </component>
+</project>

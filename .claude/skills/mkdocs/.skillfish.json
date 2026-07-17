@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "mkdocs",
+  "owner": "jamie-bitflight",
+  "repo": "claude_skills",
+  "path": "plugins/python-engineering/skills/mkdocs",
+  "branch": "main",
+  "sha": "5f5a94446dd2c0b5a7b0e5d2033fe479e9cd9034",
+  "source": "manual"
+}

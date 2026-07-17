@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <component>
+        <modules>
+            <module filepath="$PROJECT_DIR$/.idea/plugins.sonarqube.iml" fileurl="file://$PROJECT_DIR$/.idea/plugins.sonarqube.iml"/>
+            <module
+                filepath="$PROJECT_DIR$/.idea/plugins.sonarqube-jeka-src.iml" fileurl="file://$PROJECT_DIR$/.idea/plugins.sonarqube-jeka-src.iml"/>
+        </modules>
+    </component>
+</project>
