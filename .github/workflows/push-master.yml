@@ -27,11 +27,11 @@ jobs:
         path: ~/.jeka/cache
         key: ${{ runner.os }}
 
-    - name: Package JeKa (bootstrapped by ANT) and add it to PATH
+    - name: Package JeKa (bootstrapped) and add it to PATH
       env:
         JEKA_RUN_SLOW_TEST: true
       run: |
-        ant -buildfile .github/workflows/build.xml -Dbasedir=`.`
+        bash bootstrap.sh project: pack --clean --inspect --stacktrace
         echo "core/jeka-output/distrib/bin" >> $GITHUB_PATH
 
     ## jansi classpath related bug prevents launching tests, they are currently run in ANT step

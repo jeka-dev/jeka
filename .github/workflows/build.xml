@@ -1,4 +1,4 @@
-<project name="Jeka" default="run" basedir="../..">
+<project name="Jeka" default="run" basedir="..">
 
 	<description>
             This ANT file bootstraps Jeka in order it builds itself from nil.
@@ -6,7 +6,7 @@
 
 	<property environment="env"/>
 
-	<property name="bin" location="jeka-bin" />
+	<property name="bin" location="bootstrap/jeka-bin" />
 
 	<fileset id="libs" dir="core">
 		<include name="libs/compile-only/*.jar" />

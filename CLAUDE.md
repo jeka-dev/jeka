@@ -2,204 +2,142 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 1. Think Before Coding
+## What This Project Is
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
-
-## What is JeKa
-
-JeKa is a Java build tool where build logic is written in plain Java/Kotlin (no XML, no DSLs). It bootstraps itself from source: the `jeka` CLI compiles `jeka-src/*.java` on the fly, resolves declared dependencies, and runs the requested actions. The core JAR ships with zero external dependencies.
+JeKa is a Java build tool that **builds itself**. The repo is a monorepo containing the core engine, bundled plugins, and sample/integration test projects. JeKa uses JeKa for its own build — there is no Gradle or Maven wrapper.
 
 ## Build Commands
 
-JeKa builds itself. The primary way to build is via IntelliJ run configurations, which invoke `dev.jeka.core.tool.Main` directly:
+JeKa must be bootstrapped from scratch via ANT (since it needs itself to build):
 
-| Config                 | Command args                                                                                                                           | Scope                    |
-|------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| `CORE BUILD`           | `project: test pack e2eTest --clean --stacktrace -v`                                                                                   | Core module only         |
-| `CORE BUILD skip test` | `project: pack e2eTest --clean --stacktrace -v`                                                                                        | Core without tests       |
-| `FULL BUILD`           | `project: test pack e2eTest base: test build: enrichMkDocs maven: publishLocal --clean-work --duration --clean --stacktrace --inspect` | Core + plugins + docs    |
-| `FULL BUILD skip test` | Same without `test`                                                                                                                    | Core + plugins, no tests |
+```shell
+# Bootstrap and build core (from repo root)
+ant -f bootstrap/build.xml
+# Or with the bash script (pass any jeka arguments directly):
+bash bootstrap.sh project: pack --clean --inspect --stacktrace
 
-From the command line (requires `jeka` on PATH):
-```bash
-# From core/ directory
-jeka project: --doc                             # Show help on project KBean
-jeka project: test                              # Run tests
-jeka project: test test.includePatterns=ac.me.MyTestClass  # Single test class
-jeka project: pack                              # Build JAR
-jeka project: test pack e2eTest --clean         # Full core build
-
-# From root directory
-jeka build: enrichMkDocs                        # Regenerate docs from @JkDoc annotations
-jeka maven: publishLocal                        # Publish to local Maven repo
+# After that, the local JeKa distrib is at core/jeka-output/distrib/bin
+# Add it to PATH to use the local build:
+export PATH="$PWD/core/jeka-output/distrib/bin:$PATH"
 ```
 
-Bootstrap (no `jeka` on PATH yet):
-```bash
-ant -f .github/workflows/build.xml              # Compile bootstrap + core
+**IntelliJ run configurations** (pre-configured, recommended for development):
+- **CORE BUILD** — builds core only: `project: test pack e2eTest --clean --stacktrace -v` (working dir: `core/`)
+- **FULL BUILD** — builds core + all plugins + tests + docs: runs from repo root
+
+**JeKa CLI commands once bootstrapped:**
+```shell
+# From the core/ directory
+jeka project: test pack       # compile, test, and package
+jeka project: pack            # compile and package only
+jeka base: test               # run unit tests via BaseKBean
+jeka project: test e2eTest    # run all tests including e2e
+
+# From repo root (multi-module)
+jeka project: test pack e2eTest base: test build: enrichMkDocs maven: publishLocal --clean
 ```
 
-## Architecture
-
-### Module Structure
-
-```
-/core          – Main JeKa engine + reusable build APIs
-/plugins/*     – Optional plugins (springboot, sonarqube, jacoco, kotlin, nodejs, protobuf, nexus, centralportal, gradle)
-/samples/*     – Example projects demonstrating patterns
-/jeka-src/     – Root-level build KBeans (Build, Triage, SdkmanPublisher)
-/docs/         – MkDocs source (Material theme)
+**Run a single test class:**
+```shell
+jeka project: test -Djeka.test.filter=MyTestClassName
 ```
 
-Each module has its own `jeka.properties` and `jeka-src/` directory. The root `jeka.properties` enables multi-module support via `_jeka.child-bases=core, plugins/*`.
-
-### Core Package Split
-
-**`dev.jeka.core.tool`** – Execution engine: parses `jeka-src`, compiles on the fly, injects KBeans, and dispatches CLI actions.
-
-Key classes:
-- `Main` – CLI entry point
-- `Engine` / `Engines` – Orchestrates parsing → compilation → injection → execution
-- `KBean` – Base class for all build definitions
-- `JkRunbase` – Per-project execution context
-- `RunbaseGraph` – Multi-module dependency graph
-- `SourceParser` – Extracts `@JkDep`, `@JkInject` etc. from source without full compilation
-- `InitClassesResolver` – Builds the classpath from declared deps
-
-**`dev.jeka.core.api`** – Reusable build APIs, independent of the KBean model:
-- `project/JkProject` – Core project model (compilation, testing, packaging)
-- `depmanagement/` – Dependency resolution against Maven repos
-- `java/` – `JkJavaCompiler`, classpath, process management
-- `file/JkPathTree` – Glob-based file tree operations
-- `testing/JkTestProcessor` – JUnit Platform integration
-- `tooling/` – Git, IntelliJ, Docker, GraalVM helpers
-- `system/JkLog` – Logging/process output
-
-**`dev.jeka.core.tool.builtins`** – Built-in KBeans:
-- `project/ProjectKBean` – Wraps `JkProject`; the main Java project builder
-- `base/BaseKBean` – Compiles and runs `jeka-src` code
-- `app/AppKBean` – Runs Java apps directly from Git repos
-
-### KBean Model
-
-KBeans are the fundamental build-configuration unit. Users subclass `KBean` in `jeka-src/`:
-
-```java
-public class MyBuild extends KBean {
-
-    @JkDoc("Description shown in help")
-    public String myOption = "default";     // public fields = CLI/property configurable
-
-    @JkInject
-    private ProjectKBean project;            // inject other KBeans
-
-    @Override
-    protected void init() { /* customise after injection */ }
-
-    @JkDoc("Callable from CLI: jeka mybuild: myTask")
-    public void myTask() { /* ... */ }
-}
+**Documentation (MkDocs):**
+```shell
+pip install mkdocs-material
+mkdocs serve   # serves at http://localhost:8000
 ```
 
-### Configuration
+## Repository Structure
 
-`jeka.properties` controls KBean enablement and field values:
+```
+core/           # JeKa engine and all bundled KBeans — the main artifact (dev.jeka:jeka-core)
+  src/main/java/dev/jeka/core/
+    api/        # Reusable public API (Jk-prefixed classes)
+    tool/       # Engine: KBean framework, CLI parsing, classpath loading
+  jeka-src/     # KBeans used to build core itself (dev subdirectory)
+  jeka-boot/    # Pre-compiled bootstrap JARs
+  libs/         # Vendored JARs: Ivy, Bouncycastle, Classgraph, Gson, Jansi, JUnit 5, etc.
+plugins/        # Plugins released with JeKa but not bundled in core
+  plugins.springboot/
+  plugins.jacoco/
+  plugins.sonarqube/
+  plugins.kotlin/
+  plugins.nodejs/
+  plugins.protobuf/
+  plugins.nexus/
+  plugins.centralportal/
+  plugins.gradle/
+samples/        # Example projects used for illustration and integration testing
+jeka-src/       # Root-level build KBeans: Build.java, Triage.java, MkDocsEnricher.java
+jeka.properties # Root multi-module config; child-bases: core, plugins/*
+docs/           # MkDocs source for the documentation site
+```
 
+## Architecture: Core Concepts
+
+### KBean Framework (`core/src/main/java/dev/jeka/core/tool/`)
+
+**KBean** is the fundamental unit. Any Java class extending `KBean` becomes a named command group. The class name minus the `KBean` suffix is the KBean's name (e.g., `ProjectKBean` → `project`).
+
+- KBeans expose public `void` methods as CLI commands and public fields as configurable properties.
+- Use `@JkDoc` to annotate methods/fields with descriptions shown in `--doc` output.
+- KBeans must not be instantiated with `new`; use `load(SomeKBean.class)` from within another KBean.
+- Initialization logic goes in `init()`, not the constructor (fields are not yet set in the constructor).
+
+**JkRunbase** (`JkRunbase.java`) is the execution context per base directory. It holds the KBean registry, reads `jeka.properties`, and manages the classloader. Each directory with a `jeka.properties` or `jeka-src/` is a runbase.
+
+**Built-in KBeans** (in `core/src/main/java/dev/jeka/core/tool/builtins/`):
+- `ProjectKBean` — full Java project build (compile, test, pack, publish)
+- `BaseKBean` — lightweight alternative to ProjectKBean for simpler projects/scripts
+- `AppKBean` — run Java applications from source/Git
+- `DockerKBean` — build Docker images
+- `GitKBean` — Git versioning support
+- `MavenKBean` — publish to Maven repositories
+- `NativeKBean` — GraalVM native compilation
+- `IntellijKBean` / `EclipseKBean` — IDE support generation
+- `SetupKBean` — JeKa installation/upgrade
+
+### Configuration (`jeka.properties`)
+
+Properties follow the pattern `@beanname.property=value`. The `@` prefix marks a KBean name:
 ```properties
-@project=on                          # enable ProjectKBean
-@project.moduleId=org.example:mylib  # set ProjectKBean.moduleId
-jeka.classpath=dev.jeka:springboot-plugin  # add plugin to classpath
+@project=on                          # activate ProjectKBean
+@project.moduleId=com.example:my-lib # set a property
+@project.gitVersioning.enable=true
+jeka.classpath=dev.jeka:jacoco-plugin # add plugin JARs to classpath
 ```
 
-Properties are also settable from the CLI as `-D` flags or `kbeanName.field=value` positional args.
+Multi-module support via `_jeka.child-bases=core, plugins/*` in root `jeka.properties`.
 
-### API Style Conventions
+### Public API (`core/src/main/java/dev/jeka/core/api/`)
 
-- All public API classes are prefixed `Jk` (e.g., `JkProject`, `JkPathTree`, `JkDependencySet`).
-- Fluent, immutable-style builders throughout the `api/` packages.
-- **Zero external dependencies** in the core JAR — only JDK built-ins.
-- KBean classes are suffixed `KBean` (e.g., `ProjectKBean`, `BaseKBean`).
+All public API classes are prefixed with `Jk`. Key packages:
+- `api/project/` — `JkProject`: central model for Java project build (compilation, testing, packaging, publishing)
+- `api/depmanagement/` — dependency resolution via Ivy (`JkDependencySet`, `JkCoordinate`, `JkRepo`)
+- `api/java/` — JVM toolchain (`JkJavaCompilerToolChain`, `JkJavaProcess`, `JkClassLoader`)
+- `api/file/` — file utilities (`JkPathTree`, `JkPathFile`, `JkZipTree`)
+- `api/system/` — logging (`JkLog`), process execution (`JkAbstractProcess`)
+- `api/tooling/` — Docker, Git, Maven, IntelliJ integrations
 
-### Plugin Pattern
+### Naming and Style Conventions
 
-Plugins are KBeans published as separate JARs. They hook into the build via `@JkPostInit` on `ProjectKBean` or `BaseKBean`. Users activate a plugin by adding it to `jeka.classpath` and enabling it with `@pluginName=on`.
-
-### Multi-Module Builds
-
-The root `jeka.properties` lists child bases:
-```properties
-_jeka.child-bases=core, plugins/*
-```
-`RunbaseGraph` builds a dependency graph across them. Removing the `_` prefix propagate the property to child modules.
+- Public classes in `api/` are prefixed with `Jk` to stay discoverable in IDEs.
+- Internal/engine classes in `tool/` are not prefixed.
+- Fluent API style: methods return `this` or the builder type.
+- Avoid third-party dependencies unless critical — the core JAR is intentionally tiny (<2MB).
+- Target JDK 21; keep classes `public` only when needed.
+- Plugin KBeans extending a framework should follow the naming pattern `XxxPlugin` or `XxxKBean`.
 
 ## Testing
 
-- Tests use JUnit 5 (Jupiter).
-- E2E/integration tests live under `core/src/test/java/**/integrationtest/`.
-- Test output uses PLAIN style for Spring Boot compatibility.
-- The `e2eTest` action in `ProjectKBean` runs end-to-end tests as a separate step after `pack`.
+- **Unit tests**: `core/src/test/java/dev/jeka/core/tool/` and `core/src/test/java/dev/jeka/core/api/`
+- **Integration tests**: `core/src/test/java/dev/jeka/core/integrationtest/` — files named `*IT.java` (hit real Maven repos, requires network)
+- **E2E tests**: `core/src/test/java/e2e/` — invoke the actual `jeka` CLI binary
+- Slow/integration tests are gated by `JEKA_RUN_SLOW_TEST=true` env var in CI
 
-## Documentation
+The `PackageCyclicDependencyTest` enforces that the `api/` packages don't have cyclic dependencies — run it when restructuring packages.
 
-Docs live in `/docs/` and are built with MkDocs (Material theme). The `build: enrichMkDocs` action generates reference pages from `@JkDoc` annotations. To preview locally:
-```bash
-pip install mkdocs-material
-mkdocs serve   # http://localhost:8000
-```
+## Releasing
+
+Releases are created via GitHub Releases UI, which triggers the CI workflow to tag, build, and publish to Maven Central (via Central Portal). The local `ant` bootstrap + CI pipeline handles everything; there is no manual publish step.
