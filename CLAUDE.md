@@ -110,6 +110,9 @@ jeka.classpath=dev.jeka:jacoco-plugin # add plugin JARs to classpath
 
 Multi-module support via `_jeka.child-bases=core, plugins/*` in root `jeka.properties`.
 
+**The `_` prefix convention:**
+- In `jeka.properties`: a property prefixed with `_` applies only to the current base directory and is **not inherited by child projects** (e.g. `_jeka.child-bases=...`).
+
 ### Public API (`core/src/main/java/dev/jeka/core/api/`)
 
 All public API classes are prefixed with `Jk`. Key packages:

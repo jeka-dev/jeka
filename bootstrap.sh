@@ -2,7 +2,7 @@
 # Entry point for developers, AI agents, and CI to build and run JeKa purely from source,
 # with no prior JeKa or build tool installation required.
 #
-# Ien hands off to tht compiles JeKa from scratch using only the JDK, the compiled JeKa
+# It compiles JeKa from scratch using only the JDK, then hands off to the compiled JeKa
 # to execute the given arguments (e.g. 'project: pack', 'base: test').
 #
 # Usage: ./bootstrap.sh <jeka arguments>
@@ -23,7 +23,7 @@ echo "Compiling JeKa sources..."
 SOURCES_FILE=$(mktemp)
 find core/src/main/java core/jeka-src plugins/plugins.nexus -name "*.java" > "$SOURCES_FILE"
 SOURCE_COUNT=$(wc -l < "$SOURCES_FILE")
-javac -encoding UTF-8 -d "$BIN" -cp "$COMPILE_CP" "@$SOURCES_FILE"
+javac -encoding UTF-8 --release 21 -d "$BIN" -cp "$COMPILE_CP" "@$SOURCES_FILE"
 rm -f "$SOURCES_FILE"
 echo "$SOURCE_COUNT source files compiled."
 
