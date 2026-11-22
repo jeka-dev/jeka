@@ -31,6 +31,7 @@ import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.jeka.core.api.depmanagement.embedded.ivy.IvyTranslatorToConfiguration.toMasterConfigurations;
@@ -57,6 +58,16 @@ class IvyTranslatorToModuleDescriptor {
                 result.getConfigurationsNames()))
                 .forEach(excludeRule -> result.addExcludeRule(excludeRule));
 
+        // Collect modules for which the user explicitly declared a version.
+        // The BOM mediator must not override these — direct declarations beat BOM (Maven semantics).
+        Set<JkModuleId> explicitlyVersioned = dependencies.getEntries().stream()
+                .map(JkQualifiedDependency::getDependency)
+                .filter(dep -> dep instanceof JkCoordinateDependency)
+                .map(dep -> ((JkCoordinateDependency) dep).getCoordinate())
+                .filter(coord -> !coord.getVersion().isUnspecified())
+                .map(JkCoordinate::getModuleId)
+                .collect(Collectors.toSet());
+
         // Add version overwrites for transitive dependencies
         JkVersionProvider versionProvider = dependencies.getVersionProvider();
         for (final JkModuleId jkModuleId : versionProvider.getModuleIds()) {
@@ -67,7 +78,7 @@ class IvyTranslatorToModuleDescriptor {
             final JkVersion version = versionProvider.getVersionOf(jkModuleId);
             result.addDependencyDescriptorMediator(toModuleId(jkModuleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
-                    new FallbackVersionMediator(version.getValue()));
+                    new FallbackVersionMediator(version.getValue(), explicitlyVersioned));
 
         }
         return result;
@@ -118,17 +129,27 @@ class IvyTranslatorToModuleDescriptor {
         }
     }
 
-    private static class FallbackVersionMediator extends OverrideDependencyDescriptorMediator{
+    private static class FallbackVersionMediator extends OverrideDependencyDescriptorMediator {
 
-        public FallbackVersionMediator(String version) {
+        private final Set<JkModuleId> explicitlyVersioned;
+
+        public FallbackVersionMediator(String version, Set<JkModuleId> explicitlyVersioned) {
             super(null, version);
+            this.explicitlyVersioned = explicitlyVersioned;
         }
 
         public DependencyDescriptor mediate(DependencyDescriptor dd) {
             ModuleRevisionId mrid = dd.getDependencyRevisionId();
             String fallbackVersion = getVersion();
 
-            if (fallbackVersion == null || fallbackVersion.equals(mrid.getRevision()) || mrid.getRevision() != null) {
+            // Direct declarations beat BOM (Maven semantics): never override a version the
+            // user pinned explicitly in their own dependency list.
+            JkModuleId moduleId = JkModuleId.of(mrid.getOrganisation(), mrid.getName());
+            if (explicitlyVersioned.contains(moduleId)) {
+                return dd;
+            }
+
+            if (fallbackVersion == null || fallbackVersion.equals(mrid.getRevision())) {
                 return dd;
             }
 
