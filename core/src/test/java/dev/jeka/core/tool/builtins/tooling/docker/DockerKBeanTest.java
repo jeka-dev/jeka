@@ -2,11 +2,27 @@ package dev.jeka.core.tool.builtins.tooling.docker;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.tool.KBeanTestLoader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DockerKBeanTest {
+
+    @Test
+    void imageNameFromProperties_placeHoldersAreResolved(@TempDir Path tempDir) throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Files.write(baseDir.resolve("jeka.properties"), ("@project=on\n@project.moduleId=my.group:app\n"
+                + "@project.version=1.0\n@docker=on\n@docker.jvmImageName=reg/$artifactId:$version\n"
+                + "@docker.nativeImageName=native-$artifactId:$version\n").getBytes());
+        DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
+        assertEquals("reg/app:1.0", dockerKBean.resolveJvmImageName());
+        assertEquals("native-app:1.0", dockerKBean.resolveNativeImageName());
+    }
 
     @Test
     void resolvePlaceHolder_ok() {

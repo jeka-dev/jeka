@@ -1,5 +1,6 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.tool.builtins.base.BaseKBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,21 @@ class InjectedRunbaseTest {
             System.clearProperty("injected.base");
             System.clearProperty("injected.runbase");
         }
+    }
+
+    @Test
+    void injectedRunbase_invalidTarget_explicitError() throws IOException {
+        Path dir = baseDir.toRealPath();
+        Path child = Files.createDirectories(dir.resolve("child"));
+        KBeanTestLoader.load(dir, BaseKBean.class);  // set dir as the master runbase
+        JkRunbase childRunbase = new JkRunbase(child);
+
+        Exception missing = assertThrows(IllegalStateException.class,
+                () -> childRunbase.getInjectedRunbase("../missing"));
+        assertTrue(missing.getMessage().contains("mentions a directory that does not exist"), missing.getMessage());
+
+        Exception parent = assertThrows(IllegalStateException.class, () -> childRunbase.getInjectedRunbase(".."));
+        assertTrue(parent.getMessage().contains("targets the parent runbase"), parent.getMessage());
     }
 
     @Test
