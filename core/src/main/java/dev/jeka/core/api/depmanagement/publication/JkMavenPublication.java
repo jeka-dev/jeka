@@ -358,7 +358,7 @@ public final class JkMavenPublication {
         Arrays.stream(this.artifactPublisher.info().split("\n")).forEach(
                 line -> sb.append("  " + line + "\n"));
         sb.append("Published Dependencies : " + "\n");
-        getDependencies().withResolvedBoms(this.repos).toResolvedModuleVersions().getEntries().forEach(
+        getDependencies().withResolvedBoms(bomRepos(this.repos)).toResolvedModuleVersions().getEntries().forEach(
                 dep -> sb.append("  " + dep + "\n"));
         return sb.toString();
     }
@@ -401,13 +401,18 @@ public final class JkMavenPublication {
         return JkDependencySet.of(result).withVersionProvider(mergeResult.getVersionProvider());
     }
 
+    // BOMs are generally hosted on download repos
+    private JkRepoSet bomRepos(JkRepoSet publishRepos) {
+        return this.bomResolverRepoSupplier.get().and(publishRepos);
+    }
+
     private JkMavenPublication publish(JkRepoSet repos) {
 
         JkUtilsAssert.state(moduleIdSupplier.get() != null, "moduleId cannot be null.");
         JkUtilsAssert.state(versionSupplier.get() != null, "version cannot be null.");
 
         JkLog.info("Publishing %s:%s to Maven repos ...", moduleIdSupplier.get(), versionSupplier.get());
-        JkRepoSet bomRepos = this.bomResolverRepoSupplier.get().and(repos);
+        JkRepoSet bomRepos = bomRepos(repos);
         JkDependencySet dependencySet = this.getDependencies()
                 .withResolvedBoms(bomRepos)
 
