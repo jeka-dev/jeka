@@ -149,7 +149,6 @@ From a directory containing a *pom.xml* file, display its dependencies as Java c
 ```shell
 jeka maven: migrateDeps
 ```
-For now, dependencies of `provided` scope must be completed by hand. 
 See [Migrate a Maven Project](../tutorials/migrate-from-maven.md) for all the steps.
 
 ## Summary

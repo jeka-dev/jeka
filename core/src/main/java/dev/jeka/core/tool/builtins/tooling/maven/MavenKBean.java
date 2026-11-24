@@ -145,18 +145,18 @@ public final class MavenKBean extends KBean {
         jkMvn.exec();
     }
 
-    @JkDoc("Displays Java code for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
+    @JkDoc("Displays Java code and jeka.project.deps content for declaring dependencies based on pom.xml. The pom.xml file is supposed to be in root directory.")
     public void migrateDeps()  {
         String separator = "_";
         int repeat = 100;
         System.out.println(JkUtilsString.repeat(separator, repeat));
         System.out.println("Java code snippets:");
         System.out.println(JkUtilsString.repeat(separator, repeat));
-        JkLog.info(JkMavenProject.of(getBaseDir()).getDependencyAsJeKaCode(codeIndent));
+        JkLog.info("%s", JkMavenProject.of(getBaseDir()).getDependencyAsJeKaCode(codeIndent));
         System.out.println(JkUtilsString.repeat(separator, repeat));
         System.out.println(JkProject.PROJECT_DEPENDENCIES_FILE);
         System.out.println(JkUtilsString.repeat(separator, repeat));
-        JkLog.info(JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
+        JkLog.info("%s", JkMavenProject.of(getBaseDir()).getDependenciesAsTxt());
     }
 
     @JkRequire

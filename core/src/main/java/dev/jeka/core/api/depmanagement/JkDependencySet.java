@@ -628,44 +628,94 @@ public class JkDependencySet {
     /**
      * Returns the java codes that declare these dependencies.
      */
+    /**
+     * Returns the Java code, applicable on a {@link JkDependencySetModifier}, for adding the specified coordinate
+     * dependencies, or removing them if <code>and</code> is <code>false</code>.
+     */
     public static String toJavaCode(int indentCount, List<JkDependency> dependencies, boolean and) {
-        String method = and ? "add" : "minus";
         final String indent = JkUtilsString.repeat(" ", indentCount);
         final StringBuilder builder = new StringBuilder();
         for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
-                JkCoordinate coordinate = coordinateDependency.getCoordinate();
-                String dependencyString = coordinate.getModuleId().toColonNotation();
-                if (and && !coordinate.getVersion().isUnspecified()) {
-                    dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
+                builder.append(indent);
+                if (and) {
+                    builder.append(toAddJavaCode(coordinateDependency));
+                } else {
+                    builder.append(".remove(\"")
+                            .append(coordinateDependency.getCoordinate().getModuleId().toColonNotation())
+                            .append("\")");
                 }
-                builder.append(indent).append(".").append(method).append("(\"")
-                        .append(dependencyString)
-                        .append('"')
-                        .append(")\n");
+                builder.append("\n");
             }
         }
         return builder.toString();
     }
 
+    private static String toAddJavaCode(JkCoordinateDependency dependency) {
+        String coordinate = '"' + toNotation(dependency.getCoordinate()) + '"';
+        String transitivity = dependency.getTransitivity() == null ? null :
+                "JkTransitivity." + dependency.getTransitivity();
+        String exclusions = dependency.getExclusions().stream()
+                .map(exclusion -> '"' + exclusion.getModuleId().toColonNotation() + '"')
+                .collect(Collectors.joining(", "));
+        if (exclusions.isEmpty()) {
+            return ".add(" + coordinate + (transitivity == null ? "" : ", " + transitivity) + ")";
+        }
+        if (transitivity == null) {
+            return ".addWithExclusions(" + coordinate + ", " + exclusions + ")";
+        }
+        return ".add(JkCoordinateDependency.of(" + coordinate + ").withTransitivity(" + transitivity
+                + ").andExclusions(" + exclusions + "))";
+    }
+
+    /**
+     * Returns the lines declaring the specified coordinate dependencies in a <i>jeka.project.deps</i> file.
+     * If <code>minus</code> is <code>true</code>, it returns the lines for removing them, according to the legacy
+     * <i>dependencies.txt</i> format.
+     */
     public static String toTxt(List<JkDependency> dependencies, boolean minus) {
         final StringBuilder builder = new StringBuilder();
         for (final JkDependency dependency : dependencies) {
             if (dependency instanceof JkCoordinateDependency) {
                 final JkCoordinateDependency coordinateDependency = (JkCoordinateDependency) dependency;
                 JkCoordinate coordinate = coordinateDependency.getCoordinate();
-                String dependencyString = coordinate.getModuleId().toColonNotation();
-                if (!coordinate.getVersion().isUnspecified() && !minus) {
-                    dependencyString = dependencyString + ":" + coordinate.getVersion().getValue();
-                }
                 if (minus) {
-                    dependencyString = "- " + dependencyString;
+                    builder.append("- ").append(coordinate.getModuleId().toColonNotation()).append("\n");
+                    continue;
                 }
-                builder.append(dependencyString).append("\n");
+                builder.append(toNotation(coordinate));
+                JkTransitivity transitivity = coordinateDependency.getTransitivity();
+                if (!coordinate.isTransitiveByDefault() && transitivity != null && transitivity != JkTransitivity.NONE) {
+                    builder.append("  # transitive dependencies are not included, declare them if needed");
+                }
+                builder.append("\n");
+                coordinateDependency.getExclusions().forEach(exclusion ->
+                        builder.append("    !").append(exclusion.getModuleId().toColonNotation()).append("\n"));
             }
         }
         return builder.toString();
+    }
+
+    /*
+     * Returns the string notation of the specified coordinate, that can be parsed by JkCoordinate#of(String).
+     */
+    private static String toNotation(JkCoordinate coordinate) {
+        String moduleId = coordinate.getModuleId().toColonNotation();
+        String version = coordinate.hasUnspecifiedVersion() ? "" : coordinate.getVersion().getValue();
+        JkCoordinate.JkArtifactSpecification spec = coordinate.getArtifactSpecification();
+        if (JkCoordinate.JkArtifactSpecification.MAIN.equals(spec)) {
+            return version.isEmpty() ? moduleId : moduleId + ":" + version;
+        }
+        String classifier = JkUtilsString.nullToEmpty(spec.getClassifier());
+        String type = JkUtilsString.nullToEmpty(spec.getType());
+        if (type.isEmpty() && !version.isEmpty()) {
+            return moduleId + ":" + classifier + ":" + version;
+        }
+        if (coordinate.isBom() && classifier.isEmpty()) {
+            return moduleId + ":" + version + "@pom";
+        }
+        return moduleId + ":" + classifier + ":" + type + ":" + version;
     }
 
     @Override
