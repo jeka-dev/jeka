@@ -179,7 +179,7 @@ public class PicocliMainCommand {
     private boolean fakeDoc;  // Handled at upper level
 
     @Option(names = {"--doc-md"},
-            description = "Display markdown formatted documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc.md'.")
+            description = "Display markdown formatted documentation on default KBean, or a specific KBean if mentioned as 'aKBean: --doc-md'.")
     private boolean fakeDocMd;  // Handled at upper level
 
     @Option(names = {"-cb", "--child-base"},

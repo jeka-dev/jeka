@@ -12,7 +12,7 @@ Adapt `project` or `base` KBean for Spring-Boot:
 
 | Pre-initialized KBean |Description  |
 |-----------------------|-------------|
-| ProjectKBean          |Sets test progress style to STEP to display JVM messages gracefully. |
+| ProjectKBean          |Sets test progress style to STEP in order to display JVM messages gracefully. |
 
 
 **This KBean post-initializes the following KBeans:**
@@ -22,7 +22,7 @@ Adapt `project` or `base` KBean for Spring-Boot:
 | BaseKBean              | Adapts base KBean: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process. |
 | DockerKBean            | Adds exposed ports to the built images.                                                                                                                   |
 | NativeKBean            | Adds Springboot AOT step when building native executable.                                                                                                 |
-| ProjectKBean           | Adapts project: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, forces tests to run in separated process.    |
+| ProjectKBean           | Adapts project: creates Bootable JAR on #pack, adds Springboot Maven repositories to dependency resolutions, and forces tests to run in separated process.|
 
 
 **This KBean exposes the following fields:**
@@ -30,8 +30,8 @@ Adapt `project` or `base` KBean for Spring-Boot:
 | Field                          | Description                                                                                      |
 |--------------------------------|--------------------------------------------------------------------------------------------------|
 | createBootJar [boolean]        | If true, create a bootable jar artifact.                                                         |
-| createOriginalJar [boolean]    | If true, create original jar artifact for publication (jar without embedded dependencies.        |
-| createWarFile [boolean]        | If true, create a .war filed.                                                                    |
+| createOriginalJar [boolean]    | If true, create original jar artifact for publication (jar without embedded dependencies).       |
+| createWarFile [boolean]        | If true, create a .war file.                                                                     |
 | springRepo [enum:JkSpringRepo] | Specific Spring repo where to download spring artifacts. Not needed if you use official release. |
 | aotProfiles [String]           | The springboot profiles that should be activated while processing AOT.                           |
 | exposedPorts [String]          | Space separated string of ports to expose. This is likely to be used by external tool as Docker. |

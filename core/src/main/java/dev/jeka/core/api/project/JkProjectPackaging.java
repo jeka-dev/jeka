@@ -123,7 +123,8 @@ public class JkProjectPackaging {
     }
 
     /**
-     * Executes the packing process for this project, which includes compiling, testing, and creating JAR files.
+     * Executes the packing process for this project, which includes compiling (if needed) and creating JAR files.
+     * This does not run tests.
      *
      * @see #actions
      */

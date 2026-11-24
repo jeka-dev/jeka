@@ -29,7 +29,7 @@ import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 import java.util.function.Consumer;
 
 @JkDoc("Releases Nexus repositories (as OSSRH) after publication.")
-@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.nexus")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.nexus")
 public class NexusKBean extends KBean {
 
     @JkDoc("Comma separated filters for taking in account only repositories with specified profile names.")

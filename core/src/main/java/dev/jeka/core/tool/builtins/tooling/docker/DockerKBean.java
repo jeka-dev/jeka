@@ -36,19 +36,19 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 @JkDoc("""
-        Builds and runs image based on project.
+        Builds Docker images from a project or a base.
         
-        This KBean can build JVM and Native (AOT) images from an existing project.
+        This KBean can build JVM and Native (AOT) images from an existing project or base.
         """)
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-docker/")
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Explicit full name of the JVM image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"
-            + "If not specified, the image name will be inferred form the project information.")
+    @JkDoc("Explicit full name of the JVM image to build. When set from Java code, it may include the placeholders 'groupId', 'artifactId' and 'version', each enclosed in curly braces and preceded by a dollar sign.%n"
+            + "If not specified, the image name will be inferred from the project information.")
     public String jvmImageName;
 
-    @JkDoc("Explicit full name of the native image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"
-            + "If not specified, the image name will be inferred form the project information.")
+    @JkDoc("Explicit full name of the native image to build. When set from Java code, it may include the placeholders 'groupId', 'artifactId' and 'version', each enclosed in curly braces and preceded by a dollar sign.%n"
+            + "If not specified, the image name will be inferred from the project information.")
     public String nativeImageName;
 
     @JkDoc("Base image to construct the Docker image.")
@@ -222,7 +222,7 @@ public final class DockerKBean extends KBean {
         @JkDoc("Coordinate of the JVM agent, e.g. 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0'")
         public String coordinate;
 
-        @JkDoc("Option line to pass to the agent, e.g. '-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp")
+        @JkDoc("Option line to pass to the agent, e.g. '-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp'")
         public String optionLine;
     }
 

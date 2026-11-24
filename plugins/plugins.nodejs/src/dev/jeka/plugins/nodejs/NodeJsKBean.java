@@ -34,7 +34,7 @@ import java.util.stream.Stream;
         "Simply specify the Node.js version and the commands to build or test the application. " +
         "The KBean guides the `project KBean` to build and test it.\n" +
         "Node.js is automatically downloaded and installed on first use, so no manual setup is required.")
-@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.nodejs")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.nodejs")
 public class NodeJsKBean extends KBean {
 
     /**
@@ -63,7 +63,7 @@ public class NodeJsKBean extends KBean {
             "This can be similar to something like 'npx ..., npm ...'")
     public String buildCmd;
 
-    @JkDoc("Comma separated, command-lines to execute for testing when 'autoConfigureProject'=true")
+    @JkDoc("Comma separated, command-lines to execute for testing when 'configureProject'=true")
     public String testCmd;
 
     @JkDoc("Path of js project root. It is expected to be relative to the base directory.")

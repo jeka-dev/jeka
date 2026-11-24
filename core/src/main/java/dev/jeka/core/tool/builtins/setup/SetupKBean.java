@@ -39,10 +39,10 @@ public class SetupKBean extends KBean {
 
     private static final PropFile GLOBAL_PROP_FILE = new PropFile(JkLocator.getGlobalPropertiesFile());
 
-    @JkDoc("Argument for 'addGlobalProp' and 'installApp' methods.")
+    @JkDoc("Argument for the 'addShorthand' method, formatted as '[shorthand-name]=[shorthand content]'.")
     public String content;
 
-    @JkDoc("Argument for the 'removeApp' method.")
+    @JkDoc("Not used.")
     public String name;
 
     @JkDoc("Opens a file explorer window in the JeKA user home directory.")
@@ -67,8 +67,8 @@ public class SetupKBean extends KBean {
     }
 
     @JkDoc("Adds a shorthand to the global properties file.\n" +
-            "Provide it as 'content=[shorthand-name]=[shorthand content]\n" +
-            "E.g. 'jeka operations: addShorthand content=build=project: pack sonarqube: run'.")
+            "Provide it as 'content=[shorthand-name]=[shorthand content]'.\n" +
+            "E.g. `jeka setup: addShorthand content=\"build=project: pack sonarqube: run\"`.")
     public void addShorthand() {
         if (JkUtilsString.isBlank(content) || !content.contains("=")) {
             JkLog.info("You must specify the shorthand using 'content=[shorthand-name]=[shorthand content].");

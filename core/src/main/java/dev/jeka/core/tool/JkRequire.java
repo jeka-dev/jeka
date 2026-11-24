@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * <pre><code>
  *       @ JkRequire
  *       private static Class<? extends KBean> require(JkRunbase runbase) {
- *           return runbase.getBuildableClass();
+ *           return runbase.getBuildableKBeanClass();
  *       }
  * </code></pre>
  */

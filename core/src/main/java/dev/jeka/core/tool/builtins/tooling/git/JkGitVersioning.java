@@ -27,8 +27,7 @@ public class JkGitVersioning {
         return new JkGitVersioning();
     }
 
-    @JkDoc("If true, a version computed from the current Git branch/tag will be injected into the Maven KBean to " +
-            "determine the published version.")
+    @JkDoc("If true, the version is computed from the current Git branch/tag.")
     public boolean enable = false;
 
     @JkDoc("Some prefer to prefix version tags like 'v1.3.1' instead of simply using '1.3.1'. " +

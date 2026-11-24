@@ -25,7 +25,7 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 @JkDoc("Provides configuration and methods to compile protoBuffers files.")
-@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.protobuf")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.protobuf")
 public class ProtobufKBean extends KBean {
 
     @JkDoc("The path (relative to project root) of directory containing the proto files.")

@@ -26,7 +26,7 @@ Node.js is automatically downloaded and installed on first use, so no manual set
 |version [String] |The version of NodeJs to use. |
 |cmdLine [String] |Command-line to run when `exec` is called, e.g., 'npx cowsay'. |
 |buildCmd [String] |Comma separated, command-lines to execute for building js application or in conjunction with #exec method. This can be similar to something like 'npx ..., npm ...'. |
-|testCmd [String] |Comma separated, command-lines to execute for testing when 'autoConfigureProject'=true. |
+|testCmd [String] |Comma separated, command-lines to execute for testing when 'configureProject'=true. |
 |appDir [String] |Path of js project root. It is expected to be relative to the base directory. |
 |buildDir [String] |Path to the built app (usually contains an index.html file). Relative to the JS app directory. |
 |targetResourceDir [String] |If set, copies the client build output to this directory, relative to the generated class directory (e.g., 'static'). |

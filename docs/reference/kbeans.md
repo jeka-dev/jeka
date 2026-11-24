@@ -118,7 +118,7 @@ They run in _admin mode_, which means:
 - No compilation of the *jeka-src* directory is performed
 - No dependency resolution is executed
 - No child modules are traversed in multi-module projects
-- Command shorthands and catalogs defined in *jeka.properties* are ignored. Only those from system properties, environment variables and *global.properties* are read.
+- *jeka.properties* files are ignored. Only system properties, environment variables and *global.properties* are read.
 
 JeKa automatically enters admin mode when at least one admin KBean is specified on the command line.
 
@@ -138,7 +138,7 @@ jeka setup: editGlobalProps
 
 !!! note
     Do not mix admin KBeans with regular KBeans in a single command: regular KBeans would run in admin mode too,
-    without `jeka-src` KBeans and child modules. Execute them in separate commands.
+    without `jeka-src` KBeans, child modules and *jeka.properties* settings. Execute them in separate commands.
 
 KBeans can be added to the classpath like any third-party dependency.  
 This can be done by setting the `jeka.classpath` property in the `jeka.properties` file as follows:
