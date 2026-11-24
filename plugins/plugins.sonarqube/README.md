@@ -52,7 +52,7 @@ sonar.projectDescription=A demo project for showcasing JeKa.
 ```
 
 All properties in `jeka.properties` starting with `sonar.` are taken in account by the Sonar scanner.
-It is also possible to pass system props as `jeka sonatqube: run -Dsonar.token=Xxxxxxxx`.
+It is also possible to pass system props as `jeka sonarqube: run -Dsonar.token=Xxxxxxxx`.
 
 ## Token
 
@@ -65,11 +65,9 @@ We can ru Sonar scanner programmatically as below:
 ```java
 JkProject project = myProject();
 JkSonarqube.ofVersion("5.0.1.3006")
-        .setProperties(getRuntime().getProperties())  // Take Sonar properties from local.properties and System.getProperties()
+        .setProperties(getRunbase().getProperties())  // Take Sonar properties from jeka.properties, environment variables and system properties
         .configureFor(project)
         .run();
-    }
-}
 ```
 
 ### Advanced scenario

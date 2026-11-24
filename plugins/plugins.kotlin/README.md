@@ -5,7 +5,7 @@ Add Kotlin compilation capability to `project` KBean.
 ## Resources
 
 - Command-line documentation: `jeka kotlin: --doc`
-- Source code: [View Source](src/dev/jeka/plugins/kotlin/KotlinJvmKBean.java).
+- Source code: [View Source](src/dev/jeka/plugins/kotlin/KotlinKBean.java).
 - Example project: [SpringBoot Kotlin ReactJS Example](https://github.com/jeka-dev/working-examples/tree/master/springboot-kotlin-reactjs).
 
 ## Configuration Example
@@ -56,8 +56,8 @@ Some settings need to be configured programmatically. Below is an example using 
 class Build : KBean() {
     override fun init() {
         // Configure Kotlin compiler
-        load(KotlinKBean::class.java).getKotlinJvm().getKotlinCompiler
-            .addPlugin("org.jetbrains.kotlin:kotlin-allopen")
+        load(KotlinKBean::class.java).getKotlinJvm().getKotlinCompiler()
+            .addPlugin("org.jetbrains.kotlin:kotlin-allopen-compiler-plugin")
             .addPluginOption("org.jetbrains.kotlin.allopen", "preset", "spring")
     }
 }
@@ -83,11 +83,11 @@ class Build : KBean() {
 |includeStdlib [boolean] |If true, includes standard lib for compiling. |
 |kotlinApiVersion [String] |The Kotlin api version. If null, this will be deduced from Kotlin version. |
 |configureProject [boolean] |If true, the project KBean will be automatically configured to use Kotlin. |
-|preset.[key] [enum:KotlinKBean$Preset] | |
+|preset.[key] [enum:KotlinKBean$Preset] |Suggest preconfigured settings. |
 |pluginOption.[key].pluginId [String] |The compiler plugin id we want to setup. |
 |pluginOption.[key].key [String] |Property key to setup. |
 |pluginOption.[key].value [String] |Property value to setup. |
-|plugin.[key] [String] | |
+|plugin.[key] [String] |Compiler plugins. Can be a Maven coordinate or a JAR path. Version is optional if it's a coordinate. |
 
 
 **This KBean exposes the following methods:**

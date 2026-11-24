@@ -72,9 +72,11 @@ kill8      │ https://github.com/djeang/kill8           │ <master> │ up-to-
 ```shell
 jeka app: update name=kill8
 ```
-Updates the application to the highest semantic version tag.
-If a 'latest' tag exists, uses that tag.
-If no tags exist, uses the latest commit.
+The update depends on what is currently installed:
+
+- A version tag (e.g. `1.2.0`): JeKa looks for higher version tags and proposes to update to the highest one.
+- Any other tag (e.g. `latest`): the tag is kept, and its content is refreshed if it has changed.
+- No tag: the application is updated to the latest commit.
 
 ## Uninstall Applications
 
@@ -101,6 +103,7 @@ jeka app: catalog name=demo
 ```
 
 This lists all applications available in the specified catalog, showing:
+
 - Application name and description
 - Application type (CLI, SERVER, SERVER-UI, etc.)
 - Commands to run or install the application
@@ -119,12 +122,13 @@ The format is `appName@catalogName`. This is equivalent to providing the full re
 
 To add a catalog, add the following lines to your `~/.jeka/global.properties` file:
 ```properties
-catalog.xxx.repo=[http location or git repo url]
-catalog.xxx.desc=[Description of the catalog]
+jeka.catalog.xxx.repo=[http location or git repo url]
+jeka.catalog.xxx.desc=[Description of the catalog]
 ```
 where `xxx` stands for the name of your catalog.
 
-The `catalog.xxx.repo` value can be:
+The `jeka.catalog.xxx.repo` value can be:
+
 1. A full URL to the catalog properties file
 2. A GitHub organization name (looks for `jeka-catalog` repository)
 3. A GitHub organization/repository path
@@ -132,16 +136,16 @@ The `catalog.xxx.repo` value can be:
 **Valid examples:**
 ```properties
 # GitHub organization - expects jeka-catalog repo at root
-catalog.djeang.repo=djeang
-catalog.djeang.desc=Personal applications
+jeka.catalog.djeang.repo=djeang
+jeka.catalog.djeang.desc=Personal applications
 
 # GitHub organization/repository - expects jeka-catalog.properties at root
-catalog.demo.repo=jeka-dev/demo
-catalog.demo.desc=Demo applications
+jeka.catalog.demo.repo=jeka-dev/demo
+jeka.catalog.demo.desc=Demo applications
 
 # Direct URL to catalog file
-catalog.custom.repo=https://raw.githubusercontent.com/myorg/my-catalog/refs/heads/main/jeka-catalog.properties
-catalog.custom.desc=Custom application catalog
+jeka.catalog.custom.repo=https://raw.githubusercontent.com/myorg/my-catalog/refs/heads/main/jeka-catalog.properties
+jeka.catalog.custom.desc=Custom application catalog
 ```
 
 ### Catalog File Format
@@ -174,15 +178,15 @@ app.demo-springboot-angular.bundle=true
 
 ### Built-in Catalogs
 
-Jeka comes with a built-in catalog from the `jeka-dev` organization. Additional catalogs can be registered in:
-- `~/.jeka/global.properties` (user-level)
-- Project's `jeka.properties` (project-level)
+Jeka comes with a built-in catalog from the `jeka-dev` organization. Additional catalogs can be registered
+in `~/.jeka/global.properties`. A project's `jeka.properties` is not read.
 
 
 ## Security
 
-Trusted URL prefixes are stored in the `jeka.apps.url.trusted` property, located in the `~/.jeka/global.properties` file.  
-You can adjust this property later to make it more or less restrictive.  
+Trusted URL prefixes are stored in the `jeka.app.url.trusted` property, located in the `~/.jeka/global.properties` file.  
+You can adjust this property later to make it more or less restrictive, or add a prefix by running 
+`jeka app: trustUrl url=github.com/djeang/`. Prefixes are separated by spaces.  
 The check validates the start of the Git URL after removing the protocol and identifier part.
 
 Example: `jeka.app.url.trusted=github.com/djeang/` will trust URLs formed as:

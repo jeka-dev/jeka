@@ -79,16 +79,16 @@ jeka.java.distrib=corretto
 If you prefer to use a local JDK, specify its path:
 ```properties
 jeka.java.version=22
-jeka.sdk.22=/my/jdks/22-corretto
+jeka.jdk.22=/my/jdks/22-corretto
 ```
 !!! note
-    Properties can also be set via system properties or environment variables (e.g., `JEKA_SDK_22` or `-Djeka.sdk.22=...`).
+    The JDK location can also be passed on the command line, as `-Djeka.jdk.22=/my/jdks/22-corretto`.
 
 ## Define JeKa version
 
 To ensure your script always runs with a compatible JeKa version, regardless of the version installed on the host, add this to `jeka.properties`:
 ```properties
-jeka.version=0.11.24
+jeka.version=0.11.68
 ```
 
 ## Add dependencies
@@ -131,8 +131,10 @@ For complex dependencies, you can import a Maven BOM:
 ### File system dependencies
 
 You can add local JARs or class folders:
+
 - Place JARs in the `jeka-boot` directory (create it if not present).
 - Or use `@JkDep` with relative paths:
+
 ```java
 @JkDep("../other-project/mylib.jar")
 @JkDep("../other-project/my-classes")
@@ -206,13 +208,16 @@ Now `jeka hello` prints `Hello Everybody !`.
 KBeans can interact with each other. This is how JeKa plugins and complex build scripts are structured.
 
 1. Ensure `jeka.kbean.default=script` is set and remove the `@script.name` override.
-2. In `Build.java`, override the `init()` method:
+2. In `Build.java`, add a `@JkPostInit` method taking the KBean to configure as argument:
 ```java
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+
 public class Build extends KBean {
-    @Override
-    protected void init() {
-        Script script = load(Script.class); // Get the singleton instance
-        script.name = "Mates";           
+
+    @JkPostInit
+    private void postInit(Script script) {  // the singleton instance, already initialized
+        script.name = "Mates";
     }
 }
 ```
@@ -230,8 +235,8 @@ To make `build` always initialize, add this to `jeka.properties`:
 
 *Local* KBeans are in `jeka-src`. *Classpath* KBeans are pre-compiled and available in the JeKa classpath (like plugins).
 
-Run `jeka --doc` to see all available KBeans, including standard ones like `admin`.
-Example: `jeka admin: openHomeDir`
+Run `jeka --doc` to see all available KBeans, including standard ones like `setup`.
+Example: `jeka setup: openHomeDir`
 
 ### Adding Plugins
 
@@ -241,7 +246,7 @@ Adding a plugin is as simple as adding its JAR to the classpath via `jeka.classp
 jeka.classpath=\
   dev.jeka:springboot-plugin  \
   dev.jeka:sonarqube-plugin \
-  dev.jeka:openapi-plugin:0.11.0.1
+  dev.jeka:openapi-plugin:0.11.8-1
 ```
 
 !!! note

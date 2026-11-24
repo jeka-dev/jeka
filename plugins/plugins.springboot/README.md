@@ -12,7 +12,7 @@ Adapt `project` or `base` KBean for Spring-Boot:
 
 | Pre-initialized KBean |Description  |
 |-----------------------|-------------|
-| ProjectKBean          |Sets test progress style to PLAIN to display JVM messages gracefully. |
+| ProjectKBean          |Sets test progress style to STEP to display JVM messages gracefully. |
 
 
 **This KBean post-initializes the following KBeans:**
@@ -29,6 +29,7 @@ Adapt `project` or `base` KBean for Spring-Boot:
 
 | Field                          | Description                                                                                      |
 |--------------------------------|--------------------------------------------------------------------------------------------------|
+| createBootJar [boolean]        | If true, create a bootable jar artifact.                                                         |
 | createOriginalJar [boolean]    | If true, create original jar artifact for publication (jar without embedded dependencies.        |
 | createWarFile [boolean]        | If true, create a .war filed.                                                                    |
 | springRepo [enum:JkSpringRepo] | Specific Spring repo where to download spring artifacts. Not needed if you use official release. |
@@ -65,12 +66,12 @@ The scaffolded project contains workable code and configuration based on the lat
 
 ```properties
 jeka.classpath=dev.jeka:springboot-plugin
-@springboot=
+@springboot=on
 
 # Optional properties
-@springboot.springRepos=MILESTONE
+@springboot.springRepo=MILESTONE
 @springboot.aotProfiles=stage,mock
-@springboot.exposedPort=80
+@springboot.exposedPorts=80
 @springboot.createWarFile=true
 ```
 

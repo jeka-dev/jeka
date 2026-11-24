@@ -39,8 +39,8 @@ These properties can be set via command line (e.g., `project: javaVersion=17`) o
 | :--- |:-------------------------------------------| :--- |
 | `javaVersion` | Target JVM version (e.g., `21`, `25`).     | Same as JeKa runtime |
 | `test.skip` | If `true`, tests are not executed.         | `false` |
-| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`). | `REGULAR` |
-| `version` | Hardcode the project version.              | Inferred from Git |
+| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`, `SHADE`). | `REGULAR` |
+| `version` | Hardcode the project version.              | Not set. Inferred from Git if `gitVersioning.enable=true` |
 | `moduleId` | Maven coordinates (`group:name`).          | `null` |
 
 ## Programmatic Customization
@@ -58,7 +58,8 @@ class MyBuild extends KBean {
         project.compilation.addJavaCompilerOptions("-Xlint:unchecked");
         
         // Example: Customize the JAR manifest
-        project.pack.manifest.addMainAttribute("Author", "JeKa Team");
+        project.pack.manifestCustomizer.append(manifest ->
+                manifest.addMainAttribute("Author", "JeKa Team"));
     }
 }
 ```
@@ -80,9 +81,9 @@ Generated sources are written to: `jeka-output/generated-sources/annotation-proc
 
 `ProjectKBean` is designed to be extensible. Many JeKa plugins interact with it to add specific capabilities:
 
-- **[Jacoco](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.jacoco/src/dev/jeka/plugins/jacoco/JacocoKBean.java)**: Collects code coverage during the `test` phase.
-- **[Sonarqube](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.sonarqube/src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java)**: Exports project data for static analysis.
-- **[Protobuf](https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java)**: Integrates Protocol Buffers compilation.
+- **[Jacoco](https://github.com/jeka-dev/jeka/blob/master/plugins/plugins.jacoco/src/dev/jeka/plugins/jacoco/JacocoKBean.java)**: Collects code coverage during the `test` phase.
+- **[Sonarqube](https://github.com/jeka-dev/jeka/blob/master/plugins/plugins.sonarqube/src/dev/jeka/plugins/sonarqube/SonarqubeKBean.java)**: Exports project data for static analysis.
+- **[Protobuf](https://github.com/jeka-dev/jeka/blob/master/plugins/plugins.protobuf/src/dev/jeka/plugins/protobuf/ProtobufKBean.java)**: Integrates Protocol Buffers compilation.
 - **[Docker](kbeans-docker.md)**: Packages your project as a Docker image.
 
 ## Summary

@@ -6,7 +6,7 @@ This plugin allows to publish project artefacts on Maven Central via [Central Po
 
 Execute:
 ```shell
-jeka project: build centralportal: publish
+jeka -cp=dev.jeka:centralportal-plugin project: build centralportal: publish
 ```
 The credentials and signing keys are expected to be found in the following environment variables:
 
@@ -33,19 +33,19 @@ jeka.classpath=dev.jeka:centralportal-plugin
 @maven.pub.metadata.projectDescription=Modern Dom manipulation library for Java
 @maven.pub.metadata.projectUrl=https://github.com/djeang/vincer-dom
 @maven.pub.metadata.projectScmUrl=https://github.com/djeang/vincer-dom.git
-@maven.pub.metadata.licenses=Apache License V2.0:https://www.apache.org/licenses/LICENSE-2.0.html
+@maven.pub.metadata.licenses=Apache License V2.0=https://www.apache.org/licenses/LICENSE-2.0.html
 @maven.pub.metadata.developers=djeang:djeangdev@yahoo.fr
 ```
 
 Some extra properties can be specified:
 ```properties
 @centralportal.automatic=false
-@centralportal.timeout=90000
+@centralportal.timeout=900
 ```
 
 ## Programmatic Usage
 
-You can use directly `CentralportalKBean`, `JkCentralPortalBundle` and `JkCentralPortaPublisher` classes 
+You can use directly `CentralportalKBean`, `JkCentralPortalBundler` and `JkCentralPortalPublisher` classes 
 for lower-level access.
 
 Source Code: [Visit here](src/dev/jeka/plugins/centralportal/CentralportalKBean.java)
@@ -54,10 +54,7 @@ Source Code: [Visit here](src/dev/jeka/plugins/centralportal/CentralportalKBean.
 
 Plugin for publishing artifacts to Maven Central.
 
-Run `jeka centralportal:publish` to publish artifacts.
-Plugin for publishing artifacts to Maven Central.
-
-Run `jeka centralportal:publish` to publish artifacts.
+Run `jeka centralportal: publish` to publish artifacts.
 
 
 **This KBean post-initializes the following KBeans:**

@@ -30,14 +30,14 @@ Source code: [View the source](src/dev/jeka/plugins/jacoco/JacocoKBean.java)
 
 ```properties
 jeka.classpath=dev.jeka:jacoco-plugin
-@jacoco=
+@jacoco=on
 # Optional properties
 @jacoco.jacocoVersion=0.8.7
 @jacoco.configureProject=true
 @jacoco.htmlReport=true
 ```
 
-Refer to `java jacoco: --doc` for additional details.
+Refer to `jeka jacoco: --doc` for additional details.
 
 ## Programmatic Usage
 
@@ -46,7 +46,7 @@ Use the `JkJacoco` class to configure projects directly, as shown below:
 ```java
 JkProject project = myProject();
 JkJacoco.ofVersion("0.8.11")
-   .configureForAndApplyTo(project);
+   .configureAndApplyTo(project);
 ```
 
 Once configured, the project runs tests with the *Jacoco* agent.  

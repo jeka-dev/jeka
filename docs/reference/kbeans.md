@@ -1,3 +1,4 @@
+# KBeans
 
 _KBean_ is the central concept of the execution engine. _KBeans_ are classes with declared executable methods.  
 There is only one _KBean_ instance per _KBean_ class in any given Jeka base directory.
@@ -83,6 +84,7 @@ JeKa bundles a collection of KBeans for building projects, creating Docker image
 
 - [Project KBean](kbeans-project.md): The standard KBean for building JVM-based projects.
 - [Base KBean](kbeans-base.md): For building simpler JVM-based projects without a standard Maven/Gradle layout.
+- [Bundle KBean](kbeans-bundle.md): For creating self-contained applications and installers.
 - [Maven KBean](kbeans-maven.md): For publishing artifacts to Maven repositories.
 - [Docker KBean](kbeans-docker.md): For creating Docker images.
 - [Native KBean](kbeans-native.md): For compiling code to native executables.
@@ -116,9 +118,9 @@ They run in _admin mode_, which means:
 - No compilation of the *jeka-src* directory is performed
 - No dependency resolution is executed
 - No child modules are traversed in multi-module projects
-- They are agnostic to the current working directory
+- Command shorthands and catalogs defined in *jeka.properties* are ignored. Only those from system properties, environment variables and *global.properties* are read.
 
-JeKa automatically enters admin mode when only admin KBeans are specified on the command line.
+JeKa automatically enters admin mode when at least one admin KBean is specified on the command line.
 
 Currently, JeKa includes two admin KBeans:
 
@@ -131,20 +133,17 @@ Examples:
 jeka app: install repo=https://github.com/djeang/kill8 name=kill8
 
 # Configure global JeKa settings (runs in admin mode)
-jeka setup: editGlobalProperties
-
-# Mixed usage is not allowed - this will fail
-jeka app: list project: pack
+jeka setup: editGlobalProps
 ```
 
 !!! note
-    Admin KBeans cannot be mixed with regular KBeans in a single command. If you need to run both,
-    execute them in separate commands.
+    Do not mix admin KBeans with regular KBeans in a single command: regular KBeans would run in admin mode too,
+    without `jeka-src` KBeans and child modules. Execute them in separate commands.
 
 KBeans can be added to the classpath like any third-party dependency.  
-This can be done by setting the `jeka.inject.classpath` property in the `jeka.properties` file as follows:
+This can be done by setting the `jeka.classpath` property in the `jeka.properties` file as follows:
 ```properties
-jeka.inject.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
+jeka.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
 ```
 
 KBeans can also be included directly in the source code using the `@JkDep` annotation:
@@ -159,7 +158,7 @@ class Custom extends KBean {
 
 Additionally, KBeans can be dynamically added from the command line like this:
 ```bash
-jeka --classpath=dev.jeka:openapi-plugin:0.11.8-1 openapi:--doc
+jeka --classpath=dev.jeka:openapi-plugin:0.11.8-1 openapi: --doc
 ```
 
 Jeka discovers KBeans automatically by scanning the classpath.
@@ -178,11 +177,11 @@ A _KBean method_ is a specific method defined in a KBean class, designed to be e
 A _KBean field_ is a `public` instance field of a KBean class. Its value can be injected from the command line or from a property file.  
 Additionally, it can be a non-public field annotated with `@JkDoc`.
 
-Fields can be annotated with `@JkInjectProperty("my.prop.name")` to inject the value of a _property_ into the field.
+Fields can be annotated with `@JkPropValue("my.prop.name")` to inject the value of a _property_ into the field.
 
 We can also inject value using `jeka.properties` file.
 
-For more details on field accepted types, see the `dev.jeka.core.tool.FieldInjector#parse` [method](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/tool/FieldInjector.java).
+The accepted field types are listed [here](https://picocli.info/#_built_in_types).
 
 _KBean fields_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
@@ -192,10 +191,10 @@ To be referenced conveniently, _KBeans_ can be identified by specific names. For
 
 1. Fully qualified class name.
 2. Uncapitalized simple class name (e.g., `myBuild` matches `org.example.MyBuild`).
-3. Uncapitalized simple class name without the `KBean` suffix (e.g., `project` matches `dev.jeka.core.tool.builtin.project.ProjectKBean`).
+3. Uncapitalized simple class name without the `KBean` suffix (e.g., `project` matches `dev.jeka.core.tool.builtins.project.ProjectKBean`).
 
 !!! tip
-    Execute `jeka` at the root of a project to display the _KBeans_ available on the _Jeka classpath_.
+    Execute `jeka --doc` at the root of a project to display the _KBeans_ available on the _Jeka classpath_.
 
 ## Document KBeans
 
@@ -231,7 +230,7 @@ jeka <kbeanName>: [methodName...] [attributeName=xxx...]
 
 **Example:** 
 ```shell
-jeka project: info pack tests.fork=false pack.jarType=FAT sonarqube: run
+jeka project: info pack test.fork=false pack.jarType=FAT sonarqube: run
 ```
 
 You can call multiple methods and set multiple fields in a single command.
@@ -324,7 +323,7 @@ class Custom extends KBean {
 
     @JkRequire
     private static Class<? extends KBean> require(JkRunbase runbase) {
-        return runbase.getBuildableClass();
+        return runbase.getBuildableKBeanClass();
     }
 
     @JkPostInit(required = true)
@@ -335,7 +334,7 @@ class Custom extends KBean {
 
 In this example, the `MavenKBean` will be included in the initialized KBeans.
 
-The `require(JkRunbase)` method will be invoked to know which KBean should be initialized too (either [`ProjectKBean`](kbeans-project.md) nor [`BaseKBean`](kbeans-base.md).)
+The `require(JkRunbase)` method will be invoked to know which KBean should be initialized too (either [`ProjectKBean`](kbeans-project.md) or [`BaseKBean`](kbeans-base.md).)
 
 
 ## Invoke KBean from another KBean
@@ -409,7 +408,7 @@ class Build extends KBean {
 
     @JkPreInit
     private static void preInit(ProjectKBean projectKBean) {
-        projectKBean.tests.progress = JkTestProcessor.JkProgressStyle.PLAIN;
+        projectKBean.test.progress = JkTestProcessor.JkProgressStyle.PLAIN;
     }
 
     @JkPostInit(required = true)
@@ -421,16 +420,16 @@ class Build extends KBean {
         project.flatFacade.dependencies.test
                 .add("org.junit.jupiter:junit-jupiter:5.8.1");
         project.flatFacade
-                .addTestExcludeFilterSuffixedBy("IT", skipIT);
+                .addTestExcludeSuffixIf(skipIT, "IT");
     }
 
     @JkPostInit
     private void postInit(MavenKBean mavenKBean) {
 
         // Customize the published pom dependencies
-        mavenKBean.getMavenPublication().customizeDependencies(deps -> deps
+        mavenKBean.getPublication().customizeDependencies(deps -> deps
                 .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-                .minus("org.openjfx:javafx")
+                .minus("org.openjfx:javafx-base")
         );
     }
 
@@ -491,7 +490,7 @@ sequenceDiagram
 
 ### Post initialisation.
 
-One all the KBean has been initialized, bean already initialized or extra one can be invoked from the KBean methods.
+Once all the KBeans have been initialized, KBean methods can invoke already initialized KBeans or load extra ones.
 
 ```mermaid
 sequenceDiagram
@@ -544,24 +543,14 @@ classDiagram
 
 ## Multi-Project setup
 
-In multi-project scenarios, it is common for a _KBean_ in one project to access a _KBean_ instance from another project. This can be achieved in a statically typed manner:
-
-1. In the **master** _KBean_, declare a field of type `KBean` (e.g., `KBean importedBuild;`). This field does not need to be public.
-2. Annotate the field, by specifying the relative path of the imported project (e.g., `@JkInjectRunbase("../anotherModule")`).
-3. Run the command `jeka intellij: iml` or `jeka eclipse: files` to refresh project metadata.
-4. Change the declared field type from `KBean` to the concrete type of the imported _KBean_.
-5. The master _KBean_ can now access the imported _KBean_ in a type-safe manner.
-6. For an example, see [this implementation](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.master/jeka-src/MasterBuild.java).
-
-!!! tip
-    Ensure that the imported _KBean_ uses `KBean#getBaseDir` for handling file paths. This practice ensures safe execution from any working directory.
-
-For multi-module projects, use `JkInject` to access sub-module KBeans.
+In multi-module projects, use `@JkInject` with the relative path of a module to access its KBeans.
 
 ```java
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInject;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.JkInject;
 
 import java.util.List;
 
@@ -574,12 +563,12 @@ public class MasterBuild extends KBean {
     @JkInject("./bar")
     ProjectKBean barProject;
 
-    @JkDoc("For all sub-modules: clean, compile, test, create jar files, and publish them.")
+    @JkDoc("For all sub-modules: clean, compile, create jar files, and publish them.")
     public void buildAll() {
-        List.of(fooProject, barProject).forEach(projectKbean -> {
-            projectKbean.clean();
-            projectKbean.pack();
-            MavenKBean mavenKBean = projectKbean.load(MavenKBean.class);
+        List.of(fooProject, barProject).forEach(projectKBean -> {
+            projectKBean.clean();
+            projectKBean.pack();
+            MavenKBean mavenKBean = projectKBean.load(MavenKBean.class);
             mavenKBean.publishLocal();
         });
     }
@@ -587,16 +576,21 @@ public class MasterBuild extends KBean {
 ```
 In this example, JeKa initializes KBeans from the sub-modules *./foo* and *./bar*, then injects them into the `MasterBuild` KBean.
 
+!!! tip
+    Ensure that the imported _KBean_ uses `KBean#getBaseDir` for handling file paths. This practice ensures safe execution from any working directory.
+
 We can create or load a KBean on the fly using the `KBean#load` method.
 This means we only need to declare one KBean per sub-module.
 
 Another option is to inject `JkRunbase` and make all calls through it:
 
 ```java
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInject;
 import dev.jeka.core.tool.JkRunbase;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.JkInject;
 
 import java.util.List;
 
@@ -609,12 +603,12 @@ public class MasterBuild extends KBean {
     @JkInject("./bar")
     JkRunbase bar;
 
-    @JkDoc("For all sun-modules: clean, compile, test, create jar files, and publish them.")
+    @JkDoc("For all sub-modules: clean, compile, create jar files, and publish them.")
     public void buildAll() {
         List.of(foo, bar).forEach(runbase -> {
             ProjectKBean projectKBean = runbase.load(ProjectKBean.class);
-            projectKbean.clean();
-            projectKbean.pack();
+            projectKBean.clean();
+            projectKBean.pack();
             MavenKBean mavenKBean = runbase.load(MavenKBean.class);
             mavenKBean.publishLocal();
         });
@@ -622,12 +616,17 @@ public class MasterBuild extends KBean {
 }
 ```
 
-For larger sub-project structures, use `KBean#getImportedKBeans()` to list all sub-modules, either recursively or not.
+When the parent declares its modules with `_jeka.child-bases`, use `JkRunbase#loadChildren` to get the KBeans of all child modules:
 
 ```java
-@JkDoc("For all sub-modules: compile, test, create jar files, and publish them.")
+@JkDoc("For all child modules: compile, create jar files, and publish them.")
 public void buildAll() {
-    this.getImportedKBeans().get(ProjectKBean.class, true).forEach(ProjectKBean::pack);
-    this.getImportedKBeans().get(MavenKBean.class, true).forEach(MavenKBean::publish);
+    getRunbase().loadChildren(ProjectKBean.class).forEach(ProjectKBean::pack);
+    getRunbase().loadChildren(MavenKBean.class).forEach(MavenKBean::publish);
 }
 ```
+`JkRunbase#findChildren` does the same, limited to the child modules where the KBean is already initialized.
+
+After changing injected modules, run `jeka intellij: sync` or `jeka eclipse: sync` to refresh IDE metadata.
+
+See [Multi-Modules](multi-modules.md) for more details.

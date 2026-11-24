@@ -29,29 +29,36 @@ you need to specify the following property in `jeka.properties`:
 
 ### JPackage Options
 
-Configure *jpackage* using the `@bundle.jpackage.options` prefix in `jeka.properties`:
+Configure *jpackage* using the `@bundle.jpackage.options` prefix in `jeka.properties`. Declare one property per option, 
+named after the platform (`all`, `windows`, `linux` or `mac`) and the option:
 
 ```properties
 # Common options for all platforms
-@bundle.jpackage.options.all=--name=MyApp --vendor="My Company" --description="My Application"
+@bundle.jpackage.options.all.--name=MyApp
+@bundle.jpackage.options.all.--vendor="My Company"
+@bundle.jpackage.options.all.--description="My Application"
 
 # Windows-specific options
-@bundle.jpackage.options.windows=--icon=media/icon.ico --type=msi
+@bundle.jpackage.options.windows.--icon=media/icon.ico
+@bundle.jpackage.options.windows.--type=msi
 
 # Linux-specific options
-@bundle.jpackage.options.linux=--icon=media/icon.png --type=deb
+@bundle.jpackage.options.linux.--icon=media/icon.png
+@bundle.jpackage.options.linux.--type=deb
 
 # macOS-specific options
-@bundle.jpackage.options.mac=--icon=media/icon.icns --type=dmg
+@bundle.jpackage.options.mac.--icon=media/icon.icns
+@bundle.jpackage.options.mac.--type=dmg
 ```
 
 **Suggested options:**
+
 - `--name` - Application name
 - `--vendor` - Vendor name
 - `--description` - Application description
 - `--icon` - Application icon (platform-specific format)
 - `--type` - Package type (`app-image`, `exe`, `msi`, `deb`, `rpm`, `pkg`, `dmg`)
-- `--add-modules` - Additional JPMS modules to include (or use `jdeps:compute` to auto-detect)
+- `--add-modules` - Additional JPMS modules to include (or use `JDEPS-COMPUTE` to auto-detect)
 - `--java-options` - JVM options for the application
 - `--runtime-image` - Path to custom JRE
 
@@ -61,13 +68,15 @@ When using `customJre=true`, configure *jlink* using the `@bundle.jlink.options`
 
 ```properties
 # Common jlink options
-@bundle.jlink.options.all=--compress=2 --bind-services
+@bundle.jlink.options.all.--compress=2
+@bundle.jlink.options.all.--bind-services=
 
 # Platform-specific options
-@bundle.jlink.options.windows=--launcher=myapp
+@bundle.jlink.options.windows.--strip-debug=
 ```
 
 **Suggested options:**
+
 - `--add-modules` - Modules to include in custom JRE
 - `--bind-services` - Include service provider modules
 - `--compress` - Compression level (0=none, 1=constant strings, 2=ZIP)
@@ -78,13 +87,13 @@ When using `customJre=true`, configure *jlink* using the `@bundle.jlink.options`
 
 ### Automatic Module Detection
 
-Use `jdeps:compute` to automatically detect required JPMS modules:
+Use `JDEPS-COMPUTE` to automatically detect required JPMS modules:
 
 ```properties
-@bundle.jpackage.options.all=--add-modules=jdeps:compute
+@bundle.jpackage.options.all.--add-modules=JDEPS-COMPUTE
 ```
 
-This analyzes the main JAR and its dependencies to determine which modules are needed.
+This analyzes the main JAR and its dependencies to determine which modules are needed. It has no effect when `customJre=true`.
 
 ### Programmatic Configuration
 

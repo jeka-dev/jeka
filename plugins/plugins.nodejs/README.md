@@ -53,16 +53,16 @@ Resources:
 ## Configuration Example
 
 ```properties
-jeka.classpath.inject=dev.jeka:nodejs-plugin
-@nodeJs=
+jeka.classpath=dev.jeka:nodejs-plugin
+@nodeJs=on
 
 # Required configuration
-@nodeJs.cmdLine=npm install, npm run build
+@nodeJs.buildCmd=npm install, npm run build
 
 # Optional configurations
 @nodeJs.version=22.10.0
 @nodeJs.configureProject=true
-@nodeJs.buildDir=build
+@nodeJs.buildDir=dist
 @nodeJs.targetResourceDir=static
-@nodeJs.testCmdLine=npm run test-headless
+@nodeJs.testCmd=npm run test-headless
 ```

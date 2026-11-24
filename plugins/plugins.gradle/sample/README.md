@@ -40,13 +40,13 @@ Then from this `sample/` directory:
 
 ```bash
 # Run an arbitrary Gradle command
-jeka gradle: wrap --gradle.args="build" --gradle.appModule=app
+jeka gradle: wrap args="build"
 
 # Run the application
-jeka gradle: wrap --gradle.args=":app:run"
+jeka gradle: wrap args=":app:run"
 
 # Build (skipping tests) and copy app artifacts to jeka-output/
-jeka gradle: wrapBuild --gradle.appModule=app
+jeka gradle: wrapBuild appModule=app
 ```
 
 ## Run from Source
@@ -55,7 +55,7 @@ This project includes a `jeka.properties` that makes it source-runnable via the 
 Build and run in one step from this `sample/` directory:
 
 ```bash
-jeka app: run
+jeka -p
 ```
 
 JeKa will invoke `gradle: wrapBuild appModule=app`, which:

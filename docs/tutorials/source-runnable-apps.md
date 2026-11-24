@@ -49,7 +49,7 @@ When you run a remote application for the first time, JeKa will prompt you to co
 
 If you accept, JeKa clones the repository, builds the application, and runs it. On subsequent runs, it executes directly using the cached binaries.
 
-You can manage trusted URLs in your `[JEKA_HOME]/global.properties` file:
+You can manage trusted URLs in your `[JEKA_USER_HOME]/global.properties` (`~/.jeka/global.properties` by default) file:
 ```properties
 jeka.app.url.trusted=github.com/djeang/
 ```
@@ -135,10 +135,11 @@ Applications built with JeKa are "source-runnable" by default.
 When running or installing a remote application, JeKa clones the repository and builds it:
 
 1. It tries to execute the command specified in the `jeka.program.build` property from the project's `jeka.properties`.
-2. If this property is missing, it runs `jeka project: pack pack.jarType=FAT pack.detectMainClass=true` (for Java projects with a `src` directory).
-3. Otherwise, it runs `jeka base: pack`.
+2. If this property is missing, it runs `jeka project: pack pack.jarType=FAT pack.detectMainClass=true -Djeka.test.skip=true` (for Java projects with a `src` directory).
+3. Otherwise, it runs `jeka base: pack -Djeka.test.skip=true`.
 
 For native execution (or when `runtime=NATIVE`), JeKa:
+
 1. Tries to execute the command specified in `jeka.program.build.native`.
 2. If missing, it uses `jeka.program.build` followed by `native: compile`.
 3. If both are missing, it runs `native: compile`.
@@ -183,6 +184,10 @@ See a complete example at [demo-maven-multimodule](https://github.com/jeka-dev/d
 ### Gradle Projects
 
 Gradle projects can be made source-runnable using the `gradle:` KBean from the [Gradle plugin](../../plugins/plugins.gradle/README.md).
+
+!!! note
+    The Gradle plugin is not yet available on Maven Central. It will be available from the next JeKa version after 0.11.68.
+
 Add a `jeka.properties` file to your Gradle project root:
 
 ```properties
@@ -302,7 +307,7 @@ jeka -r https://github.com/jeka-dev/demo-cowsay docker: buildNative
 
 - [CLI app with Native mode (Jeka)](https://github.com/djeang/kill8)
 - [Desktop app bundled as standalone (Jeka)](https://github.com/djeang/Calculator-jeka)
-- [CLI app with Maven in JVM or Native mode](https://github.com/jeka-dev/demo-cowsay-maven)
+- [Multi-module app built with Maven](https://github.com/jeka-dev/demo-maven-multimodule)
 - [JavaFX Desktop app bundled as standalone (Maven)](https://github.com/djeang/devtools-maven)
 - [Same JavaFX app but using Jeka](https://github.com/djeang/devtools) - *Simpler configuration than Maven*
 
