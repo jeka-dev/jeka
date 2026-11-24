@@ -49,6 +49,11 @@ pip install mkdocs-material
 mkdocs serve   # serves at http://localhost:8000
 ```
 
+## Known Bugs
+
+Read [KNOWN_BUGS.md](KNOWN_BUGS.md) before diagnosing a failure or documenting a feature. It lists pending bugs with their
+symptom, location and workaround. Add bugs you discover and don't fix, and remove an entry when fixing it.
+
 ## Repository Structure
 
 ```
