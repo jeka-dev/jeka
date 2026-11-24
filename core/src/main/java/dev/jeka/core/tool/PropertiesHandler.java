@@ -19,31 +19,23 @@ package dev.jeka.core.tool;
 import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkProperties;
 import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 class PropertiesHandler {
-
-    // Reads the properties from the baseDir/jeka.properties
-    static JkProperties readJekaPropertiesFile(Path baseDir) {
-        Path jekaPropertiesFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
-        if (Files.exists(jekaPropertiesFile)) {
-            return JkProperties.ofFile(jekaPropertiesFile);
-        }
-        return JkProperties.EMPTY;
-    }
 
     static JkProperties constructRunbaseProperties(Path baseDir) {
         JkProperties result = JkProperties.ofSysPropsThenEnv()
                     .withFallback(readJekaPropertiesRecursively(JkUtilsPath.relativizeFromWorkingDir(baseDir)));
-        Path globalPropertiesFile = JkLocator.getGlobalPropertiesFile();
-        if (Files.exists(globalPropertiesFile)) {
-            result = result.withFallback(JkProperties.ofFile(globalPropertiesFile));
-        }
-        return result;
+        return result.withFallback(globalProperties());
     }
 
     /**
@@ -56,81 +48,100 @@ class PropertiesHandler {
 
     /**
      * Reads the properties from the baseDir/jeka.properties and its ancestors.
-     *
+     * <p>
      * Takes also in account properties defined in parent project dirs if any.
-     * this doesn't take in account System and global props.
+     * The result does not include System, environment and global props, but values can reference them using '${xxx}'.
+     * <p>
+     * Each file is resolved against its own parent chain, so that a child can't alter references declared in a parent.
      */
     static JkProperties readJekaPropertiesRecursively(Path baseDir) {
-        baseDir = baseDir.toAbsolutePath().normalize();
-        JkProperties result = readJekaPropertiesFile(baseDir);
-        return readJekaPropertiesRecursively(result, baseDir, true);
+        return readJekaPropertiesRecursively(baseDir.toAbsolutePath().normalize(), true);
     }
 
-    private static JkProperties readJekaPropertiesRecursively(JkProperties props, Path baseDir, boolean origin) {
-        if (origin) {
-            props = mergeUnderscore(props);
-        } else {
-            props = withoutUnderscoreProps(props);
-        }
-        Path parentDir = baseDir.getParent();
+    private static JkProperties readJekaPropertiesRecursively(Path baseDir, boolean origin) {
+        Path file = baseDir.resolve(JkConstants.PROPERTIES_FILE);
+        Map<String, String> rawProps = Files.exists(file) ? readRawProps(file) : new HashMap<>();
+        rawProps = origin ? mergeUnderscore(rawProps) : withoutUnderscoreProps(rawProps);
 
         // Stop if parent dir has no jeka.properties file
-        if (parentDir != null) {
-            Path parentPropsFile = parentDir.resolve(JkConstants.PROPERTIES_FILE);
-            if (Files.exists(parentPropsFile)) {
-                JkProperties parentProps = JkProperties.ofFile(parentPropsFile);
-                JkProperties parentChainProps = readJekaPropertiesRecursively(parentProps, parentDir, false);
-                props = resolvePlus(props, parentChainProps);
-                props = props.withFallback(parentChainProps);
-            }
+        JkProperties parentProps = JkProperties.EMPTY;
+        Path parentDir = baseDir.getParent();
+        if (parentDir != null && Files.exists(parentDir.resolve(JkConstants.PROPERTIES_FILE))) {
+            parentProps = readJekaPropertiesRecursively(parentDir, false);
+            rawProps = resolvePlus(rawProps, parentProps);
         }
-        return props;
+        return interpolate(file, rawProps, parentProps).withFallback(parentProps);
     }
 
-    private static JkProperties mergeUnderscore(JkProperties properties) {
+    private static JkProperties interpolate(Path file, Map<String, String> rawProps, JkProperties parentProps) {
+        if (rawProps.isEmpty()) {
+            return JkProperties.EMPTY;
+        }
+        String source = JkProperties.ofFile(file).getSource();
+        JkProperties context = JkProperties.ofSysPropsThenEnv()
+                .withFallback(JkProperties.ofMap(source, rawProps))
+                .withFallback(parentProps)
+                .withFallback(globalProperties());
         Map<String, String> result = new HashMap<>();
-        properties.getAllStartingWith("", true).forEach((key, value) -> {
+        rawProps.forEach((key, value) -> result.put(key, JkUtilsString.interpolate(value, token -> {
+            String tokenValue = context.get(token);
+            if (tokenValue == null) {
+                throw new IllegalArgumentException(String.format(
+                        "Property '%s' references '${%s}' which is not defined (from %s).", key, token, source));
+            }
+            return tokenValue;
+        })));
+        return JkProperties.ofMap(source, result);
+    }
+
+    private static JkProperties globalProperties() {
+        Path globalPropertiesFile = JkLocator.getGlobalPropertiesFile();
+        return Files.exists(globalPropertiesFile) ? JkProperties.ofFile(globalPropertiesFile) : JkProperties.EMPTY;
+    }
+
+    private static Map<String, String> readRawProps(Path file) {
+        Properties properties = new Properties();
+        try (InputStream is = Files.newInputStream(file)) {
+            properties.load(is);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        Map<String, String> result = new HashMap<>();
+        properties.stringPropertyNames().forEach(name -> result.put(name, properties.getProperty(name)));
+        return result;
+    }
+
+    private static Map<String, String> mergeUnderscore(Map<String, String> props) {
+        Map<String, String> result = withoutUnderscoreProps(props);
+        props.forEach((key, value) -> {
+            if (key.startsWith("_") && !key.substring(1).trim().isEmpty()) {
+                result.put(key.substring(1), value);
+            }
+        });
+        return result;
+    }
+
+    private static Map<String, String> withoutUnderscoreProps(Map<String, String> props) {
+        Map<String, String> result = new HashMap<>();
+        props.forEach((key, value) -> {
             if (!key.startsWith("_")) {
                 result.put(key, value);
             }
         });
-        properties.getAllStartingWith("_", true).forEach((key, value) -> {
-            String sanitizedKey = key.substring(1);
-            if (!sanitizedKey.trim().isEmpty()) {
-                result.put(sanitizedKey, value);
-            }
-        });
-        return JkProperties.ofMap(properties.getSource(), result);
+        return result;
     }
 
-    private static JkProperties withoutUnderscoreProps(JkProperties properties) {
+    private static Map<String, String> resolvePlus(Map<String, String> props, JkProperties parentProps) {
         Map<String, String> result = new HashMap<>();
-        properties.getAllStartingWith("", true).forEach((key, value) -> {
-            if (!key.startsWith("_")) {
-                result.put(key, value);
-            }
-        });
-        return JkProperties.ofMap(properties.getSource(), result);
-    }
-
-    public static JkProperties resolvePlus(JkProperties properties, JkProperties parentProps) {
-        Map<String, String> result = new HashMap<>();
-        properties.getAllStartingWith("", true).forEach((key, value) -> {
+        props.forEach((key, value) -> {
             if (!key.startsWith("+")) {
-                result.put(key, value);
+                result.putIfAbsent(key, value);
             } else {
                 String propName = key.substring(1);
-                String thisValue = properties.get(key);
                 String parentValue = parentProps.get(propName);
-                final String resolvedValue;
-                if (parentValue == null || parentValue.isEmpty()) {
-                    resolvedValue = thisValue;
-                } else {
-                    resolvedValue = parentValue + " " + thisValue;
-                }
-                result.put(propName, resolvedValue);
+                result.put(propName, JkUtilsString.isBlank(parentValue) ? value : parentValue + " " + value);
             }
         });
-        return JkProperties.ofMap(properties.getSource(), result);
+        return result;
     }
 }
