@@ -10,7 +10,7 @@ The JeKa JAR is structured as follows:
 
     Contains classes for running Java externally, including the `dev.jeka.core.tool.Main` class and the component model.
 
-- `dev.jeka.core.tool.builtin` package: 
+- `dev.jeka.core.tool.builtins` package: 
 
      Contains *KBeans* bundled with JeKa, such as `ProjectKBean`, `DockerKBean` or `NativeKBean`.
 
@@ -23,7 +23,7 @@ graph TD
     subgraph dev.jeka.core
         subgraph tool 
             engine[dev.jeka.core.tool]
-            builtin[dev.jeka.core.tool.builtin]
+            builtin[dev.jeka.core.tool.builtins]
         end
     
         subgraph api
@@ -32,7 +32,7 @@ graph TD
             system[dev.jeka.core.api.system]
             dep[dev.jeka.core.api.depmanagement]
             file[dev.jeka.core.api.file]
-            utils[def.jeka.core.api.utils]
+            utils[dev.jeka.core.api.utils]
             misc[...]
         end
         

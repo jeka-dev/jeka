@@ -1,166 +1,159 @@
 # Project API
 
-The **Jeka Project API** provides a high-level interface for building Java/JVM projects. At the core of this API is the `JkProject` class, which serves as the central entry point for performing build tasks.
+The **JeKa Project API** provides a high-level interface for building Java/JVM projects. `JkProject` is its entry point.
 
 ## Classes
 
-The classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jerkar/jeka/tree/master/dev.jeka.core/src/main/java/dev/jeka/core/api/project).
+The classes are located in the `dev.jeka.core.api.project` [package](https://github.com/jeka-dev/jeka/tree/master/core/src/main/java/dev/jeka/core/api/project).
 
 ### **`JkProject`**
 
-The `JkProject` class contains all the essential definitions for building a JVM project, including source locations, build output, testing, packaging (e.g., creating JAR files), compiler settings, dependencies, and more.
+`JkProject` contains all the definitions for building a JVM project: source locations, dependencies, compilation, testing, 
+packaging, and more. It offers extension points to integrate specific build behaviors.
 
-Designed with multiple extension points, it provides flexibility for integrating custom or specific build behaviors.
-
-To manage all of these concerns efficiently, the class is structured as follows:
+The main members are:
 
 ```
 project
-├─ baseDir
-├─ outputDir
-├─ artifactLocator (define where artifact files are supposed to be created)
-├─ duplicateDependencyConflictStrategy
-├─ jvmTargetVersion
-├─ sourceEncoding
-├─ javaCompileToolChain
+├─ baseDir, outputDir, jvmTargetVersion, sourceEncoding, moduleId, version, duplicateConflictStrategy (getters and setters)
+├─ artifactLocator (defines where artifact files are created)
+├─ compilerToolChain
 ├─ dependencyResolver
-├─ compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
-│  ├─ layout (where are located source and resource files)
-│  ├─ source generators (plugin mechanism for generating source files)
-│  ├─ dependencies   (stands for compile dependencies)
-│  ├─ procDependencies  (stands for annotation-processor dependencies, passed as -processorpath)
-│  ├─ preCompileActions (including resources processing)
-│  ├─ compileActions (including java sources compilation. Compilation for other languages can be added here)
+├─ compilation  (produces binary files from production sources)
+│  ├─ layout (location of source and resource files)
+│  ├─ dependencies   (compile dependencies)
+│  ├─ procDependencies  (annotation-processor dependencies, passed as -processorpath)
+│  ├─ resourceProcessor
+│  ├─ preCompileActions (including resource processing)
+│  ├─ compileActions (including Java compilation. Compilation for other languages can be added here)
 │  ├─ postCompileActions
-│  └─ methods : resolveDependencies(), run()
-├─ testing
-│  ├─ testCompilation (same as above 'prodcCompilation' but for test sources)
-│  │  ├─ layout
-│  │  ├─ dependencies (stands for test dependencies)
-│  │  └─ ...
-│  ├─ breakOnFailure (true/false)
-│  ├─ skipped (true/false)
-│  ├─ testProcessor
-│  │  ├─ forkedProcess (configured the forked process who will run tests)
+│  └─ methods : addSourceGenerator(), addJavaCompilerOptions(), generateSources(), resolveDependenciesAsFiles(), run()
+├─ test
+│  ├─ compilation (same as above, for test sources)
+│  ├─ processor
 │  │  ├─ preActions
 │  │  ├─ postActions
-│  │  ├─ engineBehavior
-│  │  │  ├─ testReportDir
-│  │  │  ├─ progressDisplayer
-│  │  │  └─ launcherConfiguration (based on junit5 platform API)
-│  │  └─ testSelection
-│  │     ├─ includePatterns
-│  │     └─ includeTags
-│  └─ method : run()
-├─ packaging (produces javadoc and source jar and bin jars)
-│  ├─ javadocConfiguration
+│  │  ├─ engineBehavior (progress display, JUnit platform launcher configuration)
+│  │  └─ methods : setForkingProcess()
+│  ├─ selection (include/exclude patterns and tags)
+│  ├─ postActions
+│  └─ methods : setSkipped(), setBreakOnFailures(), run()
+├─ pack (produces binary, fat, sources and javadoc JARs)
+│  ├─ actions
 │  ├─ runtimeDependencies
-│  ├─ manifest
-│  ├─ fatJar (customize produced fat/uber jar if any)
-│  └─ methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
-└─ methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()           
+│  ├─ javadocProcessor
+│  ├─ manifestCustomizer
+│  └─ methods : createBinJar(), createFatJar(), createSourceJar(), createJavadocJar(), customizeFatJarContent(), 
+│               resolveRuntimeDependencies(), run()
+├─ qualityCheck
+│  └─ methods : add(), run()
+├─ e2eTest
+│  └─ methods : add(), run()
+├─ flatFacade
+└─ methods : clean(), fullBuild(), toDependency(), asBuildable(), getInfo(), displayDependencyTree(), getDependenciesAsXml()
 ```
-See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.project-api/jeka-src/JkProjectBuild.java).
+See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/samples/samples.project-api/jeka-src/JkProjectCustom.java).
+
+!!! note
+    The `testing` and `packaging` fields, and the `pack()` method, are deprecated. Use `test`, `pack` and `pack.run()`.
+
+In a KBean, get the project from the `ProjectKBean`:
+
+```java
+class Custom extends KBean {
+
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
+        project.compilation.addJavaCompilerOptions("-Xlint:unchecked");
+        project.test.selection.addExcludePatterns(JkTestSelection.IT_PATTERN);
+    }
+}
+```
 
 #### Flat Facade
 
-For convenience, `JkProject` offers a simplified facade to easily configure common settings without delving into its deeper structure.
+`JkProject` offers a simplified facade to configure common settings without delving into its structure.
 
-```Java
+```java
 JkProjectFlatFacade projectFacade = JkProject.of().flatFacade;
 projectFacade
-       .setPublishedModuleId("dev.jeka:sample-javaplugin")
+       .setModuleId("dev.jeka:sample-javaplugin")
        .setVersionFromGitTag()
-       .mixResourcesAndSources()
-       .setLayoutStyle(SIMPLE)
-       .addTestExcludeFilterSuffixedBy("IT", false);
+       .setMixResourcesAndSources()
+       .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
+       .addTestExcludeSuffixIf(true, "IT");
 projectFacade.dependencies.compile
-       .add("com.google.guava:guava:21.0")
-       .add("com.sun.jersey:jersey-server:1.19.4")
+       .add("com.google.guava:guava:33.4.8-jre")
        .add("org.projectlombok:lombok:1.18.36");
 projectFacade.dependencies.runtime
        .remove("org.projectlombok:lombok")
        .add("com.github.djeang:vincer-dom:1.2.0");
 projectFacade.dependencies.test
-       .add("org.junit.vintage:junit-vintage-engine:5.6.0");
-projectFacade.doPack();  // compile, test and create jar
+       .add("org.junit.jupiter:junit-jupiter:5.12.2");
+projectFacade.doPack();  // compile and create jar
 ```
 
 #### Project Dependencies
 
-Project dependencies in Jeka are managed differently from Maven/Gradle. 
-Instead of a single collection of dependencies for a specific scope/configuration, 
-Jeka uses three distinct classpaths: **compile**, **runtime**, and **test**. Each is defined independently but can reference the others.
+JeKa uses three classpaths, each one derived from the previous ones:
 
-- **Compile classpath:** 
+- **Compile classpath:** Needed to compile the classes.
 
-Classpath needed to compile the classes.
+- **Runtime classpath:** Needed to run the application, or embedded in the JAR, or published as transitive dependencies. 
+  It is constructed from the compile classpath, where other libraries can be added or removed.
 
-- **Runtime classpath:** 
+- **Test classpath:** Needed to compile and run the tests. 
+  It is constructed by merging the compile and runtime classpaths, where other libraries can be added or removed.
 
-Classpath needed to run the build application or to embedded with the built library (embedded in jar or specified as transitive dependencies).
+There is also a **processor path** for annotation processors, independent of these classpaths.
 
-This classpath is automatically constructed by taking the compile classpath upon which other libraries can be added or removed.
+Dependencies can be declared programmatically, as above, or in a *jeka.project.deps* file.
+See [String Notation](api-dependency-management.md#string-notation) for the accepted formats.
 
-- **Test classpath:** 
-
-Classpath needed to compile and run the tests. 
-
-This classpath is constructed by merging the compile and runtime classpaths upon which other libraries can be added or removed.
-
-Dependencies must follow the format: `group:module:[classifier]:[type]:[version]`
-where *classifier*, *type*, and *version* are optional. See [`JkCoordinate` javadoc](https://github.com/jeka-dev/jeka/blob/master/dev.jeka.core/src/main/java/dev/jeka/core/api/depmanagement/JkCoordinate.java) for details.
-
-To import a *bill-of-materials* (BOM), declare a dependency as: `group:module::pom:version`.
-
-Using the programmatic api, you can also declare filesystem dependencies, meaning jar files located in 
-the project code base.
-
-<a href="#jeka.project.deps"></a>
+<a id="jeka.project.deps"></a>
 #### jeka.project.deps
 
-Entire project dependencies can be declared in full text located in the *[PROJECT_DIR]/jeka.project.deps* file.
-
+Project dependencies can be declared in the *[PROJECT_DIR]/jeka.project.deps* text file.
 
 Example:
-```INI
+```ini
 [version]
-org.junit:junit-bom:5.12.1@pom    # use this pom as a version provider for all junit dependencies
+org.junit:junit-bom:5.12.1@pom    # use this BOM as a version provider for all JUnit dependencies
 org.postgresql:postgresql:42.5.0
-org.glassfish.jaxb:jaxb-*:4.0.5   # use joker to specify version according a pattern
+org.glassfish.jaxb:jaxb-*:4.0.5   # use a wildcard to specify the version of several modules
 
 [compile]
-om.google.guava:guava:33.4.8-jre
+com.google.guava:guava:33.4.8-jre
 org.lwjgl:lwjgl:natives-linux:3.3.6  # specify the 'natives-linux' classifier for lwjgl
 org.glassfish.jaxb:jaxb-runtime      # version for org.glassfish.jaxb:jaxb-* is specified above
-../module-utils                      # specify a project directory located on file system
+../module-utils                      # specify a project directory located on the file system
 
 [compile-only]
-org.projectlombok:lombok:1.18.36
-org.openjfx:javafx-base:${jeka.platform.os}:2.0.18  # properties are interpolated
-org.openjfx:javafx-base:${maven.classifier.os}:2.0.18  # properties are interpolated
-com.github.tjake:jlama-native:${maven.classifier.os}-${maven.classifier.arch}:: # specify classifier without specifying version
+jakarta.servlet:jakarta.servlet-api:6.1.0
+org.openjfx:javafx-base:${jeka.platform.os}:21.0.2  # properties are interpolated
+com.github.tjake:jlama-native:${maven.classifier.os}-${maven.classifier.arch}:: # specify a classifier without specifying the version
 
-[runitme]
+[runtime]
 org.postgresql:postgresql
 
 [test]
 org.junit.jupiter:junit-jupiter
 org.junit.platform:junit-platform-launcher
 org.fluentlenium:fluentlenium-junit:3.2.0
-    !org.apache.httpcomponents:httpclient  # exclude http-client from 'fluentlenium-junit' transitive dependencies
-!!net.sourceforge.htmlunit:htmlunit        # exclude htmlunit from all transitive dependencies
+    !org.apache.httpcomponents:httpclient  # exclude httpclient from 'fluentlenium-junit' transitive dependencies
 
 [processor]
 org.projectlombok:lombok:1.18.38
 org.mapstruct:mapstruct-processor:1.6.3
 ```
 
-As shown in the example above, we can use the `@` and `@@` symbols to specify dependency exclusions.
+A line starting with `!` excludes a module from the transitive dependencies of the dependency declared just above.
+
 `[version]`  
 Specifies the versions of dependencies to use when not explicitly defined.  
 You can include all versions defined in a *BOM* by referencing its coordinates and appending `@pom`.  
-The versions section inherits definitions from the *version* section in the `jeka.project.deps` file located in the parent directory.
+The section inherits definitions from the `[version]` section of the `jeka.project.deps` file located in the parent directory.
 
 `[compile]`  
 Specifies dependencies required for both compiling and running the project.
@@ -171,79 +164,90 @@ Specifies dependencies required only for compiling the project, which are exclud
 `[runtime]`  
 Specifies dependencies required only for running the project.
 
-`[test]`
-Specifies dependencies for the *test* classpath.
-This includes dependencies from the *compile*, *compile-only*, and *runtime* sections, along with those specified in the *test* section.
+`[test]`  
+Specifies dependencies for the *test* classpath, in addition to those of the `[compile]`, `[compile-only]` and `[runtime]` sections.
 
-`[processor]`
+`[processor]`  
 Specifies annotation-processor dependencies (e.g. Lombok, MapStruct).
 These are passed to the compiler via `-processorpath` and are **not** added to the compile or runtime classpaths.
 Generated sources are written to `jeka-output/generated-sources/annotation-processors`.
 
 !!! tip
-    If you're using the Jeka plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
+    If you're using the JeKa plugin for IntelliJ, press `ctrl+<space>` for autocomplete suggestions.
 
 **Resolve Dependencies Programmatically**
 
-To resolve dependencies that make up the runtime classpath, you can use one of the following methods:
+To resolve the dependencies of the runtime classpath:
 
-- `JkProject.packaging.resolveRuntimeDependencies()` to fetch the dependency resolution tree.
-- `JkProject.packaging.resolveRuntimeDependenciesAsFiles()` to get the resolved classpath as a list of JAR files.
+```java
+JkResolveResult result = project.pack.resolveRuntimeDependencies();     // includes the dependency tree
+List<Path> classpath = project.pack.resolveRuntimeDependenciesAsFiles();  // JAR files only
+```
 
-The second option may be faster as it caches the results of previous invocations.
+**Display the Dependency Tree on the Console**
 
-**Display Dependency tree on the console**
+Use `JkProject.displayDependencyTree()`.
 
-The dependency tree and the resulting classpath can be displayed on the console using:
-`JkProject.displayDependencyTree()` methods.
+**Change the Maven Repository**
 
-**Change the Maven repository**
+By default, dependencies are resolved using the *Maven Central* repository. 
+You can change it using [properties](properties.md#repositories), or programmatically:
 
-By default, the dependencies are resolved using *Maven central* repository.
-
-We can change it programatically, by using `JkProject.dependencyResolver.setRepos()` method.
+```java
+project.dependencyResolver.setRepos(JkRepoSet.of("https://my.company/repo"));
+```
 
 #### Display Generic Info
 
-We can display project info such as locations, source file count, version, moduleID, and more by displaying the
-result of the `JkProject.getInfo()` method.
+`JkProject.getInfo()` returns a text with project info such as locations, source file count, version, and module ID.
 
 #### Build Project
 
-Different phases of the build can be invoked using the following methods:
+The phases of the build can be invoked using the following methods:
 
-- `JkProject.compilation.generateSources()`: Generates sources if any source generators are registered.
-- `JkProject.compilation.run()`: Runs the entire compilation process, including source generation and other registered compilation tasks.
-- `JkProject.testing.run()`: Compiles tests and runs them. This also includes production code compilation if it hasn't been done yet.
-- `JkProject.pack()`: Creates the main JAR and any additional JARs specifically configured. This includes running tests if they haven't been executed.
+- `project.compilation.generateSources()`: Generates sources if any source generators are registered.
+- `project.compilation.run()`: Runs the entire compilation process, including source generation and other registered compilation tasks.
+- `project.test.run()`: Compiles and runs tests. Production code is compiled first, if not done yet.
+- `project.pack.run()`: Creates the main JAR and any additional artifacts configured. Production code is compiled first, if not done yet. Tests are not run.
+- `project.qualityCheck.run()`: Runs the registered quality checkers.
+- `project.e2eTest.run()`: Runs the registered end-to-end tests.
+- `project.fullBuild()`: Runs clean, test, pack and end-to-end tests.
 
-In the next section, we'll detail the classes involved in the entire build process.
+In the next sections, we detail some classes involved in the build process.
 
 ### JkProjectCompilation
 
-Handles the compilation tasks for a `JkProject`.  
-This class is used for both production and test code compilation.  
+Handles the compilation tasks for a `JkProject`, for both production and test code.  
 It offers configuration methods for defining:
 
-- The locations of source files and compiled classes.
+- The locations of source files and compiled classes (`layout`).
 - Dependencies required for compilation (`dependencies`).
 - Annotation-processor dependencies passed as `-processorpath` (`procDependencies`).
-- The compiler and compilation options.
+- The compilation options.
 - Source code generators attached to the compilation task.
 - Additional `pre` and `post` actions tied to the compilation phase.
-- Interpolators for resource processing.
+- Interpolators for resource processing (`resourceProcessor`).
 
 ### JkProjectSourceGenerator
 
-Implement this class to define a source generator.
-Register the generator in a project using:
-`JkProject.compilation.addSourceGenerator(JkProjectSourceGenerator sourceGenerator)`.
+Implement this interface to define a source generator.
 
-Once registered, sources will be automatically generated during compilation or when explicitly calling:
-`JkProject.compilation.generateSources()`.
+```java
+class MyGenerator implements JkProjectSourceGenerator {
 
+    @Override
+    public String getDirName() {
+        return "my-generator";  // directory name, under the generated sources dir
+    }
 
+    @Override
+    public void generate(JkProject project, Path generatedSourceDir) {
+        JkPathFile.of(generatedSourceDir.resolve("org/example/Info.java"))
+                .createIfNotExist()
+                .write("package org.example; public class Info {}");
+    }
+}
+```
 
-
-
-
+Register it using `project.compilation.addSourceGenerator(new MyGenerator())`. 
+Sources are then generated during compilation, or when calling `project.compilation.generateSources()`.
