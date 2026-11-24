@@ -26,16 +26,16 @@ import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
-@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.jacoco")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.jacoco")
 public class JacocoKBean extends KBean {
 
-    @JkDoc("If true, project from ProjectJkBean will be configured with Jacoco automatically.")
+    @JkDoc("If true, project from ProjectKBean will be configured with Jacoco automatically.")
     public boolean configureProject = true;
 
     @JkDoc("If true, Jacoco will produce a standard XML report usable by Sonarqube.")
     public boolean xmlReport = true;
 
-    @JkDoc("If true, Jacoco will produce a standard HTML report .")
+    @JkDoc("If true, Jacoco will produce a standard HTML report.")
     public boolean htmlReport = true;
 
     @JkDoc("Options string, as '[option1]=[value1],[option2]=[value2]', to pass to agent as described here : https://www.jacoco.org/jacoco/trunk/doc/agent.html")

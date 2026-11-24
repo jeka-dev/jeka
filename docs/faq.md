@@ -126,11 +126,11 @@ The `ProjectKBean` initializes the project and configures it with its own settin
 ```java
 public class Build extends KBean {
 
-    JkProject project = load(ProjectKBean.class).project;
-    
-    @Override
-    protected void init() {
-        project.testing.testProcessor.engineBehavior.setProgressDisplayer(STEP);
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
+        project.test.processor.engineBehavior
+                .setProgressDisplayer(JkTestProcessor.JkProgressStyle.STEP);
     }
 }
 ```
@@ -145,9 +145,9 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 @JkDep("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class Build extends KBean {
 
-    @Override
-    protected void init() {
-        JkProject project = load(ProjectKBean.class).project;
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
         project.compilerToolChain.setCompileTool(new EclipseCompiler());
         
         // You may pass additional options to the compiler
@@ -160,7 +160,7 @@ public class Build extends KBean {
 
 [`ProjectKBean`](reference/kbeans-project.md) and [`BaseKBean`](reference/kbeans-base.md) provide IDE synchronization out-of-the-box, but you may prefer not to use them.
 
-If you use a different structure to build your project, simply let your `KBean` implement `JkJavaIdeSupport` and implement the required method to provide the information necessary to generate IDE metadata files.
+If you use a different structure to build your project, simply let your `KBean` implement `JkIdeSupportSupplier` and implement its `getJavaIdeSupport()` method to provide the information necessary to generate IDE metadata files.
 
 For synchronization, just execute `jeka intellij: sync` as usual.
 

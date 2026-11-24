@@ -106,7 +106,7 @@ public final class JkRunbase {
 
     JkRunbase(Path baseDir) {
         this.baseDir = baseDir;
-        this.properties = PropertiesHandler.constructRunbaseProperties(baseDir);
+        this.properties = PropertiesHandler.constructProperties(baseDir, BehaviorSettings.INSTANCE.adminMode);
     }
 
     /**
@@ -637,6 +637,19 @@ public final class JkRunbase {
         return initialized;
     }
 
+    /*
+     * Returns the runbase located at the specified path, relative to this one. It can be invoked on any runbase.
+     * The target runbase is created if needed, because a child can be initialized prior the module it injects.
+     */
+    JkRunbase getInjectedRunbase(String relPath) {
+        Path targetBaseDir = baseDir.toAbsolutePath().resolve(relPath).normalize();
+        JkUtilsAssert.state(this == MASTER || !targetBaseDir.equals(MASTER.getBaseDir().toAbsolutePath().normalize()),
+                "@JkInject(\"%s\") in '%s' targets the parent runbase, which is not initialized yet.", relPath, baseDir);
+        JkUtilsAssert.state(Files.isDirectory(targetBaseDir),
+                "@JkInject(\"%s\") in '%s' mentions a directory that does not exist.", relPath, baseDir);
+        return RunbaseGraph.getOrCreateRunbase(targetBaseDir);
+    }
+
     KBean getBean(Class<?> kbeanClass) {
         return beans.get(kbeanClass.getName());
     }
@@ -755,6 +768,9 @@ public final class JkRunbase {
         List<JkBeanDescription.BeanField> beanFields = BeanUtils.enhanceWithMultiValues(desc.beanFields, propNames);
         CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc, propNames));
         commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, kbeanClass, beanFields));
+        // Values come from properties only, so they can't be confused with a method or a field name
+        commandLine.setAllowSubcommandsAsOptionParameters(true);
+        commandLine.setAllowOptionsAsOptionParameters(true);
         commandLine.parseArgs();
         CommandLine.Model.CommandSpec commandSpec = commandLine.getCommandSpec();
 

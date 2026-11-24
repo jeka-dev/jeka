@@ -29,7 +29,7 @@ If you are coming from *Maven* or *Gradle*, this guide will help you map your ex
 | `mvn compile`       | `gradle compileJava`         | `jeka project: compile`               |
 | `mvn test`          | `gradle test`                | `jeka project: test`                  |
 | `mvn package`       | `gradle assemble`            | `jeka project: pack`                  |
-| `mvn install`       | `gradle publishToMavenLocal` | `jeka maven: publishLocal`            |
+| `mvn install`       | `gradle publishToMavenLocal` | `jeka maven: publishLocalM2`          |
 | `mvn clean`         | `gradle clean`               | `jeka --clean`  or `jeka -c`          |
 | `mvn help:describe` | `gradle help`                | `jeka --doc` or `jeka project: --doc` |
 
@@ -63,9 +63,9 @@ Builds run on any machine, even without Java installed.
   <version>1.8.0</version>
 </dependency>
 <dependency>
-  <groupId>com.google.guava</groupId>
-  <artifactId>guava</artifactId>
-  <version>31.1-jre</version>
+  <groupId>org.mockito</groupId>
+  <artifactId>mockito-core</artifactId>
+  <version>5.22.0</version>
   <scope>test</scope>
 </dependency>
 ```

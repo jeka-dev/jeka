@@ -23,16 +23,16 @@ Resources:
   - Source Code: [Visit here](src/dev/jeka/plugins/protobuf/ProtobufKBean.java).
   - Protoc compiler options: [Visit here](https://manpages.ubuntu.com/manpages/xenial/man1/protoc.1.html).
   - How to use Protocol Buffers: [Visit here](https://protobuf.dev/)
-  - 
+
 ## Configure Example
 
 ```properties
-jeka.classpath.inject=dev.jeka:protobuf-plugin
-@protobuf=
+jeka.classpath=dev.jeka:protobuf-plugin
+@protobuf=on
 
 # Optional properties
 @protobuf.protoPath=src/main/protofiles
-@protobuf.protocVersion=3.1.10
+@protobuf.protocVersion=3.11.4
 @protobuf.protobufVersion=3.21.12
 ```
 

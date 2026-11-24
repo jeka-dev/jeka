@@ -19,4 +19,12 @@ class JkVersionProviderTest {
 
     }
 
+    @Test
+    void andBom_allNotationsAreEquivalent() {
+        JkCoordinate expected = JkVersionProvider.of().andBom("g:n:1").getBoms().iterator().next();
+        assertEquals(expected, JkVersionProvider.of().andBom("g:n:1@pom").getBoms().iterator().next());
+        assertEquals(expected, JkVersionProvider.of().andBom("g:n::pom:1").getBoms().iterator().next());
+        assertEquals("1", expected.getVersion().getValue());
+    }
+
 }

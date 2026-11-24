@@ -32,6 +32,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.StandardCopyOption;
 import java.util.jar.JarFile;
 
 /**
@@ -147,10 +148,25 @@ public final class JkJarPacker {
     }
 
     public static void makeShadeJar(JkRepoSet repos, Path originalJar, Iterable<Path> extraJars, Path outputJar) {
-        JkInternalJarShader jarShader = JkInternalJarShader.of(repos);
-        jarShader.shade(originalJar,
-                        JkUtilsIterable.setOf(JkUtilsPath.disambiguate(extraJars)),
-                        outputJar);
+        makeShadeJar(JkInternalJarShader.of(repos), originalJar, extraJars, outputJar);
+    }
+
+    // non-private for testing
+    static void makeShadeJar(JkInternalJarShader jarShader, Path originalJar, Iterable<Path> extraJars, Path outputJar) {
+
+        // Write in a temp file first, so that a failure leaves neither a partial nor a stale jar at the final location
+        JkUtilsPath.deleteIfExists(outputJar);
+        // Not created by createTempFile(), which would restrict the jar permissions to the owner
+        JkUtilsPath.createDirectories(outputJar.toAbsolutePath().getParent());
+        Path tempJar = outputJar.resolveSibling(outputJar.getFileName() + ".tmp");
+        try {
+            jarShader.shade(originalJar,
+                            JkUtilsIterable.setOf(JkUtilsPath.disambiguate(extraJars)),
+                            tempJar);
+            JkUtilsPath.move(tempJar, outputJar, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            JkUtilsPath.deleteIfExistsSafely(tempJar);
+        }
     }
 
 }

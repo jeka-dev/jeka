@@ -53,6 +53,14 @@ class EngineTest {
     }
 
     @Test
+    public void injectFromJkProps_valueEqualToMethodOrFieldName_ok() {
+        JkProperties props = JkProperties.ofMap(JkUtilsIterable.mapOf("@project.moduleId", "pack", "@project.version", "moduleId"));
+        ProjectKBean projectKBean = new EngineWrapper().run(props, "project:").load(ProjectKBean.class);
+        assertEquals("pack", projectKBean.moduleId);
+        assertEquals("moduleId", projectKBean.version);
+    }
+
+    @Test
     public void publicNestedFields_ok() {
         NestedProp nestedProp = new EngineWrapper(NestedProp.class).run("options.foo=a")
                 .find(NestedProp.class).get();

@@ -53,6 +53,15 @@ class CmdLineParserTest {
         assertEquals(2, kBeanActions.size());
     }
 
+    @Test
+    void fieldValueEqualToMethodName_ok() {
+        List<KBeanAction> kBeanActions = parse("project: moduleId=pack pack").toList();
+        assertTrue(kBeanActions.stream().anyMatch(action ->
+                "moduleId".equals(action.member) && "pack".equals(action.value)));
+        assertEquals(1, kBeanActions.stream()
+                .filter(action -> action.type == KBeanAction.Action.INVOKE).count());
+    }
+
     private KBeanAction.Container parse(String args) {
         CmdLineArgs cmdArgs = new CmdLineArgs(JkUtilsString.parseCommandline(args));
         return CmdLineParser.parse(cmdArgs, kBeanResolution());

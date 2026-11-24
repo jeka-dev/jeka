@@ -35,13 +35,15 @@ Add JVM agents:
 ```java
 @JkPostInit
 private void postInit(DockerKBean dockerKBean) {
-    dockerKBean.customizeJvmImage(dockerBuild -> dockerBuild
-            .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.16.0", "")
-            .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy")
-            .nonRootSteps()   // inserted after  USER nonroot
-            .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
-            .add("RUN chmod a+rw /release.md ")
-    );
+    dockerKBean.customizeJvmImage(dockerBuild -> {
+        dockerBuild
+                .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.16.0", "")
+                .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy");
+        dockerBuild.dockerfileTemplate
+                .moveCursorBeforeUserNonRoot()   // following steps are inserted before USER nonroot
+                .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
+                .add("RUN chmod a+rw /release.md");
+    });
 }
 ```
 This KBean allows customizing the Docker image programmatically using the [JeKa libs for Docker](api-docker.md).

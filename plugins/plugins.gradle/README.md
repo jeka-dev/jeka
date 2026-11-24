@@ -9,6 +9,8 @@ is used when present in the project directory, otherwise falls back to the syste
 It also exposes [`JkGradle`](src/dev/jeka/plugins/gradle/JkGradle.java) and
 [`JkGradleProject`](src/dev/jeka/plugins/gradle/JkGradleProject.java) for programmatic usage.
 
+> **Note:** This plugin is not yet available on Maven Central. It will be available from the next JeKa version after 0.11.68.
+
 ## Run a Gradle Application from Source
 
 Add a `jeka.properties` file at the root of your Gradle project:

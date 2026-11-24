@@ -261,17 +261,16 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * starting with the specified prefix keyword then the substring following this suffix will be
      * returned.
      * <p>
-     * If no such prefix found, then a version formatted as [branch]-SNAPSHOT will be returned
+     * If no such prefix found, then a version formatted as [branch]-SNAPSHOT will be returned, or
+     * [short commit hash]-SNAPSHOT if there is no current branch (detached HEAD).
      */
     public String getVersionFromCommitMessage(String prefixKeyword) {
         String afterSuffix = extractSuffixFromLastCommitMessage(prefixKeyword);
         if (afterSuffix != null) {
             return afterSuffix;
         }
-        String branch;
         try {
-            branch = getCurrentBranch();
-            return branch + "-SNAPSHOT";
+            return getSnapshotVersion();
         } catch (IllegalStateException e) {
             JkLog.warn(e.getMessage());
             return JkVersion.UNSPECIFIED.getValue();
@@ -288,7 +287,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * taken in account.
      * <p>
      * If no tag starting with <code>prefix</code> is present on the current commit or the workspace is dirty,
-     * the version will value <i>[branch]-SNAPSHOT</i>.
+     * the version will value <i>[branch]-SNAPSHOT</i>, or <i>[short commit hash]-SNAPSHOT</i> if there is no current
+     * branch (detached HEAD).
      * <p>
      * If <code>prefix</code> is empty, any tag will match.
      */
@@ -301,6 +301,9 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .toList();
         branch = getCurrentBranch();
         dirty = isWorkspaceDirty();
+        if (branch == null && getTagsOnCurrentCommit().isEmpty()) {  // detached Head without tag
+            return getSnapshotVersion();
+        }
         if (branch == null) {   // detached Head
             JkLog.verbose("Git detached branch. Infer version from exact matching tag.");
             return this.copy()
@@ -315,6 +318,24 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         } else {
             return tags.getLast().substring(prefix.length());
         }
+    }
+
+    // There is no current branch on detached HEAD (e.g. pull request builds on CI).
+    String getSnapshotVersion() {
+        String branch = getCurrentBranch();
+        return (branch == null ? getShortCommit() : branch) + JkVersion.SNAPSHOT_SUFIX;
+    }
+
+    private String getShortCommit() {
+        String commit = copy()
+                .addParams("rev-parse", "--short", "HEAD")
+                .setLogWithJekaDecorator(false)
+                .setCollectStdout(true)
+                .execAndCheck()
+                .getStdoutAsString()
+                .replace("\n", "");
+        JkUtilsAssert.state(!JkUtilsString.isBlank(commit), "Cannot find current Git commit in %s", getWorkingDir());
+        return commit;
     }
 
     /**

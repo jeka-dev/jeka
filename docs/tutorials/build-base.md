@@ -28,10 +28,13 @@ This generates the following project structure:
 │   │   └── Custom.java  
 │   └── app              <- Suggested base package for production code/resources
 │       └── App.java     
-├── jeka-output          <- Generated dir where artifacts such as jars, classes, reports or doc are generated
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
+├── jeka.ps1             <- PowerShell script to run JeKa on Windows
+├── jeka                 <- Bash script to run JeKa on Linux/macOS
 └── README.md            <- Describes available build commands
 ```
+
+JeKa generates JARs, reports and other artifacts in the `jeka-output` directory, created on the first build.
 
 All your Java code is supposed to be in the `jeka-src` folder.
 
@@ -43,7 +46,7 @@ You can add or modify classes in any package you like.
 
 ## Sync with IntelliJ
 
-The easiest way to work with JeKa in IntelliJ is by using the [JeKa IntelliJ Plugin](https://plugins.jetbrains.com/plugin/13364-jeka). It provides syntax highlighting, auto-completion, and direct execution of JeKa commands.
+The easiest way to work with JeKa in IntelliJ is by using the [JeKa IntelliJ Plugin](https://plugins.jetbrains.com/plugin/24505-jeka). It provides syntax highlighting, auto-completion, and direct execution of JeKa commands.
 
 To synchronize your project with IntelliJ and generate the necessary project files, run:
 
@@ -61,11 +64,10 @@ jeka intellij: initProject
 
 In `base` mode, dependencies are declared directly in your Java source files using the `@JkDep` annotation. This keeps your build configuration close to the code that uses it.
 
-The scaffolded `App.java` includes examples:
+The scaffolded `App.java` includes an example:
 
 ```java title="jeka-src/app/App.java"
 @JkDep("com.github.lalyos:jfiglet:0.0.9")
-@JkDep("com.fasterxml.jackson.core:jackson-core:2.18.2")
 public class App {
     // ...
 }
@@ -86,8 +88,8 @@ You can also include JAR files as dependencies by placing them in the `jeka-boot
 Dependencies used only for development (like testing or custom build logic) should be declared in classes under the `_dev` package. This ensures they are not included in the final application bundle.
 
 ```java title="jeka-src/_dev/Custom.java"
-@JkDep("org.junit.jupiter:junit-jupiter:5.11.4")
-@JkDep("org.mockito:mockito-junit-jupiter:5.15.2")
+@JkDep("org.junit.jupiter:junit-jupiter")
+@JkDep("org.junit:junit-bom:6.0.3@pom")
 class Custom extends KBean {
     // ...
 }
@@ -164,13 +166,14 @@ The [`base` KBean](../reference/kbeans-base.md) provides several built-in comman
 
 ```text title="Available Base Commands"
 jeka base: test       # Run all tests in the _dev package
-jeka base: pack       # Run tests and create application JARs
+jeka base: pack       # Create application JARs (does not run tests)
+jeka base: build      # Run tests, then pack
 jeka base: runJar     # Execute the generated JAR
 jeka base: info       # Display project configuration and dependencies
 jeka base: depTree    # Display the full dependency tree 
 ```
 
-For more advanced commands, see the [Project Build tutorial](build-projects.md#pre-defined-build-commands).
+For more advanced commands, see the [Project Build tutorial](build-projects.md#essential-build-commands).
 
 ## Create a Library
 
@@ -180,7 +183,7 @@ Add these to your `jeka.properties`:
 
 ```properties title="jeka.properties"
 @base.moduleId=org.example:my-lib
-@base.version=1.0.0-SNAPSHOT
+@maven.pub.version=1.0.0-SNAPSHOT
 ```
 
 You can then publish your library to a Maven repository:

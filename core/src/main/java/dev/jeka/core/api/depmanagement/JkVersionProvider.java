@@ -175,11 +175,14 @@ public final class JkVersionProvider {
     }
 
     /**
-     * @param dependencyDescription Can be expressed as group:name::pom:version
-     * or group:name:version. In last case, it will be converted in the first expression
+     * @param dependencyDescription Can be expressed as group:name::pom:version, group:name:version@pom
+     * or group:name:version. In last cases, it will be converted in the first expression
      */
     public JkVersionProvider andBom(String dependencyDescription) {
         String[] items = dependencyDescription.split(":");
+        if (items.length == 3 && items[2].endsWith("@pom")) {
+            items[2] = JkUtilsString.substringBeforeLast(items[2], "@pom");
+        }
         final JkCoordinate coordinate;
         if (items.length == 5) {
             coordinate= JkCoordinate.of(dependencyDescription);
@@ -189,7 +192,7 @@ public final class JkVersionProvider {
             coordinate = JkCoordinate.of(jkModuleId, version).withClassifierAndType("", "pom");
         } else {
             throw new IllegalArgumentException("dependencyDescription must be expressed as 'group:name::pom:version' " +
-                    "or 'group:name:version'. was " + dependencyDescription);
+                    ", 'group:name:version@pom' or 'group:name:version'. was " + dependencyDescription);
         }
         return andBom(coordinate);
     }

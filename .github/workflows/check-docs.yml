@@ -1,0 +1,28 @@
+# Checks that the documentation builds without warning (broken links or anchors, missing pages, ...).
+
+name: Check Docs
+
+on:
+  push:
+    paths: ['docs/**', 'mkdocs.yml', '.github/workflows/check-docs.yml', '.github/workflows/requirements.txt']
+  pull_request:
+    paths: ['docs/**', 'mkdocs.yml', '.github/workflows/check-docs.yml', '.github/workflows/requirements.txt']
+
+permissions:
+  contents: read
+
+jobs:
+  mkdocs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install MkDocs
+      run: pip install "mkdocs>=1.6,<2" "mkdocs-material>=9,<10" -r .github/workflows/requirements.txt
+
+    - name: Build documentation
+      run: mkdocs build --strict --site-dir "$RUNNER_TEMP/site"

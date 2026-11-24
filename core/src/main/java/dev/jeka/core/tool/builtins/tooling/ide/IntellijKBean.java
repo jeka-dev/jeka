@@ -83,7 +83,7 @@ public final class IntellijKBean extends KBean {
     @JkDoc(hide = true, value = "If mentioned, misc.xml will be updated with the specified jdk name.")
     private String jdkName;
 
-    @JkDoc("If true, sources will be downloaded will resolving dependencies.")
+    @JkDoc("If true, sources will be downloaded while resolving dependencies.")
     private boolean downloadSources = false;
 
     @JkDoc
@@ -285,7 +285,7 @@ public final class IntellijKBean extends KBean {
 
     private void generateImlExec(Path moduleDir) {
         JkLog.startTask("Generate iml file on '%s'", moduleDir);
-        Main.exec(moduleDir, "intellij#iml", "-dci");
+        JekaExec.exec(moduleDir, "intellij:", "iml");
         JkLog.endTask();
     }
 

@@ -2,7 +2,7 @@
 
 ## Initialization
 
-This plugin resisters a post-publication action in *MavenKBean*, if present.
+This plugin registers a post-publication action in *MavenKBean*, if present.
 The action sends a *"close"* message to the repositories and waits until it is processed.
 
 ## Configuration
@@ -16,6 +16,7 @@ jeka.classpath=dev.jeka:nexus-plugin
 # Optional properties
 @nexus.profileNamesFilter=
 @nexus.closeTimeout=600
+@nexus.readTimeout=90000
 ```
 
 ## Programmatic Usage
@@ -43,6 +44,7 @@ _____________________________
 |-------|-------------|
 |profileNamesFilter [String] |Comma separated filters for taking in account only repositories with specified profile names. |
 |closeTimeout [int] |Timeout in seconds, before the 'close' operation times out. |
+|readTimeout [int] |Read timeout in millis, when querying the Nexus repo via http. 0 means no timeout. |
 
 
 **This KBean exposes the following methods:**

@@ -7,9 +7,10 @@ It generates `.iml` module files and, when a `ProjectKBean` is present, also syn
 
 ## Sync
 
-Run `jeka intellij: sync` (or `jeka intellij#sync`) to generate/update IntelliJ metadata.
+Run `jeka intellij: sync` to generate/update IntelliJ metadata.
 
 What gets generated:
+
 - The module `.iml` file with all classpath entries.
 - `.idea/compiler.xml` — annotation-processor configuration and per-module javac options, derived from the project build definition.
 
@@ -40,7 +41,7 @@ Example — disable compiler.xml sync entirely:
 private void postInit(IntellijKBean intellijKBean) {
     intellijKBean
             .replaceLibByModule("dev.jeka.jeka-core.jar", "core")
-            .setModuleAttributes("core", JkIml.Scope.COMPILE, null);
+            .setModuleAttributes("core", JkIntellijIml.Scope.COMPILE, null);
 }
 ```
 

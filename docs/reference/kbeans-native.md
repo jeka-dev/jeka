@@ -22,6 +22,7 @@ jeka native: compile
 ```
 
 This command:
+
 1. Compiles your project if needed
 2. Creates a native executable from the project's main artifact jar
 3. Places the executable in the output directory (same location as the jar, but without `.jar` extension)
@@ -34,7 +35,7 @@ Configure the KBean through `jeka.properties` or programmatically in your KBean 
 ```properties
 @native.includeAllResources=true
 @native.staticLink=MUSL
-@native.metadataRepoVersion=0.10.3
+@native.metadataRepoVersion=1.0.0
 @native.args=--verbose --no-fallback
 ```
 
@@ -55,12 +56,10 @@ Configure the KBean through `jeka.properties` or programmatically in your KBean 
 You can also configure the `NativeKBean` programmatically:
 
 ```java
-@JkDefClasspath("com.example:my-lib:1.0")
 public class Build extends KBean {
 
-    final NativeKBean nativeKBean = load(NativeKBean.class);
-
-    Build() {
+    @JkPostInit(required = true)
+    private void postInit(NativeKBean nativeKBean) {
         nativeKBean.includeAllResources = true;
         nativeKBean.staticLink = JkNativeCompilation.StaticLink.MUSL;
         nativeKBean.args = "--verbose --no-fallback";

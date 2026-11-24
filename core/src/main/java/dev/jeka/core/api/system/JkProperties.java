@@ -206,7 +206,7 @@ public final class JkProperties {
         if (rawValue == null) {
             return null;
         }
-        return interpolate(rawValue);
+        return interpolate(propertyName, rawValue);
     }
 
     /**
@@ -299,8 +299,15 @@ public final class JkProperties {
         return new JkProperties(SYS_PROPS_NAME, Collections.unmodifiableMap(props), null);
     }
 
-    private String interpolate(String string) {
-        return JkUtilsString.interpolate(string, this::get);
+    private String interpolate(String propertyName, String string) {
+        return JkUtilsString.interpolate(string, token -> {
+            String value = get(token);
+            if (value == null) {
+                throw new IllegalArgumentException(String.format(
+                        "Property '%s' references '${%s}' which is not defined.", propertyName, token));
+            }
+            return value;
+        });
     }
 
     private static String envVarNameToPropName(String value) {

@@ -45,7 +45,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@JkDoc("Manages Maven publication for project and 'jeka-src'.")
+@JkDoc("""
+        Publishes artifacts to Maven repositories and runs Maven builds.
+        
+        Published artifacts are those produced by the 'project' or 'base' KBean.
+        This KBean can also delegate the build to Maven, and helps migrating dependencies from a pom.xml file.
+        """)
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-maven/")
 public final class MavenKBean extends KBean {
 
     public enum PredefinedRepo {
@@ -66,7 +72,7 @@ public final class MavenKBean extends KBean {
         OSSRH
     }
 
-    @JkDoc("Indentation size for 'showPomDeps' output.")
+    @JkDoc("Indentation size for 'migrateDeps' output.")
     public int codeIndent = 4;
 
     @JkDoc("Arguments to pass to mvn command while building. Examples 'clean test', '-Pnative -X'")
@@ -234,13 +240,13 @@ public final class MavenKBean extends KBean {
         @JkDoc("The url to fetch source code, as the git repo url")
         public String projectScmUrl;
 
-        @JkDoc("Comma separated list of license formated as <license name>=<license url>")
+        @JkDoc("Comma separated list of licenses formatted as <license name>=<license url>")
         @JkDepSuggest(versionOnly = true, hint =
                 "Apache License V2.0=https://www.apache.org/licenses/LICENSE-2.0.html," +
                 "MIT License=https://www.mit.edu/~amini/LICENSE.md")
         public String licenses;
 
-        @JkDoc("Comma separated list of developers formatted as <dev nam>:<dev email>")
+        @JkDoc("Comma separated list of developers formatted as <dev name>:<dev email>")
         public String developers;
 
 
@@ -290,7 +296,7 @@ public final class MavenKBean extends KBean {
 
         @JkDoc("If true, the publication will generate a BOM as its only artifact. \n" +
                 "The BOM will point to the version of each child base that contains a project KBean.\n" +
-                "Be caution to declare it with leading '_' as  '_@maven.pub.parentBom' in jeka.properties to not" +
+                "Be careful to declare it with leading '_' as  '_@maven.pub.parentBom' in jeka.properties to not" +
                 " propagate it to children.")
         public boolean parentBom;
 
@@ -302,7 +308,7 @@ public final class MavenKBean extends KBean {
         @JkDoc("If not null, the publication will be published on this repo")
         public PredefinedRepo predefinedRepo;
 
-        @JkDoc("Coma separated string of artifact classifiers to publish, in format [classifier] or [classifier].[extension].\n" +
+        @JkDoc("Comma separated string of artifact classifiers to publish, in format [classifier] or [classifier].[extension].\n" +
                "This assumes the artifact file be present in jeka-output dir.\n" +
                 "Example: 'uber', 'doc.zip'")
         public String extraArtifacts;

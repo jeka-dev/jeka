@@ -77,6 +77,10 @@ class RunbaseGraph {
 
 
 
+    static JkRunbase getOrCreateRunbase(Path baseDir) {
+        return Node.getOrCreate(baseDir).getRunbase();
+    }
+
     List<JkRunbase> getChildren() {
         return children.stream().map(Node::getRunbase).collect(Collectors.toList());
     }

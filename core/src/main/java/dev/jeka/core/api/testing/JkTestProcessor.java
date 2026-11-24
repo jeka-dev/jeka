@@ -214,6 +214,12 @@ public final class JkTestProcessor {
             printTestFailure(result);
         }
 
+        // Otherwise, a wrong pattern looks like a success
+        if (result.getTestCount().getFound() == 0 && !effectiveSelection.getIncludePatterns().isEmpty()) {
+            JkLog.warn("No test matches the include patterns %s. Patterns are regex applied on fully qualified " +
+                    "class names (e.g. '.*MyTest').", effectiveSelection.getIncludePatterns());
+        }
+
         String greenMsg = JkAnsi.of().fg(JkAnsi.Color.GREEN).a("ALL TESTS PASSED").reset().toString();
 
         String summaryTitle = success ? greenMsg: "Summary";
