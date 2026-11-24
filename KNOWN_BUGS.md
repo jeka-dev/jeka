@@ -5,7 +5,7 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - Read this before diagnosing a failure or documenting a feature: the problem may already be known.
 - Don't fix an entry as a side effect of another task. Report it instead.
 - Remove an entry in the same commit that fixes it. Add new ones with their evidence.
-- **Evidence**: *reproduced* = observed by running it; *from source* = read in code, not run.
+- **Evidence**: *reproduced* = observed by running it; *from source* = read in code, not run; *naive agent* / *doc-writer agent* = observed by that agent only.
 
 ## Build and packaging
 
@@ -29,6 +29,43 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** packing `core` a second time fails with `FileAlreadyExistsException: .../jeka-core-master-SNAPSHOT-sdkman/LICENSE`.
 - **Workaround:** `--clean`.
 - **Evidence:** reproduced once.
+
+### Forked tests fail on Java targets below 21
+- **Symptom:** `@project.javaVersion=17` on a fresh scaffold makes `project: test` fail with `UnsupportedClassVersionError: JkTestProcessor ... class file version 65.0`. Docs use 17 as an example.
+- **Workaround:** `@project.test.fork=false`, or target 21+.
+- **To decide:** support it, or fail with a clear message, as JeKa needs Java 21.
+- **Evidence:** reproduced.
+
+### JaCoCo plugin fails on Java 25 classes
+- **Symptom:** default JaCoCo 0.8.12 gives `Unsupported class file major version 69` on a fresh scaffold (Java 25).
+- **Workaround:** `@jacoco.jacocoVersion=0.8.14`.
+- **Evidence:** reproduced by the naive agent.
+
+### `createWarFile=true` runs tests and warns on `project: pack`
+- **Symptom:** with `@springboot.createWarFile=true`, `project: pack` runs the tests and warns that `jeka-war...` is empty or does not exist.
+- **Evidence:** reproduced by the naive agent.
+
+## Publication and Maven
+
+### Published POM has wrong scopes
+- **Symptom:** dependencies of `[compile-only]` (e.g. Lombok) are published with scope `compile`, and those of `[runtime]` (e.g. PostgreSQL) are missing. `docs/reference/api-project.md` says the runtime classpath is published.
+- **Evidence:** reproduced, with `project: pack maven: publishLocal` and `maven: info`.
+
+### Sibling module missing from the published POM
+- **Symptom:** a module depending on `../plugin-common` in `jeka.project.deps` is published without that dependency.
+- **Evidence:** reproduced by the naive agent.
+
+### `maven: migrateDeps` generates an invalid `jeka.project.deps`
+- **Symptom:** a `provided` dependency becomes `- org.projectlombok:lombok` in `[compile-only]`, without version. Using it fails with `Coordinate specification '- org...' is not correct`.
+- **Evidence:** reproduced (generated output).
+
+### NPE message when a project has no module ID
+- **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` fails with `Cannot invoke "JkModuleId.toColonNotation()"...`, possibly after other modules were published. `docs/reference/multi-modules.md` shows this configuration.
+- **Evidence:** reproduced with `maven: info`.
+
+### Javadoc warning when publishing a scaffolded project
+- **Symptom:** warning with status 1.
+- **Evidence:** reproduced by the naive agent.
 
 ## Versioning (Git)
 
@@ -83,6 +120,14 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `SourceParser` reads line by line.
 - **Evidence:** reproduced by the doc-writer agent.
 
+### Untrusted remote run without a terminal fails silently
+- **Symptom:** `jeka -r <untrusted url>` without a terminal clones the repo first, then exits 1 without message.
+- **Evidence:** reproduced by the naive agent.
+
+### Git versioning without any commit gives a bare Git error
+- **Symptom:** `error code 128` or `129` on `git diff HEAD --stat`.
+- **Evidence:** reproduced by the naive agent.
+
 ## KBeans
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
@@ -91,6 +136,9 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*
 - **`SecurityChecker.addTrustedUrl`** writes a leading space in `jeka.app.url.trusted`. Harmless for Java, not checked in the shell script. *Reproduced by the doc-writer agent.*
 - **`NodeJsKBean.init` `@JkDoc`** says it configures the project, but it only registers a clean action. *From source.*
+- **`docker: build`** prints "Native compilation started at" for JVM images. *Reproduced by the naive agent.*
+- **`nodeJs: exec`** shows its output only with `-v`. *Reproduced by the naive agent.*
+- **Empty `jeka.project.deps`** gives a "has still legacy format" warning. *Reproduced by the naive agent.*
 - **`bundle`**: `jdeps` runs with `--multi-release base`, so modules used only by version-specific classes are not detected. Add them with `--add-modules`. *From source.*
 
 ## Tests and CI
