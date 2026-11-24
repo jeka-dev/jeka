@@ -15,11 +15,17 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Evidence:** reproduced. Works with Java 21.
 - **When fixed:** remove the note in `docs/reference/kbeans-maven.md`.
 
-### Stale manifest in `base` builds
-- **Symptom:** after a REGULAR or SHADE build, later FAT jars reuse the old manifest (missing version and custom attributes), even with `--clean`.
-- **Where:** `JkJarPacker.makeJar` writes `MANIFEST.MF` in `.jeka-work/jeka-src-classes`.
-- **Workaround:** `--clean-work`.
-- **Evidence:** reproduced by the doc-writer agent.
+### A `META-INF/MANIFEST.MF` resource replaces the generated manifest in FAT jars
+- **Symptom:** with a `META-INF/MANIFEST.MF` in the project resources, a FAT jar contains this one only, ignoring version and manifest customizers. A REGULAR jar contains the generated one only. Nothing tells the user. `.jeka-work/jeka-src-classes` may also hold such a file, left by JeKa 0.11.68 or older: use `--clean-work` once.
+- **Where:** `JkJarPacker.makeFatJar`.
+- **To decide:** which one wins, or merge both.
+- **Evidence:** reproduced.
+
+### Deleted classes stay in the jar without `--clean`
+- **Symptom:** after deleting a source file, `project: pack` still packages its class.
+- **Where:** `jeka-output/classes` is not cleaned, and `JkAbstractPathTree.zipTo` adds to the existing jar.
+- **Workaround:** `--clean`.
+- **Evidence:** reproduced.
 
 ### Unclear error when the main jar is missing at publication
 - **Symptom:** `No artifact file and artifact maker found for [main].jar...` instead of suggesting to run `pack`.

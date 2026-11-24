@@ -84,11 +84,20 @@ public final class JkJarPacker {
      * @param resultFile Result file
      */
     public void makeJar(Path resultFile) {
-        if (manifest != null && !manifest.isEmpty()) {
-            manifest.writeToStandardLocation(classtrees.toList().get(0).getRoot());
-        }
         JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.ofEmpty() : extraFiles;
-        classtrees.and(treeSet).zipTo(resultFile);
+        if (manifest == null || manifest.isEmpty()) {
+            classtrees.and(treeSet).zipTo(resultFile);
+            return;
+        }
+
+        // Don't write the manifest in the class dir, as it would be reused by the next fat jar
+        Path manifestDir = JkUtilsPath.createTempDirectory("jk-manifest-");
+        manifest.writeToStandardLocation(manifestDir);
+        JkPathTreeSet.ofRoots(manifestDir)
+                .and(classtrees.andMatcher(JkPathMatcher.of(false, JkManifest.STANDARD_LOCATION)))
+                .and(treeSet)
+                .zipTo(resultFile);
+        JkPathTree.of(manifestDir).deleteRoot();
     }
 
     /**
