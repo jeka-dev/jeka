@@ -109,8 +109,17 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = PropertiesHandler.constructProperties(baseDir, cmdArgs.containsAdminKBeans());
-        CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
+        final JkProperties props;
+        final CmdLineArgs interpolatedArgs;
+        try {
+            props = PropertiesHandler.constructProperties(baseDir, cmdArgs.containsAdminKBeans());
+            interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
+        } catch (RuntimeException e) {  // properties may be invalid
+            handleGenericThrowable(e, startTime);
+            JkAnsiConsole.of().systemUninstall();
+            System.exit(1);
+            throw e;  // never reached, needed by the compiler
+        }
 
         Engine engine = null;
 

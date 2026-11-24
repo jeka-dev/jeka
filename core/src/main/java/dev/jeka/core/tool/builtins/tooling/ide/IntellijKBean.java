@@ -285,7 +285,7 @@ public final class IntellijKBean extends KBean {
 
     private void generateImlExec(Path moduleDir) {
         JkLog.startTask("Generate iml file on '%s'", moduleDir);
-        Main.exec(moduleDir, "intellij#iml", "-dci");
+        JekaExec.exec(moduleDir, "intellij:", "iml");
         JkLog.endTask();
     }
 

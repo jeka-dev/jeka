@@ -90,7 +90,7 @@ public class NodeJsKBean extends KBean {
             "This usually generates packaged JS resources in the project's build directory.")
     public void build() {
         if (nodeJsProject == null) {
-            throw new JkException("The project has been configured to build with NodeJs.");
+            throw new JkException("The project has not been configured to build with NodeJs.");
         }
         nodeJsProject.build();
         JkLog.info("Build generated in %s dir.", getBaseDir().relativize(nodeJsProject.getBuildDir()));
@@ -99,7 +99,7 @@ public class NodeJsKBean extends KBean {
     @JkDoc("Runs the test commands configured for the JS project.")
     public void test() {
         if (nodeJsProject == null) {
-            throw new JkException("The project has been configured to build with NodeJs.");
+            throw new JkException("The project has not been configured to build with NodeJs.");
         }
         nodeJsProject.test();
     }

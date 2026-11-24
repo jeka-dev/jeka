@@ -112,14 +112,16 @@ public final class EclipseKBean extends KBean {
 
     @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a jeka-src directory are taken in account. See 'sync'.")
     public void all() {
-        final Iterable<Path> folders = JkPathTree.of(getBaseDir())
+        final List<Path> projectFolders = JkPathTree.of(getBaseDir())
                 .andMatching(true,"**/" + JkConstants.JEKA_SRC_DIR, JkConstants.JEKA_SRC_DIR)
                 .andMatching(false,"**/" + JkConstants.OUTPUT_PATH + "/**")
-                .getFiles();
-        for (final Path folder : folders) {
-            final Path projectFolder = folder.getParent().getParent();
+                .stream()
+                .filter(Files::isDirectory)
+                .map(path -> path.toAbsolutePath().normalize().getParent())
+                .toList();
+        for (final Path projectFolder : projectFolders) {
             JkLog.startTask("Generate Eclipse files on " + projectFolder);
-            Main.exec(projectFolder, "eclipse#files");
+            JekaExec.exec(projectFolder, "eclipse:", "sync");
             JkLog.endTask();
         }
     }
