@@ -327,13 +327,15 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     }
 
     private String getShortCommit() {
-        return copy()
+        String commit = copy()
                 .addParams("rev-parse", "--short", "HEAD")
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
                 .execAndCheck()
                 .getStdoutAsString()
                 .replace("\n", "");
+        JkUtilsAssert.state(!JkUtilsString.isBlank(commit), "Cannot find current Git commit in %s", getWorkingDir());
+        return commit;
     }
 
     /**
