@@ -383,22 +383,26 @@ public final class JkMavenPublication {
 
     /**
      * Computes the published transitive dependencies from the specified <i>compile</i> and <i>runtime</i>
-     * dependencies of the project that we are publishing artifacts for.
+     * dependencies of the project that we are publishing artifacts for.<p>
+     * Only the <i>runtime</i> dependencies are published : with the 'compile' scope if they are also part of
+     * the <i>compile</i> dependencies, with the 'runtime' scope otherwise.
      */
     public static JkDependencySet computeMavenPublishDependencies(JkDependencySet compileDeps,
                                                                   JkDependencySet runtimeDeps,
                                                                   JkCoordinate.ConflictStrategy strategy) {
-        JkDependencySetMerge merge = runtimeDeps.merge(compileDeps);
-        JkDependencySet mergeResult = merge.getResult().normalised(strategy);
-        List<JkDependency> result = new LinkedList<>();
+        JkDependencySet mergeResult = runtimeDeps.merge(compileDeps).getResult().normalised(strategy);
+        Map<JkCoordinate, JkDependency> result = new LinkedHashMap<>();
         for (JkCoordinateDependency coordinateDependency : mergeResult.getCoordinateDependencies()) {
-            JkTransitivity transitivity = JkTransitivity.COMPILE;
-            if (merge.getAbsentDependenciesFromRight().contains(coordinateDependency)) {
-                transitivity = JkTransitivity.RUNTIME;
+            if (runtimeDeps.getMatching(coordinateDependency) == null) {
+                continue;  // compile-only dependency
             }
-            result.add(coordinateDependency.withTransitivity(transitivity));
+            JkTransitivity transitivity = compileDeps.getMatching(coordinateDependency) == null ?
+                    JkTransitivity.RUNTIME : JkTransitivity.COMPILE;
+
+            // The same dependency may be declared both for compile and runtime
+            result.putIfAbsent(coordinateDependency.getCoordinate(), coordinateDependency.withTransitivity(transitivity));
         }
-        return JkDependencySet.of(result).withVersionProvider(mergeResult.getVersionProvider());
+        return JkDependencySet.of(new LinkedList<>(result.values())).withVersionProvider(mergeResult.getVersionProvider());
     }
 
     // BOMs are generally hosted on download repos

@@ -855,7 +855,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
             @Override
             public JkDependencySet getRuntimesDependencies() {
-                return JkProject.this.compilation.dependencies.get();
+                return JkProject.this.packaging.runtimeDependencies.get();
             }
 
             @Override

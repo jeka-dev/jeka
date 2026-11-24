@@ -478,14 +478,16 @@ public final class JkUtilsIO {
 
             @Override
             public void run() {
-                try (InputStreamReader isr = new InputStreamReader(in); BufferedReader br = new BufferedReader(isr)) {
+                // Copy raw bytes, as decoding then writing chars one by one corrupts non-ASCII ones.
+                try (InputStream is = in) {
+                    byte[] buffer = new byte[8192];
                     while (!stop.get() && shouldContinue()) {
-                        int c = br.read();
-                        if (c == -1) {
+                        int count = is.read(buffer);
+                        if (count == -1) {
                             break;
                         }
                         for (OutputStream out : outs) {
-                            out.write((char) c);
+                            out.write(buffer, 0, count);
                             out.flush();
                         }
                     }
