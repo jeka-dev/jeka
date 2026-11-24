@@ -53,7 +53,7 @@ public class CentralportalKBean extends KBean {
     public boolean automatic = true;
 
     @JkDoc("Wait time in seconds for successful publication")
-    public int timeout = 1000 * 60 * 15;
+    public int timeout = 60 * 15;
 
     private String deploymentId;
 

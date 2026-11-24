@@ -109,9 +109,7 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = cmdArgs.containsAdminKBeans() ?
-                PropertiesHandler.constructRunbaseProperties(baseDir) :
-                JkProperties.ofSysPropsThenEnv();
+        JkProperties props = PropertiesHandler.constructMasterProperties(baseDir, cmdArgs.containsAdminKBeans());
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
 
         Engine engine = null;
@@ -402,6 +400,7 @@ public class Main {
                     throw new IllegalStateException(msg);
                 }
                 JkLog.warn(msg);
+                continue;
             }
             if (propName.contains(".")) {
                 String fieldName = JkUtilsString.substringAfterFirst(propName, ".");

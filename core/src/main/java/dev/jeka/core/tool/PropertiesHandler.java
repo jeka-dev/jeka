@@ -47,6 +47,14 @@ class PropertiesHandler {
     }
 
     /**
+     * Returns the properties used to interpret the command line and boot the master engine.
+     * Admin KBeans are agnostic to the current dir, so jeka.properties files are ignored for them.
+     */
+    static JkProperties constructMasterProperties(Path baseDir, boolean adminMode) {
+        return adminMode ? JkProperties.ofStandardProperties() : constructRunbaseProperties(baseDir);
+    }
+
+    /**
      * Reads the properties from the baseDir/jeka.properties and its ancestors.
      *
      * Takes also in account properties defined in parent project dirs if any.

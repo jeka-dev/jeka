@@ -755,6 +755,9 @@ public final class JkRunbase {
         List<JkBeanDescription.BeanField> beanFields = BeanUtils.enhanceWithMultiValues(desc.beanFields, propNames);
         CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(desc, propNames));
         commandLine.setDefaultValueProvider(optionSpec -> getDefaultFromProps(optionSpec, kbeanClass, beanFields));
+        // Values come from properties only, so they can't be confused with a method or a field name
+        commandLine.setAllowSubcommandsAsOptionParameters(true);
+        commandLine.setAllowOptionsAsOptionParameters(true);
         commandLine.parseArgs();
         CommandLine.Model.CommandSpec commandSpec = commandLine.getCommandSpec();
 
