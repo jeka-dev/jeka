@@ -30,7 +30,7 @@ String messageToken   = git.extractSuffixFromLastCommitMessage("release:");
 This class infers project versions from Git information based on the current tag or branch.
 
 - If the current commit is on a tag and the workspace is clean, the returned version is the tag name, without the prefix.
-- Otherwise, the returned version is `branch-name-SNAPSHOT`.
+- Otherwise, the returned version is `branch-name-SNAPSHOT`, or `short-commit-hash-SNAPSHOT` if there is no current branch (detached HEAD).
 
 ```java
 JkVersionFromGit versionFromGit = JkVersionFromGit.of("v");  // consider only tags starting with 'v'

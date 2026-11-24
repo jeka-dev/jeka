@@ -19,13 +19,55 @@ package dev.jeka.core.api.tooling.git;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class JkGitTest {
+
+    @Test
+    void version_onDetachedHead(@TempDir Path dir) throws Exception {
+        for (String args : new String[] {"init -q", "config user.email a@b.c", "config user.name a",
+                "config commit.gpgsign false", "config tag.gpgsign false"}) {
+            git(dir, args);
+        }
+        Path file = dir.resolve("file.txt");
+        Files.write(file, "a".getBytes());
+        git(dir, "add .");
+        git(dir, "commit -q -m first");
+        git(dir, "checkout -q --detach");
+        JkGit detachedGit = JkGit.of(dir);
+        String expected = detachedGit.getCurrentCommit();
+
+        // No tag
+        String version = detachedGit.getVersionFromTag();
+        assertTrue(version.endsWith("-SNAPSHOT"));
+        String hash = version.replace("-SNAPSHOT", "");
+        assertTrue(hash.length() >= 4 && expected.startsWith(hash), version);
+        assertEquals(version, JkVersionFromGit.of(dir, "").getVersion());
+        assertEquals(version, detachedGit.getVersionFromCommitMessage("Release:"));
+
+        // Tag
+        git(dir, "tag 1.2.3");
+        assertEquals("1.2.3", detachedGit.getVersionFromTag());
+        assertEquals("1.2.3", JkVersionFromGit.of(dir, "").getVersion());
+
+        // Dirty
+        Files.write(file, "b".getBytes());
+        assertEquals(version, JkVersionFromGit.of(dir, "").getVersion());
+    }
+
+    private static void git(Path dir, String args) throws Exception {
+        List<String> command = new ArrayList<>(List.of("git"));
+        command.addAll(List.of(args.split(" ")));
+        assertEquals(0, new ProcessBuilder(command).directory(dir.toFile()).inheritIO().start().waitFor());
+    }
 
     JkGit git = JkGit.of(Paths.get(""));
 
