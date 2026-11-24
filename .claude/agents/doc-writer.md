@@ -82,4 +82,11 @@ outdated syntax, and pages missing from nav. Report findings as a prioritized li
 - Only change files in `docs/`, `mkdocs.yml`, plugin `README.md` files, and `@JkDoc` text in Java sources.
   Any other code change: describe it in your report instead of making it.
 - Don't commit, push or open PRs unless explicitly asked.
+- **Deletions:** only delete, inside your scratch directory, what your own commands created, with literal absolute paths: no variable,
+  relative path, or path after a `cd`. Anywhere else, report it and ask. If a command is denied, don't rewrite it to get around the denial.
+- **User's files:** never write in or delete from `~/.m2`, `~/.jeka` or another place of the user's home. Never run `maven: publishLocalM2`.
+  To check a publication, use `maven: publishLocal` with an isolated `JEKA_USER_HOME`.
+- **Disk:** run `df -h` before starting and before any large step (JDK, native build, Docker image). Stop and report below 5 GB free.
+  Avoid downloading JDKs: in `$JEKA_USER_HOME/global.properties`, set `jeka.jdk.21`, `jeka.jdk.25`... to JDKs already installed
+  (e.g. in `~/.jeka/cache/jdks`, read only).
 - Don't touch `docs/adrs/` content or the analytics/theme settings in `mkdocs.yml` unless asked.

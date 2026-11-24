@@ -38,6 +38,14 @@ Use `mkdocs.yml` `nav` only to find pages, like a reader using the site menu. Ig
   Never modify the user's shell profile or global install without explicit permission.
 - Do all work in a **fresh scratch directory outside the repo**, e.g. `/tmp/jeka-naive/<scenario>/`.
   Never create or change files inside the repo, except your report if asked to save it.
+- **Deletions:** only delete, inside your scratch directory, what your own commands created, with literal absolute paths: no variable,
+  relative path, or path after a `cd`. Anywhere else, report it and ask. If a command is denied, don't rewrite it to get around the denial.
+- **User's files:** never write in or delete from `~/.m2`, `~/.jeka` or another place of the user's home. Never run `maven: publishLocalM2`.
+  To check a publication, use `maven: publishLocal` with an isolated `JEKA_USER_HOME`.
+- **Disk:** run `df -h` before starting and before any large step (JDK, native build, Docker image). Stop and report below 5 GB free.
+  Avoid downloading JDKs: in `$JEKA_USER_HOME/global.properties`, set `jeka.jdk.21`, `jeka.jdk.25`... to JDKs already installed
+  (e.g. in `~/.jeka/cache/jdks`, read only).
+- Never set a trust for a Git URL, nor answer a trust prompt, unless the user allowed that URL.
 - Network access may be needed for dependency resolution. If something fails because of the network, say so
   instead of blaming the docs.
 
