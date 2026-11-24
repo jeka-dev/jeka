@@ -78,12 +78,13 @@ Credentials and signing key are read from environment variables. See the plugin 
 ```properties title="jeka.properties"
 # Create an extra shaded JAR, and publish it along an extra zip file
 @project.pack.shadeJarClassifier=all
+@project.javaVersion=21
 @maven.pub.extraArtifacts=all, doc.zip
 ```
 Files are expected in *jeka-output*, named after the main JAR (e.g. `org.example.my-lib-all.jar`, `org.example.my-lib-doc.zip`).
 
 !!! note
-    Shaded JARs cannot be created yet from classes compiled for Java 25.
+    Shaded JARs cannot be created yet from classes compiled for Java 24 or higher.
 
 ### Publish a BOM
 
@@ -148,6 +149,8 @@ From a directory containing a *pom.xml* file, display its dependencies as Java c
 ```shell
 jeka maven: migrateDeps
 ```
+For now, dependencies of `provided` scope must be completed by hand. 
+See [Migrate a Maven Project](../tutorials/migrate-from-maven.md) for all the steps.
 
 ## Summary
 

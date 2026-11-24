@@ -57,7 +57,7 @@ Create a Spring-Boot project from scratch:
 jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
 ```
 
-This command downloads the plugin and initializes a Spring Boot project in the current working directory.
+This command downloads the plugin, in the same version as JeKa, and initializes a Spring Boot project in the current working directory.
 The scaffolded project contains workable code and configuration based on the latest Spring-Boot version.
 
 
@@ -75,13 +75,31 @@ jeka.classpath=dev.jeka:springboot-plugin
 @springboot.createWarFile=true
 ```
 
+With `createWarFile=true`, `project: pack` creates both the bootable JAR and the WAR file. 
+For now, it also runs the tests, and may display a harmless `jeka-war... is empty or does not exists` warning.
+
 ## Programmatic Usage
 
 We can also configure a `JkProject` instance programmatically for working with Spring-Boot.
 
-```java
-JkProject project = myProject();
-JkSpringbootProject.of(project)
-        .configure()
-        .includeParentBom("3.2.1");
+```java title="jeka-src/Custom.java"
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.plugins.springboot.JkSpringbootProject;
+
+@JkDep("dev.jeka:springboot-plugin")
+class Custom extends KBean {
+
+    @JkPostInit(required = true)
+    private void postInit(ProjectKBean projectKBean) {
+        JkProject project = projectKBean.project;
+        JkSpringbootProject.of(project)
+                .configure()
+                .includeParentBom("4.2.0");
+    }
+}
 ```
+With this configuration, `@springboot=on` is not needed.

@@ -5,12 +5,12 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - Read this before diagnosing a failure or documenting a feature: the problem may already be known.
 - Don't fix an entry as a side effect of another task. Report it instead.
 - Remove an entry in the same commit that fixes it. Add new ones with their evidence.
-- **Evidence**: *reproduced* = observed by running it; *from source* = read in code, not run; *naive agent* / *doc-writer agent* = observed by that agent only.
+- **Evidence**: *reproduced* = observed by running it; *from source* = read in code, not run; *xxx agent* = observed by that agent only.
 
 ## Build and packaging
 
-### Shading fails on Java 25 classes
-- **Symptom:** `jarType=SHADE` (or `shadeJarClassifier`) fails with `Unsupported class file major version 69`. Scaffolds currently set `jeka.java.version=25`.
+### Shading fails on Java 24+ classes
+- **Symptom:** `jarType=SHADE` (or `shadeJarClassifier`) fails with `Unsupported class file major version 69` (68 for Java 24), if the project has dependencies. Scaffolds currently set `jeka.java.version=25`.
 - **Where:** maven-shade-plugin 3.6.0, in `JkInternalJarShader`.
 - **Evidence:** reproduced. Works with Java 21.
 - **When fixed:** remove the note in `docs/reference/kbeans-maven.md`.
@@ -67,12 +67,25 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Evidence:** reproduced (generated output).
 
 ### NPE message when a project has no module ID
-- **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` fails with `Cannot invoke "JkModuleId.toColonNotation()"...`, possibly after other modules were published. `docs/reference/multi-modules.md` shows this configuration.
+- **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` fails with `Cannot invoke "JkModuleId.toColonNotation()"...`, possibly after other modules were published.
 - **Evidence:** reproduced with `maven: info`.
 
 ### Javadoc warning when publishing a scaffolded project
 - **Symptom:** warning with status 1.
 - **Evidence:** reproduced by the naive agent.
+
+### Scaffold overwrites existing files
+- **Symptom:** `project: scaffold` replaces an existing `README.md` or `jeka.properties`, without asking. User content is lost.
+- **Evidence:** reproduced by the doc-writer agent.
+
+### `jeka -p` picks the javadoc JAR after a publication
+- **Symptom:** `Invalid or corrupt jarfile`, as `x-javadoc.jar` sorts before `x.jar` in `jeka-output`.
+- **Evidence:** reproduced by the doc-writer agent.
+
+### Installed app scripts expand arguments
+- **Symptom:** `cowsay "*"` prints the file names of the current directory.
+- **Where:** `AppBuilder` writes an unquoted `$@`.
+- **Evidence:** reproduced by the sample-maintainer agent with 0.11.68; same code on master.
 
 ## Versioning (Git)
 
@@ -131,6 +144,14 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `error code 128` or `129` on `git diff HEAD --stat`.
 - **Evidence:** reproduced by the naive agent.
 
+### `app: install` needs a terminal
+- **Symptom:** without a terminal, the version prompt fails with an NPE message. The version can't be set otherwise: `repo=...#tag` is not supported.
+- **Evidence:** reproduced by the naive and doc-writer agents.
+
+### Shorthand values ignore quotes
+- **Symptom:** `jeka.cmd.hi=-f daemon "Hello"` passes the quotes to the program. May be a known trade-off.
+- **Evidence:** reproduced by the sample-maintainer agent with 0.11.63; same code on master.
+
 ## KBeans
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
@@ -141,6 +162,11 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`NodeJsKBean.init` `@JkDoc`** says it configures the project, but it only registers a clean action. *From source.*
 - **`docker: build`** prints "Native compilation started at" for JVM images. *Reproduced by the naive agent.*
 - **`nodeJs: exec`** shows its output only with `-v`. *Reproduced by the naive agent.*
+- **`jeka.project.deps` with only `[processor]`** fails with a "legacy format" error. *Reproduced by the doc-writer agent.*
+- **`scaffold.kind=EMPTY`** leaves `@custom=on` without `Custom` class, which gives a warning. *Reproduced by the doc-writer agent.*
+- **`DockerKBean.jvmBaseImage`** is never used. *From source.*
+- **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
+- **`AppKBean.name`, `AppKBean.runtime`, `ProjectKBean.test.fork`, `MavenKBean` `parentBom`**: incomplete or wrong `@JkDoc`. *From source.*
 - **Empty `jeka.project.deps`** gives a "has still legacy format" warning. *Reproduced by the naive agent.*
 - **`bundle`**: `jdeps` runs with `--multi-release base`, so modules used only by version-specific classes are not detected. Add them with `--add-modules`. *From source.*
 

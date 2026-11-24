@@ -58,6 +58,7 @@ nav:
         - Build Projects: tutorials/build-projects.md
         - Build Codebase: tutorials/build-base.md
         - Source-Runnable Applications: tutorials/source-runnable-apps.md
+        - Migrate a Maven Project: tutorials/migrate-from-maven.md
     - Reference:
         - KBeans: reference/kbeans.md
         - Bundled KBeans:
@@ -91,7 +92,7 @@ nav:
     - Examples: examples.md
     - External Resources: external-resources.md
     - Javadoc: https://jeka-dev.github.io/jeka/javadoc/
-    - Migration Guide: migration-guide.md
+    - Migrating from JeKa 0.10: migration-guide.md
     - Under The Hood: under-the-hood.md
 
 repo_url: https://github.com/jeka-dev/jeka

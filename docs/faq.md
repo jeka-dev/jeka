@@ -66,11 +66,8 @@ In IntelliJ, go to `Project Settings` -> `Modules` -> `Import Module` -> choose 
 
 ### How can I migrate my project from Maven?
 
-*JeKa* helps translate all dependencies declared in a *Maven* project into the equivalent *Java* code.
-
-Assuming *Maven* is already installed and there is a `pom.xml` file at the root of the project, 
-execute `jeka maven: migrateDeps` to display the *Java* code/configuration to 
-copy-paste into a build class or `jeka.project.deps` file.
+Follow [Migrate a Maven Project](tutorials/migrate-from-maven.md). 
+The `jeka maven: migrateDeps` command translates the dependencies of the `pom.xml` file.
 
 ## Performance—Caching
 
@@ -124,6 +121,12 @@ If you want to configure a project programmatically, either within the project i
 The `ProjectKBean` initializes the project and configures it with its own settings in its `init` method. After that, it should not be modified. If you change the `ProjectKBean` instance in your code, the underlying `JkProject` instance will already have been configured by the `ProjectKBean`, meaning your changes will have no effect.
 
 ```java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
 public class Build extends KBean {
 
     @JkPostInit(required = true)
@@ -140,9 +143,14 @@ public class Build extends KBean {
 JeKa can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as follows:
 
 ```java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
-@JkDep("org.eclipse.jdt.core.compiler:ecj:4.6.1")
+@JkDep("org.eclipse.jdt:ecj:3.42.0")
 public class Build extends KBean {
 
     @JkPostInit(required = true)

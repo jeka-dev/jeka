@@ -31,8 +31,11 @@ Source code: [View the source](src/dev/jeka/plugins/jacoco/JacocoKBean.java)
 ```properties
 jeka.classpath=dev.jeka:jacoco-plugin
 @jacoco=on
+
+# Required to analyze Java 25 classes: the default version (0.8.12) does not support them
+@jacoco.jacocoVersion=0.8.14
+
 # Optional properties
-@jacoco.jacocoVersion=0.8.7
 @jacoco.configureProject=true
 @jacoco.htmlReport=true
 ```
@@ -45,9 +48,9 @@ Use the `JkJacoco` class to configure projects directly, as shown below:
 
 ```java
 JkProject project = myProject();
-JkJacoco.ofVersion("0.8.11")
+JkJacoco.ofVersion("0.8.14")
    .configureAndApplyTo(project);
 ```
 
 Once configured, the project runs tests with the *Jacoco* agent.  
-To run tests programmatically, use: `JkProject.testing.run()` method.
+To run tests programmatically, use: `project.test.run()`.

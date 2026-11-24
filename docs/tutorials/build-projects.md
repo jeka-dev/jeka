@@ -37,16 +37,31 @@ JARs, classes and reports are generated in the `jeka-output` directory, created 
 
 Put resources in `src/main/resources` and `src/test/resources`.
 
+The generated *jeka.properties* sets the JeKa and Java versions, makes `project` the default KBean, and packages the application as a FAT JAR:
+```properties title="jeka.properties"
+jeka.version=0.11.68
+jeka.java.version=25
+
+jeka.kbean.default=project
+@custom=on
+
+@project.pack.jarType=FAT
+@project.pack.detectMainClass=true
+```
+
 The `jeka` and `jeka.ps1` scripts allow building the project on machines where JeKa is not globally installed.  
-You can delete `jeka-src/Custom.java` if you don't need programmatic customization.
+You can delete `jeka-src/Custom.java` if you don't need programmatic customization. In this case, also delete the `@custom=on` line.
+
+!!! tip
+    In a directory already containing sources, use `jeka project: scaffold scaffold.kind=EMPTY`. 
+    It generates the same files, without sample classes. An existing *README.md* is replaced.
 
 ### Simple Layout
 
-If you prefer a flatter structure, you can enable the `SIMPLE` style:
+If you prefer a flatter structure, scaffold the project with the `SIMPLE` style:
 
-```properties title="jeka.properties"
-@project.layout.style=SIMPLE
-@project.layout.mixSourcesAndResources=true
+```bash
+jeka project: scaffold layout.style=SIMPLE layout.mixSourcesAndResources=true
 ```
 
 This results in a simpler layout:
@@ -55,6 +70,15 @@ This results in a simpler layout:
 ├── src       <- Java code and resources mixed
 ├── test      <- Test code and resources mixed
 ```
+
+and adds these properties:
+```properties title="jeka.properties"
+@project.layout.style=SIMPLE
+@project.layout.mixSourcesAndResources=true
+```
+
+To convert an existing project, add these properties and move the files: *src/main/java* and *src/main/resources* to *src*, 
+*src/test/java* and *src/test/resources* to *test*. Otherwise, the whole *src* directory, tests included, is compiled as production code.
 
 ### Local JAR Dependencies
 
@@ -95,7 +119,7 @@ com.google.guava:guava:33.4.0-jre
 com.google.code.gson:gson:2.13.1
 
 [compile-only] # Only needed for compilation (e.g., Lombok)
-org.projectlombok:lombok:1.18.32
+org.projectlombok:lombok:1.18.38
 
 [runtime]    # Only needed at runtime
 org.postgresql:postgresql:42.7.4
@@ -103,6 +127,9 @@ org.postgresql:postgresql:42.7.4
 [test]       # Only needed for testing
 org.junit.jupiter:junit-jupiter
 org.junit.platform:junit-platform-launcher
+
+[processor]  # Annotation processors
+org.projectlombok:lombok:1.18.38
 ```
 
 | Section | Description |
@@ -112,33 +139,68 @@ org.junit.platform:junit-platform-launcher
 | `[compile-only]` | Included in compile and test, but NOT runtime. |
 | `[runtime]` | Included in runtime and test, but NOT compile. |
 | `[test]` | Included in the test classpath only. |
+| `[processor]` | Annotation processors. Not included in any classpath. See [Annotation Processors](../reference/kbeans-project.md#annotation-processors). |
 
 You can also reference local files: `libs/my-local-lib.jar`.
 
 ## Java Version
 
-By default, the project uses the same Java version as the JeKa runtime (see `jeka.java.version` in `~/.jeka/global.properties`). 
-To target a specific version, set:
+By default, the project targets the Java version running JeKa, set by `jeka.java.version` in *jeka.properties*. 
+JeKa itself needs Java 21 or higher. To target another version, set:
 
 ```properties title="jeka.properties"
-@project.javaVersion=17
+@project.javaVersion=21
 ```
+
+!!! note
+    By default, tests run in a forked process, on a JDK of the target version. This does not work yet for targets below 21: `project: test` fails 
+    with `UnsupportedClassVersionError`. For such targets, run the tests in the JeKa process:
+    ```properties title="jeka.properties"
+    @project.javaVersion=17
+    @project.test.fork=false
+    ```
+    Classes are then compiled for Java 17, and tests run on the JDK running JeKa.
+
+## Run Tests
+
+```bash
+jeka project: test                                          # all tests
+jeka project: test test.includePatterns='.*MainTest'        # a single test class
+jeka project: test test.includePatterns='com.acme.Order.*'  # several test classes
+jeka project: build -Djeka.test.skip=true                   # full build, without tests
+```
+
+`test.includePatterns` is a space-separated list of regular expressions, matching fully qualified class names. 
+Quote it, as some shells expand `*`.
 
 ## JAR Packaging
 
-JeKa creates a **Regular JAR** by default. You can change this to a **Fat JAR** (includes all dependencies) or a **Shaded JAR** (fat JAR with relocated packages).
+The scaffolded *jeka.properties* sets a FAT JAR. Without this property, JeKa creates a regular JAR.
 
 ```properties title="jeka.properties"
 @project.pack.jarType=FAT
 ```
+
+| Type | Description |
+| :--- | :--- |
+| `REGULAR` (default) | Contains the project classes and resources only. |
+| `FAT` | Includes all runtime dependencies. |
+| `SHADE` | Same as `FAT`, with the dependency packages relocated. |
+
+!!! note
+    Shaded JARs cannot be created yet from classes compiled for Java 24 or higher. Set `@project.javaVersion=21`.
 
 ### Multiple Artifacts
 
 For libraries, you might want to produce both a regular JAR and an extra shaded JAR:
 
 ```properties title="jeka.properties"
+# Main JAR without dependencies
+@project.pack.jarType=REGULAR
+
 # Produce an extra shaded jar suffixed with '-all'
 @project.pack.shadeJarClassifier=all
+@project.javaVersion=21
 
 # Ensure the extra artifact is published to Maven
 @maven.pub.extraArtifacts=all
@@ -161,6 +223,8 @@ The recommended approach is to let JeKa infer the version from Git:
 @project.gitVersioning.enable=true
 ```
 
+The project must be in a Git repository having at least one commit. Otherwise, commands fail with a bare Git error (code 128 or 129).
+
 - If you are on a **Tag**: The version is the tag name (e.g., `1.2.3`).
 - If you are on a **Branch**: The version is `[branch]-SNAPSHOT` (e.g., `master-SNAPSHOT`).
 - **Metadata**: The JAR manifest will automatically include Git commit ID, branch, and "dirty" state.
@@ -178,7 +242,7 @@ The recommended approach is to let JeKa infer the version from Git:
 | `jeka project: compile` | Compiles source code. |
 | `jeka project: test` | Runs unit tests (e.g., JUnit). |
 | `jeka project: pack` | Packages the project into a JAR. |
-| `jeka project: build` | Full cycle: clean, compile, test, pack, quality checks. |
+| `jeka project: build` | Full cycle: clean, compile, test, pack, quality checks, end-to-end tests. |
 | `jeka project: runJar` | Executes the generated JAR. |
 | `jeka project: info` | Displays project setup and properties. |
 | `jeka project: depTree` | Prints the full dependency tree. |
@@ -186,7 +250,7 @@ The recommended approach is to let JeKa infer the version from Git:
 ### Extensions (Optional)
 - `jeka native: compile`: Compiles to a GraalVM native executable.
 - `jeka docker: build`: Creates a Docker image.
-- `jeka maven: publishLocal`: Publishes to the local Maven repository.
+- `jeka project: pack maven: publishLocal`: Publishes to the JeKa local repository. See [Maven KBean](../reference/kbeans-maven.md#publish-locally).
 
 ## Quality & Coverage (Plugins)
 
@@ -199,11 +263,14 @@ jeka.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
 # Activate JaCoCo for the project
 @jacoco=on
 
+# The default version does not support Java 25 classes
+@jacoco.jacocoVersion=0.8.14
+
 # Configure SonarQube
 sonar.host.url=http://localhost:9000
 
 # Create a shortcut command for full build + quality check
-jeka.cmd.quality=project: pack sonarqube: run
+jeka.cmd.quality=project: test pack sonarqube: run
 ```
 
 Run with: `jeka ::quality`.

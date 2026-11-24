@@ -16,7 +16,7 @@ Visit the [demo-base-application](https://github.com/jeka-dev/demo-base-applicat
 To create a base structure ready for coding, run:
 
 ```bash
-jeka base: scaffold.kind=APP base: scaffold
+jeka base: scaffold scaffold.kind=APP
 ```
 
 This generates the following project structure:
@@ -103,7 +103,7 @@ class Custom extends KBean {
 You can execute your application directly from the command line:
 
 ```bash
-jeka --program arg0 args1 ... # or `jeka -p` for short
+jeka -p arg0 arg1 ...  # or --program
 ```
 
 Use the `--clean` (`-c`) option to force a clean compilation before running:
@@ -186,8 +186,11 @@ Add these to your `jeka.properties`:
 @maven.pub.version=1.0.0-SNAPSHOT
 ```
 
-You can then publish your library to a Maven repository:
+Create the JAR and publish it to a Maven repository. The JAR must exist, so run `pack` in the same command:
 
 ```bash
-jeka maven: publish
+jeka base: pack maven: publish
 ```
+
+Without a configured repository, the library is published in the JeKa local repository (*~/.jeka/maven-publish-dir*). 
+See the [Maven KBean](../reference/kbeans-maven.md#publish) to configure a remote repository.

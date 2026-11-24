@@ -18,7 +18,10 @@ _KBean_ classes share the following characteristics:
 The following KBean exposes the `hello` and `bye` methods. The rendering can be configured 
 through `name` and `uppercase` attributes.
 
-```java
+```java title="jeka-src/Greeting.java"
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
+
 @JkDoc("Displays greeting messages")
 public class Greeting extends KBean {
 
@@ -130,7 +133,7 @@ Currently, JeKa includes two admin KBeans:
 Examples:
 ```bash
 # Install an application (runs in admin mode)
-jeka app: install repo=https://github.com/djeang/kill8 name=kill8
+jeka app: install repo=cowsay@demo
 
 # Configure global JeKa settings (runs in admin mode)
 jeka setup: editGlobalProps
@@ -149,6 +152,7 @@ jeka.classpath=dev.jeka:springboot-plugin   dev.jeka:openapi-plugin:0.11.8-1
 KBeans can also be included directly in the source code using the `@JkDep` annotation:
 ```java
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.KBean;
 
 @JkDep("dev.jeka:springboot-plugin")
 @JkDep("dev.jeka:openapi-plugin:0.11.8-1")
@@ -267,9 +271,9 @@ jeka project: pack
 jeka myBean: foo bar=1
 ```
 
-If the target KBean is the *default KBean*, then this we don't need to mention the KBean name.
+If the target KBean is the *default KBean*, then we don't need to mention the KBean name.
 
-By default, the *default KBean* is the first KBean found in *jeka-src* dir.  For instance, if you have a single KBean 
+By default, the *default KBean* is the first KBean found in *jeka-src* dir: root classes come first, then those in packages, in alphabetical order. For instance, if you have a single KBean 
 `MyBean` in *jeka-src*, then you can invoke directly the methods and fields as following:
 ```shell
 jeka foo bar=1
@@ -280,17 +284,17 @@ jeka project: pack : foo bar=1
 ```
 The above example invokes the `ProjectKBean#pack` method, then the  `MyBean#foo` method.
 
-You can select a specific default KBean, by setting the following property in *jeka-src* or as command-line argument:
+You can select a specific default KBean, by setting the following property in *jeka.properties* or as command-line argument:
 ```properties
 jeka.kbean.default=project
 ```
 
 You can also mention the default KBean using `--kbean=` option.
 
-The default KBean always participate in the runbase initialisation.
+The default KBean always participates in the runbase initialisation.
 
-This is quite frequent for project builds to use such setting as it shortens command line and prone usage of 
-`ProjectKBean` standard methods.
+Project builds frequently use this setting, as it shortens the command line and encourages using the standard 
+`ProjectKBean` methods.
 
 ## KBean Initialization
 
@@ -317,6 +321,9 @@ Then it will be inspected to discover other KBeans to initialize.
 
 ```java
 import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.JkRequire;
+import dev.jeka.core.tool.JkRunbase;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
 
 class Custom extends KBean {
@@ -341,10 +348,12 @@ The `require(JkRunbase)` method will be invoked to know which KBean should be in
 
 ### Using @JkInject
 
-```Java 
+```java title="jeka-src/Build.java"
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkInject;
+import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
-import dev.jeka.core.tool.JkInject;
 
 @JkDoc("A simple example to illustrate KBean concept.")
 class Build extends KBean {
@@ -358,6 +367,7 @@ class Build extends KBean {
     @JkDoc("Clean, compile, test, create jar files, and publish them.")
     public void packPublish() {
         projectKBean.clean();
+        projectKBean.test();
         projectKBean.pack();
         mavenKBean.publishLocal();
     }
@@ -366,6 +376,12 @@ class Build extends KBean {
 ```
 Both `ProjectKBean` and `MavenKBean` are created and injected into the `Build` KBean during initialization.
 
+Publishing needs a module ID and a version. Set them, then run `jeka build: packPublish`:
+```properties title="jeka.properties"
+@project.moduleId=org.example:my-lib
+@project.version=1.0.0-SNAPSHOT
+```
+
 ### Using #load and #find methods
 
 As we saw earlier, you can dynamically retrieve a `KBean` using the `KBean#load(Class)` method.  
@@ -373,6 +389,9 @@ This method forces the initialization of the `KBean` if it is not already presen
 It is useful when you need a specific `KBean` only within certain methods.
 
 ```java
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
+
 @JkDoc("Compiles application to native executable")
 public void createNativeExec() {
     load(NativeKBean.class).compile();
@@ -401,7 +420,16 @@ create a `KBean` and configure an existing one.
 
 For example, to configure a build, you can create a `Build` class as follows:
 
-```java
+```java title="jeka-src/Build.java"
+import dev.jeka.core.api.depmanagement.JkTransitivity;
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.testing.JkTestProcessor;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.JkPreInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+
 class Build extends KBean {
 
     public boolean skipIT;
@@ -451,7 +479,10 @@ They should not perform further configuration, as the target KBean has not yet b
 The `postInit` methods are invoked only if their respective `KBean` is fully initialized. 
 This occurs after its properties and command-line values have been injected, and its `init()` method has been executed.
 
-The `required = true` attribute, means that the KBean project must be instantiated by JeKa, if not already setup.
+As they run last, values set in `postInit` methods win over properties and command-line values. Use `preInit` for values 
+that the user should be able to override.
+
+The `required = true` attribute means that the KBean project must be instantiated by JeKa, if not already setup.
 
 For example, when executing `jeka project: pack`, the `ProjectKBean` will be initialized with the settings provided by 
 command-line arguments and `@project...=` properties defined in the *jeka.properties* file. 
@@ -619,6 +650,10 @@ public class MasterBuild extends KBean {
 When the parent declares its modules with `_jeka.child-bases`, use `JkRunbase#loadChildren` to get the KBeans of all child modules:
 
 ```java
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+
 @JkDoc("For all child modules: compile, create jar files, and publish them.")
 public void buildAll() {
     getRunbase().loadChildren(ProjectKBean.class).forEach(ProjectKBean::pack);

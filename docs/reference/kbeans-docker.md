@@ -13,9 +13,31 @@
 - Optionally switch to a non-root user (configurable).
 - Customize the generated image via Java API.
 
+**Prerequisites**
+
+- A running Docker daemon for `build` and `buildNative`.
+- An application with a main class. It is detected, or set with `@project.pack.mainClass`.
+- No need to run `pack` before: classes are compiled if needed.
+
 **Example Invocation:**
 
-- `jeka docker: buildNative`: Builds a native Docker image of your application.
+```shell
+jeka docker: build         # builds a JVM image
+jeka docker: buildNative   # builds an image containing the native executable only
+jeka docker: info          # displays the image name and the Dockerfile, without building the image
+```
+When the image is built, the console displays the command to run it, as `docker run --rm com.acme-shop:1.0.0`.
+
+**Image Name**
+
+By default, the name is `<group>-<artifact>:<version>` (e.g. `com.acme-shop:1.0.0`), or the directory name if the project has no module ID. 
+Native image names are prefixed with `native-`. 
+The tag is `latest` when the version is a SNAPSHOT or not specified.
+To use another name:
+```properties title="jeka.properties"
+@docker.jvmImageName=my-app:$version
+@docker.nativeImageName=my-app-native:$version
+```
 
 **Example Configuration:**
 
@@ -32,18 +54,27 @@ Add JVM agents:
 
 **Example for programmatic customization:**
 
-```java
-@JkPostInit
-private void postInit(DockerKBean dockerKBean) {
-    dockerKBean.customizeJvmImage(dockerBuild -> {
-        dockerBuild
-                .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.16.0", "")
-                .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy");
-        dockerBuild.dockerfileTemplate
-                .moveCursorBeforeUserNonRoot()   // following steps are inserted before USER nonroot
-                .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
-                .add("RUN chmod a+rw /release.md");
-    });
+```java title="jeka-src/Custom.java"
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.tooling.docker.DockerKBean;
+
+import java.nio.file.Paths;
+
+class Custom extends KBean {
+
+    @JkPostInit
+    private void postInit(DockerKBean dockerKBean) {
+        dockerKBean.customizeJvmImage(dockerBuild -> {
+            dockerBuild
+                    .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.16.0", "")
+                    .setBaseImage("eclipse-temurin:21.0.1_12-jre-jammy");
+            dockerBuild.dockerfileTemplate
+                    .moveCursorBeforeUserNonRoot()   // following steps are inserted before USER nonroot
+                    .addCopy(Paths.get("jeka-output/release-note.md"), "/release.md")
+                    .add("RUN chmod a+rw /release.md");
+        });
+    }
 }
 ```
 This KBean allows customizing the Docker image programmatically using the [JeKa libs for Docker](api-docker.md).

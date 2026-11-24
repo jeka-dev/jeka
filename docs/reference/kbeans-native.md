@@ -23,8 +23,8 @@ jeka native: compile
 
 This command:
 
-1. Compiles your project if needed
-2. Creates a native executable from the project's main artifact jar
+1. Compiles your project if needed (no need to run `pack` before)
+2. Creates a native executable from the compiled classes and the runtime dependencies, downloading GraalVM if needed
 3. Places the executable in the output directory (same location as the jar, but without `.jar` extension)
 
 ### Configuration
@@ -56,6 +56,11 @@ Configure the KBean through `jeka.properties` or programmatically in your KBean 
 You can also configure the `NativeKBean` programmatically:
 
 ```java
+import dev.jeka.core.api.tooling.nativ.JkNativeCompilation;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
+
 public class Build extends KBean {
 
     @JkPostInit(required = true)
