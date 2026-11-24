@@ -1,3 +1,5 @@
+# Cheat Sheet
+
 ## Useful Commands
 
 | Command                 | Description                                                    |
@@ -14,13 +16,13 @@
 
 | Property Name         | Default Value                         | Description                                                                                                                                                                            |
 |-----------------------|---------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| jeka.version          |                                       | The JeKa version to use. It will be fetched from the repository specified in the `jeka.distrib.repo` property. Use `jeka.version=.` to force the use of the locally installed version. |
-| jeka.distrib.location |                                       | The exact location (directory) to get the JeKa distribution. If set, both `jeka.version` and `jeka.distrib.repo` will be ignored.                                                      |
-| jeka.java.version     |                                       | The version of the JDK used to run JeKa and compile code located in `jeka-src`.                                                                                                        |
-| jeka.java.distrib     | `temurin`                             | The distribution of JDK to fetch when `jeka.java.version` is mentioned. Should be 21 or higher.                                                                                        |
-| jeka.repos.download   | `local, mavenCentral`                 | Comma-separated string of repositories to fetch Maven dependencies. More details [here](reference/properties.md#repositories).                                                         |
+| jeka.version          |                                       | The JeKa version to use. It will be fetched from the repository specified first in the `jeka.repos.download` property. Use `jeka.version=.` to force the use of the locally installed version. |
+| jeka.distrib.location |                                       | The exact location (directory) to get the JeKa distribution. If set, `jeka.version` will be ignored.                                                      |
+| jeka.java.version     |                                       | The version of the JDK used to run JeKa and compile code located in `jeka-src`. Should be 21 or higher.                                                                                                        |
+| jeka.java.distrib     | `temurin`                             | The distribution of JDK to fetch when `jeka.java.version` is mentioned.                                                                                        |
+| jeka.repos.download   | `mavenCentral`                        | Comma-separated string of repositories to fetch Maven dependencies. More details [here](reference/properties.md#repositories).                                                         |
 | jeka.repos.publish    |                                       | Comma-separated string of repositories to publish Maven artifacts. More details [here](reference/properties.md#repositories).                                                          |
-| jeka.program.build    | `project: pack -Djeka.test.skip=true` | Command line to execute to build the project when execution files are absent.                                                                                                          |
+| jeka.program.build    | See [here](tutorials/source-runnable-apps.md#jeka-projects) | Command line to execute to build the application when execution files are absent.                                                                                                          |
 | jeka.kbean.default    |                                       | Name or class name of the KBean to use as default (when none is specified).                                                                                                            |
 | jeka.test.skip        |                                       | Skip tests when building projects or codebases.                                                                                                                                        |
 | jeka.platform.os      | *linux*, *windows* or *mac*           | Provides the OS of the running machine.                                                                                                                                                |
@@ -42,7 +44,7 @@
 JeKa reads properties in this order:
 
 - Command-line arguments (as `-Dmy.prop=xxx`).
-- Environment variables (`my.prop` or `MY_PROP`).
+- Environment variables (`my.prop` or `MY_PROP`). The bash launcher only recognizes the exact `my.prop` name for the properties it reads itself (`jeka.version`, `jeka.java.version`, `jeka.java.distrib`, `jeka.jdk.X`, ...).
 - The `jeka.properties` file in the base directory.
 - The `jeka.properties` file in parent directories, until it is not found.
 - The `global.properties` file in `[JEKA_USER_HOME]`.

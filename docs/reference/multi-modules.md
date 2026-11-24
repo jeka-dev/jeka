@@ -76,7 +76,7 @@ parent-project
 jeka.java.version=21
 
 # specify location of child modules
-_jeka.child-base=core, plugins/*
+_jeka.child-bases=core, plugins/*
 
 # Parent module does not contain a JVM project
 _@project=off
@@ -111,7 +111,7 @@ To make a property non-transmitted to the children, we need to prefix it with `_
 
 The child modules inherit properties from the parent, except for properties prefixed with `_`
 
-When a property declaration is prefixed with `+`, the specified value is happened to the parent value instead of overriding it.
+When a property declaration is prefixed with `+`, the specified value is appended to the parent value instead of overriding it.
 In this example, `-g -Xlint:none` will be passed to the compiler options.
 
 ## Running JeKa commands 
@@ -122,10 +122,10 @@ If a module is not concerned with a given KBean, it should declare it in its `je
 
 If we run the following command on the above example:
 
-```properties
+```shell
 jeka project: pack maven: publish
 ```
-This will first run `project: test pack` method on all child modules. Parent module won't execute these actions 
+This will first run the `project: pack` method on all child modules. Parent module won't execute these actions 
 because it does not explicitly declare the project KBean (`@project=on` is absent).
 
 Then the `maven: publish` action is invoked on all child modules and the parent module as it declares it explicitly (`@maven=on`).
@@ -135,10 +135,10 @@ This could be the case if *plugin-common* should not be published as a Maven art
 
 ### Running child module
 
-If you need to run some Jeka command for a child module, you have 3 options:
+If you need to run some Jeka command for a child module, you have 2 options:
 
 1. Use `-cb` (alias `--child-base`) option
-   ```properties
+   ```shell
    jeka -cb=plugins/plugin-1 project: test pack
    ```
 
@@ -231,7 +231,7 @@ class Custom extends KBean {
     @JkInject("../../core")
     private ProjectKBean coreProjectKBean;
 
-    @JkInject("../pluginCommon")
+    @JkInject("../plugin-common")
     private ProjectKBean pluginCommonProjectKBean;
 
     public void doXxxx() {

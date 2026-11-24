@@ -193,13 +193,14 @@ public class JkDependenciesTxt {
 
     private static JkDependencySet apply(String line, JkDependencySet current,
                                          Path baseDir, Function<Path, JkProject> projectResolver) {
+        // Should be tested first, cause the local symbol is a prefix of the global one
+        if (line.startsWith(GLOBAL_EXCLUDE_SYMBOL)) {
+            String coordinate = line.substring(GLOBAL_EXCLUDE_SYMBOL.length()).trim();
+            return current.andGlobalExclusion(coordinate);
+        }
         if (line.startsWith(LOCAL_EXCLUDE_SYMBOL)) {
             String coordinate = line.substring(LOCAL_EXCLUDE_SYMBOL.length()).trim();
             return current.withLocalExclusions(coordinate);
-        }
-        if (line.startsWith(GLOBAL_EXCLUDE_SYMBOL)) {
-            String coordinate = line.substring(GLOBAL_EXCLUDE_SYMBOL.length()).trim();
-            return current.withGlobalExclusions(coordinate);
         } else {
             return current.and(translate(line, baseDir, projectResolver));
         }

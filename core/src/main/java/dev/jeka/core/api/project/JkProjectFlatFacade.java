@@ -286,9 +286,10 @@ public class JkProjectFlatFacade {
     // ------------------------------ action methods ---------------------------------
 
     /**
-     * Executes the packing process for this project, which includes compiling, testing, and creating JAR files.
+     * Executes the packing process for this project, which includes compiling (if needed) and creating JAR files.
+     * This does not run tests.
      *
-     * @see JkProject#packActions
+     * @see JkProjectPackaging#run()
      */
     public JkProjectFlatFacade doPack() {
         project.pack.run();
@@ -296,7 +297,7 @@ public class JkProjectFlatFacade {
     }
 
     /**
-     * Same as {@link #doPack()} but skips the testing phase.
+     * Same as {@link #doPack()}.
      */
     public JkProjectFlatFacade doFastPack() {
         project.compilation.runIfNeeded();  // Better to launch it first explicitly for log clarity

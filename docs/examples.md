@@ -1,3 +1,5 @@
+# Examples
+
 You can find some examples below to learn more about JeKa:
 
 ### Zero-Configuration Build and Run
@@ -28,7 +30,7 @@ You can find some examples below to learn more about JeKa:
 ### Combine with Maven
 
 - [JeKa wrapping a Quarkus native app Maven build](https://github.com/jeka-dev/demo-maven-jeka-quarkus)
-- [JeKa wrapping a Spring Boot native Maven build](https://github.com/jeka-dev/demo-maven-springboot-native)
+- [JeKa wrapping a multi-module Maven build](https://github.com/jeka-dev/demo-maven-multimodule)
 
 ### Native and Docker Images
 

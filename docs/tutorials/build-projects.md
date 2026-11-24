@@ -20,23 +20,24 @@ You'll get the following project structure:
 ```text
 .
 ├── src                  
-│   ├── main             <- Java code and resources
-│   │   ├── java
-│   │   └── resources    
-│   └── test             <- Unit tests and test resources
-│       ├── java
-│       └── resources 
+│   ├── main
+│   │   └── java         <- Java code
+│   └── test
+│       └── java         <- Unit tests
 ├── jeka-src             <- Java (or Kotlin) code for build customization
 │   └── Custom.java      
-├── jeka-output          <- Generated artifacts (JARs, classes, reports)
 ├── jeka.project.deps    <- Project dependencies
 ├── jeka.properties      <- Build configuration and properties
-├── jeka.ps              <- PowerShell wrapper (optional)
+├── jeka.ps1             <- PowerShell wrapper (optional)
 ├── jeka                 <- Bash wrapper (optional)
 └── README.md            <- Project overview and build instructions
 ```
 
-The `jeka` and `jeka.ps` scripts allow building the project on machines where JeKa is not globally installed.  
+JARs, classes and reports are generated in the `jeka-output` directory, created on the first build.
+
+Put resources in `src/main/resources` and `src/test/resources`.
+
+The `jeka` and `jeka.ps1` scripts allow building the project on machines where JeKa is not globally installed.  
 You can delete `jeka-src/Custom.java` if you don't need programmatic customization.
 
 ### Simple Layout
@@ -116,7 +117,7 @@ You can also reference local files: `libs/my-local-lib.jar`.
 
 ## Java Version
 
-By default, the project uses the same Java version as the JeKa runtime (see `jeka.java.version` in `~/.jeka/jeka.properties`). 
+By default, the project uses the same Java version as the JeKa runtime (see `jeka.java.version` in `~/.jeka/global.properties`). 
 To target a specific version, set:
 
 ```properties title="jeka.properties"
@@ -140,7 +141,7 @@ For libraries, you might want to produce both a regular JAR and an extra shaded 
 @project.pack.shadeJarClassifier=all
 
 # Ensure the extra artifact is published to Maven
-@maven.publication.extraArtifacts=all
+@maven.pub.extraArtifacts=all
 ```
 
 ## Versioning and Git
@@ -193,10 +194,10 @@ JeKa plugins like **JaCoCo** and **SonarQube** can be added via `jeka.properties
 
 ```properties title="jeka.properties"
 # Inject plugins into the build classpath
-jeka.inject.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
+jeka.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
 
 # Activate JaCoCo for the project
-@jacoco=
+@jacoco=on
 
 # Configure SonarQube
 sonar.host.url=http://localhost:9000
@@ -205,13 +206,14 @@ sonar.host.url=http://localhost:9000
 jeka.cmd.quality=project: pack sonarqube: run
 ```
 
-Run with: `jeka quality`.
+Run with: `jeka ::quality`.
 
 ## Programmatic Customization
 
 For complex logic, use `jeka-src/Custom.java`. This allows you to hook into the build lifecycle using `@JkPostInit`.
 
 ```java title="jeka-src/Custom.java"
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 import dev.jeka.core.tool.builtins.project.ProjectKBean;
 import dev.jeka.core.tool.JkPostInit;
@@ -223,7 +225,7 @@ public class Custom extends KBean {
         // Customize compiler options
         projectKBean.project.compilation.addJavaCompilerOptions("-Xlint:unchecked");
         
-        // Add a custom resource to the JAR
+        // Add a runtime dependency
         projectKBean.project.pack.runtimeDependencies.add("org.postgresql:postgresql:42.7.4");
     }
 
@@ -234,7 +236,7 @@ public class Custom extends KBean {
 }
 ```
 
-Run your custom action with: `jeka myAction`.
+Run your custom action with: `jeka custom: myAction`.
 
 !!! note
     The `JkProject` object is the heart of the `project` KBean. It provides a rich API for every aspect of the build. [See API Reference](../reference/api-project.md).

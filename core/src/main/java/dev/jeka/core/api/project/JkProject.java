@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 /**
  * Stands for the whole project model for building purpose. It has the same purpose and scope than the Maven <i>POM</i> but
  * it also holds methods to actually perform builds.<br/>
- * A complete overview is available <a href="https://jeka-dev.github.io/jeka/reference-guide/build-library-project-build/#project-api">here</a>.
+ * A complete overview is available <a href="https://jeka-dev.github.io/jeka/reference/api-project/">here</a>.
  * <p/>
  *
  * A <code>JkProject</code> consists in 4 main parts : <ul>
@@ -66,57 +66,49 @@ import java.util.stream.Collectors;
  *    <li>{@link JkProjectPackaging} : responsible to creates javadoc, sources and jars</li>
  *    <li>{@link JkMavenPublication} : responsible to publish the artifacts on Maven repositories</li>
  * </ul>
- * The {@link JkProject#pack()} method is supposed to generates the artifacts
+ * The <code>project.pack.run()</code> method is supposed to generate the artifacts
  * (or simply perform actions as deploying docker image) locally. By default, it generates
- * a regular binary jar, but it can be customized for your needs.
+ * a regular binary jar, but it can be customized for your needs. It does not run tests.
  * <p>
  * The following represents a tree of the JkProject API.
  * <pre><code>
  * project
- * +- baseDir
- * +- outputDir (generally values to ${baseDir}/jeka-output dir)
- * +- artifactLocator (define paths of created artifact files -jar files- )
- * |  +- methods: getArtifactPath(), getMainArtifactPath(), ....
- * +- duplicateDependencyConflictStrategy
- * +- jvmTargetVersion
- * +- sourceEncoding
- * +- javaCompileToolChain
+ * +- baseDir, outputDir, jvmTargetVersion, sourceEncoding, moduleId, version, duplicateConflictStrategy (getters and setters)
+ * +- artifactLocator (defines where artifact files are created)
+ * +- compilerToolChain
  * +- dependencyResolver
- * +- compilation  (produce individual binary files from production sources. This includes resource processing, code generation, processing on .class files, ...)
- * |  +- layout (where are located sources, resources and compiled classes)
- * |  +- source generators (plugin mechanism for generating source files)
- * |  +- dependencies   (stands for compile dependencies)
- * |  +- preCompileActions (including resources processing)
- * |  +- compileActions (including java sources compilation. Compilation for other languages can be added here)
+ * +- compilation  (produces binary files from production sources)
+ * |  +- layout (location of source and resource files)
+ * |  +- dependencies   (compile dependencies)
+ * |  +- procDependencies  (annotation-processor dependencies, passed as -processorpath)
+ * |  +- resourceProcessor
+ * |  +- preCompileActions (including resource processing)
+ * |  +- compileActions (including Java compilation. Compilation for other languages can be added here)
  * |  +- postCompileActions
- * |  +- methods : resolveDependencies(), run()
+ * |  +- methods : addSourceGenerator(), addJavaCompilerOptions(), generateSources(), resolveDependenciesAsFiles(), run()
  * +- test
- * |  +- testCompilation (same as for 'prod' compilation but configured for tests purpose)
- * |  +- breakOnFailure (true/false)
- * |  +- skipped (true/false)
- * |  +- testProcessor
- * |  |  +- forkedProcess (configured the forked process who will run tests)
+ * |  +- compilation (same as above, for test sources)
+ * |  +- processor
  * |  |  +- preActions
  * |  |  +- postActions
- * |  |  +- engineBehavior
- * |  |  |  +- testReportDir
- * |  |  |  +- progressDisplayer
- * |  |  |  +- launcherConfiguration (based on junit5 platform API)
- * |  |  +- testSelection
- * |  |  |  +- includePatterns
- * |  |  |  +- includeTags
- * |  +- method : run()
- * +- packaging (produces javadoc and source jar and bin jars)
- * |  +- javadocConfiguration
+ * |  |  +- engineBehavior (progress display, JUnit platform launcher configuration)
+ * |  |  +- methods : setForkingProcess()
+ * |  +- selection (include/exclude patterns and tags)
+ * |  +- postActions
+ * |  +- methods : setSkipped(), setBreakOnFailures(), run()
+ * +- pack (produces binary, fat, sources and javadoc JARs)
+ * |  +- actions
  * |  +- runtimeDependencies
- * |  +- manifest
- * |  +- fatJar (customize produced fat/uber jar if any)
- * |  +- methods : createJavadocJar(), createSourceJar(), createBinJar(), createFatJar(), resolveRuntimeDependencies()
- * +- e2eTest
- * |  +- methods : add(), run()
+ * |  +- javadocProcessor
+ * |  +- manifestCustomizer
+ * |  +- methods : createBinJar(), createFatJar(), createSourceJar(), createJavadocJar(), customizeFatJarContent(),
+ * |               resolveRuntimeDependencies(), run()
  * +- qualityCheck
  * |  +- methods : add(), run()
- * + methods :  toDependency(transitivity), getIdeSupport(), pack(), getDependenciesAsXml(), includeLocalAndTextDependencies()
+ * +- e2eTest
+ * |  +- methods : add(), run()
+ * +- flatFacade
+ * +- methods : clean(), fullBuild(), toDependency(), asBuildable(), getInfo(), displayDependencyTree(), getDependenciesAsXml()
  * </code></pre>
  */
 public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Supplier {

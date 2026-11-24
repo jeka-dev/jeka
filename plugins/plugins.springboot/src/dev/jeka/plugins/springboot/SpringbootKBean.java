@@ -48,22 +48,22 @@ import java.util.function.Consumer;
        This plugin:
        
          - Produces bootable JARs
-         - Customizes WAR files for the 'projectKBean
+         - Customizes WAR files for the 'project' KBean
          - Adapts scaffolding for creating Spring-Boot projects
          - Includes Spring Maven repositories for dependency resolution
          - Adapts Docker image generator to expose ports
        """
 )
-@JkDocUrl("https://github.com/jeka-dev/jeka/blob/master/plugins/dev.jeka.plugins.springboot/README.md")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.springboot")
 public final class SpringbootKBean extends KBean {
 
     @JkDoc("If true, create a bootable jar artifact.")
     private boolean createBootJar = true;
 
-    @JkDoc("If true, create original jar artifact for publication (jar without embedded dependencies")
+    @JkDoc("If true, create original jar artifact for publication (jar without embedded dependencies)")
     private boolean createOriginalJar;
 
-    @JkDoc("If true, create a .war filed.")
+    @JkDoc("If true, create a .war file.")
     private boolean createWarFile;
 
     @JkDoc("Specific Spring repo where to download spring artifacts. Not needed if you use official release.")
@@ -87,7 +87,7 @@ public final class SpringbootKBean extends KBean {
         return runbase.getBuildableKBeanClass();
     }
 
-    @JkDoc("Sets test progress style to PLAIN in order to display JVM messages gracefully.")
+    @JkDoc("Sets test progress style to STEP in order to display JVM messages gracefully.")
     @JkPreInit
     private static void initProjectKbean(ProjectKBean projectKBean) {
         projectKBean.project.test.processor.engineBehavior

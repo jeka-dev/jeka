@@ -39,7 +39,8 @@ jeka project: test pack e2eTest base: test build: enrichMkDocs maven: publishLoc
 
 **Run a single test class:**
 ```shell
-jeka project: test -Djeka.test.filter=MyTestClassName
+# Regex on the fully qualified class name: the '.*' prefix is needed
+jeka project: test test.includePatterns='.*MyTestClassName'
 ```
 
 **Documentation (MkDocs):**

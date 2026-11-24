@@ -6,7 +6,7 @@ It relies on the Docker CLI, so a Docker installation (e.g., Docker Desktop) is 
 ## Features
 
 - Define Dockerfiles and build-context directories programmatically.
-- Generate optimized Docker images (JVM-based and native) directly from a project definition (e.g., a `JKProject` instance).
+- Generate optimized Docker images (JVM-based and native) directly from a project definition (e.g., a `JkProject` instance).
 
 ## Classes
 
@@ -17,10 +17,10 @@ The classes are located in package `dev.jeka.core.api.tooling.docker`.
 Provides helper methods to:
 
 - Execute Docker commands conveniently.
-- Retrieve a list of image names present in the Docker registry.
+- Retrieve a list of image names present locally.
 
 ```java
-JkDocker.execCmdLine("run", "--rm -p8080:8080 io.my-registry/my-image:latest");
+JkDocker.of().execCmdLine("run --rm -p8080:8080 io.my-registry/my-image:latest");
 ```
 
 ### `JkDockerBuild`
@@ -57,7 +57,7 @@ FROM eclipse-temurin:21-jdk-alpine
 RUN addgroup --gid 1002 nonrootgroup && \
     adduser --uid 1001 -g 1002 --disabled-password nonroot
 USER nonroot
-COPY imported-files/hello-jeka.jar /app/my-app.jar
+COPY imported-files/my-app.jar /app/my-app.jar
 WORKDIR /app
 ENTRYPOINT ["java", "-jar", "/app/my-app.jar"]
 EXPOSE 8080
@@ -79,15 +79,14 @@ An extension of `JkDockerBuild` that provides additional methods to:
 
 
 ```java title="Example"
-JkProject project = project();
-JkDockerJvmBuild dockerJvmBuild = JkDockerJvmBuild.of(project.asBuildable())
+JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of(project.asBuildable())
     .addAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.10.0", "myAgentOption");
 
 dockerBuild.buildImageInTemp("my-jvm-image:latest");  // Create the Docker image in a random temp dir
 ```
 
 ```dockerfile title="Generated Dockerfile"
-FROM eclipse-temurin:23-jdk-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup --gid 1002 nonrootgroup && \
     adduser --uid 1001 -g 1002 --disabled-password nonroot
 RUN mkdir -p /app && chown -R nonroot:nonrootgroup /app \
@@ -100,7 +99,7 @@ COPY classpath.txt /app/classpath.txt
 COPY resources /app/classes
 COPY classes /app/classes
 WORKDIR /workdir
-ENTRYPOINT [ "java", "-javaagent:/app/agents/opentelemetry-javaagent-2.10.0.jar=myAgentOption", "-cp", "@/app/classpath.txt", "dev.jeka.core.tool.Main" ]
+ENTRYPOINT [ "java", "-javaagent:/app/agents/opentelemetry-javaagent-2.10.0.jar=myAgentOption", "-cp", "@/app/classpath.txt", "app.Main" ]
 CMD []
 ```
  **Key Notes:**
@@ -113,23 +112,23 @@ CMD []
 
 An extension of `JkDockerBuild` offering additional methods for creating compact and efficient native executable images.
 
-**Example:* Creating a Minimalist Distroless Image
+**Example:** Creating a Minimalist Distroless Image
 
 This approach produces images with a minimal package set to reduce the attack surface.
 It requires building a native executable with static linking on `libc` (e.g., using MUSL).
 
 ```java title="Example"
-JkNativeCompilation nativeCompilation = getNativeCompilation()
-    .setStaticLinkage(MUSL);
+JkNativeCompilation nativeCompilation = nativeKBean.createNativeCompilation(project.asBuildable())
+    .setStaticLinkage(JkNativeCompilation.StaticLink.MUSL);
 
-JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeCompilation)
-    .setBaseImage("gcr.io/distroless/static-debian12:nonroot");
+JkDockerNativeBuild dockerBuild = JkDockerNativeBuild.of(nativeCompilation);
+dockerBuild.setBaseImage("gcr.io/distroless/static-debian12:nonroot");
 
 dockerBuild.buildImageInTemp("my-jvm-image:latest");  // Create the Docker image in a random temp dir
 ```
 
 ```dockerfile title="Generated Dockerfile"
-FROM ghcr.io/graalvm/native-image-community:23-muslib AS build
+FROM ghcr.io/graalvm/native-image-community:25.0.2-muslib AS build
 COPY imported-files/j2objc-annotations-3.0.0.jar /root/cp/j2objc-annotations-3.0.0.jar
 COPY imported-files/error_prone_annotations-2.28.0.jar /root/cp/error_prone_annotations-2.28.0.jar
 COPY imported-files/checker-qual-3.43.0.jar /root/cp/checker-qual-3.43.0.jar

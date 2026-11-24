@@ -165,9 +165,6 @@ public final class JkBeanDescription {
         header.append(this.synopsisDetail);
 
         StringBuilder body = new StringBuilder();
-        body.append(this.synopsisHeader).append("\n\n");
-        body.append(this.synopsisDetail).append("\n");
-
         if (!preInitInfos.isEmpty()) {
             body.append("\n\n");
             body.append("**This KBean pre-initializes the following KBeans:**\n\n");
@@ -236,7 +233,10 @@ public final class JkBeanDescription {
         if (original == null) {
             return "";
         }
-        String result = original.replaceAll("\\n", "<br/>").replaceAll("%n", "<br/>");
+        String result = original
+                .replaceAll("\\n", "<br/>")
+                .replaceAll("%n", "<br/>")
+                .replace("|", "\\|");  // otherwise, it breaks the Markdown table
         if (!result.endsWith(".")) {
             result = result + ".";
         }
@@ -484,7 +484,7 @@ public final class JkBeanDescription {
 
         private static BeanField of(Class<? extends KBean> beanClass, NameAndField nameAndField) {
             if (nameAndField.field == null) {
-                return of(beanClass, null, null, null, nameAndField.type, nameAndField.name);
+                return new BeanField(nameAndField.name, nameAndField.descr, null, null, nameAndField.type, null);
             }
             Field field = nameAndField.field;
             return of(beanClass,

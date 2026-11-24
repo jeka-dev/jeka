@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 @JkDoc("Add Kotlin compilation capability to `project` KBean.")
-@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.kotlin")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.kotlin")
 public class KotlinKBean extends KBean {
 
     public enum Preset {

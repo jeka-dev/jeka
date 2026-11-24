@@ -32,7 +32,7 @@ import java.nio.file.Files;
 @JkDoc("Runs Sonarqube analysis and checks quality gates. \n" +
         "The properties prefixed with 'sonar.', such as '-Dsonar.host.url=http://myserver/..', " +
         "will be appended to the SonarQube configuration.")
-@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/dev.jeka.plugins.sonarqube")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.sonarqube")
 public class SonarqubeKBean extends KBean {
 
     @JkDoc("If true, the list of production dependency files will be provided to sonarqube")

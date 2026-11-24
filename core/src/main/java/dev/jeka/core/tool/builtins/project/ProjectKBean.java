@@ -309,7 +309,7 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         /**
          * @deprecated Use ProjectKBean#javaVersion instead
          */
-        @JkDoc("The target JVM version for compiled files.")
+        @JkDoc("Deprecated: use 'javaVersion' instead. The target JVM version for compiled files.")
         @Deprecated
         public String javaVersion;
 

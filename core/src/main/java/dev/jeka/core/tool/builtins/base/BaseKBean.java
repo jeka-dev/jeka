@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @JkDoc("""
         Manages the build and execution of code located in 'jeka-src' directory.
         
-        The code stands for neither an application nor a library.
+        The code can stand for either an application or a library.
         For applications, code should contain a class including a main method to:
         
           - Run application

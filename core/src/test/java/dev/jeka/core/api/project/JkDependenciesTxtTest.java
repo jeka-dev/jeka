@@ -73,6 +73,24 @@ class JkDependenciesTxtTest {
     }
 
     @Test
+    void readFile_exclusions_ok() {
+        Path tempBase = JkUtilsPath.createTempDirectory("jeka-test-exclusions");
+        try {
+            Path projectDeps = tempBase.resolve("child").resolve(JkProject.PROJECT_DEPENDENCIES_FILE);
+            JkUtilsPath.createDirectories(projectDeps.getParent());
+            String content = "[compile]\na:b:1\n!x:local\n!!x:global1\n!!x:global2\n";
+            JkUtilsPath.write(projectDeps, content.getBytes());
+            JkDependencySet deps = JkDependenciesTxt.parse(projectDeps, tempBase, p -> null, new HashMap<>())
+                    .getDependencies(JkDependenciesTxt.COMPILE);
+            assertEquals(2, deps.getGlobalExclusions().size());
+            JkCoordinateDependency dep = (JkCoordinateDependency) deps.getEntries().get(0);
+            assertEquals(1, dep.getExclusions().size());
+        } finally {
+            JkUtilsPath.deleteQuietly(tempBase, true);
+        }
+    }
+
+    @Test
     void readFile_newNaming_ok() {
         Path tempBase = JkUtilsPath.createTempDirectory("jeka-test-new-naming");
         try {

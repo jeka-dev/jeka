@@ -462,7 +462,13 @@ public final class JkUtilsIO {
             // This runnable must stop when the process dies.
             private final Process process;
 
-            public long lastCheckAliveTs = 0;
+            // Time given to read the remaining output, once the process is dead.
+            // It's bounded, cause a descendant process may hold the stream open.
+            private static final long DRAIN_TIMEOUT_MS = 5000;
+
+            private long lastCheckAliveTs = 0;
+
+            private long deadTs = -1;
 
             private InnerRunnable(Process process, InputStream is, OutputStream[] outputStreams) {
                 this.in = is;
@@ -473,7 +479,7 @@ public final class JkUtilsIO {
             @Override
             public void run() {
                 try (InputStreamReader isr = new InputStreamReader(in); BufferedReader br = new BufferedReader(isr)) {
-                    while (!stop.get() && isProcessAlive()) {
+                    while (!stop.get() && shouldContinue()) {
                         int c = br.read();
                         if (c == -1) {
                             break;
@@ -488,14 +494,20 @@ public final class JkUtilsIO {
                 }
             }
 
+            // A dead process may have left some output to read, so we can't stop as soon as it dies.
             // Avoid checking for process alive at every round.
-            private boolean isProcessAlive() {
+            private boolean shouldContinue() {
                 long ts = System.currentTimeMillis();
-                if ((ts - lastCheckAliveTs) < 1000) {
-                    return true;
+                if (deadTs >= 0) {
+                    return ts - deadTs < DRAIN_TIMEOUT_MS;
                 }
-                lastCheckAliveTs = ts;
-                return process.isAlive();
+                if ((ts - lastCheckAliveTs) >= 1000) {
+                    lastCheckAliveTs = ts;
+                    if (!process.isAlive()) {
+                        deadTs = ts;
+                    }
+                }
+                return true;
             }
         }
     }

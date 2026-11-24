@@ -77,6 +77,7 @@ public final class JkJdeps {
         return Arrays.stream(JkProcess.of(execPath)
                 .addParamsIf(!JkLog.isVerbose(), "-quiet")
                 .addParams("--ignore-missing-deps")
+                .addParams("--multi-release", "base")  // otherwise, jdeps fails on multi-release jars
                 .addParamsIf(!modulePaths.isEmpty(), "--module-path", modulePaths.toPath())
                 .addParamsIf(!modulePaths.isEmpty(), "--class-path", modulePaths.toPath())
                 .addParams("--print-module-deps", jar.toString())

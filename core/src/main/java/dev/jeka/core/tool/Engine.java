@@ -109,7 +109,7 @@ class Engine {
         this.baseDir = baseDir;
         this.isMaster = isMaster;
         this.commandLineDependencies = commandLineDependencies;
-        this.properties = PropertiesHandler.constructRunbaseProperties(baseDir);
+        this.properties = PropertiesHandler.constructProperties(baseDir, BehaviorSettings.INSTANCE.adminMode);
         this.jekaSrcDir = baseDir.resolve(JkConstants.JEKA_SRC_DIR);
         this.jekaSrcClassDir = baseDir.resolve(JkConstants.JEKA_SRC_CLASSES_DIR);
 

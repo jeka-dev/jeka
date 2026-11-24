@@ -36,7 +36,9 @@ This generates a structure as:
 .                        <- Project root directory
 ├── jeka-src             <- Source dir for JeKa scripts and configuration code
 │   └── Script.java     
-└── jeka.properties      <- JeKa configuration (Java and JeKa version, default parameters...)
+├── jeka.properties      <- JeKa configuration (Java and JeKa version, default parameters...)
+├── jeka.ps1             <- Optional PowerShell script to run JeKa on Windows
+└── jeka                 <- Optional bash script to run JeKa on Linux/macOS
 ```
 This script class looks like:
 ```java
@@ -127,9 +129,9 @@ Run `hello` from another directory:
 jeka -r /path/to/script/root-dir hello
 ```
 
-Run `hello` from a remote Git repository:
+Run a KBean method from a remote Git repository:
 ```bash
-jeka -r https://github.com/jeka-dev/demo-base hello
+jeka -r https://github.com/jeka-dev/demo-base-application base: info
 ```
 
 JeKa acts as an application source manager, allowing you to run or install applications directly from their source code.
@@ -162,11 +164,12 @@ This creates a structure like this:
 ├── jeka-src             <- Source root directory
 │   ├── _dev             <- Optional package containing all non-prod (build and test)
 │   │   ├── test
-│   │   └── Build.java  
+│   │   └── Custom.java  
 │   └── app              <- Suggested base package for production code/resources
 │       └── App.java     
-├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
+├── jeka.ps1             <- Optional PowerShell script to run JeKa on Windows
+├── jeka                 <- Optional bash script to run JeKa on Linux/macOS
 └── README.md            <- Describes available build commands
 ```
 
@@ -184,21 +187,20 @@ This generates a project structure as:
 ```
 .
 ├── src                  
-│   ├── main             <- Java code and resources
-│   │   ├── java
-│   │   └── resources    
-│   └── test             <- Java code and resources for tests
-│       ├── java
-│       └── resources 
+│   ├── main
+│   │   └── java         <- Java code
+│   └── test
+│       └── java         <- Java code for tests
 ├── jeka-src             <- Optional Java (or Kotlin) code for building the project
-│   └── Build.java      
-├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
-├── jeka.project.deps   <- Dependency lists for compile, runtime and testing
+│   └── Custom.java      
+├── jeka.project.deps    <- Dependency lists for compile, runtime and testing
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
-├── jeka.ps              <- Optional PowerShell script to boot JeKa on Windows
+├── jeka.ps1             <- Optional PowerShell script to boot JeKa on Windows
 ├── jeka                 <- Optional bash script to boot JeKa on Linux/MacOS
 └── README.md            <- Describes available build commands for building the project
 ```
+
+Generated artifacts (JARs, reports) are stored in `jeka-output`, created on the first build.
 
 Follow the [tutorial](tutorials/build-projects.md) for more details.
 
@@ -218,18 +220,17 @@ This generates the following project structure:
 │   │   │   └── app
 │   │   │       ├── Application.java      <- Spring Boot app class
 │   │   │       └── Controller.java       <- REST controller
-│   │   └── resources    
+│   │   └── resources
+│   │       └── application.properties
 │   └── test             
-│       ├── java
-│       │   └── app
-│       │       └── ControllerIT.java     <- Integration Test for REST controller 
-│       └── resources 
+│       └── java
+│           └── app
+│               └── ControllerIT.java     <- Integration Test for REST controller 
 ├── jeka-src             
-│   └── Build.java       <- Optional build class (if needed)
-├── jeka-output          <- Directory where generated artifacts (JARs, reports) are stored
-├── jeka.project.deps   <- Spring Boot and extra dependencies
+│   └── Custom.java      <- Optional build class (if needed)
+├── jeka.project.deps    <- Spring Boot and extra dependencies
 ├── jeka.properties      <- Build configuration 
-├── jeka.ps              
+├── jeka.ps1             
 ├── jeka                 
 └── README.md            <- Describes available build commands for building the project
 ```
@@ -252,13 +253,13 @@ You'll end up with the following code layout:
 The dependencies are generated with the latest Spring Boot version:
 ```ini title="jeka.project.deps"
 [version]
-org.springframework.boot:spring-boot-dependencies:3.4.1@pom
+org.springframework.boot:spring-boot-dependencies:4.2.0@pom
 
 [compile]
-org.springframework.boot:spring-boot-starter-web
+org.springframework.boot:spring-boot-starter-webmvc
 
 [test]
-org.springframework.boot:spring-boot-starter-test
+org.springframework.boot:spring-boot-starter-webmvc-test
 ```
 You can start from here for modifying, adding code, tests and dependencies.
 

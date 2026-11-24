@@ -34,21 +34,22 @@ import dev.jeka.core.tool.builtins.tooling.nativ.NativeKBean;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
 
 @JkDoc("""
-        Builds and runs image based on project.
+        Builds Docker images from a project or a base.
         
-        This KBean can build JVM and Native (AOT) images from an existing project.
+        This KBean can build JVM and Native (AOT) images from an existing project or base.
         """)
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-docker/")
 public final class DockerKBean extends KBean {
 
-    @JkDoc("Explicit full name of the JVM image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"
-            + "If not specified, the image name will be inferred form the project information.")
+    @JkDoc("Explicit full name of the JVM image to build. It may include the placeholders '$groupId', '$artifactId', and '$version'.%n"
+            + "If not specified, the image name will be inferred from the project information.")
     public String jvmImageName;
 
-    @JkDoc("Explicit full name of the native image to build. It may includes placeholders such as '$version', '$groupId', and '$artifactId'.%n"
-            + "If not specified, the image name will be inferred form the project information.")
+    @JkDoc("Explicit full name of the native image to build. It may include the placeholders '$groupId', '$artifactId', and '$version'.%n"
+            + "If not specified, the image name will be inferred from the project information.")
     public String nativeImageName;
 
     @JkDoc("Base image to construct the Docker image.")
@@ -222,7 +223,7 @@ public final class DockerKBean extends KBean {
         @JkDoc("Coordinate of the JVM agent, e.g. 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.32.0'")
         public String coordinate;
 
-        @JkDoc("Option line to pass to the agent, e.g. '-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp")
+        @JkDoc("Option line to pass to the agent, e.g. '-Dotel.traces.exporter=otlp,-Dotel.metrics.exporter=otlp'")
         public String optionLine;
     }
 
@@ -282,10 +283,23 @@ public final class DockerKBean extends KBean {
     }
 
     private String resolvePlaceHolder(String candidateName, JkBuildable buildable) {
+        return resolvePlaceHolder(candidateName, buildable.getModuleId(), buildable.getVersion());
+    }
+
+    // '$name' form is needed cause '${name}' is interpolated prior reaching this KBean, when set from properties.
+    static String resolvePlaceHolder(String candidateName, JkModuleId moduleId, JkVersion version) {
+        String result = candidateName;
+        if (moduleId != null) {
+            result = replacePlaceHolder(result, "groupId", moduleId.getGroup());
+            result = replacePlaceHolder(result, "artifactId", moduleId.getName());
+        }
+        return replacePlaceHolder(result, "version", version.toString());
+    }
+
+    private static String replacePlaceHolder(String candidateName, String name, String value) {
         return candidateName
-                .replace("${groupId}", buildable.getModuleId().getGroup())
-                .replace("${artifactId}", buildable.getModuleId().getName())
-                .replace("${version}", buildable.getVersion().toString());
+                .replace("${" + name + "}", value)
+                .replaceAll("\\$" + name + "\\b", Matcher.quoteReplacement(value));
     }
 
     public static class jvmConfig {

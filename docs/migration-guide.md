@@ -33,7 +33,7 @@ Also, the entire wrapper is contained inside shell scripts, so the `jeka/wrapper
 
 ## Properties
 
-- `jeka.classpath.inject` -> `jeka.inject.classpath`
+- `jeka.classpath.inject` -> `jeka.classpath`
 - KBean field reference has changed from `myKBean#xxx` to `@myKBean.xxx`.
 
 ## Command Line
@@ -42,6 +42,6 @@ Also, the entire wrapper is contained inside shell scripts, so the `jeka/wrapper
   
   Example: `project#pack project#tests.skip=true`
   
-  Is now: `project: pack tests.skip=true` 
+  Is now: `project: pack test.skip=true` 
 
 - Use `jeka --help` as a starting point for command-line help.

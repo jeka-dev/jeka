@@ -91,6 +91,8 @@ class CmdLineParser {
         // -- Do parse
         CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(kBeanDescription,
                 Arrays.asList(fieldOnlyArgs)));
+        // -- Field values may be equal to a method name (e.g. buildDir=build)
+        commandLine.setAllowSubcommandsAsOptionParameters(true);
         CommandLine.ParseResult parseResult = commandLine.parseArgs(fieldOnlyArgs);
         for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
             String name = optionSpec.names()[0];

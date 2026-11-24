@@ -1,305 +1,246 @@
-For Jeka, a _dependency_ is something that can be resolved to a set of files by a `JkDependencyResolver`.
-Generally a dependency resolves to 1 file (or folder) but it can also be 0 or many.
+# Dependency Management API
 
-Compared to mainstream build tools, Jeka offers a simpler and more flexible model to deal with multiple dependency configurations required to build a project.
+In JeKa, a _dependency_ is something that can be resolved to a set of files by a `JkDependencyResolver`.
+Generally, a dependency resolves to one file (or folder), but it can also be none or many.
+
+The classes are located in the `dev.jeka.core.api.depmanagement` [package](https://github.com/jeka-dev/jeka/tree/master/core/src/main/java/dev/jeka/core/api/depmanagement).
+
+!!! tip
+    To declare the dependencies of a project, you generally only need a `jeka.project.deps` file. 
+    See [Project API](api-project.md#jekaprojectdeps).
 
 ## Types of Dependency
 
-A dependency is always an instance of `JkDependency`.
+A dependency is always an instance of `JkDependency`. There are three main types:
 
-Jeka distinguishes between 3 main types of dependency :
+* **Coordinates** (`JkCoordinateDependency`): modules hosted in a Maven or Ivy repository, resolved transitively as in Maven or Gradle.
+* **Files** (`JkFileSystemDependency`): files located on the file system, expected to be present when the build runs.
+* **Computed files** (`JkComputedDependency`): files produced by a computation, run only if the files are missing. 
+  A dependency on another project (`JkLocalProjectDependency`) is a specialization of this type.
 
-* __Arbitrary files__ located on the file system (represented by `JkFileSystemDependency` class). These files are assumed to be present on the file system while the build is running.
-* __Files produced by a computation__ (represented by `JkComputedDependency` class). These files may be present on file system, or not. If they are not present, the computation is run in order to produce the missing files. Usually the computation stands for the build of an external project.
-* __Coordinate pointing to a remote artifact__ (represented by `JkCoordinateDependency`) hosted in a binary repository (Ivy or Maven for instance) : Jeka can consume and transitively resolve any artifact located in a repository as you would do with Maven, Ivy, or Gradle.
-
-Lastly, Jeka uses _Ivy 2.5.1_ under the hood.
-Jeka jar embeds Ivy and executes it in a dedicated classloader to be hidden for client code.
-
-**Dependency type hierarchy:**
 ```mermaid
 graph TD
 
-    JkCoordinateDependency --> JkDependency
+    JkCoordinateDependency --> JkTransitivityDependency
+    JkTransitivityDependency --> JkDependency
     JkFileDependency --> JkDependency
     
     JkComputedDependency --> JkFileDependency
     JkFileSystemDependency --> JkFileDependency
-    JkLocalProjectDependency --> JkFileDependency
+    JkLocalProjectDependency --> JkComputedDependency
+    JkLocalProjectDependency --> JkTransitivityDependency
 ```
 
+JeKa uses _Ivy 2.5.3_ under the hood. Ivy is downloaded on first use and runs in a dedicated classloader, hidden from your code.
 
-### Coordinate dependency
-
-This type of dependency is represented by a `JkCoordinateDependency` class.
-It stands for a Maven/Ivy dependency expressed with coordinates (e.g. _group:module:version_).
-
-This is for declaring a dependency on a module hosted in the _Maven_ or _Ivy_ repositories. 
-Basically you instantiate a `JkCoordinateDependency` from its group, name, and version.
+### Coordinate Dependencies
 
 #### String Notation
 
-The string representation follows the [Gradle short notation](https://docs.gradle.org/current/userguide/dependency_versions.html), 
-and accept the similar [Ivy versioning](https://ant.apache.org/ivy/history/2.1.0/settings/version-matchers.html).
-
-Additionally, the Jeka notation allow to express extensions, classifiers and BOMs.
-Many string formats are accepted to specify a module coordinate :
+Coordinates are expressed as strings, in one of the following formats:
 
 - _group_:_name_
 - _group_:_name_:_version_
-- _group_:_name_:_classifier_:_version_
-- _group_:_name_:_classifier_:_extension_:_version_
+- _group_:_name_:_classifiers_:_version_
+- _group_:_name_:_classifiers_:_extension_:_version_
+- _group_:_name_:_classifiers_::
+- _group_:_name_:_classifiers_:_extension_:
+- _group_:_name_:_version_@pom
+
+_classifiers_ can be a comma-separated list. The two formats ending with `:` specify classifiers or an extension without specifying the version.
 
 Examples:
 ```
+org.slf4j:slf4j-api                              <-- The version is provided elsewhere (BOM, version provider)
 org.slf4j:slf4j-api:2.0.16                       <-- Declares an exact version
-org.slf4j:slf4j-api:2.0.16+                      <-- Declares a lower bound version
-org.slf4j:slf4j-api:[2.0.0,2.0.16[               <-- Declares a bounded version
+org.mock-server:mockserver-netty:shaded:5.15.0   <-- Declares a dependency on the 'shaded' classifier
+org.lwjgl:lwjgl:natives-linux:3.3.6              <-- Declares a dependency on the 'natives-linux' classifier
+org.lwjgl:lwjgl:natives-linux::                  <-- Same, without specifying the version
+org.slf4j:slf4j-bom:2.0.16@pom                   <-- Declares a BOM
+org.slf4j:slf4j-bom::pom:2.0.16                  <-- Declares a BOM (equivalent notation)
+```
 
-org.mock-server:mockserver-netty:shaded:5.15.0   <-- Declare a dependency on the -shaded- classifier
-org.lwjgl:lwjgl:natives_linux:3.1.0              <-- Declare a dependency on the natives_linux classifier
-org.slf4j:slf4j-bom::pom:2.0.16                  <-- Declare a bom dependency 
+Versions can also be dynamic, using the [Ivy version matchers](https://ant.apache.org/ivy/history/2.5.3/settings/version-matchers.html).
+
+In Java, a coordinate dependency can be created from this notation:
+
+```java
+JkCoordinateDependency dep = JkCoordinateDependency.of("com.google.guava:guava:33.4.8-jre")
+        .withTransitivity(JkTransitivity.RUNTIME)
+        .andExclusions("com.google.code.findbugs:jsr305");
 ```
 
 #### BOM
 
-To mention a *BOM* dependency, we just need to reference the *POM* extension of this dependency.
-For example, Springboot defines a *BOM* in `org.springframework.boot:spring-boot-dependencies` Maven module.
+To import a Maven *BOM*, reference its _pom_: `org.springframework.boot:spring-boot-dependencies:3.3.6@pom`.
+The versions it declares are then used for modules declared without version.
 
-To reference this BOM in our dependencies, we just need to specify the POM extension as in
-`org.springframework.boot:spring-boot-dependencies::pom:3.3.6`.
+### File Dependencies
 
-#### Transitivity
+Mention the path of one or several files. If one of the files does not exist at resolution time, the build fails.
 
-By default, dependencies specifying a classifier or an extension are not considered to be transitive. 
-Although, transitivity can be explicitly defined programmatically.
-
-By default, _Jeka_ uses the most relevant transitivity according to the declaration context, so users don't need to specify it
-unless they want a specific one.
-
-Example of programmatic instantiation of a coordinate dependency:
 ```java
-var dep = JkCoordinateDependency.of("group:name:version")
-                                .withTransitivity(JkTransitivity.RUNTIME);
+JkDependencySet deps = JkDependencySet.of()
+        .andFiles("libs/my.jar", "libs/my.testingtool.jar");
 ```
-
-
-
-See [later](#transitivity) for more details about _transitivity_.
-
-### File System Dependencies
-
-This type of dependency is represented by the `JkFileSystemDependency` class.
-
-Just mention the path of one or several files. If one of the files does not exist at the time of resolution (when the dependency is actually retrieved), build fails.
-
-```Java
-JkDependencySet.of().andFiles("libs/my.jar", "libs/my.testingtool.jar");
-``` 
 
 ### Computed Dependencies
 
-This type of dependency is represented by the `JkComputedDependency` class.
+If the specified files are not present, the computation runs to generate them. If some files are still missing afterwards, the build fails.
 
-It is typically used for _multi-modules_ or _multi-techno_ projects.
+This is useful for depending on files produced by other projects or other build tools (Maven, Gradle, npm, ...).
+The computation is either a `java.lang.Runnable` or a `JkProcess`.
 
-The principle is that if the specified files are not present, the computation is run in order to generate the missing files.
-If some files still missing after the computation has run, the build fails.
+The following snippet creates a dependency set on two external projects, one built with Maven, the other with JeKa:
 
-This mechanism is quite simple yet powerful as it addresses the following use cases :
+```java
+Path mavenProjectDir = Paths.get("../a-maven-project");
+Path mavenProjectJar = mavenProjectDir.resolve("target/maven-project.jar");
+JkProcess mavenBuild = JkProcess.of("mvn", "clean", "package")
+        .setWorkingDir(mavenProjectDir);
 
-* Dependencies on files produced by an artifact producer (`JkArtifactProducer`). A `JkProject` is an artifact producer.
-* Dependencies on files produced by external build tools (Ant, Maven, Gradle, SBT, Android SDK, Make, npm ...).
-* ... In other words, files produced by any means.
-
-The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
-
-The following snippet constructs a set of dependencies on two external projects : one is built with Maven, the other with
-_Jeka_.
-```Java
-Path mavenProject = Paths.get("../a-maven-project");
-Path mavenProjectJar = mavenProject.resolve("target/maven-project.jar");
-Path externalProject = Paths.get("../a-jeka-project");
-
-JkProcess mavenBuild = JkProcess.of("mvn", "clean", "install").withWorkingDir(mavenProject);
-
-JkJavaProject externalProject = JkJavaProject.of(externalProject); 
+JkProject jekaProject = JkProject.of()
+        .setBaseDir(Paths.get("../a-jeka-project"));
 
 JkDependencySet deps = JkDependencySet.of()
-    .and(JkComputedDependency.of(mavenBuild, mavenProjectJar))
-    .and(externalProject);
+        .and(JkComputedDependency.of(mavenBuild, mavenProjectJar))
+        .and(jekaProject.toDependency());
 ```
 
-## Dependency Set 
+## Dependency Set
 
-A _dependency set_ (`JkDependencySet`) is an ordered bunch of dependencies used for a given purpose (compilation,
-war packaging, testing, ...). It can contain any kind of `JkDependency`. See [here](https://github.com/jerkar/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java)
+A `JkDependencySet` is an ordered set of dependencies used for a given purpose (compilation, testing, ...).
+It can contain any kind of `JkDependency`, and also defines:
 
-_dependencySet_ also defines :
+* A version provider, giving the version of the modules declared without version.
+* A set of transitive dependency exclusions, applied to all dependencies of the set.
 
-* A version provider to define which version of a module should be used in case it is not explicitly mentioned. 
-* A set of transitive dependency exclusion rules.
+It is immutable: each method returns a new set.
 
-It is designed as an immutable object where we can apply set theory operations for adding, removing, or
-merging with other dependencies and _dependencySet_.
+```java
+JkVersionProvider versionProvider = JkVersionProvider.of()
+        .andBom("org.slf4j:slf4j-bom:2.0.16")
+        .and("com.google.guava:guava", "33.4.8-jre");
 
-
-```java title="Example.java"
-...
 JkDependencySet deps = JkDependencySet.of()
-    .and("com.google.guava") 
-    .and("org.slf4j:slf4j-simple")
-    .and("com.orientechnologies:orientdb-client:2.0.8")
-    .andFile("../libs.myjar")
-    .withVersionProvider(myVersionProvider);
+        .and("com.google.guava:guava")
+        .and("org.slf4j:slf4j-simple")
+        .and("org.apache.httpcomponents:httpclient:4.5.14")
+        .andFiles("../libs/myjar.jar")
+        .andGlobalExclusion("commons-logging:commons-logging")
+        .withVersionProvider(versionProvider);
 ```
 
-!!! note
-    * Module versions can be omitted when declaring dependencies. Versions can be provided by a `JkVersionProvider` or a *BOM* dependency.
-    * Instances of `JkDependencySet` can be combined in order to construct a large _dependencySet_ from smaller ones.
+See the [source code](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/api/depmanagement/JkDependencySet.java) for all available operations.
 
 ## Transitivity
 
-For each dependency, mainstream build tools use a single concept (_scope_ or _configuration_) to determine :
+Maven scopes and Gradle configurations answer three questions at once: which part of the build needs the dependency, which 
+transitive dependencies are fetched, and how the dependency is published. JeKa answers them separately:
 
-1. which part of the build needs the dependency
-2. which transitive dependencies to fetch along the dependency
-3. with which transitivity the dependency must be published
+1. Each part of the build (compile, runtime, test) has its own dependency set, which can be derived from another.
+2. Each dependency can have its own transitivity.
+3. The published dependencies can be redefined at publication time.
 
-This confusion leads to dependency management systems that are bloated, difficult to reason with, and not quite flexible.
-Gradle comes with a proliferation of 'configurations' to cover most use case combinations,
-while Maven narrows 'scopes' to a smaller number, but with limitations and not-so-clear transitivity/publish rules.
+`JkTransitivity` defines three levels:
 
-In the opposite, Jeka distinguishes clearly the following three purposes :
+- `NONE`: Not transitive.
+- `COMPILE`: Also fetches transitive dependencies declared with the 'compile' scope in the published POM.
+- `RUNTIME`: Also fetches transitive dependencies declared with the 'compile' or 'runtime' scope in the published POM.
 
-1. Jeka uses distinct _dependencySet_ instances for each part of the build (compile, runtime, test,...). Each can be
-   defined relatively to another using set theory operations.
-2. For each dependency, we can decide its transitivity, that is, the transitive dependencies fetched along the dependency.
-3. For publishing, we can optionally re-define a specific _dependencySet_, exposing exactly what we want.
+When no transitivity is specified, JeKa uses the most relevant one according to the context where the dependency is declared.
+Transitivity applies only to `JkCoordinateDependency` and `JkLocalProjectDependency`.
 
-Jeka defines by default, three levels of transitivity :
+The following example configures the dependencies of a project. Runtime dependencies are derived from compile ones:
 
-- NONE : Not transitive
-- COMPILE : Also fetches transitive dependencies declared with scope 'compile' in the dependency published pom.
-- RUNTIME : Also fetches transitive dependencies declared with any scope in the dependency published pom.
-
-!!! notes
-    On Maven repositories, published poms can declare only two scopes for transitive dependencies : 'compile' and 'runtime'.
-
-For Ivy repositories, it is possible to declare a specific transitivity that maps to a slave 'configuration'.
-
-The below example shows a JkJavaProject declaration using explicit transitivity.
-
-```Java
-JkJavaProject.of().simpleFacade()
-    .configureCompileDeps(deps -> deps
-            .and("com.google.guava:guava:23.0", JkTransitivity.NONE)
-            .and("javax.servlet:javax.servlet-api:4.0.1"))
-    .configureRuntimeDeps(deps -> deps
-            .and("org.postgresql:postgresql:42.2.19")
-            .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME)
-            .minus("javax.servlet:javax.servlet-api"))
-    .configureTestDeps(deps -> deps
-            .and(Hint.first(), "org.mockito:mockito-core:2.10.0")
-    )
+```java
+JkProject project = JkProject.of();
+project.flatFacade.dependencies.compile
+        .add("com.google.guava:guava:33.4.8-jre", JkTransitivity.NONE)
+        .add("javax.servlet:javax.servlet-api:4.0.1");
+project.flatFacade.dependencies.runtime
+        .add("org.postgresql:postgresql:42.7.4")
+        .modify(deps -> deps.withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME))
+        .remove("javax.servlet:javax.servlet-api");
+project.flatFacade.dependencies.test
+        .add(JkDependencySet.Hint.first(), "org.mockito:mockito-core:5.22.0");
 ```
-It results in :
-```
-Declared Compile Dependencies : 2 elements.
-  com.google.guava:guava:23.0 transitivity:NONE
-  javax.servlet:javax.servlet-api:4.0.1
-  
-Declared Runtime Dependencies : 2 elements.
-  com.google.guava:guava:23.0 transitivity:RUNTIME
-  org.postgresql:postgresql:42.2.19
-  
-Declared Test Dependencies : 4 elements.
-  org.mockito:mockito-core:2.10.0
-  com.google.guava:guava:23.0 transitivity:RUNTIME
-  org.postgresql:postgresql:42.2.19
-  javax.servlet:javax.servlet-api:4.0.1
-```
-Dependencies without any transitivity specified will take default transitivity for
-their purpose, namely COMPILE for compile dependencies, and RUNTIME for runtime and test dependencies.
 
-The API allows you to redefine the transitivity declared in a upper dependency set.
-
-Note that transitivity can only apply to `JkModuleDependency` (like <i>com.google.guava:guava:23.0</i>)
-and `JkLocalProjectDependency`.
+`Hint` controls the position of the dependency in the set, and thus its position in the classpath.
 
 ## Resolve Dependencies
 
-The `JkDependencyResolver` class is responsible JkDependencyResolver.of(JkRepo.ofMavenCentral());to resolve dependencies by returning `JkResolveResult` from a
-`JkdependencySet`.
+`JkDependencyResolver` resolves a `JkDependencySet` to a `JkResolveResult`.
 
 ```java
 JkDependencySet deps = JkDependencySet.of()
-                            .and("org.apache.httpcomponents:httpclient:4.5.3")
-                            .andFile("libs/my.jar");
+        .and("org.apache.httpcomponents:httpclient:4.5.14");
 
-// Here, module dependencies are fetched from Maven central repo
-JkDependencyResolver resolver = 
-        JkDependencyResolver.of(JkRepo.ofMavenCentral());  
-JkResolveResult result = resolver().resolve(deps);
+JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.ofMavenCentral());
+JkResolveResult result = resolver.resolve(deps);
+
+// Navigate in the resolved dependency tree
+System.out.println(result.getDependencyTree().toStringTree());
+JkVersion version = result.getVersionOf(JkModuleId.of("commons-codec:commons-codec"));
+
+// Get the resolved files, as a classpath
+JkPathSequence files = result.getFiles();
+files.forEach(System.out::println);
 ```
 
-From the result you can :
-
-* Navigate in the resolved dependency tree as :
-
-```java
-JkDependencyNode slfjApiNodeDep = result.getDependencyTree()
-        .getFirst(JkModuleId.of("org.slf4j:slf4j-api"));
-System.out.println(slfjApiNode.getModuleInfo().getResolvedVersion());
-```
-
-* Get the direct list of artifact files
-
-```java
-JkPathSequence sequence = result.getFiles();  
-sequence.forEach(System.out::println); // print each files part of the result
-```
+If you only need the files, `JkDependencyResolver#resolveFiles` returns them directly.
 
 ## Publication
 
-Jeka is able to publish on both the Maven and Ivy repositories. This includes repositories such as [Sonatype Nexus](http://www.sonatype.org/nexus/).
+JeKa can publish to both Maven and Ivy repositories, including [Sonatype Nexus](https://www.sonatype.com/products/sonatype-nexus-repository). 
+As Maven and Ivy have different publication models, there is a specific API for each one.
 
-Maven and Ivy have different publication models, so Jeka proposes specific APIs according to whether you want to publish on a Maven or Ivy repository.
+!!! tip
+    To publish a project on a Maven repository without writing code, use the [Maven KBean](kbeans-maven.md).
 
-### Publish on a Maven repository
+### Publish to a Maven Repository
 
-Jeka proposes a complete API to pubish on Maven repository. POM files will be generated by Jeka according to
-provided elements.
+```java
+JkMavenPublication publication = JkMavenPublication.of(project.asBuildable())
+        .setModuleId("org.example:my-lib")
+        .setVersion("1.0.0")
+        .setRepos(JkRepoSet.of("https://my.org/repository/internal"))
+        .customizeDependencies(deps -> deps   // adjust the published transitive dependencies
+                .withTransitivity("com.google.guava:guava", JkTransitivity.RUNTIME));
 
-Find an example [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/AntStyleJkBean.java)
+publication.pomMetadata
+        .setProjectName("My library")
+        .setProjectUrl("https://my.project.url")
+        .addLicense("Apache License V2.0", "https://www.apache.org/licenses/LICENSE-2.0.html");
 
+publication.publish();
+```
 
-Notice that Jeka allows you to :
+The POM file is generated by JeKa. The main, sources and javadoc JARs are published by default. With this API, you can also:
 
-- Publish more than one artifact.
-- Produce & publish checksum files for each published artifact.
-- Mention using unique snapshots ([What is it ?](http://stackoverflow.com/questions/1243574/how-to-stop-maven-artifactory-from-keeping-snapshots-with-timestamps)).
-- Feed generated pom with data necessary to publish on [central repository](https://maven.apache.org/guides/mini/guide-central-repository-upload.html).
-- Sign published artifacts with PGP
-- Publish to multiple repositories by creating the publisher using a `JkRepoSet` instead of a `JkRepo`.
+- Publish additional artifacts, using `putArtifact`.
+- Produce and publish checksum files.
+- Publish unique snapshots (see `JkRepo.publishConfig`).
+- Provide metadata required by [Maven Central](https://central.sonatype.org/publish/requirements/).
+- Sign published artifacts with PGP. There is no need to install PGP, as JeKa embeds [Bouncy Castle](https://www.bouncycastle.org/).
+- Publish to multiple repositories.
 
-To sign with PGP, there is no need to have PGP installed on Jeka machine. Jeka uses <a href="https://www.bouncycastle.org/">Bouncy Castle</a> internally to sign artifacts.
+See a complete example [here](https://github.com/jeka-dev/jeka/blob/master/samples/samples.project-api/jeka-src/JkProjectCustom.java).
 
-### Publish to a Ivy repository
+### Publish to an Ivy Repository
 
-Publishing on Ivy repo is pretty similar to publishing on Maven, though there are options specific to Ivy.
+Publishing to an Ivy repository is similar:
 
-See also [here](https://github.com/jeka-dev/jeka/blob/master/samples/dev.jeka.samples.basic/jeka/def/dev/jeka/core/samples/AntStyleJkBean.java)
-
+```java
+JkProjectPublications.ivyPublication(project)
+        .setRepos(JkRepoSet.of("https://my.org/ivy-repository"))
+        .publish();
+```
 
 ## Common Classes
 
-* `JkRepo` and `JkRepoSet` represent both download and upload repositories. 
-
-* `JkRepoFromProperties`provides configured repositories according to global or project scopes _properties_.
-
+* `JkRepo` and `JkRepoSet` represent download and publish repositories.
+* `JkRepoProperties` provides the repositories configured by [properties](properties.md#repositories).
 * `JkDependencySet` represents a set of dependencies.
-
-* `JkDependencyResolver` resolves dependencies to classpaths and resolution results that allow resolution exploration.
-
-* `JkModuleFileProxy` provides an smart way to get a file from its coordinates.
+* `JkDependencyResolver` resolves dependencies to files and dependency trees.
+* `JkCoordinateFileProxy` gets a file from its coordinate, downloading it if needed.

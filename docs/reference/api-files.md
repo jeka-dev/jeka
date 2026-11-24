@@ -11,7 +11,7 @@ A simple wrapper for files (not folders). It provides copying, interpolation, ch
 ```java title="Example"
 JkPathFile.of("my-new-file.txt")
     .fetchContentFrom("https://www.bgreco.net/fortune.txt")
-    .copyToDir(myFolder);
+    .copyToDir(Paths.get("my-folder"));
 ```
 
 ## `JkPathTree`
@@ -21,16 +21,16 @@ This is a central class in Jeka API.
 ```java title="Examples"
 
 // copies all non java source files to another directory preserving structure
-JkPathTree.of("src").andMatching(false, "**/*.java").copyTo("build/classes");
+JkPathTree.of("src").andMatching(false, "**/*.java").copyTo(Paths.get("build/classes"));
 
 // One liner to zip an entire directory
 JkPathTree.of("build/classes").zipTo(Paths.get("mylib.jar"));
 
-// Traverse the tree in breath first (opposite to deep-first) 
-JkPathTree.of("build/classes").streamBreathFirst().forEach(file -> ...);
+// Traverse the tree breadth first (as opposed to depth first) 
+JkPathTree.of("build/classes").streamBreathFirst().forEach(file -> System.out.println(file));
 
 // Compute MD5
-String md5 = JkPathTree.of("src/main/java").checksum();
+String md5 = JkPathTree.of("src/main/java").checksum("MD5");
 ```
 
 
@@ -38,12 +38,12 @@ String md5 = JkPathTree.of("src/main/java").checksum();
 An Immutable sequence of `java.nio.file.Path` providing methods for filtering or appending.
 ```java title="Example"
 URL[] urls = JkPathSequence.of(paths)
-                .and(embeddedLibs())
+                .and(embeddedLibs)
                 .toUrls();
 ```
 
 ## `JkPathMatcher`
-An immutable `java.nio.file.PathMatcher` based on `java.nio.file` glob pattern or regerxp.
+An immutable `java.nio.file.PathMatcher` based on `java.nio.file` glob pattern or regexp.
   Used by `JkPathTree` to filter in/out files according name patterns.
 
 

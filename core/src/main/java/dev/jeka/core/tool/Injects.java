@@ -45,7 +45,7 @@ class Injects {
             JkRunbase runbase = kbeanUnderInitialization.getRunbase();
 
             if (type.equals(JkRunbase.class)) {
-                JkRunbase childRunbase = runbase.getChildRunbase(jkInjectValue);
+                JkRunbase childRunbase = runbase.getInjectedRunbase(jkInjectValue);
                 JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, childRunbase);
                 continue;
             }
@@ -68,7 +68,7 @@ class Injects {
                 JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, injectedValue);
 
             } else {
-                JkRunbase childRunbase = runbase.getChildRunbase(jkInjectValue);
+                JkRunbase childRunbase = runbase.getInjectedRunbase(jkInjectValue);
                 KBean value = childRunbase.load(kbeanClass);
                 JkUtilsReflect.setFieldValue(kbeanUnderInitialization, field, value);
             }

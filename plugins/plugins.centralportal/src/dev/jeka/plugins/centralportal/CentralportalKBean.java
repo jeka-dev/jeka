@@ -21,6 +21,7 @@ import dev.jeka.core.api.crypto.gpg.JkGpgSigner;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.JkPostInit;
 import dev.jeka.core.tool.JkPropValue;
 import dev.jeka.core.tool.KBean;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 
 @JkDoc("Plugin for publishing artifacts to Maven Central.\n" +
         "Run `jeka centralportal: publish` to publish artifacts.")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.centralportal")
 public class CentralportalKBean extends KBean {
 
     @JkPropValue("JEKA_CENTRAL_PORTAL_USERNAME")
@@ -53,7 +55,7 @@ public class CentralportalKBean extends KBean {
     public boolean automatic = true;
 
     @JkDoc("Wait time in seconds for successful publication")
-    public int timeout = 1000 * 60 * 15;
+    public int timeout = 60 * 15;
 
     private String deploymentId;
 

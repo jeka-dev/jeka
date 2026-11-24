@@ -71,7 +71,7 @@ public class JkVersionFromGit  {
         boolean dirty = git.isWorkspaceDirty();
         if (dirty) {
             JkLog.verbose("Git workspace is dirty. Use SNAPSHOT for version.");
-            cachedVersion = git.getCurrentBranch() + JkVersion.SNAPSHOT_SUFIX;
+            cachedVersion = git.getSnapshotVersion();
         } else {
             cachedVersion =  git.getVersionFromTag(versionTagPrefix);
         }

@@ -22,6 +22,7 @@ import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.JkDocUrl;
 import dev.jeka.core.tool.KBean;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 @JkDoc("Wraps Gradle build commands from JeKa.")
+@JkDocUrl("https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.gradle")
 public class GradleKBean extends KBean {
 
     @JkDoc("Arguments to pass to the gradle command. Example: 'clean build', '--info -Pprofile=prod'")
