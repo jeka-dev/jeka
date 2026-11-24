@@ -613,7 +613,12 @@ add_or_append_property_to_file() {
         escaped_key=$(printf '%s\n' "$key" | sed 's/[.[\*^$\/&]/\\&/g')
         escaped_value=$(printf '%s\n' "$value" | sed 's/[.[\*^$\/&]/\\&/g')
 
-        sed -i '' "s/^$escaped_key=\(.*\)/$escaped_key=\1${delimiter}${escaped_value}/" "$file"
+        # 'sed -i' is not portable between macOS and Linux
+        local tmp_file
+        tmp_file=$(mktemp)
+        sed "s/^$escaped_key=\(.*\)/$escaped_key=\1${delimiter}${escaped_value}/" "$file" > "$tmp_file"
+        cat "$tmp_file" > "$file"   # keep permissions and links of the original file
+        rm -f "$tmp_file"
     else
         # Add a new key-value pair
         echo "$key=$value" >> "$file"
