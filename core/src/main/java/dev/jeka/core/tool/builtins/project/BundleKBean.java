@@ -28,6 +28,7 @@ import java.util.stream.Stream;
         This integrates with ProjectKBean for project-specific setups, handles file
         system operations to prepare input directories, and invokes jpackage and jlink tools.
         """)
+@JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-bundle/")
 public final class BundleKBean extends KBean {
 
     private static final String JDEPS = "JDEPS-COMPUTE";
@@ -40,7 +41,7 @@ public final class BundleKBean extends KBean {
     @JkDoc("If true, creates a bundled application along with the regular JAR when executing 'project: pack'.")
     public boolean projectPack;
 
-    @JkDoc("It true, the runtimes libs will be added in the packaged application, which may be not necessary whe using FAT jars.")
+    @JkDoc("If true, the runtime libs will be added in the packaged application, which may not be necessary when using FAT jars.")
     public boolean includeRuntimeLibs = true;
 
     @JkDoc
@@ -169,22 +170,22 @@ public final class BundleKBean extends KBean {
 
         private JpackageOptions() {}
 
-        @JkDoc("Extra options to pass to jpackage (e.g. 'options.all=--name=myapp)")
+        @JkDoc("Extra options to pass to jpackage (e.g. 'jpackage.options.all.--name=myapp')")
         @JkSuggest(value = {"--add-modules", "--java-options", "--name", "--runtime-image", "--vendor", "--description",
                 "--verbose"},
                     multiValues = {"ALL-MODULE-PATH", JDEPS, "app-image" })
 
         public JkMultiValue<String> all = JkMultiValue.of(String.class);
 
-        @JkDoc("Extra options to pass to jpackage only when running on Windows. (e.g. 'options.windows--icon=media/icon.ico)")
+        @JkDoc("Extra options to pass to jpackage only when running on Windows. (e.g. 'jpackage.options.windows.--icon=media/icon.ico')")
         @JkSuggest(value = {"--icon","--type", "--add-launcher"}, multiValues = {"app-image", "exe", "msi"})
         public JkMultiValue<String> windows = JkMultiValue.of(String.class);
 
-        @JkDoc("Extra options to pass to jpackage only when running on Linux. (e.g. 'options.linux--icon=media/icon.png)")
+        @JkDoc("Extra options to pass to jpackage only when running on Linux. (e.g. 'jpackage.options.linux.--icon=media/icon.png')")
         @JkSuggest(value = {"--icon","--type"}, multiValues = {"app-image", "deb", "rpm"})
         public JkMultiValue<String> linux = JkMultiValue.of(String.class);
 
-        @JkDoc("Extra options to pass to jpackage only when running on MacOS. (e.g. 'mac.options.--icon=media/icon.icns)")
+        @JkDoc("Extra options to pass to jpackage only when running on MacOS. (e.g. 'jpackage.options.mac.--icon=media/icon.icns')")
         @JkSuggest(value = {"--icon","--type"}, multiValues = {"app-image", "dmg", "pkg"})
         public JkMultiValue<String> mac = JkMultiValue.of(String.class);
 
@@ -211,7 +212,7 @@ public final class BundleKBean extends KBean {
 
         private JlinkOptions() {}
 
-        @JkDoc("Extra options to pass to jlink (e.g. 'options.all=--name=myapp)")
+        @JkDoc("Extra options to pass to jlink (e.g. 'jlink.options.all.--compress=zip-6')")
         @JkSuggest({"--add-modules", "--bind-services","--compress", "--disable-plugin", "--limit-module"})
         public JkMultiValue<String> all = JkMultiValue.of(String.class);
 
@@ -219,11 +220,11 @@ public final class BundleKBean extends KBean {
         @JkSuggest({"--launcher","--type"})
         public JkMultiValue<String> windows = JkMultiValue.of(String.class);
 
-        @JkDoc("Extra options to pass to jpackage only when running on Linux.)")
+        @JkDoc("Extra options to pass to jlink only when running on Linux.")
         @JkSuggest({"--icon","--type"})
         public JkMultiValue<String> linux = JkMultiValue.of(String.class);
 
-        @JkDoc("Extra options to pass to jpackage only when running on MacOS.")
+        @JkDoc("Extra options to pass to jlink only when running on MacOS.")
         @JkSuggest({"--icon","--type"})
         public JkMultiValue<String> mac = JkMultiValue.of(String.class);
 
@@ -242,12 +243,40 @@ public final class BundleKBean extends KBean {
 
     private void fillJklinkOptions(JkJlink jkJlink) {
         JkProject.JpmsModules jpmsModules = projectKBean.project.jpmsModules;
-        List<String> moduleDeps = jpmsModules.getAddModules();
         JkPathSequence modulePath = jpmsModules.getModulePaths();
-        jkJlink
-                .addOptions("--add-modules", String.join(",", moduleDeps))
-                .addOptions("--module-path", String.join(",", modulePath.toPath()))
-                .addOptions("--output", customJrePath().toString());
+        boolean addModulesSetByUser = jlinkOptions.stream()
+                .flatMap(Arrays::stream)
+                .anyMatch(option -> option.equals("--add-modules") || option.startsWith("--add-modules="));
+
+        // jlink does not accept empty values
+        List<String> modules = jpmsModules.getAddModules();
+        if (modules.isEmpty() && !addModulesSetByUser) {
+            modules = computeModules(modulePath);
+        }
+        if (!modules.isEmpty()) {
+            jkJlink.addOptions("--add-modules", String.join(",", modules));
+        }
+        if (!modulePath.toList().isEmpty()) {
+            jkJlink.addOptions("--module-path", modulePath.toPath());
+        }
+        jkJlink.addOptions("--output", customJrePath().toString());
+    }
+
+    // Computes the modules required by the main jar and, if they are bundled, the runtime libs.
+    private List<String> computeModules(JkPathSequence modulePath) {
+        List<Path> jars = new LinkedList<>();
+        jars.add(mainJar());
+        if (includeRuntimeLibs) {
+            jars.addAll(projectKBean.project.pack.resolveRuntimeDependenciesAsFiles());
+        }
+        JkJdeps jdeps = jdeps();
+        return jars.stream()
+                .filter(Files::isRegularFile)
+                .flatMap(jar -> jdeps.getModuleDeps(jar, modulePath).stream())
+                .map(String::trim)
+                .filter(module -> !module.isEmpty())
+                .distinct()
+                .toList();
     }
 
     private Path customJrePath() {

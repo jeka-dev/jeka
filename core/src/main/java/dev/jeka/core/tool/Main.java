@@ -109,7 +109,7 @@ public class Main {
         }
 
         // Interpolate command line with values found in properties
-        JkProperties props = PropertiesHandler.constructMasterProperties(baseDir, cmdArgs.containsAdminKBeans());
+        JkProperties props = PropertiesHandler.constructProperties(baseDir, cmdArgs.containsAdminKBeans());
         CmdLineArgs interpolatedArgs = cmdArgs.interpolated(props).withoutShellArgs();
 
         Engine engine = null;

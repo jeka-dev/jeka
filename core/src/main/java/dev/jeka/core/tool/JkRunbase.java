@@ -106,7 +106,7 @@ public final class JkRunbase {
 
     JkRunbase(Path baseDir) {
         this.baseDir = baseDir;
-        this.properties = PropertiesHandler.constructRunbaseProperties(baseDir);
+        this.properties = PropertiesHandler.constructProperties(baseDir, BehaviorSettings.INSTANCE.adminMode);
     }
 
     /**
@@ -635,6 +635,19 @@ public final class JkRunbase {
 
     boolean isInitialized() {
         return initialized;
+    }
+
+    /*
+     * Returns the runbase located at the specified path, relative to this one. It can be invoked on any runbase.
+     * The target runbase is created if needed, because a child can be initialized prior the module it injects.
+     */
+    JkRunbase getInjectedRunbase(String relPath) {
+        Path targetBaseDir = baseDir.toAbsolutePath().resolve(relPath).normalize();
+        JkUtilsAssert.state(this == MASTER || !targetBaseDir.equals(MASTER.getBaseDir().toAbsolutePath().normalize()),
+                "@JkInject(\"%s\") in '%s' targets the parent runbase, which is not initialized yet.", relPath, baseDir);
+        JkUtilsAssert.state(Files.isDirectory(targetBaseDir),
+                "@JkInject(\"%s\") in '%s' mentions a directory that does not exist.", relPath, baseDir);
+        return RunbaseGraph.getOrCreateRunbase(targetBaseDir);
     }
 
     KBean getBean(Class<?> kbeanClass) {

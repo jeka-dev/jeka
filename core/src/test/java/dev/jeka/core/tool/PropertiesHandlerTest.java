@@ -26,7 +26,7 @@ class PropertiesHandlerTest {
     }
 
     @Test
-    void constructMasterProperties_regularKBean_usesJekaProperties() {
+    void constructProperties_regularKBean_usesJekaProperties() {
         JkProperties props = masterProperties("::zzq");
         assertArrayEquals(new String[] {"project:", "pack"},
                 new CmdLineArgs("::zzq").interpolated(props).get());
@@ -35,12 +35,12 @@ class PropertiesHandlerTest {
     }
 
     @Test
-    void constructMasterProperties_adminKBean_ignoresJekaProperties() {
+    void constructProperties_adminKBean_ignoresJekaProperties() {
         assertNull(masterProperties("app:", "list").get("jeka.cmd.zzq"));
         assertNull(masterProperties("setup:", "openHomeDir").get("jeka.cmd.zzq"));
     }
 
     private JkProperties masterProperties(String... args) {
-        return PropertiesHandler.constructMasterProperties(baseDir, new CmdLineArgs(args).containsAdminKBeans());
+        return PropertiesHandler.constructProperties(baseDir, new CmdLineArgs(args).containsAdminKBeans());
     }
 }

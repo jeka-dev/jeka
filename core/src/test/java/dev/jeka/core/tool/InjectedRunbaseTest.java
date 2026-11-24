@@ -1,0 +1,81 @@
+package dev.jeka.core.tool;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+import dev.jeka.core.api.depmanagement.JkRepoSet;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class InjectedRunbaseTest {
+
+    @TempDir
+    Path baseDir;
+
+    private BehaviorSettings initialSettings;
+
+    private ClassLoader initialClassloader;
+
+    @BeforeEach
+    void setUp() {
+        initialSettings = BehaviorSettings.INSTANCE;
+        initialClassloader = Thread.currentThread().getContextClassLoader();
+        BehaviorSettings.INSTANCE = BehaviorSettings.ofDefault();
+    }
+
+    @AfterEach
+    void tearDown() {
+        BehaviorSettings.INSTANCE = initialSettings;
+        Thread.currentThread().setContextClassLoader(initialClassloader);
+    }
+
+    @Test
+    void childInjectingSibling_fromParent_ok() throws IOException {
+        Path dir = baseDir.toRealPath();
+        write(dir.resolve("jeka.properties"), "_jeka.child-bases=b, a\n");
+        write(dir.resolve("a/jeka.properties"), "@project=on\n");
+        write(dir.resolve("b/jeka.properties"), "@project=on\n");
+        write(dir.resolve("b/jeka-src/BuildB.java"),
+                "import dev.jeka.core.tool.*;\n" +
+                "import dev.jeka.core.tool.builtins.project.ProjectKBean;\n" +
+                "class BuildB extends KBean {\n" +
+                "  @JkInject(\"../a\") ProjectKBean a;\n" +
+                "  public void init() { System.setProperty(\"injected.base\", a.getBaseDir().toString()); }\n" +
+                "}\n");
+        try {
+            Engine engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
+            engine.resolveKBeans();
+            Engines.registerMaster(engine);
+            Thread.currentThread().setContextClassLoader(
+                    new AppendableClassloader(engine.getClasspathSetupResult().runClasspath));
+            JkRunbase runbase = engine.getOrCreateRunbase(new KBeanAction.Container(), true);
+            assertEquals(2, runbase.getChildRunbases().size());
+            assertEquals("a", runbase.getChildRunbases().get(0).getBaseDir().getFileName().toString());
+            assertEquals(dir.resolve("a").toString(), System.getProperty("injected.base"));
+        } finally {
+            System.clearProperty("injected.base");
+        }
+    }
+
+    @Test
+    void adminMode_ignoresProjectDefaultKBean() throws IOException {
+        Path dir = baseDir.toRealPath();
+        write(dir.resolve("jeka.properties"), "jeka.kbean.default=script\n");
+        BehaviorSettings.setAdminMode();
+        Engine engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
+        assertNull(engine.resolveKBeans().defaultKbeanClassName);
+        assertNull(new JkRunbase(dir).getProperties().get("jeka.kbean.default"));
+    }
+
+    private static void write(Path file, String content) throws IOException {
+        Files.createDirectories(file.getParent());
+        Files.write(file, content.getBytes());
+    }
+}
