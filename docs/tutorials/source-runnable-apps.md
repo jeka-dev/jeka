@@ -183,7 +183,7 @@ See a complete example at [demo-maven-multimodule](https://github.com/jeka-dev/d
 
 ### Gradle Projects
 
-Gradle projects can be made source-runnable using the `gradle:` KBean from the [Gradle plugin](../../plugins/plugins.gradle/README.md).
+Gradle projects can be made source-runnable using the `gradle:` KBean from the [Gradle plugin](https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.gradle).
 
 !!! note
     The Gradle plugin is not yet available on Maven Central. It will be available from the next JeKa version after 0.11.68.
@@ -232,7 +232,7 @@ plugins {
 }
 ```
 
-See a complete example at [plugins/plugins.gradle/sample](../../plugins/plugins.gradle/sample).
+See a complete example at [plugins/plugins.gradle/sample](https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.gradle/sample).
 
 ### Custom Build Commands
 
