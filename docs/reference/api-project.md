@@ -142,6 +142,7 @@ org.junit.jupiter:junit-jupiter
 org.junit.platform:junit-platform-launcher
 org.fluentlenium:fluentlenium-junit:3.2.0
     !org.apache.httpcomponents:httpclient  # exclude httpclient from 'fluentlenium-junit' transitive dependencies
+!!commons-logging:commons-logging          # exclude commons-logging from all dependencies of this section
 
 [processor]
 org.projectlombok:lombok:1.18.38
@@ -149,6 +150,7 @@ org.mapstruct:mapstruct-processor:1.6.3
 ```
 
 A line starting with `!` excludes a module from the transitive dependencies of the dependency declared just above.
+A line starting with `!!` excludes a module from the transitive dependencies of all the dependencies of the section.
 
 `[version]`  
 Specifies the versions of dependencies to use when not explicitly defined.  
