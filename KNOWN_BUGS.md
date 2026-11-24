@@ -109,10 +109,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `foo=${foo}` in a properties file ends with a `StackOverflowError`, when `foo` is not defined by a system property or an environment variable.
 - **Evidence:** from source.
 
-### Process output: non-ASCII characters are corrupted
-- **Where:** `JkUtilsIO.JkStreamGobbler` writes each decoded char as a single byte.
-- **Evidence:** from source.
-
 ### `--program-args` is advertised but not handled
 - **Symptom:** `--help` shows `--program-args`, the shell script only handles `-p` and `--program`.
 - **Where:** `PicocliMainCommand`, `core/src/main/shell/jeka`.
