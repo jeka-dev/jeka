@@ -584,6 +584,58 @@ class ZipExtractor {
   }
 }
 
+# Keep in sync with SecurityChecker.java
+class TrustedUrl {
+
+  # Returns the git url as [host]/[path], without protocol, user info and tag.
+  static [string] Normalize([string]$gitUrl) {
+    $u = ($gitUrl.Trim() -split '#', 2)[0]
+    $protocolIndex = $u.IndexOf('://')
+    if ($protocolIndex -ge 0) {
+      $u = $u.Substring($protocolIndex + 3)
+    }
+    $slashIndex = $u.IndexOf('/')
+    $authority = $u
+    $path = ''
+    if ($slashIndex -ge 0) {
+      $authority = $u.Substring(0, $slashIndex)
+      $path = $u.Substring($slashIndex)
+    }
+    $authority = $authority.Substring($authority.LastIndexOf('@') + 1)
+
+    # 'host:owner/repo' notation. The owner must be kept. A port number is part of the host.
+    $colonIndex = $authority.IndexOf(':')
+    if (($colonIndex -ge 0) -and ($authority.Substring($colonIndex + 1) -notmatch '^[0-9]+$')) {
+      $path = '/' + $authority.Substring($colonIndex + 1) + $path
+      if ($path.StartsWith('//')) {
+        $path = $path.Substring(1)
+      }
+      $authority = $authority.Substring(0, $colonIndex)
+    }
+    return $authority.ToLowerInvariant() + $path
+  }
+
+  # Matches on whole path segments
+  static [bool] IsTrustedBy([string]$gitUrl, [string]$trustedEntry) {
+    $u = [TrustedUrl]::Normalize($gitUrl).TrimEnd('/')
+    $entry = [TrustedUrl]::Normalize($trustedEntry).TrimEnd('/')
+    if ($entry -eq '') {
+      return $false
+    }
+    # Such urls can be resolved by Git to another location than the one they start with
+    if ($u.Contains('%') -or $u.Contains('\') -or $u.Contains('//') -or ($u -match '[\s\p{Cc}]')) {
+      return $false
+    }
+    if ("/$u/".Contains('/../') -or "/$u/".Contains('/./')) {
+      return $false
+    }
+    if (($u -replace '\.git$', '') -ceq ($entry -replace '\.git$', '')) {
+      return $true
+    }
+    return (-not $entry.EndsWith('.git')) -and $u.StartsWith("$entry/", [System.StringComparison]::Ordinal)
+  }
+}
+
 class ProgramExecutor {
   [string]$folder
   [array]$cmdLineArgs   # only args passed after -p
@@ -623,8 +675,8 @@ class ProgramExecutor {
     if ( -not $isGit) {
       return
     }
-    $domain = [BaseDirResolver]::ProtocolLess($this.url)
-    if ($domain.StartsWith("github.com/jeka-dev/", [System.StringComparison]::OrdinalIgnoreCase)) {
+    $domain = [TrustedUrl]::Normalize($this.url)
+    if ([TrustedUrl]::IsTrustedBy($this.url, "github.com/jeka-dev/")) {
       return
     }
     $propName = "jeka.app.url.trusted"
@@ -639,7 +691,7 @@ class ProgramExecutor {
       if ([string]::IsNullOrWhiteSpace($prefix)) {
         continue
       }
-      if ($domain.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+      if ([TrustedUrl]::IsTrustedBy($this.url, $prefix)) {
         $found = $true
         break
       }

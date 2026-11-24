@@ -492,6 +492,66 @@ is_remote_arg() {
 }
 
 #######################################
+# Returns the git url as [host]/[path], without protocol, user info and tag.
+# Keep in sync with SecurityChecker.java
+#######################################
+normalize_git_url() {
+  local url="$1"
+  url="${url%%#*}"
+  if [[ "$url" == *"://"* ]]; then
+    url="${url#*://}"
+  fi
+  local authority="${url%%/*}"
+  local path=""
+  if [[ "$url" == */* ]]; then
+    path="/${url#*/}"
+  fi
+  authority="${authority##*@}"
+  # 'host:owner/repo' notation. The owner must be kept. A port number is part of the host.
+  if [[ "$authority" == *:* ]]; then
+    local after_colon="${authority#*:}"
+    if [[ ! "$after_colon" =~ ^[0-9]+$ ]]; then
+      path="/$after_colon$path"
+      if [[ "$path" == //* ]]; then
+        path="${path:1}"
+      fi
+      authority="${authority%%:*}"
+    fi
+  fi
+  authority=$(printf '%s' "$authority" | tr '[:upper:]' '[:lower:]')
+  printf '%s' "$authority$path"
+}
+
+#######################################
+# Returns 0 if the url matches the trusted entry, on whole path segments.
+# Keep in sync with SecurityChecker.java
+#######################################
+is_url_trusted_by() {
+  local url entry
+  url=$(normalize_git_url "$1")
+  entry=$(normalize_git_url "$2")
+  while [[ "$entry" == */ ]]; do entry="${entry%/}"; done
+  while [[ "$url" == */ ]]; do url="${url%/}"; done
+  if [ -z "$entry" ]; then
+    return 1
+  fi
+  # Such urls can be resolved by Git to another location than the one they start with
+  if [[ "$url" == *%* || "$url" == *\\* || "$url" == *//* || "$url" =~ [[:space:][:cntrl:]] ]]; then
+    return 1
+  fi
+  if [[ "/$url/" == */../* || "/$url/" == */./* ]]; then
+    return 1
+  fi
+  if [[ "${url%.git}" == "${entry%.git}" ]]; then
+    return 0
+  fi
+  if [[ "$entry" != *.git && "$url" == "$entry"/* ]]; then
+    return 0
+  fi
+  return 1
+}
+
+#######################################
 # Check if the remote url to execute is whitelisted
 # Arguments:
 #   $1 : a string representing the url
@@ -500,7 +560,7 @@ is_remote_arg() {
 #######################################
 check_url_white_listed() {
   local url
-  url=$(get_protocol_less_url "$1")
+  url=$(normalize_git_url "$1")
   if [ -z "$url" ]; then
    return
   fi
@@ -514,8 +574,9 @@ check_url_white_listed() {
   trusted_urls+=("github.com/jeka-dev/")
   local is_found=false
 
+  local prefix
   for prefix in "${trusted_urls[@]}"; do
-    if [[ "$url" == "$prefix"* ]]; then
+    if is_url_trusted_by "$1" "$prefix"; then
       is_found=true
       break
     fi

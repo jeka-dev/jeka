@@ -22,7 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Locale;
 
 class SecurityChecker {
 
@@ -32,11 +32,12 @@ class SecurityChecker {
 
     private static final String URL_SEPARATOR = " ";
 
+    private static final String DOT_GIT = ".git";
+
     static final Path GLOBAL_PROP_FILE = JkLocator.getGlobalPropertiesFile();
 
     static boolean isAllowed(String gitUrl) {
-        String sanitized = parseGitUrl(gitUrl).trim();
-        if (sanitized.startsWith(APPROVED_URL_PROP)) {
+        if (isTrustedBy(gitUrl, APPROVED_URL_PROP)) {
             return true;
         }
         JkProperties props = JkProperties.ofFile(GLOBAL_PROP_FILE);
@@ -44,40 +45,79 @@ class SecurityChecker {
         if (JkUtilsString.isBlank(approvedUrlString)) {
             return false;
         }
-        List<String> approvedUrls = Arrays.asList(approvedUrlString.split(URL_SEPARATOR));
-        return approvedUrls.stream()
-                .map(String::trim)
-                .anyMatch(sanitized::startsWith);
+        return Arrays.stream(approvedUrlString.split(URL_SEPARATOR))
+                .anyMatch(trusted -> isTrustedBy(gitUrl, trusted));
+    }
+
+    /*
+     * A trusted entry matches whole path segments: 'github.com/foo' matches 'github.com/foo/bar' but
+     * not 'github.com/foo-bar/baz'. An entry ending with '.git' designates a single repository.
+     */
+    // non-private for testing
+    static boolean isTrustedBy(String gitUrl, String trustedEntry) {
+        String url = parseGitUrl(gitUrl);
+        String entry = parseGitUrl(trustedEntry);
+        while (entry.endsWith("/")) {
+            entry = entry.substring(0, entry.length() - 1);
+        }
+        while (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        if (entry.isEmpty() || isSuspicious(url)) {
+            return false;
+        }
+        if (withoutDotGit(url).equals(withoutDotGit(entry))) {
+            return true;
+        }
+        return !entry.endsWith(DOT_GIT) && url.startsWith(entry + "/");
+    }
+
+    // Such urls can be resolved by Git to another location than the one they start with.
+    private static boolean isSuspicious(String url) {
+        if (url.contains("%") || url.contains("\\") || url.contains("//") || url.matches("(?s).*[\\s\\p{Cntrl}].*")) {
+            return true;
+        }
+        return Arrays.stream(url.split("/")).anyMatch(segment -> segment.equals(".") || segment.equals(".."));
+    }
+
+    private static String withoutDotGit(String url) {
+        return url.endsWith(DOT_GIT) ? url.substring(0, url.length() - DOT_GIT.length()) : url;
     }
 
     static void addTrustedUrl(String allowedUrl) {
-        String sanitized = parseGitUrl(allowedUrl).trim();
+        String sanitized = parseGitUrl(allowedUrl);
         PropFile propFile = new PropFile(GLOBAL_PROP_FILE);
         String existing = JkProperties.ofFile(GLOBAL_PROP_FILE).get(GIT_TRUSTED_URL_PREFIX_PROP);
         String newValue = JkUtilsString.nullToEmpty(existing) + URL_SEPARATOR + sanitized;
         propFile.appendValueToMultiValuedProp(GIT_TRUSTED_URL_PREFIX_PROP, newValue, URL_SEPARATOR);
     }
 
+    /*
+     * Returns the url as [host]/[path], without protocol, user info and tag.
+     */
     // non-private for testing
     static String parseGitUrl(String gitUrl) {
+        String url = JkUtilsString.nullToEmpty(gitUrl).trim();
+        int fragmentIndex = url.indexOf('#');
+        if (fragmentIndex >= 0) {
+            url = url.substring(0, fragmentIndex);
+        }
+        int protocolIndex = url.indexOf("://");
+        if (protocolIndex >= 0) {
+            url = url.substring(protocolIndex + 3);
+        }
+        int slashIndex = url.indexOf('/');
+        String authority = slashIndex < 0 ? url : url.substring(0, slashIndex);
+        String path = slashIndex < 0 ? "" : url.substring(slashIndex);
+        authority = authority.substring(authority.lastIndexOf('@') + 1);
 
-        // http/https
-        if (gitUrl.startsWith("https://") || gitUrl.startsWith("http://")) {
-            String afterProtocol = JkUtilsString.substringAfterFirst(gitUrl, "//");
-            String firstSegment = JkUtilsString.substringBeforeFirst(afterProtocol, "/");
-            if (firstSegment.contains("@")) {
-                return JkUtilsString.substringAfterFirst(afterProtocol, "@");
-            }
-            return afterProtocol;
+        // 'host:owner/repo' notation. The owner must be kept. A port number is part of the host.
+        int colonIndex = authority.indexOf(':');
+        if (colonIndex >= 0 && !authority.substring(colonIndex + 1).matches("\\d+")) {
+            path = "/" + authority.substring(colonIndex + 1) + path;
+            path = path.startsWith("//") ? path.substring(1) : path;
+            authority = authority.substring(0, colonIndex);
         }
-        // ssl
-        String afterProtocol = gitUrl.replace("ssh://", "");
-        afterProtocol = afterProtocol.replace("git@", "");
-        String firstSegment = JkUtilsString.substringBeforeFirst(afterProtocol, "/");
-        if (firstSegment.contains(":")) {
-            String userPart = ":" + JkUtilsString.substringAfterFirst(firstSegment, ":");
-            return afterProtocol.replace(userPart, "");
-        }
-        return afterProtocol;
+        return authority.toLowerCase(Locale.ROOT) + path;
     }
 }
