@@ -352,17 +352,16 @@ public class JkQualifiedDependencySet {
                 .assertNoUnspecifiedVersion().getVersionResolvedCoordinateDependencies()) {
             final String configurationSource;
             String configurationTarget;
-            if (mergeWithProd.getResult().getMatching(dependency) != null) {
-                if (mergeWithProd.getAbsentDependenciesFromRight().contains(dependency)) {
-                    configurationSource = COMPILE_SCOPE;
-                    configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF;
-                } else if (mergeWithProd.getAbsentDependenciesFromLeft().contains(dependency)) {
+            if (allRuntimeDeps.getMatching(dependency) != null) {
+                if (allCompileDeps.getMatching(dependency) == null) {
                     configurationSource = RUNTIME_SCOPE;
                     configurationTarget = MASTER_TARGET_CONF + ", " + RUNTIME_TARGET_CONF;
                 } else {
                     configurationSource = COMPILE_SCOPE + "," + RUNTIME_SCOPE;
                     configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF + ", " + RUNTIME_TARGET_CONF;
                 }
+            } else if (allTestDeps.getMatching(dependency) == null) {
+                continue;  // compile-only dependency
             } else {
                 configurationSource = TEST_SCOPE;
                 configurationTarget = MASTER_TARGET_CONF + ", " + COMPILE_TARGET_CONF + ", "

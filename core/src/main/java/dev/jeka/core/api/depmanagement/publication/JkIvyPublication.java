@@ -314,10 +314,11 @@ public final class JkIvyPublication {
         List<JkQualifiedDependency> result = new LinkedList<>();
         for (JkCoordinateDependency coordinateDependency : merge.getResult().normalised(strategy)
                 .assertNoUnspecifiedVersion().getVersionResolvedCoordinateDependencies()) {
+            if (runtimeDependencies.getMatching(coordinateDependency) == null) {
+                continue;  // compile-only dependency
+            }
             String configuration = "compile->compile(*),master(*)";
-            if (merge.getAbsentDependenciesFromRight().contains(coordinateDependency)) {
-                // compile only dependency
-            } else if (merge.getAbsentDependenciesFromLeft().contains(coordinateDependency)) {
+            if (compileDependencies.getMatching(coordinateDependency) == null) {
                 configuration = "runtime->runtime(*),master(*)";
             } else {
                 configuration = configuration + ";runtime -> runtime(*),master(*)";

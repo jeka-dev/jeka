@@ -132,7 +132,11 @@ class JkProjectTest {
         mavenPublication.customizeDependencies(deps -> deps.minus("org.postgresql:postgresql"));
         JkDependencySet publishDeps = mavenPublication.getDependencies();
         publishDeps.getEntries().forEach(System.out::println);
-        assertEquals(JkTransitivity.COMPILE, publishDeps.get("javax.servlet:javax.servlet-api").getTransitivity());
+        assertEquals(1, publishDeps.getEntries().size());
+        assertEquals(JkTransitivity.COMPILE, publishDeps.get("com.google.guava:guava").getTransitivity());
+
+        // Not part of the runtime dependencies
+        Assertions.assertNull(publishDeps.get("javax.servlet:javax.servlet-api"));
     }
 
     @Test

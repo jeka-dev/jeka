@@ -47,13 +47,14 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Publication and Maven
 
-### Published POM has wrong scopes
-- **Symptom:** dependencies of `[compile-only]` (e.g. Lombok) are published with scope `compile`, and those of `[runtime]` (e.g. PostgreSQL) are missing. `docs/reference/api-project.md` says the runtime classpath is published.
-- **Evidence:** reproduced, with `project: pack maven: publishLocal` and `maven: info`.
-
 ### Sibling module missing from the published POM
 - **Symptom:** a module depending on `../plugin-common` in `jeka.project.deps` is published without that dependency.
 - **Evidence:** reproduced by the naive agent.
+
+### Compile-only dependencies of a sibling module leak into the runtime classpath
+- **Symptom:** a module declaring `../a` in `[compile]` gets the `[compile-only]` dependencies of `a` (e.g. Lombok) in its runtime and test classpaths.
+- **Where:** `JkProject.toDependency` exports the compile and runtime dependencies merged.
+- **Evidence:** reproduced with `project: depTree`.
 
 ### `maven: migrateDeps` generates an invalid `jeka.project.deps`
 - **Symptom:** a `provided` dependency becomes `- org.projectlombok:lombok` in `[compile-only]`, without version. Using it fails with `Coordinate specification '- org...' is not correct`.

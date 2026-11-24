@@ -118,7 +118,7 @@ class Custom extends KBean {
         mavenKBean.getPublication()
                 .customizeDependencies(deps -> deps   // published dependencies
                         .withTransitivity("com.google.code.gson:gson", JkTransitivity.COMPILE)
-                        .minus("org.projectlombok:lombok"))
+                        .minus("org.postgresql:postgresql"))
                 .pomMetadata
                         .setProjectName("My library")
                         .addLicense("Apache License V2.0", "https://www.apache.org/licenses/LICENSE-2.0.html");
