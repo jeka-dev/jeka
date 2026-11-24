@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JkPropertiesTest {
 
@@ -18,6 +19,14 @@ class JkPropertiesTest {
         assertEquals("bar fooValue", JkProperties.ofMap("", map).get("bar"));
         map.put("bar", "bar value");
         assertEquals("bar value", JkProperties.ofMap("", map).get("bar"));
+    }
+
+    @Test
+    void get_undefinedReference_fails() {
+        Map<String, String> map = new HashMap<>();
+        map.put("bar", "${undefined.zzz}");
+        Exception e = assertThrows(IllegalArgumentException.class, () -> JkProperties.ofMap("", map).get("bar"));
+        assertEquals("Property 'bar' references '${undefined.zzz}' which is not defined.", e.getMessage());
     }
 
     @Test

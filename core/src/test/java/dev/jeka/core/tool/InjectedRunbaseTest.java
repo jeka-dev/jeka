@@ -47,7 +47,9 @@ class InjectedRunbaseTest {
                 "import dev.jeka.core.tool.builtins.project.ProjectKBean;\n" +
                 "class BuildB extends KBean {\n" +
                 "  @JkInject(\"../a\") ProjectKBean a;\n" +
-                "  public void init() { System.setProperty(\"injected.base\", a.getBaseDir().toString()); }\n" +
+                "  @JkInject(\"../a\") JkRunbase aBase;\n" +
+                "  public void init() { System.setProperty(\"injected.base\", a.getBaseDir().toString());\n" +
+                "    System.setProperty(\"injected.runbase\", aBase.getBaseDir().toString()); }\n" +
                 "}\n");
         try {
             Engine engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
@@ -59,8 +61,10 @@ class InjectedRunbaseTest {
             assertEquals(2, runbase.getChildRunbases().size());
             assertEquals("a", runbase.getChildRunbases().get(0).getBaseDir().getFileName().toString());
             assertEquals(dir.resolve("a").toString(), System.getProperty("injected.base"));
+            assertEquals(dir.resolve("a").toString(), System.getProperty("injected.runbase"));
         } finally {
             System.clearProperty("injected.base");
+            System.clearProperty("injected.runbase");
         }
     }
 

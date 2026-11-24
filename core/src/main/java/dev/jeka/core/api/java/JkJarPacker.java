@@ -148,7 +148,11 @@ public final class JkJarPacker {
     }
 
     public static void makeShadeJar(JkRepoSet repos, Path originalJar, Iterable<Path> extraJars, Path outputJar) {
-        JkInternalJarShader jarShader = JkInternalJarShader.of(repos);
+        makeShadeJar(JkInternalJarShader.of(repos), originalJar, extraJars, outputJar);
+    }
+
+    // non-private for testing
+    static void makeShadeJar(JkInternalJarShader jarShader, Path originalJar, Iterable<Path> extraJars, Path outputJar) {
 
         // Write in a temp file first, so that a failure leaves neither a partial nor a stale jar at the final location
         JkUtilsPath.deleteIfExists(outputJar);
