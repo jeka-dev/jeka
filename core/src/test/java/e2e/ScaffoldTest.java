@@ -16,6 +16,7 @@
 
 package e2e;
 
+import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * End-to-end tests about scaffolding.
@@ -87,6 +89,20 @@ class ScaffoldTest {
     void scaffoldProject_plugin_ok() {
         jeka("project: scaffold scaffold.kind=PLUGIN scaffold.jekaVersion=NO");
         jeka("test pack");
+    }
+
+    @Test
+    void scaffoldProject_existingFilesKept_updateLocalScriptsReplacesScripts() {
+        List<String> fileNames = List.of("README.md", "jeka.properties", "jeka.project.deps", "jeka", "jeka.ps1");
+        fileNames.forEach(name -> JkPathFile.of(runDir.resolve(name)).write("# my " + name));
+        jeka("project: scaffold scaffold.kind=EMPTY scaffold.jekaVersion=NO");
+        fileNames.forEach(name ->
+                Assertions.assertEquals("# my " + name, JkPathFile.of(runDir.resolve(name)).readAsString()));
+
+        jeka("setup: updateLocalScripts");
+        Assertions.assertTrue(JkPathFile.of(runDir.resolve("jeka")).readAsString().startsWith("#!/bin/bash"));
+        Assertions.assertNotEquals("# my jeka.ps1", JkPathFile.of(runDir.resolve("jeka.ps1")).readAsString());
+        Assertions.assertEquals("# my README.md", JkPathFile.of(runDir.resolve("README.md")).readAsString());
     }
 
     @Test

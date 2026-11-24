@@ -14,10 +14,7 @@ jeka project: scaffold scaffold.kind=EMPTY
 ```
 
 This adds *jeka.properties*, *jeka.project.deps*, and the `jeka` and `jeka.ps1` wrapper scripts. 
-`kind=EMPTY` avoids generating the sample classes.
-
-!!! warning
-    This replaces the existing *README.md* file. Restore it with `git checkout README.md`.
+`kind=EMPTY` avoids generating the sample classes. Existing files, as *README.md*, are kept.
 
 ## 2. Convert the Dependencies
 

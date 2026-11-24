@@ -39,11 +39,13 @@ public class JkScaffoldOptions {
     @JkDoc("Set a specific jeka.distrib.repo to include in jeka.properties.")
     private String jekaDistribRepo;
 
-    @JkDoc("Coma separated string representing properties to add to jeka.properties.")
+    @JkDoc("Coma separated string representing properties to add to jeka.properties. " +
+            "If this file already exists, they are appended to it, except the ones already declared.")
     private String extraJekaProps = "";
 
     @JkDoc(
             "Set the path of a file containing the exact content of the jeka.properties file to generate.%n"
+        +   "An existing jeka.properties file is kept as is.%n"
         +   "If this field is set, all others related to jeka.properties generation are ignored.")
     private Path rawJekaPropsContentPath;
 
@@ -54,7 +56,7 @@ public class JkScaffoldOptions {
         if (rawJekaPropsContentPath != null) {
             scaffold.setRawJekaPropsPath(rawJekaPropsContentPath);
         } else if (extraJekaProps != null) {
-            Arrays.stream(extraJekaProps.split(",")).forEach(scaffold::addJekaPropValue);
+            Arrays.stream(extraJekaProps.split(",")).forEach(scaffold::addRequestedJekaPropValue);
             scaffold
                     .setJekaVersion(jekaVersion)
                     .setJekaDistribLocation(jekaLocation)

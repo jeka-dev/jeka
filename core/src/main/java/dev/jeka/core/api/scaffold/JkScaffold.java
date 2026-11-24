@@ -26,7 +26,9 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.*;
 import dev.jeka.core.tool.JkConstants;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -62,6 +64,9 @@ public abstract class JkScaffold {
 
     private String jekaPropsContent = "";
 
+    // Properties explicitly requested by the user, to add to jeka.properties even if it already exists
+    private final List<String> requestedJekaProps = new LinkedList<>();
+
     // If not null, we take this file content as is and ignore other settings
     private Path rawJekaPropsPath;
 
@@ -90,6 +95,15 @@ public abstract class JkScaffold {
      */
     public JkScaffold addJekaPropValue(String propValue) {
         return addJekaPropsContent(propValue.trim() + "\n");
+    }
+
+    /**
+     * Same as {@link #addJekaPropValue(String)} but, if a jeka.properties file already exists, the property
+     * is appended to it, unless the file already declares it.
+     */
+    public JkScaffold addRequestedJekaPropValue(String propValue) {
+        requestedJekaProps.add(propValue.trim());
+        return addJekaPropValue(propValue);
     }
 
     public JkScaffold setJekaVersion(String jekaVersion) {
@@ -150,7 +164,9 @@ public abstract class JkScaffold {
     }
 
     /**
-     * Runs the scaffolding, meaning folder structure, build class, props file and .gitignore
+     * Runs the scaffolding, meaning folder structure, build class, props file and .gitignore.
+     * <p>
+     * Existing files are kept untouched, except .gitignore and jeka.properties, which may only be appended to.
      */
     protected void run() {
         // Create 'jeka-src' dir
@@ -158,10 +174,45 @@ public abstract class JkScaffold {
         JkLog.verbose("Create %s", jekaSrc);
 
         JkUtilsPath.createDirectories(jekaSrc);
-        createOrUpdateJekaProps();  // Create 'jeka.properties' file
+        createJekaProps();  // Create 'jeka.properties' file
         createOrUpdateGitIgnore();  // Create .gitignore
-        createShellScripts();   // Shell scripts
+        createShellScripts(baseDir, false);   // Shell scripts
         fileEntries.forEach(extraEntry -> extraEntry.write(baseDir));
+    }
+
+    /**
+     * Writes the specified content to the specified file, unless the file already exists.
+     * In this case, the file is kept untouched and the user is told about it.
+     *
+     * @return <code>true</code> if the file has been written.
+     */
+    protected static boolean writeIfAbsent(Path file, String content) {
+        if (keepExisting(file)) {
+            return false;
+        }
+        JkPathFile.of(file).createIfNotExist().write(content);
+        return true;
+    }
+
+    /**
+     * Returns <code>true</code> if the specified file already exists, telling the user that it is kept untouched.
+     */
+    private static boolean keepExisting(Path file) {
+        if (!Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
+            return false;
+        }
+        JkLog.info("Keep existing %s", file.toAbsolutePath().normalize());
+        return true;
+    }
+
+    /**
+     * Tells the user about the lines that would have been generated in a file, but are not part of the existing one.
+     */
+    protected static void warnMissingLines(Path existingFile, List<String> missingLines) {
+        if (!missingLines.isEmpty()) {
+            JkLog.warn("%s already exists, so these lines have not been added. Add them if needed:\n%s",
+                    existingFile.getFileName(), String.join("\n", missingLines));
+        }
     }
 
     /**
@@ -196,7 +247,7 @@ public abstract class JkScaffold {
     /**
      * Adds a file entry to the list of file entries in the scaffold.
      * The file entry consists of a relative path and its content.
-     * The file entry will be created or updated when the scaffold is run.
+     * The file entry will be created when the scaffold is run, unless the file already exists.
      */
     public final void addFileEntry(String relativePath, String content) {
         JkFileEntry fileEntry = JkFileEntry.of(Paths.get(relativePath), content);
@@ -243,15 +294,19 @@ public abstract class JkScaffold {
      * @param baseDir the base directory where the shell scripts will be created or replaced.
      */
     public static void createShellScripts(Path baseDir) {
+        createShellScripts(baseDir, true);
+    }
+
+    private static void createShellScripts(Path baseDir, boolean replaceExisting) {
         final Path jekaBat = JkLocator.getJekaHomeDir().resolve("jeka.ps1");
-        if (Files.exists(jekaBat)) {
+        if (Files.exists(jekaBat) && (replaceExisting || !keepExisting(baseDir.resolve("jeka.ps1")))) {
             JkLog.verbose("Create jeka.ps1 file");
             JkUtilsPath.copy(jekaBat, baseDir.resolve("jeka.ps1"), StandardCopyOption.REPLACE_EXISTING);
         }
         Path jekaShell = JkLocator.getJekaHomeDir().resolve("jeka");
         if (Files.isDirectory(jekaShell)) {
             JkLog.warn("%s directory is still present. Cannot create jeka shell file in base directory.", jekaShell);
-        } else if (Files.exists(jekaShell)) {
+        } else if (Files.exists(jekaShell) && (replaceExisting || !keepExisting(baseDir.resolve("jeka")))) {
             JkLog.verbose("Create jeka shell file");
             JkUtilsPath.copy(jekaShell, baseDir.resolve("jeka"),
                     StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
@@ -259,7 +314,7 @@ public abstract class JkScaffold {
         }
     }
 
-    private void createOrUpdateJekaProps() {
+    private void createJekaProps() {
         final String fileContent;
 
         if (rawJekaPropsPath != null) {
@@ -291,12 +346,54 @@ public abstract class JkScaffold {
         }
         String interpolated = interpolateLastVersionOf(fileContent, 0, this.downloadRepos);
 
-        JkPathFile jekaPropsFile  = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE));
-        if (!jekaPropsFile.exists()) {
-            jekaPropsFile.fetchContentFrom(JkScaffold.class.getResource(JkConstants.PROPERTIES_FILE));
+        Path jekaPropsFile = baseDir.resolve(JkConstants.PROPERTIES_FILE);
+        if (!writeIfAbsent(jekaPropsFile, interpolated)) {
+            completeJekaProps(jekaPropsFile, interpolated);
+        }
+    }
+
+    /*
+     * Appends the requested properties to the existing jeka.properties, and tells which other ones are missing.
+     */
+    private void completeJekaProps(Path jekaPropsFile, String generatedContent) {
+        JkPathFile file = JkPathFile.of(jekaPropsFile);
+        String existingContent = file.readAsString();
+        Set<String> existingKeys = new HashSet<>(parseProps(existingContent).stringPropertyNames());
+
+        if (rawJekaPropsPath == null) {
+            List<String> added = new LinkedList<>();
+            for (String propValue : requestedJekaProps) {
+                String content = interpolateLastVersionOf(propValue.replace("\\n", "\n"), 0, this.downloadRepos);
+                for (String line : content.split("\n")) {
+                    if (parseProps(line).stringPropertyNames().stream().anyMatch(existingKeys::add)) {
+                        added.add(line);
+                    }
+                }
+            }
+            if (!added.isEmpty()) {
+                String prefix = existingContent.isEmpty() || existingContent.endsWith("\n") ? "" : "\n";
+                file.write(prefix + String.join("\n", added) + "\n", StandardOpenOption.APPEND);
+                JkLog.info("Properties added to %s:\n%s", JkConstants.PROPERTIES_FILE, String.join("\n", added));
+            }
         }
 
-        jekaPropsFile.write(interpolated, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+        Properties generated = parseProps(generatedContent);
+        List<String> missing = generated.stringPropertyNames().stream()
+                .filter(key -> !existingKeys.contains(key))
+                .sorted()
+                .map(key -> key + "=" + generated.getProperty(key))
+                .collect(Collectors.toList());
+        warnMissingLines(jekaPropsFile, missing);
+    }
+
+    private static Properties parseProps(String content) {
+        Properties properties = new Properties();
+        try {
+            properties.load(new StringReader(content));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return properties;
     }
 
     private void createOrUpdateGitIgnore() {
@@ -309,10 +406,6 @@ public abstract class JkScaffold {
         if (lines.stream().noneMatch(line -> JEKA_WORK_IGNORE.equals(line.trim()))) {
             file.write("\n" + JEKA_WORK_IGNORE, StandardOpenOption.APPEND);
         }
-    }
-
-    private void createShellScripts() {
-        createShellScripts(baseDir);
     }
 
     public static class JkFileEntry {
@@ -333,9 +426,7 @@ public abstract class JkScaffold {
         }
 
         void write(Path baseDir) {
-            JkPathFile.of(baseDir.resolve(relativePath)).createIfNotExist();
-            JkUtilsPath.write(baseDir.resolve(relativePath), content.getBytes(StandardCharsets.UTF_8),
-                    StandardOpenOption.WRITE);
+            writeIfAbsent(baseDir.resolve(relativePath), content);
         }
     }
 

@@ -16,7 +16,6 @@
 
 package dev.jeka.core.tool.builtins.base;
 
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.scaffold.JkScaffold;
 import dev.jeka.core.api.system.JkLog;
@@ -162,10 +161,10 @@ public final class JkBaseScaffold extends JkScaffold {
     private void generateReadme() {
         if (this.baseScaffoldOption.kind == Kind.APP) {
             String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md"));
-            JkPathFile.of(baseDir.resolve("README.md")).createIfNotExist().write(content);
+            writeIfAbsent(baseDir.resolve("README.md"), content);
         }  else if (this.baseScaffoldOption.kind == Kind.PLUGIN) {
             String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README_PLUGIN.md"));
-            JkPathFile.of(baseDir.resolve("README.md")).createIfNotExist().write(content);
+            writeIfAbsent(baseDir.resolve("README.md"), content);
         }
     }
 

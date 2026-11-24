@@ -74,10 +74,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** warning with status 1.
 - **Evidence:** reproduced by the naive agent.
 
-### Scaffold overwrites existing files
-- **Symptom:** `project: scaffold` replaces an existing `README.md` or `jeka.properties`, without asking. User content is lost.
-- **Evidence:** reproduced by the doc-writer agent.
-
 ### `jeka -p` picks the javadoc JAR after a publication
 - **Symptom:** `Invalid or corrupt jarfile`, as `x-javadoc.jar` sorts before `x.jar` in `jeka-output`.
 - **Evidence:** reproduced by the doc-writer agent.
