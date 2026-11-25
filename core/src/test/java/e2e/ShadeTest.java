@@ -124,4 +124,66 @@ class ShadeTest {
         assertTrue(output.contains("found:app.Task"), output);
     }
 
+    @Test
+    void shade_onlyRelocatesDependencyPackages() throws Exception {
+        Path dir = tempDir.toRealPath();
+        Files.writeString(dir.resolve("jeka.properties"), """
+                @project=on
+                @project.moduleId=org.example:shaded
+                @project.javaVersion=21
+                @project.pack.jarType=SHADE
+                @project.pack.mainClass=org.example.Main
+                """);
+
+        // Logback refers to org.xml.sax, and jsr305 contains javax.annotation
+        Files.writeString(dir.resolve("jeka.project.deps"), """
+                [compile]
+                ch.qos.logback:logback-classic:1.5.18
+                com.google.code.findbugs:jsr305:3.0.2
+                """);
+        Path sources = dir.resolve("src/main/java/org/example");
+        Files.createDirectories(sources.resolve("sub"));
+        Files.writeString(sources.resolve("Main.java"), """
+                package org.example;
+                public class Main {
+                    public static void main(String[] args) {
+                        org.slf4j.LoggerFactory.getLogger(Main.class).info("logged");
+                        System.out.println("found:" + org.w3c.dom.Node.class.getName());
+                        System.out.println("found:" + javax.xml.parsers.SAXParserFactory.class.getName());
+                        System.out.println("found:" + javax.annotation.Nonnull.class.getName());
+                        System.out.println("found:" + org.example.sub.Other.class.getName());
+                    }
+                }
+                """);
+        Files.writeString(sources.resolve("sub/Other.java"), """
+                package org.example.sub;
+                public class Other {
+                }
+                """);
+        // Class names in text files are not relocated
+        Path resources = dir.resolve("src/main/resources");
+        Files.createDirectories(resources);
+        Files.writeString(resources.resolve("logback.xml"), """
+                <configuration>
+                  <appender name="C" class="org.example._shaded.ch.qos.logback.core.ConsoleAppender">
+                    <encoder><pattern>logback:%msg%n</pattern></encoder>
+                  </appender>
+                  <root level="info"><appender-ref ref="C"/></root>
+                </configuration>
+                """);
+
+        new JekaCmdLineExecutor().runWithDistribJekaShell(dir, "project: pack");
+
+        Path jar = dir.resolve("jeka-output/org.example.shaded.jar");
+        String output = JkProcess.of(Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                        "-jar", jar.toString())
+                .setCollectStdout(true)
+                .exec().getStdoutAsString();
+        assertTrue(output.contains("found:org.w3c.dom.Node"), output);
+        assertTrue(output.contains("found:javax.xml.parsers.SAXParserFactory"), output);
+        assertTrue(output.contains("found:org.example._shaded.javax.annotation.Nonnull"), output);
+        assertTrue(output.contains("found:org.example.sub.Other"), output);
+        assertTrue(output.contains("logback:logged"), output);
+    }
+
 }

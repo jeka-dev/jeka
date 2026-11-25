@@ -188,6 +188,11 @@ The scaffolded *jeka.properties* sets a FAT JAR. Without this property, JeKa cre
 | `FAT` | Includes all runtime dependencies. |
 | `SHADE` | Same as `FAT`, with the dependency packages relocated. |
 
+!!! note
+    `SHADE` relocates classes and `META-INF/services` files, but not the class names written in other text files.
+    For example, `logback.xml` must mention the relocated name: `my.app._shaded.ch.qos.logback.core.ConsoleAppender`,
+    where `my.app` is the root package of your application. Prefer `FAT` for applications that don't need relocation.
+
 ### Multiple Artifacts
 
 For libraries, you might want to produce both a regular JAR and an extra shaded JAR:

@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -98,14 +99,14 @@ public class MavenJarShader implements JkInternalJarShader {
 
 
 
-    private Set<String> baseFolderContainingClass(Path jarFile) {
-        try (JkZipTree tree = JkZipTree.of(jarFile)) {
-            return tree.streamBreathFirst()
-                    .filter(path -> path.toString().endsWith(".class"))
-                    .map(path -> path.iterator().next().toString())
-                    .filter(base -> !"META-INF".equals(base))
-                    .filter(base -> !"module-info.class".equals(base))
+    private static Set<String> entries(Path jarFile) {
+        try (JarFile jar = new JarFile(jarFile.toFile())) {
+            return jar.stream()
+                    .filter(entry -> !entry.isDirectory())
+                    .map(JarEntry::getName)
                     .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -121,25 +122,33 @@ public class MavenJarShader implements JkInternalJarShader {
     }
 
     private List<Relocator> relocators(Path jarFile, List<Path> extraJars) {
-        String basePackage = rootPackage(jarFile);
-        String exclude = basePackage.replace(".", "/") + "/*";
-        String baseRelocationPackage = basePackage + "._shaded.";
-        List<Relocator> relocators = new LinkedList<>();
-        Set<String> basePackages = new HashSet<>();
+        String baseRelocationPackage = rootPackage(jarFile) + "._shaded.";
+        Set<String> dependencyEntries = new HashSet<>();
         for (Path extraJar : extraJars) {
-            basePackages.addAll(baseFolderContainingClass(extraJar));
+            dependencyEntries.addAll(entries(extraJar));
         }
-        for (String basePackageName : basePackages) {
-            Relocator relocator = new SimpleRelocator(
-                    basePackageName + ".",
-                    baseRelocationPackage + basePackageName + ".",
-                    null,
-                    Collections.singletonList(exclude));
-            relocators.add(relocator);
+        ShadedPackages shadedPackages = ShadedPackages.of(entries(jarFile), dependencyEntries);
+        List<Relocator> relocators = new LinkedList<>();
+        for (String root : shadedPackages.roots()) {
+            relocators.add(new PackageRelocator(root, baseRelocationPackage, shadedPackages));
         }
         return relocators;
     }
 
+    private static class PackageRelocator extends SimpleRelocator {
+
+        private final ShadedPackages shadedPackages;
+
+        PackageRelocator(String root, String baseRelocationPackage, ShadedPackages shadedPackages) {
+            super(root + ".", baseRelocationPackage + root + ".", null, null);
+            this.shadedPackages = shadedPackages;
+        }
+
+        @Override
+        public boolean canRelocatePath(String path) {
+            return super.canRelocatePath(path) && shadedPackages.contains(path);
+        }
+    }
 
     private void modifyManifest(Path mainJar, Path shadeJar) {
         Manifest jarManifest;
