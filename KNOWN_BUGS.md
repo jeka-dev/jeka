@@ -45,6 +45,20 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** with `@springboot.createWarFile=true`, `project: pack` runs the tests and warns that `jeka-war...` is empty or does not exist.
 - **Evidence:** reproduced by the naive agent.
 
+### Compiling for Java 8 fails
+- **Symptom:** `@project.javaVersion=8` makes `project: pack` fail with `Unrecognized option: --add-exports=jdk.compiler/...`. Targets 11 and 17 compile.
+- **Where:** `JkJavaCompilerToolChain` and `JkProject` pass `-J--add-exports` to forked compilers whatever the JDK; options in `JkJavaCompileSpec`.
+- **Evidence:** reproduced. Not new: same in 0.11.68 (sample-maintainer agent).
+
+### `jeka.jdk.N` is ignored by `bundle`
+- **Symptom:** `bundle: pack` downloads a JDK although `jeka.jdk.N` is set. `native`, `jlink` and `jdeps` use the same code.
+- **Where:** `JkUtilsJdk.getJdk` only looks in the cache.
+- **Evidence:** reproduced by the sample-maintainer agent for `bundle`, from source for the others.
+
+### `-p` runs a non-runnable JAR left by `project: pack`
+- **Symptom:** `no main manifest attribute` after packing a REGULAR jar. `jeka -c -p` works.
+- **Evidence:** reproduced by the sample-maintainer agent.
+
 ## Publication and Maven
 
 ### Sibling module missing from the published POM
@@ -55,6 +69,11 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** a module declaring `../a` in `[compile]` gets the `[compile-only]` dependencies of `a` (e.g. Lombok) in its runtime and test classpaths.
 - **Where:** `JkProject.toDependency` exports the compile and runtime dependencies merged.
 - **Evidence:** reproduced with `project: depTree`.
+
+### Obscure error without Maven
+- **Symptom:** without `mvn` in the PATH nor `mvnw`, `maven:` commands fail with `Cannot run program "-N"` (or another argument).
+- **Where:** `JkMvn.mvnCmd` returns null.
+- **Evidence:** reproduced with `migrateDeps`.
 
 ### BOM: versions managed by a grandparent POM are ignored
 - **Symptom:** with `x:p1:1@pom` in `[version]`, `p1` having parent `p2`, itself having parent `p3`, versions managed by `p3` are not found: `Following modules do not specify version`. Those of `p1` and `p2` are. Also concerns external parents declared by `maven: migrateDeps`.
@@ -145,6 +164,19 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `jeka.cmd.hi=-f daemon "Hello"` passes the quotes to the program. May be a known trade-off.
 - **Evidence:** reproduced by the sample-maintainer agent with 0.11.63; same code on master.
 
+### `jeka --doc` can fail with a bare `Failed!`
+- **Symptom:** happens when an enum initializer runs under two classloaders (working-examples/kubernetes). The cause is hidden.
+- **Where:** `PicocliHelp.cmdHelp` builds its own classloader; `Main.handleGenericThrowable` prints `Failed!` when the message is null.
+- **Evidence:** reproduced by the sample-maintainer agent.
+
+### Spinner text in redirected output on recent JDKs
+- **Symptom:** `Booting JeKa... /` in logs with JDK 23.
+- **Where:** `JkConsoleSpinner` and `JkUtilsSystem` test `System.console()` for null; JDK 22+ may return one when redirected (inferred).
+- **Evidence:** reproduced by the sample-maintainer agent.
+
+### `-cb=<unknown>` only warns and exits 0
+- **Evidence:** reproduced by the sample-maintainer agent.
+
 ## KBeans
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
@@ -153,6 +185,8 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*
 - **`SecurityChecker.addTrustedUrl`** writes a leading space in `jeka.app.url.trusted`. Harmless for Java, not checked in the shell script. *Reproduced by the doc-writer agent.*
 - **`NodeJsKBean.init` `@JkDoc`** says it configures the project, but it only registers a clean action. *From source.*
+- **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". *Reproduced by the sample-maintainer agent.*
+- **`--doc` of a KBean** prints `null` for undocumented `@JkPostInit` methods, and no space after long names (`PicocliHelp`). *Reproduced by the sample-maintainer agent.*
 - **`docker: build`** prints "Native compilation started at" for JVM images. *Reproduced by the naive agent.*
 - **`nodeJs: exec`** shows its output only with `-v`. *Reproduced by the naive agent.*
 - **`jeka.project.deps` with only `[processor]`** fails with a "legacy format" error. *Reproduced by the doc-writer agent.*
