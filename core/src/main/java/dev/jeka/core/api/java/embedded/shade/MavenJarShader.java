@@ -31,6 +31,7 @@ import org.apache.maven.plugins.shade.filter.Filter;
 import org.apache.maven.plugins.shade.filter.SimpleFilter;
 import org.apache.maven.plugins.shade.relocation.Relocator;
 import org.apache.maven.plugins.shade.relocation.SimpleRelocator;
+import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -74,7 +75,8 @@ public class MavenJarShader implements JkInternalJarShader {
                 JkUtilsIterable.setOf("module-info.class", "META-INF/*.SF", "META-INF/*.DSA","META-INF/*.RSA") );
         shadeRequest.setFilters(Collections.singletonList(filter));
 
-        shadeRequest.setResourceTransformers(Collections.emptyList());
+        // Relocate and merge META-INF/services files, so ServiceLoader still finds relocated classes
+        shadeRequest.setResourceTransformers(Collections.singletonList(new ServicesResourceTransformer()));
 
         List<Relocator> relocators = relocators(mainJar, new LinkedList<>(extraJars));
         shadeRequest.setRelocators(relocators);

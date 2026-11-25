@@ -188,9 +188,6 @@ The scaffolded *jeka.properties* sets a FAT JAR. Without this property, JeKa cre
 | `FAT` | Includes all runtime dependencies. |
 | `SHADE` | Same as `FAT`, with the dependency packages relocated. |
 
-!!! note
-    Shaded JARs cannot be created yet from classes compiled for Java 24 or higher. Set `@project.javaVersion=21`.
-
 ### Multiple Artifacts
 
 For libraries, you might want to produce both a regular JAR and an extra shaded JAR:
@@ -201,7 +198,6 @@ For libraries, you might want to produce both a regular JAR and an extra shaded 
 
 # Produce an extra shaded jar suffixed with '-all'
 @project.pack.shadeJarClassifier=all
-@project.javaVersion=21
 
 # Ensure the extra artifact is published to Maven
 @maven.pub.extraArtifacts=all

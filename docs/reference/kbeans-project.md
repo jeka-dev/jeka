@@ -41,7 +41,7 @@ These properties can be set via command line (e.g., `project: javaVersion=21`) o
 | `test.skip` | If `true`, tests are not executed.         | `false` |
 | `test.fork` | If `true`, tests run in a forked process, on a JDK of the target version. | `true` |
 | `test.includePatterns` | Space-separated regular expressions selecting the test classes to run. | All classes |
-| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`, `SHADE`). `SHADE` does not support classes compiled for Java 24 or higher yet. | `REGULAR` (scaffolded projects set `FAT`) |
+| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`, `SHADE`). | `REGULAR` (scaffolded projects set `FAT`) |
 | `version` | Hardcode the project version.              | Not set. Inferred from Git if `gitVersioning.enable=true` |
 | `moduleId` | Maven coordinates (`group:name`).          | `null` |
 
