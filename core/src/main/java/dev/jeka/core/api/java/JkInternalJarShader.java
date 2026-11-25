@@ -49,7 +49,7 @@ public interface JkInternalJarShader {
                     .setUseFileSystemCache(true);
             JkDependencySet dependencies = JkDependencySet.of()
                     .and("org.slf4j:slf4j-simple:2.0.13")
-                    .and("org.apache.maven.plugins:maven-shade-plugin:3.6.0")
+                    .and("org.apache.maven.plugins:maven-shade-plugin:3.6.2")
                         .withLocalExclusions("org.slf4j:slf4j-simple")
                     .and("org.apache.maven:maven-plugin-api:3.9.8");
             List<Path> classpath = dependencyResolver.resolveFiles("shading jar", dependencies);

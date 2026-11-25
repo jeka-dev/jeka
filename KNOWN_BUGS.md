@@ -9,12 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Build and packaging
 
-### Shading fails on Java 24+ classes
-- **Symptom:** `jarType=SHADE` (or `shadeJarClassifier`) fails with `Unsupported class file major version 69` (68 for Java 24), if the project has dependencies. Scaffolds currently set `jeka.java.version=25`.
-- **Where:** maven-shade-plugin 3.6.0, in `JkInternalJarShader`.
-- **Evidence:** reproduced. Works with Java 21.
-- **When fixed:** remove the note in `docs/reference/kbeans-maven.md`.
-
 ### A `META-INF/MANIFEST.MF` resource replaces the generated manifest in FAT jars
 - **Symptom:** with a `META-INF/MANIFEST.MF` in the project resources, a FAT jar contains this one only, ignoring version and manifest customizers. A REGULAR jar contains the generated one only. Nothing tells the user. `.jeka-work/jeka-src-classes` may also hold such a file, left by JeKa 0.11.68 or older: use `--clean-work` once.
 - **Where:** `JkJarPacker.makeFatJar`.
@@ -26,6 +20,11 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `jeka-output/classes` is not cleaned, and `JkAbstractPathTree.zipTo` adds to the existing jar.
 - **Workaround:** `--clean`.
 - **Evidence:** reproduced.
+
+### Service files are not relocated in shaded jars
+- **Symptom:** `META-INF/services` files keep their original names and content, while classes are relocated, so `ServiceLoader` finds nothing (e.g. SLF4J: `No SLF4J providers were found`).
+- **Where:** `MavenJarShader` uses no resource transformer.
+- **Evidence:** reproduced on Java 21, with maven-shade-plugin 3.6.0 and 3.6.2.
 
 ### Unclear error when the main jar is missing at publication
 - **Symptom:** `No artifact file and artifact maker found for [main].jar...` instead of suggesting to run `pack`.
