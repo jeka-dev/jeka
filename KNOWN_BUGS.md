@@ -21,11 +21,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Workaround:** `--clean`.
 - **Evidence:** reproduced.
 
-### Service files are not relocated in shaded jars
-- **Symptom:** `META-INF/services` files keep their original names and content, while classes are relocated, so `ServiceLoader` finds nothing (e.g. SLF4J: `No SLF4J providers were found`).
-- **Where:** `MavenJarShader` uses no resource transformer.
-- **Evidence:** reproduced on Java 21, with maven-shade-plugin 3.6.0 and 3.6.2.
-
 ### Unclear error when the main jar is missing at publication
 - **Symptom:** `No artifact file and artifact maker found for [main].jar...` instead of suggesting to run `pack`.
 - **Evidence:** reproduced.
