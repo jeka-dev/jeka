@@ -38,7 +38,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -99,17 +98,6 @@ public class MavenJarShader implements JkInternalJarShader {
 
 
 
-    private static Set<String> entries(Path jarFile) {
-        try (JarFile jar = new JarFile(jarFile.toFile())) {
-            return jar.stream()
-                    .filter(entry -> !entry.isDirectory())
-                    .map(JarEntry::getName)
-                    .collect(Collectors.toSet());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     private String rootPackage(Path jarFile) {
         try (JkZipTree tree = JkZipTree.of(jarFile)) {
             return tree.streamBreathFirst()
@@ -123,11 +111,7 @@ public class MavenJarShader implements JkInternalJarShader {
 
     private List<Relocator> relocators(Path jarFile, List<Path> extraJars) {
         String baseRelocationPackage = rootPackage(jarFile) + "._shaded.";
-        Set<String> dependencyEntries = new HashSet<>();
-        for (Path extraJar : extraJars) {
-            dependencyEntries.addAll(entries(extraJar));
-        }
-        ShadedPackages shadedPackages = ShadedPackages.of(entries(jarFile), dependencyEntries);
+        ShadedPackages shadedPackages = ShadedPackages.ofJars(jarFile, extraJars);
         List<Relocator> relocators = new LinkedList<>();
         for (String root : shadedPackages.roots()) {
             relocators.add(new PackageRelocator(root, baseRelocationPackage, shadedPackages));

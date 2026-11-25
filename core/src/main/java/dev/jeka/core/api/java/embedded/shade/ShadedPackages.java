@@ -16,10 +16,16 @@
 
 package dev.jeka.core.api.java.embedded.shade;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -47,6 +53,14 @@ class ShadedPackages {
         parents.removeAll(keptPackages);
         parents.removeAll(keptParents);
         parents.removeIf(parent -> !parent.contains("/"));
+    }
+
+    static ShadedPackages ofJars(Path appJar, Collection<Path> dependencyJars) {
+        Set<String> dependencyEntries = new HashSet<>();
+        for (Path dependencyJar : dependencyJars) {
+            dependencyEntries.addAll(entries(dependencyJar));
+        }
+        return of(entries(appJar), dependencyEntries);
     }
 
     /**
@@ -87,6 +101,17 @@ class ShadedPackages {
         return packages.contains(name) || packages.contains(parent(name)) || parents.contains(name);
     }
 
+    private static Set<String> entries(Path jarFile) {
+        try (JarFile jar = new JarFile(jarFile.toFile())) {
+            return jar.stream()
+                    .filter(entry -> !entry.isDirectory())
+                    .map(JarEntry::getName)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     private static Set<String> classPackages(Collection<String> entries) {
         return entries.stream()
                 .filter(entry -> entry.endsWith(".class"))
@@ -100,7 +125,7 @@ class ShadedPackages {
     private static Set<String> jdkPackages() {
         // Other modules, as JavaFX, may be bundled in some JDKs
         return ModuleFinder.ofSystem().findAll().stream()
-                .map(module -> module.descriptor())
+                .map(ModuleReference::descriptor)
                 .filter(module -> module.name().startsWith("java.") || module.name().startsWith("jdk."))
                 .flatMap(module -> module.packages().stream())
                 .map(pack -> pack.replace('.', '/'))
