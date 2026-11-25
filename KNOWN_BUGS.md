@@ -45,6 +45,12 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** with `@springboot.createWarFile=true`, `project: pack` runs the tests and warns that `jeka-war...` is empty or does not exist.
 - **Evidence:** reproduced by the naive agent.
 
+### Shaded jars relocate JDK classes sharing a root package with a dependency
+- **Symptom:** `NoClassDefFoundError: app/_shaded/org/xml/sax/InputSource`, e.g. with Logback and a `logback.xml`. The app crashes since #267, as Logback is now found; with 0.11.68 it ran without logging. `javax` is probably concerned too (from source).
+- **Where:** `MavenJarShader.relocators` relocates root folders (`org`), so also `org.xml.sax` or `org.w3c.dom`, which are not in the jar.
+- **Workaround:** `jarType=FAT`.
+- **Evidence:** reproduced with Logback 1.5.18 and the Micronaut sample.
+
 ### Compiling for Java 8 fails
 - **Symptom:** `@project.javaVersion=8` makes `project: pack` fail with `Unrecognized option: --add-exports=jdk.compiler/...`. Targets 11 and 17 compile.
 - **Where:** `JkJavaCompilerToolChain` and `JkProject` pass `-J--add-exports` to forked compilers whatever the JDK; options in `JkJavaCompileSpec`.
