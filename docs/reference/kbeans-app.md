@@ -197,17 +197,17 @@ See [Trust and Security](../tutorials/source-runnable-apps.md#trust-and-security
 Trusted URL prefixes are stored in the `jeka.app.url.trusted` property, located in the `~/.jeka/global.properties` file.  
 You can adjust this property later to make it more or less restrictive, or add a prefix by running 
 `jeka app: trustUrl url=github.com/djeang/`. Prefixes are separated by spaces.  
-The check validates the start of the Git URL after removing the protocol and identifier part.
+The check compares whole path segments of the Git URL, after removing the protocol, user and tag: `github.com/djeang` trusts 
+`github.com/djeang/xxx`, but not `github.com/djeang-other/xxx`. URLs containing `..`, `//`, `%`, `\` or spaces are never trusted.
 
-Prefer entries naming a single repository, or ending with `/`.
+Prefer entries naming a single repository (`github.com/djeang/kill8`).
 
 Example: `jeka.app.url.trusted=github.com/djeang/` will trust URLs formed as:
 
-  - `https://github.com/djeang/xxx...`    
-  - `https://my-user-name@github.com/djeang/xxx...`
-  - `git@github.com/djeang/xxx..`
-  - `git@github.com:my-user-name/djeang/xxx..`
-  - ...
+  - `https://github.com/djeang/xxx`
+  - `https://my-user-name@github.com/djeang/xxx`
+  - `git@github.com:djeang/xxx.git`
+  - `ssh://git@github.com/djeang/xxx.git`
 
 ## Summary
 
