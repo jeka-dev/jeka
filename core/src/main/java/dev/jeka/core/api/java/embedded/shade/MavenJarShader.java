@@ -98,17 +98,6 @@ public class MavenJarShader implements JkInternalJarShader {
 
 
 
-    private Set<String> baseFolderContainingClass(Path jarFile) {
-        try (JkZipTree tree = JkZipTree.of(jarFile)) {
-            return tree.streamBreathFirst()
-                    .filter(path -> path.toString().endsWith(".class"))
-                    .map(path -> path.iterator().next().toString())
-                    .filter(base -> !"META-INF".equals(base))
-                    .filter(base -> !"module-info.class".equals(base))
-                    .collect(Collectors.toSet());
-        }
-    }
-
     private String rootPackage(Path jarFile) {
         try (JkZipTree tree = JkZipTree.of(jarFile)) {
             return tree.streamBreathFirst()
@@ -121,25 +110,29 @@ public class MavenJarShader implements JkInternalJarShader {
     }
 
     private List<Relocator> relocators(Path jarFile, List<Path> extraJars) {
-        String basePackage = rootPackage(jarFile);
-        String exclude = basePackage.replace(".", "/") + "/*";
-        String baseRelocationPackage = basePackage + "._shaded.";
+        String baseRelocationPackage = rootPackage(jarFile) + "._shaded.";
+        ShadedPackages shadedPackages = ShadedPackages.ofJars(jarFile, extraJars);
         List<Relocator> relocators = new LinkedList<>();
-        Set<String> basePackages = new HashSet<>();
-        for (Path extraJar : extraJars) {
-            basePackages.addAll(baseFolderContainingClass(extraJar));
-        }
-        for (String basePackageName : basePackages) {
-            Relocator relocator = new SimpleRelocator(
-                    basePackageName + ".",
-                    baseRelocationPackage + basePackageName + ".",
-                    null,
-                    Collections.singletonList(exclude));
-            relocators.add(relocator);
+        for (String root : shadedPackages.roots()) {
+            relocators.add(new PackageRelocator(root, baseRelocationPackage, shadedPackages));
         }
         return relocators;
     }
 
+    private static class PackageRelocator extends SimpleRelocator {
+
+        private final ShadedPackages shadedPackages;
+
+        PackageRelocator(String root, String baseRelocationPackage, ShadedPackages shadedPackages) {
+            super(root + ".", baseRelocationPackage + root + ".", null, null);
+            this.shadedPackages = shadedPackages;
+        }
+
+        @Override
+        public boolean canRelocatePath(String path) {
+            return super.canRelocatePath(path) && shadedPackages.contains(path);
+        }
+    }
 
     private void modifyManifest(Path mainJar, Path shadeJar) {
         Manifest jarManifest;
