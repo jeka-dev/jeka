@@ -12,6 +12,9 @@ jeka base: scaffold
 This generates a `jeka-src/Script.java` file, which is an example of Java code invokable from the command line.
 
 ```java
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
+
 class Script extends KBean {
 
     @JkDoc("Person to whom the greeting is intended")
@@ -97,10 +100,14 @@ Your scripts can easily depend on external libraries from Maven repositories or 
 
 Annotate the `Script` class:
 ```java
+import com.github.lalyos.jfiglet.FigletFont;
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
 
 @JkDep("com.github.lalyos:jfiglet:0.0.9")
 class Script extends KBean {
+    // existing fields and methods
 }
 ```
 ... and execute `jeka intellij: sync` to update your IDE classpath.
@@ -155,7 +162,12 @@ jeka.classpath=\
 JeKa compiles `jeka-src` classes on-the-fly. You can pass options to the Java compiler using `@JkCompileOption`:
 
 ```java
+import dev.jeka.core.tool.JkCompileOption;
+import dev.jeka.core.tool.KBean;
+
 @JkCompileOption("-Xlint:-options")
+class Script extends KBean {
+}
 ```
 
 ## Multi-file scripts & KBeans
@@ -172,12 +184,13 @@ public class Build extends KBean {
     }
 }
 ```
-Execute `jeka foo`. It works because `Build` is now the primary KBean found.
+Execute `jeka foo`. It works because `Build` is now the default KBean: without explicit setting, this is the first one found in `jeka-src`, in alphabetical order 
+(root classes first, then those in packages).
 
 2. Now try `jeka hello`. You will get an error:
    `ERROR: Unmatched argument at index 0: 'hello'`
    
-   This is because JeKa uses a discovery strategy to find a default KBean. When multiple KBeans exist, you may need to be explicit.
+   `hello` is not a method of the default KBean. When multiple KBeans exist, you may need to be explicit.
 
 3. To execute a method from a specific KBean, use the format `jeka [kbean]: [method]`:
    `jeka script: hello`
@@ -231,6 +244,19 @@ To make `build` always initialize, add this to `jeka.properties`:
    @build=on
    ```
 
+!!! note
+    `@JkPostInit` methods run after the command-line values have been injected, so they win: `jeka hello name=Zed` now prints `Hello Mates !`.  
+    To set a default value that can be overridden, use a *static* `@JkPreInit` method instead.
+
+## Combine KBeans on the Command Line
+
+Methods and fields belong to the KBean mentioned just before them:
+
+```bash
+jeka project: pack javaVersion=21 maven: publishLocal   # 'javaVersion' is a field of 'project'
+```
+With `javaVersion=21` at the end, JeKa looks for this field in `maven` and fails with `Unmatched argument`.
+
 ## Classpath KBeans
 
 *Local* KBeans are in `jeka-src`. *Classpath* KBeans are pre-compiled and available in the JeKa classpath (like plugins).
@@ -256,20 +282,21 @@ jeka.classpath=\
 
 You can even add KBeans dynamically from the CLI:
 ```bash
-jeka -cp=dev.jeka:nodejs-plugin nodeJs: version="20.12.2" cmdLine="npx cowsay Hello JeKa" exec
+jeka -v -cp=dev.jeka:nodejs-plugin nodeJs: version="20.12.2" cmdLine="npx cowsay Hello JeKa" exec
 ```
 
-This should display:
+This displays, after some logs:
 ```text
-       ___________
-      < Hello JeKa >
-       -----------
-              \   ^__^
-               \  (oo)\_______
-                  (__)\       )\/\
-                      ||----w |
-                      ||     ||
+ ____________
+< Hello JeKa >
+ ------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
 ```
+The `-v` (verbose) option is needed to see the output of the Node.js command.
 
 ---
 **Next steps:** Learn how to [Build a Base Application](build-base.md) or a [Full Project](build-projects.md).

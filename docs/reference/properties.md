@@ -12,7 +12,8 @@ _Properties_ can be defined at different levels, in order of precedence:
 * Global: Defined in the _[User Home]/.jeka/global.properties_ file. Typically used to define URLs, local paths, and credentials.
 
 
-_Properties_ inherit from project _properties_ defined in project parent folders (if they exist). 
+_Properties_ inherit from project _properties_ defined in project parent folders, up to the first parent folder without a *jeka.properties* file. 
+In a hierarchical structure, add a *jeka.properties* file, even empty, in each intermediate folder.
 
 Here, project2 will inherit properties defined in _project1/jeka.properties_:
 ```

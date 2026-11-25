@@ -20,6 +20,13 @@ For a practical guide on running and installing applications from source, see th
 jeka app: install repo=REPO_URL
 ```
 
+JeKa may ask to trust the URL, to choose a version if the repository has tags, and to choose a name if neither `name` nor a catalog application is specified. 
+These questions need a terminal: without it, the command fails. The version cannot be set with a `#tag` suffix.
+
+!!! note
+    Add *~/.jeka/apps* to your `PATH` before installing applications. Otherwise, they are installed in the JeKa distribution directory, 
+    and may be lost when switching versions (e.g. with SDKMAN!).
+
 Applications can be installed in different runtime modes:
 
 ### Runtime Modes
@@ -113,7 +120,7 @@ This lists all applications available in the specified catalog, showing:
 
 Install an application using the catalog shorthand:
 ```shell
-jeka app: install repo=cowsay@jeka-dev
+jeka app: install repo=cowsay@demo
 ```
 
 The format is `appName@catalogName`. This is equivalent to providing the full repository URL.
@@ -178,16 +185,21 @@ app.demo-springboot-angular.bundle=true
 
 ### Built-in Catalogs
 
-Jeka comes with a built-in catalog from the `jeka-dev` organization. Additional catalogs can be registered
+JeKa comes with built-in catalogs (`demo`, `djeang`, `thirdparty`), listed by `jeka app: catalog`. Additional catalogs can be registered
 in `~/.jeka/global.properties`. A project's `jeka.properties` is not read.
 
 
 ## Security
 
+Repositories from `github.com/jeka-dev/` are trusted by default. 
+See [Trust and Security](../tutorials/source-runnable-apps.md#trust-and-security) for the different ways to trust other URLs, and the behavior without a terminal.
+
 Trusted URL prefixes are stored in the `jeka.app.url.trusted` property, located in the `~/.jeka/global.properties` file.  
 You can adjust this property later to make it more or less restrictive, or add a prefix by running 
 `jeka app: trustUrl url=github.com/djeang/`. Prefixes are separated by spaces.  
 The check validates the start of the Git URL after removing the protocol and identifier part.
+
+Prefer entries naming a single repository, or ending with `/`.
 
 Example: `jeka.app.url.trusted=github.com/djeang/` will trust URLs formed as:
 

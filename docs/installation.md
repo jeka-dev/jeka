@@ -1,5 +1,8 @@
 # CLI Installation
 
+You don't need to install a JDK: JeKa downloads the version required by each project (about 200 MB, once). 
+If a project does not specify any, JeKa uses the JDK set in `JAVA_HOME`, or downloads JDK 21.
+
 ## Windows
 
 ```shell
@@ -11,12 +14,22 @@ iex "& { $(iwr -useb https://jeka.dev/install.ps1) } install check"
 ```shell
 sdk install jeka
 ```
+To [install applications](tutorials/source-runnable-apps.md#desktop-installation) with JeKa, also add *~/.jeka/apps* to your `PATH`. 
+Otherwise, they are installed in the directory of the current JeKa version.
 
 ## MacOS and Linux
 
 ```shell
 curl -sL https://jeka.dev/install.sh | $(echo $0) -s - install check
 ```
+
+`$(echo $0)` stands for your current shell. If the command fails (e.g. `-zsh: command not found`), replace it with `bash`:
+```shell
+curl -sL https://jeka.dev/install.sh | bash -s - install check
+```
+
+The script installs JeKa in *~/.jeka/bin*, and adds this directory to the `PATH` in your shell profile (e.g. *~/.zshrc*). 
+To install applications with JeKa, also add *~/.jeka/apps* to your `PATH`.
 
 !!! note
 
@@ -35,6 +48,8 @@ The manual installation is straightforward and may help when script installation
   and download file named *jeka-core-xxx-distrib.zip*.
 - Unzip the content of the zip file and copy the content of the `bin` directory to `[USER HOME]/.jeka/bin`. 
 - Add `[USER HOME]/.jeka/bin` and `[USER HOME]/.jeka/apps` to your `PATH` environment variable.
+- On macOS and Linux, make the scripts executable: `chmod +x ~/.jeka/bin/jeka ~/.jeka/bin/jeka-update`.
+- On Windows, edit the user `PATH` in *System Properties > Environment Variables*, then open a new terminal.
 
 ## Post Install
 
@@ -51,6 +66,13 @@ Open a new terminal session and execute the following command to access JeKa hel
 ```bash
 jeka --help
 ```
+
+Next: [Quick Start](quick-start.md).
+
+## Uninstall
+
+Delete *~/.jeka*, which contains JeKa, its cache, installed applications and *global.properties*, then remove it from your `PATH` 
+(in your shell profile, or in the Windows environment variables). With SDKMAN!, also execute `sdk uninstall jeka <version>`.
 
 ## Docker Image - Zero Install
 

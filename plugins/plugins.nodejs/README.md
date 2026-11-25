@@ -66,3 +66,11 @@ jeka.classpath=dev.jeka:nodejs-plugin
 @nodeJs.targetResourceDir=static
 @nodeJs.testCmd=npm run test-headless
 ```
+
+## Run a Command
+
+```shell
+jeka -v -cp=dev.jeka:nodejs-plugin nodeJs: version=20.12.2 cmdLine="npx cowsay Hello JeKa" exec
+```
+The `-v` (verbose) option is needed to see the output of the command.
+

@@ -18,9 +18,12 @@ jeka -r GIT_URL -p PROGRAM_ARGUMENTS
 
 **Example:**
 ```bash
-jeka -r https://github.com/djeang/demo-dir-checksum -p -a SHA256
+jeka -r https://github.com/jeka-dev/demo-cowsay -p "Hello JeKa!"
 ```
 You can pass `-Dxxxxx=yyyy` as a program argument to set system properties.
+
+The first run clones and builds the application, with the JeKa and Java versions set in the *jeka.properties* of the repository. 
+They are downloaded if needed, and may differ from those installed on your machine.
 
 ### Browsing the Catalog
 
@@ -45,15 +48,27 @@ jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p "Hello JeKa!"
 
 ### Trust and Security
 
-When you run a remote application for the first time, JeKa will prompt you to confirm whether you trust the source URL. This prevents the accidental execution of malicious code.
+Only run applications from sources you trust, as they execute code on your machine. 
+Repositories from `github.com/jeka-dev/` are trusted by default.
 
-If you accept, JeKa clones the repository, builds the application, and runs it. On subsequent runs, it executes directly using the cached binaries.
+When running an application from another repository, JeKa asks you to confirm that you trust the URL. If you accept, the URL is added to 
+the trusted list. JeKa then builds and runs the application. On subsequent runs, it executes directly the cached binaries.
 
-You can manage trusted URLs in your `[JEKA_USER_HOME]/global.properties` (`~/.jeka/global.properties` by default) file:
-```properties
-jeka.app.url.trusted=github.com/djeang/
-```
-In this example, any repository starting with `github.com/djeang/` will be trusted automatically.
+Without a terminal (CI, scripts), JeKa cannot ask, and the run fails. Declare the trusted URLs beforehand.
+
+There are several ways to trust a URL:
+
+- Accept it when JeKa asks.
+- Add it with `jeka app: trustUrl url=github.com/djeang/kill8`.
+- Edit *[JEKA_USER_HOME]/global.properties* (*~/.jeka/global.properties* by default), using a space-separated list:
+  ```properties
+  jeka.app.url.trusted=github.com/djeang/kill8 github.com/my-org/
+  ```
+- Set the `JEKA_APP_URL_TRUSTED` environment variable, in the same format. It replaces the list of *global.properties* for `jeka -r`, but is not used by `app: install`.
+
+!!! tip
+    Prefer entries naming a single repository (`github.com/djeang/kill8`). 
+    To trust all the repositories of an account, end the entry with `/` (`github.com/my-org/`).
 
 ## Performance and Shortcuts
 
@@ -81,10 +96,21 @@ jeka ::cowsay "Hello World!"
 
 JeKa lets you install applications for direct execution from your terminal, making them available in your system `PATH`.
 
+Add *~/.jeka/apps* to your `PATH` first. Otherwise, applications are installed in the JeKa distribution directory, and may be lost when 
+switching versions (e.g. with SDKMAN!).
+
 ```bash
 jeka app: install repo=https://github.com/djeang/kill8
 ```
-Or use a shorthand for known repositories:
+JeKa may ask for:
+
+- Confirmation, if the URL is not [trusted](#trust-and-security).
+- The version, if the repository has tags: press *Enter* for the proposed tag, type another tag, or `@` for the last commit.
+- The name of the application, unless set with `name=...` or if installed from a catalog.
+
+These questions need a terminal: without it, the command fails. The `#tag` suffix is for `jeka -r` only, not for `repo=`.
+
+Or use a shorthand for applications listed in a [catalog](#browsing-the-catalog):
 ```bash
 jeka app: install repo=kill8@djeang
 ```
@@ -175,8 +201,28 @@ jeka.program.bundle.dist=target/dist
 
 **Requirements:**
 
-1. **Maven wrapper**: Include `mvnw` / `mvnw.cmd` in your repository (to make the build fully portable)
-2. **Fat JAR plugin**: Configure `maven-shade-plugin` to create executable JARs.
+1. **Maven wrapper** (recommended): Include `mvnw` / `mvnw.cmd` in your repository, to make the build fully portable. Otherwise, `mvn` must be in the `PATH`.
+2. **Fat JAR plugin**: Configure `maven-shade-plugin` to create an executable JAR, with a main class. Otherwise, running the application fails with `no main manifest attribute`.
+    ```xml
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>3.6.0</version>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals><goal>shade</goal></goals>
+          <configuration>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <mainClass>com.example.app.App</mainClass>
+              </transformer>
+            </transformers>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+    ```
 3. **Native support (optional)**: Add `native-maven-plugin` in a Maven profile.
 
 See a complete example at [demo-maven-multimodule](https://github.com/jeka-dev/demo-maven-multimodule).
@@ -244,6 +290,19 @@ jeka.program.build.native=custom: buildNative
 ```
 
 ```java
+import dev.jeka.core.api.file.JkPathTree;
+import dev.jeka.core.api.system.JkLocator;
+import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcess;
+import dev.jeka.core.tool.JkConstants;
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
 class Custom extends KBean {
 
     @JkDoc("Build application and copy result to jeka-output")

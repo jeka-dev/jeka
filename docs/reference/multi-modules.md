@@ -69,6 +69,10 @@ parent-project
      └── ...
 ```
 
+!!! warning
+    Each intermediate directory must contain a *jeka.properties* file, even empty, as *plugins/jeka.properties* here. 
+    Otherwise, inheritance stops there: *plugin-1* would get no property from the root, and would be published without the right version.
+
 ### Example of *jeka.properties* for parent project
 
 ```properties
@@ -85,10 +89,10 @@ _@project=off
 @project.compilation.compilerOptions=-g
 @project.pack.javadocOptions=-notimestamp
 
-# Enable Git-based versioning for Maven
+# Enable Git-based versioning for Maven (needs a Git repository with at least one commit)
 @maven.pub.gitVersioning.enable=true
 
-# Parent module Maven-specific settings
+# Parent module Maven-specific settings: publish a BOM listing the child modules
 _@maven.pub.moduleId=dev.jeka:bom
 _@maven.pub.parentBom=true
 
@@ -105,8 +109,8 @@ To make a property non-transmitted to the children, we need to prefix it with `_
 @project.pack.mainClass=dev.jeka.core.tool.Main
 +@project.compilation.compilerOptions=-Xlint:none
 
-# Specific Maven publish settings
-@maven.pub.moduleId=dev.jeka:jeka-core
+# Module ID, required in every child when the parent publishes a BOM
+@project.moduleId=dev.jeka:jeka-core
 ```
 
 The child modules inherit properties from the parent, except for properties prefixed with `_`
@@ -126,9 +130,9 @@ If we run the following command on the above example:
 jeka project: pack maven: publish
 ```
 This will first run the `project: pack` method on all child modules. Parent module won't execute these actions 
-because it does not explicitly declare the project KBean (`@project=on` is absent).
+because it disables the `project` KBean (`_@project=off`).
 
-Then the `maven: publish` action is invoked on all child modules and the parent module as it declares it explicitly (`@maven=on`).
+Then the `maven: publish` action is invoked on all child modules and the parent module as it configures this KBean explicitly (`_@maven.pub.parentBom=true`).
 
 If a child module is not concerned by a specific KBean, it should be explicitly disabled (e.g. `@maven=off`).
 This could be the case if *plugin-common* should not be published as a Maven artifact.
@@ -174,6 +178,9 @@ com.google.guava:guava
 [compile-only]
 org.projectlombok:lombok
 
+[processor]
+org.projectlombok:lombok
+
 [test]
 org.junit.jupiter:junit-jupiter
 org.junit.platform:junit-platform-launcher
@@ -197,10 +204,12 @@ Let’s say there’s a central set of dependencies in the `jeka-src` folder of 
 These dependencies can be defined as constants in a class, like a `PluginCommon` class, so they can be reused in other modules.
 
 ```java title="plugins/plugin-common/jeka-src/PluginCommon.java"
+import dev.jeka.core.api.depmanagement.JkDependencySet;
+
 class PluginCommon {
 
     static final JkDependencySet LOG_LIBS = JkDependencySet.of()
-            .and("ch.qos.logback:logback:0.5")
+            .and("ch.qos.logback:logback-classic:1.5.18")
             .and("org.slf4j:slf4j-api:2.0.17");
     
 }
@@ -211,6 +220,7 @@ We can reuse the code in `jeka-src` of plugin-1 module, for instance, as below:
 ```java title="plugins/plugin-1/jeka-src/Plugin1Custom.java"
 import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.KBean;
 
 @JkDep("../plugin-common")
 class Plugin1Custom extends KBean {
@@ -225,7 +235,16 @@ The specified path is relative to the module declaring the annotation.
 
 You may use some KBeans from other modules. For example you want to run kbean action for a given list of child modules.
 
-```java
+```java title="plugins/plugin-1/jeka-src/Custom.java"
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.project.JkProjectPackaging;
+import dev.jeka.core.tool.JkInject;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
+import java.nio.file.Path;
+
 class Custom extends KBean {
 
     @JkInject("../../core")
@@ -256,7 +275,13 @@ class Custom extends KBean {
 
 In similar way, we can import runbases from other modules.
 
-```java
+```java title="jeka-src/Custom.java"
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkInject;
+import dev.jeka.core.tool.JkRunbase;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
 class Custom extends KBean {
 
     @JkInject("core")
@@ -275,7 +300,15 @@ class Custom extends KBean {
 
 From a parent module we can programmatically access the child modules.
 
-```java
+```java title="jeka-src/MasterBuild.java"
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+import dev.jeka.core.tool.builtins.tooling.maven.MavenKBean;
+
+import java.util.Optional;
+
 class MasterBuild extends KBean {
 
     public boolean runIT = true;

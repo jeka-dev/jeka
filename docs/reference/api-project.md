@@ -60,6 +60,12 @@ See a detailed example [here](https://github.com/jeka-dev/jeka/blob/master/sampl
 In a KBean, get the project from the `ProjectKBean`:
 
 ```java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.api.testing.JkTestSelection;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
 class Custom extends KBean {
 
     @JkPostInit(required = true)
@@ -145,8 +151,7 @@ org.fluentlenium:fluentlenium-junit:3.2.0
 !!commons-logging:commons-logging          # exclude commons-logging from all dependencies of this section
 
 [processor]
-org.projectlombok:lombok:1.18.38
-org.mapstruct:mapstruct-processor:1.6.3
+org.mapstruct:mapstruct-processor:1.6.3   # 'org.mapstruct:mapstruct' must also be in [compile]
 ```
 
 A line starting with `!` excludes a module from the transitive dependencies of the dependency declared just above.
@@ -171,7 +176,7 @@ Specifies dependencies for the *test* classpath, in addition to those of the `[c
 
 `[processor]`  
 Specifies annotation-processor dependencies (e.g. Lombok, MapStruct).
-These are passed to the compiler via `-processorpath` and are **not** added to the compile or runtime classpaths.
+These are passed to the compiler via `-processorpath` and are **not** added to the compile or runtime classpaths. Declare the annotations used in your code in `[compile]` or `[compile-only]` as well.
 Generated sources are written to `jeka-output/generated-sources/annotation-processors`.
 
 !!! tip

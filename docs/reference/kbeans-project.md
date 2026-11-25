@@ -33,21 +33,33 @@ wrapping a [`JkProject`](api-project.md) instance to provide high-level build au
 
 ## Common Options
 
-These properties can be set via command line (e.g., `project: javaVersion=17`) or in `jeka.properties` (e.g., `@project.javaVersion=17`).
+These properties can be set via command line (e.g., `project: javaVersion=21`) or in `jeka.properties` (e.g., `@project.javaVersion=21`).
 
 | Property | Description                                | Default |
 | :--- |:-------------------------------------------| :--- |
 | `javaVersion` | Target JVM version (e.g., `21`, `25`).     | Same as JeKa runtime |
 | `test.skip` | If `true`, tests are not executed.         | `false` |
-| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`, `SHADE`). | `REGULAR` |
+| `test.fork` | If `true`, tests run in a forked process, on a JDK of the target version. | `true` |
+| `test.includePatterns` | Space-separated regular expressions selecting the test classes to run. | All classes |
+| `pack.jarType` | Type of JAR to produce (`REGULAR`, `FAT`, `SHADE`). `SHADE` does not support classes compiled for Java 24 or higher yet. | `REGULAR` (scaffolded projects set `FAT`) |
 | `version` | Hardcode the project version.              | Not set. Inferred from Git if `gitVersioning.enable=true` |
 | `moduleId` | Maven coordinates (`group:name`).          | `null` |
+
+!!! note
+    Forked tests need Java 21 or higher. For a lower `javaVersion`, set `@project.test.fork=false` to run tests on the JDK running JeKa.
+
+See [Run Tests](../tutorials/build-projects.md#run-tests) to run a single test class.
 
 ## Programmatic Customization
 
 Access the underlying `JkProject` for deep customization, typically within `@JkPostInit`.
 
 ```java
+import dev.jeka.core.api.project.JkProject;
+import dev.jeka.core.tool.JkPostInit;
+import dev.jeka.core.tool.KBean;
+import dev.jeka.core.tool.builtins.project.ProjectKBean;
+
 class MyBuild extends KBean {
 
     @JkPostInit(required = true)
@@ -68,13 +80,20 @@ class MyBuild extends KBean {
 
 Annotation processors (e.g. **Lombok**, **MapStruct**) should be declared in the dedicated `[processor]` section of `jeka.project.deps`:
 
-```ini
+```ini title="jeka.project.deps"
+[compile]
+org.mapstruct:mapstruct:1.6.3
+
+[compile-only]
+org.projectlombok:lombok:1.18.38
+
 [processor]
 org.mapstruct:mapstruct-processor:1.6.3
 org.projectlombok:lombok:1.18.38
 ```
 
 Dependencies in `[processor]` are passed to the compiler via `-processorpath`, keeping them off the compile and runtime classpaths.
+The annotations used in your code must therefore also be declared in `[compile]` or `[compile-only]`.
 Generated sources are written to: `jeka-output/generated-sources/annotation-processors`.
 
 ## Extending with Plugins

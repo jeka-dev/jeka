@@ -2,6 +2,8 @@
 
 If you are coming from *Maven* or *Gradle*, this guide will help you map your existing knowledge to JeKa concepts.
 
+To convert an existing project, follow [Migrate a Maven Project](tutorials/migrate-from-maven.md).
+
 ## Core Philosophies
 
 | Feature            | Maven            | Gradle              | JeKa                                                  |
@@ -20,6 +22,7 @@ If you are coming from *Maven* or *Gradle*, this guide will help you map your ex
 | `src/main/java`            | `src/main/java`        | Standard Java structure is supported by the `project` KBean. |
 | `src/test/java`            | `src/test/java`        | Standard Test structure is supported.                        |
 | `build.gradle` / `pom.xml` | `jeka.properties`      | Global project settings and tool versions.                   |
+| Dependencies section       | `jeka.project.deps`    | `provided` / `compileOnly` dependencies go to `[compile-only]`. |
 | Custom Task/Plugin         | `jeka-src/Custom.java` | Any Java code in `jeka-src` is part of your build logic.     |
 
 ### Common Commands
@@ -28,8 +31,13 @@ If you are coming from *Maven* or *Gradle*, this guide will help you map your ex
 |:--------------------|:-----------------------------|:--------------------------------------|
 | `mvn compile`       | `gradle compileJava`         | `jeka project: compile`               |
 | `mvn test`          | `gradle test`                | `jeka project: test`                  |
-| `mvn package`       | `gradle assemble`            | `jeka project: pack`                  |
-| `mvn install`       | `gradle publishToMavenLocal` | `jeka maven: publishLocalM2`          |
+| `mvn test -Dtest=OrderTest` | `gradle test --tests '*OrderTest'` | `jeka project: test test.includePatterns='.*OrderTest'` |
+| `mvn package -DskipTests` | `gradle assemble`      | `jeka project: pack` (does not run tests) |
+| `mvn package`       |                              | `jeka project: test pack`             |
+| `mvn verify`        | `gradle build`               | `jeka project: build`                 |
+| `mvn install`       | `gradle publishToMavenLocal` | `jeka project: pack maven: publishLocalM2` |
+| `mvn deploy`        | `gradle publish`             | `jeka project: pack maven: publish`   |
+| `mvn dependency:tree` | `gradle dependencies`      | `jeka project: depTree`               |
 | `mvn clean`         | `gradle clean`               | `jeka --clean`  or `jeka -c`          |
 | `mvn help:describe` | `gradle help`                | `jeka --doc` or `jeka project: --doc` |
 

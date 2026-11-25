@@ -46,5 +46,5 @@ JeKa reads properties in this order:
 - Command-line arguments (as `-Dmy.prop=xxx`).
 - Environment variables (`my.prop` or `MY_PROP`). The bash launcher only recognizes the exact `my.prop` name for the properties it reads itself (`jeka.version`, `jeka.java.version`, `jeka.java.distrib`, `jeka.jdk.X`, ...).
 - The `jeka.properties` file in the base directory.
-- The `jeka.properties` file in parent directories, until it is not found.
+- The `jeka.properties` files in parent directories, up to the first directory without one.
 - The `global.properties` file in `[JEKA_USER_HOME]`.

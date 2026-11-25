@@ -25,4 +25,6 @@ You can have a brief look at the [tutorial](tutorials/basics.md) to get an idea 
 
 3. Explore and experiment with [examples](examples.md).
 
+Prefer the command line? [Install the CLI](installation.md), then follow the [Quick Start](quick-start.md).
+
 Have fun!

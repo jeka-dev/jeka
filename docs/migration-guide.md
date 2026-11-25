@@ -1,6 +1,6 @@
-# Migration Guide
+# Migrating from JeKa 0.10
 
-This page helps you migrate from JeKa 0.10 to JeKa 0.11.
+This page helps you migrate from JeKa 0.10 to JeKa 0.11. To migrate from Maven, see [Migrate a Maven Project](tutorials/migrate-from-maven.md).
 
 ## Command Line and Wrapper
 

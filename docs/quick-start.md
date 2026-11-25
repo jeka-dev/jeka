@@ -41,7 +41,10 @@ This generates a structure as:
 └── jeka                 <- Optional bash script to run JeKa on Linux/macOS
 ```
 This script class looks like:
-```java
+```java title="jeka-src/Script.java"
+import dev.jeka.core.tool.JkDoc;
+import dev.jeka.core.tool.KBean;
+
 @JkDoc("Minimalist script for demo purpose.")
 class Script extends KBean {
 
@@ -60,6 +63,8 @@ You can run the method `hello()` and change the parameter, by executing:
 ```bash
 jeka hello name="JeKa"
 ```
+The first execution may download the JDK set in `jeka.properties` (about 200 MB), if it is not already in the cache.
+
 This displays the following text on the console:
 ```
 Hello JeKa !
@@ -211,6 +216,8 @@ To create a new Spring Boot project, execute:
 jeka -cp=dev.jeka:springboot-plugin project: scaffold springboot:
 ```
 
+Without version, JeKa uses the plugin version matching its own version.
+
 This generates the following project structure:
 ```
 .
@@ -237,10 +244,9 @@ This generates the following project structure:
 This contains a minimal workable project with production and test code. 
 
 #### Modify Layout
-You can choose a simpler code layout structure by setting the following properties:
-```properties title="jeka.properties"
-@project.layout.style=SIMPLE
-@project.layout.mixSourcesAndResources=true
+You can choose a simpler code layout structure when scaffolding:
+```bash
+jeka -cp=dev.jeka:springboot-plugin project: scaffold layout.style=SIMPLE layout.mixSourcesAndResources=true springboot:
 ```
 You'll end up with the following code layout:
 ```
@@ -248,6 +254,7 @@ You'll end up with the following code layout:
 ├── src       <- Contains both Java code and resources    
 ├── test      <- Contains both Java code and resources for testing
 ```
+To convert an existing project, see [Simple Layout](tutorials/build-projects.md#simple-layout).
 
 #### Modify Dependencies
 The dependencies are generated with the latest Spring Boot version:
