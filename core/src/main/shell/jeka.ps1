@@ -584,6 +584,99 @@ class ZipExtractor {
   }
 }
 
+# Keep in sync with SecurityChecker.java
+class TrustedUrl {
+
+  # Returns the git url as [host]/[path], without protocol, user info and tag.
+  static [string] Normalize([string]$gitUrl) {
+    $u = ($gitUrl.Trim() -split '#', 2)[0]
+    $protocolIndex = $u.IndexOf('://')
+    if ($protocolIndex -ge 0) {
+      $u = $u.Substring($protocolIndex + 3)
+    }
+    $slashIndex = $u.IndexOf('/')
+    $authority = $u
+    $path = ''
+    if ($slashIndex -ge 0) {
+      $authority = $u.Substring(0, $slashIndex)
+      $path = $u.Substring($slashIndex)
+    }
+    $authority = $authority.Substring($authority.LastIndexOf('@') + 1)
+
+    # 'host:owner/repo' notation. The owner must be kept. A port number is part of the host.
+    $colonIndex = $authority.IndexOf(':')
+    if (($colonIndex -ge 0) -and ($authority.Substring($colonIndex + 1) -notmatch '^[0-9]+$')) {
+      $path = '/' + $authority.Substring($colonIndex + 1) + $path
+      if ($path.StartsWith('//')) {
+        $path = $path.Substring(1)
+      }
+      $authority = $authority.Substring(0, $colonIndex)
+    }
+    return $authority.ToLowerInvariant() + $path
+  }
+
+  # Matches on whole path segments
+  static [bool] IsTrustedBy([string]$gitUrl, [string]$trustedEntry) {
+    $u = [TrustedUrl]::Normalize($gitUrl).TrimEnd('/')
+    $entry = [TrustedUrl]::Normalize($trustedEntry).TrimEnd('/')
+    if ($entry -eq '') {
+      return $false
+    }
+    # Such urls can be resolved by Git to another location than the one they start with
+    if ($u.Contains('%') -or $u.Contains('\') -or $u.Contains('//') -or ($u -match '[\s\p{Cc}]')) {
+      return $false
+    }
+    if ("/$u/".Contains('/../') -or "/$u/".Contains('/./')) {
+      return $false
+    }
+    if (($u -replace '\.git$', '') -ceq ($entry -replace '\.git$', '')) {
+      return $true
+    }
+    return (-not $entry.EndsWith('.git')) -and $u.StartsWith("$entry/", [System.StringComparison]::Ordinal)
+  }
+
+  # Exits if the url is not trusted
+  static [void] Check([string]$gitUrl, [string]$globalPropFile) {
+    $isGit = [BaseDirResolver]::IsGitRemote($gitUrl)
+    if ( -not $isGit) {
+      return
+    }
+    $domain = [TrustedUrl]::Normalize($gitUrl)
+    if ([TrustedUrl]::IsTrustedBy($gitUrl, "github.com/jeka-dev/")) {
+      return
+    }
+    $propName = "jeka.app.url.trusted"
+    $trustedUrlProp = [Props]::GetValueFromFile($globalPropFile, $propName);
+    $trustedEnVar = $env:JEKA_APP_URL_TRUSTED
+    if ( -not [string]::IsNullOrEmpty($trustedEnVar)) {
+      $trustedUrlProp = $trustedEnVar
+    }
+    $trustedUrls = $trustedUrlProp.Trim() -split '\s+'
+    $found = $false
+    foreach ($prefix in $trustedUrls) {
+      if ([string]::IsNullOrWhiteSpace($prefix)) {
+        continue
+      }
+      if ([TrustedUrl]::IsTrustedBy($gitUrl, $prefix)) {
+        $found = $true
+        break
+      }
+    }
+    if ($found) {   # the url is part of the trusted domains
+      return
+    }
+    Write-Host
+    $response = Read-Host "Domain '$domain' is not trusted. Add to trusted? [N/y]"
+
+    if ($response -match '^[Yy]') {
+      [Props]::addOrAppendProperty($globalPropFile, $propName, $domain)
+    } else {
+      Write-Host "Execution aborted: '$domain' is not trusted."
+      exit 1
+    }
+  }
+}
+
 class ProgramExecutor {
   [string]$folder
   [array]$cmdLineArgs   # only args passed after -p
@@ -606,7 +699,6 @@ class ProgramExecutor {
   }
 
   [string] FindProg() {
-    $this.CheckTrustedUrl()
     $dir = $this.folder
     if (-not (Test-Path $dir)) {
       return $null
@@ -616,46 +708,6 @@ class ProgramExecutor {
       return $exeFile
     }
     return $this.findFile(".jar")
-  }
-
-  hidden CheckTrustedUrl() {
-    $isGit = [BaseDirResolver]::IsGitRemote($this.url)
-    if ( -not $isGit) {
-      return
-    }
-    $domain = [BaseDirResolver]::ProtocolLess($this.url)
-    if ($domain.StartsWith("github.com/jeka-dev/", [System.StringComparison]::OrdinalIgnoreCase)) {
-      return
-    }
-    $propName = "jeka.app.url.trusted"
-    $trustedUrlProp = [Props]::GetValueFromFile($this.globalPropFile, $propName);
-    $trustedEnVar = $env:JEKA_APP_URL_TRUSTED
-    if ( -not [string]::IsNullOrEmpty($trustedEnVar)) {
-      $trustedUrlProp = $trustedEnVar
-    }
-    $trustedUrls = $trustedUrlProp.Trim() -split '\s+'
-    $found = $false
-    foreach ($prefix in $trustedUrls) {
-      if ([string]::IsNullOrWhiteSpace($prefix)) {
-        continue
-      }
-      if ($domain.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
-        $found = $true
-        break
-      }
-    }
-    if ($found) {   # the url is part of the trusted domains
-      return
-    }
-    Write-Host
-    $response = Read-Host "Domain '$domain' is not trusted. Add to trusted? [N/y]"
-
-    if ($response -match '^[Yy]') {
-      [Props]::addOrAppendProperty($this.globalPropFile, $propName, $domain)
-    } else {
-      Write-Host "Operation aborted by the user."
-      exit 0
-    }
   }
 
   hidden [string] findFile([string]$extension) {
@@ -747,6 +799,9 @@ function Main {
   $remoteArg = $cmdLineArgs.GetRemoteBaseDirArg()
   $updateArg = $cmdLineArgs.IsUpdateFlagPresent()
   $baseDirResolver = [BaseDirResolver]::new($remoteArg, $cacheDir, $updateArg)
+
+  # Must be done before cloning, and whatever is executed : jeka-src code from the repo may run even without '-p' option
+  [TrustedUrl]::Check($remoteArg, $globalPropFile)
   $baseDir = $baseDirResolver.GetPath()
   $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
   $cmdLineArgs = $props.InterpolatedCmdLine()
