@@ -51,10 +51,10 @@ jeka -r https://github.com/jeka-dev/demo-cowsay#0.0.6 -p "Hello JeKa!"
 Only run applications from sources you trust, as they execute code on your machine. 
 Repositories from `github.com/jeka-dev/` are trusted by default.
 
-When running an application from another repository, JeKa asks you to confirm that you trust the URL. If you accept, the URL is added to 
-the trusted list. JeKa then builds and runs the application. On subsequent runs, it executes directly the cached binaries.
+When using another repository with `jeka -r` (with or without `-p`) or `jeka app: install`, JeKa asks you to confirm that you trust the URL, 
+before cloning it. If you accept, the URL is added to the trusted list.
 
-Without a terminal (CI, scripts), JeKa cannot ask, and the run fails. Declare the trusted URLs beforehand.
+Without a terminal (CI, scripts), JeKa cannot ask: `jeka -r` stops with exit code 1. Declare the trusted URLs beforehand.
 
 There are several ways to trust a URL:
 
@@ -68,7 +68,7 @@ There are several ways to trust a URL:
 
 !!! tip
     Prefer entries naming a single repository (`github.com/djeang/kill8`). 
-    To trust all the repositories of an account, end the entry with `/` (`github.com/my-org/`).
+    To trust all the repositories of an account, use `github.com/my-org/`.
 
 ## Performance and Shortcuts
 

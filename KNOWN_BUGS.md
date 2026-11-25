@@ -136,10 +136,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `SourceParser` reads line by line.
 - **Evidence:** reproduced by the doc-writer agent.
 
-### Untrusted remote run without a terminal fails silently
-- **Symptom:** `jeka -r <untrusted url>` without a terminal clones the repo first, then exits 1 without message.
-- **Evidence:** reproduced by the naive agent.
-
 ### Git versioning without any commit gives a bare Git error
 - **Symptom:** `error code 128` or `129` on `git diff HEAD --stat`.
 - **Evidence:** reproduced by the naive agent.
