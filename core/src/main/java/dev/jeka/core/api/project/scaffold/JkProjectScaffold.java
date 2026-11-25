@@ -16,7 +16,6 @@
 
 package dev.jeka.core.api.project.scaffold;
 
-import dev.jeka.core.api.file.JkPathFile;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.project.JkCompileLayout;
@@ -27,10 +26,8 @@ import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.tool.JkConstants;
-import dev.jeka.core.tool.builtins.project.ProjectKBean;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -214,23 +211,17 @@ public final class JkProjectScaffold extends JkScaffold {
             Path breakingChangeFile = project.getBaseDir().resolve("breaking_versions.txt");
             String text = "## Next line means plugin 2.4.0.RC11 is not compatible with Jeka 0.9.0.RELEASE and above\n" +
                     "## 2.4.0.RC11 : 0.9.0.RELEASE   (remove this comment and leading '##' to be effective)";
-            JkPathFile.of(breakingChangeFile).write(text);
+            writeIfAbsent(breakingChangeFile, text);
 
             String pluginCode = JkUtilsIO.read(JkProjectScaffold.class.getResource("plugin-class.snippet"));
-            JkPathFile.of(sourceDir.resolve("your/basepackage/XxxxxKBean.java"))
-                    .createIfNotExist()
-                    .write(pluginCode.getBytes(StandardCharsets.UTF_8));
+            writeIfAbsent(sourceDir.resolve("your/basepackage/XxxxxKBean.java"), pluginCode);
 
         } else if (kind == Kind.REGULAR) {
             String mainClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("main-class.snippet"));
-            JkPathFile.of(sourceDir.resolve("app/Main.java"))
-                    .createIfNotExist()
-                    .write(mainClass.getBytes(StandardCharsets.UTF_8));
+            writeIfAbsent(sourceDir.resolve("app/Main.java"), mainClass);
 
             String testClass = JkUtilsIO.read(JkProjectScaffold.class.getResource("test-class.snippet"));
-            JkPathFile.of(testSourceDir.resolve("app/MainTest.java"))
-                    .createIfNotExist()
-                    .write(testClass.getBytes(StandardCharsets.UTF_8));
+            writeIfAbsent(testSourceDir.resolve("app/MainTest.java"), testClass);
         }
     }
 
@@ -239,8 +230,8 @@ public final class JkProjectScaffold extends JkScaffold {
      */
     private JkProjectScaffold generateLibsFolders() {
         Path libs = project.getBaseDir().resolve(JkProject.PROJECT_LIBS_DIR);
-        JkPathFile.of(libs.resolve("readme.txt"))
-                .fetchContentFrom(ProjectKBean.class.getResource("libs-readme.txt"));
+        writeIfAbsent(libs.resolve("readme.txt"),
+                JkUtilsIO.read(JkProjectScaffold.class.getResource("libs-readme.txt")));
         JkUtilsPath.createDirectories(libs.resolve("compile"));
         JkUtilsPath.createDirectories(libs.resolve("compile-only"));
         JkUtilsPath.createDirectories(libs.resolve("runtime-only"));
@@ -276,14 +267,19 @@ public final class JkProjectScaffold extends JkScaffold {
             }
         }
         String content = sb.toString();
-        JkPathFile.of(project.getBaseDir().resolve(JkProject.PROJECT_DEPENDENCIES_FILE))
-                .createIfNotExist()
-                .write(content);
+        Path depsFile = project.getBaseDir().resolve(JkProject.PROJECT_DEPENDENCIES_FILE);
+        if (!writeIfAbsent(depsFile, content)) {
+            List<String> existingLines = JkUtilsPath.readAllLines(depsFile).stream().map(String::trim).toList();
+            warnMissingLines(depsFile, content.lines()
+                    .filter(line -> !line.isBlank() && !line.startsWith("#") && !line.startsWith("["))
+                    .filter(line -> !existingLines.contains(line))
+                    .toList());
+        }
     }
 
     private void generateReadme() {
         String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
-        JkPathFile.of(project.getBaseDir().resolve("README.md")).createIfNotExist().write(content);
+        writeIfAbsent(project.getBaseDir().resolve("README.md"), content);
     }
 
 }

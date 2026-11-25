@@ -54,7 +54,8 @@ You can delete `jeka-src/Custom.java` if you don't need programmatic customizati
 
 !!! tip
     In a directory already containing sources, use `jeka project: scaffold scaffold.kind=EMPTY`. 
-    It generates the same files, without sample classes. An existing *README.md* is replaced.
+    It generates the same files, without sample classes. 
+    Existing files are kept. If *jeka.properties* or *jeka.project.deps* already exist, JeKa displays the lines to add.
 
 ### Simple Layout
 

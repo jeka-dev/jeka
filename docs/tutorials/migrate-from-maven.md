@@ -14,10 +14,7 @@ jeka project: scaffold scaffold.kind=EMPTY
 ```
 
 This adds *jeka.properties*, *jeka.project.deps*, and the `jeka` and `jeka.ps1` wrapper scripts. 
-`kind=EMPTY` avoids generating the sample classes.
-
-!!! warning
-    This replaces the existing *README.md* file. Restore it with `git checkout README.md`.
+`kind=EMPTY` avoids generating the sample classes. Existing files, as *README.md*, are kept.
 
 ## 2. Convert the Dependencies
 
@@ -33,7 +30,7 @@ Copy the latter into *jeka.project.deps*, replacing its content:
 com.google.guava:guava:33.4.8-jre
 
 [compile-only]
-- org.projectlombok:lombok
+org.projectlombok:lombok:1.18.38
 
 [runtime]
 org.postgresql:postgresql:42.7.4
@@ -41,14 +38,6 @@ org.postgresql:postgresql:42.7.4
 [test]
 org.junit.jupiter:junit-jupiter:5.12.2
 ```
-
-!!! warning "Fix `[compile-only]` by hand"
-    For now, dependencies of `provided` scope are displayed with a leading `-` and without version, as *lombok* above. 
-    Remove the dash and add the version. Otherwise, builds fail with `Coordinate specification '- org...' is not correct`.
-    ```ini
-    [compile-only]
-    org.projectlombok:lombok:1.18.38
-    ```
 
 If *lombok* or another dependency is an annotation processor, also declare it in a `[processor]` section:
 
@@ -68,6 +57,15 @@ Maven scopes translate as follows:
 | `<annotationProcessorPaths>`     | `[processor]`                                                       |
 | `<dependencyManagement>`, `import` scope | `[version]`, with `@pom` suffix for BOMs                    |
 | `<exclusions>`                   | `!group:name` lines, below the dependency                           |
+
+The `system` scope translates to file paths in `[compile-only]`. Annotation processors are not translated.
+
+Check these cases by hand:
+
+- Dependencies with a classifier do not bring their transitive dependencies in JeKa. A comment is displayed next to them. 
+- Dependencies of type `pom` are displayed as comments. Declare the dependencies they bring instead.
+- An external parent POM managing versions is declared as a BOM in `[version]`.
+- Versions managed in Maven profiles are not added to `[version]`.
 
 See [jeka.project.deps](../reference/api-project.md#jeka.project.deps) for the complete syntax.
 

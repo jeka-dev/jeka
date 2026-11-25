@@ -151,6 +151,60 @@ public final class JkPom {
 
 
     /**
+     * The dependencies declared in the dependencyManagement section of this POM, without any resolution.
+     */
+    List<JkCoordinateDependency> getManagedDependencies() {
+        Element dependencyManagementEl = dependencyManagementEl();
+        if (dependencyManagementEl == null) {
+            return List.of();
+        }
+        Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl, "dependencies");
+        if (dependenciesEl == null) {
+            return List.of();
+        }
+        return dependencies(dependenciesEl, getProperties()).getCoordinateDependencies();
+    }
+
+    /**
+     * The paths of the dependencies having 'system' scope.
+     */
+    List<String> getSystemPaths() {
+        Element dependenciesEl = dependenciesElement();
+        if (dependenciesEl == null) {
+            return List.of();
+        }
+        return JkUtilsXml.directChildren(dependenciesEl, "dependency").stream()
+                .map(dependencyEl -> JkUtilsXml.directChildText(dependencyEl, "systemPath"))
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .toList();
+    }
+
+    /**
+     * Returns the path, relative to the POM directory, where the parent POM may be located, or <code>null</code>
+     * if this POM has no parent or if the parent must not be looked up in the file system.
+     */
+    String getParentRelativePath() {
+        Element parentEl = JkUtilsXml.directChild(projectEl(), "parent");
+        if (parentEl == null) {
+            return null;
+        }
+        String relativePath = JkUtilsXml.directChildText(parentEl, "relativePath");
+        if (relativePath == null) {
+            return "../pom.xml";
+        }
+        return relativePath.isBlank() ? null : relativePath.trim();
+    }
+
+    /**
+     * The artifactId of the parent, or <code>null</code> if this POM has no parent.
+     */
+    String getParentArtifactId() {
+        Element parentEl = JkUtilsXml.directChild(projectEl(), "parent");
+        return parentEl == null ? null : JkUtilsXml.directChildText(parentEl, "artifactId");
+    }
+
+    /**
      * Converts the current POM representation into a {@link JkVersionProvider}, which manages
      * version information for dependencies within the POM, including those defined in its
      * dependency management section. If there is no dependency management section, an empty

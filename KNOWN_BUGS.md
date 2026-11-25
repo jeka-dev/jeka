@@ -62,9 +62,16 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkProject.toDependency` exports the compile and runtime dependencies merged.
 - **Evidence:** reproduced with `project: depTree`.
 
-### `maven: migrateDeps` generates an invalid `jeka.project.deps`
-- **Symptom:** a `provided` dependency becomes `- org.projectlombok:lombok` in `[compile-only]`, without version. Using it fails with `Coordinate specification '- org...' is not correct`.
-- **Evidence:** reproduced (generated output).
+### BOM: versions managed by a grandparent POM are ignored
+- **Symptom:** with `x:p1:1@pom` in `[version]`, `p1` having parent `p2`, itself having parent `p3`, versions managed by `p3` are not found: `Following modules do not specify version`. Those of `p1` and `p2` are. Also concerns external parents declared by `maven: migrateDeps`.
+- **Where:** `PomResolver.getParentPom` returns the parent POM without resolving its own parent.
+- **Evidence:** reproduced with a file repository.
+
+### A wildcard exclusion can exclude the dependency itself
+- **Symptom:** in *jeka.project.deps*, `com.google.guava:guava:33.4.8-jre` followed by `!com.google.guava:*` or `!*:*` resolves nothing. Maven excludes transitive dependencies only. `maven: migrateDeps` works around it for `*:*`.
+- **Where:** `IvyTranslatorToDependency`, the exclude rule also applies to the artifact of the dependency.
+- **Workaround:** name the excluded modules. To exclude all, declare `com.google.guava:guava::jar:33.4.8-jre`.
+- **Evidence:** reproduced.
 
 ### NPE message when a project has no module ID
 - **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` fails with `Cannot invoke "JkModuleId.toColonNotation()"...`, possibly after other modules were published.
@@ -73,10 +80,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 ### Javadoc warning when publishing a scaffolded project
 - **Symptom:** warning with status 1.
 - **Evidence:** reproduced by the naive agent.
-
-### Scaffold overwrites existing files
-- **Symptom:** `project: scaffold` replaces an existing `README.md` or `jeka.properties`, without asking. User content is lost.
-- **Evidence:** reproduced by the doc-writer agent.
 
 ### `jeka -p` picks the javadoc JAR after a publication
 - **Symptom:** `Invalid or corrupt jarfile`, as `x-javadoc.jar` sorts before `x.jar` in `jeka-output`.

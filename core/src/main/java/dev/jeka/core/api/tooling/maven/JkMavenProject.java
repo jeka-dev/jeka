@@ -26,8 +26,6 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import static dev.jeka.core.api.depmanagement.JkQualifiedDependencySet.*;
-
 /**
  * Represents a Maven project with various utility methods for performing common tasks.
  */
@@ -76,29 +74,7 @@ public class JkMavenProject {
      * @param codeIndent The number of spaces for each indentation level in the generated code.
      */
     public String getDependencyAsJeKaCode(int codeIndent)  {
-        StringBuilder sb = new StringBuilder();
-        Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
-        mvn().addParamsAsCmdLine("help:effective-pom -Doutput=%s", effectivePom)
-                .setLogCommand(JkLog.isVerbose())
-                .setLogWithJekaDecorator(JkLog.isVerbose())
-                .exec();
-        //Path pomPath = getBaseDir().resolve("pom.xml");
-        //JkUtilsAssert.state(Files.exists(pomPath), "No pom file found at " + pomPath);
-        JkPom pom = JkPom.of(effectivePom);
-        sb.append("Compile:\n");
-        sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(null,
-                COMPILE_SCOPE, PROVIDED_SCOPE), true));
-
-        sb.append("Runtime:\n");
-        sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
-                RUNTIME_SCOPE), true));
-        sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
-                PROVIDED_SCOPE), false));
-
-        sb.append("Test:\n");
-        sb.append(JkDependencySet.toJavaCode(codeIndent, pom.getDependencies().getDependenciesHavingQualifier(
-                TEST_SCOPE), true));
-        return sb.toString();
+        return PomMigration.of(baseDir, effectivePom()).toJavaCode(codeIndent);
     }
 
     /**
@@ -106,30 +82,18 @@ public class JkMavenProject {
      * in <i>jeka.project.deps</i> file.
      */
     public String getDependenciesAsTxt()  {
-        StringBuilder sb = new StringBuilder();
+        return PomMigration.of(baseDir, effectivePom()).toTxt();
+    }
+
+    private JkPom effectivePom() {
         Path effectivePom = JkUtilsPath.createTempFile("jeka-effective-pom-", ".pom");
-        mvn().addParamsAsCmdLine("help:effective-pom -Doutput=%s", effectivePom)
+
+        // '-N' because, otherwise, the output contains a pom for each module
+        mvn().addParamsAsCmdLine("-N help:effective-pom -Doutput=%s", effectivePom)
                 .setLogCommand(JkLog.isVerbose())
                 .setLogWithJekaDecorator(JkLog.isVerbose())
                 .exec();
-        JkPom pom = JkPom.of(effectivePom);
-        sb.append("[compile]\n");
-        sb.append(JkDependencySet.toTxt( pom.getDependencies().getDependenciesHavingQualifier(null,
-                COMPILE_SCOPE), false));
-
-        sb.append("\n\n[compile-only]\n");
-        sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                PROVIDED_SCOPE), true));
-
-        sb.append("\n\n[runtime]\n");
-        sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                RUNTIME_SCOPE), false));
-
-        sb.append("\n\n[test]\n");
-        sb.append(JkDependencySet.toTxt(pom.getDependencies().getDependenciesHavingQualifier(
-                TEST_SCOPE), false));
-
-        return sb.toString();
+        return JkPom.of(effectivePom);
     }
 
     /**
