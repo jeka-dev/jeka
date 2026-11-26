@@ -52,12 +52,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkMvn.mvnCmd` returns null.
 - **Evidence:** reproduced with `migrateDeps`.
 
-### A wildcard exclusion can exclude the dependency itself
-- **Symptom:** in *jeka.project.deps*, `com.google.guava:guava:33.4.8-jre` followed by `!com.google.guava:*` or `!*:*` resolves nothing. Maven excludes transitive dependencies only. `maven: migrateDeps` works around it for `*:*`.
-- **Where:** `IvyTranslatorToDependency`, the exclude rule also applies to the artifact of the dependency.
-- **Workaround:** name the excluded modules. To exclude all, declare `com.google.guava:guava::jar:33.4.8-jre`.
-- **Evidence:** reproduced.
-
 ### NPE message when a project has no module ID
 - **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` fails with `Cannot invoke "JkModuleId.toColonNotation()"...`, possibly after other modules were published.
 - **Evidence:** reproduced with `maven: info`.

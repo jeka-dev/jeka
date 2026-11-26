@@ -7,9 +7,13 @@ import dev.jeka.core.api.depmanagement.JkQualifiedDependencySet;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.id.ArtifactId;
+import org.apache.ivy.core.module.id.ModuleId;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
@@ -53,6 +57,24 @@ class IvyTranslationsTest {
         DependencyArtifactDescriptor defaultArtifact = dependencyDescriptors[0].getAllDependencyArtifacts()[1];
         assertEquals("jar", defaultArtifact.getType());
         assertNull(defaultArtifact.getExtraAttribute("classifier"));
+    }
+
+    @Test
+    void toResolveModuleDescriptor_wildcardExclusion_excludesTransitiveDependenciesOnly() {
+        JkQualifiedDependencySet deps = JkQualifiedDependencySet.of()
+                .and(null, JkCoordinateDependency.of("com.google.guava:guava:33.4.8-jre")
+                        .andExclusions("com.google.guava:*", "*:*"));
+        DependencyDescriptor guavaDesc = IvyTranslatorToModuleDescriptor.toResolveModuleDescriptor(OWNER, deps)
+                .getDependencies()[0];
+        String[] confs = guavaDesc.getModuleConfigurations();
+
+        assertFalse(guavaDesc.doesExclude(confs, artifactId("com.google.guava", "guava")));
+        assertTrue(guavaDesc.doesExclude(confs, artifactId("com.google.guava", "failureaccess")));
+        assertTrue(guavaDesc.doesExclude(confs, artifactId("org.jspecify", "jspecify")));
+    }
+
+    private static ArtifactId artifactId(String group, String name) {
+        return new ArtifactId(new ModuleId(group, name), name, "jar", "jar");
     }
 
 }
