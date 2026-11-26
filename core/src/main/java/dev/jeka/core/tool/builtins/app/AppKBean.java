@@ -49,7 +49,7 @@ public class AppKBean extends KBean {
     @JkDoc("Git Remote repository URL of the app to install.")
     public String repo;
 
-    @JkDoc("Specifies the name of the app to update/uninstall.")
+    @JkDoc("Specifies the name of the app to install, update or uninstall.")
     public String name;
 
     @JkDoc("Short description of the app provided by the application author.")

@@ -299,7 +299,8 @@ public final class MavenKBean extends KBean {
         public String version;
 
         @JkDoc("If true, the publication will generate a BOM as its only artifact. \n" +
-                "The BOM will point to the version of each child base that contains a project KBean.\n" +
+                "The BOM manages the project module ID of each child base that contains a project KBean, " +
+                "with the version of the BOM.\n" +
                 "Be careful to declare it with leading '_' as  '_@maven.pub.parentBom' in jeka.properties to not" +
                 " propagate it to children.")
         public boolean parentBom;
