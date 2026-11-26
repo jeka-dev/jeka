@@ -327,6 +327,7 @@ public final class JkTestProcessor {
     }
 
     private JkTestResult launchInForkedProcess(JkTestSelection testSelection) {
+        checkForkedJavaVersion(jvmHints.javaVersion);
         Path serializedResultPath = JkUtilsPath.createTempFile("testResult-", ".ser");
         Args args = new Args();
         args.resultFile = serializedResultPath.toAbsolutePath().toString();
@@ -446,6 +447,15 @@ public final class JkTestProcessor {
             return this;
         }
 
+    }
+
+    // The test launcher runs in the forked JVM, and is compiled for the Java version JeKa needs. Non-private for testing.
+    static void checkForkedJavaVersion(JkJavaVersion javaVersion) {
+        if (javaVersion != null && !javaVersion.isEqualOrGreaterThan(JkJavaVersion.V21)) {
+            throw new IllegalStateException(String.format("Forked tests run on Java %s, the target version, "
+                    + "but JeKa needs Java 21 or higher to run them. Run them in the JeKa JVM with "
+                    + "'@project.test.fork=false', or target Java 21 or higher.", javaVersion));
+        }
     }
 
     private static class JvmHints {

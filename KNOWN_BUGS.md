@@ -9,12 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Build and packaging
 
-### Forked tests fail on Java targets below 21
-- **Symptom:** `@project.javaVersion=17` on a fresh scaffold makes `project: test` fail with `UnsupportedClassVersionError: JkTestProcessor ... class file version 65.0`. Docs use 17 as an example.
-- **Workaround:** `@project.test.fork=false`, or target 21+.
-- **To decide:** support it, or fail with a clear message, as JeKa needs Java 21.
-- **Evidence:** reproduced.
-
 ### Micronaut applications do not start from a shaded jar
 - **Symptom:** with `jarType=SHADE`, the Micronaut sample prints its banner, then no server starts. Same output with 0.11.68.
 - **Where:** `META-INF/micronaut` entries keep their original names, as `MavenJarShader` only transforms `META-INF/services` (inferred). Class names in text files (e.g. `logback.xml`) are not relocated either: this is documented.
