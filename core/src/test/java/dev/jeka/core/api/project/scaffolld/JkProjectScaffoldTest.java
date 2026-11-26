@@ -48,6 +48,20 @@ class JkProjectScaffoldTest {
     }
 
     @Test
+    void scaffold_regular_javadocGenerated() {
+        Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
+        JkProject project = JkProject.of().setBaseDir(baseDir);
+        JkProjectScaffold.of(project).setKind(JkProjectScaffold.Kind.REGULAR).run();
+
+        // Javadoc fails when no class is public, as publishing creates a javadoc jar
+        JkProject scaffoldedProject = JkProject.of().setBaseDir(baseDir);
+        scaffoldedProject.packaging.createJavadocJar();
+        assertTrue(Files.exists(scaffoldedProject.packaging.getJavadocDir().resolve("index.html")));
+
+        JkPathTree.of(baseDir).deleteRoot();
+    }
+
+    @Test
     void scaffold_withSimpleLayout_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);
