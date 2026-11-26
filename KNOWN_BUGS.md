@@ -9,11 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Build and packaging
 
-### Compiling for Java 8 not verified with a real JDK 8
-- **Symptom:** `@project.javaVersion=8` failed with `Unrecognized option: --add-exports=jdk.compiler/...`. The option is no longer passed to JDK 8 compilers, but no JDK 8 build was run since: other options may still fail.
-- **Where:** `JkJavaCompilerToolChain.ToolOrProcess.run`.
-- **Evidence:** fixed from a fake `javac` in `JkJavaCompilerToolChainTest`.
-
 ## Publication and Maven
 
 ## Versioning (Git)
