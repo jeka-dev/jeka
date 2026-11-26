@@ -109,10 +109,30 @@ class InjectedRunbaseTest {
         // The parent is initialized
         assertEquals(dir, childRunbase.getInjectedRunbase("..").getBaseDir());
 
+        // The parent passes the guard
+        JkRunbase master = KBeanTestLoader.load(dir, BaseKBean.class).getRunbase();
+        Exception fromParent = assertThrows(IllegalStateException.class, () -> master.getInjectedRunbase("missing"));
+        assertTrue(fromParent.getMessage().contains("mentions a directory that does not exist"), fromParent.getMessage());
+
         // The parent is not initialized yet: a KBean of the parent injects the child, which injects the parent back
         JkRunbase.setMaster(new JkRunbase(dir));
         Exception parent = assertThrows(IllegalStateException.class, () -> childRunbase.getInjectedRunbase(".."));
         assertTrue(parent.getMessage().contains("targets the parent runbase"), parent.getMessage());
+    }
+
+    @Test
+    void adminMode_noChildBase() throws IOException {
+        Path dir = baseDir.toRealPath();
+        write(dir.resolve("jeka.properties"), "_jeka.child-bases=a\n");
+        write(dir.resolve("a/jeka.properties"), "");
+        BehaviorSettings.setAdminMode();
+        Engine engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
+        engine.resolveKBeans();
+        Engines.registerMaster(engine);
+        Thread.currentThread().setContextClassLoader(
+                new AppendableClassloader(engine.getClasspathSetupResult().runClasspath));
+        JkRunbase runbase = engine.getOrCreateRunbase(new KBeanAction.Container(), true);
+        assertTrue(runbase.getChildRunbases().isEmpty());
     }
 
     @Test
