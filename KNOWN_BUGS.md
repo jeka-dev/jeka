@@ -54,6 +54,8 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Evidence:** reproduced with `jeka`.
 
 ### `-cb=<unknown>` only warns and exits 0
+- **Where:** `JkRunbase`: the exception became a warning on purpose in 77cacad47, "to improve IDE compatibility", as some IDE tools build every JeKa module.
+- **To decide:** failing unless `--force` may break those IDE tools.
 - **Evidence:** reproduced by the sample-maintainer agent.
 
 ## KBeans
