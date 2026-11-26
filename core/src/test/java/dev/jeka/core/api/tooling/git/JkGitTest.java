@@ -88,6 +88,13 @@ class JkGitTest {
         assertEquals("1.0", jkGit.getLatestTag());
     }
 
+    @Test
+    void version_noCommit_explicitError(@TempDir Path dir) throws Exception {
+        git(dir, "init -q");
+        Exception e = assertThrows(IllegalStateException.class, () -> JkVersionFromGit.of(dir, "").getVersion());
+        assertTrue(e.getMessage().contains("at least one commit"), e.getMessage());
+    }
+
     private static void git(Path dir, String args) throws Exception {
         List<String> command = new ArrayList<>(List.of("git"));
         command.addAll(List.of(args.split(" ")));

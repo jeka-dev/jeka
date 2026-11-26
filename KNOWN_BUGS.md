@@ -91,10 +91,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `SourceParser` reads line by line.
 - **Evidence:** reproduced by the doc-writer agent.
 
-### Git versioning without any commit gives a bare Git error
-- **Symptom:** `error code 128` or `129` on `git diff HEAD --stat`.
-- **Evidence:** reproduced by the naive agent.
-
 ### `app: install` needs a terminal
 - **Symptom:** without a terminal, `app:` commands fail with "the 'app' commands need an interactive terminal". The trust, version and name prompts can't be answered otherwise: `repo=...#tag` is not supported, and there is no option for the tag.
 - **To decide:** which options to add for a non-interactive install.

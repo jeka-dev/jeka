@@ -68,6 +68,7 @@ public class JkVersionFromGit  {
             return cachedVersion;
         }
         JkGit git = JkGit.of(baseDir);
+        assertHasCommit(git);
         boolean dirty = git.isWorkspaceDirty();
         if (dirty) {
             JkLog.verbose("Git workspace is dirty. Use SNAPSHOT for version.");
@@ -92,6 +93,7 @@ public class JkVersionFromGit  {
             buildable.setVersionSupplier(this::getVersionAsJkVersion);
         }
         JkGit git = JkGit.of(buildable.getBaseDir());
+        assertHasCommit(git);
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
         String branch = git.getCurrentBranch();  // null on detached HEAD
         buildable.getManifestCustomizers().append(manifest -> {
@@ -112,5 +114,20 @@ public class JkVersionFromGit  {
     }
 
 
+
+    // Otherwise, Git commands referencing HEAD fail with a bare error code
+    private static void assertHasCommit(JkGit git) {
+        int exitCode = git.copy()
+                .addParams("rev-parse", "--verify", "--quiet", "HEAD")
+                .setLogWithJekaDecorator(false)
+                .setCollectStdout(true)
+                .setFailOnError(false)
+                .exec()
+                .getExitCode();
+        if (exitCode != 0) {
+            throw new IllegalStateException(String.format("Git versioning needs a Git repository with at least one commit in %s. "
+                    + "Commit, or disable Git versioning.", git.getWorkingDir().toAbsolutePath().normalize()));
+        }
+    }
 
 }
