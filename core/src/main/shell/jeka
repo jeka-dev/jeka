@@ -829,6 +829,11 @@ compute_JEKA_DIST_DIR() {
         [ -n "$distrib_repo" ] && distrib_repo=$(echo "$distrib_repo" | cut -d',' -f1 | xargs)
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
 
+        # A repository specific to the JeKa distribution prevails
+        local specific_distrib_repo
+        specific_distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
+        [ -n "$specific_distrib_repo" ] && jeka_repo=$(echo "$specific_distrib_repo" | xargs)
+
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
         local auth_header=""
         auth_header=$(get_prop_value_from_base_dir "$base_dir" "jeka.repos.download.headers.Authorization")

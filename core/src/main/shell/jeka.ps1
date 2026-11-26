@@ -504,6 +504,12 @@ class JekaDistrib {
 
     $distRepo = $this.props.GetValueOrDefault("jeka.repos.download", "https://repo.maven.apache.org/maven2")
     $distRepo = $distRepo.Split(',')[0].Trim()
+
+    # A repository specific to the JeKa distribution prevails
+    $specificDistRepo = $this.props.GetValue("jeka.distrib.repo")
+    if (![String]::IsNullOrWhiteSpace($specificDistRepo)) {
+      $distRepo = $specificDistRepo.Trim()
+    }
     $url = "$distRepo/dev/jeka/jeka-core/$jekaVersion/jeka-core-$jekaVersion-distrib.zip"
     $zipExtractor = [ZipExtractor]::new($url, $distDir)
 
