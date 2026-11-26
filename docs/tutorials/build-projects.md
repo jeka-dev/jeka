@@ -193,6 +193,9 @@ The scaffolded *jeka.properties* sets a FAT JAR. Without this property, JeKa cre
     For example, `logback.xml` must mention the relocated name: `my.app._shaded.ch.qos.logback.core.ConsoleAppender`,
     where `my.app` is the root package of your application. Prefer `FAT` for applications that don't need relocation.
 
+    Frameworks that list classes in their own resource files, such as Micronaut (`META-INF/micronaut/...`),
+    don't start from a shaded jar: use `FAT` for them.
+
 ### Multiple Artifacts
 
 For libraries, you might want to produce both a regular JAR and an extra shaded JAR:

@@ -9,13 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Build and packaging
 
-### Micronaut applications do not start from a shaded jar
-- **Symptom:** with `jarType=SHADE`, the Micronaut sample prints its banner, then no server starts. Same output with 0.11.68.
-- **Where:** `META-INF/micronaut` entries keep their original names, as `MavenJarShader` only transforms `META-INF/services` (inferred). Class names in text files (e.g. `logback.xml`) are not relocated either: this is documented.
-- **Workaround:** `jarType=FAT`.
-- **To decide:** add a transformer for `META-INF/micronaut`, or document that frameworks naming classes in resources need `FAT`.
-- **Evidence:** reproduced.
-
 ### Compiling for Java 8 not verified with a real JDK 8
 - **Symptom:** `@project.javaVersion=8` failed with `Unrecognized option: --add-exports=jdk.compiler/...`. The option is no longer passed to JDK 8 compilers, but no JDK 8 build was run since: other options may still fail.
 - **Where:** `JkJavaCompilerToolChain.ToolOrProcess.run`.
