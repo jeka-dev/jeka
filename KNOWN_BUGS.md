@@ -77,10 +77,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `CmdLineParser`. Left as is, so that a field without value does not swallow the next argument.
 - **Evidence:** from source.
 
-### `${...}` in `@JkDoc` is displayed as `null` by `--doc`
-- **Workaround:** don't write `${...}` in `@JkDoc` texts.
-- **Evidence:** reproduced by the doc-writer agent.
-
 ### Two `@JkDep` on the same line fail
 - **Symptom:** `module does not specify version`. Documented in `docs/reference/kbeans-base.md`.
 - **Where:** `SourceParser` reads line by line.

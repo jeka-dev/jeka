@@ -107,7 +107,7 @@ class PicocliHelp {
             synopsis.add(String.format("@|magenta Default KBean|@ @|yellow %s:|@ %s",
                     KBean.name(defaultKBeanClassName), defaultKBeanClassName));
             if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
-                synopsis.add("Description  : " + beanDescription.synopsisHeader);
+                synopsis.add("Description  : " + PicocliCommands.escapeVariables(beanDescription.synopsisHeader));
             }
             if (!beanDescription.beanFields.isEmpty()) {
                 synopsis.add(JkAnsi.magenta("\nFields"));
@@ -126,7 +126,8 @@ class PicocliHelp {
         for (Class<? extends KBean> kbeanClass : JkBeanDescription.STANDARD_KBEAN_CLASSES) {
             JkBeanDescription description = JkBeanDescription.of(kbeanClass, false);
             String name = KBean.name(kbeanClass);
-            stdKBeans.put( String.format("@|yellow %s:|@", name), description.synopsisHeader);
+            stdKBeans.put( String.format("@|yellow %s:|@", name),
+                    PicocliCommands.escapeVariables(description.synopsisHeader));
         }
         CommandLine commandLine = new CommandLine(main);
         commandLine.getHelpSectionMap().put(SECTION_STD_KBEANS_HEADING,
@@ -189,7 +190,7 @@ class PicocliHelp {
 
     }
 
-    private static CommandLine kbeanHelp(
+    static CommandLine kbeanHelp(  // non-private for testing
             JkBeanDescription beanDescription) {
 
         CommandLine.Model.CommandSpec main = PicocliCommands.fromKBeanDesc(beanDescription);
@@ -205,10 +206,11 @@ class PicocliHelp {
 
         // KBean description (class level JkDoc)
         if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
-            String header = beanDescription.synopsisHeader.trim();
+            String header = PicocliCommands.escapeVariables(beanDescription.synopsisHeader).trim();
             header = header.endsWith(".") ? header : header + ".";
             synopsis.add(header);
-            List<String> descLines = Arrays.asList(beanDescription.synopsisDetail.split("\n"));
+            List<String> descLines = Arrays.asList(
+                    PicocliCommands.escapeVariables(beanDescription.synopsisDetail).split("\n"));
             synopsis.addAll(descLines);
         }
 
@@ -218,7 +220,7 @@ class PicocliHelp {
             beanDescription.preInitInfos.forEach(
                     info -> synopsis.add("      "
                             + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
-                            + info.description));
+                            + PicocliCommands.escapeVariables(info.description)));
         }
 
         // PostInit
@@ -227,7 +229,7 @@ class PicocliHelp {
             beanDescription.postInitInfos.forEach(
                     info -> synopsis.add("      "
                             + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
-                            + info.description));
+                            + PicocliCommands.escapeVariables(info.description)));
         }
 
         // Fields
