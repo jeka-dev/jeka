@@ -79,6 +79,38 @@ class JkJarPackerManifestTest {
         assertEquals("0", versionInJar());
     }
 
+    @Test
+    void makeJarAndFatJar_manifestInClassDir_attributesMergedUnderGenerated() throws IOException {
+        JkManifest.of()
+                .addMainAttribute("Implementation-Version", "0")
+                .addMainAttribute("X-Custom", "kept")
+                .writeToStandardLocation(classDir);
+
+        packer("1").makeJar(jar);
+        assertEquals("1", versionInJar());
+        assertEquals("kept", mainAttributeInJar("X-Custom"));
+
+        packer("2").makeFatJar(jar, Collections.emptyList(), JkPathMatcher.of());
+        assertEquals("2", versionInJar());
+        assertEquals("kept", mainAttributeInJar("X-Custom"));
+    }
+
+    @Test
+    void makeFatJar_manifestIsFirstEntry() throws IOException {
+        JkManifest.of().addMainAttribute("X-Custom", "kept").writeToStandardLocation(classDir);
+        packer("1").makeFatJar(jar, Collections.emptyList(), JkPathMatcher.of());
+        try (JarInputStream is = new JarInputStream(Files.newInputStream(jar))) {
+            assertNotNull(is.getManifest());
+            assertEquals("1", is.getManifest().getMainAttributes().getValue("Implementation-Version"));
+        }
+    }
+
+    private String mainAttributeInJar(String name) throws IOException {
+        try (JarFile jarFile = new JarFile(jar.toFile())) {
+            return jarFile.getManifest().getMainAttributes().getValue(name);
+        }
+    }
+
     private JkJarPacker packer(String version) {
         return JkJarPacker.of(classDir)
                 .withManifest(JkManifest.of().addMainAttribute("Implementation-Version", version));

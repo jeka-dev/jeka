@@ -9,12 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Build and packaging
 
-### A `META-INF/MANIFEST.MF` resource replaces the generated manifest in FAT jars
-- **Symptom:** with a `META-INF/MANIFEST.MF` in the project resources, a FAT jar contains this one only, ignoring version and manifest customizers. A REGULAR jar contains the generated one only. Nothing tells the user. `.jeka-work/jeka-src-classes` may also hold such a file, left by JeKa 0.11.68 or older: use `--clean-work` once.
-- **Where:** `JkJarPacker.makeFatJar`.
-- **To decide:** which one wins, or merge both.
-- **Evidence:** reproduced.
-
 ### Forked tests fail on Java targets below 21
 - **Symptom:** `@project.javaVersion=17` on a fresh scaffold makes `project: test` fail with `UnsupportedClassVersionError: JkTestProcessor ... class file version 65.0`. Docs use 17 as an example.
 - **Workaround:** `@project.test.fork=false`, or target 21+.
