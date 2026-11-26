@@ -119,9 +119,12 @@ class AppBuilder {
         return JkPathFile.of(batFile).write(shellContent).get();
     }
 
-    private static Path createShellFile(Path baseDir, Path jarPath) {
+    // non-private for testing
+    static Path createShellFile(Path baseDir, Path jarPath) {
+
+        // "$@" passes each argument as is, without word splitting nor filename expansion
         String shellContent = SHE_BANG + "\n" +
-                "jeka -r \"" + baseDir + "\" -p $@\n";
+                "jeka -r \"" + baseDir + "\" -p \"$@\"\n";
         String fileName = jarPath.getFileName().toString().replace(".jar", ".sh");
         Path shellFile = jarPath.resolveSibling(fileName);
         return JkPathFile.of(shellFile)

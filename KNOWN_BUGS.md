@@ -89,11 +89,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `Invalid or corrupt jarfile`, as `x-javadoc.jar` sorts before `x.jar` in `jeka-output`.
 - **Evidence:** reproduced by the doc-writer agent.
 
-### Installed app scripts expand arguments
-- **Symptom:** `cowsay "*"` prints the file names of the current directory.
-- **Where:** `AppBuilder` writes an unquoted `$@`.
-- **Evidence:** reproduced by the sample-maintainer agent with 0.11.68; same code on master.
-
 ## Versioning (Git)
 
 ### Tag prefix ignored on detached HEAD
