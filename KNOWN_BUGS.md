@@ -24,11 +24,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `PicocliHelp.cmdHelp` builds its own classloader.
 - **Evidence:** reproduced by the sample-maintainer agent.
 
-### `-c` after `-p` cleans `jeka-output`
-- **Symptom:** `jeka -p -c` passes `-c` to the program, but the shell script also deletes `jeka-output`, so the program is rebuilt. Same with `-v` and `-q`, which change the script logs.
-- **Where:** `compute_VERBOSE_QUIET_CLEAN` in `jeka` reads all arguments; `IsCleanFlagPresent` in `jeka.ps1` too (from source).
-- **Evidence:** reproduced with `jeka`.
-
 ## KBeans
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
