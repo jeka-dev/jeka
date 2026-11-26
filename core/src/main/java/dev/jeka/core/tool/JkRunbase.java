@@ -382,8 +382,6 @@ public final class JkRunbase {
 
         if (BehaviorSettings.INSTANCE.adminMode) {
             runbaseGraph = RunbaseGraph.ofAdmin(this);
-        } else if (master) {
-            runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
         }
 
         if (LogSettings.INSTANCE.inspect) {
@@ -474,6 +472,11 @@ public final class JkRunbase {
             }
         }
         initialized = true;
+
+        // Child bases are initialized after the KBeans of the parent, so that they can inject them
+        if (master && !BehaviorSettings.INSTANCE.adminMode) {
+            runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
+        }
 
         // Post-initialize KBeans
         Jk2ColumnsText postInitializeText = null;
@@ -649,8 +652,10 @@ public final class JkRunbase {
      */
     JkRunbase getInjectedRunbase(String relPath) {
         Path targetBaseDir = baseDir.toAbsolutePath().resolve(relPath).normalize();
-        JkUtilsAssert.state(this == MASTER || !targetBaseDir.equals(MASTER.getBaseDir().toAbsolutePath().normalize()),
-                "@JkInject(\"%s\") in '%s' targets the parent runbase, which is not initialized yet.", relPath, baseDir);
+        JkUtilsAssert.state(this == MASTER || MASTER.isInitialized()
+                        || !targetBaseDir.equals(MASTER.getBaseDir().toAbsolutePath().normalize()),
+                "@JkInject(\"%s\") in '%s' targets the parent runbase, which is not initialized yet: " +
+                        "a KBean of the parent injects this base, which injects the parent back.", relPath, baseDir);
         JkUtilsAssert.state(Files.isDirectory(targetBaseDir),
                 "@JkInject(\"%s\") in '%s' mentions a directory that does not exist.", relPath, baseDir);
         return RunbaseGraph.getOrCreateRunbase(targetBaseDir);
