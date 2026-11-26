@@ -18,6 +18,7 @@ package dev.jeka.core.tool.builtins.app;
 
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.JkColumnText;
+import dev.jeka.core.api.tooling.git.JkGit;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
@@ -51,6 +52,9 @@ public class AppKBean extends KBean {
 
     @JkDoc("Specifies the name of the app to install, update or uninstall.")
     public String name;
+
+    @JkDoc("Git tag to install, or '@' for the last commit of the default branch. When set, no version is asked.")
+    public String tag;
 
     @JkDoc("Short description of the app provided by the application author.")
     public String description;
@@ -100,7 +104,7 @@ public class AppKBean extends KBean {
 
 
         List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
-        if (!installedAppsForRepo.isEmpty()) {
+        if (!installedAppsForRepo.isEmpty() && JkUtilsString.isBlank(tag)) {
             JkLog.info("This repository has been already installed for following app/versions:");
             installedAppsForRepo.forEach(System.out::println);
             String response = ask("Do you want to install another version? %s:", JkAnsi.yellow("[N,y]")).trim();
@@ -134,8 +138,12 @@ public class AppKBean extends KBean {
 
         final RepoAndTag repoAndTag;
 
+        // Tag set from options
+        if (!JkUtilsString.isBlank(tag)) {
+            repoAndTag = repoAndTagFromOption(tag, remoteUrl, tagBucket, branch);
+
         // No tag available
-        if (tagBucket.tags.isEmpty()) {
+        } else if (tagBucket.tags.isEmpty()) {
             JkLog.info("No tags found in remote Git repository. Last commit from branch <%s> will be installed.",
                     JkAnsi.magenta(branch));
             repoAndTag = new RepoAndTag(remoteUrl, null);
@@ -460,6 +468,21 @@ public class AppKBean extends KBean {
         }
         JkLog.info("No new version available.");
         return false;
+    }
+
+    // Non-private for testing
+    static RepoAndTag repoAndTagFromOption(String tagOption, String remoteUrl, TagBucket tagBucket, String branch) {
+        String requestedTag = tagOption.trim();
+        if ("@".equals(requestedTag)) {
+            JkLog.info("Last commit from branch %s will be installed.", JkAnsi.magenta(branch));
+            return new RepoAndTag(remoteUrl, null);
+        }
+        if (!tagBucket.hasTag(requestedTag)) {
+            throw new JkException("No tag '%s' found in %s. Available tags: %s", requestedTag, remoteUrl,
+                    tagBucket.tags.stream().map(JkGit.Tag::getName).toList());
+        }
+        JkLog.info("Version %s will be installed.", JkAnsi.magenta(requestedTag));
+        return new RepoAndTag(remoteUrl, requestedTag);
     }
 
     // JkPrompt returns null when the input is closed, as when no terminal is attached. Non-private for testing.

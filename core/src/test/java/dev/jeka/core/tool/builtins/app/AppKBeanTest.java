@@ -31,6 +31,18 @@ class AppKBeanTest {
         withInput("no-such-app-for-jeka-test\n", () -> Assertions.assertDoesNotThrow(appKBean::uninstall));
     }
 
+    @Test
+    void repoAndTagFromOption_ok() {
+        TagBucket tagBucket = TagBucket.ofValues(java.util.List.of("1.0", "1.1"));
+
+        Assertions.assertEquals("1.0",
+                AppKBean.repoAndTagFromOption(" 1.0 ", "https://x/y.git", tagBucket, "main").tag);
+        Assertions.assertNull(AppKBean.repoAndTagFromOption("@", "https://x/y.git", tagBucket, "main").tag);
+        JkException e = Assertions.assertThrows(JkException.class,
+                () -> AppKBean.repoAndTagFromOption("2.0", "https://x/y.git", tagBucket, "main"));
+        Assertions.assertTrue(e.getMessage().contains("1.1"), e.getMessage());
+    }
+
     private static void withInput(String input, Runnable runnable) {
         InputStream originalIn = System.in;
         System.setIn(new ByteArrayInputStream(input.getBytes()));
