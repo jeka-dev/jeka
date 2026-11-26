@@ -15,10 +15,9 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Engine and command line
 
-### Command-line value equal to a field name is rejected
-- **Symptom:** `project: version=moduleId` fails. Works from `jeka.properties`.
-- **Where:** `CmdLineParser`. Left as is, so that a field without value does not swallow the next argument.
-- **Evidence:** from source.
+### A boolean field without value fails on the command line
+- **Symptom:** `project: test.skip info` fails with `Invalid value for option 'test.skip': '_NULL_' is not a boolean`. `test.skip=true` works.
+- **Evidence:** reproduced on master `6ab3a30be`. Cause not investigated.
 
 ### Two `@JkDep` on the same line fail
 - **Symptom:** `module does not specify version`. Documented in `docs/reference/kbeans-base.md`.

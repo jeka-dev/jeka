@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CmdLineParserTest {
@@ -60,6 +61,32 @@ class CmdLineParserTest {
                 "moduleId".equals(action.member) && "pack".equals(action.value)));
         assertEquals(1, kBeanActions.stream()
                 .filter(action -> action.type == KBeanAction.Action.INVOKE).count());
+    }
+
+    @Test
+    void fieldValueEqualToFieldName_ok() {
+        List<KBeanAction> kBeanActions = parse("project: version=moduleId moduleId=version").toList();
+        assertEquals("moduleId", valueOf(kBeanActions, "version"));
+        assertEquals("version", valueOf(kBeanActions, "moduleId"));
+    }
+
+    @Test
+    void fieldWithoutValue_followedByField_fails() {
+        CommandLine.ParameterException e = assertThrows(CommandLine.ParameterException.class,
+                () -> parse("project: version moduleId=x"));
+        assertTrue(e.getMessage().contains("Expected parameter for option 'version'"), e.getMessage());
+    }
+
+    @Test
+    void fieldWithSeparateValue_ok() {
+        assertEquals("1.2", valueOf(parse("project: version 1.2").toList(), "version"));
+    }
+
+    private static Object valueOf(List<KBeanAction> kBeanActions, String member) {
+        return kBeanActions.stream()
+                .filter(action -> member.equals(action.member))
+                .map(action -> action.value)
+                .findFirst().orElse(null);
     }
 
     private KBeanAction.Container parse(String args) {
