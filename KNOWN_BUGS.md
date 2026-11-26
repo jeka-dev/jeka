@@ -53,11 +53,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `compute_VERBOSE_QUIET_CLEAN` in `jeka` reads all arguments; `IsCleanFlagPresent` in `jeka.ps1` too (from source).
 - **Evidence:** reproduced with `jeka`.
 
-### `-cb=<unknown>` only warns and exits 0
-- **Where:** `JkRunbase`: the exception became a warning on purpose in 77cacad47, "to improve IDE compatibility", as some IDE tools build every JeKa module.
-- **To decide:** failing unless `--force` may break those IDE tools.
-- **Evidence:** reproduced by the sample-maintainer agent.
-
 ## KBeans
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*

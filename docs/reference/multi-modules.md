@@ -145,6 +145,8 @@ If you need to run some Jeka command for a child module, you have 2 options:
    ```shell
    jeka -cb=plugins/plugin-1 project: test pack
    ```
+   The value is a path relative to the parent, with `/` or `\` on any OS. If it is not a declared child base,
+   the command fails; add `--force` to only get a warning.
 
 2. Execute actions from child module directory:
    ```shell
