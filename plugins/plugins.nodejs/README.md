@@ -9,7 +9,7 @@ Node.js is automatically downloaded and installed on first use, so no manual set
 
 |KBean Initialisation  |
 |--------|
-|Optionally configures the `project` KBean in order it includes building of a JS application.<br/>. |
+|Registers the deletion of the JS build directory as a clean action. |
 
 
 **This KBean post-initializes the following KBeans:**

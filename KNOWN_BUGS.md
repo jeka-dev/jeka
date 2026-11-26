@@ -105,7 +105,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
 - **`scaffold.jekaDistribRepo`** writes `jeka.distrib.repo`, which nothing reads. *From source.*
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*
-- **`NodeJsKBean.init` `@JkDoc`** says it configures the project, but it only registers a clean action. *From source.*
 - **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". *Reproduced by the sample-maintainer agent.*
 - **`nodeJs: exec`** shows its output only with `-v`. *Reproduced by the naive agent.*
 - **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
