@@ -67,7 +67,7 @@ public class JkInternalEmbeddedClassloader {
         return of(classLoader);
     }
 
-    static List<Path> embeddedLibs() {
+    public static List<Path> embeddedLibs() {
         JkUtilsSystem.disableUnsafeWarning();  // Avoiding unsafe warning due to Ivy.
         List<Path> pathList = new LinkedList<>();
         URL embeddedNameUrl =  JkInternalEmbeddedClassloader.class.getClassLoader()

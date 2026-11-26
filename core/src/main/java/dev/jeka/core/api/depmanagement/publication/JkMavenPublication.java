@@ -390,6 +390,8 @@ public final class JkMavenPublication {
     public static JkDependencySet computeMavenPublishDependencies(JkDependencySet compileDeps,
                                                                   JkDependencySet runtimeDeps,
                                                                   JkCoordinate.ConflictStrategy strategy) {
+        compileDeps = compileDeps.replaceLocalProjectDependenciesByCoordinates();
+        runtimeDeps = runtimeDeps.replaceLocalProjectDependenciesByCoordinates();
         JkDependencySet mergeResult = runtimeDeps.merge(compileDeps).getResult().normalised(strategy);
         Map<JkCoordinate, JkDependency> result = new LinkedHashMap<>();
         for (JkCoordinateDependency coordinateDependency : mergeResult.getCoordinateDependencies()) {

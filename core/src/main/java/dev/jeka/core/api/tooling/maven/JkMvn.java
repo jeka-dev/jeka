@@ -25,6 +25,7 @@ import dev.jeka.core.api.utils.JkUtilsSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Predicate;
 
 /**
  * Convenient class wrapping maven process.
@@ -90,27 +91,37 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
 
     // TODO handle mvn wrapper
     private static String mvnCmd(Path workingDir) {
-        if (JkUtilsSystem.IS_WINDOWS) {
+        return mvnCmd(workingDir, JkUtilsSystem.IS_WINDOWS, JkMvn::exist);
+    }
+
+    // Non-private for testing
+    static String mvnCmd(Path workingDir, boolean windows, Predicate<String> exist) {
+        if (windows) {
             if (Files.exists(workingDir.resolve("mvnw.cmd"))) {
                 return "mvnw.cmd";
             }
-            if (exist("mvn.bat")) {
+            if (exist.test("mvn.bat")) {
                 return "mvn.bat";
             }
-            if (exist("mvn.cmd")) {
+            if (exist.test("mvn.cmd")) {
                 return "mvn.cmd";
             }
-            return null;
+            throw mavenNotFound(workingDir);
         }
 
         // non windows
         if (Files.exists(workingDir.resolve("mvnw"))) {
             return "./mvnw";
         }
-        if (exist("mvn")) {
+        if (exist.test("mvn")) {
             return "mvn";
         }
-        return null;
+        throw mavenNotFound(workingDir);
+    }
+
+    private static IllegalStateException mavenNotFound(Path workingDir) {
+        return new IllegalStateException(String.format("This command needs Maven: no 'mvn' found in the PATH, "
+                + "nor Maven wrapper in %s.", workingDir.toAbsolutePath().normalize()));
     }
 
     private static boolean exist(String mvnCmd) {

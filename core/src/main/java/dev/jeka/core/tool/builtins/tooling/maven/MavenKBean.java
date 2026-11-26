@@ -209,6 +209,10 @@ public final class MavenKBean extends KBean {
         bomPublication.setPomPublicationOnly();  // No artifacts in BOM
         getRunbase().loadChildren(ProjectKBean.class).forEach(projectKBean -> {
             JkProject project = projectKBean.project;
+            if (project.getModuleId() == null) {
+                throw new JkException("Child base %s has no project module ID, required to list it in the parent BOM. "
+                        + "Set '@project.moduleId' in its jeka.properties.", projectKBean.getBaseDir());
+            }
             bomPublication.addManagedDependenciesInPom(project.getModuleId().toColonNotation(),
                     bomPublication.getVersion().toString());
         });
@@ -295,7 +299,8 @@ public final class MavenKBean extends KBean {
         public String version;
 
         @JkDoc("If true, the publication will generate a BOM as its only artifact. \n" +
-                "The BOM will point to the version of each child base that contains a project KBean.\n" +
+                "The BOM manages the project module ID of each child base that contains a project KBean, " +
+                "with the version of the BOM.\n" +
                 "Be careful to declare it with leading '_' as  '_@maven.pub.parentBom' in jeka.properties to not" +
                 " propagate it to children.")
         public boolean parentBom;

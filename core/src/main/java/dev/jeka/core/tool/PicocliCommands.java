@@ -53,7 +53,7 @@ class PicocliCommands {
                     : Objects.toString(beanField.defaultValue);
 
             String description = beanField.description == null ?
-                    "No description." : beanField.description;
+                    "No description." : escapeVariables(beanField.description);
             description = description.trim();
             description = description.endsWith(".") ? description : description + ".";
 
@@ -87,10 +87,16 @@ class PicocliCommands {
     private static CommandSpec fromKBeanMethod(JkBeanDescription.BeanMethod beanMethod) {
         CommandSpec spec = CommandSpec.create();
         spec.subcommandsRepeatable(true);
-        String description = beanMethod.description == null ? "No Description" : beanMethod.description;
+        String description = beanMethod.description == null ? "No Description"
+                : escapeVariables(beanMethod.description);
         description = description.endsWith(".") ? description : description + ".";
         spec.usageMessage().header(description);
         return spec;
+    }
+
+    // Picocli interpolates '${...}' in texts: unknown variables would be displayed as 'null'
+    static String escapeVariables(String text) {
+        return text == null ? null : text.replace("${", "$${");
     }
 
 }

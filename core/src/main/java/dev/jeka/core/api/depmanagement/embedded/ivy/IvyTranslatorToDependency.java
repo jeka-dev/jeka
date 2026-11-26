@@ -87,8 +87,8 @@ class IvyTranslatorToDependency {
         }
 
         final boolean force = !version.isDynamic();
-        DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, force, changing,
-                isTransitive);
+        DefaultDependencyDescriptor result = new TransitiveExcludingDependencyDescriptor(moduleRevisionId, force,
+                changing, isTransitive);
         List<IvyConfigurationMapping> configurationMappings = IvyConfigurationMapping.ofMultiple(qualifier);
        for (IvyConfigurationMapping configurationMapping : configurationMappings) {
         //IvyConfigurationMapping configurationMapping = IvyConfigurationMapping.of(qualifier);
@@ -142,6 +142,26 @@ class IvyTranslatorToDependency {
     static JkCoordinate toJkCoordinate(ModuleRevisionId moduleRevisionId) {
         return JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName())
                         .toCoordinate(moduleRevisionId.getRevision());
+    }
+
+    /*
+     * As in Maven, exclusions of a dependency apply to its transitive dependencies only. Ivy applies them to
+     * the dependency itself as well, so that '!com.google.guava:*' would exclude 'com.google.guava:guava'.
+     */
+    private static class TransitiveExcludingDependencyDescriptor extends DefaultDependencyDescriptor {
+
+        TransitiveExcludingDependencyDescriptor(ModuleRevisionId moduleRevisionId, boolean force, boolean changing,
+                                                boolean transitive) {
+            super(null, moduleRevisionId, force, changing, transitive);
+        }
+
+        @Override
+        public boolean doesExclude(String[] moduleConfigurations, ArtifactId artifactId) {
+            if (artifactId.getModuleId().equals(getDependencyId())) {
+                return false;
+            }
+            return super.doesExclude(moduleConfigurations, artifactId);
+        }
     }
 
 }

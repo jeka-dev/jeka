@@ -35,4 +35,13 @@ class LocalAndTxtDependenciesTest {
         assertFalse(LocalAndTxtDependencies.isLegacyFormat(content));
     }
 
+    @Test
+    void newFormat_withOtherSectionsOrEmpty_isDetected() {
+        assertFalse(LocalAndTxtDependencies.isLegacyFormat("[processor]\norg.projectlombok:lombok:1.18.38\n"));
+        assertFalse(LocalAndTxtDependencies.isLegacyFormat("# comment\n[compile-only]\norg.projectlombok:lombok\n"));
+        assertFalse(LocalAndTxtDependencies.isLegacyFormat(""));
+        assertFalse(LocalAndTxtDependencies.isLegacyFormat("# nothing yet\n\n"));
+        assertTrue(LocalAndTxtDependencies.isLegacyFormat("com.google.guava:guava:33.4.8-jre\n"));
+    }
+
 }

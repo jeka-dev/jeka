@@ -20,6 +20,7 @@ import dev.jeka.core.api.depmanagement.JkDependencySet;
 import dev.jeka.core.api.depmanagement.JkDependencySetModifier;
 import dev.jeka.core.api.depmanagement.resolution.JkResolutionParameters;
 import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkResourceProcessor;
 import dev.jeka.core.api.function.JkConsumers;
 import dev.jeka.core.api.function.JkRunnables;
@@ -129,6 +130,9 @@ public class JkProjectCompilation {
      * Performs entire compilation phase.
      */
     public void run() {
+
+        // Classes and resources of deleted sources must not end up in the jars
+        JkPathTree.of(layout.resolveClassDir()).deleteContent();
         generateSources();
         preCompileActions.run();
         compileActions.run();

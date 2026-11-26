@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.tooling.git;
 
+import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.project.JkProject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -61,6 +63,36 @@ class JkGitTest {
         // Dirty
         Files.write(file, "b".getBytes());
         assertEquals(version, JkVersionFromGit.of(dir, "").getVersion());
+
+        // No branch in manifest
+        JkProject project = JkProject.of().setBaseDir(dir);
+        JkVersionFromGit.of(dir, "").handleVersioning(project);
+        JkManifest manifest = project.packaging.getManifest();
+        assertNotNull(manifest.getMainAttribute("Git-commit"));
+        assertFalse(manifest.asString().contains("Git-branch"), manifest.asString());
+    }
+
+    @Test
+    void getLatestTag_noTag_returnsNull(@TempDir Path dir) throws Exception {
+        for (String args : new String[] {"init -q", "config user.email a@b.c", "config user.name a",
+                "config commit.gpgsign false", "config tag.gpgsign false"}) {
+            git(dir, args);
+        }
+        Files.write(dir.resolve("file.txt"), "a".getBytes());
+        git(dir, "add .");
+        git(dir, "commit -q -m first");
+        JkGit jkGit = JkGit.of(dir);
+
+        assertNull(jkGit.getLatestTag());
+        git(dir, "tag 1.0");
+        assertEquals("1.0", jkGit.getLatestTag());
+    }
+
+    @Test
+    void version_noCommit_explicitError(@TempDir Path dir) throws Exception {
+        git(dir, "init -q");
+        Exception e = assertThrows(IllegalStateException.class, () -> JkVersionFromGit.of(dir, "").getVersion());
+        assertTrue(e.getMessage().contains("at least one commit"), e.getMessage());
     }
 
     private static void git(Path dir, String args) throws Exception {

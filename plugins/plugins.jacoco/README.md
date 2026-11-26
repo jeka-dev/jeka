@@ -32,10 +32,8 @@ Source code: [View the source](src/dev/jeka/plugins/jacoco/JacocoKBean.java)
 jeka.classpath=dev.jeka:jacoco-plugin
 @jacoco=on
 
-# Required to analyze Java 25 classes: the default version (0.8.12) does not support them
-@jacoco.jacocoVersion=0.8.14
-
 # Optional properties
+@jacoco.jacocoVersion=0.8.14
 @jacoco.configureProject=true
 @jacoco.htmlReport=true
 ```

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -35,13 +36,17 @@ public class JkLocalProjectDependency extends JkComputedDependency
 
     private final JkTransitivity transitivity;
 
+    // coordinate under which the artifact is published, to be referenced by published dependers
+    private final Supplier<JkCoordinate> coordinateSupplier;
+
     /*
      * Constructs a {@link JkLocalProjectDependency} from an artifact producer and the artifact file id
      * one is interested on.
      */
     private JkLocalProjectDependency(Runnable producer, Path file, Path ideProjectDir,
                                      JkDependencySet exportedDependencies,
-                                     JkTransitivity transitivity) {
+                                     JkTransitivity transitivity,
+                                     Supplier<JkCoordinate> coordinateSupplier) {
         super(producer, ideProjectDir, Collections.singleton(file));
         List<JkDependency> relocatedDependencies = exportedDependencies.getEntries().stream()
                 //.map(dep -> dep.withIdeProjectDir(ideProjectDir))
@@ -50,6 +55,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
                 .withGlobalExclusions(new LinkedList<>(exportedDependencies.getGlobalExclusions()))
                 .withVersionProvider(exportedDependencies.getVersionProvider());
         this.transitivity = transitivity;
+        this.coordinateSupplier = coordinateSupplier;
     }
 
     /**
@@ -64,7 +70,7 @@ public class JkLocalProjectDependency extends JkComputedDependency
      */
     public static JkLocalProjectDependency of(Runnable producer, Path file, Path basedir,
                                               JkDependencySet dependencies) {
-        return new JkLocalProjectDependency(producer, file, basedir, dependencies, null);
+        return new JkLocalProjectDependency(producer, file, basedir, dependencies, null, null);
     }
 
     /**
@@ -95,17 +101,36 @@ public class JkLocalProjectDependency extends JkComputedDependency
     @Override
     public JkLocalProjectDependency withIdeProjectDir(Path path) {
         return new JkLocalProjectDependency(runnable, files.iterator().next(), path, exportedDependencies,
-                transitivity);
+                transitivity, coordinateSupplier);
     }
 
     public JkLocalProjectDependency withTransitivity(JkTransitivity transitivity) {
         return new JkLocalProjectDependency(runnable, files.iterator().next(), getIdeProjectDir(),
-                exportedDependencies, transitivity);
+                exportedDependencies, transitivity, coordinateSupplier);
     }
 
     public JkLocalProjectDependency withoutExportedDependencies() {
         return new JkLocalProjectDependency(runnable, files.iterator().next(), getIdeProjectDir(),
-                JkDependencySet.of(), transitivity);
+                JkDependencySet.of(), transitivity, coordinateSupplier);
+    }
+
+    /**
+     * Returns a copy of this dependency, referenced by the specified coordinate in the published
+     * dependencies (as POM) of the projects depending on it.
+     * @param coordinateSupplier Supplies the published coordinate of the artifact, or <code>null</code>
+     *                           if it is not published. Evaluated at publication time.
+     */
+    public JkLocalProjectDependency withCoordinate(Supplier<JkCoordinate> coordinateSupplier) {
+        return new JkLocalProjectDependency(runnable, files.iterator().next(), getIdeProjectDir(),
+                exportedDependencies, transitivity, coordinateSupplier);
+    }
+
+    /**
+     * Returns the coordinate under which the artifact of this dependency is published, or <code>null</code>
+     * if unknown.
+     */
+    public JkCoordinate getCoordinate() {
+        return coordinateSupplier == null ? null : coordinateSupplier.get();
     }
 
     @Override

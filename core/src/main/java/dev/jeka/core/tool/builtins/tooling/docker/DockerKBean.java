@@ -237,8 +237,9 @@ public final class DockerKBean extends KBean {
         return buildable;
     }
 
-    private JkDockerJvmBuild jvmDockerBuild(JkBuildable buildable) {
+    JkDockerJvmBuild jvmDockerBuild(JkBuildable buildable) {  // non-private for testing
         JkDockerJvmBuild dockerBuild = JkDockerJvmBuild.of();
+        dockerBuild.setBaseImage(jvmBaseImage);
         dockerBuild.setNonRootUserCreationMode(jvmNonRootUser);
         JkLog.verbose("Configure JVM Docker image for %s", buildable);
         dockerBuild.addJvmOptions(JkUtilsString.splitWhiteSpaces(jvmOptions));

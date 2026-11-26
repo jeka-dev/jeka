@@ -160,7 +160,9 @@ public final class JkProjectScaffold extends JkScaffold {
 
     private void configureDefault() {
         addJekaPropValue(JkConstants.KBEAN_DEFAULT_PROP + "=project");
-        addJekaPropsContent("@custom=on\n");
+        if (kind != Kind.EMPTY) {  // no Custom class to activate
+            addJekaPropsContent("@custom=on\n");
+        }
     }
 
     /*

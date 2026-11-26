@@ -74,25 +74,29 @@ class PomResolver {
 
     // resolve to effective pom
     void resolve(Document pom) {
+        mergeParents(pom);
+        Map<String, String> properties = getPropertiesFromDom(pom);
+        interpolateElement(pom.getDocumentElement(), properties);
+    }
+
+    // Merges the content of the parent POMs, from the farthest to the nearest. Interpolation is done afterward,
+    // so that properties of the child override those of the parents.
+    private void mergeParents(Document pom) {
         Document parentPom = getParentPom(pom);
         if (parentPom != null) {
+            mergeParents(parentPom);
             mergeProperties(pom, parentPom);
             mergeDependencies(pom, parentPom);
             mergeDependencyManagement(pom, parentPom);
             mergeRepositories(pom, parentPom);
         }
-        Map<String, String> properties = getPropertiesFromDom(pom);
-        interpolateElement(pom.getDocumentElement(), properties);
     }
 
+    // Returns the parent POM as declared, without the content of its own parents.
     private Document getParentPom(Document pom) {
         JkCoordinate parentCoordinate = getParentCoordinate(pom);
         if (parentCoordinate == null) {
             return null;
-        }
-        Document parentDoc = RESOLVED_POMS.get(parentCoordinate);
-        if (parentDoc != null) {
-            return parentDoc;
         }
 
         // Resolve parent pom

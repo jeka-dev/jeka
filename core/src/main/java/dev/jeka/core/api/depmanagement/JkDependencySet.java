@@ -16,6 +16,7 @@
 
 package dev.jeka.core.api.depmanagement;
 
+import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -287,6 +288,31 @@ public class JkDependencySet {
             list.add(dep);
         }
         return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
+    }
+
+    /**
+     * Returns a copy of this dependency set where the local project dependencies are replaced with the
+     * coordinate of the artifact they publish, as expected in published dependencies.
+     * Local project dependencies without coordinate are removed, with a warning.
+     */
+    public JkDependencySet replaceLocalProjectDependenciesByCoordinates() {
+        List<JkDependency> result = new LinkedList<>();
+        for (JkDependency dependency : entries) {
+            if (dependency instanceof JkLocalProjectDependency) {
+                JkLocalProjectDependency localProjectDependency = (JkLocalProjectDependency) dependency;
+                JkCoordinate coordinate = localProjectDependency.getCoordinate();
+                if (coordinate == null) {
+                    JkLog.warn("%s has no module ID: it is not included in the published dependencies.",
+                            localProjectDependency);
+                    continue;
+                }
+                result.add(JkCoordinateDependency.of(coordinate)
+                        .withTransitivity(localProjectDependency.getTransitivity()));
+            } else {
+                result.add(dependency);
+            }
+        }
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
     public JkDependencySet mergeLocalProjectExportedDependencies() {

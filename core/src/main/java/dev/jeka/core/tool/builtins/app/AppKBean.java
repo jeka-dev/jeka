@@ -22,6 +22,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocUrl;
+import dev.jeka.core.tool.JkException;
 import dev.jeka.core.tool.KBean;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class AppKBean extends KBean {
     @JkDoc("Git Remote repository URL of the app to install.")
     public String repo;
 
-    @JkDoc("Specifies the name of the app to update/uninstall.")
+    @JkDoc("Specifies the name of the app to install, update or uninstall.")
     public String name;
 
     @JkDoc("Short description of the app provided by the application author.")
@@ -72,7 +73,7 @@ public class AppKBean extends KBean {
     public void install() {
         String gitUrl = this.repo;
         if (JkUtilsString.isBlank(gitUrl)) {
-            JkLog.info("You must specify the git url using 'remote=[Git URL]'.");
+            JkLog.info("You must specify the git url using 'repo=[Git URL]'.");
             return;
         }
         String remoteUrl = this.repo.trim();
@@ -102,7 +103,7 @@ public class AppKBean extends KBean {
         if (!installedAppsForRepo.isEmpty()) {
             JkLog.info("This repository has been already installed for following app/versions:");
             installedAppsForRepo.forEach(System.out::println);
-            String response = JkPrompt.ask("Do you want to install another version? %s:", JkAnsi.yellow("[N,y]")).trim();
+            String response = ask("Do you want to install another version? %s:", JkAnsi.yellow("[N,y]")).trim();
             if (!response.equalsIgnoreCase("y")) {
                 JkLog.info("Installation aborted by user.");
                 return;
@@ -143,7 +144,7 @@ public class AppKBean extends KBean {
         } else if (tagBucket.tags.size() == 1) {
             String tag = tagBucket.tags.getFirst().getName();
             JkLog.info("Found one tag '%s' in the remote Git repository.", JkAnsi.magenta(tag));
-            String response = JkPrompt.ask("Do you want to install the tag '%s' or last commit on branch %s:? " +
+            String response = ask("Do you want to install the tag '%s' or last commit on branch %s:? " +
                     "[%s = last commit, %s = '%s' tag]:",
                     JkAnsi.magenta(tag),
                     JkAnsi.magenta(branch),
@@ -165,7 +166,7 @@ public class AppKBean extends KBean {
             String highest = tagBucket.getHighestVersion();
             String chooseTag = null; // empty mean choose last commit
             while (chooseTag == null) {
-                String response = JkPrompt.ask("Enter the version to install [%s = last commit /" +
+                String response = ask("Enter the version to install [%s = last commit /" +
                         " %s = '%s' tag]:",
                                 JkAnsi.yellow("@"),
                                 JkAnsi.yellow("<ENTER>"),
@@ -200,10 +201,10 @@ public class AppKBean extends KBean {
                     if (!retry) {
                         JkLog.info("An application named '%s' is already installed.", JkAnsi.yellow(suggestedAppName));
                     }
-                    response = JkPrompt.ask("Choose a new name for the application:").trim();
+                    response = ask("Choose a new name for the application:").trim();
                 } else {
                     String suggestName = appManager.suggestName(suggestedAppName);
-                    response = JkPrompt.ask("Choose a name for this application. Press %s to select '%s':",
+                    response = ask("Choose a name for this application. Press %s to select '%s':",
                                     JkAnsi.yellow("<ENTER>"),
                                     JkAnsi.yellow(suggestName))
                             .trim();
@@ -254,7 +255,7 @@ public class AppKBean extends KBean {
         final String appName;
         if (JkUtilsString.isBlank(name)) {
             list();
-            appName = JkPrompt.ask("Which app do you want to update?:").trim();
+            appName = ask("Which app do you want to update?:").trim();
         } else {
             appName = name.trim();
         }
@@ -286,7 +287,7 @@ public class AppKBean extends KBean {
         final String appName;
         if (JkUtilsString.isBlank(name)) {
             list();
-            appName = JkPrompt.ask("Which app do you want to uninstall?:").trim();
+            appName = ask("Which app do you want to uninstall?:").trim();
         } else {
             appName = name.trim();
         }
@@ -379,7 +380,7 @@ public class AppKBean extends KBean {
         }
 
         JkLog.info("Host/path '%s' is not in present in the trusted list.", JkAnsi.magenta(urlPath), GLOBAL_PROP_FILE);
-        String response = JkPrompt.ask("Add? %s:", JkAnsi.yellow("[N,y]")).trim();
+        String response = ask("Add? %s:", JkAnsi.yellow("[N,y]")).trim();
         if ("y".equalsIgnoreCase(response)) {
             SecurityChecker.addTrustedUrl(gitUrl);
             return true;
@@ -403,7 +404,7 @@ public class AppKBean extends KBean {
             appManager.getRemoteTags(appName).forEach(JkLog::info);
             boolean ok = false;
             while (!ok) {
-                String userResponse = JkPrompt.ask("Do you want to abort (A), update on the last commit of default branch (D)," +
+                String userResponse = ask("Do you want to abort (A), update on the last commit of default branch (D)," +
                         " or choose a tag (T)?").trim().toUpperCase();
                 switch (userResponse) {
                     case "A" -> {
@@ -415,7 +416,7 @@ public class AppKBean extends KBean {
                         return true;
                     }
                     case "T" -> {
-                        String tag = JkPrompt.ask("Choose a tag from the list above:").trim();
+                        String tag = ask("Choose a tag from the list above:").trim();
                         appManager.updateWithTag(appName, tag);
                         return true;
                     }
@@ -447,7 +448,7 @@ public class AppKBean extends KBean {
         List<String> higherVersions = tagBucket.getHighestVersionsThan(currentTag);
         if (!higherVersions.isEmpty()) {
             String highestVersion = tagBucket.getHighestVersion();
-            String response = JkPrompt.ask("Found the latest version %s. Update now? [n/Y]", highestVersion).trim();
+            String response = ask("Found the latest version %s. Update now? [n/Y]", highestVersion).trim();
             if (response.equalsIgnoreCase("n")) {
                 JkLog.info("Update aborted by user.", currentTag);
                 return false;
@@ -459,6 +460,16 @@ public class AppKBean extends KBean {
         }
         JkLog.info("No new version available.");
         return false;
+    }
+
+    // JkPrompt returns null when the input is closed, as when no terminal is attached. Non-private for testing.
+    static String ask(String prompt, Object... items) {
+        String response = JkPrompt.ask(prompt, items);
+        if (response == null) {
+            System.out.println();
+            throw new JkException("No answer can be read: the 'app' commands need an interactive terminal.");
+        }
+        return response;
     }
 
 }

@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 class LocalAndTxtDependencies {
@@ -133,12 +134,13 @@ class LocalAndTxtDependencies {
     }
 
     static boolean isLegacyFormat(String content) {
-        return Arrays.stream(content.split("\n"))
-                .noneMatch(line ->
-                        line.trim().startsWith("[compile]")
-                        || line.trim().startsWith("[runtime]")
-                        || line.trim().startsWith("[test]")
-                        || line.trim().startsWith("[version]"));
+        List<String> lines = Arrays.stream(content.split("\n"))
+                .map(String::trim)
+                .filter(line -> !line.isEmpty() && !line.startsWith("#"))
+                .collect(Collectors.toList());
+
+        // Any section, as [processor] or [compile-only], means the current format. An empty file has no format.
+        return !lines.isEmpty() && lines.stream().noneMatch(line -> line.startsWith("["));
     }
 
     /**

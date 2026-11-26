@@ -1223,7 +1223,10 @@ execute_and_exit_native_if_present() {
 execute_and_exit_java_if_present() {
   local jar_file;
   for file in "$BASE_DIR"/jeka-output/*; do
-      if [ -f "$file" ] && [[ "$file" == *".jar" ]]; then
+
+      # Sources and javadoc jars, created when publishing, are not runnable
+      if [ -f "$file" ] && [[ "$file" == *".jar" ]] && [[ "$file" != *"-sources.jar" ]] \
+          && [[ "$file" != *"-javadoc.jar" ]]; then
         jar_file="$file"
         break
       fi
@@ -1306,15 +1309,17 @@ filter_out_sysProp() {
 ##############################################################
 
 compute_VERBOSE_QUIET_CLEAN
-if [[ "$CLEAN_JEKA_OUTPUT" == "true" ]] && [ -d "jeka-output" ]; then
-    rm -rf "jeka-output"
-fi
 JEKA_USER_HOME=$(get_jeka_user_home)
 GLOBAL_PROP_FILE="$JEKA_USER_HOME/global.properties"
 
 compute_INTERPOLATED_ARGS "${CMD_LINE_ARGS[@]}"
 compute_PROGRAM_OPTION_INDEX "${INTERPOLATED_ARGS[@]}"
 compute_BASE_DIR "${INTERPOLATED_ARGS[@]}"
+
+# The base dir may differ from the working dir, as with '-r'
+if [[ "$CLEAN_JEKA_OUTPUT" == "true" ]] && [ -d "$BASE_DIR/jeka-output" ]; then
+    rm -rf "$BASE_DIR/jeka-output"
+fi
 
 execute_program_if_requested
 

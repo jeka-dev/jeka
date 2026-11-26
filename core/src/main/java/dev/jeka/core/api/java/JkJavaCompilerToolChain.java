@@ -57,7 +57,7 @@ public final class JkJavaCompilerToolChain {
      */
     public static final PathMatcher JAVA_SOURCE_MATCHER = JkPathMatcher.of(true, "**/*.java", "*.java");
 
-    private ToolOrProcess toolOrProcess = new ToolOrProcess(null, null);
+    private ToolOrProcess toolOrProcess = new ToolOrProcess(null, null, null);
 
     private String[] toolParams = new String[0];
 
@@ -130,6 +130,13 @@ public final class JkJavaCompilerToolChain {
 
     public String getJavaDistrib() {
         return javaDistrib;
+    }
+
+    /**
+     * Returns the JDKs explicitly specified to compile for specific Java versions.
+     */
+    public JkJdks getJdks() {
+        return jdkHints.jdks;
     }
 
     /**
@@ -290,7 +297,7 @@ public final class JkJavaCompilerToolChain {
                 throw new IllegalStateException("The current Java: " + javaHome + " is not a JDK." +
                         " Please run a JDK or precise the java version to run.");
             }
-            return new ToolOrProcess(javaHome);
+            return new ToolOrProcess(javaHome, JkJavaVersion.ofCurrent());
         }
         Path currentJavaHome = Paths.get(System.getProperty("java.home"));
         boolean hasJavac = Files.exists(currentJavaHome.resolve("bin").resolve(javacFileName));
@@ -305,17 +312,17 @@ public final class JkJavaCompilerToolChain {
             if (jdkHints.preferTool || !hasJavac) {
                 return new ToolOrProcess(compileToolOrFail());
             }
-            return new ToolOrProcess(currentJavaHome);
+            return new ToolOrProcess(currentJavaHome, javaVersion);
         }
         Path specificJavaHome = jdkHints.jdks.getHome(javaVersion);
         if (specificJavaHome != null) {
             JkLog.info("Use JDK %s to compile for JVM %s", specificJavaHome, javaVersion);
-            return new ToolOrProcess(specificJavaHome);
+            return new ToolOrProcess(specificJavaHome, javaVersion);
         } else {
             JkLog.verbose("Compile using JDK %s %s...", javaDistrib, javaVersion);
             try {
                 Path downloadedPath = JkUtilsJdk.getJdk(javaDistrib, javaVersion.toString());
-                return new ToolOrProcess(downloadedPath);
+                return new ToolOrProcess(downloadedPath, javaVersion);
             } catch (Exception e) {
                 JkLog.warn("Downloading JDK failed. Will use embedded compiler %s.", JkJavaVersion.ofCurrent());
                 return new ToolOrProcess(compileToolOrFail());
@@ -387,21 +394,25 @@ public final class JkJavaCompilerToolChain {
 
         final JavaCompiler compileTool;
 
-        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess) {
+        // Version of the JDK running the compile process, null if unknown
+        final JkJavaVersion processJdkVersion;
+
+        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess, JkJavaVersion processJdkVersion) {
             this.compileProcess = compileProcess;
             this.compileTool = compileTool;
+            this.processJdkVersion = processJdkVersion;
+        }
+
+        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess) {
+            this(compileTool, compileProcess, null);
         }
 
         ToolOrProcess(JavaCompiler compileTool) {
             this(compileTool, null);
         }
 
-        ToolOrProcess(JkProcess compileProcess) {
-            this(null, compileProcess);
-        }
-
-        ToolOrProcess(Path javaHome) {
-            this(JkProcess.of(findJavac(javaHome).toString()));
+        ToolOrProcess(Path javaHome, JkJavaVersion jdkVersion) {
+            this(null, JkProcess.of(findJavac(javaHome).toString()), jdkVersion);
         }
 
         boolean isSpecified() {
@@ -412,7 +423,9 @@ public final class JkJavaCompilerToolChain {
              if (compileTool != null) {
                  return runOnTool(compileSpec, compileTool, toolParams);
              } else if (compileProcess != null) {
-                 if (JkJavaCompilerToolChain.this.addCompilerModuleExportOptions) {
+                 // JDK 8 and below do not know about modules: their JVM fails on '--add-exports'
+                 boolean supportsModules = processJdkVersion == null || processJdkVersion.isEqualOrGreaterThan(9);
+                 if (JkJavaCompilerToolChain.this.addCompilerModuleExportOptions && supportsModules) {
                      compileSpec.addCompilerModuleExportOptions();
                  }
                  return runOnProcess(compileSpec, compileProcess);

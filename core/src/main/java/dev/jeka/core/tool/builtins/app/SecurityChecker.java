@@ -87,9 +87,7 @@ class SecurityChecker {
     static void addTrustedUrl(String allowedUrl) {
         String sanitized = parseGitUrl(allowedUrl);
         PropFile propFile = new PropFile(GLOBAL_PROP_FILE);
-        String existing = JkProperties.ofFile(GLOBAL_PROP_FILE).get(GIT_TRUSTED_URL_PREFIX_PROP);
-        String newValue = JkUtilsString.nullToEmpty(existing) + URL_SEPARATOR + sanitized;
-        propFile.appendValueToMultiValuedProp(GIT_TRUSTED_URL_PREFIX_PROP, newValue, URL_SEPARATOR);
+        propFile.appendValueToMultiValuedProp(GIT_TRUSTED_URL_PREFIX_PROP, sanitized, URL_SEPARATOR);
     }
 
     /*

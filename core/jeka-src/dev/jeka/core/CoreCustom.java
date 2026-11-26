@@ -135,11 +135,15 @@ public class CoreCustom extends KBean {
         final JkPathTree distrib = JkPathTree.of(distribFolder());
         String entryName = "jeka-core-" + project.getVersion() + "-sdkman";
         Path sdkmanDistribDir = getOutputDir().resolve(entryName);
+
+        // Files of a previous pack must not stay in the archive
+        JkPathTree.of(sdkmanDistribDir).deleteContent();
         distrib.copyTo(sdkmanDistribDir);
 
         // Zipping with Java does npt preserve permissions.
         // We need to use native unix tool.
         Path zipFile = project.artifactLocator.getArtifactPath("sdkman", "zip");
+        JkUtilsPath.deleteIfExists(zipFile);  // 'zip' adds to an existing archive
         JkProcess.of("zip", "-r", zipFile.getFileName().toString(), entryName)
                 .setWorkingDir(getOutputDir())
                 .exec();

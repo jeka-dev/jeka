@@ -80,7 +80,7 @@ public class NodeJsKBean extends KBean {
 
     private JkNodeJsProject nodeJsProject;
 
-    @JkDoc("Optionally configures the `project` KBean in order it includes building of a JS application.\n")
+    @JkDoc("Registers the deletion of the JS build directory as a clean action.")
     @Override
     protected void init() {
         getRunbase().registerCLeanAction(CLEAN_ACTION, this::cleanBuildDir);
@@ -115,7 +115,7 @@ public class NodeJsKBean extends KBean {
 
     @JkDoc("Executes the nodeJs command line mentioned in `cmdLine` field.")
     public void exec() {
-        JkNodeJs.ofVersion(version).exec(cmdLine);
+        JkNodeJs.ofVersion(version).setShowOutput(true).exec(cmdLine);
     }
 
     @JkDoc("Displays configuration info.")

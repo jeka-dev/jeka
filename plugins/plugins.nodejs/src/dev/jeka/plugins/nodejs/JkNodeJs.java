@@ -50,6 +50,8 @@ public class JkNodeJs {
 
     private Path workingDir = Paths.get("");
 
+    private boolean showOutput;
+
     private JkNodeJs(Path installDir) {
         this.installDir = installDir;
     }
@@ -90,6 +92,14 @@ public class JkNodeJs {
      */
     public JkNodeJs setWorkingDir(Path workingDir) {
         this.workingDir = workingDir;
+        return this;
+    }
+
+    /**
+     * Sets whether the output of npm and npx commands is displayed. By default, it is displayed in verbose mode only.
+     */
+    public JkNodeJs setShowOutput(boolean showOutput) {
+        this.showOutput = showOutput;
         return this;
     }
 
@@ -169,7 +179,7 @@ public class JkNodeJs {
                 .setFailOnError(true)
                 .setLogCommand(JkLog.isDebug())
                 .setInheritIO(false)
-                .setLogWithJekaDecorator(JkLog.isVerbose())
+                .setLogWithJekaDecorator(showOutput || JkLog.isVerbose())
                 .setEnv("PATH", pathVar);
     }
 

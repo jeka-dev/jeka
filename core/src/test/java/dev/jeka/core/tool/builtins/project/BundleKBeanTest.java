@@ -1,5 +1,6 @@
 package dev.jeka.core.tool.builtins.project;
 
+import dev.jeka.core.api.java.JkJavaVersion;
 import dev.jeka.core.tool.KBeanTestLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,6 +32,16 @@ class BundleKBeanTest {
                 "@bundle.jlink.options.all.--add-modules=java.base,java.xml\n");
         assertTrue(release.contains("java.xml"), release);
         assertFalse(release.contains("java.logging"), release);
+    }
+
+    @Test
+    void jdkHome_jdkSetInProperties_isUsed() throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Path jdkHome = Files.createDirectories(baseDir.resolve("my-jdk"));
+        String javaVersion = JkJavaVersion.ofCurrent().toString();
+        write(baseDir.resolve("jeka.properties"), "@project=on\n@bundle=on\njeka.jdk." + javaVersion + "="
+                + jdkHome.toString().replace("\\", "/") + "\n");
+        assertEquals(jdkHome, KBeanTestLoader.load(baseDir, BundleKBean.class).jdkHome());
     }
 
     private static String packAndReadRelease(Path baseDir, String extraProps) throws Exception {

@@ -107,7 +107,7 @@ class PicocliHelp {
             synopsis.add(String.format("@|magenta Default KBean|@ @|yellow %s:|@ %s",
                     KBean.name(defaultKBeanClassName), defaultKBeanClassName));
             if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
-                synopsis.add("Description  : " + beanDescription.synopsisHeader);
+                synopsis.add("Description  : " + PicocliCommands.escapeVariables(beanDescription.synopsisHeader));
             }
             if (!beanDescription.beanFields.isEmpty()) {
                 synopsis.add(JkAnsi.magenta("\nFields"));
@@ -126,7 +126,8 @@ class PicocliHelp {
         for (Class<? extends KBean> kbeanClass : JkBeanDescription.STANDARD_KBEAN_CLASSES) {
             JkBeanDescription description = JkBeanDescription.of(kbeanClass, false);
             String name = KBean.name(kbeanClass);
-            stdKBeans.put( String.format("@|yellow %s:|@", name), description.synopsisHeader);
+            stdKBeans.put( String.format("@|yellow %s:|@", name),
+                    PicocliCommands.escapeVariables(description.synopsisHeader));
         }
         CommandLine commandLine = new CommandLine(main);
         commandLine.getHelpSectionMap().put(SECTION_STD_KBEANS_HEADING,
@@ -189,7 +190,7 @@ class PicocliHelp {
 
     }
 
-    private static CommandLine kbeanHelp(
+    static CommandLine kbeanHelp(  // non-private for testing
             JkBeanDescription beanDescription) {
 
         CommandLine.Model.CommandSpec main = PicocliCommands.fromKBeanDesc(beanDescription);
@@ -205,29 +206,24 @@ class PicocliHelp {
 
         // KBean description (class level JkDoc)
         if (!JkUtilsString.isBlank(beanDescription.synopsisHeader)) {
-            String header = beanDescription.synopsisHeader.trim();
+            String header = PicocliCommands.escapeVariables(beanDescription.synopsisHeader).trim();
             header = header.endsWith(".") ? header : header + ".";
             synopsis.add(header);
-            List<String> descLines = Arrays.asList(beanDescription.synopsisDetail.split("\n"));
+            List<String> descLines = Arrays.asList(
+                    PicocliCommands.escapeVariables(beanDescription.synopsisDetail).split("\n"));
             synopsis.addAll(descLines);
         }
 
         // Pre Init
         if (!beanDescription.preInitInfos.isEmpty()) {
             synopsis.add("\n" + JkAnsi.magenta("Pre-initialize (on activation)"));
-            beanDescription.preInitInfos.forEach(
-                    info -> synopsis.add("      "
-                            + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
-                            + info.description));
+            beanDescription.preInitInfos.forEach(info -> synopsis.add(initInfoLine(info)));
         }
 
         // PostInit
         if (!beanDescription.postInitInfos.isEmpty()) {
             synopsis.add("\n" + JkAnsi.magenta("Post-initialize (on activation)"));
-            beanDescription.postInitInfos.forEach(
-                    info -> synopsis.add("      "
-                            + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
-                            + info.description));
+            beanDescription.postInitInfos.forEach(info -> synopsis.add(initInfoLine(info)));
         }
 
         // Fields
@@ -239,6 +235,15 @@ class PicocliHelp {
                 .customSynopsis(synopsis.toArray(new String[0]))
                 .commandListHeading(JkAnsi.magenta("Methods") + "\n");
         return new CommandLine(main).setUsageHelpAutoWidth(true);
+    }
+
+    private static String initInfoLine(JkBeanDescription.InitMethodInfo info) {
+
+        // The trailing space separates long KBean names from the description
+        String kbeanName = JkAnsi.yellow(info.targetKBean.getSimpleName()) + " ";
+        String description = info.description == null ? "Undocumented."
+                : PicocliCommands.escapeVariables(info.description);
+        return "      " + JkUtilsString.padEnd(kbeanName, 26, ' ') + description;
     }
 
     private static JkBeanDescription kbeanDescription(JkPathSequence classpath,

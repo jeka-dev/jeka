@@ -277,7 +277,8 @@ public final class ProjectKBean extends KBean implements JkIdeSupportSupplier, J
         public boolean skip;
 
         /** Turn it on to run tests in a withForking process. */
-        @JkDoc("If true, tests will be executed in a forked process.")
+        @JkDoc("If true, tests are executed in a forked process, running on the JDK of the project Java version. "
+                + "Otherwise, they are executed in the JeKa process.")
         public boolean fork = true;
 
         /** Argument passed to the JVM if tests are withForking. Example : -Xms2G -Xmx2G */

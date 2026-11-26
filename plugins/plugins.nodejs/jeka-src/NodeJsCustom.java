@@ -26,6 +26,9 @@ public class NodeJsCustom extends KBean {
                 .setLayoutStyle(JkCompileLayout.Style.SIMPLE)
                 .dependencies.compile
                 .add(JkLocator.getJekaJarPath());
+        project.flatFacade.dependencies.test
+                .add("org.junit.platform:junit-platform-launcher:1.12.0")
+                .add("org.junit.jupiter:junit-jupiter:5.12.0");
     }
 
     @JkPostInit

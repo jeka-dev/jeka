@@ -26,6 +26,7 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,7 +114,7 @@ class PropFile {
             this.insertProp(propKey, propValue);
             return;
         }
-        List<String> items = Stream.of(fullValue.split(fullValue))
+        List<String> items = Stream.of(fullValue.split(Pattern.quote(separator)))
                 .map(String::trim)
                 .filter(item -> ! JkUtilsString.isBlank(item))
                 .collect(Collectors.toCollection(ArrayList::new));

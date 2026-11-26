@@ -6,6 +6,7 @@ import dev.jeka.core.api.java.tools.JkJlink;
 import dev.jeka.core.api.java.tools.JkJpackage;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.utils.JkUtilsJdk;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.api.utils.JkUtilsSystem;
@@ -13,6 +14,7 @@ import dev.jeka.core.tool.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -361,21 +363,34 @@ public final class BundleKBean extends KBean {
     }
 
     private JkJpackage jpackage() {
-        String distribution = Optional.ofNullable(getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP))
-                .orElse("temurin");
-        return JkJpackage.ofJavaVersion(projectKBean.project.getEffectiveJavaVersion(), distribution);
+        return JkJpackage.of(jdkTool("jpackage"));
     }
 
     private JkJlink jlink() {
-        String distribution = Optional.ofNullable(getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP))
-                .orElse("temurin");
-        return JkJlink.ofJavaVersion(projectKBean.project.getEffectiveJavaVersion(), distribution);
+        return JkJlink.of(jdkTool("jlink"));
     }
 
     private JkJdeps jdeps() {
+        String javaVersion = projectKBean.project.getEffectiveJavaVersion();
+
+        // Analyze the classes that run on the bundled Java version
+        return JkJdeps.of(jdkTool("jdeps")).setMultiRelease(javaVersion);
+    }
+
+    private Path jdkTool(String name) {
+        return jdkHome().resolve("bin").resolve(name + (JkUtilsSystem.IS_WINDOWS ? ".exe" : ""));
+    }
+
+    // Non-private for testing. As for compilation, a JDK set with 'jeka.jdk.[version]' prevails.
+    Path jdkHome() {
+        String javaVersion = projectKBean.project.getEffectiveJavaVersion();
+        String explicitHome = getRunbase().getProperties().get("jeka.jdk." + javaVersion);
+        if (!JkUtilsString.isBlank(explicitHome)) {
+            return Paths.get(explicitHome.trim());
+        }
         String distribution = Optional.ofNullable(getRunbase().getProperties().get(JkConstants.JEKA_JAVA_DISTRIB_PROP))
                 .orElse("temurin");
-        return JkJdeps.ofJavaVersion(projectKBean.project.getEffectiveJavaVersion(), distribution);
+        return JkUtilsJdk.getJdk(distribution, javaVersion);
     }
 
 

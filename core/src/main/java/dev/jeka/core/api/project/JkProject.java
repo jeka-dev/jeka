@@ -399,7 +399,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .and(this.packaging.resolveRuntimeDependenciesAsFiles());
         JkJavaProcess javaProcess;
         if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
-            Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
+            Path jdkPath = runJdkHome();
             javaProcess = JkJavaProcess.ofJavaFromJdk(jdkPath, mainClass);
         } else {
             javaProcess = JkJavaProcess.ofJava(mainClass);
@@ -411,6 +411,15 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setInheritIO(true);
+    }
+
+    // A JDK set with 'jeka.jdk.[version]' prevails, as for compilation
+    private Path runJdkHome() {
+        Path explicitHome = compilerToolChain.getJdks().getHome(jvmTargetVersion);
+        if (explicitHome != null) {
+            return explicitHome;
+        }
+        return JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
     }
 
     /**
@@ -427,7 +436,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
         JkJavaProcess javaProcess;
         if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
-            Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
+            Path jdkPath = runJdkHome();
             javaProcess = JkJavaProcess.ofJavaJarFromJdk(jdkPath, artifactPath);
         } else {
             javaProcess = JkJavaProcess.ofJavaJar(artifactPath);
@@ -603,7 +612,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * @see #toDependency(Runnable, Path, JkTransitivity)
      */
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
-        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath().toAbsolutePath(), transitivity);
+        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath().toAbsolutePath(), transitivity)
+                .withCoordinate(() -> moduleId == null ? null : JkCoordinate.of(moduleId, getVersion()));
     }
 
     /**
@@ -611,8 +621,15 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * is meant to be consumed by an external project.
      */
     public JkLocalProjectDependency toDependency(Runnable artifactMaker, Path artifactPath, JkTransitivity transitivity) {
-       JkDependencySet exportedDependencies = compilation.dependencies.get()
-               .merge(packaging.runtimeDependencies.get()).getResult();
+       JkDependencySet compileDependencies = compilation.dependencies.get();
+       JkDependencySet runtimeDependencies = packaging.runtimeDependencies.get();
+
+       // As in Maven, compile-only dependencies are not transitive
+       List<JkDependency> compileOnlyDependencies = compileDependencies.getEntries().stream()
+               .filter(dependency -> runtimeDependencies.getMatching(dependency) == null)
+               .collect(Collectors.toList());
+       JkDependencySet exportedDependencies = compileDependencies.merge(runtimeDependencies).getResult()
+               .minus(compileOnlyDependencies);
         return JkLocalProjectDependency.of(artifactMaker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }
@@ -842,7 +859,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
-                if (JkProject.this.compilation.isCompilationForked()) {
+                // The forked JDK has the target version: JDK 8 and below do not know about modules
+                JkJavaVersion targetVersion = JkProject.this.getJvmTargetVersion();
+                boolean supportsModules = targetVersion == null || targetVersion.isEqualOrGreaterThan(9);
+                if (JkProject.this.compilation.isCompilationForked() && supportsModules) {
                     compileSpec.addCompilerModuleExportOptions();
                 }
                 return JkProject.this.compilerToolChain.compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;

@@ -60,7 +60,7 @@ public final class JkJacoco {
 
     public static final String OUTPUT_HTML_RELATIVE_PATH = "jacoco/html";  // this is a folder
 
-    public static final String DEFAULT_VERSION = "0.8.12";
+    public static final String DEFAULT_VERSION = "0.8.14";
 
     public static final String JACOCO_AGENT_ACTION = "jacoco-agent";
 

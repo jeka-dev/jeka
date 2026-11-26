@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Container for artifact files to publish.
@@ -87,8 +88,12 @@ public final class JkArtifactPublisher {
             }
             Consumer<Path> consumer = consumers.get(artifactId);
             if (consumer == null) {
-                throw new IllegalArgumentException("No artifact file and artifact maker found for " + artifactId + ". " +
-                        "Artifact maker are defined for : " + consumers.entrySet());
+                throw new IllegalArgumentException(String.format("Artifact %s not found at %s. Create it before "
+                        + "publishing, as with 'jeka project: pack maven: publish'. JeKa can only create %s.",
+                        artifactId, path, consumers.entrySet().stream()
+                                .filter(entry -> entry.getValue() != null)
+                                .map(entry -> entry.getKey().toString())
+                                .collect(Collectors.joining(", "))));
             }
             JkLog.startTask("generate-artifact (missing %s)", path.getFileName());
             consumer.accept(path);

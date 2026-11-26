@@ -711,7 +711,9 @@ class ProgramExecutor {
   }
 
   hidden [string] findFile([string]$extension) {
-    $files = Get-ChildItem -Path $this.folder -Filter "*$extension"
+    # Sources and javadoc jars, created when publishing, are not runnable
+    $files = Get-ChildItem -Path $this.folder -Filter "*$extension" |
+        Where-Object { $_.Name -notlike "*-sources.jar" -and $_.Name -notlike "*-javadoc.jar" }
     if ($files) {
       $firstFile = $files | Select-Object -First 1
       return $firstFile.FullName
@@ -791,9 +793,6 @@ function Main {
   }
   $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
   $cmdLineArgs = $rawProps.InterpolatedCmdLine()
-  if (($cmdLineArgs.IsCleanFlagPresent()) -and (Test-Path .\jeka-output)) {
-    Remove-Item .\jeka-output -Recurse -Force -ErrorAction SilentlyContinue
-  }
 
   # Resolve basedir and interpolate cmdLine according props declared in base dir
   $remoteArg = $cmdLineArgs.GetRemoteBaseDirArg()
@@ -803,6 +802,12 @@ function Main {
   # Must be done before cloning, and whatever is executed : jeka-src code from the repo may run even without '-p' option
   [TrustedUrl]::Check($remoteArg, $globalPropFile)
   $baseDir = $baseDirResolver.GetPath()
+
+  # The base dir may differ from the working dir, as with '-r'
+  $jekaOutputDir = Join-Path $baseDir "jeka-output"
+  if (($cmdLineArgs.IsCleanFlagPresent()) -and (Test-Path $jekaOutputDir)) {
+    Remove-Item $jekaOutputDir -Recurse -Force -ErrorAction SilentlyContinue
+  }
   $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
   $cmdLineArgs = $props.InterpolatedCmdLine()
   $joinedArgs = $cmdLineArgs.args -join " "

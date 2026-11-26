@@ -30,6 +30,22 @@ class JkPropertiesTest {
     }
 
     @Test
+    void get_selfReference_failsWithClearMessage() {
+        Map<String, String> map = new HashMap<>();
+        map.put("jk.test.foo", "${jk.test.foo}");
+        map.put("jk.test.a", "x ${jk.test.b}");
+        map.put("jk.test.b", "${jk.test.a}");
+        map.put("jk.test.c", "${jk.test.d} ${jk.test.d}");
+        map.put("jk.test.d", "d");
+        JkProperties props = JkProperties.ofMap("", map);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> props.get("jk.test.foo"));
+        assertEquals("Property 'jk.test.foo' references itself: jk.test.foo -> jk.test.foo.", e.getMessage());
+        e = assertThrows(IllegalArgumentException.class, () -> props.get("jk.test.a"));
+        assertEquals("Property 'jk.test.a' references itself: jk.test.a -> jk.test.b -> jk.test.a.", e.getMessage());
+        assertEquals("d d", props.get("jk.test.c"));  // referenced twice, but no cycle
+    }
+
+    @Test
     @Disabled("Only works on some macos system")
     void test_env() {
         String envValue = System.getenv("COMMAND_MODE");
