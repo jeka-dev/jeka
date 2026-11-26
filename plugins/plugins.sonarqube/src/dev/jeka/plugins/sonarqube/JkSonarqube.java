@@ -335,7 +335,7 @@ public final class JkSonarqube {
     }
 
     public JkSonarqube setProjectBaseDir(Path baseDir) {
-        return setProperty(PROJECT_BASE_DIR, baseDir.toAbsolutePath().toString());
+        return setProperty(PROJECT_BASE_DIR, baseDir.toAbsolutePath().normalize().toString());
     }
 
     public JkSonarqube setBinaries(Iterable<Path> files) {
@@ -468,12 +468,12 @@ public final class JkSonarqube {
         final StringBuilder result = new StringBuilder();
         final Path projectDir = projectDir();
         while (it.hasNext()) {
-            final Path file = it.next();
+            final Path file = it.next().toAbsolutePath().normalize();
             String path;
             if (file.startsWith(projectDir)) {
-                path = projectDir.relativize(file).normalize().toString();
+                path = projectDir.relativize(file).toString();
             } else {
-                path = file.toAbsolutePath().normalize().toString();
+                path = file.toString();
             }
             result.append(path);
             if (it.hasNext()) {
@@ -484,7 +484,7 @@ public final class JkSonarqube {
     }
 
     private Path projectDir() {
-        return Paths.get(this.params.get(PROJECT_BASE_DIR));
+        return Paths.get(this.params.get(PROJECT_BASE_DIR)).toAbsolutePath().normalize();
     }
 
     private Path getToolJar() {
