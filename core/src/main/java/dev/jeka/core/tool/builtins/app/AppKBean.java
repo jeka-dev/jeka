@@ -37,7 +37,7 @@ import java.util.Optional;
         Runtime modes:
         - JVM: Runs on a Jeka-managed JDK, installed in ~/.jeka/apps
         - NATIVE: Compiled as a native executable
-        - BUNDLE: Runs with a tailored JRE bundled with the app, installed where the user decides""")
+        - BUNDLE: Runs with a tailored JRE bundled with the app, which JeKa opens for you to install. macOS and Windows only.""")
 @JkDocUrl("https://jeka-dev.github.io/jeka/reference/kbeans-app/")
 public class AppKBean extends KBean {
 
@@ -69,7 +69,8 @@ public class AppKBean extends KBean {
             Runtime mode for app installation:
             - JVM (default): Runs on a Jeka-managed JDK, installed in ~/.jeka/apps (on your PATH)
             - NATIVE: Compiled as a native executable, installed in ~/.jeka/apps (on your PATH)
-            - BUNDLE: Bundled with a tailored JRE, installed in a user-specified location
+            - BUNDLE: Bundled with a tailored JRE. JeKa opens the folder holding the bundle (a .dmg on macOS),
+              for you to install it. macOS and Windows only.
             """)
     public RuntimeMode runtime = RuntimeMode.JVM;
 
