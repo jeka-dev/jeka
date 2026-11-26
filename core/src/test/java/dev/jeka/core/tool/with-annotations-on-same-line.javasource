@@ -1,0 +1,10 @@
+import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkCompileOption;
+import dev.jeka.core.tool.JkInjectRunbase;
+
+@JkDep("com.google:guava:18.0") @JkDep("toto:titi:12")
+@JkDep(value = "foo:bar:1.0") @JkInjectRunbase("../other") @JkCompileOption("-opt1")
+class Build {
+
+    String notParsed = "@JkDep(\"not:parsed:1\")";
+}

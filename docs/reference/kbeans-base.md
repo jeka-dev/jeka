@@ -83,7 +83,7 @@ class Custom extends KBean {
 The `postInit` method customizes the build. Add `@custom=on` to *jeka.properties* to have `Custom` always initialized.
 
 !!! note
-    Declare one `@JkDep` per line, as annotations are read from the source code before compilation.
+    `@JkDep` values are read from the source code before compilation: write them as string literals, not constants.
 
 **Example**
 

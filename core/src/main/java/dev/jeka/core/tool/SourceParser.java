@@ -24,8 +24,20 @@ import dev.jeka.core.api.utils.JkUtilsString;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class SourceParser {
+
+    // '@JkDep("value")' or '@JkDep(value = "value")', for the annotations read before compilation
+    private static final Pattern ANNOTATION = Pattern.compile("@(" + Stream.of(JkDep.class, JkInjectClasspath.class,
+                    JkInjectRunbase.class, JkInjectCompileOption.class, JkCompileOption.class)
+            .map(Class::getSimpleName)
+            .collect(Collectors.joining("|"))
+            + ")\\(\\s*(?:value\\s*=\\s*)?\"([^\"]*)\"");
+
 
     private final JkPathTree sources;
 
@@ -72,78 +84,36 @@ final class SourceParser {
 
     private static void augment(ParsedSourceInfo info, String rawLine, Path baseDir, boolean privateFolder) {
         String line = rawLine.trim();
-        if (!line.startsWith("@") && !rawLine.startsWith("//DEPS ")) {
-            return;
-        }
 
         // Handle JBang notation
-        if (line.startsWith("//DEPS ")) {
+        if (rawLine.startsWith("//DEPS ")) {
             String value = JkUtilsString.substringAfterFirst(line, "//DEPS").trim();
             info.addDep(!privateFolder, JkDependency.of(baseDir, value));
             return;
         }
-
-        // Handle @JkInjectClasspath
-        AnnotationParser annotationParser = new AnnotationParser(line, JkInjectClasspath.class);
-        if (annotationParser.isMatching()) {
-            String value = annotationParser.readUniqueStringValue();
-            info.addDep(!privateFolder, JkDependency.of(baseDir, value));
+        if (!line.startsWith("@")) {
             return;
         }
 
-        // Handle @JkInjectClasspath
-        annotationParser = new AnnotationParser(line, JkDep.class);
-        if (annotationParser.isMatching()) {
-            String value = annotationParser.readUniqueStringValue();
-            info.addDep(!privateFolder, JkDependency.of(baseDir, value));
-            return;
-        }
-
-        // Handle @JkInjectRunbase
-        annotationParser = new AnnotationParser(line, JkInjectRunbase.class);
-        if (annotationParser.isMatching()) {
-            String value = annotationParser.readUniqueStringValue();
-            if (!JkUtilsString.isBlank(value) && !".".equals(value)) {
-                info.importedBaseDirs.add(baseDir.resolve(value));
-            }
-            return;
-        }
-
-        // Handle @JkInjectCompileOption
-        annotationParser = new AnnotationParser(line, JkInjectCompileOption.class);
-        if (annotationParser.isMatching()) {
-            String value = annotationParser.readUniqueStringValue();
-            info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));
-        }
-
-        // Handle JkInjectCompileOption
-        annotationParser = new AnnotationParser(line, JkCompileOption.class);
-        if (annotationParser.isMatching()) {
-            String value = annotationParser.readUniqueStringValue();
-            info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));
+        // A line may hold several annotations, e.g. '@JkDep("a:b:1") @JkDep("c:d:2")'
+        Matcher matcher = ANNOTATION.matcher(line);
+        while (matcher.find()) {
+            handleAnnotation(info, matcher.group(1), matcher.group(2), baseDir, privateFolder);
         }
     }
 
-    static class AnnotationParser {
-
-        private final String line;
-
-        private final Class<?> annotationClass;
-
-        AnnotationParser(String line, Class<?> annotationClass) {
-            this.line = line;
-            this.annotationClass = annotationClass;
+    private static void handleAnnotation(ParsedSourceInfo info, String annotationName, String value, Path baseDir,
+                                         boolean privateFolder) {
+        if (annotationName.equals(JkDep.class.getSimpleName())
+                || annotationName.equals(JkInjectClasspath.class.getSimpleName())) {
+            info.addDep(!privateFolder, JkDependency.of(baseDir, value));
+        } else if (annotationName.equals(JkInjectRunbase.class.getSimpleName())) {
+            if (!JkUtilsString.isBlank(value) && !".".equals(value)) {
+                info.importedBaseDirs.add(baseDir.resolve(value));
+            }
+        } else {  // JkCompileOption or JkInjectCompileOption
+            info.compileOptions.addAll(Arrays.asList(JkUtilsString.parseCommandline(value)));
         }
-
-        boolean isMatching() {
-            return line.startsWith("@" + annotationClass.getSimpleName() + "(");
-        }
-
-        String readUniqueStringValue() {
-            String afterAnnotation = JkUtilsString.substringAfterFirst(line, "\"");
-            return JkUtilsString.substringBeforeFirst(afterAnnotation, "\"");
-        }
-
     }
 
 }
