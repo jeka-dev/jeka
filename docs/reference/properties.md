@@ -62,6 +62,7 @@ See [Multi-Modules](multi-modules.md) for examples.
 
 * `jeka.cmd.xxx=` defines an alias that can be substituted for its value in the command line using the `::` symbol.
     Example: `jeka.cmd.myBuild=project: pack sonarqube: run` allows you to simply execute `jeka ::myBuild`.
+    Single or double quotes group words into one argument, and are removed: `jeka.cmd.hi=-p "Hello World"` passes `Hello World` to the program.
 *  `jeka.cmd._append=` will append the argument to every Jeka execution command.
    Example: `jeka.cmd._append=-cp=dev.jeka:springboot-plugin` will add springboot plugin to Jeka classpath for each execution.
    This property can be split when the argument line becomes too long. In fact, every property starting with `jeka.cmd._append` will 
