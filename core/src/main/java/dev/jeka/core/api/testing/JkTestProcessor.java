@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Processor executing a given bunch of tests existing in compiled Java classes. <p/>
@@ -334,8 +335,16 @@ public final class JkTestProcessor {
         Path serializedArgPath = JkUtilsPath.createTempFile("testArgs-", ".ser");
         JkUtilsIO.serialize(args, serializedArgPath);
         String arg = serializedArgPath.toAbsolutePath().toString();
+
+        // JeKa loads its embedded libs in dedicated classloaders, along with libraries as Jansi.
+        // From the system classpath, their classes would not see those libraries.
+        List<Path> embeddedLibs = JkInternalEmbeddedClassloader.embeddedLibs().stream()
+                .map(path -> path.toAbsolutePath().normalize())
+                .collect(Collectors.toList());
         List<Path> classpath = JkClassLoader.ofCurrent().getClasspath()
-                .andPrepend(computeClasspath(testClasspath.get())).withoutDuplicates().getEntries();
+                .andPrepend(computeClasspath(testClasspath.get())).withoutDuplicates().getEntries().stream()
+                .filter(path -> !embeddedLibs.contains(path.toAbsolutePath().normalize()))
+                .collect(Collectors.toList());
         if (JkLog.isDebug()) {
             JkLog.debug("------------ Test Classpath --------------");
             classpath.forEach(path -> JkLog.debug(path.toString()));

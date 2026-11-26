@@ -173,11 +173,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Tests and CI
 
-### E2E and sample tests need jansi on the classpath
-- **Symptom:** `NoClassDefFoundError: org/jline/jansi/Ansi`.
-- **Workaround:** `-cp=core/libs/compile-only/jansi-3.30.4.jar`, as in CI.
-- **Evidence:** reproduced.
-
 ### Core tests fail with `test.fork=false`
 - **Symptom:** `IllegalAccessError` on package-private classes, as JeKa tests itself in-process.
 - **Evidence:** reproduced.
@@ -185,6 +180,10 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 ### Tests relying on Maven Central are flaky
 - **Symptom:** `JkRepoTest.findVersionsOf`, `DependencySetResolutionIT.resolve_usingDynamicVersion_ok` and `JkScaffoldTest.testInterpolateLastVersionOf` failed once in CI and passed when rerun on the same code.
 - **Evidence:** reproduced once.
+
+### SonarQube plugin runs no tests
+- **Symptom:** `project: test` reports `Test Found: 0` as success: `test/` only holds `SonarqubeRestClientRunner`, a `main` class.
+- **Evidence:** reproduced from the root with `project: test`.
 
 ## Not bugs, but to plan
 - Material for MkDocs reaches end of life on 2027-05-05.
