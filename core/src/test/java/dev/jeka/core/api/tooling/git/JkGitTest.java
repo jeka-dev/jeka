@@ -89,6 +89,40 @@ class JkGitTest {
     }
 
     @Test
+    void versionFromTag_detachedHead_honorsPrefix(@TempDir Path dir) throws Exception {
+        initRepoWithOneCommit(dir);
+        git(dir, "tag other");
+        git(dir, "checkout -q --detach");
+        JkGit detachedGit = JkGit.of(dir);
+
+        // A tag without the prefix does not give the version
+        assertTrue(detachedGit.getVersionFromTag("v").endsWith("-SNAPSHOT"));
+
+        git(dir, "tag v1.0");
+        assertEquals("1.0", detachedGit.getVersionFromTag("v"));
+        assertEquals("1.0", JkVersionFromGit.of(dir, "v").getVersion());
+    }
+
+    @Test
+    void versionFromTag_branchWithSlash_replacedByDash(@TempDir Path dir) throws Exception {
+        initRepoWithOneCommit(dir);
+        git(dir, "checkout -q -b feat/slash");
+
+        assertEquals("feat-slash-SNAPSHOT", JkGit.of(dir).getVersionFromTag());
+        assertEquals("feat-slash-SNAPSHOT", JkGit.of(dir).getVersionFromCommitMessage("Release:"));
+    }
+
+    private static void initRepoWithOneCommit(Path dir) throws Exception {
+        for (String args : new String[] {"init -q", "config user.email a@b.c", "config user.name a",
+                "config commit.gpgsign false", "config tag.gpgsign false"}) {
+            git(dir, args);
+        }
+        Files.write(dir.resolve("file.txt"), "a".getBytes());
+        git(dir, "add .");
+        git(dir, "commit -q -m first");
+    }
+
+    @Test
     void version_noCommit_explicitError(@TempDir Path dir) throws Exception {
         git(dir, "init -q");
         Exception e = assertThrows(IllegalStateException.class, () -> JkVersionFromGit.of(dir, "").getVersion());

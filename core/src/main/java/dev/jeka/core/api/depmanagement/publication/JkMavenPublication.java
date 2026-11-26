@@ -165,6 +165,13 @@ public final class JkMavenPublication {
     }
 
     /**
+     * Returns the module IDs and versions to put in the <i>dependencyManagement</i> of the POM file to be published.
+     */
+    public Map<JkModuleId, JkVersion> getManagedDependencies() {
+        return Collections.unmodifiableMap(managedDependencies);
+    }
+
+    /**
      * Returns the dependencies to be included in POM as transitive dependencies.
      */
     public JkDependencySet getDependencies() {

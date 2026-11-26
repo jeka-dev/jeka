@@ -41,7 +41,7 @@ handling the code:
 @project.gitVersioning.tagPrefix=v
 ```
 Use `@base.gitVersioning` for the [`base` KBean](kbeans-base.md). If the current commit is tagged and the workspace is clean, the version 
-is the tag without its prefix. Otherwise, it is `[branch]-SNAPSHOT`, or 
+is the tag without its prefix, also on a detached HEAD. Otherwise, it is `[branch]-SNAPSHOT` (`/` replaced by `-`), or 
 `[short commit hash]-SNAPSHOT` if there is no current branch (detached HEAD).
 
 To run other Git commands from Java, see the [Git API](api-git.md).

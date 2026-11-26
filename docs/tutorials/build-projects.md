@@ -193,6 +193,9 @@ The scaffolded *jeka.properties* sets a FAT JAR. Without this property, JeKa cre
     For example, `logback.xml` must mention the relocated name: `my.app._shaded.ch.qos.logback.core.ConsoleAppender`,
     where `my.app` is the root package of your application. Prefer `FAT` for applications that don't need relocation.
 
+    Frameworks that list classes in their own resource files, such as Micronaut (`META-INF/micronaut/...`),
+    don't start from a shaded jar: use `FAT` for them.
+
 ### Multiple Artifacts
 
 For libraries, you might want to produce both a regular JAR and an extra shaded JAR:
@@ -228,7 +231,7 @@ The recommended approach is to let JeKa infer the version from Git:
 The project must be in a Git repository having at least one commit. Otherwise, commands fail with a bare Git error (code 128 or 129).
 
 - If you are on a **Tag**: The version is the tag name (e.g., `1.2.3`).
-- If you are on a **Branch**: The version is `[branch]-SNAPSHOT` (e.g., `master-SNAPSHOT`).
+- If you are on a **Branch**: The version is `[branch]-SNAPSHOT` (e.g., `master-SNAPSHOT`), with `/` replaced by `-` (`feat/x` gives `feat-x-SNAPSHOT`).
 - **Metadata**: The JAR manifest will automatically include Git commit ID, branch, and "dirty" state.
 
 ## Essential Build Commands

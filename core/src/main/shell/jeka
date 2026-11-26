@@ -829,6 +829,11 @@ compute_JEKA_DIST_DIR() {
         [ -n "$distrib_repo" ] && distrib_repo=$(echo "$distrib_repo" | cut -d',' -f1 | xargs)
         [ -n "$distrib_repo" ] && jeka_repo=$distrib_repo
 
+        # A repository specific to the JeKa distribution prevails
+        local specific_distrib_repo
+        specific_distrib_repo=$(get_prop_value_from_base_dir "$base_dir" "jeka.distrib.repo")
+        [ -n "$specific_distrib_repo" ] && jeka_repo=$(echo "$specific_distrib_repo" | xargs)
+
         local url=$jeka_repo/dev/jeka/jeka-core/$jeka_version/jeka-core-$jeka_version-distrib.zip
         local auth_header=""
         auth_header=$(get_prop_value_from_base_dir "$base_dir" "jeka.repos.download.headers.Authorization")
@@ -1220,6 +1225,18 @@ execute_and_exit_native_if_present() {
 # Outputs:
 #   None. Exit anyway if program found
 #######################################
+# A jar left by 'project: pack' may have no Main-Class. Checked only when 'unzip' is available.
+check_runnable_jar() {
+  local jar_file="$1"
+  if ! command -v unzip >/dev/null 2>&1; then
+    return 0
+  fi
+  if ! unzip -p "$jar_file" META-INF/MANIFEST.MF 2>/dev/null | grep -qi '^Main-Class:'; then
+    msg "$jar_file has no Main-Class, so it cannot be run with -p. Use 'jeka -c -p ...' to rebuild it as a runnable jar."
+    exit 1
+  fi
+}
+
 execute_and_exit_java_if_present() {
   local jar_file;
   for file in "$BASE_DIR"/jeka-output/*; do
@@ -1235,6 +1252,7 @@ execute_and_exit_java_if_present() {
     debug "No Jar file found in $BASE_DIR/jeka-output/*"
     return 0
   fi
+  check_runnable_jar "$jar_file"
   compute_JAVA_CMD
   local -a sysProp_params
   filter_in_sysProp "$@"

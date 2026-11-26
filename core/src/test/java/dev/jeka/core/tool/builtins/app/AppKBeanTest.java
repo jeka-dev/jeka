@@ -24,11 +24,36 @@ class AppKBeanTest {
     }
 
     @Test
-    void updateAndUninstall_noNameAnsweredWithUnknownApp_doNothing(@TempDir Path tempDir) throws Exception {
+    void updateAndUninstall_noNameAnsweredWithUnknownApp_fail(@TempDir Path tempDir) throws Exception {
         AppKBean appKBean = KBeanTestLoader.load(tempDir.toRealPath(), AppKBean.class);
         appKBean.name = null;
-        withInput("no-such-app-for-jeka-test\n", () -> Assertions.assertDoesNotThrow(appKBean::update));
-        withInput("no-such-app-for-jeka-test\n", () -> Assertions.assertDoesNotThrow(appKBean::uninstall));
+        withInput("no-such-app-for-jeka-test\n", () -> assertUnknownApp(appKBean::update));
+        withInput("no-such-app-for-jeka-test\n", () -> assertUnknownApp(appKBean::uninstall));
+    }
+
+    @Test
+    void uninstall_unknownAppWithForce_doesNotFail(@TempDir Path tempDir) throws Exception {
+        AppKBean appKBean = KBeanTestLoader.load(tempDir.toRealPath(), AppKBean.class);
+        appKBean.name = "no-such-app-for-jeka-test";
+        appKBean.force = true;
+        Assertions.assertDoesNotThrow(appKBean::uninstall);
+    }
+
+    private static void assertUnknownApp(Executable executable) {
+        JkException e = Assertions.assertThrows(JkException.class, executable);
+        Assertions.assertTrue(e.getMessage().contains("No app named 'no-such-app-for-jeka-test'"), e.getMessage());
+    }
+
+    @Test
+    void repoAndTagFromOption_ok() {
+        TagBucket tagBucket = TagBucket.ofValues(java.util.List.of("1.0", "1.1"));
+
+        Assertions.assertEquals("1.0",
+                AppKBean.repoAndTagFromOption(" 1.0 ", "https://x/y.git", tagBucket, "main").tag);
+        Assertions.assertNull(AppKBean.repoAndTagFromOption("@", "https://x/y.git", tagBucket, "main").tag);
+        JkException e = Assertions.assertThrows(JkException.class,
+                () -> AppKBean.repoAndTagFromOption("2.0", "https://x/y.git", tagBucket, "main"));
+        Assertions.assertTrue(e.getMessage().contains("1.1"), e.getMessage());
     }
 
     private static void withInput(String input, Runnable runnable) {

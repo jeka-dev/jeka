@@ -9,56 +9,14 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Build and packaging
 
-### A `META-INF/MANIFEST.MF` resource replaces the generated manifest in FAT jars
-- **Symptom:** with a `META-INF/MANIFEST.MF` in the project resources, a FAT jar contains this one only, ignoring version and manifest customizers. A REGULAR jar contains the generated one only. Nothing tells the user. `.jeka-work/jeka-src-classes` may also hold such a file, left by JeKa 0.11.68 or older: use `--clean-work` once.
-- **Where:** `JkJarPacker.makeFatJar`.
-- **To decide:** which one wins, or merge both.
-- **Evidence:** reproduced.
-
-### Forked tests fail on Java targets below 21
-- **Symptom:** `@project.javaVersion=17` on a fresh scaffold makes `project: test` fail with `UnsupportedClassVersionError: JkTestProcessor ... class file version 65.0`. Docs use 17 as an example.
-- **Workaround:** `@project.test.fork=false`, or target 21+.
-- **To decide:** support it, or fail with a clear message, as JeKa needs Java 21.
-- **Evidence:** reproduced.
-
-### Micronaut applications do not start from a shaded jar
-- **Symptom:** with `jarType=SHADE`, the Micronaut sample prints its banner, then no server starts. Same output with 0.11.68.
-- **Where:** `META-INF/micronaut` entries keep their original names, as `MavenJarShader` only transforms `META-INF/services` (inferred). Class names in text files (e.g. `logback.xml`) are not relocated either: this is documented.
-- **Workaround:** `jarType=FAT`.
-- **To decide:** add a transformer for `META-INF/micronaut`, or document that frameworks naming classes in resources need `FAT`.
-- **Evidence:** reproduced.
-
 ### Compiling for Java 8 not verified with a real JDK 8
 - **Symptom:** `@project.javaVersion=8` failed with `Unrecognized option: --add-exports=jdk.compiler/...`. The option is no longer passed to JDK 8 compilers, but no JDK 8 build was run since: other options may still fail.
 - **Where:** `JkJavaCompilerToolChain.ToolOrProcess.run`.
 - **Evidence:** fixed from a fake `javac` in `JkJavaCompilerToolChainTest`.
 
-### `-p` runs a non-runnable JAR left by `project: pack`
-- **Symptom:** `no main manifest attribute` after packing a REGULAR jar. `jeka -c -p` works.
-- **Where:** `execute_and_exit_java_if_present` in `jeka`, `FindProg` in `jeka.ps1`: the first `.jar` of `jeka-output` is run, without checking its `Main-Class`.
-- **To decide:** rebuild with the program build command, or fail with a message suggesting `-c`. Reading the manifest from the shell scripts needs `unzip` or the JDK `jar` tool.
-- **Evidence:** reproduced.
-
 ## Publication and Maven
 
-### A BOM child without project module ID fails late
-- **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` makes the parent fail with "has no project module ID", possibly after other modules were published. The BOM ignores `@maven.pub.moduleId`.
-- **To decide:** list the publication module ID of children in the BOM, or skip children without module ID.
-- **Evidence:** reproduced with `maven: info`.
-
 ## Versioning (Git)
-
-### Tag prefix ignored on detached HEAD
-- **Symptom:** a detached commit tagged `v1.0` gives version `v1.0` even with `tagPrefix=v`. Docs say the prefix is removed. Any tag matches, whatever the prefix.
-- **Where:** `JkGit.getVersionFromTag`, which uses `git describe --exact-match`.
-- **Caution:** fixing it changes released versions for anyone building this way.
-- **Evidence:** from source.
-
-### Git versioning keeps the `/` of branch names
-- **Symptom:** on branch `feat/slash`, the version is `feat/slash-SNAPSHOT`. `maven: publishLocal` writes `org/ex/gv/feat/slash-SNAPSHOT/gv-feat/slash-SNAPSHOT.jar`, without any warning. The `core` build creates `jeka-output/jeka-core-feat/...` directories.
-- **Where:** `JkGit.getVersionFromTag` and siblings return `branch + "-SNAPSHOT"`.
-- **To decide:** which character replaces `/`. Changes the versions of branch builds.
-- **Evidence:** reproduced with a local publication.
 
 ## Engine and command line
 
@@ -81,11 +39,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `SourceParser` reads line by line.
 - **Evidence:** reproduced by the doc-writer agent.
 
-### `app: install` needs a terminal
-- **Symptom:** without a terminal, `app:` commands fail with "the 'app' commands need an interactive terminal". The trust, version and name prompts can't be answered otherwise: `repo=...#tag` is not supported, and there is no option for the tag.
-- **To decide:** which options to add for a non-interactive install.
-- **Evidence:** reproduced with `< /dev/null`.
-
 ### Shorthand values ignore quotes
 - **Symptom:** `jeka.cmd.hi=-f daemon "Hello"` passes the quotes to the program. May be a known trade-off.
 - **Evidence:** reproduced by the sample-maintainer agent with 0.11.63; same code on master.
@@ -101,15 +54,15 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Evidence:** reproduced with `jeka`.
 
 ### `-cb=<unknown>` only warns and exits 0
+- **Where:** `JkRunbase`: the exception became a warning on purpose in 77cacad47, "to improve IDE compatibility", as some IDE tools build every JeKa module.
+- **To decide:** failing unless `--force` may break those IDE tools.
 - **Evidence:** reproduced by the sample-maintainer agent.
 
 ## KBeans
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
-- **`scaffold.jekaDistribRepo`** writes `jeka.distrib.repo`, which nothing reads. *From source.*
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*
 - **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". Not reproduced on a project or base scaffolded by the Spring Boot plugin, nor on `samples.springboot`: in a project, it shows `Main Class : dev.jeka.core.tool.Main` instead. *Reproduced by the sample-maintainer agent.*
-- **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
 - **`AppKBean.runtime`**: incomplete or wrong `@JkDoc`, according to an earlier review; the issue was not identified again. *From source.*
 
 ## Tests and CI
@@ -120,6 +73,7 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ### Tests relying on Maven Central are flaky
 - **Symptom:** `JkRepoTest.findVersionsOf`, `DependencySetResolutionIT.resolve_usingDynamicVersion_ok` and `JkScaffoldTest.testInterpolateLastVersionOf` failed once in CI and passed when rerun on the same code.
+- **To decide:** renaming them `*IT` changes nothing, as CI runs IT tests (`runIT=true` in `CoreCustom`). Options: skip them when Maven Central does not answer, or retry them.
 - **Evidence:** reproduced once.
 
 ### SonarQube plugin runs no tests

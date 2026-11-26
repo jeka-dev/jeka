@@ -88,14 +88,15 @@ public final class JkJarPacker {
 
         // zipTo() appends to an existing archive, which would keep entries of deleted files
         JkUtilsPath.deleteIfExists(resultFile);
-        if (manifest == null || manifest.isEmpty()) {
+        JkManifest effectiveManifest = effectiveManifest();
+        if (effectiveManifest == null || effectiveManifest.isEmpty()) {
             classtrees.and(treeSet).zipTo(resultFile);
             return;
         }
 
         // Don't write the manifest in the class dir, as it would be reused by the next fat jar
         Path manifestDir = JkUtilsPath.createTempDirectory("jk-manifest-");
-        manifest.writeToStandardLocation(manifestDir);
+        effectiveManifest.writeToStandardLocation(manifestDir);
         JkPathTreeSet.ofRoots(manifestDir)
                 .and(classtrees.andMatcher(JkPathMatcher.of(false, JkManifest.STANDARD_LOCATION)))
                 .and(treeSet)
@@ -115,12 +116,17 @@ public final class JkJarPacker {
     public void makeFatJar(Path resultFile, Iterable<Path> extraEntries, PathMatcher filter) {
         Path originalJar = JkUtilsPath.createTempFile("jk-jar-original", ".jar");
         JkUtilsPath.deleteFile(originalJar);
-        classtrees.andMatcher(filter).andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(originalJar);
+        classtrees.andMatcher(filter).andMatcher(EXCLUDE_SIGNATURE_MATCHER)
+                .andMatcher(JkPathMatcher.of(false, JkManifest.STANDARD_LOCATION))
+                .zipTo(originalJar);
         JkJarWriter jarWriter = JkJarWriter.of(resultFile);
-        jarWriter.writeEntries(JkUtilsZip.jarFile(originalJar));
-        if (manifest != null && !manifest.isEmpty()) {
-            jarWriter.writeManifest(manifest.getManifest());
+
+        // Written first, so that the manifests of the dependencies are ignored
+        JkManifest effectiveManifest = effectiveManifest();
+        if (effectiveManifest != null && !effectiveManifest.isEmpty()) {
+            jarWriter.writeManifest(effectiveManifest.getManifest());
         }
+        jarWriter.writeEntries(JkUtilsZip.jarFile(originalJar));
         for (Path extraEntry : extraEntries) {
             if (Files.isDirectory(extraEntry)) {
                 jarWriter.writeEntries(extraEntry, EXCLUDE_SIGNATURE_MATCHER);
@@ -136,6 +142,25 @@ public final class JkJarPacker {
 
         // On Windows, this may happen that the deletion fails cause another process is using it
         JkUtilsPath.deleteIfExistsSafely(originalJar);
+    }
+
+    /*
+     * The generated manifest prevails over a META-INF/MANIFEST.MF found in the class trees, whose other attributes
+     * are kept. Returns null if there is none of them.
+     */
+    private JkManifest effectiveManifest() {
+        Path resourceManifest = classtrees.toList().stream()
+                .map(tree -> tree.getRoot().resolve(JkManifest.STANDARD_LOCATION))
+                .filter(Files::isRegularFile)
+                .findFirst().orElse(null);
+        if (resourceManifest == null) {
+            return manifest;
+        }
+        JkManifest result = JkManifest.of().loadFromFile(resourceManifest);
+        if (manifest != null && !manifest.isEmpty()) {
+            result.merge(manifest.getManifest());
+        }
+        return result;
     }
 
     public static void makeFatJar(Iterable<Path> jarOrDirs, Path outputJar) {

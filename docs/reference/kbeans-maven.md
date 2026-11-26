@@ -98,7 +98,7 @@ _@maven.pub.parentBom=true
 ```shell
 jeka project: pack maven: publish
 ```
-Properties prefixed with `_` apply to the parent only. Each child must declare its own `@project.moduleId`.
+Properties prefixed with `_` apply to the parent only. The BOM lists each child with the module ID it is published with: its `@maven.pub.moduleId`, or else its `@project.moduleId`.
 
 ### Customize the Publication in Java
 

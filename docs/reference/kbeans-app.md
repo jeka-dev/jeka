@@ -23,6 +23,15 @@ jeka app: install repo=REPO_URL
 JeKa may ask to trust the URL, to choose a version if the repository has tags, and to choose a name if neither `name` nor a catalog application is specified. 
 These questions need a terminal: without it, the command fails. The version cannot be set with a `#tag` suffix.
 
+To install without any question, as in a script or CI, trust the URL first, then pass the tag and the name:
+
+```shell
+jeka app: trustUrl url=github.com/my-org/
+jeka app: install repo=https://github.com/my-org/my-app.git tag=1.2.0 name=my-app
+```
+
+Use `tag=@` to install the last commit of the default branch.
+
 !!! note
     Add *~/.jeka/apps* to your `PATH` before installing applications. Otherwise, they are installed in the JeKa distribution directory, 
     and may be lost when switching versions (e.g. with SDKMAN!).
@@ -90,6 +99,8 @@ The update depends on what is currently installed:
 ```shell
 jeka app: uninstall name=kill8
 ```
+
+If no app has this name, the command fails, as `app: update` does. Add `force=true` to only get a warning, as in a cleanup script.
 
 ## Catalogs
 

@@ -504,6 +504,12 @@ class JekaDistrib {
 
     $distRepo = $this.props.GetValueOrDefault("jeka.repos.download", "https://repo.maven.apache.org/maven2")
     $distRepo = $distRepo.Split(',')[0].Trim()
+
+    # A repository specific to the JeKa distribution prevails
+    $specificDistRepo = $this.props.GetValue("jeka.distrib.repo")
+    if (![String]::IsNullOrWhiteSpace($specificDistRepo)) {
+      $distRepo = $specificDistRepo.Trim()
+    }
     $url = "$distRepo/dev/jeka/jeka-core/$jekaVersion/jeka-core-$jekaVersion-distrib.zip"
     $zipExtractor = [ZipExtractor]::new($url, $distDir)
 
@@ -722,6 +728,26 @@ class ProgramExecutor {
   }
 }
 
+# A jar left by 'project: pack' may have no Main-Class
+function IsRunnableJar([string]$jarFile) {
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  $zip = [System.IO.Compression.ZipFile]::OpenRead($jarFile)
+  try {
+    $entry = $zip.GetEntry("META-INF/MANIFEST.MF")
+    if ($null -eq $entry) {
+      return $false
+    }
+    $reader = New-Object System.IO.StreamReader($entry.Open())
+    try {
+      return $reader.ReadToEnd() -match '(?im)^Main-Class:'
+    } finally {
+      $reader.Dispose()
+    }
+  } finally {
+    $zip.Dispose()
+  }
+}
+
 function ExecJekaEngine {
   param(
     [string]$baseDir,
@@ -830,6 +856,9 @@ function Main {
     $progJdk.SetForProg($true)
     $progJavaCmd = $progJdk.GetJavaCmd()
     if ($progFile -ne '') {
+      if ($progFile.EndsWith(".jar") -and -not (IsRunnableJar $progFile)) {
+        Exit-Error "$progFile has no Main-Class, so it cannot be run with -p. Use 'jeka -c -p ...' to rebuild it as a runnable jar."
+      }
       ExecProg -javaCmd $progJavaCmd -progFile $progFile -progDir $progDir -cmdLineArgs $progArgs
       exit $LASTEXITCODE
     }
