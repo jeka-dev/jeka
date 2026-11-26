@@ -345,6 +345,9 @@ public class JkQualifiedDependencySet {
             JkDependencySet allRuntimeDeps,
             JkDependencySet allTestDeps,
             JkCoordinate.ConflictStrategy strategy) {
+        allCompileDeps = allCompileDeps.replaceLocalProjectDependenciesByCoordinates();
+        allRuntimeDeps = allRuntimeDeps.replaceLocalProjectDependenciesByCoordinates();
+        allTestDeps = allTestDeps.replaceLocalProjectDependenciesByCoordinates();
         JkDependencySetMerge mergeWithProd = allCompileDeps.merge(allRuntimeDeps);
         JkDependencySetMerge mergeWithTest = mergeWithProd.getResult().merge(allTestDeps);
         List<JkQualifiedDependency> result = new LinkedList<>();

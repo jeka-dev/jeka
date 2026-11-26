@@ -603,7 +603,8 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * @see #toDependency(Runnable, Path, JkTransitivity)
      */
     public JkLocalProjectDependency toDependency(JkTransitivity transitivity) {
-        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath().toAbsolutePath(), transitivity);
+        return toDependency(packaging::createBinJar, artifactLocator.getMainArtifactPath().toAbsolutePath(), transitivity)
+                .withCoordinate(() -> moduleId == null ? null : JkCoordinate.of(moduleId, getVersion()));
     }
 
     /**

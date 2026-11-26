@@ -140,6 +140,21 @@ class JkProjectTest {
     }
 
     @Test
+    void getPublishMavenDependencies_withSiblingProject_containsSiblingCoordinate() {
+        JkProject sibling = JkProject.of().setModuleId("org.example:sibling");
+        JkProject project = JkProject.of().setModuleId("org.example:project").setVersion("1.0");
+        project.compilation.dependencies.add(sibling.toDependency());
+        sibling.setVersion("1.0-sibling");  // the version is taken at publication time
+
+        JkDependencySet publishDeps = JkMavenPublication.of(project.asBuildable()).getDependencies();
+
+        JkCoordinateDependency siblingDep = publishDeps.get("org.example:sibling");
+        assertNotNull(siblingDep, publishDeps.toString());
+        assertEquals("1.0-sibling", siblingDep.getCoordinate().getVersion().getValue());
+        assertEquals(JkTransitivity.COMPILE, siblingDep.getTransitivity());
+    }
+
+    @Test
     void getPublishIvyDependencies_ok() {
         JkProject project = JkProject.of();
         project.compilation.dependencies

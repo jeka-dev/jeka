@@ -61,10 +61,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Publication and Maven
 
-### Sibling module missing from the published POM
-- **Symptom:** a module depending on `../plugin-common` in `jeka.project.deps` is published without that dependency.
-- **Evidence:** reproduced by the naive agent.
-
 ### Compile-only dependencies of a sibling module leak into the runtime classpath
 - **Symptom:** a module declaring `../a` in `[compile]` gets the `[compile-only]` dependencies of `a` (e.g. Lombok) in its runtime and test classpaths.
 - **Where:** `JkProject.toDependency` exports the compile and runtime dependencies merged.
