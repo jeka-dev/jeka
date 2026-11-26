@@ -115,7 +115,7 @@ public class NodeJsKBean extends KBean {
 
     @JkDoc("Executes the nodeJs command line mentioned in `cmdLine` field.")
     public void exec() {
-        JkNodeJs.ofVersion(version).exec(cmdLine);
+        JkNodeJs.ofVersion(version).setShowOutput(true).exec(cmdLine);
     }
 
     @JkDoc("Displays configuration info.")
