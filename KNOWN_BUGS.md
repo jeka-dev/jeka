@@ -173,10 +173,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Tests and CI
 
-### Node.js plugin runs no tests
-- **Symptom:** 0 test found in CI, reported as success. Without CI's classpath: `Cannot create Launcher without at least one TestEngine`.
-- **Evidence:** reproduced.
-
 ### Docker native test never runs in CI
 - **Where:** `ScaffoldTest.docker_native_image_ok` needs `JEKA_RUN_SLOW_TEST=true`, which `push-master.yml` sets only for the packaging step.
 - **Evidence:** reproduced (1 skipped in CI). It passes on macOS with Docker.
