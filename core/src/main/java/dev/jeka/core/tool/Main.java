@@ -358,14 +358,8 @@ public class Main {
     private static void handleGenericThrowable(Throwable t, long start) {
         JkBusyIndicator.stop();
         JkLog.restoreToInitialState();
-        if (t.getMessage() != null) {
-            String errClassName = (t instanceof Error) ? t.getClass().getName() + " " : "";
-            String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + errClassName + t.getMessage());
-            System.err.println(txt);
-        } else {
-            String failedText = CommandLine.Help.Ansi.AUTO.string("@|red Failed! |@");
-            System.err.println(failedText);
-        }
+        String txt = CommandLine.Help.Ansi.AUTO.string("@|red ERROR: |@" + errorMessage(t));
+        System.err.println(txt);
         String suggestTxt = CommandLine.Help.Ansi.AUTO.string("You can investigate using @|yellow --verbose|@, " +
                 "@|yellow --debug|@, @|yellow --stacktrace|@, @|yellow --doc|@ , @|yellow --inspect|@ " +
                 "or @|yellow -ls=DEBUG|@ options.");
@@ -376,6 +370,23 @@ public class Main {
         if (shouldPrintExceptionDetails()) {
             printException(t);
         }
+    }
+
+    // Non-private for testing
+    static String errorMessage(Throwable t) {
+        if (t.getMessage() != null) {
+            String errClassName = (t instanceof Error) ? t.getClass().getName() + " " : "";
+            return errClassName + t.getMessage();
+        }
+
+        // As ExceptionInInitializerError, which has no message but a cause
+        String result = t.getClass().getName();
+        Throwable cause = t.getCause();
+        if (cause != null) {
+            result = result + " caused by " + cause.getClass().getName()
+                    + (cause.getMessage() == null ? "" : ": " + cause.getMessage());
+        }
+        return result;
     }
 
     private static boolean shouldPrintExceptionDetails() {

@@ -91,9 +91,9 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `jeka.cmd.hi=-f daemon "Hello"` passes the quotes to the program. May be a known trade-off.
 - **Evidence:** reproduced by the sample-maintainer agent with 0.11.63; same code on master.
 
-### `jeka --doc` can fail with a bare `Failed!`
-- **Symptom:** happens when an enum initializer runs under two classloaders (working-examples/kubernetes). The cause is hidden.
-- **Where:** `PicocliHelp.cmdHelp` builds its own classloader; `Main.handleGenericThrowable` prints `Failed!` when the message is null.
+### `jeka --doc` can fail when an enum initializer runs under two classloaders
+- **Symptom:** seen with working-examples/kubernetes. The error now names the exception and its cause, instead of a bare `Failed!`.
+- **Where:** `PicocliHelp.cmdHelp` builds its own classloader.
 - **Evidence:** reproduced by the sample-maintainer agent.
 
 ### Spinner text in redirected output on recent JDKs
