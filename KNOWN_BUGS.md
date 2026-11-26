@@ -77,11 +77,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `CmdLineParser`. Left as is, so that a field without value does not swallow the next argument.
 - **Evidence:** from source.
 
-### `--program-args` is advertised but not handled
-- **Symptom:** `--help` shows `--program-args`, the shell script only handles `-p` and `--program`.
-- **Where:** `PicocliMainCommand`, `core/src/main/shell/jeka`.
-- **Evidence:** from source.
-
 ### `${...}` in `@JkDoc` is displayed as `null` by `--doc`
 - **Workaround:** don't write `${...}` in `@JkDoc` texts.
 - **Evidence:** reproduced by the doc-writer agent.
