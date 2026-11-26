@@ -95,7 +95,7 @@ class CmdLineParser {
         commandLine.setAllowSubcommandsAsOptionParameters(true);
         commandLine.setAllowOptionsAsOptionParameters(true);
         checkNoFieldTakenAsValue(commandLine, fieldOnlyArgs);
-        CommandLine.ParseResult parseResult = commandLine.parseArgs(fieldOnlyArgs);
+        CommandLine.ParseResult parseResult = commandLine.parseArgs(withExplicitBooleans(commandLine, fieldOnlyArgs));
         for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
             String name = optionSpec.names()[0];
             Object value = parseResult.matchedOptionValue(name, null);
@@ -139,6 +139,22 @@ class CmdLineParser {
                         "Expected parameter for option '%s' but found '%s'", args[i], args[i + 1]));
             }
         }
+    }
+
+    /*
+     * A boolean field without value (e.g. 'test.skip') means true. Picocli would flip its default value instead,
+     * which fails when the default value is unknown.
+     */
+    private static String[] withExplicitBooleans(CommandLine commandLine, String[] args) {
+        CommandLine.Model.CommandSpec spec = commandLine.getCommandSpec();
+        return Arrays.stream(args)
+                .map(arg -> {
+                    CommandLine.Model.OptionSpec option = spec.findOption(arg);
+                    boolean isBoolean = option != null
+                            && (option.type() == boolean.class || option.type() == Boolean.class);
+                    return isBoolean ? arg + "=true" : arg;
+                })
+                .toArray(String[]::new);
     }
 
     private static String[] removeMethods(String[] args, List<String> methodNames) {

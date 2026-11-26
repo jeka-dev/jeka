@@ -82,6 +82,31 @@ class CmdLineParserTest {
         assertEquals("1.2", valueOf(parse("project: version 1.2").toList(), "version"));
     }
 
+    @Test
+    void booleanWithoutValue_isTrue() {
+        assertEquals(Boolean.TRUE, valueOf(parse("project: test.skip").toList(), "test.skip"));
+    }
+
+    @Test
+    void booleanWithoutValue_followedByField_ok() {
+        List<KBeanAction> kBeanActions = parse("project: test.skip moduleId=x").toList();
+        assertEquals(Boolean.TRUE, valueOf(kBeanActions, "test.skip"));
+        assertEquals("x", valueOf(kBeanActions, "moduleId"));
+    }
+
+    @Test
+    void booleanWithoutValue_followedByMethod_ok() {
+        List<KBeanAction> kBeanActions = parse("project: test.skip pack").toList();
+        assertEquals(Boolean.TRUE, valueOf(kBeanActions, "test.skip"));
+        assertEquals(1, kBeanActions.stream()
+                .filter(action -> action.type == KBeanAction.Action.INVOKE).count());
+    }
+
+    @Test
+    void booleanFalse_ok() {
+        assertEquals(Boolean.FALSE, valueOf(parse("project: test.skip=false").toList(), "test.skip"));
+    }
+
     private static Object valueOf(List<KBeanAction> kBeanActions, String member) {
         return kBeanActions.stream()
                 .filter(action -> member.equals(action.member))

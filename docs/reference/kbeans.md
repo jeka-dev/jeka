@@ -187,6 +187,9 @@ We can also inject value using `jeka.properties` file.
 
 The accepted field types are listed [here](https://picocli.info/#_built_in_types).
 
+On the command line, a value is set with `name=value`, e.g. `project: version=1.0`. A boolean field without value
+is set to `true`: `project: test.skip` is the same as `project: test.skip=true`.
+
 _KBean fields_ can also represent nested composite objects. See the example in the `ProjectKBean#pack` [field](https://github.com/jeka-dev/jeka/blob/master/core/src/main/java/dev/jeka/core/tool/builtins/project/ProjectKBean.java).
 
 ## Naming KBeans
