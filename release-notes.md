@@ -27,6 +27,7 @@ Some changes may need action when upgrading from 0.11.68:
 - Bases built with an older version may hold a stale manifest: run `--clean-work` once.
 
 **Command line, scripts and `app:`**
+- **`-cb=<location>` fails when no declared child base matches**, instead of only warning. Use `--force` to keep the warning. The location may use `/` or `\` on any OS, and a trailing `/` is ignored.
 - **`app: update` and `app: uninstall` fail on an unknown name**, instead of exiting with 0. With `force=true`, `uninstall` only warns.
 - **App scripts already installed** keep their old launch line until `app: update`.
 - **`-p` on a jar without `Main-Class`** fails with a message suggesting `jeka -c -p`.
