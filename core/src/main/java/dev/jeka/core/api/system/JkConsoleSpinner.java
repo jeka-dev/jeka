@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.system;
 
+import dev.jeka.core.api.utils.JkUtilsSystem;
+
 import java.io.Console;
 import java.io.PrintStream;
 
@@ -40,7 +42,7 @@ public class JkConsoleSpinner {
     }
 
     public void run(Runnable runnable) {
-        Console console = System.console();
+        Console console = JkUtilsSystem.CONSOLE;
         if (console == null || JkLog.isVerbose() || !JkLog.isAnimationAccepted()
                 || JkMemoryBufferLogDecorator.isActive()) {
             if (alternativeMassage != null) {

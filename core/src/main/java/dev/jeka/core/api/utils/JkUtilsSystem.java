@@ -50,9 +50,28 @@ public final class JkUtilsSystem {
 
     public static final boolean IS_LINUX = isLinux();
 
-    public static final Console CONSOLE = System.console();
+    /**
+     * The console attached to a terminal, or <code>null</code> if the standard streams are redirected.
+     */
+    public static final Console CONSOLE = terminalConsole();
 
     private static final Class UNSAFE_CLASS = JkClassLoader.ofCurrent().loadIfExist("sun.misc.Unsafe");
+
+    // From JDK 22, System.console() returns a console even when the standard streams are redirected
+    private static Console terminalConsole() {
+        Console console = System.console();
+        if (console == null) {
+            return null;
+        }
+        try {
+            Method isTerminal = Console.class.getMethod("isTerminal");
+            return (Boolean) isTerminal.invoke(console) ? console : null;
+        } catch (NoSuchMethodException e) {
+            return console;  // JDK 21: a console is always attached to a terminal
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     private static boolean isWindows() {
         final String osName = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
