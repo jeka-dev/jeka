@@ -37,10 +37,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `IllegalAccessError` on package-private classes, as JeKa tests itself in-process.
 - **Evidence:** reproduced.
 
-### SonarQube plugin runs no tests
-- **Symptom:** `project: test` reports `Test Found: 0` as success: `test/` only holds `SonarqubeRestClientRunner`, a `main` class.
-- **Evidence:** reproduced from the root with `project: test`.
-
 ## Not bugs, but to plan
 - Material for MkDocs reaches end of life on 2027-05-05.
 - Four minor SonarCloud issues in `JkBeanDescription` and `BundleKBean`.
