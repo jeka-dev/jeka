@@ -125,8 +125,9 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Evidence:** reproduced by the naive agent.
 
 ### `app: install` needs a terminal
-- **Symptom:** without a terminal, the version prompt fails with an NPE message. The version can't be set otherwise: `repo=...#tag` is not supported.
-- **Evidence:** reproduced by the naive and doc-writer agents.
+- **Symptom:** without a terminal, `app:` commands fail with "the 'app' commands need an interactive terminal". The trust, version and name prompts can't be answered otherwise: `repo=...#tag` is not supported, and there is no option for the tag.
+- **To decide:** which options to add for a non-interactive install.
+- **Evidence:** reproduced with `< /dev/null`.
 
 ### Shorthand values ignore quotes
 - **Symptom:** `jeka.cmd.hi=-f daemon "Hello"` passes the quotes to the program. May be a known trade-off.
