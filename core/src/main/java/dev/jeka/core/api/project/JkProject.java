@@ -850,7 +850,10 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
 
             @Override
             public boolean compile(JkJavaCompileSpec compileSpec) {
-                if (JkProject.this.compilation.isCompilationForked()) {
+                // The forked JDK has the target version: JDK 8 and below do not know about modules
+                JkJavaVersion targetVersion = JkProject.this.getJvmTargetVersion();
+                boolean supportsModules = targetVersion == null || targetVersion.isEqualOrGreaterThan(9);
+                if (JkProject.this.compilation.isCompilationForked() && supportsModules) {
                     compileSpec.addCompilerModuleExportOptions();
                 }
                 return JkProject.this.compilerToolChain.compile(compileSpec) != JkJavaCompilerToolChain.Status.FAILED;

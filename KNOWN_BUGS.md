@@ -36,10 +36,10 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Workaround:** `jarType=FAT`.
 - **Evidence:** reproduced.
 
-### Compiling for Java 8 fails
-- **Symptom:** `@project.javaVersion=8` makes `project: pack` fail with `Unrecognized option: --add-exports=jdk.compiler/...`. Targets 11 and 17 compile.
-- **Where:** `JkJavaCompilerToolChain` and `JkProject` pass `-J--add-exports` to forked compilers whatever the JDK; options in `JkJavaCompileSpec`.
-- **Evidence:** reproduced. Not new: same in 0.11.68 (sample-maintainer agent).
+### Compiling for Java 8 not verified with a real JDK 8
+- **Symptom:** `@project.javaVersion=8` failed with `Unrecognized option: --add-exports=jdk.compiler/...`. The option is no longer passed to JDK 8 compilers, but no JDK 8 build was run since: other options may still fail.
+- **Where:** `JkJavaCompilerToolChain.ToolOrProcess.run`.
+- **Evidence:** fixed from a fake `javac` in `JkJavaCompilerToolChainTest`.
 
 ### `jeka.jdk.N` is ignored by `bundle`
 - **Symptom:** `bundle: pack` downloads a JDK although `jeka.jdk.N` is set. `native`, `jlink` and `jdeps` use the same code.
