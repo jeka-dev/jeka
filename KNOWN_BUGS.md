@@ -65,9 +65,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkVersionFromGit.handleVersioning`. Cosmetic.
 - **Evidence:** reproduced.
 
-### `git: lastTag` without any tag shows a raw Git error
-- **Evidence:** reproduced by the doc-writer agent.
-
 ## Engine and command line
 
 ### `-cb=<child> <kbean>:` fails for a KBean existing only in that child

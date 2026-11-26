@@ -379,13 +379,22 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     }
 
     /**
-     * Returns the latest tag in the Git repository.
+     * Returns the latest tag in the Git repository, or <code>null</code> if no tag is reachable from HEAD.
      */
     public String getLatestTag() {
-        List<String> tags = copy().addParams("describe", "--tags", "--abbrev=0")
+        JkProcResult result = copy().addParams("describe", "--tags", "--abbrev=0")
                 .setCollectStdout(true)
-                .execAndCheck()
-                .getStdoutAsMultiline();
+                .setCollectStderr(true)
+                .setFailOnError(false)
+                .exec();
+        if (result.getExitCode() != 0) {
+            String error = result.getStderrAsString();
+            if (error.contains("No names found") || error.contains("No tags can describe")) {
+                return null;
+            }
+            throw new IllegalStateException("Cannot get the latest Git tag: " + error.trim());
+        }
+        List<String> tags = result.getStdoutAsMultiline();
         return tags.isEmpty() ? null : tags.getFirst();
     }
 

@@ -63,6 +63,22 @@ class JkGitTest {
         assertEquals(version, JkVersionFromGit.of(dir, "").getVersion());
     }
 
+    @Test
+    void getLatestTag_noTag_returnsNull(@TempDir Path dir) throws Exception {
+        for (String args : new String[] {"init -q", "config user.email a@b.c", "config user.name a",
+                "config commit.gpgsign false", "config tag.gpgsign false"}) {
+            git(dir, args);
+        }
+        Files.write(dir.resolve("file.txt"), "a".getBytes());
+        git(dir, "add .");
+        git(dir, "commit -q -m first");
+        JkGit jkGit = JkGit.of(dir);
+
+        assertNull(jkGit.getLatestTag());
+        git(dir, "tag 1.0");
+        assertEquals("1.0", jkGit.getLatestTag());
+    }
+
     private static void git(Path dir, String args) throws Exception {
         List<String> command = new ArrayList<>(List.of("git"));
         command.addAll(List.of(args.split(" ")));

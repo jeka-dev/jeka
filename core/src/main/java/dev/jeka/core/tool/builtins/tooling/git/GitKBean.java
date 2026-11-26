@@ -36,7 +36,8 @@ public final class GitKBean extends KBean {
 
     @JkDoc("Displays last git tag in current branch")
     public void lastTag() {
-        System.out.println(JkGit.of(getBaseDir()).setLogWithJekaDecorator(false).getLatestTag());
+        String tag = JkGit.of(getBaseDir()).setLogWithJekaDecorator(false).getLatestTag();
+        System.out.println(tag == null ? "No tag found in current branch." : tag);
     }
 
     @JkDoc("Displays all commit messages since last tag")
