@@ -265,9 +265,6 @@ jeka.classpath=dev.jeka:sonarqube-plugin dev.jeka:jacoco-plugin
 # Activate JaCoCo for the project
 @jacoco=on
 
-# The default version does not support Java 25 classes
-@jacoco.jacocoVersion=0.8.14
-
 # Configure SonarQube
 sonar.host.url=http://localhost:9000
 
