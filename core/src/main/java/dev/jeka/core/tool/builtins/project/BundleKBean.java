@@ -371,7 +371,10 @@ public final class BundleKBean extends KBean {
     }
 
     private JkJdeps jdeps() {
-        return JkJdeps.of(jdkTool("jdeps"));
+        String javaVersion = projectKBean.project.getEffectiveJavaVersion();
+
+        // Analyze the classes that run on the bundled Java version
+        return JkJdeps.of(jdkTool("jdeps")).setMultiRelease(javaVersion);
     }
 
     private Path jdkTool(String name) {

@@ -41,6 +41,8 @@ public final class JkJdeps {
 
     private final List<String> options =  new LinkedList<>();
 
+    private String multiRelease = "base";
+
     private JkJdeps(Path execPath) {
         this.execPath = execPath;
     }
@@ -56,6 +58,15 @@ public final class JkJdeps {
     public static JkJdeps ofJavaVersion(String javaVersion, String distribution) {
         Path jdkPath = JkUtilsJdk.getJdk(distribution, javaVersion);
         return new JkJdeps(jdkPath.resolve("bin").resolve(EXEC_NAME));
+    }
+
+    /**
+     * Sets the version of the classes to analyze in multi-release jars, as '21'. Default is 'base',
+     * which ignores the classes specific to Java versions, and so the modules they use.
+     */
+    public JkJdeps setMultiRelease(String multiRelease) {
+        this.multiRelease = multiRelease;
+        return this;
     }
 
     public JkJdeps addOptions(String... options) {
@@ -77,7 +88,7 @@ public final class JkJdeps {
         return Arrays.stream(JkProcess.of(execPath)
                 .addParamsIf(!JkLog.isVerbose(), "-quiet")
                 .addParams("--ignore-missing-deps")
-                .addParams("--multi-release", "base")  // otherwise, jdeps fails on multi-release jars
+                .addParams("--multi-release", multiRelease)  // otherwise, jdeps fails on multi-release jars
                 .addParamsIf(!modulePaths.isEmpty(), "--module-path", modulePaths.toPath())
                 .addParamsIf(!modulePaths.isEmpty(), "--class-path", modulePaths.toPath())
                 .addParams("--print-module-deps", jar.toString())

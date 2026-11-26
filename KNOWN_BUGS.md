@@ -108,7 +108,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". *Reproduced by the sample-maintainer agent.*
 - **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
 - **`AppKBean.runtime`**: incomplete or wrong `@JkDoc`, according to an earlier review; the issue was not identified again. *From source.*
-- **`bundle`**: `jdeps` runs with `--multi-release base`, so modules used only by version-specific classes are not detected. Add them with `--add-modules`. *From source.*
 
 ## Tests and CI
 
