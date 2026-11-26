@@ -211,15 +211,27 @@ class CmdLineArgs {
   }
 
   [bool] IsQuietFlagPresent() {
-    $remoteArgs= @("-q", "--quiet")
-    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
-    return ($remoteIndex -ne -1)
+    return $this.IsFlagBeforeProgram(@("-q", "--quiet"))
   }
 
   [bool] IsVerboseFlagPresent() {
-    $remoteArgs= @("-v", "--verbose", "--debug")
-    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
-    return ($remoteIndex -ne -1)
+    return $this.IsFlagBeforeProgram(@("-v", "--verbose", "--debug"))
+  }
+
+  # Arguments after '-p' belong to the program
+  [bool] IsFlagBeforeProgram([array]$flags) {
+    $flagIndex = -1
+    foreach ($flag in $flags) {
+      $index = $this.args.IndexOf($flag)
+      if (($index -ne -1) -and (($flagIndex -eq -1) -or ($index -lt $flagIndex))) {
+        $flagIndex = $index
+      }
+    }
+    if ($flagIndex -eq -1) {
+      return $false
+    }
+    $programIndex = $this.GetProgramArgIndex()
+    return ($programIndex -eq -1) -or ($flagIndex -lt $programIndex)
   }
 
   [bool] IsProgramFlagPresent() {
@@ -228,9 +240,7 @@ class CmdLineArgs {
   }
 
   [bool] IsCleanFlagPresent() {
-    $remoteArgs= @("-c", "--clean")
-    $remoteIndex= $this.GetIndexOfFirstOf($remoteArgs)
-    return ($remoteIndex -ne -1)
+    return $this.IsFlagBeforeProgram(@("-c", "--clean"))
   }
 
   [array] FilterOutSysProp() {

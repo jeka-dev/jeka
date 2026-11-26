@@ -218,6 +218,10 @@ download_and_unpack() {
 compute_VERBOSE_QUIET_CLEAN() {
   for arg in "${CMD_LINE_ARGS[@]}"
     do
+      # Arguments after '-p' belong to the program
+      if [ "$arg" == "-p" ] || [ "$arg" == "--program" ]; then
+          break
+      fi
       if [ "$arg" == "--verbose" ] || [ "$arg" == "-v" ] || [ "$arg" == "-d" ] || [ "$arg" == "--debug" ]; then
           IS_VERBOSE="true"
       elif [ "$arg" == "--quiet" ] || [ "$arg" == "-q" ]; then
