@@ -711,7 +711,9 @@ class ProgramExecutor {
   }
 
   hidden [string] findFile([string]$extension) {
-    $files = Get-ChildItem -Path $this.folder -Filter "*$extension"
+    # Sources and javadoc jars, created when publishing, are not runnable
+    $files = Get-ChildItem -Path $this.folder -Filter "*$extension" |
+        Where-Object { $_.Name -notlike "*-sources.jar" -and $_.Name -notlike "*-javadoc.jar" }
     if ($files) {
       $firstFile = $files | Select-Object -First 1
       return $firstFile.FullName
