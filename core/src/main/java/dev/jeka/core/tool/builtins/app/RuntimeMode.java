@@ -21,7 +21,8 @@ package dev.jeka.core.tool.builtins.app;
  * <ul>
  *   <li><b>JVM</b>: JVM application running on a JDK managed by Jeka. Binary located in ~/.jeka/apps</li>
  *   <li><b>NATIVE</b>: Native executable compiled ahead-of-time. Binary located in ~/.jeka/apps</li>
- *   <li><b>BUNDLE</b>: Application bundled with a tailored JRE, installed in user-specified location</li>
+ *   <li><b>BUNDLE</b>: Application bundled with a tailored JRE. JeKa opens the folder holding the bundle, for the
+ *   user to install it. macOS and Windows only.</li>
  * </ul>
  */
 enum RuntimeMode {
@@ -36,7 +37,8 @@ enum RuntimeMode {
     NATIVE,
 
     /**
-     * Application bundled with tailored JRE (installed in user-specified location)
+     * Application bundled with tailored JRE. JeKa opens the folder holding the bundle, for the user to install it.
+     * macOS and Windows only.
      */
     BUNDLE
 }

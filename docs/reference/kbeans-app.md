@@ -42,7 +42,7 @@ Applications can be installed in different runtime modes:
 
 - **JVM** (default): JVM application running on a JDK managed by Jeka. Binary is installed in `~/.jeka/apps` and available in PATH.
 - **NATIVE**: Native executable compiled ahead-of-time using GraalVM.
-- **BUNDLE**: Application bundled with a tailored JRE. Installed in a user-specified location.
+- **BUNDLE**: Application bundled with a tailored JRE. JeKa opens the folder holding the bundle (a `.dmg` on macOS), for you to install it. macOS and Windows only.
 
 ### Using the `runtime` parameter
 
