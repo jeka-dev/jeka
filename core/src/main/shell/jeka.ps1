@@ -791,9 +791,6 @@ function Main {
   }
   $rawProps = [Props]::new($rawCmdLineArgs, $PWD.Path, $globalPropFile)
   $cmdLineArgs = $rawProps.InterpolatedCmdLine()
-  if (($cmdLineArgs.IsCleanFlagPresent()) -and (Test-Path .\jeka-output)) {
-    Remove-Item .\jeka-output -Recurse -Force -ErrorAction SilentlyContinue
-  }
 
   # Resolve basedir and interpolate cmdLine according props declared in base dir
   $remoteArg = $cmdLineArgs.GetRemoteBaseDirArg()
@@ -803,6 +800,12 @@ function Main {
   # Must be done before cloning, and whatever is executed : jeka-src code from the repo may run even without '-p' option
   [TrustedUrl]::Check($remoteArg, $globalPropFile)
   $baseDir = $baseDirResolver.GetPath()
+
+  # The base dir may differ from the working dir, as with '-r'
+  $jekaOutputDir = Join-Path $baseDir "jeka-output"
+  if (($cmdLineArgs.IsCleanFlagPresent()) -and (Test-Path $jekaOutputDir)) {
+    Remove-Item $jekaOutputDir -Recurse -Force -ErrorAction SilentlyContinue
+  }
   $props = [Props]::new($cmdLineArgs, $baseDir, $globalPropFile)
   $cmdLineArgs = $props.InterpolatedCmdLine()
   $joinedArgs = $cmdLineArgs.args -join " "

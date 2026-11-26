@@ -160,6 +160,11 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkConsoleSpinner` and `JkUtilsSystem` test `System.console()` for null; JDK 22+ may return one when redirected (inferred).
 - **Evidence:** reproduced by the sample-maintainer agent.
 
+### `-c` after `-p` cleans `jeka-output`
+- **Symptom:** `jeka -p -c` passes `-c` to the program, but the shell script also deletes `jeka-output`, so the program is rebuilt. Same with `-v` and `-q`, which change the script logs.
+- **Where:** `compute_VERBOSE_QUIET_CLEAN` in `jeka` reads all arguments; `IsCleanFlagPresent` in `jeka.ps1` too (from source).
+- **Evidence:** reproduced with `jeka`.
+
 ### `-cb=<unknown>` only warns and exits 0
 - **Evidence:** reproduced by the sample-maintainer agent.
 
