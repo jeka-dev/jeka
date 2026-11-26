@@ -66,7 +66,9 @@ public class JkJ2eWarArchiver {
     public void generateWarDir(Path destDir) {
         JkPathTree webappTree = webappDir != null ? JkPathTree.of(webappDir) : null;
         if (webappTree == null || !webappTree.exists() || !webappTree.containFiles()) {
-            JkLog.warn(destDir + " is empty or does not exists.");
+
+            // Not needed by all web applications, as Spring Boot ones
+            JkLog.verbose("No webapp files found in %s.", webappDir);
         } else {
             webappTree.copyTo(destDir);
         }

@@ -87,7 +87,6 @@ public class JkJ2eWarProjectAdapter {
                 .setLibs(project.pack.resolveRuntimeDependenciesAsFiles())
                 .setWebappDir(webappPath);
         project.compilation.runIfNeeded();
-        project.test.runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
 
