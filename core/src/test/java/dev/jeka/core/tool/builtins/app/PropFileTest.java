@@ -18,6 +18,12 @@ package dev.jeka.core.tool.builtins.app;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PropFileTest {
 
@@ -36,6 +42,19 @@ class PropFileTest {
         System.out.println("---------- modified content -------------- ");
         System.out.println(result);
         System.out.println("---------- end -------------- ");
+    }
+
+    @Test
+    void appendValueToMultiValuedProp_appendsOneValueWithoutLeadingSeparator(@TempDir Path dir) throws Exception {
+        Path file = Files.writeString(dir.resolve("global.properties"), "other=a\n");
+        PropFile propFile = new PropFile(file);
+
+        propFile.appendValueToMultiValuedProp("jeka.app.url.trusted", "github.com/a", " ");
+        propFile.appendValueToMultiValuedProp("jeka.app.url.trusted", "gitlab.com/c", " ");
+        propFile.appendValueToMultiValuedProp("jeka.app.url.trusted", "github.com/e", " ");
+
+        assertEquals("github.com/a gitlab.com/c github.com/e",
+                dev.jeka.core.api.system.JkProperties.ofFile(file).get("jeka.app.url.trusted"));
     }
 
 }
