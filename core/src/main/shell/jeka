@@ -1220,6 +1220,18 @@ execute_and_exit_native_if_present() {
 # Outputs:
 #   None. Exit anyway if program found
 #######################################
+# A jar left by 'project: pack' may have no Main-Class. Checked only when 'unzip' is available.
+check_runnable_jar() {
+  local jar_file="$1"
+  if ! command -v unzip >/dev/null 2>&1; then
+    return 0
+  fi
+  if ! unzip -p "$jar_file" META-INF/MANIFEST.MF 2>/dev/null | grep -qi '^Main-Class:'; then
+    msg "$jar_file has no Main-Class, so it cannot be run with -p. Use 'jeka -c -p ...' to rebuild it as a runnable jar."
+    exit 1
+  fi
+}
+
 execute_and_exit_java_if_present() {
   local jar_file;
   for file in "$BASE_DIR"/jeka-output/*; do
@@ -1235,6 +1247,7 @@ execute_and_exit_java_if_present() {
     debug "No Jar file found in $BASE_DIR/jeka-output/*"
     return 0
   fi
+  check_runnable_jar "$jar_file"
   compute_JAVA_CMD
   local -a sysProp_params
   filter_in_sysProp "$@"

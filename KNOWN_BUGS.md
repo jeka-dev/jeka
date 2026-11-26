@@ -21,12 +21,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkJavaCompilerToolChain.ToolOrProcess.run`.
 - **Evidence:** fixed from a fake `javac` in `JkJavaCompilerToolChainTest`.
 
-### `-p` runs a non-runnable JAR left by `project: pack`
-- **Symptom:** `no main manifest attribute` after packing a REGULAR jar. `jeka -c -p` works.
-- **Where:** `execute_and_exit_java_if_present` in `jeka`, `FindProg` in `jeka.ps1`: the first `.jar` of `jeka-output` is run, without checking its `Main-Class`.
-- **To decide:** rebuild with the program build command, or fail with a message suggesting `-c`. Reading the manifest from the shell scripts needs `unzip` or the JDK `jar` tool.
-- **Evidence:** reproduced.
-
 ## Publication and Maven
 
 ### A BOM child without project module ID fails late
