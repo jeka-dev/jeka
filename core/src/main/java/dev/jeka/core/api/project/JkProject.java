@@ -399,7 +399,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .and(this.packaging.resolveRuntimeDependenciesAsFiles());
         JkJavaProcess javaProcess;
         if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
-            Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
+            Path jdkPath = runJdkHome();
             javaProcess = JkJavaProcess.ofJavaFromJdk(jdkPath, mainClass);
         } else {
             javaProcess = JkJavaProcess.ofJava(mainClass);
@@ -411,6 +411,15 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
                 .setDestroyAtJvmShutdown(true)
                 .setLogCommand(true)
                 .setInheritIO(true);
+    }
+
+    // A JDK set with 'jeka.jdk.[version]' prevails, as for compilation
+    private Path runJdkHome() {
+        Path explicitHome = compilerToolChain.getJdks().getHome(jvmTargetVersion);
+        if (explicitHome != null) {
+            return explicitHome;
+        }
+        return JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
     }
 
     /**
@@ -427,7 +436,7 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
         }
         JkJavaProcess javaProcess;
         if (this.jvmTargetVersion != null && !JkJavaVersion.ofCurrent().equals(this.jvmTargetVersion)) {
-            Path jdkPath = JkUtilsJdk.getJdk(compilerToolChain.getJavaDistrib(), jvmTargetVersion.toString());
+            Path jdkPath = runJdkHome();
             javaProcess = JkJavaProcess.ofJavaJarFromJdk(jdkPath, artifactPath);
         } else {
             javaProcess = JkJavaProcess.ofJavaJar(artifactPath);

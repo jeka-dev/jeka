@@ -133,6 +133,13 @@ public final class JkJavaCompilerToolChain {
     }
 
     /**
+     * Returns the JDKs explicitly specified to compile for specific Java versions.
+     */
+    public JkJdks getJdks() {
+        return jdkHints.jdks;
+    }
+
+    /**
      * Configures whether the Java compilation process should be forked into
      * an external process.
      *

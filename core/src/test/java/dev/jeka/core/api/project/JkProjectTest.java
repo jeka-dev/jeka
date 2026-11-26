@@ -6,6 +6,8 @@ import dev.jeka.core.api.depmanagement.publication.JkIvyPublication;
 import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
+import dev.jeka.core.api.java.JkJavaCompilerToolChain;
+import dev.jeka.core.api.java.JkJavaVersion;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -291,6 +293,25 @@ class JkProjectTest {
         project.packaging.createFatJar(project.getOutputDir().resolve("fat.jar"));
         project.packaging.createSourceJar(project.getOutputDir().resolve("sources.jar"));
         return project;
+    }
+
+    @Test
+    void prepareRunMain_otherJavaVersionWithExplicitJdk_usesIt() throws Exception {
+        Path base = Files.createTempDirectory("jk-run-jdk");
+        Path jdkHome = Files.createDirectories(base.resolve("my-jdk"));
+        JkJavaVersion otherVersion = JkJavaVersion.ofCurrent().equals(JkJavaVersion.V17)
+                ? JkJavaVersion.V21 : JkJavaVersion.V17;
+        JkProject project = JkProject.of().setBaseDir(base).setJvmTargetVersion(otherVersion);
+        project.compilerToolChain.setJdkHints(JkJavaCompilerToolChain.JkJdks.ofJdkHomeProps(
+                java.util.Map.of(otherVersion.toString(), jdkHome.toString())), false);
+        project.packaging.setMainClass("app.Main");
+        Path classDir = Files.createDirectories(project.compilation.layout.resolveClassDir());
+        Files.writeString(classDir.resolve("Main.class"), "");  // avoid compilation
+
+        String javaCmd = project.prepareRunMain().getParamAt(0);
+
+        Assertions.assertTrue(javaCmd.startsWith(jdkHome.toString()), javaCmd);
+        JkPathTree.of(base).deleteRoot();
     }
 
     private static Path unzipToDir() throws IOException, URISyntaxException {

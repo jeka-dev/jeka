@@ -41,11 +41,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkJavaCompilerToolChain.ToolOrProcess.run`.
 - **Evidence:** fixed from a fake `javac` in `JkJavaCompilerToolChainTest`.
 
-### `jeka.jdk.N` is ignored by `bundle`
-- **Symptom:** `bundle: pack` downloads a JDK although `jeka.jdk.N` is set. `native`, `jlink` and `jdeps` use the same code.
-- **Where:** `JkUtilsJdk.getJdk` only looks in the cache.
-- **Evidence:** reproduced by the sample-maintainer agent for `bundle`, from source for the others.
-
 ### `-p` runs a non-runnable JAR left by `project: pack`
 - **Symptom:** `no main manifest attribute` after packing a REGULAR jar. `jeka -c -p` works.
 - **Evidence:** reproduced by the sample-maintainer agent.
