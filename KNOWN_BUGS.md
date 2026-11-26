@@ -25,6 +25,7 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** with `jarType=SHADE`, the Micronaut sample prints its banner, then no server starts. Same output with 0.11.68.
 - **Where:** `META-INF/micronaut` entries keep their original names, as `MavenJarShader` only transforms `META-INF/services` (inferred). Class names in text files (e.g. `logback.xml`) are not relocated either: this is documented.
 - **Workaround:** `jarType=FAT`.
+- **To decide:** add a transformer for `META-INF/micronaut`, or document that frameworks naming classes in resources need `FAT`.
 - **Evidence:** reproduced.
 
 ### Compiling for Java 8 not verified with a real JDK 8
@@ -34,7 +35,9 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ### `-p` runs a non-runnable JAR left by `project: pack`
 - **Symptom:** `no main manifest attribute` after packing a REGULAR jar. `jeka -c -p` works.
-- **Evidence:** reproduced by the sample-maintainer agent.
+- **Where:** `execute_and_exit_java_if_present` in `jeka`, `FindProg` in `jeka.ps1`: the first `.jar` of `jeka-output` is run, without checking its `Main-Class`.
+- **To decide:** rebuild with the program build command, or fail with a message suggesting `-c`. Reading the manifest from the shell scripts needs `unzip` or the JDK `jar` tool.
+- **Evidence:** reproduced.
 
 ## Publication and Maven
 
@@ -105,7 +108,7 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
 - **`scaffold.jekaDistribRepo`** writes `jeka.distrib.repo`, which nothing reads. *From source.*
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*
-- **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". *Reproduced by the sample-maintainer agent.*
+- **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". Not reproduced on a project or base scaffolded by the Spring Boot plugin, nor on `samples.springboot`: in a project, it shows `Main Class : dev.jeka.core.tool.Main` instead. *Reproduced by the sample-maintainer agent.*
 - **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
 - **`AppKBean.runtime`**: incomplete or wrong `@JkDoc`, according to an earlier review; the issue was not identified again. *From source.*
 
