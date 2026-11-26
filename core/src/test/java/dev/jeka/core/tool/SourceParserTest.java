@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 class SourceParserTest {
@@ -53,6 +54,18 @@ class SourceParserTest {
                 .compileOptions;
         assertEquals(3, compileOptions.size());
         assertEquals("-opt1", compileOptions.get(0));
+    }
+
+    @Test
+    void annotationsOnSameLine_allRead() {
+        ParsedSourceInfo info = parseResource("with-annotations-on-same-line.javasource");
+        JkDependencySet dependencies = info.getDependencies();
+        assertEquals(3, dependencies.getEntries().size(), dependencies.toString());
+        assertNotNull(dependencies.get("com.google:guava"));
+        assertNotNull(dependencies.get("toto:titi"));
+        assertNotNull(dependencies.get("foo:bar"));
+        assertEquals(1, info.importedBaseDirs.size());
+        assertEquals(List.of("-opt1"), info.compileOptions);
     }
 
     private static ParsedSourceInfo parseResource(String resourceName) {

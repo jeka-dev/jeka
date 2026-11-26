@@ -19,11 +19,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `project: test.skip info` fails with `Invalid value for option 'test.skip': '_NULL_' is not a boolean`. `test.skip=true` works.
 - **Evidence:** reproduced on master `6ab3a30be`. Cause not investigated.
 
-### Two `@JkDep` on the same line fail
-- **Symptom:** `module does not specify version`. Documented in `docs/reference/kbeans-base.md`.
-- **Where:** `SourceParser` reads line by line.
-- **Evidence:** reproduced by the doc-writer agent.
-
 ### Shorthand values ignore quotes
 - **Symptom:** `jeka.cmd.hi=-f daemon "Hello"` passes the quotes to the program. May be a known trade-off.
 - **Evidence:** reproduced by the sample-maintainer agent with 0.11.63; same code on master.
