@@ -91,8 +91,10 @@ class CmdLineParser {
         // -- Do parse
         CommandLine commandLine = new CommandLine(PicocliCommands.fromKBeanDesc(kBeanDescription,
                 Arrays.asList(fieldOnlyArgs)));
-        // -- Field values may be equal to a method name (e.g. buildDir=build)
+        // -- Field values may be equal to a method name (e.g. buildDir=build), or to a field name (e.g. version=moduleId)
         commandLine.setAllowSubcommandsAsOptionParameters(true);
+        commandLine.setAllowOptionsAsOptionParameters(true);
+        checkNoFieldTakenAsValue(commandLine, fieldOnlyArgs);
         CommandLine.ParseResult parseResult = commandLine.parseArgs(fieldOnlyArgs);
         for (CommandLine.Model.OptionSpec optionSpec : parseResult.matchedOptions()) {
             String name = optionSpec.names()[0];
@@ -118,6 +120,25 @@ class CmdLineParser {
             commandSpec.addSubcommand(kbeanName, CommandSpec.create());
         }
         return new CommandLine(commandSpec.name(source));
+    }
+
+    /*
+     * As field names are accepted as values, 'version moduleId=x' would set 'version' to 'moduleId=x'.
+     * A field expecting a value, followed by another field, fails instead, as it did before.
+     */
+    private static void checkNoFieldTakenAsValue(CommandLine commandLine, String[] args) {
+        CommandLine.Model.CommandSpec spec = commandLine.getCommandSpec();
+        for (int i = 0; i < args.length - 1; i++) {
+            CommandLine.Model.OptionSpec option = spec.findOption(args[i]);
+            if (option == null || option.arity().min() == 0) {
+                continue;
+            }
+            String nextName = args[i + 1].split("=", 2)[0];
+            if (spec.findOption(nextName) != null) {
+                throw new CommandLine.ParameterException(commandLine, String.format(
+                        "Expected parameter for option '%s' but found '%s'", args[i], args[i + 1]));
+            }
+        }
     }
 
     private static String[] removeMethods(String[] args, List<String> methodNames) {
