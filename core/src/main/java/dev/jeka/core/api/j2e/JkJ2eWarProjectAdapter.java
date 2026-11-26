@@ -20,6 +20,7 @@ import dev.jeka.core.api.depmanagement.artifact.JkArtifactId;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.project.JkProject;
 import dev.jeka.core.api.project.JkProjectPackaging;
+import dev.jeka.core.api.utils.JkUtilsPath;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -89,6 +90,10 @@ public class JkJ2eWarProjectAdapter {
         project.test.runIfNeeded();
         if (generateDir) {
             Path dirPath = project.getOutputDir().resolve("j2e-war");
+
+            // Files of a previous run must not stay in the war
+            JkPathTree.of(dirPath).deleteContent();
+            JkUtilsPath.deleteIfExists(targetFile);
             archiver.generateWarDir(dirPath);
             JkPathTree.of(dirPath).zipTo(targetFile);
         } else {

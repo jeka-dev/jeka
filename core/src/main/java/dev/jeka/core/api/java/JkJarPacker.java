@@ -85,6 +85,9 @@ public final class JkJarPacker {
      */
     public void makeJar(Path resultFile) {
         JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.ofEmpty() : extraFiles;
+
+        // zipTo() appends to an existing archive, which would keep entries of deleted files
+        JkUtilsPath.deleteIfExists(resultFile);
         if (manifest == null || manifest.isEmpty()) {
             classtrees.and(treeSet).zipTo(resultFile);
             return;

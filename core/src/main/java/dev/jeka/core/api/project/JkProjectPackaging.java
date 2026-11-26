@@ -161,6 +161,7 @@ public class JkProjectPackaging {
             return;
         }
         Path javadocDir = getJavadocDir();
+        JkUtilsPath.deleteIfExists(target);  // zipTo() appends to an existing archive
         JkPathTree.of(javadocDir).zipTo(target);
     }
 
@@ -184,6 +185,7 @@ public class JkProjectPackaging {
             JkLog.warn("No sources found : skip sources jar.");
             return;
         }
+        JkUtilsPath.deleteIfExists(target);  // zipTo() appends to an existing archive
         compilation.layout.resolveSources().and(compilation
                 .layout.resolveGeneratedSourceDir()).zipTo(target);
     }
@@ -413,6 +415,7 @@ public class JkProjectPackaging {
         if (!sources.containFiles()) {
             return false;
         }
+        JkPathTree.of(getJavadocDir()).deleteContent();  // pages of deleted classes must not stay
         javadocProcessor.make(classpath, sources, getJavadocDir());
         return true;
     }

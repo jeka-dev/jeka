@@ -82,6 +82,7 @@ public class JkJ2eWarArchiver {
     public void generateWarFile(Path destFile) {
         Path temp = JkUtilsPath.createTempDirectory("jeka-war");
         generateWarDir(temp);
+        JkUtilsPath.deleteIfExists(destFile);  // zipTo() appends to an existing archive
         JkPathTree.of(temp).zipTo(destFile);
         JkPathTree.of(temp).deleteRoot();
     }

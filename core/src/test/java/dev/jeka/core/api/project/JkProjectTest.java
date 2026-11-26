@@ -226,6 +226,41 @@ class JkProjectTest {
         JkPathTree.of(top).deleteRoot();
     }
 
+    @Test
+    void pack_afterSourceDeletion_jarsDoNotContainDeletedFiles() throws Exception {
+        Path base = Files.createTempDirectory("jk-stale-classes");
+        Path srcDir = base.resolve("src/main/java/app");
+        Files.createDirectories(srcDir);
+        Files.writeString(srcDir.resolve("Kept.java"), "package app; public class Kept {}");
+        Path deleted = srcDir.resolve("Deleted.java");
+        Files.writeString(deleted, "package app; public class Deleted {}");
+        createJars(base);
+
+        Files.delete(deleted);
+        JkProject project = createJars(base);   // a new project, as for a second 'jeka' run
+
+        Path binJar = project.getOutputDir().resolve("bin.jar");
+        Path fatJar = project.getOutputDir().resolve("fat.jar");
+        Path sourceJar = project.getOutputDir().resolve("sources.jar");
+        Assertions.assertFalse(Files.exists(project.compilation.layout.resolveClassDir().resolve("app/Deleted.class")));
+        try (JkZipTree bin = JkZipTree.of(binJar); JkZipTree fat = JkZipTree.of(fatJar);
+             JkZipTree sources = JkZipTree.of(sourceJar)) {
+            Assertions.assertTrue(Files.exists(bin.get("app/Kept.class")));
+            Assertions.assertFalse(Files.exists(bin.get("app/Deleted.class")));
+            Assertions.assertFalse(Files.exists(fat.get("app/Deleted.class")));
+            Assertions.assertFalse(Files.exists(sources.get("app/Deleted.java")));
+        }
+        JkPathTree.of(base).deleteRoot();
+    }
+
+    private static JkProject createJars(Path base) {
+        JkProject project = JkProject.of().setBaseDir(base);
+        project.packaging.createBinJar(project.getOutputDir().resolve("bin.jar"));
+        project.packaging.createFatJar(project.getOutputDir().resolve("fat.jar"));
+        project.packaging.createSourceJar(project.getOutputDir().resolve("sources.jar"));
+        return project;
+    }
+
     private static Path unzipToDir() throws IOException, URISyntaxException {
         final Path dest = Files.createTempDirectory(JkProjectTest.class.getName());
         final Path zip = Paths.get(JkProjectTest.class.getResource("sample-multi-scriptless.zip").toURI());

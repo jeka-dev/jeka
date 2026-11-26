@@ -15,12 +15,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **To decide:** which one wins, or merge both.
 - **Evidence:** reproduced.
 
-### Deleted classes stay in the jar without `--clean`
-- **Symptom:** after deleting a source file, `project: pack` still packages its class.
-- **Where:** `jeka-output/classes` is not cleaned, and `JkAbstractPathTree.zipTo` adds to the existing jar.
-- **Workaround:** `--clean`.
-- **Evidence:** reproduced.
-
 ### Unclear error when the main jar is missing at publication
 - **Symptom:** `No artifact file and artifact maker found for [main].jar...` instead of suggesting to run `pack`.
 - **Evidence:** reproduced.
