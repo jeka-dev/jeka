@@ -36,18 +36,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Versioning (Git)
 
-### Tag prefix ignored on detached HEAD
-- **Symptom:** a detached commit tagged `v1.0` gives version `v1.0` even with `tagPrefix=v`. Docs say the prefix is removed. Any tag matches, whatever the prefix.
-- **Where:** `JkGit.getVersionFromTag`, which uses `git describe --exact-match`.
-- **Caution:** fixing it changes released versions for anyone building this way.
-- **Evidence:** from source.
-
-### Git versioning keeps the `/` of branch names
-- **Symptom:** on branch `feat/slash`, the version is `feat/slash-SNAPSHOT`. `maven: publishLocal` writes `org/ex/gv/feat/slash-SNAPSHOT/gv-feat/slash-SNAPSHOT.jar`, without any warning. The `core` build creates `jeka-output/jeka-core-feat/...` directories.
-- **Where:** `JkGit.getVersionFromTag` and siblings return `branch + "-SNAPSHOT"`.
-- **To decide:** which character replaces `/`. Changes the versions of branch builds.
-- **Evidence:** reproduced with a local publication.
-
 ## Engine and command line
 
 ### `-cb=<child> <kbean>:` fails for a KBean existing only in that child

@@ -228,7 +228,7 @@ The recommended approach is to let JeKa infer the version from Git:
 The project must be in a Git repository having at least one commit. Otherwise, commands fail with a bare Git error (code 128 or 129).
 
 - If you are on a **Tag**: The version is the tag name (e.g., `1.2.3`).
-- If you are on a **Branch**: The version is `[branch]-SNAPSHOT` (e.g., `master-SNAPSHOT`).
+- If you are on a **Branch**: The version is `[branch]-SNAPSHOT` (e.g., `master-SNAPSHOT`), with `/` replaced by `-` (`feat/x` gives `feat-x-SNAPSHOT`).
 - **Metadata**: The JAR manifest will automatically include Git commit ID, branch, and "dirty" state.
 
 ## Essential Build Commands

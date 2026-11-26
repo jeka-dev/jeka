@@ -286,8 +286,9 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      * If there is many tags starting with <code>prefix</code> on the current commit, only the last one in alphabetical order is
      * taken in account.
      * <p>
-     * If no tag starting with <code>prefix</code> is present on the current commit or the workspace is dirty,
-     * the version will value <i>[branch]-SNAPSHOT</i>, or <i>[short commit hash]-SNAPSHOT</i> if there is no current
+     * If no tag starting with <code>prefix</code> is present on the current commit or the workspace is dirty (not checked
+     * on detached HEAD),
+     * the version will value <i>[branch]-SNAPSHOT</i> ("/" replaced by "-"), or <i>[short commit hash]-SNAPSHOT</i> if there is no current
      * branch (detached HEAD).
      * <p>
      * If <code>prefix</code> is empty, any tag will match.
@@ -300,21 +301,13 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
                 .filter(tag -> tag.startsWith(prefix))
                 .toList();
         branch = getCurrentBranch();
+        if (branch == null) {   // detached HEAD, as on CI: the workspace state is not checked
+            JkLog.verbose("Git detached HEAD. Infer version from the tags on current commit.");
+            return tags.isEmpty() ? getSnapshotVersion() : tags.getLast().substring(prefix.length());
+        }
         dirty = isWorkspaceDirty();
-        if (branch == null && getTagsOnCurrentCommit().isEmpty()) {  // detached Head without tag
-            return getSnapshotVersion();
-        }
-        if (branch == null) {   // detached Head
-            JkLog.verbose("Git detached branch. Infer version from exact matching tag.");
-            return this.copy()
-                    .addParams("describe", "--tags", "--exact-match")
-                    .setCollectStdout(true)
-                    .execAndCheck()
-                    .getStdoutAsString()
-                    .replace("\n", "");
-        }
         if (tags.isEmpty() || dirty) {
-            return branch + "-SNAPSHOT";
+            return snapshotVersionOfBranch(branch);
         } else {
             return tags.getLast().substring(prefix.length());
         }
@@ -323,7 +316,12 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
     // There is no current branch on detached HEAD (e.g. pull request builds on CI).
     String getSnapshotVersion() {
         String branch = getCurrentBranch();
-        return (branch == null ? getShortCommit() : branch) + JkVersion.SNAPSHOT_SUFIX;
+        return branch == null ? getShortCommit() + JkVersion.SNAPSHOT_SUFIX : snapshotVersionOfBranch(branch);
+    }
+
+    // '/' of branch names as 'feat/x' would create sub-directories in repositories and output dirs
+    private static String snapshotVersionOfBranch(String branch) {
+        return branch.replace('/', '-') + JkVersion.SNAPSHOT_SUFIX;
     }
 
     private String getShortCommit() {
