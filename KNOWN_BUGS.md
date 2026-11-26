@@ -15,10 +15,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **To decide:** which one wins, or merge both.
 - **Evidence:** reproduced.
 
-### Unclear error when the main jar is missing at publication
-- **Symptom:** `No artifact file and artifact maker found for [main].jar...` instead of suggesting to run `pack`.
-- **Evidence:** reproduced.
-
 ### Forked tests fail on Java targets below 21
 - **Symptom:** `@project.javaVersion=17` on a fresh scaffold makes `project: test` fail with `UnsupportedClassVersionError: JkTestProcessor ... class file version 65.0`. Docs use 17 as an example.
 - **Workaround:** `@project.test.fork=false`, or target 21+.
