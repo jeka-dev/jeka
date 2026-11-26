@@ -173,10 +173,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Tests and CI
 
-### Docker native test never runs in CI
-- **Where:** `ScaffoldTest.docker_native_image_ok` needs `JEKA_RUN_SLOW_TEST=true`, which `push-master.yml` sets only for the packaging step.
-- **Evidence:** reproduced (1 skipped in CI). It passes on macOS with Docker.
-
 ### Sample tests need a checkout folder named `jeka`
 - **Symptom:** `jacoco_ok`, `sonarqube_ok` and `protobuf_ok` fail with `...plugin.jar not found`.
 - **Where:** `SamplesTest.pluginsDir()` in `jeka-src/_dev/test`.
