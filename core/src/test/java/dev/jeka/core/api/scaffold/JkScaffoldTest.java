@@ -17,6 +17,7 @@
 package dev.jeka.core.api.scaffold;
 
 import dev.jeka.core.api.depmanagement.JkRepo;
+import dev.jeka.core.api.depmanagement.MavenCentralTestSupport;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.depmanagement.JkVersion;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class JkScaffoldTest {
 
     @Test
-    void testInterpolateLastVersionOf() {
+    void testInterpolateLastVersionOf() throws Throwable {
+        MavenCentralTestSupport.runOrSkipIfCentralDown(JkScaffoldTest::interpolateLastVersionOf);
+    }
+
+    private static void interpolateLastVersionOf() {
         JkRepoSet repos = JkRepo.ofMavenCentral().toSet();
 
         String noToken = "azertyuio azer {";
