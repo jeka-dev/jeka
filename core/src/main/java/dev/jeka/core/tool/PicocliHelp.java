@@ -217,19 +217,13 @@ class PicocliHelp {
         // Pre Init
         if (!beanDescription.preInitInfos.isEmpty()) {
             synopsis.add("\n" + JkAnsi.magenta("Pre-initialize (on activation)"));
-            beanDescription.preInitInfos.forEach(
-                    info -> synopsis.add("      "
-                            + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
-                            + PicocliCommands.escapeVariables(info.description)));
+            beanDescription.preInitInfos.forEach(info -> synopsis.add(initInfoLine(info)));
         }
 
         // PostInit
         if (!beanDescription.postInitInfos.isEmpty()) {
             synopsis.add("\n" + JkAnsi.magenta("Post-initialize (on activation)"));
-            beanDescription.postInitInfos.forEach(
-                    info -> synopsis.add("      "
-                            + JkUtilsString.padEnd(JkAnsi.yellow(info.targetKBean.getSimpleName()), 26, ' ')
-                            + PicocliCommands.escapeVariables(info.description)));
+            beanDescription.postInitInfos.forEach(info -> synopsis.add(initInfoLine(info)));
         }
 
         // Fields
@@ -241,6 +235,15 @@ class PicocliHelp {
                 .customSynopsis(synopsis.toArray(new String[0]))
                 .commandListHeading(JkAnsi.magenta("Methods") + "\n");
         return new CommandLine(main).setUsageHelpAutoWidth(true);
+    }
+
+    private static String initInfoLine(JkBeanDescription.InitMethodInfo info) {
+
+        // The trailing space separates long KBean names from the description
+        String kbeanName = JkAnsi.yellow(info.targetKBean.getSimpleName()) + " ";
+        String description = info.description == null ? "Undocumented."
+                : PicocliCommands.escapeVariables(info.description);
+        return "      " + JkUtilsString.padEnd(kbeanName, 26, ' ') + description;
     }
 
     private static JkBeanDescription kbeanDescription(JkPathSequence classpath,

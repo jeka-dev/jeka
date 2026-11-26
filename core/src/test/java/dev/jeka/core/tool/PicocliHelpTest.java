@@ -29,4 +29,24 @@ class PicocliHelpTest {
         }
     }
 
+    @Test
+    void kbeanHelp_undocumentedPostInitOnLongKBeanName_readable() {
+        String help = PicocliHelp.kbeanHelp(JkBeanDescription.of(UndocumentedPostInitKBean.class, false))
+                .getUsageMessage(CommandLine.Help.Ansi.OFF)
+                .replaceAll("\u001B\\[[;\\d]*m", "");  // JkAnsi colors
+
+        assertFalse(help.contains("null"), help);
+        assertTrue(help.contains("AVeryLongNameForATargetedKBean Undocumented."), help);
+    }
+
+    public static class UndocumentedPostInitKBean extends KBean {
+
+        @JkPostInit
+        private void postInit(AVeryLongNameForATargetedKBean kbean) {
+        }
+    }
+
+    public static class AVeryLongNameForATargetedKBean extends KBean {
+    }
+
 }
