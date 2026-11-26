@@ -15,11 +15,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Engine and command line
 
-### A child cannot inject its parent when run from the parent
-- **Symptom:** `@JkInject("..")` fails with `targets the parent runbase, which is not initialized yet`. Modules injecting each other work, with warnings.
-- **Where:** `JkRunbase.getInjectedRunbase`.
-- **Evidence:** reproduced by unit test.
-
 ### Command-line value equal to a field name is rejected
 - **Symptom:** `project: version=moduleId` fails. Works from `jeka.properties`.
 - **Where:** `CmdLineParser`. Left as is, so that a field without value does not swallow the next argument.
