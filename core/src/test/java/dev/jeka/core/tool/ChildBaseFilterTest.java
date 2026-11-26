@@ -18,14 +18,20 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class ChildBaseFilterTest {
 
+    private static final String INIT_PROP = "child.only.init";
+
+    private static final String HI_PROP = "child.only.hi";
+
     @TempDir
     Path baseDir;
+
+    private Path dir;
 
     private BehaviorSettings initialSettings;
 
     private ClassLoader initialClassloader;
 
-    private JkRunbase runbase;
+    private Engine engine;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -33,30 +39,41 @@ class ChildBaseFilterTest {
         initialClassloader = Thread.currentThread().getContextClassLoader();
         BehaviorSettings.INSTANCE = BehaviorSettings.ofDefault();
 
-        Path dir = baseDir.toRealPath();
+        dir = baseDir.toRealPath();
         write(dir.resolve("jeka.properties"), "_jeka.child-bases=mods/a\n");
         write(dir.resolve("mods/a/jeka.properties"), "");
-        Engine engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
+
+        // A KBean existing only in the child
+        write(dir.resolve("mods/a/jeka-src/ChildOnly.java"),
+                "import dev.jeka.core.tool.KBean;\n" +
+                "public class ChildOnly extends KBean {\n" +
+                "  protected void init() {\n" +
+                "    String previous = System.getProperty(\"" + INIT_PROP + "\", \"\");\n" +
+                "    System.setProperty(\"" + INIT_PROP + "\", previous + getBaseDir().toAbsolutePath() + \";\");\n" +
+                "  }\n" +
+                "  public void hi() { System.setProperty(\"" + HI_PROP + "\", getBaseDir().toAbsolutePath().toString()); }\n" +
+                "}\n");
+
+        engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
         engine.resolveKBeans();
         Engines.registerMaster(engine);
         Thread.currentThread().setContextClassLoader(
                 new AppendableClassloader(engine.getClasspathSetupResult().runClasspath));
-        runbase = engine.getOrCreateRunbase(new KBeanAction.Container(), true);
     }
 
     @AfterEach
     void tearDown() {
         BehaviorSettings.INSTANCE = initialSettings;
         Thread.currentThread().setContextClassLoader(initialClassloader);
+        System.clearProperty(INIT_PROP);
+        System.clearProperty(HI_PROP);
     }
 
     @Test
     void undeclaredChildBase_fails() {
         setChildBase("mods/b", false);
         JkException e = assertThrows(JkException.class, this::run);
-        assertTrue(e.getMessage().contains("No child base found at location mods/b"), e.getMessage());
-        assertTrue(e.getMessage().contains("[mods/a]"), e.getMessage());
-        assertTrue(e.getMessage().contains("--force"), e.getMessage());
+        assertNotFoundMessage(e);
     }
 
     @Test
@@ -79,8 +96,53 @@ class ChildBaseFilterTest {
         assertDoesNotThrow(this::run);
     }
 
+    @Test
+    void kbeanOnlyInChild_runsInChild() {
+        setChildBase("mods/a", false);
+        KBeanAction.Container actions = CmdLineParser.parse(new CmdLineArgs("childOnly:", "hi"), cmdLineResolution());
+
+        JkRunbase runbase = engine.getOrCreateRunbase(actions, true);
+        runbase.run(actions, true);
+
+        String childDir = dir.resolve("mods/a").toString();
+        assertEquals(childDir, System.getProperty(HI_PROP));
+        assertEquals(childDir + ";", System.getProperty(INIT_PROP), "Initialized in the parent too");
+    }
+
+    @Test
+    void kbeanOnlyInChild_withoutChildBase_notFound() {
+        assertThrows(CommandLine.ParameterException.class,
+                () -> CmdLineParser.parse(new CmdLineArgs("childOnly:", "hi"), cmdLineResolution()));
+    }
+
+    @Test
+    void cmdLineResolution_currentBase_isTheBaseOne() {
+        setChildBase(".", false);
+        assertSame(engine.getKbeanResolution(), cmdLineResolution());
+    }
+
+    @Test
+    void cmdLineResolution_undeclaredChildBase_failsUnlessForce() {
+        setChildBase("mods/b", false);
+        assertNotFoundMessage(assertThrows(JkException.class, this::cmdLineResolution));
+
+        setChildBase("mods/b", true);
+        assertSame(engine.getKbeanResolution(), cmdLineResolution());
+    }
+
+    private KBeanResolution cmdLineResolution() {
+        return Main.cmdLineKBeanResolution(engine, new JkRunbase(dir).getProperties(), engine.getKbeanResolution());
+    }
+
     private void run() {
+        JkRunbase runbase = engine.getOrCreateRunbase(new KBeanAction.Container(), true);
         runbase.run(new KBeanAction.Container(), true);
+    }
+
+    private static void assertNotFoundMessage(Exception e) {
+        assertTrue(e.getMessage().contains("No child base found at location mods/b"), e.getMessage());
+        assertTrue(e.getMessage().contains("[mods/a]"), e.getMessage());
+        assertTrue(e.getMessage().contains("--force"), e.getMessage());
     }
 
     private static void setChildBase(String childBase, boolean force) {

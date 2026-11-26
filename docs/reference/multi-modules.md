@@ -147,6 +147,8 @@ If you need to run some Jeka command for a child module, you have 2 options:
    ```
    The value is a path relative to the parent, with `/` or `\` on any OS. If it is not a declared child base,
    the command fails; add `--force` to only get a warning.
+   The command applies to the KBeans of the child, as when run from its directory, including KBeans
+   defined only in its `jeka-src`.
 
 2. Execute actions from child module directory:
    ```shell
