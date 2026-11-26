@@ -61,11 +61,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkMvn.mvnCmd` returns null.
 - **Evidence:** reproduced with `migrateDeps`.
 
-### BOM: versions managed by a grandparent POM are ignored
-- **Symptom:** with `x:p1:1@pom` in `[version]`, `p1` having parent `p2`, itself having parent `p3`, versions managed by `p3` are not found: `Following modules do not specify version`. Those of `p1` and `p2` are. Also concerns external parents declared by `maven: migrateDeps`.
-- **Where:** `PomResolver.getParentPom` returns the parent POM without resolving its own parent.
-- **Evidence:** reproduced with a file repository.
-
 ### A wildcard exclusion can exclude the dependency itself
 - **Symptom:** in *jeka.project.deps*, `com.google.guava:guava:33.4.8-jre` followed by `!com.google.guava:*` or `!*:*` resolves nothing. Maven excludes transitive dependencies only. `maven: migrateDeps` works around it for `*:*`.
 - **Where:** `IvyTranslatorToDependency`, the exclude rule also applies to the artifact of the dependency.
