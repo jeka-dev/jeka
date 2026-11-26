@@ -203,6 +203,7 @@ public final class IntellijKBean extends KBean {
                     }
                 })
                 .distinct()
+                .filter(moduleDir -> IdeSyncedFolders.markSynced("intellij", moduleDir))
                 .forEach(this::generateImlExec);
     }
 

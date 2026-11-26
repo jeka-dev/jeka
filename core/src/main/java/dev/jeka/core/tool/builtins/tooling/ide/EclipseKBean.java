@@ -118,6 +118,7 @@ public final class EclipseKBean extends KBean {
                 .stream()
                 .filter(Files::isDirectory)
                 .map(path -> path.toAbsolutePath().normalize().getParent())
+                .filter(projectFolder -> IdeSyncedFolders.markSynced("eclipse", projectFolder))
                 .toList();
         for (final Path projectFolder : projectFolders) {
             JkLog.startTask("Generate Eclipse files on " + projectFolder);
