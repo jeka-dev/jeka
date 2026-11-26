@@ -16,11 +16,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Publication and Maven
 
-### A BOM child without project module ID fails late
-- **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` makes the parent fail with "has no project module ID", possibly after other modules were published. The BOM ignores `@maven.pub.moduleId`.
-- **To decide:** list the publication module ID of children in the BOM, or skip children without module ID.
-- **Evidence:** reproduced with `maven: info`.
-
 ## Versioning (Git)
 
 ## Engine and command line
