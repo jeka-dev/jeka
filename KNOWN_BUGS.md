@@ -15,10 +15,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Engine and command line
 
-### A boolean field without value fails on the command line
-- **Symptom:** `project: test.skip info` fails with `Invalid value for option 'test.skip': '_NULL_' is not a boolean`. `test.skip=true` works.
-- **Evidence:** reproduced on master `6ab3a30be`. Cause not investigated.
-
 ### `jeka --doc` can fail when an enum initializer runs under two classloaders
 - **Symptom:** seen with working-examples/kubernetes. The error now names the exception and its cause, instead of a bare `Failed!`.
 - **Where:** `PicocliHelp.cmdHelp` builds its own classloader.
