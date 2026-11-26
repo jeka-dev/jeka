@@ -62,6 +62,19 @@ class JkProjectScaffoldTest {
     }
 
     @Test
+    void scaffold_empty_noCustomKBeanActivated() {
+        Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
+        JkProject project = JkProject.of().setBaseDir(baseDir);
+        JkProjectScaffold.of(project).setKind(JkProjectScaffold.Kind.EMPTY).run();
+
+        String jekaContent = JkPathFile.of(baseDir.resolve(JkConstants.PROPERTIES_FILE)).readAsString();
+        assertFalse(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Custom.java")));
+        assertFalse(jekaContent.contains("@custom=on"), jekaContent);
+
+        JkPathTree.of(baseDir).deleteRoot();
+    }
+
+    @Test
     void scaffold_withSimpleLayout_ok() throws Exception {
         Path baseDir = JkUtilsPath.createTempDirectory("jk-test-");
         JkProject project = JkProject.of().setBaseDir(baseDir);

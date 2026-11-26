@@ -108,7 +108,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`NodeJsKBean.init` `@JkDoc`** says it configures the project, but it only registers a clean action. *From source.*
 - **`base: info`** fails in a Spring Boot project: "No class annotated with @SpringBootApplication found". *Reproduced by the sample-maintainer agent.*
 - **`nodeJs: exec`** shows its output only with `-v`. *Reproduced by the naive agent.*
-- **`scaffold.kind=EMPTY`** leaves `@custom=on` without `Custom` class, which gives a warning. *Reproduced by the doc-writer agent.*
 - **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
 - **`AppKBean.name`, `AppKBean.runtime`, `ProjectKBean.test.fork`, `MavenKBean` `parentBom`**: incomplete or wrong `@JkDoc`. *From source.*
 - **`bundle`**: `jdeps` runs with `--multi-release base`, so modules used only by version-specific classes are not detected. Add them with `--add-modules`. *From source.*
