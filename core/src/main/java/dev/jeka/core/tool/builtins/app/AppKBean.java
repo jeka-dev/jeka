@@ -56,6 +56,9 @@ public class AppKBean extends KBean {
     @JkDoc("Git tag to install, or '@' for the last commit of the default branch. When set, no version is asked.")
     public String tag;
 
+    @JkDoc("If true, 'uninstall' does not fail when no app has the specified name.")
+    public boolean force;
+
     @JkDoc("Short description of the app provided by the application author.")
     public String description;
 
@@ -268,8 +271,8 @@ public class AppKBean extends KBean {
             appName = name.trim();
         }
         if (!appManager.installedAppNames().contains(appName)) {
-            JkLog.info("No app named `%s` found.", JkAnsi.yellow(appName));
-            return;
+            throw new JkException("No app named '%s' found. Installed apps: %s", appName,
+                    appManager.installedAppNames());
         }
         Optional<GitTag> optionalGitTag = appManager.getCurrentTag(appName);
         boolean updated;
@@ -301,9 +304,12 @@ public class AppKBean extends KBean {
         }
         boolean found = appManager.uninstall(appName);
         if (!found) {
-            JkLog.warn("No application '%s' found.", appName);
-            JkLog.info("Installed applications are:");
-            appManager.installedAppNames().forEach(JkLog::info);
+            String message = String.format("No app named '%s' found. Installed apps: %s", appName,
+                    appManager.installedAppNames());
+            if (!force) {
+                throw new JkException(message + ". Use 'force=true' to ignore it.");
+            }
+            JkLog.warn(message);
         } else {
             JkLog.info("Application %s uninstalled.", JkAnsi.yellow(appName));
         }

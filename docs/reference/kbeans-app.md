@@ -100,6 +100,8 @@ The update depends on what is currently installed:
 jeka app: uninstall name=kill8
 ```
 
+If no app has this name, the command fails, as `app: update` does. Add `force=true` to only get a warning, as in a cleanup script.
+
 ## Catalogs
 
 Application catalogs are curated collections of Jeka applications that can be easily discovered and installed. Catalogs make it simple to share and distribute applications across teams or communities.
