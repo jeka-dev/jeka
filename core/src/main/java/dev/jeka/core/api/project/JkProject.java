@@ -612,8 +612,15 @@ public final class JkProject implements JkIdeSupportSupplier, JkBuildable.Suppli
      * is meant to be consumed by an external project.
      */
     public JkLocalProjectDependency toDependency(Runnable artifactMaker, Path artifactPath, JkTransitivity transitivity) {
-       JkDependencySet exportedDependencies = compilation.dependencies.get()
-               .merge(packaging.runtimeDependencies.get()).getResult();
+       JkDependencySet compileDependencies = compilation.dependencies.get();
+       JkDependencySet runtimeDependencies = packaging.runtimeDependencies.get();
+
+       // As in Maven, compile-only dependencies are not transitive
+       List<JkDependency> compileOnlyDependencies = compileDependencies.getEntries().stream()
+               .filter(dependency -> runtimeDependencies.getMatching(dependency) == null)
+               .collect(Collectors.toList());
+       JkDependencySet exportedDependencies = compileDependencies.merge(runtimeDependencies).getResult()
+               .minus(compileOnlyDependencies);
         return JkLocalProjectDependency.of(artifactMaker, artifactPath, this.baseDir, exportedDependencies)
                 .withTransitivity(transitivity);
     }

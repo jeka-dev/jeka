@@ -155,6 +155,23 @@ class JkProjectTest {
     }
 
     @Test
+    void toDependency_compileOnlyDependencies_notExported() {
+        JkProject project = JkProject.of();
+        project.compilation.dependencies
+                .add("com.google.guava:guava:23.0")
+                .add("org.projectlombok:lombok:1.18.38");
+        project.packaging.runtimeDependencies
+                .remove("org.projectlombok:lombok")
+                .add("org.postgresql:postgresql:42.2.19");
+
+        JkDependencySet exportedDeps = project.toDependency().getExportedDependencies();
+
+        assertNotNull(exportedDeps.get("com.google.guava:guava"));
+        assertNotNull(exportedDeps.get("org.postgresql:postgresql"));
+        Assertions.assertNull(exportedDeps.get("org.projectlombok:lombok"), exportedDeps.toString());
+    }
+
+    @Test
     void getPublishIvyDependencies_ok() {
         JkProject project = JkProject.of();
         project.compilation.dependencies
