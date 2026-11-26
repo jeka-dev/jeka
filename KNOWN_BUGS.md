@@ -19,11 +19,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `No artifact file and artifact maker found for [main].jar...` instead of suggesting to run `pack`.
 - **Evidence:** reproduced.
 
-### `pack` without `--clean` can fail on an existing sdkman directory
-- **Symptom:** packing `core` a second time fails with `FileAlreadyExistsException: .../jeka-core-master-SNAPSHOT-sdkman/LICENSE`.
-- **Workaround:** `--clean`.
-- **Evidence:** reproduced once.
-
 ### Forked tests fail on Java targets below 21
 - **Symptom:** `@project.javaVersion=17` on a fresh scaffold makes `project: test` fail with `UnsupportedClassVersionError: JkTestProcessor ... class file version 65.0`. Docs use 17 as an example.
 - **Workaround:** `@project.test.fork=false`, or target 21+.
@@ -67,6 +62,12 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Where:** `JkGit.getVersionFromTag`, which uses `git describe --exact-match`.
 - **Caution:** fixing it changes released versions for anyone building this way.
 - **Evidence:** from source.
+
+### Git versioning keeps the `/` of branch names
+- **Symptom:** on branch `feat/slash`, the version is `feat/slash-SNAPSHOT`. `maven: publishLocal` writes `org/ex/gv/feat/slash-SNAPSHOT/gv-feat/slash-SNAPSHOT.jar`, without any warning. The `core` build creates `jeka-output/jeka-core-feat/...` directories.
+- **Where:** `JkGit.getVersionFromTag` and siblings return `branch + "-SNAPSHOT"`.
+- **To decide:** which character replaces `/`. Changes the versions of branch builds.
+- **Evidence:** reproduced with a local publication.
 
 ### `Git-branch: null` in manifest on detached HEAD
 - **Where:** `JkVersionFromGit.handleVersioning`. Cosmetic.
