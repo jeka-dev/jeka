@@ -136,7 +136,9 @@ class SamplesTest {
     }
 
     private static Path pluginsDir() {
-        if (Paths.get("").toAbsolutePath().getFileName().toString().equals("jeka")) {
+
+        // The checkout dir may have any name
+        if (Files.isDirectory(Paths.get("plugins"))) {
             return Paths.get("plugins");
         }
         return Paths.get("..");

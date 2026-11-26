@@ -173,11 +173,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Tests and CI
 
-### Sample tests need a checkout folder named `jeka`
-- **Symptom:** `jacoco_ok`, `sonarqube_ok` and `protobuf_ok` fail with `...plugin.jar not found`.
-- **Where:** `SamplesTest.pluginsDir()` in `jeka-src/_dev/test`.
-- **Evidence:** reproduced.
-
 ### E2E and sample tests need jansi on the classpath
 - **Symptom:** `NoClassDefFoundError: org/jline/jansi/Ansi`.
 - **Workaround:** `-cp=core/libs/compile-only/jansi-3.30.4.jar`, as in CI.
