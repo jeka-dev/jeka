@@ -15,10 +15,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Engine and command line
 
-### `-cb=<child> <kbean>:` fails for a KBean existing only in that child
-- **Symptom:** `jeka -cb=b build: hi` gives `No KBean found for name 'build'`. KBean names are resolved against the parent.
-- **Evidence:** reproduced.
-
 ### A child cannot inject its parent when run from the parent
 - **Symptom:** `@JkInject("..")` fails with `targets the parent runbase, which is not initialized yet`. Modules injecting each other work, with warnings.
 - **Where:** `JkRunbase.getInjectedRunbase`.

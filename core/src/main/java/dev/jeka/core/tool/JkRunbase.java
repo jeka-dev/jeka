@@ -403,6 +403,12 @@ public final class JkRunbase {
         List<String> kbeansToExclude = kbeansToExclude();
         actions = actions.withoutAnyOfKBeanClasses(kbeansToExclude);
 
+        // With '-cb=<child>', the command line may name KBeans existing only in that child: the parent skips them
+        String childBaseFilter = childBaseFilter();
+        if (master && childBaseFilter != null && !childBaseFilter.equals(".")) {
+            actions = actions.withOnlyKBeanClasses(kbeanResolution.allKbeanClassNames);
+        }
+
         if (JkLog.isDebug()) {
             JkLog.debug("Initialize Runbase with \n" + actions.toColumnText());
             JkLog.debug("Default KBean class name: " + kbeanResolution.defaultKbeanClassName);
@@ -670,7 +676,7 @@ public final class JkRunbase {
      * The '-cb' value, with '/' separators: it is compared to relative paths whatever the OS, so that
      * 'plugins/p1' and 'plugins\\p1' both work on Windows. Null if not set.
      */
-    private static String childBaseFilter() {
+    static String childBaseFilter() {
         String value = BehaviorSettings.INSTANCE.childBase;
         if (value == null) {
             return null;

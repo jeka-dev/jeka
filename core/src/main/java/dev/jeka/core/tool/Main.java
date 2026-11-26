@@ -191,7 +191,7 @@ public class Main {
             // Parse command line to get action beans
             KBeanAction.Container actionContainer = CmdLineParser.parse(
                     interpolatedArgs.withoutOptions(),
-                    kBeanResolution);
+                    cmdLineKBeanResolution(engine, props, kBeanResolution));
 
             if (LogSettings.INSTANCE.inspect) {
                 logRuntimeInfoEngineCommands(actionContainer);
@@ -326,6 +326,37 @@ public class Main {
 
     private static void displayDuration(long startTs) {
         System.out.println("\nTotal Duration \u23F1 " + JkUtilsTime.formatMillis(System.currentTimeMillis() - startTs));
+    }
+
+    /*
+     * With '-cb=<child>', the command line applies to the KBeans of this child, as when running from its
+     * directory: they may exist only there. An undeclared child keeps the KBeans of the base, and fails later.
+     */
+    static KBeanResolution cmdLineKBeanResolution(Engine engine, JkProperties props,
+                                                          KBeanResolution baseResolution) {
+        String childBase = JkRunbase.childBaseFilter();
+        if (childBase == null || childBase.equals(".") || BehaviorSettings.INSTANCE.adminMode) {
+            return baseResolution;
+        }
+        Path baseDir = engine.baseDir.toAbsolutePath().normalize();
+        Path childDir = baseDir.resolve(childBase).normalize();
+        List<Path> declaredChildDirs = RunbaseGraph.getChildBaseProps(baseDir, props).stream()
+                .map(path -> path.toAbsolutePath().normalize())
+                .collect(Collectors.toList());
+        if (!declaredChildDirs.contains(childDir)) {
+            if (!declaredChildDirs.isEmpty() && !BehaviorSettings.INSTANCE.forceMode) {
+                List<String> declared = declaredChildDirs.stream()
+                        .map(path -> baseDir.relativize(path).toString().replace('\\', '/'))
+                        .collect(Collectors.toList());
+                throw new JkException("No child base found at location %s. Declared child bases are %s. "
+                        + "Use --force to only warn.", childBase, declared);
+            }
+            return baseResolution;
+        }
+        Engine childEngine = Engines.get(childDir);
+        KBeanResolution childResolution = childEngine.resolveKBeans();
+        AppendableClassloader.append(childEngine.getClasspathSetupResult().runClasspath);
+        return childResolution;
     }
 
     private static void logRuntimeInfoBase(Engine engine, JkProperties props) {
