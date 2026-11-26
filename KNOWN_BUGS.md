@@ -71,11 +71,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **Symptom:** `IllegalAccessError` on package-private classes, as JeKa tests itself in-process.
 - **Evidence:** reproduced.
 
-### Tests relying on Maven Central are flaky
-- **Symptom:** `JkRepoTest.findVersionsOf`, `DependencySetResolutionIT.resolve_usingDynamicVersion_ok` and `JkScaffoldTest.testInterpolateLastVersionOf` failed once in CI and passed when rerun on the same code.
-- **To decide:** renaming them `*IT` changes nothing, as CI runs IT tests (`runIT=true` in `CoreCustom`). Options: skip them when Maven Central does not answer, or retry them.
-- **Evidence:** reproduced once.
-
 ### SonarQube plugin runs no tests
 - **Symptom:** `project: test` reports `Test Found: 0` as success: `test/` only holds `SonarqubeRestClientRunner`, a `main` class.
 - **Evidence:** reproduced from the root with `project: test`.

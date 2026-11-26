@@ -181,7 +181,11 @@ public class DependencySetResolutionIT {
     }
 
     @Test
-    void resolve_usingDynamicVersion_ok() {
+    void resolve_usingDynamicVersion_ok() throws Throwable {
+        MavenCentralTestSupport.runOrSkipIfCentralDown(this::resolveUsingDynamicVersion);
+    }
+
+    private void resolveUsingDynamicVersion() {
         JkModuleId jkModuleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkDependencySet deps = JkDependencySet.of().and(jkModuleId.toCoordinate("1.4.+"));
         JkDependencyResolver resolver = JkDependencyResolver.of().addRepos(JkRepo.ofMavenCentral());

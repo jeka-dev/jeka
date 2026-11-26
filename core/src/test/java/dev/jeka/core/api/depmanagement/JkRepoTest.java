@@ -25,8 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class JkRepoTest {
 
     @Test
-    void findVersionsOf() {
-        List<String> jekaVersions = JkRepo.ofMavenCentral().findVersionsOf("dev.jeka:jeka-core");
-        assertFalse(jekaVersions.isEmpty());
+    void findVersionsOf() throws Throwable {
+        MavenCentralTestSupport.runOrSkipIfCentralDown(() -> {
+            List<String> jekaVersions = JkRepo.ofMavenCentral().findVersionsOf("dev.jeka:jeka-core");
+            assertFalse(jekaVersions.isEmpty());
+        });
     }
 }
