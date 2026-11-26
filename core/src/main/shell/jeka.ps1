@@ -329,10 +329,38 @@ class Props {
     return [CmdLineArgs]::new($result)
   }
 
+  # Splits a line in words, as the JeKa engine does (JkUtilsString.parseCommandline): spaces separate words,
+  # unless they are in single or double quotes, which are removed. Nothing else is interpreted.
   static [array] ParseCommandLine([string]$cmdLine) {
-    $pattern = '(""[^""]*""|[^ ]*)'
-    $regex = New-Object Text.RegularExpressions.Regex $pattern
-    return $regex.Matches($cmdLine) | ForEach-Object { $_.Value.Trim('"') } | Where-Object { $_ -ne "" }
+    $words = New-Object System.Collections.Generic.List[string]
+    $word = New-Object System.Text.StringBuilder
+    $quote = [char]0
+    $hasWord = $false
+    foreach ($c in $cmdLine.ToCharArray()) {
+      if ($quote -ne [char]0) {
+        if ($c -eq $quote) {
+          $quote = [char]0
+        } else {
+          [void]$word.Append($c)
+        }
+      } elseif ($c -eq [char]"'" -or $c -eq [char]'"') {
+        $quote = $c
+        $hasWord = $true
+      } elseif ($c -eq [char]' ') {
+        if ($hasWord) {
+          $words.Add($word.ToString())
+          [void]$word.Clear()
+          $hasWord = $false
+        }
+      } else {
+        [void]$word.Append($c)
+        $hasWord = $true
+      }
+    }
+    if ($hasWord) {
+      $words.Add($word.ToString())
+    }
+    return $words.ToArray()
   }
 
   static [string] GetValueFromFile([string]$filePath, [string]$propertyName) {

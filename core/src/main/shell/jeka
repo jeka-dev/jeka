@@ -411,6 +411,50 @@ get_java_version_from_props() {
 }
 
 #######################################
+# Splits a line in words, as the JeKa engine does (JkUtilsString.parseCommandline): spaces separate words,
+# unless they are in single or double quotes, which are removed. Nothing else is interpreted.
+# Globals:
+#   SPLIT_WORDS (write)
+# Arguments:
+#   $1 : the line to split
+#######################################
+split_words() {
+  SPLIT_WORDS=()
+  local line="$1"
+  local word=""
+  local quote=""
+  local has_word="false"
+  local char
+  local i
+  for (( i=0; i<${#line}; i++ )); do
+    char="${line:i:1}"
+    if [ -n "$quote" ]; then
+      if [ "$char" == "$quote" ]; then
+        quote=""
+      else
+        word+="$char"
+      fi
+    elif [ "$char" == "'" ] || [ "$char" == '"' ]; then
+      quote="$char"
+      has_word="true"
+    elif [ "$char" == " " ]; then
+      if [ "$has_word" == "true" ]; then
+        SPLIT_WORDS+=("$word")
+        word=""
+        has_word="false"
+      fi
+    else
+      word+="$char"
+      has_word="true"
+    fi
+  done
+  if [ "$has_word" == "true" ]; then
+    SPLIT_WORDS+=("$word")
+  fi
+  return 0
+}
+
+#######################################
 # Returns the JAVA version to use according properties
 # Globals:
 #   INTERPOLATED_ARGS (write)
@@ -430,9 +474,10 @@ compute_INTERPOLATED_ARGS() {
       if [ "$value" != "" ]; then
 
         # Value may content 0 or many elements
-        # shellcheck disable=SC2206
-        local substitute=($value)
-        INTERPOLATED_ARGS+=("${substitute[@]}")
+        split_words "$value"
+        if [ ${#SPLIT_WORDS[@]} -gt 0 ]; then
+          INTERPOLATED_ARGS+=("${SPLIT_WORDS[@]}")
+        fi
       else
         INTERPOLATED_ARGS+=("$arg")
       fi
@@ -1154,8 +1199,8 @@ execute_program_if_requested() {
     fi
   fi
 
-  # shellcheck disable=SC2206
-  local -a build_args=($build_cmd)
+  split_words "$build_cmd"
+  local -a build_args=("${SPLIT_WORDS[@]}")
   # shellcheck disable=SC2145
   info "Launch build with command : ${heading_args[@]} ${build_args[@]}"
   "$JAVA_CMD" "${JEKA_OPTS[@]}" "-Djeka.current.basedir=$BASE_DIR" -cp "$JEKA_CLASSPATH" "dev.jeka.core.tool.Main" "${heading_args[@]}" "${build_args[@]}"
