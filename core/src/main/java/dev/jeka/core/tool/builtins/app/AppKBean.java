@@ -73,7 +73,7 @@ public class AppKBean extends KBean {
     public void install() {
         String gitUrl = this.repo;
         if (JkUtilsString.isBlank(gitUrl)) {
-            JkLog.info("You must specify the git url using 'remote=[Git URL]'.");
+            JkLog.info("You must specify the git url using 'repo=[Git URL]'.");
             return;
         }
         String remoteUrl = this.repo.trim();

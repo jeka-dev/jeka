@@ -104,7 +104,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 - **`eclipse: all` and `intellij: syncAll`** process each module twice when the parent has `child-bases`. Harmless. *Reproduced.*
 - **`scaffold.jekaDistribRepo`** writes `jeka.distrib.repo`, which nothing reads. *From source.*
-- **`AppKBean.install`** tells to use `remote=`; the field is `repo`. *From source.*
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*
 - **`SecurityChecker.addTrustedUrl`** writes a leading space in `jeka.app.url.trusted`. Harmless for Java, not checked in the shell script. *Reproduced by the doc-writer agent.*
 - **`NodeJsKBean.init` `@JkDoc`** says it configures the project, but it only registers a clean action. *From source.*
