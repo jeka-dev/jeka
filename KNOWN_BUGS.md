@@ -15,11 +15,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Engine and command line
 
-### `jeka --doc` can fail when an enum initializer runs under two classloaders
-- **Symptom:** seen with working-examples/kubernetes. The error now names the exception and its cause, instead of a bare `Failed!`.
-- **Where:** `PicocliHelp.cmdHelp` builds its own classloader.
-- **Evidence:** reproduced by the sample-maintainer agent.
-
 ## KBeans
 
 - **`SetupKBean.name`** is not used. Kept, as removing a public field may break users. *From source.*

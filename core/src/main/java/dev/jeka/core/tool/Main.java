@@ -503,7 +503,9 @@ public class Main {
             System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanName);
             return true;
         }
-        ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath).get();
+        // Parent is the context classloader, which already loaded these classes: no class is loaded twice
+        ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath,
+                Thread.currentThread().getContextClassLoader()).get();
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
         String mdDoc = JkBeanDescription.of(defaultKBeanClass, false).toMdContent().toString();
         System.out.println(mdDoc);

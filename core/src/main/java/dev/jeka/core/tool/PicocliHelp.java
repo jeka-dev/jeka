@@ -85,7 +85,8 @@ class PicocliHelp {
 
         String defaultKBeanClassName = kbeanResolution.defaultKbeanClassName;
 
-        ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
+        // Parent is the context classloader, which already loaded these classes: no class is loaded twice
+        ClassLoader classLoader = JkUrlClassLoader.of(classpath, Thread.currentThread().getContextClassLoader()).get();
 
         // Add commands and options from default KBean
         final CommandLine.Model.CommandSpec main;
@@ -256,7 +257,8 @@ class PicocliHelp {
         if (kbeanClassName == null) {
             return null;
         }
-        ClassLoader classLoader = JkUrlClassLoader.of(classpath).get();
+        // Parent is the context classloader, which already loaded these classes: no class is loaded twice
+        ClassLoader classLoader = JkUrlClassLoader.of(classpath, Thread.currentThread().getContextClassLoader()).get();
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
         return JkBeanDescription.ofWithDefaultValues(defaultKBeanClass, runbase);
     }
