@@ -111,7 +111,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **`nodeJs: exec`** shows its output only with `-v`. *Reproduced by the naive agent.*
 - **`jeka.project.deps` with only `[processor]`** fails with a "legacy format" error. *Reproduced by the doc-writer agent.*
 - **`scaffold.kind=EMPTY`** leaves `@custom=on` without `Custom` class, which gives a warning. *Reproduced by the doc-writer agent.*
-- **`DockerKBean.jvmBaseImage`** is never used. *From source.*
 - **`app: update` and `app: uninstall`** with an unknown name exit with code 0. *Reproduced by the naive agent.*
 - **`AppKBean.name`, `AppKBean.runtime`, `ProjectKBean.test.fork`, `MavenKBean` `parentBom`**: incomplete or wrong `@JkDoc`. *From source.*
 - **Empty `jeka.project.deps`** gives a "has still legacy format" warning. *Reproduced by the naive agent.*

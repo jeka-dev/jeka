@@ -2,6 +2,7 @@ package dev.jeka.core.tool.builtins.tooling.docker;
 
 import dev.jeka.core.api.depmanagement.JkModuleId;
 import dev.jeka.core.api.depmanagement.JkVersion;
+import dev.jeka.core.api.tooling.docker.JkDockerJvmBuild;
 import dev.jeka.core.tool.KBeanTestLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,6 +23,21 @@ class DockerKBeanTest {
         DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
         assertEquals("reg/app:1.0", dockerKBean.resolveJvmImageName());
         assertEquals("native-app:1.0", dockerKBean.resolveNativeImageName());
+    }
+
+    @Test
+    void jvmDockerBuild_jvmBaseImageSet_isUsed(@TempDir Path tempDir) throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Files.write(baseDir.resolve("jeka.properties"), ("@project=on\n@project.pack.mainClass=app.Main\n"
+                + "@docker=on\n@docker.jvmBaseImage=eclipse-temurin:21-jre\n").getBytes());
+        Path srcDir = Files.createDirectories(baseDir.resolve("src/main/java/app"));
+        Files.writeString(srcDir.resolve("Main.java"),
+                "package app; public class Main { public static void main(String[] args) {} }");
+        DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
+
+        JkDockerJvmBuild dockerBuild = dockerKBean.jvmDockerBuild(dockerKBean.getRunbase().getBuildable());
+
+        assertEquals("eclipse-temurin:21-jre", dockerBuild.getBaseImage());
     }
 
     @Test
