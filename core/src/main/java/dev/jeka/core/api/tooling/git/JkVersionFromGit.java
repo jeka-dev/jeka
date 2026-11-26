@@ -93,9 +93,13 @@ public class JkVersionFromGit  {
         }
         JkGit git = JkGit.of(buildable.getBaseDir());
         String commit = git.isWorkspaceDirty() ?  "dirty-" + git.getCurrentCommit() : git.getCurrentCommit();
-        buildable.getManifestCustomizers().append(manifest -> manifest
-                .addMainAttribute("Git-commit", commit)
-                .addMainAttribute("Git-branch", git.getCurrentBranch()));
+        String branch = git.getCurrentBranch();  // null on detached HEAD
+        buildable.getManifestCustomizers().append(manifest -> {
+            manifest.addMainAttribute("Git-commit", commit);
+            if (branch != null) {
+                manifest.addMainAttribute("Git-branch", branch);
+            }
+        });
     }
 
     /**

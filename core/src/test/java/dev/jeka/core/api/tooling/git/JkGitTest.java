@@ -16,6 +16,8 @@
 
 package dev.jeka.core.api.tooling.git;
 
+import dev.jeka.core.api.java.JkManifest;
+import dev.jeka.core.api.project.JkProject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -61,6 +63,13 @@ class JkGitTest {
         // Dirty
         Files.write(file, "b".getBytes());
         assertEquals(version, JkVersionFromGit.of(dir, "").getVersion());
+
+        // No branch in manifest
+        JkProject project = JkProject.of().setBaseDir(dir);
+        JkVersionFromGit.of(dir, "").handleVersioning(project);
+        JkManifest manifest = project.packaging.getManifest();
+        assertNotNull(manifest.getMainAttribute("Git-commit"));
+        assertFalse(manifest.asString().contains("Git-branch"), manifest.asString());
     }
 
     @Test

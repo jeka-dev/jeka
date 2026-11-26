@@ -61,10 +61,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 - **To decide:** which character replaces `/`. Changes the versions of branch builds.
 - **Evidence:** reproduced with a local publication.
 
-### `Git-branch: null` in manifest on detached HEAD
-- **Where:** `JkVersionFromGit.handleVersioning`. Cosmetic.
-- **Evidence:** reproduced.
-
 ## Engine and command line
 
 ### `-cb=<child> <kbean>:` fails for a KBean existing only in that child
