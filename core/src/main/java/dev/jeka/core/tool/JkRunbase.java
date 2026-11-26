@@ -500,7 +500,7 @@ public final class JkRunbase {
     void run(KBeanAction.Container actionContainer, boolean master) {
 
         // Guard if '-cb=" is activated
-        String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
+        String childBaseFilter = childBaseFilter();
 
 
         List<KBeanAction.Container> splitContainers = actionContainer.splitByKBean();
@@ -517,17 +517,17 @@ public final class JkRunbase {
                 } else {
                     List<String> allRelPaths = childRunbases.stream()
                             .map(JkRunbase::toRelPathName)
+                            .map(JkRunbase::withSlashes)
                             .collect(Collectors.toList());
 
-                    // Some IDE tools attempt to build all Jeka modules, including those not declared
-                    // as children of the root module. We warn about this instead of throwing an
-                    // exception to maintain IDE compatibility
-                    if (!BehaviorSettings.INSTANCE.forceMode
-                            && !childBaseFilter.equals(".")
-                            && !allRelPaths.contains(childBaseFilter)) {
+                    // Otherwise, nothing would run, and the command would succeed
+                    if (!childBaseFilter.equals(".") && !allRelPaths.contains(childBaseFilter)) {
+                        if (!BehaviorSettings.INSTANCE.forceMode) {
+                            throw new JkException("No child base found at location %s. Declared child bases are %s. "
+                                    + "Use --force to only warn.", childBaseFilter, allRelPaths);
+                        }
                         JkLog.warn("No child base found at location %s. Declared child bases are %s",
                                 childBaseFilter, allRelPaths);
-
                     }
                 }
                 needSplit = splitContainers.size() > 1;
@@ -552,7 +552,7 @@ public final class JkRunbase {
     private void runUnit(KBeanAction.Container actionContainer, boolean master) {
 
         // Guard if '-cb=" is activated
-        String childBaseFilter = BehaviorSettings.INSTANCE.childBase;
+        String childBaseFilter = childBaseFilter();
 
         KBeanAction.Container runActions = actionContainer;
 
@@ -568,7 +568,7 @@ public final class JkRunbase {
             if (childBaseFilter != null) {
                 for (ListIterator<JkRunbase> it = childRunbases.listIterator(); it.hasNext(); ) {
                     JkRunbase childBase = it.next();
-                    String relPath = childBase.toRelPathName();
+                    String relPath = withSlashes(childBase.toRelPathName());
                     if (!childBaseFilter.equals(relPath)) {
                         JkLog.verbose("Child base filtered on %s, skip child base %s", childBaseFilter, relPath);
                         it.remove();
@@ -664,6 +664,26 @@ public final class JkRunbase {
     @Override
     public String toString() {
         return String.format("JkRunbase{ baseDir=%s, beans=%s }", relBaseDir(), beans.keySet());
+    }
+
+    /*
+     * The '-cb' value, with '/' separators: it is compared to relative paths whatever the OS, so that
+     * 'plugins/p1' and 'plugins\\p1' both work on Windows. Null if not set.
+     */
+    private static String childBaseFilter() {
+        String value = BehaviorSettings.INSTANCE.childBase;
+        if (value == null) {
+            return null;
+        }
+        String result = withSlashes(value.trim());
+        while (result.length() > 1 && result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
+    }
+
+    private static String withSlashes(String path) {
+        return path.replace('\\', '/');
     }
 
     public String toRelPathName() {
