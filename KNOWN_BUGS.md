@@ -42,11 +42,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Publication and Maven
 
-### Obscure error without Maven
-- **Symptom:** without `mvn` in the PATH nor `mvnw`, `maven:` commands fail with `Cannot run program "-N"` (or another argument).
-- **Where:** `JkMvn.mvnCmd` returns null.
-- **Evidence:** reproduced with `migrateDeps`.
-
 ### NPE message when a project has no module ID
 - **Symptom:** in a multi-module build with `parentBom=true`, a child declaring `@maven.pub.moduleId` but no `@project.moduleId` fails with `Cannot invoke "JkModuleId.toColonNotation()"...`, possibly after other modules were published.
 - **Evidence:** reproduced with `maven: info`.

@@ -100,7 +100,7 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
             if (exist("mvn.cmd")) {
                 return "mvn.cmd";
             }
-            return null;
+            throw mavenNotFound(workingDir);
         }
 
         // non windows
@@ -110,7 +110,12 @@ public final class JkMvn extends JkAbstractProcess<JkMvn> {
         if (exist("mvn")) {
             return "mvn";
         }
-        return null;
+        throw mavenNotFound(workingDir);
+    }
+
+    private static IllegalStateException mavenNotFound(Path workingDir) {
+        return new IllegalStateException(String.format("This command needs Maven: no 'mvn' found in the PATH, "
+                + "nor Maven wrapper in %s.", workingDir.toAbsolutePath().normalize()));
     }
 
     private static boolean exist(String mvnCmd) {
