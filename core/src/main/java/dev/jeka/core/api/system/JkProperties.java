@@ -202,11 +202,22 @@ public final class JkProperties {
      * See <a href="https://google.github.io/styleguide/shellguide.html#s7.3-constants-and-environment-variable-names">Environment variable conventions</a>
      */
     public String get(String propertyName) {
+        return get(propertyName, new LinkedHashSet<>());
+    }
+
+    // 'resolving' contains the properties being interpolated, to detect cycles
+    private String get(String propertyName, Set<String> resolving) {
         String rawValue = getRawValue(propertyName);
         if (rawValue == null) {
             return null;
         }
-        return interpolate(propertyName, rawValue);
+        if (!resolving.add(propertyName)) {
+            throw new IllegalArgumentException(String.format("Property '%s' references itself: %s.", propertyName,
+                    String.join(" -> ", resolving) + " -> " + propertyName));
+        }
+        String result = interpolate(propertyName, rawValue, resolving);
+        resolving.remove(propertyName);
+        return result;
     }
 
     /**
@@ -299,9 +310,9 @@ public final class JkProperties {
         return new JkProperties(SYS_PROPS_NAME, Collections.unmodifiableMap(props), null);
     }
 
-    private String interpolate(String propertyName, String string) {
+    private String interpolate(String propertyName, String string, Set<String> resolving) {
         return JkUtilsString.interpolate(string, token -> {
-            String value = get(token);
+            String value = get(token, resolving);
             if (value == null) {
                 throw new IllegalArgumentException(String.format(
                         "Property '%s' references '${%s}' which is not defined.", propertyName, token));
