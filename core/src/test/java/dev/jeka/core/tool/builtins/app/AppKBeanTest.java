@@ -19,11 +19,26 @@ class AppKBeanTest {
     }
 
     @Test
-    void updateAndUninstall_noNameWithClosedInput_failWithClearMessage(@TempDir Path tempDir) throws Exception {
+    void ask_withAnswer_returnsIt() {
+        withInput("y\n", () -> Assertions.assertEquals("y", AppKBean.ask("Add? [N,y]:")));
+    }
+
+    @Test
+    void updateAndUninstall_noNameAnsweredWithUnknownApp_doNothing(@TempDir Path tempDir) throws Exception {
         AppKBean appKBean = KBeanTestLoader.load(tempDir.toRealPath(), AppKBean.class);
         appKBean.name = null;
-        assertFailsWithoutTerminal(appKBean::update);
-        assertFailsWithoutTerminal(appKBean::uninstall);
+        withInput("no-such-app-for-jeka-test\n", () -> Assertions.assertDoesNotThrow(appKBean::update));
+        withInput("no-such-app-for-jeka-test\n", () -> Assertions.assertDoesNotThrow(appKBean::uninstall));
+    }
+
+    private static void withInput(String input, Runnable runnable) {
+        InputStream originalIn = System.in;
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+        try {
+            runnable.run();
+        } finally {
+            System.setIn(originalIn);
+        }
     }
 
     @Test

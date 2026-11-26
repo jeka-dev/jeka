@@ -1,6 +1,12 @@
 package dev.jeka.core.tool;
 
+import dev.jeka.core.api.file.JkPathSequence;
+import dev.jeka.core.api.system.JkProperties;
 import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,6 +53,36 @@ class PicocliHelpTest {
     }
 
     public static class AVeryLongNameForATargetedKBean extends KBean {
+    }
+
+    @Test
+    void printCmdHelp_defaultKBeanDocWithDollarBraces_displayedAsIs() {
+        KBeanResolution resolution = new KBeanResolution(List.of(DocVariablesKBean.class.getName()), List.of(),
+                DocVariablesKBean.class.getName(), true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        PicocliHelp.printCmdHelp(JkPathSequence.of(), resolution, JkProperties.EMPTY, new PrintStream(out, true));
+
+        String help = out.toString().replaceAll("\u001B\\[[;\\d]*m", "");
+        assertTrue(help.contains("Description  : Class doc with ${class.var}"), help);
+        assertTrue(help.contains("Standard KBeans"), help);
+    }
+
+    @Test
+    void kbeanHelp_preInit_listed() {
+        String help = PicocliHelp.kbeanHelp(JkBeanDescription.of(PreInitKBean.class, false))
+                .getUsageMessage(CommandLine.Help.Ansi.OFF)
+                .replaceAll("\u001B\\[[;\\d]*m", "");
+
+        assertTrue(help.contains("Pre-initialize (on activation)"), help);
+        assertTrue(help.contains("AVeryLongNameForATargetedKBean Undocumented."), help);
+    }
+
+    public static class PreInitKBean extends KBean {
+
+        @JkPreInit
+        private static void preInit(AVeryLongNameForATargetedKBean kbean) {
+        }
     }
 
 }

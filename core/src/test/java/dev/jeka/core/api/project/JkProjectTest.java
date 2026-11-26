@@ -7,6 +7,8 @@ import dev.jeka.core.api.depmanagement.publication.JkMavenPublication;
 import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkZipTree;
 import dev.jeka.core.api.java.JkJavaCompilerToolChain;
+import dev.jeka.core.api.file.JkPathTreeSet;
+import dev.jeka.core.api.java.JkJavaCompileSpec;
 import dev.jeka.core.api.java.JkJavaVersion;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -154,6 +156,36 @@ class JkProjectTest {
         assertNotNull(siblingDep, publishDeps.toString());
         assertEquals("1.0-sibling", siblingDep.getCoordinate().getVersion().getValue());
         assertEquals(JkTransitivity.COMPILE, siblingDep.getTransitivity());
+    }
+
+    @Test
+    void getPublishMavenDependencies_withSiblingWithoutModuleId_skipsIt() {
+        JkProject sibling = JkProject.of();
+        JkProject project = JkProject.of().setModuleId("org.example:project").setVersion("1.0");
+        project.compilation.dependencies
+                .add(sibling.toDependency())
+                .add("com.google.guava:guava:23.0");
+
+        JkDependencySet publishDeps = JkMavenPublication.of(project.asBuildable()).getDependencies();
+
+        assertEquals(1, publishDeps.getEntries().size(), publishDeps.toString());
+        assertNotNull(publishDeps.get("com.google.guava:guava"));
+    }
+
+    @Test
+    void buildableCompile_inProcess_compilesSources() throws Exception {
+        Path base = Files.createTempDirectory("jk-buildable-compile");
+        Path srcDir = Files.createDirectories(base.resolve("src"));
+        Files.writeString(srcDir.resolve("A.java"), "public class A {}");
+        Path classDir = base.resolve("classes");
+        JkProject project = JkProject.of().setBaseDir(base);
+        JkJavaCompileSpec spec = JkJavaCompileSpec.of()
+                .setSources(JkPathTreeSet.ofRoots(srcDir))
+                .setOutputDir(classDir);
+
+        Assertions.assertTrue(project.asBuildable().compile(spec));
+        Assertions.assertTrue(Files.exists(classDir.resolve("A.class")));
+        JkPathTree.of(base).deleteRoot();
     }
 
     @Test
