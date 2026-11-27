@@ -69,6 +69,14 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Workaround:** set `jeka.jdk.8` to an installed JDK.
 - **Evidence:** sample-maintainer agent, on vincer-dom.
 
+### `base: scaffold scaffold.kind=APP` writes a README with an empty title
+- **Symptom:** the generated `README.md` starts with a bare `#` line.
+- **Cause:** the template's first line is `#`, copied as is.
+- **Where:** `core/src/main/java/dev/jeka/core/tool/builtins/base/README.md:1`, copied by `JkBaseScaffold.generateReadme`.
+- **Workaround:** edit the title by hand.
+- **When fixed:** put a real title in the template, or fill in the directory name.
+- **Evidence:** naive agent and doc-writer agent, reproduced on 0.11.71 (2026-11-27); template read from source on master.
+
 
 ## Tests and CI
 
