@@ -27,6 +27,19 @@ This guide covers several use cases:
 
 ## Create Scripts
 
+!!! note "First runs need network access"
+    The first commands print download messages before their output. The very first `jeka` command downloads the Ivy
+    library used to resolve dependencies: lines such as `Ivy jar file not found at: ...`, `Trying to download ivy from ...`
+    and `Ivy downloaded successfully` are expected, not errors. `jeka base: scaffold` writes a `jeka.properties` that pins the versions to use:
+    `jeka.version` for JeKa, `jeka.java.version` for the JDK. Whether you run the global `jeka` or the project's `./jeka`
+    script, JeKa runs with the pinned versions, so the first run in the project (`jeka hello` below) may download that
+    JeKa distribution and the JDK (about 200 MB). They are cached in `~/.jeka/cache` for the next runs
+    (in `$JEKA_USER_HOME/cache` if you set the `JEKA_USER_HOME` environment variable to move the JeKa user directory).
+    See [Properties](reference/properties.md#standard-properties).
+
+    For the same reason, `jeka --version` prints the version used in the current directory: the pinned one inside a
+    project, the installed one elsewhere.
+
 Create a directory to host the codebase. Navigate into it and execute:
 ```bash
 jeka base: scaffold
@@ -72,13 +85,8 @@ This displays the following text on the console:
 ```
 Hello JeKa !
 ```
-
-!!! note "First run needs network access"
-    `jeka.properties` pins the versions to use: `jeka.version` for JeKa, `jeka.java.version` for the JDK.
-    Whether you run the global `jeka` or the project's `./jeka` script, JeKa runs with the pinned version, so the first
-    run may download that JeKa distribution, the JDK (about 200 MB) and the Ivy library used to resolve dependencies.
-    They are cached in `~/.jeka/cache` for the next runs (in `$JEKA_USER_HOME/cache` if you set the `JEKA_USER_HOME`
-    environment variable to move the JeKa user directory). See [Properties](reference/properties.md#standard-properties).
+`Script` extends `KBean`: JeKa calls such a class a *KBean*. Its public fields are parameters, set on the command line
+as `name=value`, and its public void methods are commands.
 
 ### Write Extra Methods
 You can add extra methods relying or not on third-party dependencies. Add the `header()` method, the two `@JkDep`
@@ -167,11 +175,10 @@ Remove the `jeka.kbean.default=script2` line before going on: the next examples 
 
 ### KBeans
 
-Every script should inherit from the `KBean` class. 
+Every script class extends `KBean`. KBeans can be provided as source code (in the `jeka-src` directory, as above)
+or as compiled classes available in the classpath.
 
-KBeans can either be provided as source code (located in the `jeka-src` directory) or as compiled classes available in the classpath.
-
-JeKa includes several standard KBeans, which you can list by running:
+JeKa includes several standard KBeans (such as `base`, used below), which you can list by running:
 ```bash
 jeka --doc
 ```
@@ -182,6 +189,8 @@ jeka.java.version=21
 ```
 On the next run, JeKa uses that JDK, and downloads it first if it is not installed yet.
 To check which JDK is in use, run `jeka --inspect` and look at `Java Version`.
+This setting only applies to this directory: the next section starts in a new directory, from a new scaffold with its
+own `jeka.properties`, so you don't need to change it back.
 
 ### Source-Runnable Applications
 
@@ -224,7 +233,7 @@ jeka base: depTree   # Show dependency tree
 
 JeKa's *base* mode is the simplest way to build pure Java applications or libraries. It avoids the complexity of traditional Maven/Gradle structures while supporting full-featured builds, testing, native compilation, and Docker packaging.
 
-To create a new code structure, run the following command:
+To create a new code structure, run the following command in a new, empty directory (for example `myapp`):
 ```bash
 jeka base: scaffold scaffold.kind=APP
 ```

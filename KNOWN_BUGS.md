@@ -61,6 +61,12 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Engine and command line
 
+### `jeka --doc`: the last line breaks inside a colour code
+- **Symptom:** the footer `Execute jeka <kbean>: --doc (as jeka docker: --doc) to get details on specific KBean.` is split over two lines, after the italic `jeka docker: --doc` and before its reset code, so the second line starts with `[m)`.
+- **Cause:** probably picocli wrapping the footer at the usage width, counting the ANSI codes as characters. Not checked.
+- **Where:** `PicocliHelp`, footer built at line 188.
+- **Evidence:** naive agent, on 0.11.71 (2026-11-27), output not on a terminal; footer code read from source on master.
+
 ## KBeans
 
 ### `intellij: iml` aborts when the JDK of the target version can't be downloaded
@@ -76,6 +82,12 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Workaround:** edit the title by hand.
 - **When fixed:** put a real title in the template, or fill in the directory name.
 - **Evidence:** naive agent and doc-writer agent, reproduced on 0.11.71 (2026-11-27); template read from source on master.
+
+### Scaffolded `.gitignore` and `App.java` have no final newline
+- **Symptom:** after `base: scaffold scaffold.kind=APP`, the last line of `.gitignore` (`/.jeka-work`) and of `jeka-src/app/App.java` has no newline: `git diff` shows `\ No newline at end of file`, and a line appended to `.gitignore` joins the last one.
+- **Cause:** `JkScaffold` appends each ignore line as `"\n" + line`, and `App.snippet` ends with `}` and no newline.
+- **Where:** `JkScaffold.java:404` and `:407`; `core/src/main/java/dev/jeka/core/tool/builtins/base/App.snippet`.
+- **Evidence:** naive agent, on 0.11.71 (2026-11-27); both read from source on master.
 
 
 ## Tests and CI
