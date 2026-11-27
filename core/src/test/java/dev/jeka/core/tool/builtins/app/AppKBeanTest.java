@@ -39,6 +39,15 @@ class AppKBeanTest {
         Assertions.assertDoesNotThrow(appKBean::uninstall);
     }
 
+    @Test
+    void install_repoWithFragment_failsSuggestingTag(@TempDir Path tempDir) throws Exception {
+        AppKBean appKBean = KBeanTestLoader.load(tempDir.toRealPath(), AppKBean.class);
+        appKBean.repo = "https://github.com/jeka-dev/demo-cowsay#0.0.9";
+        JkException e = Assertions.assertThrows(JkException.class, appKBean::install);
+        Assertions.assertTrue(e.getMessage().contains(
+                "jeka app: install repo=https://github.com/jeka-dev/demo-cowsay tag=0.0.9"), e.getMessage());
+    }
+
     private static void assertUnknownApp(Executable executable) {
         JkException e = Assertions.assertThrows(JkException.class, executable);
         Assertions.assertTrue(e.getMessage().contains("No app named 'no-such-app-for-jeka-test'"), e.getMessage());
