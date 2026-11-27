@@ -53,6 +53,19 @@ class DockerKBeanTest {
     }
 
     @Test
+    void buildableClassDir_baseWithJekaSrcClasses_copied(@TempDir Path tempDir) throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Files.write(baseDir.resolve("jeka.properties"), "@base=on\n".getBytes());
+        Path classFile = baseDir.resolve(".jeka-work/jeka-src-classes/app/App.class");
+        Files.createDirectories(classFile.getParent());
+        Files.write(classFile, new byte[0]);
+        DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
+
+        Path classDir = dockerKBean.getRunbase().getBuildable().getClassDir();
+        assertTrue(Files.exists(classDir.resolve("app/App.class")));
+    }
+
+    @Test
     void resolvePlaceHolder_ok() {
         JkModuleId moduleId = JkModuleId.of("my.group", "app");
         JkVersion version = JkVersion.of("1.0");
