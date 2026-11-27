@@ -131,14 +131,17 @@ record TriageResult(
 // =============================================================================
 
 /**
- * Calls the Anthropic Claude API to classify a GitHub issue and
- * generate a first response. Uses only java.net.http — no extra deps.
+ * Calls the Anthropic Claude API to classify a GitHub issue.
+ * Uses only java.net.http — no extra deps.
  */
 class ClaudeTriageClient {
 
     private static final String API_URL     = "https://api.anthropic.com/v1/messages";
-    private static final String MODEL       = "claude-sonnet-4-20250514";
+    private static final String MODEL       = "claude-sonnet-5-5";
     private static final String API_VERSION = "2023-06-01";
+
+    // If the model declines a request, the API retries it on a fallback model chosen by the server.
+    private static final String FALLBACK_BETA = "server-side-fallback-2026-07-01";
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -173,7 +176,9 @@ class ClaudeTriageClient {
         String requestBody = """
                 {
                   "model": "%s",
-                  "max_tokens": 1000,
+                  "max_tokens": 4000,
+                  "output_config": { "effort": "low" },
+                  "fallbacks": "default",
                   "messages": [
                     { "role": "user", "content": %s }
                   ]
@@ -185,6 +190,7 @@ class ClaudeTriageClient {
                 .timeout(Duration.ofSeconds(30))
                 .header("x-api-key",         apiKey)
                 .header("anthropic-version", API_VERSION)
+                .header("anthropic-beta",    FALLBACK_BETA)
                 .header("content-type",      "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
@@ -201,18 +207,20 @@ class ClaudeTriageClient {
 
             return extractText(response.body());
 
-        } catch (IOException | InterruptedException e) {
-            Thread.currentThread().interrupt();
+        } catch (IOException e) {
             throw new RuntimeException("Failed to call Claude API", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while calling Claude API", e);
         }
     }
 
     // ── JSON helpers (stdlib only) ────────────────────────────────────────────
 
-    /** Extract the text field from Anthropic's response envelope. */
+    /** Extract the text field from Anthropic's response envelope (thinking blocks have no "text" field). */
     private static String extractText(String json) {
         int start = json.indexOf("\"text\":");
-        if (start == -1) throw new RuntimeException("Unexpected Claude response: " + json);
+        if (start == -1) throw new RuntimeException("No text in Claude response (refusal or max_tokens?): " + json);
         int quoteStart = json.indexOf('"', start + 7) + 1;
         int quoteEnd   = findClosingQuote(json, quoteStart);
         return unescapeJson(json.substring(quoteStart, quoteEnd));
@@ -274,8 +282,7 @@ class ClaudeTriageClient {
 // =============================================================================
 
 /**
- * Minimal GitHub REST API v3 client.
- * Supports posting issue comments and adding labels.
+ * Minimal GitHub REST API v3 client, to add labels to issues.
  * Uses only java.net.http — no extra dependencies.
  */
 class GitHubClient {
@@ -319,19 +326,12 @@ class GitHubClient {
                 throw new RuntimeException("GitHub API error %d for %s: %s"
                         .formatted(response.statusCode(), url, response.body()));
 
-        } catch (IOException | InterruptedException e) {
-            Thread.currentThread().interrupt();
+        } catch (IOException e) {
             throw new RuntimeException("Failed to call GitHub API: " + url, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while calling GitHub API: " + url, e);
         }
-    }
-
-    private static String jsonString(String s) {
-        return "\"" + s.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t")
-                + "\"";
     }
 
     private static String requireEnv(String key) {
