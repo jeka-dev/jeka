@@ -77,7 +77,8 @@ Hello JeKa !
     `jeka.properties` pins the versions to use: `jeka.version` for JeKa, `jeka.java.version` for the JDK.
     Whether you run the global `jeka` or the project's `./jeka` script, JeKa runs with the pinned version, so the first
     run may download that JeKa distribution, the JDK (about 200 MB) and the Ivy library used to resolve dependencies.
-    They are cached in `~/.jeka/cache` for the next runs. See [Properties](reference/properties.md#standard-properties).
+    They are cached in `~/.jeka/cache` for the next runs (in `$JEKA_USER_HOME/cache` if you set the `JEKA_USER_HOME`
+    environment variable to move the JeKa user directory). See [Properties](reference/properties.md#standard-properties).
 
 ### Write Extra Methods
 You can add extra methods relying or not on third-party dependencies. Add the `header()` method, the two `@JkDep`
@@ -162,6 +163,8 @@ Then `jeka hi` runs `Script2`, and the methods of `Script` need their prefix: `j
 Without it, `jeka hello` fails with `Unmatched argument at index 0: 'hello'`.
 See [Default KBean](reference/kbeans.md#default-kbean).
 
+Remove the `jeka.kbean.default=script2` line before going on: the next examples call `hello` without a prefix.
+
 ### KBeans
 
 Every script should inherit from the `KBean` class. 
@@ -182,10 +185,12 @@ To check which JDK is in use, run `jeka --inspect` and look at `Java Version`.
 
 ### Source-Runnable Applications
 
-Run `hello` from another directory:
+Run `hello` from another directory, by passing the directory that holds `jeka-src` and `jeka.properties`
+(an absolute or relative path):
 ```bash
 jeka -r /path/to/script/root-dir hello
 ```
+If that directory sets another default KBean, add the prefix: `jeka -r /path/to/script/root-dir script: hello`.
 
 Run a KBean method from a remote Git repository:
 ```bash
@@ -251,13 +256,18 @@ library that `App.java` declares with `@JkDep`.
 
 The JAR is compiled for the JDK set in `jeka.java.version` (25 in the scaffold). `runJar` uses that JDK; to run the
 JAR yourself with `java -jar jeka-output/<directory-name>.jar`, use that JDK or a newer one, or lower
-`jeka.java.version` (see [Change Java Version](#change-java-version)). Otherwise `java` fails with
-`UnsupportedClassVersionError`.
+`jeka.java.version` and run `jeka base: pack` again (see [Change Java Version](#change-java-version)): the JAR
+already built stays compiled for the former version. Otherwise `java` fails with `UnsupportedClassVersionError`.
+
 JeKa may have downloaded that JDK itself: `jeka --inspect` shows where it is, on the `Java Home` line.
 Run its `bin/java` directly:
 ```bash
 jeka --inspect | grep 'Java Home'    # e.g. Java Home          : /Users/me/.jeka/cache/jdks/temurin-25
 /Users/me/.jeka/cache/jdks/temurin-25/bin/java -jar jeka-output/<directory-name>.jar
+```
+Or in one line, without copying the path:
+```bash
+"$(jeka --inspect | grep 'Java Home' | sed 's/.*: //')/bin/java" -jar jeka-output/<directory-name>.jar
 ```
 
 The generated `jeka.properties` sets `jeka.kbean.default=base`, so you can leave out `base:` in this project:
