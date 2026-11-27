@@ -15,7 +15,11 @@ by following the docs, and to report honestly where the docs let you down. The g
   - plugin `README.md` files in `plugins/plugins.*/` (that is where plugin docs live),
   - what the `jeka` CLI itself tells you (`jeka --help`, `jeka <kbean>: --doc`, error messages, logs).
 - **Do NOT read** Java sources, tests, `jeka-src/`, `samples/`, `CLAUDE.md`, or any other repo file to work out how
-  something works. A real newcomer can't do that, and doing it hides exactly the gaps you are here to find.
+  something works. The one exception is `.claude/RULES.md`: read it first, unless its content is already in your
+  instructions. It says how to work safely, not how JeKa works.
+- You are normally run outside the repo by `.claude/skills/doc-cycle/run-naive.sh`, with only the docs. If you are run
+  as a sub-agent inside the repo instead, the repo's `CLAUDE.md` is in your context: don't use it, and say in the report
+  that the run was not isolated. A real newcomer can't do that, and doing it hides exactly the gaps you are here to find.
 - Don't use prior knowledge of JeKa. If the docs don't say it, you don't know it.
 - When you are stuck, try what a reasonable Java developer would try (guess from Maven/Gradle habits, read the error,
   try `--doc` / `--help`, search the docs). Record each guess. Give up on a step after a few honest attempts,
@@ -34,20 +38,11 @@ Use `mkdocs.yml` `nav` only to find pages, like a reader using the site menu. Ig
 ## Environment
 
 - Use the locally built JeKa if it exists: `export PATH="<repo-root>/core/jeka-output/distrib/bin:$PATH"`.
-  If it does not exist, follow `installation.md` only if the caller allows installing; otherwise stop and say so.
-  Never modify the user's shell profile or global install without explicit permission.
-- Do all work in a **fresh scratch directory outside the repo**, e.g. `/tmp/jeka-naive/<scenario>/`.
-  Never create or change files inside the repo, except your report if asked to save it.
-- **Deletions:** only delete, inside your scratch directory, what your own commands created, with literal absolute paths: no variable,
-  relative path, or path after a `cd`. Anywhere else, report it and ask. If a command is denied, don't rewrite it to get around the denial.
-- **User's files:** never write in or delete from `~/.m2`, `~/.jeka` or another place of the user's home. Never run `maven: publishLocalM2`.
-  To check a publication, use `maven: publishLocal` with an isolated `JEKA_USER_HOME`.
-- **Disk:** run `df -h` before starting and before any large step (JDK, native build, Docker image). Stop and report below 5 GB free.
-  Avoid downloading JDKs: in `$JEKA_USER_HOME/global.properties`, set `jeka.jdk.21`, `jeka.jdk.25`... to JDKs already installed
-  (e.g. in `~/.jeka/cache/jdks`, read only).
-- Never set a trust for a Git URL, nor answer a trust prompt, unless the user allowed that URL.
-- Network access may be needed for dependency resolution. If something fails because of the network, say so
-  instead of blaming the docs.
+  If it does not exist, follow `installation.md` only if the caller allows installing, with the isolated home of
+  `.claude/RULES.md`; otherwise stop and say so.
+- Do each scenario in its own directory, `<scratch>/<scenario>/`. Never create or change files inside the repo.
+- A step the docs make you do may conflict with `.claude/RULES.md` (e.g. installing in your home, `publishLocalM2`):
+  follow the rules, and report the step as not run.
 
 ## What to do
 
@@ -56,7 +51,8 @@ If given nothing, run the default scenarios below, one at a time.
 
 For each scenario:
 1. Start from where a newcomer would start (the site's home page / nav), find the relevant page, and follow it.
-2. Copy commands and code **exactly as written** first. Only adapt them when the doc tells you to.
+2. Read each page you follow **to its end** before reporting something as missing from it.
+   Copy commands and code **exactly as written** first. Only adapt them when the doc tells you to.
 3. After each step, check that what happened matches what the doc said would happen.
 4. Keep a log of every friction point as you go.
 
@@ -105,6 +101,11 @@ Outcome: completed | completed with workarounds | blocked at step N
 
 ## Path taken
 Short list of pages visited in order, and where you looked but didn't find what you needed.
+
+## To hand over
+(Findings that are not doc problems, e.g. a JeKa bug: see `.claude/RULES.md`.)
+
+KNOWN_BUGS.md: ...
 ```
 
 Keep outputs and logs trimmed to the relevant lines. Be specific and concrete: the report will be handed to

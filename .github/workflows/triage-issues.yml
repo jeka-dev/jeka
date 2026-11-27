@@ -2,13 +2,14 @@
 #
 # Triggered on every new GitHub issue opened on jeka-dev/jeka.
 # Builds and runs the Java triage agent (via JeKa itself!),
-# which classifies the issue, adds labels, and posts a first response.
+# which classifies the issue and adds a label.
+# Only on 'opened': re-running on edits would add a second label, or undo a label fixed by hand.
 
 name: AI Issue Triage
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 jobs:
   triage:
