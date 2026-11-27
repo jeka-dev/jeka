@@ -63,7 +63,7 @@ class Script extends KBean {
     }
 }
 ```
-#### Run methods
+### Run methods
 You can run the method `hello()` and change the parameter, by executing:
 ```bash
 jeka hello name="JeKa"
@@ -79,7 +79,7 @@ Hello JeKa !
     run may download that JeKa distribution, the JDK (about 200 MB) and the Ivy library used to resolve dependencies.
     They are cached in `~/.jeka/cache` for the next runs. See [Properties](reference/properties.md#standard-properties).
 
-#### Write Extra Methods
+### Write Extra Methods
 You can add extra methods relying or not on third-party dependencies. Add the `header()` method, the two `@JkDep`
 annotations and the new imports to `jeka-src/Script.java`, keeping `hello()`. The whole file becomes:
 ```java title="jeka-src/Script.java"
@@ -133,7 +133,7 @@ On the first run, JeKa shows `Resolving dependencies...` while it downloads the 
     - You can create multiple script classes. To run a specific script, use the class name, e.g., `jeka script2: hi`.
     - You can also [use classes provided by JeKa](reference/api-intro.md) without explicitly declaring them.
 
-#### KBeans
+### KBeans
 
 Every script should inherit from the `KBean` class. 
 
@@ -143,14 +143,15 @@ JeKa includes several standard KBeans, which you can list by running:
 ```bash
 jeka --doc
 ```
-#### Change Java Version
-To change version of Java, edit `jeka.properties`:
-```properties
-jeka.java.version=23
+### Change Java Version
+The scaffold pins a recent JDK in `jeka.properties` (e.g. `jeka.java.version=25`). To use another version, change the value:
+```properties title="jeka.properties"
+jeka.java.version=21
 ```
-This will automatically download Java 23 (if not already installed) on the next method run.
+On the next run, JeKa uses that JDK, and downloads it first if it is not installed yet.
+To check which JDK is in use, run `jeka --inspect` and look at `Java Version`.
 
-#### Source-Runnable Applications
+### Source-Runnable Applications
 
 Run `hello` from another directory:
 ```bash
@@ -161,11 +162,17 @@ Run a KBean method from a remote Git repository:
 ```bash
 jeka -r https://github.com/jeka-dev/demo-base-application base: info
 ```
+JeKa clones the repository, then `base: info` shows its build info: module id, main class, classpath, manifest...
+
+!!! note "Trusted repositories"
+    Repositories under `github.com/jeka-dev/` are trusted by default. For any other URL, JeKa asks you to confirm
+    that you trust it before cloning, and fails without a terminal (CI, scripts).
+    See [Trust and Security](tutorials/source-runnable-apps.md#trust-and-security).
 
 JeKa acts as an application source manager, allowing you to run or install applications directly from their source code.
 For more details, see the [Source-Runnable Applications tutorial](tutorials/source-runnable-apps.md).
 
-#### Common Options & Commands
+### Common Options & Commands
 
 ```bash
 jeka --help          # Displays help message
@@ -174,7 +181,7 @@ jeka --inspect       # Displays details about JeKa setup and properties
 jeka base: depTree   # Show dependency tree
 ```
 
-#### Resources
+### Resources
 - [Basics Tutorial](tutorials/basics.md)
 - [Write Scripts in Java Video](https://youtu.be/r-PUX6amBrw)
 
@@ -211,6 +218,11 @@ jeka base: runJar    # Runs the JAR
 ```
 `test` ends with `ALL TESTS PASSED`, and `runJar` prints a "Hello JeKa" ASCII-art banner, made by the JFiglet
 library that `App.java` declares with `@JkDep`.
+
+The generated `jeka.properties` sets `jeka.kbean.default=base`, so you can leave out `base:` in this project:
+`jeka test pack runJar` does the same as the three commands above.
+The generated `README.md` lists more commands, such as `jeka -p` to run the built JAR without checking whether the
+sources changed, and `jeka docker: build` to create a Docker image.
 
 Follow the [tutorial](tutorials/build-base.md) for more details.
 
@@ -277,7 +289,7 @@ This generates the following project structure:
 ```
 This contains a minimal workable project with production and test code. 
 
-#### Modify Layout
+### Modify Layout
 You can choose a simpler code layout structure when scaffolding:
 ```bash
 jeka -cp=dev.jeka:springboot-plugin project: scaffold layout.style=SIMPLE layout.mixSourcesAndResources=true springboot:
@@ -290,7 +302,7 @@ You'll end up with the following code layout:
 ```
 To convert an existing project, see [Simple Layout](tutorials/build-projects.md#simple-layout).
 
-#### Modify Dependencies
+### Modify Dependencies
 The dependencies are generated with the latest Spring Boot version:
 ```ini title="jeka.project.deps"
 [version]
@@ -304,7 +316,7 @@ org.springframework.boot:spring-boot-starter-webmvc-test
 ```
 You can start from here for modifying, adding code, tests and dependencies.
 
-#### Execute Commands
+### Execute Commands
 
 These are the most useful commands for developing Spring Boot applications.
 
@@ -319,7 +331,7 @@ jeka docker: build       # Creates Docker image containing the Spring Boot appli
 jeka docker: buildNative # Creates Docker image for the native-compiled application
 ```
 
-#### Customize Docker File
+### Customize Docker File
 
 To reduce a Docker native image size, use a distroless base image. The native executable must be statically linked as libc is unavailable in such distributions. Configure it as follows:
 ```properties title="jeka.properties"
@@ -327,7 +339,7 @@ To reduce a Docker native image size, use a distroless base image. The native ex
 @docker.nativeBaseImage=gcr.io/distroless/static-debian12:nonroot
 ```
 
-#### What Next?
+### What Next?
 
 Explore more advanced topics and real-world examples:
 
