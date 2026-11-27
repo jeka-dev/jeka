@@ -36,4 +36,10 @@ class JkUtilsJdkTest {
         JkUtilsJdk.getJdk("graalvm", "22");
         Assertions.assertTrue(Files.exists(path.resolve("bin")));
     }
+
+    @Test
+    void jdkDownloadUrlUnix_latestAvailable() {
+        String url = JkUtilsJdk.jdkDownloadUrlUnix("temurin", "libc", "8", "mac", "x64");
+        Assertions.assertTrue(url.endsWith("&architecture=x64&latest=available"), url);
+    }
 }

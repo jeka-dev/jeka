@@ -9,12 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Build and packaging
 
-### Java 8 target compiled to the running JDK's bytecode when the JDK download fails
-- **Symptom:** with `@project.javaVersion=8`, classes get the class version of the running JDK (69 on Java 25), with only a warning. A published jar would not load on Java 8. Seen in vincer-dom.
-- **Cause:** the JDK download URL for Java 8 is broken: `JkUtilsJdk.jdkDownloadUrlUnix` ends it with `&latest=available=available`, which foojay answers with 404 (the shell script uses `&latest=available`, which works). Then `JkJavaCompilerToolChain.guess` compiles in-process without `--release <target>`.
-- **Where:** `JkUtilsJdk.jdkDownloadUrlUnix`, `JkJavaCompilerToolChain.guess`.
-- **Evidence:** sample-maintainer agent; the URL suffix from source.
-
 ### Kotlin 2.1.21 and later fail to compile
 - **Symptom:** `NoClassDefFoundError: org/jetbrains/annotations/NotNull` with `kotlin-compiler:2.1.21` and later, on 0.11.69 and 0.11.70. 2.1.0 works.
 - **Cause:** the compiler classpath misses `org.jetbrains:annotations`. Likely the `*:*` exclusion on `kotlin-reflect` applied beyond its own dependencies. Not proven.

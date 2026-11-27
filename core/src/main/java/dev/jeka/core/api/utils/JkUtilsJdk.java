@@ -125,7 +125,8 @@ public final class JkUtilsJdk {
      * @param os macos,...
      * @return
      */
-    private static String jdkDownloadUrlUnix(String distrib, String libcType, String version,
+    // Visible for testing
+    static String jdkDownloadUrlUnix(String distrib, String libcType, String version,
                                              String os, String architecture) {
         String urlTemplate =
                 "https://api.foojay.io/disco/v3.0/directuris?distro=" + distrib +
@@ -134,7 +135,7 @@ public final class JkUtilsJdk {
                 "&operating_system=" + os +
                 "&package_type=jdk&version=" + version +
                 "&architecture=" + architecture +
-                "&latest=available=available";
+                "&latest=available";
         return String.format(urlTemplate, distrib, version);
     }
 

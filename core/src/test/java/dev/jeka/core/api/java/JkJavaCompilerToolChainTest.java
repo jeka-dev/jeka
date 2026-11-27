@@ -31,6 +31,25 @@ class JkJavaCompilerToolChainTest {
         assertTrue(forkedJavacArgs("17").contains("--add-exports"));  // still there for JDKs knowing modules
     }
 
+    @Test
+    void compile_jdkDownloadFails_embeddedCompilerTargetsRequestedVersion() throws IOException {
+        Path dir = Files.createTempDirectory("jk-jdk-fallback");
+        Path srcDir = Files.createDirectories(dir.resolve("src"));
+        Files.writeString(srcDir.resolve("A.java"), "class A {}");
+        JkJavaCompileSpec compileSpec = JkJavaCompileSpec.of()
+                .setSources(JkPathTree.of(srcDir).toSet())
+                .setOutputDir(dir.resolve("classes"));
+
+        JkJavaCompilerToolChain.Status status = JkJavaCompilerToolChain.of()
+                .setJavaDistrib("jeka-test-unknown-distrib")  // the JDK download fails
+                .compile(JkJavaVersion.of("11"), compileSpec);
+
+        assertEquals(JkJavaCompilerToolChain.Status.SUCCESS, status);
+        byte[] classBytes = Files.readAllBytes(dir.resolve("classes/A.class"));
+        assertEquals(55, ((classBytes[6] & 0xff) << 8) | (classBytes[7] & 0xff));  // Java 11
+        JkPathTree.of(dir).deleteRoot();
+    }
+
     // Returns the arguments passed to a fake javac of the specified version
     private static String forkedJavacArgs(String jdkVersion) throws IOException {
         Path dir = Files.createTempDirectory("jk-fake-jdk");
