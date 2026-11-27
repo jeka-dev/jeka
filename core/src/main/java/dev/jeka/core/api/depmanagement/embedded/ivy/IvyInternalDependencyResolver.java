@@ -224,8 +224,13 @@ final class IvyInternalDependencyResolver implements JkInternalDependencyResolve
 
         IvyTreeResolver(Iterable<IvyNode> nodes, IvyArtifactContainer artifactContainer) {
 
+            // A parent keeps the first node met for a module. Evicted nodes come last, so that the winning
+            // version, and its files, are kept when an evicted version is met first.
+            final List<IvyNode> sortedNodes = new LinkedList<>();
+            nodes.forEach(sortedNodes::add);
+            sortedNodes.sort(Comparator.comparing(IvyNode::isCompletelyEvicted));
 
-            for (final IvyNode node : nodes) {
+            for (final IvyNode node : sortedNodes) {
                 if (node.isCompletelyBlacklisted()) {
                     continue;
                 }

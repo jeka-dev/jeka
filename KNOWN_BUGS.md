@@ -9,12 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Build and packaging
 
-### Kotlin 2.1.21 and later fail to compile
-- **Symptom:** `NoClassDefFoundError: org/jetbrains/annotations/NotNull` with `kotlin-compiler:2.1.21` and later, on 0.11.69 and 0.11.70. 2.1.0 works.
-- **Cause:** the compiler classpath misses `org.jetbrains:annotations`. Likely the `*:*` exclusion on `kotlin-reflect` applied beyond its own dependencies. Not proven.
-- **Where:** Kotlin plugin.
-- **Evidence:** sample-maintainer agent, on working-examples/springboot-kotlin-reactjs.
-
 - **nodejs plugin:** the default `testCmd` fails on a fresh clone: JS tests run before the dependency install. *sample-maintainer agent.*
 - **Docker image name doubled** when the module ID has no group: `demo-build-conventions-consumer-demo-build-conventions-consumer`. *sample-maintainer agent.*
 
