@@ -18,7 +18,6 @@ package _dev.test;
 
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.tooling.docker.JkDocker;
-import dev.jeka.core.api.utils.JkUtilsSystem;
 
 import dev.jeka.core.tool.JkDep;
 import org.junit.jupiter.api.BeforeAll;
@@ -92,11 +91,6 @@ class SamplesTest {
 
     @Test
     void protobuf_ok() {
-
-        // Protobuf seems failed on last macos ship
-        if (JkUtilsSystem.IS_MACOS && JkUtilsSystem.getProcessor().isAarch64()) {
-            return;
-        }
         Path protobufPluginJar = fromPlugins("plugins.protobuf/jeka-output/dev.jeka.protobuf-plugin.jar");
         run("samples.protobuf", "-ivc project: test pack -cp=" + protobufPluginJar);
     }
