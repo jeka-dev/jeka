@@ -268,12 +268,13 @@ public final class JkVersionProvider {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JkVersionProvider that = (JkVersionProvider) o;
-        return map.equals(that.map);
+        // BOMs are compared as lists, as the first one wins over the next ones
+        return map.equals(that.map) && new ArrayList<>(boms).equals(new ArrayList<>(that.boms));
     }
 
     @Override
     public int hashCode() {
-        return map.hashCode();
+        return 31 * map.hashCode() + new ArrayList<>(boms).hashCode();
     }
 
     /**
