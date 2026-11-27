@@ -180,8 +180,6 @@ Remove the `jeka.kbean.default=script2` line before going on: the next examples 
 
 ### KBeans
 
-### KBeans
-
 Every script class extends `KBean`. KBeans can be provided as source code (in the `jeka-src` directory, as above)
 or as compiled classes available in the classpath.
 
