@@ -64,6 +64,14 @@ Bugs found and fixed within the same task don't go in. If you may not modify thi
 put the update in your report instead. End your report with one line: `KNOWN_BUGS.md: <what changed>` or
 `KNOWN_BUGS.md: no change`.
 
+## Agents and Skills
+
+- `.claude/agents/`: `doc-writer`, `naive` (tests the docs as a newcomer), `known-bug-fixer`, `sample-maintainer`.
+- `.claude/RULES.md`: rules common to all agents (workspace, isolated JeKa home, autonomy, merging, end of report).
+- `.claude/skills/`: `/doc-cycle` (naive → doc-writer → naive) and `/sample-cycle`
+  (sample-maintainer → `KNOWN_BUGS.md` → known-bug-fixer) chain the agents. Agents can't launch each other: the session
+  running the skill passes each one what the previous one found.
+
 ## Repository Structure
 
 ```

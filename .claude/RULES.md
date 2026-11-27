@@ -73,6 +73,9 @@ What each agent may do with its changes, unless the caller explicitly asks for m
 | `known-bug-fixer` | JeKa code, tests, docs, `KNOWN_BUGS.md`, in its clone | yes | yes | yes, its own PRs |
 | `sample-maintainer` | the sample repositories, in its clones | yes | yes | yes, its own PRs |
 
+The skills that chain agents (`.claude/skills/`) keep these rights for each agent. Besides, `/sample-cycle` records the bugs
+found in `KNOWN_BUGS.md` with a PR it merges, and `/doc-cycle` adds them to `KNOWN_BUGS.md` in the checkout, uncommitted.
+
 The caller may ask for less (e.g. "don't merge") or more, for one run. Never tag, publish, create a release, or change
 repository settings.
 
