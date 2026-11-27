@@ -49,7 +49,7 @@ done >> "$JEKA_USER_HOME/global.properties"
 ## Deletions
 
 Only delete, inside `<scratch>`, what your own commands created, with literal absolute paths: no variable, relative path,
-or path after a `cd`. Anywhere else, report it and ask. If a command is denied, don't rewrite it to get around the denial.
+or path after a `cd`. Anywhere else, report it and ask, except your own Docker images (see "Resources"). If a command is denied, don't rewrite it to get around the denial.
 
 Before reporting, delete your clones and the isolated home, unless the caller may need them (an open branch or PR, a
 failure to investigate): then list their paths.
@@ -58,8 +58,16 @@ failure to investigate): then list their paths.
 
 - **Disk:** run `df -h` before starting and before any large step (JDK, native build, Docker image). Stop and report below
   5 GB free.
-- **Docker:** check `docker info` first. Run `docker images` before a command that builds an image: if it would replace an
-  image the user has, change the tag or don't run it. List the images you create, and don't delete any.
+- **Docker:** check `docker info` first. Images built by earlier runs piled up by the hundreds, so:
+  - **Name** every image you build `jk-agent-<agent>-<what>`, e.g. `jk-agent-sample-maintainer-cowsay-native`. When JeKa
+    derives the name, pass it: `docker: build jvmImageName=<name>`, `docker: buildNative nativeImageName=<name>`. A command
+    that can't take a name: run `docker images` before; if it would replace an image the user has, don't run it.
+  - **Run** containers with `--rm`, and stop those you started in the background.
+  - **Remove** your images before reporting: `docker rmi` each name you built, then check that
+    `docker images --format '{{.Repository}}:{{.Tag}}' | grep '^jk-agent-<agent>-'` gives nothing. Keep only those the caller
+    needs (a failure to investigate), and list them. This is the only deletion allowed outside `<scratch>`.
+  - Never delete another image, container or the build cache, even unnamed (`<none>`): report it instead.
+  - JeKa's own tests name their images `jk-test-...` and remove them: don't touch those of a test still running.
 - **Long-running processes** (servers, GUIs): start them in the background with a timeout, check them, then stop only the
   processes you started.
 - **Network:** a failure caused by the network, a service down or missing credentials is reported as such, not as a bug.
