@@ -74,8 +74,15 @@ public final class JkRunbase {
 
     private JkDependencySet fullDependencies;
 
-    // Contains the runbase children
+    // Contains the runbase children. Created on first use, by the parent runbase only: see runbaseGraph()
     private RunbaseGraph runbaseGraph;
+
+    // Default KBean class used to create the runbase graph of the parent runbase. Set at init time.
+    private Class<? extends KBean> graphDefaultKBeanClass;
+
+    private boolean graphOwner;
+
+    private boolean creatingGraph;
 
     // Note: An empty container has to be present at instantiation time for sub-runBases, as
     // they are not initialized with any KbeanActions.
@@ -222,7 +229,7 @@ public final class JkRunbase {
      */
     public List<JkRunbase> getInjectedRunbases() {
         Path masterRelativePath = this.relBaseDir();
-        return MASTER.runbaseGraph.getInjectedRunbases(masterRelativePath.toString());
+        return MASTER.runbaseGraph().getInjectedRunbases(masterRelativePath.toString());
     }
 
     /**
@@ -235,7 +242,7 @@ public final class JkRunbase {
     public List<JkRunbase> getChildRunbases() {
         JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
                 "loadChildren() can only be called on the parent runbase.");
-        List<JkRunbase> result = runbaseGraph.getChildren();
+        List<JkRunbase> result = runbaseGraph().getChildren();
         JkLog.debug("Child runbases of %s are: %s", this.baseDir, result.stream().map(JkRunbase::getBaseDir).collect(Collectors.toList()));
         return result;
     }
@@ -252,7 +259,7 @@ public final class JkRunbase {
     public JkRunbase getChildRunbase(String name) {
         JkUtilsAssert.state(MASTER.getBaseDir().equals(this.getBaseDir()),
                 "loadChildren() can only be called on the parent runbase.");
-        return runbaseGraph.getRunbase(name);
+        return runbaseGraph().getRunbase(name);
     }
 
     /**
@@ -382,6 +389,9 @@ public final class JkRunbase {
 
         if (BehaviorSettings.INSTANCE.adminMode) {
             runbaseGraph = RunbaseGraph.ofAdmin(this);
+        } else if (master) {
+            graphOwner = true;
+            graphDefaultKBeanClass = defaultKBeanClass;
         }
 
         if (LogSettings.INSTANCE.inspect) {
@@ -473,10 +483,9 @@ public final class JkRunbase {
         }
         initialized = true;
 
-        // Child bases are initialized after the KBeans of the parent, so that they can inject them
-        if (master && !BehaviorSettings.INSTANCE.adminMode) {
-            runbaseGraph = RunbaseGraph.of(defaultKBeanClass, this);
-        }
+        // Child bases are initialized after the KBeans of the parent, so that they can inject them,
+        // unless a KBean of the parent already asked for them in its init(), as with 'findChildren()'
+        runbaseGraph();
 
         // Post-initialize KBeans
         Jk2ColumnsText postInitializeText = null;
@@ -515,8 +524,8 @@ public final class JkRunbase {
         List<KBeanAction.Container> splitContainers = actionContainer.splitByKBean();
         final boolean needSplit;
         if (master) {
-            if (runbaseGraph.declaresChildren()) {
-                List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getChildren());
+            if (runbaseGraph().declaresChildren()) {
+                List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph().getChildren());
 
                 if (childBaseFilter == null) {
                     String msg = JkAnsi.of().fg(JkAnsi.Color.BLUE).a("Run child bases in sequence:").reset().toString();
@@ -565,13 +574,13 @@ public final class JkRunbase {
 
         KBeanAction.Container runActions = actionContainer;
 
-        if (master && runbaseGraph.declaresChildren()) {  // We are in a parent runbase
+        if (master && runbaseGraph().declaresChildren()) {  // We are in a parent runbase
 
             // Run child runbases
             // -- We remove from child actions, parent local KBeans
             KBeanAction.Container childActions = runActions
                     .withoutAnyOfKBeanClasses(kbeanResolution.localKBeanClassNames);
-            List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph.getChildren());
+            List<JkRunbase> childRunbases = new LinkedList<>(runbaseGraph().getChildren());
 
             // filter if -cb= option
             if (childBaseFilter != null) {
@@ -630,7 +639,7 @@ public final class JkRunbase {
             KBean bean = load(kBeanAction.beanClass);
             JkUtilsReflect.invoke(bean, kBeanAction.method());
         }
-        if (master && runbaseGraph.declaresChildren()) {
+        if (master && runbaseGraph().declaresChildren()) {
             JkLog.endTask();
         }
     }
@@ -650,6 +659,21 @@ public final class JkRunbase {
      * Returns the runbase located at the specified path, relative to this one. It can be invoked on any runbase.
      * The target runbase is created if needed, because a child can be initialized prior the module it injects.
      */
+    // Creates the runbase graph on first use, so that a KBean of the parent can reach the child bases from its init()
+    private RunbaseGraph runbaseGraph() {
+        if (runbaseGraph == null && graphOwner) {
+            JkUtilsAssert.state(!creatingGraph,
+                    "The child bases of %s are requested while they are being created.", baseDir);
+            creatingGraph = true;
+            try {
+                runbaseGraph = RunbaseGraph.of(graphDefaultKBeanClass, this);
+            } finally {
+                creatingGraph = false;
+            }
+        }
+        return runbaseGraph;
+    }
+
     JkRunbase getInjectedRunbase(String relPath) {
         Path targetBaseDir = baseDir.toAbsolutePath().resolve(relPath).normalize();
         JkUtilsAssert.state(this == MASTER || MASTER.isInitialized()
