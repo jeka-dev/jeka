@@ -160,7 +160,7 @@ public final class JkBaseScaffold extends JkScaffold {
 
     private void generateReadme() {
         if (this.baseScaffoldOption.kind == Kind.APP) {
-            String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md"));
+            String content = interpolateReadme(JkUtilsIO.read(JkBaseScaffold.class.getResource("README.md")));
             writeIfAbsent(baseDir.resolve("README.md"), content);
         }  else if (this.baseScaffoldOption.kind == Kind.PLUGIN) {
             String content = JkUtilsIO.read(JkBaseScaffold.class.getResource("README_PLUGIN.md"));

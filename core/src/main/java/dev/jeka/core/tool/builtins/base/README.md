@@ -1,4 +1,4 @@
-#
+# ${projectName}
 
 ## JeKa commands
 

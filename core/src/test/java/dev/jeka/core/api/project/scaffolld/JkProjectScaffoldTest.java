@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JkProjectScaffoldTest {
@@ -32,6 +33,10 @@ class JkProjectScaffoldTest {
         String gitIgnoreContent = JkPathFile.of(baseDir.resolve(".gitignore")).readAsString();
         assertTrue(gitIgnoreContent.contains("/.jeka-work"));
         assertTrue(gitIgnoreContent.contains("/jeka-output"));
+
+        // check README title
+        String readmeTitle = JkPathFile.of(baseDir.resolve("README.md")).readAsLines().get(0);
+        assertEquals("# " + baseDir.getFileName(), readmeTitle);
 
         // Check Build class is present
         assertTrue(Files.exists(baseDir.resolve(JkConstants.JEKA_SRC_DIR).resolve("Custom.java")));
