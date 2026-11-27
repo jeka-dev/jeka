@@ -16,7 +16,6 @@
 
 package dev.jeka.core.tool;
 
-import dev.jeka.core.api.utils.JkUtilsIterable;
 import dev.jeka.core.api.utils.JkUtilsReflect;
 import dev.jeka.core.api.utils.JkUtilsString;
 import dev.jeka.core.tool.builtins.app.AppKBean;
@@ -234,8 +233,8 @@ public final class JkBeanDescription {
             return "";
         }
         String result = original
-                .replaceAll("\\n", "<br/>")
-                .replaceAll("%n", "<br/>")
+                .replace("\n", "<br/>")
+                .replace("%n", "<br/>")
                 .replace("|", "\\|");  // otherwise, it breaks the Markdown table
         if (!result.endsWith(".")) {
             result = result + ".";

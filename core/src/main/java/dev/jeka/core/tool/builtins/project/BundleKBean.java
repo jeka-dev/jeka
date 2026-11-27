@@ -37,6 +37,10 @@ public final class BundleKBean extends KBean {
 
     public static final String JPACKAGE_TEMP_DIR_NAME = "jpackage-input";
 
+    private static final String ADD_MODULES = "--add-modules";
+
+    private static final String MODULE_PATH = "--module-path";
+
     @JkDoc("If true, a custom JRE is created including only Java modules used by the application.")
     public boolean customJre;
 
@@ -86,13 +90,13 @@ public final class BundleKBean extends KBean {
         }
 
         JkLog.startTask("create-bundled-application");
-        JkJpackage jpackage = jpackage();
+        JkJpackage jkJpackage = jpackage();
 
         // Set Project options
-        setProjectOptions(jpackage, jar);
+        setProjectOptions(jkJpackage, jar);
 
         // Add extra options
-        jpackageOptions.forEach(jpackage::addOptions);
+        jpackageOptions.forEach(jkJpackage::addOptions);
 
 
         if (customJre) {
@@ -106,12 +110,12 @@ public final class BundleKBean extends KBean {
             jkJlink.run();
             JkLog.endTask();
 
-            jpackage.addOptions("--runtime-image", customJrePath().toString());
+            jkJpackage.addOptions("--runtime-image", customJrePath().toString());
         }
 
         // Run jpackage
-        jpackage.prepareOutputDir();
-        jpackage.run();
+        jkJpackage.prepareOutputDir();
+        jkJpackage.run();
         JkLog.endTask();
     }
 
@@ -173,7 +177,7 @@ public final class BundleKBean extends KBean {
         private JpackageOptions() {}
 
         @JkDoc("Extra options to pass to jpackage (e.g. 'jpackage.options.all.--name=myapp')")
-        @JkSuggest(value = {"--add-modules", "--java-options", "--name", "--runtime-image", "--vendor", "--description",
+        @JkSuggest(value = {ADD_MODULES, "--java-options", "--name", "--runtime-image", "--vendor", "--description",
                 "--verbose"},
                     multiValues = {"ALL-MODULE-PATH", JDEPS, "app-image" })
 
@@ -199,9 +203,13 @@ public final class BundleKBean extends KBean {
         }
 
         private JkMultiValue<String> getCurrentOsOptions() {
-            return JkUtilsSystem.IS_WINDOWS ? windows
-                    : JkUtilsSystem.IS_MACOS ? mac
-                    : linux;
+            if (JkUtilsSystem.IS_WINDOWS) {
+                return windows;
+            }
+            if (JkUtilsSystem.IS_MACOS) {
+                return mac;
+            }
+            return linux;
         }
 
         private String getEffectiveOption(String optionName) {
@@ -215,7 +223,7 @@ public final class BundleKBean extends KBean {
         private JlinkOptions() {}
 
         @JkDoc("Extra options to pass to jlink (e.g. 'jlink.options.all.--compress=zip-6')")
-        @JkSuggest({"--add-modules", "--bind-services","--compress", "--disable-plugin", "--limit-module"})
+        @JkSuggest({ADD_MODULES, "--bind-services","--compress", "--disable-plugin", "--limit-module"})
         public JkMultiValue<String> all = JkMultiValue.of(String.class);
 
         @JkDoc("Extra options to pass to jlink only when running on Windows.")
@@ -248,7 +256,7 @@ public final class BundleKBean extends KBean {
         JkPathSequence modulePath = jpmsModules.getModulePaths();
         boolean addModulesSetByUser = jlinkOptions.stream()
                 .flatMap(Arrays::stream)
-                .anyMatch(option -> option.equals("--add-modules") || option.startsWith("--add-modules="));
+                .anyMatch(option -> option.equals(ADD_MODULES) || option.startsWith(ADD_MODULES + "="));
 
         // jlink does not accept empty values
         List<String> modules = jpmsModules.getAddModules();
@@ -256,10 +264,10 @@ public final class BundleKBean extends KBean {
             modules = computeModules(modulePath);
         }
         if (!modules.isEmpty()) {
-            jkJlink.addOptions("--add-modules", String.join(",", modules));
+            jkJlink.addOptions(ADD_MODULES, String.join(",", modules));
         }
         if (!modulePath.toList().isEmpty()) {
-            jkJlink.addOptions("--module-path", modulePath.toPath());
+            jkJlink.addOptions(MODULE_PATH, modulePath.toPath());
         }
         jkJlink.addOptions("--output", customJrePath().toString());
     }
@@ -320,11 +328,11 @@ public final class BundleKBean extends KBean {
         JkLog.debug("Module path from project.jpmsModules: " + projectModulePath);
         if (!projectModulePath.toList().isEmpty()
                 && !customJre
-                && this.jpackage.options.getEffectiveOption("--module-path") == null) {
-            jkPackage.addOptions("--module-path", projectModulePath.toPath());
+                && this.jpackage.options.getEffectiveOption(MODULE_PATH) == null) {
+            jkPackage.addOptions(MODULE_PATH, projectModulePath.toPath());
         }
 
-        if (JDEPS.equals(jpackage.options.getEffectiveOption("--add-modules"))
+        if (JDEPS.equals(jpackage.options.getEffectiveOption(ADD_MODULES))
                 && !customJre) {
             List<String> addModules = jdeps().getModuleDeps(project.artifactLocator.getMainArtifactPath(), projectModulePath);
 
@@ -335,7 +343,7 @@ public final class BundleKBean extends KBean {
                         .modules()
                         .forEach(m -> JkLog.debug(m.getName()));
             }
-            jkPackage.addOptions("--add-modules", String.join(",", addModules));
+            jkPackage.addOptions(ADD_MODULES, String.join(",", addModules));
         }
     }
 

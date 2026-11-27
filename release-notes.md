@@ -31,8 +31,10 @@ Some changes may need action when upgrading from 0.11.68:
 - **`app: update` and `app: uninstall` fail on an unknown name**, instead of exiting with 0. With `force=true`, `uninstall` only warns.
 - **App scripts already installed** keep their old launch line until `app: update`.
 - **`-p` on a jar without `Main-Class`** fails with a message suggesting `jeka -c -p`.
+- **Options after `-p` go to the program:** with the `jeka` and `jeka.ps1` scripts, `-c`, `-v` and `-q` written after `-p` are passed to the program, and no longer clean `jeka-output` or change JeKa's log level. Put them before `-p` to act on JeKa.
 - **Scaffolding keeps existing files**, including `jeka` and `jeka.ps1`. Use `setup: updateLocalScripts` to refresh the scripts.
 - **KBean property validation is active again:** unknown properties warn, or fail with `--strict`.
+- **`setup: name` is removed**: it was never used. `jeka setup: name=...` now fails with `Unmatched argument`.
 
 ## New features
 
@@ -67,14 +69,20 @@ Some changes may need action when upgrading from 0.11.68:
 - `-p` skips `*-sources.jar` and `*-javadoc.jar`.
 - `jeka -r <dir> -c` cleans `<dir>/jeka-output`, not the working dir's.
 - Installed app scripts pass `*` and spaces as is.
+- `-cb=<child>` finds the KBeans that only the child declares.
+- A field name is accepted as a command-line value, as `version=moduleId`.
+- A boolean field written without a value, as `project: test.skip`, is set to `true`.
+- Quoted words stay together in `jeka.cmd.*` shorthands run by the scripts with `-p`.
 
 **KBeans and engine**
 - `app:` and `setup:` ignore the `jeka.properties` of the current project.
 - Output of short-lived processes, such as Git commands, is no longer lost, and non-ASCII characters are no longer corrupted.
 - `@JkInject("../x")` works in a child module built from its parent.
+- A child can inject its parent with `@JkInjectRunbase` when it is built from that parent.
+- All annotations on a line of `jeka-src` are read, as several `@JkDep` on one line.
 - `$groupId`, `$artifactId` and `$version` work in Docker image names set from properties or the command line.
 - `docker.jvmBaseImage` is used again.
-- `intellij: syncAll` and `eclipse: all` work again.
+- `intellij: syncAll` and `eclipse: all` work again, and sync each module once from a parent.
 - `scaffold.generateLibsFolders=true` works again, and `scaffold.kind=EMPTY` no longer writes `@custom=on`.
 - Scaffolded projects have a `public class Main`, so javadoc is no longer empty.
 - Building a detached commit without tag uses `<short hash>-SNAPSHOT` as version, instead of failing. `Git-branch` is omitted from the manifest on a detached HEAD.
@@ -82,6 +90,7 @@ Some changes may need action when upgrading from 0.11.68:
 - Forked tests no longer need jansi on the classpath.
 - Central Portal publication times out after 15 minutes (it was about 10 days).
 - JaCoCo defaults to 0.8.14, which supports Java 25.
+- The SonarQube plugin passes the project base dir and source paths without `..` segments, and has tests.
 - A warning tells when test include patterns match no test.
 - Trust of remote Git URLs is saved on Linux too, and trusted URLs are appended without a leading space.
 
@@ -90,6 +99,7 @@ Some changes may need action when upgrading from 0.11.68:
 - `Failed!` names the exception when it has no message.
 - No spinner in redirected output on JDK 22+.
 - `--doc` shows `${...}` as is, and "Undocumented." for undocumented init methods.
+- `--doc` no longer fails when a KBean's enum initializer would run under two classloaders: KBean classes are loaded once.
 - `--help` documents `--program`, the name the scripts handle.
 
 ## API
@@ -109,6 +119,7 @@ One change: `JkUtilsSystem.CONSOLE` is null when output is redirected on JDK 22+
 - New tutorial: [migrate a Maven project](https://jeka-dev.github.io/jeka/tutorials/migrate-from-maven/).
 - Pages on installation, `app:`, trust, Docker and native images are completed.
 - Micronaut and similar frameworks need `FAT` jars, not `SHADE`: the docs now say so.
+- The BUNDLE runtime of `app: install` is described as it works.
 
 ## Contributing
 
