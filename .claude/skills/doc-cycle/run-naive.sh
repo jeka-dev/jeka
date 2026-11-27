@@ -72,6 +72,8 @@ Setup for this run (it replaces the paths of your instructions):
   plugin docs in ./site/plugins/*/README.md.
 - JeKa is installed at $RUN/jeka/bin: put it first on PATH. It is a build of the current docs' version.
 - Your scratch directory is $RUN/work/runs. JEKA_USER_HOME is $RUN/home: keep it, and keep its global.properties.
+- Never write in /tmp, /private/tmp or anywhere else outside $RUN: put every file you create, backup copies
+  included, under $RUN/work/runs. TMPDIR already points there.
 - Projects you scaffold pin the latest JeKa release, run by their ./jeka script. When a step fails with it, run the
   same step again with the jeka on PATH ($RUN/jeka/bin/jeka), and report both results: the docs may describe
   something not released yet.
@@ -83,8 +85,10 @@ MODEL_ARGS=()
 [ -n "${NAIVE_MODEL:-}" ] && MODEL_ARGS=(--model "$NAIVE_MODEL")
 
 cd "$RUN/work"
+# naive used to copy files to /tmp: point the temporary directory of the tools it runs to the run directory.
+mkdir -p "$RUN/work/runs/tmp"
 # ${a[@]+...}: an empty array is an error under 'set -u' in the bash 3.2 of macOS.
-JEKA_USER_HOME="$RUN/home" claude -p --agents "$RUN/agents.json" --agent naive ${MODEL_ARGS[@]+"${MODEL_ARGS[@]}"} \
+TMPDIR="$RUN/work/runs/tmp" JEKA_USER_HOME="$RUN/home" claude -p --agents "$RUN/agents.json" --agent naive ${MODEL_ARGS[@]+"${MODEL_ARGS[@]}"} \
   --permission-prompts none --allowedTools Bash Read Write Glob Grep \
   < "$RUN/prompt.txt" > "$RUN/report.md"
 echo "Report: $RUN/report.md"
