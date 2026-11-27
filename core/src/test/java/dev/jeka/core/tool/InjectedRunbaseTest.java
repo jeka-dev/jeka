@@ -96,6 +96,31 @@ class InjectedRunbaseTest {
     }
 
     @Test
+    void parentKBeanFindingChildren_inInit_ok() throws IOException {
+        Path dir = baseDir.toRealPath();
+        write(dir.resolve("jeka.properties"), "_jeka.child-bases=a, b\n_@parentCustom=on\n");
+        write(dir.resolve("a/jeka.properties"), "@project=on\n");
+        write(dir.resolve("b/jeka.properties"), "@project=on\n");
+        write(dir.resolve("jeka-src/ParentCustom.java"),
+                "import dev.jeka.core.tool.*;\n" +
+                "import dev.jeka.core.tool.builtins.project.ProjectKBean;\n" +
+                "class ParentCustom extends KBean {\n" +
+                "  protected void init() { getRunbase().findChildren(ProjectKBean.class)\n" +
+                "    .forEach(p -> p.project.setModuleId(\"g:\" + p.getBaseDir().getFileName())); }\n" +
+                "}\n");
+        Engine engine = Engine.of(true, dir, JkRepoSet.ofLocal(), JkDependencySet.of());
+        engine.resolveKBeans();
+        Engines.registerMaster(engine);
+        Thread.currentThread().setContextClassLoader(
+                new AppendableClassloader(engine.getClasspathSetupResult().runClasspath));
+        JkRunbase runbase = engine.getOrCreateRunbase(new KBeanAction.Container(), true);
+        assertEquals(2, runbase.getChildRunbases().size());
+        JkRunbase a = runbase.getChildRunbases().get(0);
+        assertEquals("g:a", a.find(dev.jeka.core.tool.builtins.project.ProjectKBean.class)
+                .orElseThrow().project.getModuleId().toString());
+    }
+
+    @Test
     void injectedRunbase_invalidTarget_explicitError() throws IOException {
         Path dir = baseDir.toRealPath();
         Path child = Files.createDirectories(dir.resolve("child"));
