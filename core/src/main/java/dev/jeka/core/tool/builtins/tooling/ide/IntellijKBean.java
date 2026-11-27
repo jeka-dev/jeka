@@ -533,7 +533,15 @@ public final class IntellijKBean extends KBean {
             if (!JkUtilsString.isBlank(definedJdk)) {
                 return;
             }
-            JkUtilsJdk.getJdk(distrib, javaVersion.toString());
+            try {
+                JkUtilsJdk.getJdk(distrib, javaVersion.toString());
+            } catch (RuntimeException e) {
+                // The iml can still be generated: it refers to the SDK by name
+                JkLog.warn("Downloading JDK %s %s failed: %s%nDefine the SDK '%s' in IntelliJ, or set '%s' "
+                        + "to the path of an installed JDK %s.", distrib, javaVersion, e.getMessage(),
+                        JkIntellijJdk.ofJekaJdk(distrib, javaVersion).getJdkName(), "jeka.jdk." + javaVersion,
+                        javaVersion);
+            }
         }
 
         private JkJavaVersion jekaModuleJavaVersion(boolean isForJkProject) {

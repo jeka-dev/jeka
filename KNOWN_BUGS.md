@@ -53,11 +53,12 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## KBeans
 
-### `intellij: iml` aborts when the JDK of the target version can't be downloaded
-- **Symptom:** with `@project.javaVersion=8` on macOS aarch64 (no Temurin 8 exists), `intellij: iml` fails with a `FileNotFoundException` on the foojay URL, after writing the `.iml`. Also on 0.11.70. Compilation has a fallback since #294; the IntelliJ KBean doesn't.
-- **Where:** `IntellijKBean.SdkResolver.downloadJkdIfNeeded` -> `JkUtilsJdk.getJdk`.
-- **Workaround:** set `jeka.jdk.8` to an installed JDK.
-- **Evidence:** sample-maintainer agent, on vincer-dom.
+### `intellij: sync` drops the SDK and the iml customizers in the default, single-module mode
+- **Symptom:** the `.iml` written misses what `IntellijKBean` customizers add. E.g. in `plugins/plugins.protobuf`, `ProtobufCustom` calls `replaceLibByModule("dev.jeka.jeka-core.jar", "core")`, but `jeka intellij: iml` writes a `module-library` on `dev.jeka.jeka-core.jar` instead of the `core` module dependency of the committed `.idea/plugins.protobuf.iml`.
+- **Cause:** `IntellijKBean.generateSingleIml` writes the file, then sets the SDK (`computeImlJdk`, which reads the existing `.iml`) and runs `imlCustomizers` on the iml object, after it was written. Only the split mode (`splitModule=true`, or a project Java version other than the running one) writes after them.
+- **Where:** `IntellijKBean.generateSingleIml`.
+- **Workaround:** `@intellij.splitModule=true`: the project `.iml` then holds the customizations.
+- **Evidence:** reproduced on master (2026-11-27) in `plugins/plugins.protobuf`; order of the calls from source; workaround run there.
 
 ## Tests and CI
 
