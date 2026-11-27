@@ -33,14 +33,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Decision needed:** using only the name when the group equals it changes the name of the images that existing projects build and push.
 - **Evidence:** reproduced on master (2026-11-27).
 
-### `docker:` fails on a `base` project without `jeka-src`
-- **Symptom:** `jeka docker: info` (and the image builds) fail with `NoSuchFileException: .../.jeka-work/jeka-src-classes` when the base dir has `@base=on` but no `jeka-src` dir.
-- **Cause:** `BaseKBean`'s buildable copies `getAppClasses()` from a class dir that is never created.
-- **Where:** `BaseKBean`, anonymous `JkBuildable.getClassDir()`, called by `DockerKBean.getBuildable`.
-- **Workaround:** have a `jeka-src` dir, as the scaffolded base projects do.
-- **Evidence:** reproduced on master (2026-11-27).
-
-
 ## Publication and Maven
 
 ### Ivy messages shown as errors

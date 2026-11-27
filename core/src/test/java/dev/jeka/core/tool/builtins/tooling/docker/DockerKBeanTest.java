@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DockerKBeanTest {
 
@@ -38,6 +39,30 @@ class DockerKBeanTest {
         JkDockerJvmBuild dockerBuild = dockerKBean.jvmDockerBuild(dockerKBean.getRunbase().getBuildable());
 
         assertEquals("eclipse-temurin:21-jre", dockerBuild.getBaseImage());
+    }
+
+    @Test
+    void info_baseWithoutJekaSrc_ok(@TempDir Path tempDir) throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Files.write(baseDir.resolve("jeka.properties"), "@base=on\n@base.moduleId=org.acme:nosrc\n".getBytes());
+        DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
+
+        Path classDir = dockerKBean.getRunbase().getBuildable().getClassDir();
+        assertTrue(Files.isDirectory(classDir));
+        dockerKBean.info();
+    }
+
+    @Test
+    void buildableClassDir_baseWithJekaSrcClasses_copied(@TempDir Path tempDir) throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Files.write(baseDir.resolve("jeka.properties"), "@base=on\n".getBytes());
+        Path classFile = baseDir.resolve(".jeka-work/jeka-src-classes/app/App.class");
+        Files.createDirectories(classFile.getParent());
+        Files.write(classFile, new byte[0]);
+        DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
+
+        Path classDir = dockerKBean.getRunbase().getBuildable().getClassDir();
+        assertTrue(Files.exists(classDir.resolve("app/App.class")));
     }
 
     @Test
