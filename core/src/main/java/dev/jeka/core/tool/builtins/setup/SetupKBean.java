@@ -42,9 +42,6 @@ public class SetupKBean extends KBean {
     @JkDoc("Argument for the 'addShorthand' method, formatted as '[shorthand-name]=[shorthand content]'.")
     public String content;
 
-    @JkDoc("Not used.")
-    public String name;
-
     @JkDoc("Opens a file explorer window in the JeKA user home directory.")
     public void openHomeDir() throws IOException {
         Desktop.getDesktop().open(JkLocator.getJekaUserHomeDir().toFile());
