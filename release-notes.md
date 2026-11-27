@@ -2,6 +2,9 @@
 
 ## Fixes
 
+**Build**
+- `@project.javaVersion=8` downloads a JDK 8 on Linux and macOS: foojay rejected the download URL for Java 8. When a JDK download fails, the running JDK compiles with `--release <version>`, instead of producing classes of its own version with only a warning.
+
 **Dependencies and Maven**
 - Versions follow the BOM again (regression of 0.11.70): with `spring-boot-dependencies:3.5.16`, `httpclient5` is 5.5.2 again, not 5.3.1. As in Maven, only `pom` dependencies with scope `import` are imported BOMs, the versions a BOM declares win over the ones it imports, and the first import wins over the next ones.
 

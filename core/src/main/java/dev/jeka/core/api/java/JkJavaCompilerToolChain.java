@@ -324,8 +324,9 @@ public final class JkJavaCompilerToolChain {
                 Path downloadedPath = JkUtilsJdk.getJdk(javaDistrib, javaVersion.toString());
                 return new ToolOrProcess(downloadedPath, javaVersion);
             } catch (Exception e) {
-                JkLog.warn("Downloading JDK failed. Will use embedded compiler %s.", JkJavaVersion.ofCurrent());
-                return new ToolOrProcess(compileToolOrFail());
+                JkLog.warn("Downloading JDK %s failed. Will use embedded compiler %s with --release %s.",
+                        javaVersion, JkJavaVersion.ofCurrent(), javaVersion);
+                return new ToolOrProcess(compileToolOrFail(), null, null, javaVersion);
             }
         }
     }
@@ -397,10 +398,19 @@ public final class JkJavaCompilerToolChain {
         // Version of the JDK running the compile process, null if unknown
         final JkJavaVersion processJdkVersion;
 
-        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess, JkJavaVersion processJdkVersion) {
+        // Version to compile for with the compile tool, when it differs from the running JDK; null otherwise
+        final JkJavaVersion toolReleaseVersion;
+
+        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess, JkJavaVersion processJdkVersion,
+                      JkJavaVersion toolReleaseVersion) {
             this.compileProcess = compileProcess;
             this.compileTool = compileTool;
             this.processJdkVersion = processJdkVersion;
+            this.toolReleaseVersion = toolReleaseVersion;
+        }
+
+        ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess, JkJavaVersion processJdkVersion) {
+            this(compileTool, compileProcess, processJdkVersion, null);
         }
 
         ToolOrProcess(JavaCompiler compileTool, JkProcess compileProcess) {
@@ -421,7 +431,7 @@ public final class JkJavaCompilerToolChain {
 
         boolean run(JkJavaCompileSpec compileSpec) {
              if (compileTool != null) {
-                 return runOnTool(compileSpec, compileTool, toolParams);
+                 return runOnTool(withToolRelease(compileSpec), compileTool, toolParams);
              } else if (compileProcess != null) {
                  // JDK 8 and below do not know about modules: their JVM fails on '--add-exports'
                  boolean supportsModules = processJdkVersion == null || processJdkVersion.isEqualOrGreaterThan(9);
@@ -436,6 +446,15 @@ public final class JkJavaCompilerToolChain {
 
         boolean isForkedInProcess() {
             return compileTool == null;
+        }
+
+        // Without it, the running JDK would produce classes of its own version, silently
+        private JkJavaCompileSpec withToolRelease(JkJavaCompileSpec compileSpec) {
+            if (toolReleaseVersion == null || compileSpec.minJavaVersion() != null
+                    || compileSpec.getOptions().contains("--release")) {
+                return compileSpec;
+            }
+            return compileSpec.copy().addOptions("--release", toolReleaseVersion.toString());
         }
 
     }
