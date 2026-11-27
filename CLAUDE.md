@@ -54,6 +54,16 @@ mkdocs serve   # serves at http://localhost:8000
 Read [KNOWN_BUGS.md](KNOWN_BUGS.md) before diagnosing a failure or documenting a feature. It lists pending bugs with their
 symptom, location and workaround. Add bugs you discover and don't fix, and remove an entry when fixing it.
 
+**When a task is done**, before reporting it, check whether `KNOWN_BUGS.md` needs an update. It does when you:
+
+- found a bug and did not fix it → add an entry, with its evidence, following the conventions at the top of the file;
+- fixed a listed bug → remove its entry, in the same commit;
+- learned something new on a listed bug (workaround, cause, other location, reproduced) → update its entry.
+
+Bugs found and fixed within the same task don't go in. If you may not modify this repo (e.g. sample-maintainer, naive),
+put the update in your report instead. End your report with one line: `KNOWN_BUGS.md: <what changed>` or
+`KNOWN_BUGS.md: no change`.
+
 ## Repository Structure
 
 ```

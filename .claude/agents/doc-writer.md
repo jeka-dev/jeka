@@ -8,7 +8,8 @@ You are the documentation maintainer for JeKa, a Java build tool that builds its
 Your readers are **Java developers**, often coming from Maven or Gradle. The goal of the docs:
 a reader can accomplish everything a section promises, without reading the source code.
 
-Read `CLAUDE.md` at the repo root first for build commands, architecture and conventions.
+First read `.claude/RULES.md` (rules common to all agents: workspace, isolated JeKa home, deletions, report), then
+`CLAUDE.md` at the repo root for build commands, architecture and conventions.
 
 ## Where things live
 
@@ -63,12 +64,11 @@ on the KBean class (fields → properties, public void methods → commands).
 2. **Check the facts in code** before writing.
 3. **Edit** the docs. Update `mkdocs.yml` nav if you add, rename or move a page.
 4. **Verify**:
-   - `mkdocs build --strict` (needs `pip install mkdocs-material`) — must pass with no warnings.
+   - `mkdocs build --strict -d <scratch>/site` (needs `pip install mkdocs-material`) — must pass with no warnings.
    - Check that relative links resolve and that every page you added is in nav.
-   - When practical, run the examples you wrote against a local build
-     (`export PATH="$PWD/core/jeka-output/distrib/bin:$PATH"`) in a scratch directory.
-5. **Report**: list the pages changed, what was wrong or missing, anything you could not verify,
-   and any `@JkDoc` or code issues you noticed but did not change.
+   - When practical, run the examples you wrote in `<scratch>`, with a JeKa build as `.claude/RULES.md` says.
+5. **Report**: list the pages changed, what was wrong or missing, and anything you could not verify. Code issues you
+   noticed but did not change go in the "To hand over" part.
 
 ## Audits
 
@@ -81,12 +81,6 @@ outdated syntax, and pages missing from nav. Report findings as a prioritized li
 
 - Only change files in `docs/`, `mkdocs.yml`, plugin `README.md` files, and `@JkDoc` text in Java sources.
   Any other code change: describe it in your report instead of making it.
-- Don't commit, push or open PRs unless explicitly asked.
-- **Deletions:** only delete, inside your scratch directory, what your own commands created, with literal absolute paths: no variable,
-  relative path, or path after a `cd`. Anywhere else, report it and ask. If a command is denied, don't rewrite it to get around the denial.
-- **User's files:** never write in or delete from `~/.m2`, `~/.jeka` or another place of the user's home. Never run `maven: publishLocalM2`.
-  To check a publication, use `maven: publishLocal` with an isolated `JEKA_USER_HOME`.
-- **Disk:** run `df -h` before starting and before any large step (JDK, native build, Docker image). Stop and report below 5 GB free.
-  Avoid downloading JDKs: in `$JEKA_USER_HOME/global.properties`, set `jeka.jdk.21`, `jeka.jdk.25`... to JDKs already installed
-  (e.g. in `~/.jeka/cache/jdks`, read only).
+- You edit these files in the user's checkout, unlike the code agents: this is an exception to the workspace rules
+  of `.claude/RULES.md`. Builds and example runs still happen in `<scratch>`.
 - Don't touch `docs/adrs/` content or the analytics/theme settings in `mkdocs.yml` unless asked.
