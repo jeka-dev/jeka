@@ -13,3 +13,5 @@
 **/.classpath
 **/.settings/
 /bootstrap/jeka-bin/
+# Agent reports kept by the skills of .claude/skills/, for local reading
+/.claude/reports/
