@@ -22,7 +22,6 @@ import dev.jeka.core.api.depmanagement.JkRepoProperties;
 import dev.jeka.core.api.depmanagement.JkRepoSet;
 import dev.jeka.core.api.file.JkPathSequence;
 import dev.jeka.core.api.java.JkClassLoader;
-import dev.jeka.core.api.java.JkUrlClassLoader;
 import dev.jeka.core.api.system.*;
 import dev.jeka.core.api.text.Jk2ColumnsText;
 import dev.jeka.core.api.utils.JkUtilsPath;
@@ -489,7 +488,7 @@ public class Main {
         return found;
     }
 
-    private static boolean performDocMdKBean(Engine engine, String kbeanName) {
+    static boolean performDocMdKBean(Engine engine, String kbeanName) {
         if (JkUtilsString.isBlank(kbeanName)) {
             System.err.println("You must specify a KBean name as in 'jeka project: --doc-md'.");
             return false;
@@ -503,7 +502,7 @@ public class Main {
             System.err.printf("No KBean named '%s' found in classpath. Execute 'jeka --doc' to see available KBeans.", kbeanName);
             return true;
         }
-        ClassLoader classLoader = JkUrlClassLoader.of(engine.resolveClassPaths().runClasspath).get();
+        ClassLoader classLoader = PicocliHelp.helpClassLoader(engine.resolveClassPaths().runClasspath);
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
         String mdDoc = JkBeanDescription.of(defaultKBeanClass, false).toMdContent().toString();
         System.out.println(mdDoc);
