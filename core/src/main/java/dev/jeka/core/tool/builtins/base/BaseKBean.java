@@ -479,7 +479,10 @@ public final class BaseKBean extends KBean implements JkBuildable.Supplier {
             @Override
             public Path getClassDir() {
                 Path tempDirClass = JkUtilsPath.createTempDirectory("jk-");
-                BaseKBean.this.getAppClasses().copyTo(tempDirClass);
+                JkPathTree appClasses = BaseKBean.this.getAppClasses();
+                if (appClasses.exists()) {  // no class dir when the base has no jeka-src
+                    appClasses.copyTo(tempDirClass);
+                }
                 return tempDirClass;
             }
 
