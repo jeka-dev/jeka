@@ -23,11 +23,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Versioning (Git)
 
-### `app: install` proposes peeled tags as versions
-- **Symptom:** `app: install` proposes `0.11.69^{}` by default, and git then fails to clone it. Typing `0.11.69` works.
-- **Cause:** `JkGit.getRemoteTags` keeps the `^{}` entries of annotated tags.
-- **Evidence:** sample-maintainer agent, with demo-cowsay.
-
 - **`app: install repo=<url>#branch`** fails with git exit code 128 and no explanation. *sample-maintainer agent.*
 
 

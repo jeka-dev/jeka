@@ -10,6 +10,9 @@
 - Changing only a BOM version resolves the dependencies again, instead of reusing the classpath cached in `.jeka-work`.
 - Versions follow the BOM again (regression of 0.11.70): with `spring-boot-dependencies:3.5.16`, `httpclient5` is 5.5.2 again, not 5.3.1. As in Maven, only `pom` dependencies with scope `import` are imported BOMs, the versions a BOM declares win over the ones it imports, and the first import wins over the next ones.
 
+**`app:` and Git**
+- `app: install` proposes `0.11.69`, not `0.11.69^{}`, for an annotated tag. `app: list` and `app: update` no longer take an app installed on an annotated tag for outdated.
+
 # 0.11.70
 
 ## Upgrade notes

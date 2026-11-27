@@ -39,6 +39,8 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
 
     private static final String REFS_TAGS = "refs/tags/";
 
+    private static final String PEELED_SUFFIX = "^{}";
+
     private static final String REFS_HEADS= "refs/heads/";
 
     private JkGit() {
@@ -453,15 +455,21 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
      */
     public String getRemoteTagCommit(String repoUrl, String tag) {
         String tagRef = JkUtilsString.isBlank(tag) ? "HEAD" : "refs/tags/" + tag;
-        String response = this.copy()
+        JkGit git = this.copy()
                 .setLogWithJekaDecorator(false)
                 .setCollectStdout(true)
-                .addParams("ls-remote", repoUrl, tagRef)
-                .exec().getStdoutAsString();
-        if (JkUtilsString.isBlank(response)) {
+                .addParams("ls-remote", repoUrl, tagRef);
+        if (!JkUtilsString.isBlank(tag)) {
+            git.addParams(tagRef + PEELED_SUFFIX);
+        }
+        List<String> lines = git.exec().getStdoutAsMultiline().stream()
+                .filter(line -> !JkUtilsString.isBlank(line))
+                .collect(Collectors.toList());
+        if (lines.isEmpty()) {
             return null;
         }
-        return Tag.ofGitCmdlineResult(response).commitHash;
+        return peeled(lines.stream().map(Tag::ofGitCmdlineResult).collect(Collectors.toList()))
+                .getFirst().commitHash;
     }
 
     /**
@@ -487,7 +495,21 @@ public final class JkGit extends JkAbstractProcess<JkGit> {
         if (result.size() == 1 && JkUtilsString.isBlank(result.getFirst().name)) {
             return Collections.emptyList();
         }
-        return result;
+        return peeled(result);
+    }
+
+    // An annotated tag 'X' is listed with the hash of the tag object, then as 'X^{}' with the hash of its commit.
+    // Returns each tag once, with the hash of its commit.
+    private static List<Tag> peeled(List<Tag> tags) {
+        Map<String, String> peeledCommits = new HashMap<>();
+        tags.stream()
+                .filter(tag -> tag.name.endsWith(PEELED_SUFFIX))
+                .forEach(tag -> peeledCommits.put(
+                        JkUtilsString.substringBeforeLast(tag.name, PEELED_SUFFIX), tag.commitHash));
+        return tags.stream()
+                .filter(tag -> !tag.name.endsWith(PEELED_SUFFIX))
+                .map(tag -> new Tag(tag.name, peeledCommits.getOrDefault(tag.name, tag.commitHash)))
+                .collect(Collectors.toList());
     }
 
     /**

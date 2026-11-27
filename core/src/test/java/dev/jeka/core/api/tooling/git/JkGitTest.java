@@ -72,6 +72,29 @@ class JkGitTest {
         assertFalse(manifest.asString().contains("Git-branch"), manifest.asString());
     }
 
+    // 'git ls-remote' lists an annotated tag twice: 'X' with the tag object, and 'X^{}' with the commit
+    @Test
+    void getRemoteTags_annotatedTag_listedOnceWithItsCommit(@TempDir Path dir) throws Exception {
+        for (String args : new String[] {"init -q", "config user.email a@b.c", "config user.name a",
+                "config commit.gpgsign false", "config tag.gpgsign false"}) {
+            git(dir, args);
+        }
+        Files.write(dir.resolve("file.txt"), "a".getBytes());
+        git(dir, "add .");
+        git(dir, "commit -q -m first");
+        git(dir, "tag 1.0.0");
+        git(dir, "tag -a 1.1.0 -m annotated");
+        String commit = JkGit.of(dir).getCurrentCommit();
+        String repoUrl = dir.toUri().toString();
+
+        List<JkGit.Tag> tags = JkGit.of().getRemoteTags(repoUrl);
+
+        assertEquals(List.of("1.0.0", "1.1.0"), JkGit.of().getRemoteTagAsStrings(repoUrl));
+        tags.forEach(tag -> assertEquals(commit, tag.getCommitHash(), tag.getName()));
+        assertEquals(commit, JkGit.of().getRemoteTagCommit(repoUrl, "1.1.0"));
+        assertEquals(commit, JkGit.of().getRemoteTagCommit(repoUrl, "1.0.0"));
+    }
+
     @Test
     void getLatestTag_noTag_returnsNull(@TempDir Path dir) throws Exception {
         for (String args : new String[] {"init -q", "config user.email a@b.c", "config user.name a",
