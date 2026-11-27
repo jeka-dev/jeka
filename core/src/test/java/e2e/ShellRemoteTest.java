@@ -106,14 +106,20 @@ class ShellRemoteTest  {
         if (isDockerAbsent()) {
             return;
         }
-        prepareJeka("-ru %s -Djeka.java.version=21 docker: build", COW_SAY_URL).exec();
+        // A name of our own, so that the test can't replace an image of the user, and can remove it
+        String imageName = "jk-test-cowsay";
+        try {
+            prepareJeka("-ru %s -Djeka.java.version=21 docker: build jvmImageName=%s", COW_SAY_URL, imageName).exec();
 
-        // Run image
-        JkDocker.of().addParams("run", "--rm", "github.com_jeka-dev_demo-cowsay:" + COWSAY_VERSION, "toto")
-                .setLogCommand(true)
-                .setInheritIO(false)
-                .setLogWithJekaDecorator(true)
-                .exec();
+            // Run image
+            JkDocker.of().addParams("run", "--rm", imageName, "toto")
+                    .setLogCommand(true)
+                    .setInheritIO(false)
+                    .setLogWithJekaDecorator(true)
+                    .exec();
+        } finally {
+            JkDocker.of().removeImage(imageName);
+        }
     }
 
     @Test
@@ -121,7 +127,13 @@ class ShellRemoteTest  {
         if (isDockerAbsent()) {
             return;
         }
-        prepareJeka("-v -ru %s -Djeka.java.version=21 docker: buildNative", COW_SAY_URL).exec();
+        String imageName = "jk-test-cowsay-native";
+        try {
+            prepareJeka("-v -ru %s -Djeka.java.version=21 docker: buildNative nativeImageName=%s", COW_SAY_URL, imageName)
+                    .exec();
+        } finally {
+            JkDocker.of().removeImage(imageName);
+        }
     }
 
     private JkProcess prepareJeka(String cmdLine, String... tokens) {

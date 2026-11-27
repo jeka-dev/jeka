@@ -21,6 +21,7 @@ import dev.jeka.core.api.system.JkLocator;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.utils.JkUtilsAssert;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -106,6 +107,60 @@ public class JkDocker extends JkAbstractProcess<JkDocker> {
                 .map(String::trim)
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns <code>true</code> if an image with the specified name exists locally.
+     *
+     * @param imageName The image name, as "my-image" or "my-image:1.0". Without tag, "latest" is assumed.
+     */
+    public boolean hasLocalImage(String imageName) {
+        JkUtilsAssert.argument(!JkUtilsString.isBlank(imageName), "Image name cannot be blank.");
+        return copy().addParams("image", "inspect", "--format", "{{.Id}}", imageName)
+                .setLogCommand(JkLog.isDebug())
+                .setLogWithJekaDecorator(JkLog.isDebug())
+                .setInheritIO(false)
+                .setCollectStdout(true)
+                .setCollectStderr(true)
+                .setFailOnError(false)
+                .exec().hasSucceed();
+    }
+
+    /**
+     * Removes the specified image from the local Docker images. Does nothing if the image does not exist.
+     * Fails if a container, even stopped, uses the image.
+     *
+     * @param imageName The image name, as "my-image" or "my-image:1.0". Without tag, "latest" is assumed.
+     * @return <code>true</code> if the image has been removed, <code>false</code> if it did not exist.
+     */
+    public boolean removeImage(String imageName) {
+        if (!hasLocalImage(imageName)) {
+            return false;
+        }
+        copy().addParams("image", "rm", imageName)
+                .setLogCommand(JkLog.isVerbose())
+                .setLogWithJekaDecorator(JkLog.isVerbose())
+                .setInheritIO(false)
+                .setCollectStdout(true)
+                .exec();
+        JkLog.verbose("Docker image %s removed.", imageName);
+        return true;
+    }
+
+    /**
+     * Removes the local images whose name, formatted as "repository:tag", starts with the specified prefix.
+     * This is convenient to clean images created by tests, when they share a dedicated prefix.
+     *
+     * @param prefix The prefix of the images to remove, as "my-test-". It cannot be blank.
+     * @return The names of the removed images.
+     */
+    public List<String> removeImagesStartingWith(String prefix) {
+        JkUtilsAssert.argument(!JkUtilsString.isBlank(prefix), "Image name prefix cannot be blank.");
+        List<String> imageNames = getLocalImages().stream()
+                .filter(name -> name.startsWith(prefix))
+                .collect(Collectors.toList());
+        imageNames.forEach(this::removeImage);
+        return imageNames;
     }
 
     /**

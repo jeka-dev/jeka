@@ -17,10 +17,14 @@ The classes are located in package `dev.jeka.core.api.tooling.docker`.
 Provides helper methods to:
 
 - Execute Docker commands conveniently.
-- Retrieve a list of image names present locally.
+- Retrieve a list of image names present locally, or check that one exists.
+- Remove an image, or all the images whose name starts with a prefix: convenient to clean the images built by tests.
 
 ```java
 JkDocker.of().execCmdLine("run --rm -p8080:8080 io.my-registry/my-image:latest");
+
+// Remove images built by tests, named 'my-test-...'. An image used by a container is not removed.
+JkDocker.of().removeImagesStartingWith("my-test-");
 ```
 
 ### `JkDockerBuild`
