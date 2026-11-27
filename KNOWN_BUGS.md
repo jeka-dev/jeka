@@ -21,11 +21,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Publication and Maven
 
-### The dependency resolution cache ignores BOM changes
-- **Symptom:** when only a BOM version changes, `.jeka-work/project-dep-resolution-cache` keeps serving the old classpath. Deleting `.jeka-work` works around it.
-- **Cause:** `JkVersionProvider.hashCode()` and `equals()` don't include the BOMs.
-- **Evidence:** sample-maintainer agent; cause from source.
-
 ### Ivy messages shown as errors
 - **Symptom:** `Error: [Ivy] unknown resolver https://...` lines show at the normal log level.
 - **Cause:** `IvyMessageLogger` only hides messages starting with `unknown resolver url`, and the resolver names changed.

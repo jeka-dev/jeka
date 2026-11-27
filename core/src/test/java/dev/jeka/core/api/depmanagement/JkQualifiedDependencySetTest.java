@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static dev.jeka.core.api.depmanagement.JkPopularLibs.GUAVA;
 import static dev.jeka.core.api.depmanagement.JkPopularLibs.JAVAX_SERVLET_API;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class JkQualifiedDependencySetTest {
 
@@ -21,5 +22,15 @@ class JkQualifiedDependencySetTest {
         assertEquals("provided", servlet.getQualifier() );
     }
 
+    // The md5 is the key of the dependency resolution cache: it must change when only a BOM changes
+    @Test
+    void md5_onlyBomChanges_differs() {
+        JkDependencySet deps = JkDependencySet.of().and("com.fasterxml.jackson.core:jackson-databind");
+        JkQualifiedDependencySet withBom1 = JkQualifiedDependencySet.of(deps
+                .withVersionProvider(JkVersionProvider.of().andBom("com.fasterxml.jackson:jackson-bom:2.17.0")));
+        JkQualifiedDependencySet withBom2 = JkQualifiedDependencySet.of(deps
+                .withVersionProvider(JkVersionProvider.of().andBom("com.fasterxml.jackson:jackson-bom:2.18.0")));
+        assertNotEquals(withBom1.md5(), withBom2.md5());
+    }
 
 }
