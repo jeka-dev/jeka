@@ -1,4 +1,14 @@
-# Next release
+# 0.11.71
+
+Fixes a regression of 0.11.70: some dependency versions did not follow the BOM.
+
+## Upgrade notes
+
+Some changes may need action when upgrading from 0.11.70:
+
+- **BOM precedence follows Maven:** when a BOM and one of the BOMs it imports manage the same module, the version of the BOM itself now wins. Only `pom` dependencies with scope `import` are imported BOMs.
+- **A Java target newer than the running JDK fails** when JeKa can't download the requested JDK, instead of producing classes of the running JDK's version.
+- **Kotlin 2.1.21 and later:** if you tried such a version, delete `~/.jeka/cache/kotlinc/<version>` and the `.jeka-work` dir of affected projects.
 
 ## Fixes
 
@@ -12,6 +22,10 @@
 
 **`app:` and Git**
 - `app: install` proposes `0.11.69`, not `0.11.69^{}`, for an annotated tag. `app: list` and `app: update` no longer take an app installed on an annotated tag for outdated.
+
+## API
+
+One change: for an annotated remote tag, `JkGit.Tag.getCommitHash()` returns the hash of the commit, not of the tag object.
 
 # 0.11.70
 
