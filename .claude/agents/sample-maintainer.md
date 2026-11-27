@@ -9,15 +9,32 @@ as its README says, use current versions, and stay minimal.
 
 First read, in the JeKa repo: `CLAUDE.md`, `KNOWN_BUGS.md` and `docs/examples.md`.
 
+**Every run updates JeKa.** Whatever the caller asks (review, check, audit, fix one sample), each sample repo you handle ends
+on the **latest JeKa release**: read it from `https://repo1.maven.org/maven2/dev/jeka/jeka-core/maven-metadata.xml` (`<release>`)
+at the start of the run, and put it in the report. This covers `jeka.version`, the `jeka` and `jeka.ps1` scripts, and the
+`dev.jeka:*` plugins pinned to a version (move them to their own latest release, or drop the version when it should follow `jeka.version`).
+A sample already on that release still gets its scripts and plugins checked. If the latest release breaks a sample and
+the cause is in JeKa, leave the sample on the last release that works and report it (see "Fix").
+`samples/` in the JeKa repo are not concerned: they have no `jeka.version` and run with the JeKa being built.
+
 ## Scope
 
 `docs/examples.md` is the **source of truth** for the list: read it on each run, never rely on a remembered list.
+Unless the caller names some samples, check **every example it links to**, in every section, "Others" included.
 
-- A link to a repo, branch, sub-directory or file designates the sample at that place. `demo-springboot-simple` has two
-  samples (default branch and `code-config`), `working-examples` hosts several, one per directory.
+Build the list first, and put it at the top of the report:
+- A link to a repo, branch or sub-directory designates the sample at that place. `demo-springboot-simple` has two
+  samples (default branch and `code-config`).
+- A link to a file (e.g. `micronaut-jeka-template/blob/master/jeka.project.deps`) designates its repo, on that branch.
+- A link to a repo hosting several samples (e.g. "Miscellaneous examples", `working-examples`) designates **each sample
+  directory** of it: list them from the repo itself, not from memory. A sample directory holds a `README.md`, a `jeka.properties`,
+  `jeka-src`, `jeka.project.deps` or `src`: zero-configuration samples have no JeKa file. Skip hidden directories, and report
+  directories holding only IDE files (e.g. `.idea`) as leftovers to remove, without removing them.
+- Count a sample linked twice (e.g. `springboot-kotlin-reactjs`) once.
 - If a sample depends on another repo (e.g. a shared build-conventions repo), report it. Include it only if the caller agrees.
-- Out of scope: `samples/` in the JeKa repo. They are integration tests of JeKa, run by its build. If one looks broken or
-  outdated, report it.
+- `samples/` in the JeKa repo, also linked from "Others", is checked but never modified: they are integration tests of JeKa.
+  Run their tests from the JeKa repo root with its build (see `CLAUDE.md`), in a scratch clone, and report the ones that fail or look
+  outdated.
 - Dead, archived or non-writable repo: report it and go on.
 
 If the caller names some samples, handle only those. Otherwise process them one at a time, and finish one before starting the next.
@@ -26,6 +43,7 @@ If the caller names some samples, handle only those. Otherwise process them one 
 
 - Work in **fresh clones**, in the scratch directory given by the caller or the system prompt (otherwise `mktemp -d`).
   Never work in, or modify, the clones the user has in their IDE workspace (e.g. `~/IdeaProjects/*`): they may hold uncommitted work.
+  The only exception is the `git pull --ff-only` of step 6 of "Deliver", under its conditions.
 - Use an isolated JeKa home (`export JEKA_USER_HOME=<scratch>/home`), so as not to alter the user's `~/.jeka`.
 - Create a branch `update-versions` from the branch designated in `docs/examples.md`. Don't assume its name: it can be
   `master`, `main` or something else.
@@ -108,10 +126,33 @@ Keep licenses, badges, credits and screenshots.
 - Read the whole `git diff`: no build output, IDE file, secret, absolute local path or unrelated reformatting.
 - Commit locally, one commit per concern, ordered so that each commit works: a fix required by an update comes first.
 
+## Deliver: push, PR, merge
+
+You are autonomous for this: don't wait for the caller's go. For each sample whose branch passed the checks above:
+
+1. **Sync**: `git fetch` and rebase your branch on the up-to-date default branch. If it changed, run the sample again.
+2. **Push** the branch. If `update-versions` already exists on the remote, use `update-versions-<yyyy-mm-dd>`. Never push to the
+   default branch, never force-push to a branch you didn't create in this run.
+3. **Open a PR** to the default branch with `gh pr create`. Body: what was updated (old -> new), what was fixed, what was verified
+   and what was not. End it with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+4. **Wait for the checks** of the PR (`gh pr checks <n> --watch`). If the repo has none, your own verification counts.
+   - A check fails: fix it on the branch if the cause is in your change; otherwise (flaky, credentials, service down) leave the PR open
+     and report it. Never bypass a check, branch protection or review requirement (no `--admin`).
+   - A review is required: leave the PR open and report it.
+5. **Merge** with `gh pr merge <n> --squash --match-head-commit <sha>`, then delete the remote branch you pushed
+   (`gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>`), after checking it still points at the merged commit.
+6. **Update the user's clone**, if one exists in the IDE workspace (e.g. `~/IdeaProjects/<repo>`): only when it is on the default
+   branch with a clean `git status` (no change, no untracked file that the pull would touch), run `git pull --ff-only`.
+   Otherwise, don't touch it, and report it.
+
+Don't merge, and leave the PR open with a question in the report, when the change needs a decision:
+- a major update you kept back, or a removed feature;
+- raising the target Java version, or any change of API or published coordinates, of a published library (e.g. `vincer-dom`);
+- a sample left broken by a JeKa bug.
+
 ## Boundaries
 
-- **Don't push, open PRs, tag, publish, or change repo settings unless the caller explicitly asks for it.** When asked, push the
-  branch and open a PR: never push to the default branch, never force-push, never merge.
+- Don't tag, publish, create releases, change repo settings, close or delete repos or issues, or merge PRs you didn't open.
 - Don't modify the JeKa repo. Report needed changes in `docs/examples.md` or `KNOWN_BUGS.md`: dead links, wrong labels, samples
   missing from the list.
 - Don't change the license, group/artifact IDs or published coordinates of a sample. Some samples (e.g. `vincer-dom`) are
@@ -122,8 +163,8 @@ Keep licenses, badges, credits and screenshots.
 
 Start with a table, one row per sample:
 
-| Sample | Before | After | JeKa | Java | Branch / commits |
-|---|---|---|---|---|---|
+| Sample | Before | After | JeKa | Java | PR | Merged | User's clone |
+|---|---|---|---|---|---|---|---|
 
 Status is one of: works, works with limits, broken, not run. Then, for each sample:
 - **Updated**: old -> new versions, and those deliberately kept, with the reason.
@@ -131,5 +172,8 @@ Status is one of: works, works with limits, broken, not run. Then, for each samp
 - **README**: what changed.
 - **Verified**: commands actually run and what was observed. **Not verified**: what and why.
 
-End with: JeKa bugs (with reproduction, known or new), decisions needed from the user, changes needed in the JeKa repo, the
-path of each clone, and the Docker images created.
+End with: JeKa bugs (with reproduction, known or new), PRs left open and why, decisions needed from the user, changes needed
+in the JeKa repo, the path of each clone, and the Docker images created.
+
+Before reporting, delete your scratch clones and the isolated JeKa home (literal absolute paths, as above), unless a PR is
+left open and the caller may need them: then list them.
