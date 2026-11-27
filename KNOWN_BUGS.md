@@ -21,5 +21,4 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261.
 
 ## Not bugs, but to plan
 - Material for MkDocs reaches end of life on 2027-05-05.
-- `gradle-plugin` is not on Maven Central yet; docs say it will be published in a future release.
 - Known limitation: core tests fail with `test.fork=false` (`IllegalAccessError` on package-private classes). In-process, `JkTestProcessor.launch` loads tests in a child of the JeKa classloader, so core main classes come from the running JeKa: two runtime packages. Only projects on the JeKa classpath, as core, are affected; `test.fork=true` (the default) avoids it. A fix would need child-first loading, which loads JeKa twice.

@@ -231,9 +231,6 @@ See a complete example at [demo-maven-multimodule](https://github.com/jeka-dev/d
 
 Gradle projects can be made source-runnable using the `gradle:` KBean from the [Gradle plugin](https://github.com/jeka-dev/jeka/tree/master/plugins/plugins.gradle).
 
-!!! note
-    The Gradle plugin is not yet available on Maven Central. It will be published in a future JeKa release.
-
 Add a `jeka.properties` file to your Gradle project root:
 
 ```properties

@@ -1,18 +1,12 @@
 ## Upgrade notes
 
-Some changes may need action when upgrading from 0.11.68:
-
-**Security and trust**
-- **Remote Git runs check trust before cloning.** `jeka -r <url> <command>` now asks for confirmation for untrusted URLs, even without `-p`. Without a terminal, it refuses and exits with code 1. In CI, set `JEKA_APP_URL_TRUSTED` or `jeka.app.url.trusted`.
-- **Trusted URLs match on whole path segments:** `github.com/foo` no longer trusts `github.com/foo-bar`. URLs trusted from SSH URLs must be trusted again.
+Some changes may need action when upgrading from 0.11.69:
 
 **Versions from Git**
 - **Released versions:** builds of a tagged, detached commit (as on CI) now remove `tagPrefix` from the version. Tags without the prefix are no longer used.
 - **Branch versions** no longer contain `/`: `feat/x` gives `feat-x-SNAPSHOT`.
 
 **Dependencies and publication**
-- **Published POM and Ivy files contain the runtime classpath.** `[compile-only]` dependencies are no longer published, and `[runtime]` ones are, with scope `runtime`.
-- **BOM versions apply.** Versions managed by a BOM were ignored; they now apply, while versions declared directly still win, as in Maven.
 - **Properties of a child POM** override those of its parents in inherited dependency management, as in Maven.
 - **A sibling module without a version** now fails with "do not specify version", instead of being dropped from the POM.
 - **The parent BOM** lists each child under the module ID it is published with: `@maven.pub.moduleId`, or else `@project.moduleId`.
@@ -20,11 +14,9 @@ Some changes may need action when upgrading from 0.11.68:
 **Build and packaging**
 - **Files put in `jeka-output/classes` before compilation are wiped**, as the class dir is now cleaned before compiling.
 - **A `META-INF/MANIFEST.MF` resource is merged** under the generated manifest, in regular and FAT jars: the generated attributes prevail when both set the same one.
-- **Shaded jars** relocate only the packages of the dependencies: application and JDK packages keep their names. `META-INF/services` files are now relocated and merged. Class names in other text files (e.g. `logback.xml`) are not relocated.
 - **`pack` no longer runs tests for wars.**
 - **`jeka.jdk.N` wins over the JDK cache** for jpackage, jlink, jdeps and running projects.
 - **Forked tests on a Java target below 21** fail before starting, with a message suggesting `@project.test.fork=false`, instead of an `UnsupportedClassVersionError`.
-- Bases built with an older version may hold a stale manifest: run `--clean-work` once.
 
 **Command line, scripts and `app:`**
 - **`-cb=<location>` fails when no declared child base matches**, instead of only warning. Use `--force` to keep the warning. The location may use `/` or `\` on any OS, and a trailing `/` is ignored.
@@ -32,8 +24,6 @@ Some changes may need action when upgrading from 0.11.68:
 - **App scripts already installed** keep their old launch line until `app: update`.
 - **`-p` on a jar without `Main-Class`** fails with a message suggesting `jeka -c -p`.
 - **Options after `-p` go to the program:** with the `jeka` and `jeka.ps1` scripts, `-c`, `-v` and `-q` written after `-p` are passed to the program, and no longer clean `jeka-output` or change JeKa's log level. Put them before `-p` to act on JeKa.
-- **Scaffolding keeps existing files**, including `jeka` and `jeka.ps1`. Use `setup: updateLocalScripts` to refresh the scripts.
-- **KBean property validation is active again:** unknown properties warn, or fail with `--strict`.
 - **`setup: name` is removed**: it was never used. `jeka setup: name=...` now fails with `Unmatched argument`.
 
 ## New features
@@ -45,11 +35,7 @@ Some changes may need action when upgrading from 0.11.68:
 
 **Packaging**
 - Packing no longer keeps the classes and jar entries of deleted files.
-- Shading works with classes compiled for Java 24 and higher (maven-shade-plugin 3.6.2).
-- Shaded jars no longer break `ServiceLoader`, nor relocate JDK packages such as `org.xml.sax`.
-- A failed shade no longer leaves a partial jar that could be published.
-- FAT jars no longer reuse the manifest of a previous build, and their manifest is written first.
-- `bundle: customJre=true` works for non-modular projects, and `jdeps` accepts multi-release jars.
+- FAT jars write their manifest first.
 - `bundle` (jpackage, jlink, jdeps) uses `jeka.jdk.N`, and `jdeps` analyzes the classes of the bundled Java version.
 
 **Dependencies and Maven**
@@ -58,14 +44,8 @@ Some changes may need action when upgrading from 0.11.68:
 - BOM versions are resolved from all parent POMs.
 - Exclusions apply to transitive dependencies only, so `!com.google.guava:*` no longer excludes guava itself.
 - A deps file with only `[processor]`, or an empty one, is not taken for the legacy format.
-- `maven: migrateDeps` generates valid dependencies and Java code: provided and system scopes, classifiers, exclusions, BOMs and managed versions.
-- `!!` global exclusions in `jeka.project.deps`, and `@pom` in `andBom`.
-- `maven: info` resolves BOMs from the download repositories.
 
 **Properties and command line**
-- `::shorthand`, `jeka.cmd._append` and download repositories work again from `jeka.properties` and `global.properties`.
-- `${x}` can reference environment, system, parent and global values, and an undefined reference gives a clear error.
-- Properties of an unknown KBean warn instead of crashing.
 - `-p` skips `*-sources.jar` and `*-javadoc.jar`.
 - `jeka -r <dir> -c` cleans `<dir>/jeka-output`, not the working dir's.
 - Installed app scripts pass `*` and spaces as is.
@@ -75,24 +55,17 @@ Some changes may need action when upgrading from 0.11.68:
 - Quoted words stay together in `jeka.cmd.*` shorthands run by the scripts with `-p`.
 
 **KBeans and engine**
-- `app:` and `setup:` ignore the `jeka.properties` of the current project.
-- Output of short-lived processes, such as Git commands, is no longer lost, and non-ASCII characters are no longer corrupted.
-- `@JkInject("../x")` works in a child module built from its parent.
 - A child can inject its parent with `@JkInjectRunbase` when it is built from that parent.
 - All annotations on a line of `jeka-src` are read, as several `@JkDep` on one line.
-- `$groupId`, `$artifactId` and `$version` work in Docker image names set from properties or the command line.
 - `docker.jvmBaseImage` is used again.
-- `intellij: syncAll` and `eclipse: all` work again, and sync each module once from a parent.
-- `scaffold.generateLibsFolders=true` works again, and `scaffold.kind=EMPTY` no longer writes `@custom=on`.
+- `intellij: syncAll` and `eclipse: all` sync each module once from a parent.
+- `scaffold.kind=EMPTY` no longer writes `@custom=on`.
 - Scaffolded projects have a `public class Main`, so javadoc is no longer empty.
-- Building a detached commit without tag uses `<short hash>-SNAPSHOT` as version, instead of failing. `Git-branch` is omitted from the manifest on a detached HEAD.
+- `Git-branch` is omitted from the manifest on a detached HEAD.
 - Forked compilation for Java 8 no longer passes `-J--add-exports`.
-- Forked tests no longer need jansi on the classpath.
-- Central Portal publication times out after 15 minutes (it was about 10 days).
 - JaCoCo defaults to 0.8.14, which supports Java 25.
 - The SonarQube plugin passes the project base dir and source paths without `..` segments, and has tests.
-- A warning tells when test include patterns match no test.
-- Trust of remote Git URLs is saved on Linux too, and trusted URLs are appended without a leading space.
+- Trusted URLs are appended without a leading space.
 
 **Messages**
 - Clear errors when Maven is missing, Git has no commit or tag, the main jar is missing at publication, a property references itself, an `app:` command runs without a terminal, or a BOM child has no module ID.
@@ -105,9 +78,8 @@ Some changes may need action when upgrading from 0.11.68:
 ## API
 
 All additions:
-- `JkLocalProjectDependency.withCoordinate/getCoordinate`, `JkDependencySet.replaceLocalProjectDependenciesByCoordinates`.
+- `JkLocalProjectDependency.getCoordinate`, `JkDependencySet.replaceLocalProjectDependenciesByCoordinates`.
 - `JkJavaCompilerToolChain.getJdks`, `JkJdeps.setMultiRelease`, `JkNodeJs.setShowOutput`.
-- `JkMavenPublication.getManagedDependencies()`.
 - The `app:` fields `tag` and `force`.
 - `JkInternalEmbeddedClassloader.embeddedLibs` is now public.
 
@@ -115,16 +87,11 @@ One change: `JkUtilsSystem.CONSOLE` is null when output is redirected on JDK 22+
 
 ## Documentation
 
-- Tutorials, KBean reference, properties, API pages and plugin READMEs are corrected, after an audit and a test by a newcomer.
-- New tutorial: [migrate a Maven project](https://jeka-dev.github.io/jeka/tutorials/migrate-from-maven/).
-- Pages on installation, `app:`, trust, Docker and native images are completed.
 - Micronaut and similar frameworks need `FAT` jars, not `SHADE`: the docs now say so.
 - The BUNDLE runtime of `app: install` is described as it works.
 
 ## Contributing
 
-- JeKa is bootstrapped with `bootstrap.sh` or `bootstrap.ps1` instead of Ant. `CONTRIBUTING.md` is updated.
-- Known pending bugs are listed in [KNOWN_BUGS.md](https://github.com/jeka-dev/jeka/blob/master/KNOWN_BUGS.md).
 - CI sets `JEKA_RUN_SLOW_TEST`, so slow tests such as the Docker native one run. CI takes longer.
 - Tests relying on Maven Central are skipped, not failed, when it does not answer.
 - Sample tests no longer need the repo folder to be named `jeka`, and the Node.js plugin has tests.
