@@ -7,6 +7,7 @@
 ## Fixes
 
 - **Scaffolded README title:** `base: scaffold scaffold.kind=APP` and `project: scaffold` write a `README.md` titled with the name of the base dir, instead of a bare `#` line.
+- **Scaffolded files end with a newline:** `.gitignore`, the Java sources and the other files written by `base: scaffold` and `project: scaffold` lacked a final newline, so a line appended to `.gitignore` joined the last one.
 
 ## API
 

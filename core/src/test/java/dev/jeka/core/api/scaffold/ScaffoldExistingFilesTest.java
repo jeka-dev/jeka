@@ -107,7 +107,34 @@ class ScaffoldExistingFilesTest {
         JkPathFile.of(gitIgnore).write("/mine");
         projectScaffold(baseDir).run();
         projectScaffold(baseDir).run();
-        assertEquals(List.of("/mine", "/jeka-output", "/.jeka-work"), JkPathFile.of(gitIgnore).readAsLines());
+        assertEquals("/mine\n/jeka-output\n/.jeka-work\n", read(gitIgnore));
+    }
+
+    @Test
+    void project_allKinds_generatedFilesEndWithNewline() {
+        for (JkProjectScaffold.Kind kind : JkProjectScaffold.Kind.values()) {
+            Path dir = baseDir.resolve(kind.name());
+            projectScaffold(dir).setKind(kind).setGenerateLibsFolders(true).run();
+            assertEndWithNewline(dir);
+        }
+    }
+
+    @Test
+    void base_allKinds_generatedFilesEndWithNewline() {
+        for (JkBaseScaffold.Kind kind : JkBaseScaffold.Kind.values()) {
+            Path dir = baseDir.resolve(kind.name());
+            BaseKBean.BaseScaffoldOptions options = new BaseKBean.BaseScaffoldOptions();
+            options.kind = kind;
+            JkBaseScaffold.of(dir, options).setJekaVersion(JkScaffold.UNSPECIFIED_JEKA_VERSION).run();
+            assertEndWithNewline(dir);
+        }
+    }
+
+    private static void assertEndWithNewline(Path dir) {
+        for (Path file : files(dir)) {
+            String content = read(file);
+            assertTrue(content.isEmpty() || content.endsWith("\n"), file + " does not end with a newline");
+        }
     }
 
     private void assertExistingFilesKept(Path dir, Runnable scaffold) {

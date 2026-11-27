@@ -75,13 +75,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Workaround:** set `jeka.jdk.8` to an installed JDK.
 - **Evidence:** sample-maintainer agent, on vincer-dom.
 
-### Scaffolded `.gitignore` and `App.java` have no final newline
-- **Symptom:** after `base: scaffold scaffold.kind=APP`, the last line of `.gitignore` (`/.jeka-work`) and of `jeka-src/app/App.java` has no newline: `git diff` shows `\ No newline at end of file`, and a line appended to `.gitignore` joins the last one.
-- **Cause:** `JkScaffold` appends each ignore line as `"\n" + line`, and `App.snippet` ends with `}` and no newline.
-- **Where:** `JkScaffold.java:404` and `:407`; `core/src/main/java/dev/jeka/core/tool/builtins/base/App.snippet`.
-- **Evidence:** naive agent, on 0.11.71 (2026-11-27); both read from source on master.
-
-
 ## Tests and CI
 
 - **Outdated samples:** `samples/samples.baseapp` and `samples/samples.project-api` set `jeka.java.version=17`, below the Java 21 JeKa needs to run. `samples/samples.project-flat-facade-api` has no command running its test, and outdated dependencies. *sample-maintainer agent.*

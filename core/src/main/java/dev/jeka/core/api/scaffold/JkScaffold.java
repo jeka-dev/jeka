@@ -192,6 +192,7 @@ public abstract class JkScaffold {
     /**
      * Writes the specified content to the specified file, unless the file already exists.
      * In this case, the file is kept untouched and the user is told about it.
+     * A non-empty content is ended with a newline, if it does not end with one.
      *
      * @return <code>true</code> if the file has been written.
      */
@@ -199,7 +200,9 @@ public abstract class JkScaffold {
         if (keepExisting(file)) {
             return false;
         }
-        JkPathFile.of(file).createIfNotExist().write(content);
+        // Resources read with JkUtilsIO.read lose their final newline
+        String endedContent = content.isEmpty() || content.endsWith("\n") ? content : content + "\n";
+        JkPathFile.of(file).createIfNotExist().write(endedContent);
         return true;
     }
 
@@ -408,13 +411,21 @@ public abstract class JkScaffold {
     private void createOrUpdateGitIgnore() {
         JkPathFile file = JkPathFile.of(baseDir.resolve(".gitignore"));
         file.createIfNotExist();
+        String content = file.readAsString();
         List<String> lines = file.readAsLines();
-        if (lines.stream().noneMatch(line -> JEKA_OUTPUT_IGNORE.equals(line.trim()))) {
-            file.write("\n" + JEKA_OUTPUT_IGNORE, StandardOpenOption.APPEND);
+        StringBuilder missing = new StringBuilder();
+        for (String ignore : List.of(JEKA_OUTPUT_IGNORE, JEKA_WORK_IGNORE)) {
+            if (lines.stream().noneMatch(line -> ignore.equals(line.trim()))) {
+                missing.append(ignore).append("\n");
+            }
         }
-        if (lines.stream().noneMatch(line -> JEKA_WORK_IGNORE.equals(line.trim()))) {
-            file.write("\n" + JEKA_WORK_IGNORE, StandardOpenOption.APPEND);
+        if (missing.length() == 0) {
+            return;
         }
+        if (!content.isEmpty() && !content.endsWith("\n")) {
+            missing.insert(0, "\n");
+        }
+        file.write(missing.toString(), StandardOpenOption.APPEND);
     }
 
     public static class JkFileEntry {
