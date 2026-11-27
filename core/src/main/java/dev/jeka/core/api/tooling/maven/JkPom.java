@@ -208,8 +208,9 @@ public final class JkPom {
      * Converts the current POM representation into a {@link JkVersionProvider}, which manages
      * version information for dependencies within the POM, including those defined in its
      * dependency management section. If there is no dependency management section, an empty
-     * version provider is returned. Dependencies with a type of "pom" are identified as imported
-     * BOMs and are not included in the returned provider.
+     * version provider is returned. Dependencies with a type of "pom" and a scope of "import" are
+     * identified as imported BOMs: their versions are included, unless this POM or a previously imported
+     * BOM already manages the same module.
      * <p>
      * Important: Ensure to use this method on an effectivePom (obtained with #toEffectivePom) to
      * get full resolution.
@@ -234,18 +235,25 @@ public final class JkPom {
         }
         final JkQualifiedDependencySet scopedDependencies = dependencies(dependenciesEl, getProperties());
 
+        // As in Maven, only dependencies of type 'pom' and scope 'import' are imported BOMs.
         List<JkCoordinate> importedBoms = new LinkedList<>();
-        for (final JkCoordinateDependency coordinateDependency : scopedDependencies.getCoordinateDependencies()) {
-
-            JkCoordinate coordinate = coordinateDependency.getCoordinate();
-            if (!"pom".equals(coordinate.getArtifactSpecification().getType())) {
-                coordinates.add(coordinate);
-            } else {
+        for (final JkQualifiedDependency qualifiedDependency : scopedDependencies.getEntries()) {
+            if (!(qualifiedDependency.getDependency() instanceof JkCoordinateDependency)) {
+                continue;
+            }
+            JkCoordinate coordinate = ((JkCoordinateDependency) qualifiedDependency.getDependency()).getCoordinate();
+            if ("pom".equals(coordinate.getArtifactSpecification().getType())
+                    && IMPORT_SCOPE.equals(qualifiedDependency.getQualifier())) {
                 importedBoms.add(coordinate);
+            } else {
+                coordinates.add(coordinate);
             }
         }
 
-        // Import recursively boms
+        // Import recursively boms. As in Maven, versions declared in this POM win over imported ones,
+        // and the first imported BOM wins over the next ones.
+        Set<JkModuleId> managedModules = new HashSet<>();
+        coordinates.forEach(coordinate -> managedModules.add(coordinate.getModuleId()));
         importedBoms.forEach(pomCoordinate -> {
             pomCoordinate = pomCoordinate.withType("pom");
             Document resolvedImportedBomDoc = new PomResolver(repos).effectivePom(pomCoordinate);
@@ -254,8 +262,12 @@ public final class JkPom {
             }
             resolvedCoordinates.add(pomCoordinate);
             JkLog.debug("Resolving bom: " + pomCoordinate);
-            JkPom resolvedImportedBom = new JkPom(resolvedImportedBomDoc);;
-            coordinates.addAll(resolvedImportedBom.toVersionProvider(repos, resolvedCoordinates).toList());
+            JkPom resolvedImportedBom = new JkPom(resolvedImportedBomDoc);
+            for (JkCoordinate coordinate : resolvedImportedBom.toVersionProvider(repos, resolvedCoordinates).toList()) {
+                if (managedModules.add(coordinate.getModuleId())) {
+                    coordinates.add(coordinate);
+                }
+            }
         });
 
         return JkVersionProvider.of(coordinates);

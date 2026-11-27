@@ -27,12 +27,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Publication and Maven
 
-### Some versions no longer follow the BOM (regression in 0.11.70)
-- **Symptom:** with `org.springframework.boot:spring-boot-dependencies:3.5.16@pom` in `[version]` and `httpclient5` without version, `project: depTree` gives `httpclient5:5.3.1` with 0.11.70 and master, instead of 5.5.2 with 0.11.61 to 0.11.69. With Spring Boot 4.2.0, Jackson comes out as 3.2.3 instead of 3.1.8.
-- **Cause:** likely the `PomResolver.mergeParents` change of #269 (08f84c825). Not proven.
-- **Where:** `PomResolver`.
-- **Evidence:** reproduced with 0.11.69 and 0.11.70, on a fresh project with these two lines in `jeka.project.deps`; Spring Boot 4 case by the sample-maintainer agent.
-
 ### The dependency resolution cache ignores BOM changes
 - **Symptom:** when only a BOM version changes, `.jeka-work/project-dep-resolution-cache` keeps serving the old classpath. Deleting `.jeka-work` works around it.
 - **Cause:** `JkVersionProvider.hashCode()` and `equals()` don't include the BOMs.
