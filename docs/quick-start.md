@@ -85,8 +85,13 @@ This displays the following text on the console:
 ```
 Hello JeKa !
 ```
-`Script` extends `KBean`: JeKa calls such a class a *KBean*. Its public fields are parameters, set on the command line
-as `name=value`, and its public void methods are commands.
+
+!!! note "First run needs network access"
+    `jeka.properties` pins the versions to use: `jeka.version` for JeKa, `jeka.java.version` for the JDK.
+    Whether you run the global `jeka` or the project's `./jeka` script, JeKa runs with the pinned version, so the first
+    run may download that JeKa distribution, the JDK (about 200 MB) and the Ivy library used to resolve dependencies.
+    They are cached in `~/.jeka/cache` for the next runs (in `$JEKA_USER_HOME/cache` if you set the `JEKA_USER_HOME`
+    environment variable to move the JeKa user directory). See [Properties](reference/properties.md#standard-properties).
 
 ### Write Extra Methods
 You can add extra methods relying or not on third-party dependencies. Add the `header()` method, the two `@JkDep`
@@ -175,6 +180,8 @@ Remove the `jeka.kbean.default=script2` line before going on: the next examples 
 
 ### KBeans
 
+### KBeans
+
 Every script class extends `KBean`. KBeans can be provided as source code (in the `jeka-src` directory, as above)
 or as compiled classes available in the classpath.
 
@@ -189,8 +196,6 @@ jeka.java.version=21
 ```
 On the next run, JeKa uses that JDK, and downloads it first if it is not installed yet.
 To check which JDK is in use, run `jeka --inspect` and look at `Java Version`.
-This setting only applies to this directory: the next section starts in a new directory, from a new scaffold with its
-own `jeka.properties`, so you don't need to change it back.
 
 ### Source-Runnable Applications
 
@@ -206,9 +211,6 @@ Run a KBean method from a remote Git repository:
 jeka -r https://github.com/jeka-dev/demo-base-application base: info
 ```
 JeKa clones the repository, then `base: info` shows its build info: main class, class files, classpath, manifest...
-The clone goes into `~/.jeka/cache/git/` (here `~/.jeka/cache/git/github.com_jeka-dev_demo-base-application`),
-not into the current directory. The next runs reuse it without fetching: add `-u` (`jeka -ru <git-url> ...`) to
-clone it again with the latest commits.
 On the first lines, `Module Id` is `null` and `Version` is `UNSPECIFIED-SNAPSHOT`: that is normal, this demo declares neither.
 
 !!! note "Trusted repositories"
@@ -269,17 +271,7 @@ library that `App.java` declares with `@JkDep`.
 The JAR is compiled for the JDK set in `jeka.java.version` (25 in the scaffold). `runJar` uses that JDK; to run the
 JAR yourself with `java -jar jeka-output/<directory-name>.jar`, use that JDK or a newer one, or lower
 `jeka.java.version` and run `jeka base: pack` again (see [Change Java Version](#change-java-version)): the JAR
-already built stays compiled for the former version. Otherwise `java` fails, here with Java 21 on the `PATH`:
-```
-Error: LinkageError occurred while loading main class app.App
-	java.lang.UnsupportedClassVersionError: app/App has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0
-```
-The cause is on the second line: class file version 69 is Java 25, 65 is Java 21.
-
-`runJar` logs a line like `start-program >java -Dhttp.nonProxyHosts=... -jar .../myapp.jar`. The `java` there is
-the `bin/java` of that JDK, not the `java` on your `PATH`: run `jeka -v base: runJar` to see its full path on the
-`command path` line. The `-D` options are the proxy settings of the JVM running JeKa, which JeKa passes on to the
-program; you didn't set them.
+already built stays compiled for the former version. Otherwise `java` fails with `UnsupportedClassVersionError`.
 
 JeKa may have downloaded that JDK itself: `jeka --inspect` shows where it is, on the `Java Home` line.
 Run its `bin/java` directly:
@@ -290,11 +282,6 @@ jeka --inspect | grep 'Java Home'    # e.g. Java Home          : /Users/me/.jeka
 Or in one line, without copying the path:
 ```bash
 "$(jeka --inspect | grep 'Java Home' | sed 's/.*: //')/bin/java" -jar jeka-output/<directory-name>.jar
-```
-In PowerShell, on Windows:
-```powershell
-$javaHome = (jeka --inspect | Select-String 'Java Home').Line -replace '^.*?: ', ''
-& "$javaHome\bin\java" -jar jeka-output\<directory-name>.jar
 ```
 
 The generated `jeka.properties` sets `jeka.kbean.default=base`, so you can leave out `base:` in this project:
