@@ -39,21 +39,24 @@ public class JkDockerJvmBuildIT {
         dockerJvmBuild.dockerfileTemplate
                 .moveCursorBefore("COPY classpath.txt")
                 .add( "# rem for testing 'insertBefore'");
-        String imageName = "jk-testunit-jvm";
+        String imageName = "jk-test-unit-jvm";
 
         System.out.println(dockerJvmBuild.renderInfo());
 
         // now run the image
         Path contextDir =JkUtilsPath.createTempDirectory("jk-test");
         System.out.println(contextDir);
-        dockerJvmBuild.buildImage(contextDir, imageName);
-        JkDocker.of().addParams("run", imageName)
-                .setLogCommand(true)
-                .addParams("--version")
-                .setInheritIO(false)
-                .setLogWithJekaDecorator(true)
-                .exec();
-        JkDocker.of().addParams("image", "rm", "--force", imageName);
+        try {
+            dockerJvmBuild.buildImage(contextDir, imageName);
+            JkDocker.of().addParams("run", "--rm", imageName)
+                    .setLogCommand(true)
+                    .addParams("--version")
+                    .setInheritIO(false)
+                    .setLogWithJekaDecorator(true)
+                    .exec();
+        } finally {
+            JkDocker.of().removeImage(imageName);
+        }
     }
 
     private JkProject project() {

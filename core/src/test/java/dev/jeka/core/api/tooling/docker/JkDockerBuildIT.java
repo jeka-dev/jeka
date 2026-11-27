@@ -58,14 +58,16 @@ class JkDockerBuildIT {
 
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
         System.out.println("Cereating buidcontext in " + contextDir);
-        dockerBuild.buildImage(contextDir, imageName);
-        JkDocker.of().addParams("run", imageName)
-                .setInheritIO(false)
-                .addParams("lulu")
-                .setLogWithJekaDecorator(true).
-                exec();
-        JkDocker.of().addParams("image", "rm", "--force", imageName)
-                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
+        try {
+            dockerBuild.buildImage(contextDir, imageName);
+            JkDocker.of().addParams("run", "--rm", imageName)
+                    .setInheritIO(false)
+                    .addParams("lulu")
+                    .setLogWithJekaDecorator(true).
+                    exec();
+        } finally {
+            JkDocker.of().removeImage(imageName);
+        }
         System.out.println("Generated in " + contextDir);
     }
 
@@ -91,7 +93,12 @@ class JkDockerBuildIT {
                 .add("RUN keytool -import -file /app/my-cert.jks -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit");
         System.out.println(dockerBuild.renderDockerfile());
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
-        dockerBuild.buildImage(contextDir, "my-demo-image");
+        String imageName = "jk-test-java-from-scratch";
+        try {
+            dockerBuild.buildImage(contextDir, imageName);
+        } finally {
+            JkDocker.of().removeImage(imageName);
+        }
         System.out.println(contextDir);
     }
 
@@ -112,17 +119,19 @@ class JkDockerBuildIT {
         dockerBuild.dockerfileTemplate.moveCursorBeforeUserNonRoot().moveCursorNext();
         dockerBuild.dockerfileTemplate.addEntrypoint("echo", "toto");
         dockerBuild.setBaseImage(baseImage);
-        String imageName = "jk-test-simplenonroot-" + baseImage;
+        String imageName = "jk-test-simplenonroot-" + baseImage.replace(':', '-');
         System.out.println("----------- raw docker file");
         System.out.println(dockerBuild.dockerfileTemplate.render(dockerBuild));
         System.out.println("----------- raw docker file");
         System.out.println(dockerBuild.renderDockerfile());
         Path contextDir = JkUtilsPath.createTempDirectory("jk-docker-ctx");
-        dockerBuild.buildImage(contextDir, imageName);
-        JkDocker.of().addParams("run", imageName)
-                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
-        JkDocker.of().addParams("image", "rm", "--force", imageName)
-                .setInheritIO(false).setLogWithJekaDecorator(true).exec();
+        try {
+            dockerBuild.buildImage(contextDir, imageName);
+            JkDocker.of().addParams("run", "--rm", imageName)
+                    .setInheritIO(false).setLogWithJekaDecorator(true).exec();
+        } finally {
+            JkDocker.of().removeImage(imageName);
+        }
     }
 
 }

@@ -49,7 +49,13 @@ class SamplesTest {
         // Run Self-App
         run("samples.baseapp", "-Djeka.java.version=25 base: test pack -c");
         if (JkDocker.of().isPresent()) {
-            run("samples.baseapp", "-Djeka.java.version=25 docker: build -c");
+            // A name of our own, so that the test can't replace an image of the user, and can remove it
+            String imageName = "jk-test-samples-baseapp";
+            try {
+                run("samples.baseapp", "-Djeka.java.version=25 docker: build jvmImageName=" + imageName + " -c");
+            } finally {
+                JkDocker.of().removeImage(imageName);
+            }
         }
     }
 

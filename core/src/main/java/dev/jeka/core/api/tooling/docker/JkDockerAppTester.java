@@ -47,6 +47,8 @@ public class JkDockerAppTester extends JkApplicationTester {
 
     private String effectiveImageName;
 
+    private boolean removeImage = true;
+
     private JkDockerAppTester(JkDockerBuild dockerBuild, Consumer<String> tester) {
         this.dockerBuild = dockerBuild;
         this.tester = tester;
@@ -96,6 +98,9 @@ public class JkDockerAppTester extends JkApplicationTester {
         JkDocker.of().addParams("rm", "-f", containerName)
                 .setInheritIO(false).setLogWithJekaDecorator(true)
                 .exec();
+        if (removeImage) {
+            JkDocker.of().removeImage(effectiveImageName);
+        }
     }
 
     @Override
@@ -134,6 +139,15 @@ public class JkDockerAppTester extends JkApplicationTester {
 
     public JkDockerAppTester setImageName(String imageName) {
         this.imageName = imageName;
+        return this;
+    }
+
+    /**
+     * Sets whether the image built for the test is removed once the application is stopped. Default is <code>true</code>,
+     * as the image is built for the test only.
+     */
+    public JkDockerAppTester setRemoveImage(boolean removeImage) {
+        this.removeImage = removeImage;
         return this;
     }
 

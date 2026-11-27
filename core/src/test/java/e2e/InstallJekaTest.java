@@ -32,7 +32,7 @@ import java.time.Instant;
 @Disabled
 class InstallJekaTest {
 
-    private static final String IMAGE_NAME = "jeka-install-ubuntu";
+    private static final String IMAGE_NAME = "jk-test-install-ubuntu";
 
     private static final Path DOCKER_DIR = dockerDir();
 
@@ -65,9 +65,13 @@ class InstallJekaTest {
                 .setInheritIO(true)
                 .exec();
 
-        JkDocker.of().addParams("run", "-rm", "-t", IMAGE_NAME)
-                .setWorkingDir(DOCKER_DIR)
-                .exec();
+        try {
+            JkDocker.of().addParams("run", "--rm", "-t", IMAGE_NAME)
+                    .setWorkingDir(DOCKER_DIR)
+                    .exec();
+        } finally {
+            JkDocker.of().removeImage(IMAGE_NAME);
+        }
     }
 
     private static Path dockerDir() {

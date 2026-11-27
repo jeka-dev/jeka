@@ -1,3 +1,19 @@
+# Next release
+
+## Changes
+
+- **`JkDockerAppTester` removes the image it built** for the test once the application is stopped. E2e tests run with it, as those created by `DockerKBean.createJvmAppTester`, used to leave a `<image>-e2e-test` image after each run. Use `setRemoveImage(false)` to keep it.
+
+## API
+
+All additions:
+- `JkDocker.hasLocalImage`, `JkDocker.removeImage` and `JkDocker.removeImagesStartingWith`.
+- `JkDockerAppTester.setRemoveImage`.
+
+## Contributing
+
+- Tests building Docker images name them `jk-test-...` and remove them, even when they fail. They no longer replace an image of the user, such as `samples.baseapp:latest` or the demo-cowsay one.
+
 # 0.11.71
 
 Fixes a regression of 0.11.70: some dependency versions did not follow the BOM.
