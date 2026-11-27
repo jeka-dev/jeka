@@ -280,7 +280,7 @@ public final class JkProjectScaffold extends JkScaffold {
     }
 
     private void generateReadme() {
-        String content = JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md"));
+        String content = interpolateReadme(JkUtilsIO.read(JkProjectScaffold.class.getResource("README.md")));
         writeIfAbsent(project.getBaseDir().resolve("README.md"), content);
     }
 

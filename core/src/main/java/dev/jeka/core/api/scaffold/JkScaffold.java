@@ -181,6 +181,15 @@ public abstract class JkScaffold {
     }
 
     /**
+     * Returns the specified README template, with <code>${projectName}</code> replaced by the name of the base dir.
+     */
+    protected String interpolateReadme(String readmeTemplate) {
+        Path dirName = baseDir.toAbsolutePath().normalize().getFileName();
+        String projectName = dirName == null ? "" : dirName.toString();
+        return readmeTemplate.replace("${projectName}", projectName);
+    }
+
+    /**
      * Writes the specified content to the specified file, unless the file already exists.
      * In this case, the file is kept untouched and the user is told about it.
      *

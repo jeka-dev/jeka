@@ -4,11 +4,16 @@
 
 - **`JkDockerAppTester` removes the image it built** for the test once the application is stopped. E2e tests run with it, as those created by `DockerKBean.createJvmAppTester`, used to leave a `<image>-e2e-test` image after each run. Use `setRemoveImage(false)` to keep it.
 
+## Fixes
+
+- **Scaffolded README title:** `base: scaffold scaffold.kind=APP` and `project: scaffold` write a `README.md` titled with the name of the base dir, instead of a bare `#` line.
+
 ## API
 
 All additions:
 - `JkDocker.hasLocalImage`, `JkDocker.removeImage` and `JkDocker.removeImagesStartingWith`.
 - `JkDockerAppTester.setRemoveImage`.
+- `JkScaffold.interpolateReadme` (protected).
 
 ## Contributing
 

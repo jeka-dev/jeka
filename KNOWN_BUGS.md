@@ -75,14 +75,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Workaround:** set `jeka.jdk.8` to an installed JDK.
 - **Evidence:** sample-maintainer agent, on vincer-dom.
 
-### `base: scaffold scaffold.kind=APP` writes a README with an empty title
-- **Symptom:** the generated `README.md` starts with a bare `#` line.
-- **Cause:** the template's first line is `#`, copied as is.
-- **Where:** `core/src/main/java/dev/jeka/core/tool/builtins/base/README.md:1`, copied by `JkBaseScaffold.generateReadme`.
-- **Workaround:** edit the title by hand.
-- **When fixed:** put a real title in the template, or fill in the directory name.
-- **Evidence:** naive agent and doc-writer agent, reproduced on 0.11.71 (2026-11-27); template read from source on master.
-
 ### Scaffolded `.gitignore` and `App.java` have no final newline
 - **Symptom:** after `base: scaffold scaffold.kind=APP`, the last line of `.gitignore` (`/.jeka-work`) and of `jeka-src/app/App.java` has no newline: `git diff` shows `\ No newline at end of file`, and a line appended to `.gitignore` joins the last one.
 - **Cause:** `JkScaffold` appends each ignore line as `"\n" + line`, and `App.snippet` ends with `}` and no newline.
