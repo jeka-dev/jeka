@@ -130,8 +130,37 @@ On the first run, JeKa shows `Resolving dependencies...` while it downloads the 
 !!! note
     - You can define multiple script methods in `Script.java`. These methods must be public, non-static, take no arguments, and return `void`.
     - You can rename `Script.java` to any name and place it in any package.
-    - You can create multiple script classes. To run a specific script, use the class name, e.g., `jeka script2: hi`.
     - You can also [use classes provided by JeKa](reference/api-intro.md) without explicitly declaring them.
+
+### Write Several Script Classes
+
+Add a second class next to `Script.java`:
+```java title="jeka-src/Script2.java"
+import dev.jeka.core.tool.KBean;
+
+class Script2 extends KBean {
+
+    public void hi() {
+        System.out.println("Hi from Script2");
+    }
+}
+```
+Call its methods with the KBean name as prefix. The name is the class name with a lowercase first letter
+(a `KBean` suffix is dropped, as in `ProjectKBean` → `project`):
+```bash
+jeka script2: hi
+```
+`@JkDoc` is optional: it only adds a description to `jeka --doc`.
+
+Methods called without a prefix (`jeka hello`) go to the *default KBean*: the first class found in `jeka-src`,
+root classes before those in packages, then in alphabetical order (here `Script`, before `Script2`).
+`jeka --doc` shows it on its first line (`Default KBean script: ...`). To choose another one, set it in `jeka.properties`:
+```properties title="jeka.properties"
+jeka.kbean.default=script2
+```
+Then `jeka hi` runs `Script2`, and the methods of `Script` need their prefix: `jeka script: hello`.
+Without it, `jeka hello` fails with `Unmatched argument at index 0: 'hello'`.
+See [Default KBean](reference/kbeans.md#default-kbean).
 
 ### KBeans
 
@@ -162,7 +191,8 @@ Run a KBean method from a remote Git repository:
 ```bash
 jeka -r https://github.com/jeka-dev/demo-base-application base: info
 ```
-JeKa clones the repository, then `base: info` shows its build info: module id, main class, classpath, manifest...
+JeKa clones the repository, then `base: info` shows its build info: main class, class files, classpath, manifest...
+On the first lines, `Module Id` is `null` and `Version` is `UNSPECIFIED-SNAPSHOT`: that is normal, this demo declares neither.
 
 !!! note "Trusted repositories"
     Repositories under `github.com/jeka-dev/` are trusted by default. For any other URL, JeKa asks you to confirm
@@ -218,6 +248,17 @@ jeka base: runJar    # Runs the JAR
 ```
 `test` ends with `ALL TESTS PASSED`, and `runJar` prints a "Hello JeKa" ASCII-art banner, made by the JFiglet
 library that `App.java` declares with `@JkDep`.
+
+The JAR is compiled for the JDK set in `jeka.java.version` (25 in the scaffold). `runJar` uses that JDK; to run the
+JAR yourself with `java -jar jeka-output/<directory-name>.jar`, use that JDK or a newer one, or lower
+`jeka.java.version` (see [Change Java Version](#change-java-version)). Otherwise `java` fails with
+`UnsupportedClassVersionError`.
+JeKa may have downloaded that JDK itself: `jeka --inspect` shows where it is, on the `Java Home` line.
+Run its `bin/java` directly:
+```bash
+jeka --inspect | grep 'Java Home'    # e.g. Java Home          : /Users/me/.jeka/cache/jdks/temurin-25
+/Users/me/.jeka/cache/jdks/temurin-25/bin/java -jar jeka-output/<directory-name>.jar
+```
 
 The generated `jeka.properties` sets `jeka.kbean.default=base`, so you can leave out `base:` in this project:
 `jeka test pack runJar` does the same as the three commands above.
