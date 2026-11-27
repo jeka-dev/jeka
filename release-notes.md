@@ -9,6 +9,7 @@
 - **Scaffolded README title:** `base: scaffold scaffold.kind=APP` and `project: scaffold` write a `README.md` titled with the name of the base dir, instead of a bare `#` line.
 - **Scaffolded files end with a newline:** `.gitignore`, the Java sources and the other files written by `base: scaffold` and `project: scaffold` lacked a final newline, so a line appended to `.gitignore` joined the last one.
 - **`docker:` on a `base` project without `jeka-src`:** `docker: info` and the image builds failed with `NoSuchFileException: .../.jeka-work/jeka-src-classes`.
+- **Protobuf plugin on macOS aarch64:** protoc-jar 3.11.4, the default, has no protoc for Apple silicon: it printed `Unsupported platform`, generated nothing, and the plugin reported success. The plugin now runs its x86_64 protoc there, through Rosetta 2, unless a protoc version is requested with `-v<version>`. When protoc generates no Java file, the build fails and shows the protoc-jar output.
 
 ## API
 

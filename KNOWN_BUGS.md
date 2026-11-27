@@ -9,14 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Build and packaging
 
-### Protobuf plugin generates nothing on macOS aarch64, and reports success
-- **Symptom:** `samples/samples.protobuf` fails to compile on Apple silicon: protoc-jar prints `Unsupported platform` but exits with 0, so the plugin logs "compiled 1 files" and javac then fails.
-- **Cause:** the default `JkProtoc.PROTOC_JAR_VERSION = "3.11.4"`, the last protoc-jar release, has no `osx-aarch_64` protoc.
-- **Workaround:** `@protobuf.extraProtocOptions=-v3.21.12`. `protocVersion=3.21.12` doesn't work: there is no such protoc-jar.
-- **Where:** `plugins/plugins.protobuf`, `JkProtoc`.
-- **Evidence:** sample-maintainer agent.
-
-
 ### nodejs plugin: JS tests run before the dependency install
 - **Symptom:** with the configuration of the plugin README (`@nodeJs.buildCmd=npm install, npm run build`, `@nodeJs.testCmd=npm run test-headless`, `@nodeJs.configureProject=true`), `project: test pack` on a fresh clone runs the JS tests before `npm install`, and they fail.
 - **Cause:** `JkNodeJsProject.registerIn` appends the JS tests to `project.test.postActions`, while the build commands, which hold `npm install`, run in `project.pack.actions`, after the tests.

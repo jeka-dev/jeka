@@ -17,16 +17,21 @@
 package dev.jeka.plugins.protobuf;
 
 import dev.jeka.core.api.depmanagement.*;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.file.JkPathTreeSet;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.system.JkLog;
+import dev.jeka.core.api.system.JkProcResult;
 import dev.jeka.core.api.utils.JkUtilsAssert;
 import dev.jeka.core.api.utils.JkUtilsPath;
 import dev.jeka.core.api.utils.JkUtilsString;
+import dev.jeka.core.api.utils.JkUtilsSystem;
+import dev.jeka.core.tool.JkException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -101,16 +106,42 @@ public class JkProtoc {
         JkUtilsAssert.state(!outDirs.isEmpty(), "No output directory has been specified.");
         outDirs.forEach(dir -> JkUtilsPath.createDirectories(dir));
         Path jar = JkCoordinateFileProxy.of(repos, PROTOC_JAR_MODULE + ":" + protocJarVersion).get();
+        List<String> allOptions = new LinkedList<>(protocOptions);
+        allOptions.addAll(Arrays.asList(extraOptions));
         JkJavaProcess javaProcess = JkJavaProcess.ofJavaJar(jar)
+                .addJavaOptions(platformJavaOptions(JkUtilsSystem.IS_MACOS
+                        && JkUtilsSystem.getProcessor().isAarch64(), allOptions))
                 .addParams(protocOptions)
                 .addParams(extraOptions)
                 .setLogCommand(logCommand)
-                .setLogWithJekaDecorator(logOutput);
+                .setLogWithJekaDecorator(logOutput)
+                .setCollectStdout(true)
+                .setCollectStderr(true);
         for (Path file : protoFiles) {
             javaProcess.addParams(file.toString());
         }
-        javaProcess.exec();
+        JkProcResult result = javaProcess.exec();
+
+        // protoc-jar exits with 0 when it can not find a protoc for the platform
+        Optional<Path> javaOutDir = getOptionValue("--java_out=").map(Paths::get);
+        if (!protoFiles.isEmpty() && javaOutDir.isPresent() && !JkPathTree.of(javaOutDir.get()).containFiles()) {
+            throw new JkException("Protoc generated no file in %s. Protoc-jar output:%n%s%s", javaOutDir.get(),
+                    result.getStdoutAsString(), result.getStderrAsString());
+        }
         JkLog.info("Protocol buffer compiled " + protoFiles.size() + " files to " + outDirs + ".");
+    }
+
+    /*
+     * protoc-jar 3.11.4, the last release, has no protoc for macOS aarch64: we make it extract the x86_64 one,
+     * run by Rosetta 2. Unless a protoc version is requested with '-v', which protoc-jar downloads for the platform.
+     */
+    static List<String> platformJavaOptions(boolean macosAarch64, List<String> protocOptions) {
+        boolean versionRequested = protocOptions.stream()
+                .anyMatch(option -> option.startsWith("-v") && !option.startsWith("--"));
+        if (macosAarch64 && !versionRequested) {
+            return Collections.singletonList("-Dos.arch=x86_64");
+        }
+        return Collections.emptyList();
     }
 
     /**
