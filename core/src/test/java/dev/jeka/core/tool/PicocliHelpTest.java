@@ -83,6 +83,21 @@ class PicocliHelpTest {
     }
 
     @Test
+    void printCmdHelp_footer_notWrappedInsideAnsiCode() {
+        KBeanResolution resolution = new KBeanResolution(List.of(DocVariablesKBean.class.getName()), List.of(),
+                DocVariablesKBean.class.getName(), true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        PicocliHelp.printCmdHelp(JkPathSequence.of(), resolution, JkProperties.EMPTY, new PrintStream(out, true));
+
+        // A line wrapped inside an ANSI code leaves an ESC char that is not part of a whole code
+        String help = out.toString().replaceAll("\u001B\\[[;\\d]*m", "");
+        assertFalse(help.contains("\u001B"), help);
+        assertTrue(help.replaceAll("\\s+", " ").contains(
+                "Execute jeka <kbean>: --doc (as jeka docker: --doc) to get details on specific KBean."), help);
+    }
+
+    @Test
     void kbeanHelp_preInit_listed() {
         String help = PicocliHelp.kbeanHelp(JkBeanDescription.of(PreInitKBean.class, false))
                 .getUsageMessage(CommandLine.Help.Ansi.OFF)

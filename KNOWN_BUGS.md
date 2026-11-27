@@ -37,12 +37,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Engine and command line
 
-### `jeka --doc`: the last line breaks inside a colour code
-- **Symptom:** the footer `Execute jeka <kbean>: --doc (as jeka docker: --doc) to get details on specific KBean.` is split over two lines, after the italic `jeka docker: --doc` and before its reset code, so the second line starts with `[m)`.
-- **Cause:** probably picocli wrapping the footer at the usage width, counting the ANSI codes as characters. Not checked.
-- **Where:** `PicocliHelp`, footer built at line 188.
-- **Evidence:** naive agent, on 0.11.71 and master-SNAPSHOT (2026-11-27), output not on a terminal: `jeka --doc 2>&1 | tail -3 | od -c` shows the line break between `ESC` and `[m`; footer code read from source on master.
-
 ## KBeans
 
 ### `intellij: sync` drops the SDK and the iml customizers in the default, single-module mode

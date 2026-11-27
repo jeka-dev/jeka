@@ -185,12 +185,9 @@ class PicocliHelp {
             commandLine.setHelpSectionKeys(keys);
         }
 
-        String msg = JkAnsi.of()
-                .fg(JkAnsi.Color.MAGENTA).a("Execute ").reset()
-                .fg(JkAnsi.Color.YELLOW).a("jeka <kbean>: --doc").reset()
-                .a(" (as ")
-                .a(JkAnsi.Attribute.ITALIC).a("jeka docker: --doc").reset()
-                .a(") to get details on specific KBean.").toString();
+        // Picocli markup, not ANSI codes: picocli would count them in the line width, and wrap the line inside one
+        String msg = "@|magenta Execute|@ @|yellow jeka <kbean>: --doc|@ (as @|italic jeka docker: --doc|@)"
+                + " to get details on specific KBean.";
         main.usageMessage()
                 .footer("", msg);
 
