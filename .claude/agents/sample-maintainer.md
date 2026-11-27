@@ -82,8 +82,9 @@ call the HTTP endpoint, read the console output, check that the jar or image exi
 - Tests reported as passed with **0 test found** are a failure to investigate.
 - Interactive prompts (e.g. the version asked by `app: install`): pipe the answer. Never answer a trust prompt, or set any trust.
 - GUI apps: check that they start without error, then stop them.
-- Docker and native: run them if the daemon is available, following the Docker rules of `.claude/RULES.md`. Native builds can
-  take several minutes. To avoid replacing a user's image, change the tag, e.g. by running from a `#branch` URL.
+- Docker and native: run them if the daemon is available, following the Docker rules of `.claude/RULES.md`: name your images
+  `jk-agent-sample-maintainer-<sample>...` and remove them at the end. Native builds can take several minutes. A README
+  command that builds under the default name is run with that name passed (`jvmImageName=`), and the README keeps its form.
 - Anything needing credentials or a remote service (Maven Central, SonarQube, registries): publish to a local directory instead
   when possible, and say what was not verified.
 
