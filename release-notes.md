@@ -3,6 +3,7 @@
 ## Changes
 
 - **`JkDockerAppTester` removes the image it built** for the test once the application is stopped. E2e tests run with it, as those created by `DockerKBean.createJvmAppTester`, used to leave a `<image>-e2e-test` image after each run. Use `setRemoveImage(false)` to keep it.
+- **Docker image name of a module ID without group:** `@project.moduleId=demo-consumer` (or `@base.moduleId`) names the image `demo-consumer:<tag>`, instead of `demo-consumer-demo-consumer:<tag>`. Projects that push this image get a new name: set `@docker.jvmImageName` (and `@docker.nativeImageName`) to keep the old one.
 
 ## Fixes
 

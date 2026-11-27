@@ -17,14 +17,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Decision needed:** document the workaround in the README, run the build commands before the tests, or install the dependencies before the tests when `node_modules` is missing (`npm` only, while `buildCmd` may use another tool).
 - **Evidence:** sample-maintainer agent; order of the actions from source.
 
-### Docker image name doubled when the module ID has no group
-- **Symptom:** `@base.moduleId=demo-consumer` gives the image `demo-consumer-demo-consumer:latest` (`docker: info`).
-- **Cause:** `JkModuleId.of("demo-consumer")` uses the name as group too, as documented, and `DockerKBean.computeImageName` joins group and name with `-`.
-- **Where:** `DockerKBean.computeImageName(JkModuleId, JkVersion, Path)`.
-- **Workaround:** set `@docker.jvmImageName` (and `@docker.nativeImageName`).
-- **Decision needed:** using only the name when the group equals it changes the name of the images that existing projects build and push.
-- **Evidence:** reproduced on master (2026-11-27).
-
 ## Publication and Maven
 
 ## Versioning (Git)

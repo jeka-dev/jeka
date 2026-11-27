@@ -66,6 +66,15 @@ class DockerKBeanTest {
     }
 
     @Test
+    void imageName_moduleIdWithoutGroup_nameNotDoubled(@TempDir Path tempDir) throws Exception {
+        Path baseDir = tempDir.toRealPath();
+        Files.write(baseDir.resolve("jeka.properties"), "@project=on\n@project.moduleId=demo-consumer\n".getBytes());
+        DockerKBean dockerKBean = KBeanTestLoader.load(baseDir, DockerKBean.class);
+        assertEquals("demo-consumer:latest", dockerKBean.resolveJvmImageName());
+        assertEquals("native-demo-consumer:latest", dockerKBean.resolveNativeImageName());
+    }
+
+    @Test
     void resolvePlaceHolder_ok() {
         JkModuleId moduleId = JkModuleId.of("my.group", "app");
         JkVersion version = JkVersion.of("1.0");
