@@ -60,6 +60,64 @@ class JkPomTest {
         JkPathTree.of(repoDir).deleteRoot();
     }
 
+    // A dependency of type 'pom' without scope 'import' is a managed version, not an imported BOM (as in Maven).
+    @Test
+    void toVersionProvider_pomTypeWithoutImportScope_notImported() throws IOException {
+        Path repoDir = Files.createTempDirectory("jk-pom-repo");
+        String group = "org.example.pomtype" + System.nanoTime();
+        writePom(repoDir, group, "bundle", null, "org.apache.httpcomponents.client5", "httpclient5", "5.3.1");
+        writeRawPom(repoDir, group, "bom", "<dependency><groupId>" + group + "</groupId><artifactId>bundle</artifactId>"
+                + "<version>1.0</version><type>pom</type></dependency>");
+        JkRepoSet repos = JkRepoSet.of(JkRepo.of(repoDir));
+
+        JkVersionProvider versionProvider = JkPom.ofEffectivePom(JkCoordinate.of(group + ":bom:1.0@pom"), repos)
+                .toVersionProvider(repos);
+
+        assertNull(versionProvider.getVersionOf("org.apache.httpcomponents.client5:httpclient5"));
+        assertEquals("1.0", versionProvider.getVersionOf(group + ":bundle"));
+        JkPathTree.of(repoDir).deleteRoot();
+    }
+
+    // As in Maven, versions declared in the BOM win over imported ones, and the first import wins over the next ones.
+    @Test
+    void toVersionProvider_sameModuleInImportedBoms_ownThenFirstImportWins() throws IOException {
+        Path repoDir = Files.createTempDirectory("jk-pom-repo");
+        String group = "org.example.precedence" + System.nanoTime();
+        writeRawPom(repoDir, group, "imported1", managed("org.slf4j", "slf4j-api", "2.0.1")
+                + managed("com.google.guava", "guava", "31.0-jre"));
+        writeRawPom(repoDir, group, "imported2", managed("org.slf4j", "slf4j-api", "2.0.2")
+                + managed("com.google.guava", "guava", "32.0-jre"));
+        String imports = "<dependency><groupId>" + group + "</groupId><artifactId>imported1</artifactId>"
+                + "<version>1.0</version><type>pom</type><scope>import</scope></dependency>"
+                + "<dependency><groupId>" + group + "</groupId><artifactId>imported2</artifactId>"
+                + "<version>1.0</version><type>pom</type><scope>import</scope></dependency>";
+        writeRawPom(repoDir, group, "bom", imports + managed("org.slf4j", "slf4j-api", "2.0.17"));
+        JkRepoSet repos = JkRepoSet.of(JkRepo.of(repoDir));
+
+        JkVersionProvider versionProvider = JkPom.ofEffectivePom(JkCoordinate.of(group + ":bom:1.0@pom"), repos)
+                .toVersionProvider(repos);
+
+        assertEquals("2.0.17", versionProvider.getVersionOf("org.slf4j:slf4j-api"));
+        assertEquals("31.0-jre", versionProvider.getVersionOf("com.google.guava:guava"));
+        JkPathTree.of(repoDir).deleteRoot();
+    }
+
+    private static String managed(String group, String artifactId, String version) {
+        return String.format("<dependency><groupId>%s</groupId><artifactId>%s</artifactId><version>%s</version>"
+                + "</dependency>", group, artifactId, version);
+    }
+
+    private static void writeRawPom(Path repoDir, String group, String artifactId, String managedDependencies)
+            throws IOException {
+        String content = String.format("<project><modelVersion>4.0.0</modelVersion><groupId>%s</groupId>"
+                + "<artifactId>%s</artifactId><version>1.0</version><packaging>pom</packaging>"
+                + "<dependencyManagement><dependencies>%s</dependencies></dependencyManagement></project>",
+                group, artifactId, managedDependencies);
+        Path dir = repoDir.resolve(group.replace('.', '/')).resolve(artifactId).resolve("1.0");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve(artifactId + "-1.0.pom"), content);
+    }
+
     private static void writePom(Path repoDir, String group, String artifactId, String parentArtifactId,
                                  String managedGroup, String managedArtifact, String managedVersion) throws IOException {
         String parent = parentArtifactId == null ? "" : String.format(
