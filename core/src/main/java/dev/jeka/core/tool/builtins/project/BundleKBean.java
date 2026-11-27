@@ -203,13 +203,7 @@ public final class BundleKBean extends KBean {
         }
 
         private JkMultiValue<String> getCurrentOsOptions() {
-            if (JkUtilsSystem.IS_WINDOWS) {
-                return windows;
-            }
-            if (JkUtilsSystem.IS_MACOS) {
-                return mac;
-            }
-            return linux;
+            return selectForOs(JkUtilsSystem.IS_WINDOWS, JkUtilsSystem.IS_MACOS, windows, mac, linux);
         }
 
         private String getEffectiveOption(String optionName) {
@@ -252,6 +246,12 @@ public final class BundleKBean extends KBean {
     }
 
     private void fillJklinkOptions(JkJlink jkJlink) {
+        jlinkProjectOptions().forEach(jkJlink::addOptions);
+    }
+
+    // The jlink options computed from the project
+    List<String[]> jlinkProjectOptions() {
+        List<String[]> result = new LinkedList<>();
         JkProject.JpmsModules jpmsModules = projectKBean.project.jpmsModules;
         JkPathSequence modulePath = jpmsModules.getModulePaths();
         boolean addModulesSetByUser = jlinkOptions.stream()
@@ -264,12 +264,13 @@ public final class BundleKBean extends KBean {
             modules = computeModules(modulePath);
         }
         if (!modules.isEmpty()) {
-            jkJlink.addOptions(ADD_MODULES, String.join(",", modules));
+            result.add(new String[] {ADD_MODULES, String.join(",", modules)});
         }
         if (!modulePath.toList().isEmpty()) {
-            jkJlink.addOptions(MODULE_PATH, modulePath.toPath());
+            result.add(new String[] {MODULE_PATH, modulePath.toPath()});
         }
-        jkJlink.addOptions("--output", customJrePath().toString());
+        result.add(new String[] {"--output", customJrePath().toString()});
+        return result;
     }
 
     // Computes the modules required by the main jar and, if they are bundled, the runtime libs.
@@ -306,7 +307,7 @@ public final class BundleKBean extends KBean {
                         .toList();
     }
 
-    private void setProjectOptions(JkJpackage jkPackage, Path jar) {
+    void setProjectOptions(JkJpackage jkPackage, Path jar) {
         JkProject project = projectKBean.project;
 
         Path inputDir = projectKBean.getOutputDir().resolve(JPACKAGE_TEMP_DIR_NAME);
@@ -368,6 +369,16 @@ public final class BundleKBean extends KBean {
 
     private Path outputDir() {
         return projectKBean.project.getOutputDir();
+    }
+
+    static <T> T selectForOs(boolean isWindows, boolean isMacos, T windows, T mac, T linux) {
+        if (isWindows) {
+            return windows;
+        }
+        if (isMacos) {
+            return mac;
+        }
+        return linux;
     }
 
     private JkJpackage jpackage() {
