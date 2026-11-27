@@ -35,14 +35,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Versioning (Git)
 
-### `app: install repo=<url>#branch` fails with a bare git error
-- **Symptom:** `jeka app: install repo=https://github.com/jeka-dev/demo-cowsay#master` fails with `Process has returned with error code 128`, after the git command line, with no explanation.
-- **Cause:** `repo` is passed as is to `git ls-remote --symref`, and git rejects the `#` fragment. `app: install` doesn't support `#`: the version goes in `tag=`, and branches other than the default one are not supported.
-- **Where:** `AppKBean.install`, `AppManager.getRemoteDefaultBranch`.
-- **Decision needed:** fail early with a message pointing to `tag=`, or accept `#<tag>` as `jeka -r <url>#<tag>` does.
-- **Evidence:** reproduced on master (2026-11-27).
-
-
 ## Engine and command line
 
 ### `jeka --doc`: the last line breaks inside a colour code

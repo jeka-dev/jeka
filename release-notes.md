@@ -11,6 +11,7 @@
 - **`docker:` on a `base` project without `jeka-src`:** `docker: info` and the image builds failed with `NoSuchFileException: .../.jeka-work/jeka-src-classes`.
 - **Protobuf plugin on macOS aarch64:** protoc-jar 3.11.4, the default, has no protoc for Apple silicon: it printed `Unsupported platform`, generated nothing, and the plugin reported success. The plugin now runs its x86_64 protoc there, through Rosetta 2, unless a protoc version is requested with `-v<version>`. When protoc generates no Java file, the build fails and shows the protoc-jar output.
 - **`intellij: sync` when the JDK of the project can't be downloaded:** with `@project.javaVersion=8` on macOS aarch64, where no Temurin 8 exists, it failed with a `FileNotFoundException` on the foojay URL, leaving the project `.iml` unwritten. It now warns, telling to define the SDK in IntelliJ or to set `jeka.jdk.<version>`, and writes the `.iml`.
+- **`app: install repo=<url>#<tag>`** failed with a bare `Process has returned with error code 128`: git rejects the `#` fragment. It now fails at once, telling to use `tag=<tag>`, and that only the default branch can be installed.
 
 ## API
 

@@ -85,6 +85,12 @@ public class AppKBean extends KBean {
             return;
         }
         String remoteUrl = this.repo.trim();
+        if (remoteUrl.contains("#")) {  // git rejects it with a bare error
+            String suggestedTag = JkUtilsString.substringAfterLast(remoteUrl, "#");
+            throw new JkException("'repo' can not hold a '#' fragment: %s%nTo install a given tag, use: "
+                    + "jeka app: install repo=%s tag=%s%nOnly the default branch can be installed.", remoteUrl,
+                    JkUtilsString.substringBeforeLast(remoteUrl, "#"), suggestedTag);
+        }
         String suggestedAppName = name;
         boolean shouldAskAppName = JkUtilsString.isBlank(name);
         if (!remoteUrl.contains(":")) {
