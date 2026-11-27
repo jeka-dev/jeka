@@ -24,13 +24,15 @@ The result is **uncommitted changes in the user's checkout** (`docs/`, `mkdocs.y
 
 ## 1. Test
 
-Split the argument into scenarios: one per page or goal given, or the default scenarios of `naive`. Launch one `naive`
-agent per scenario, in the background, in parallel. Each prompt gives:
-- the scenario, as given;
-- its scratch directory, `<run>/naive-<n>`;
-- "The generated docs are in `jeka-output/mkdocs/docs/`. End your report with the parts required by `.claude/RULES.md`."
+Split the argument into scenarios: one per page or goal given, or the default scenarios of `naive`.
 
-Wait for all of them.
+**Don't launch `naive` as a sub-agent**: a sub-agent gets the repo's `CLAUDE.md` and the project memory in its context,
+which tell it how JeKa works and hide the gaps of the docs. Run it in a separate session, outside the repo, with
+`.claude/skills/doc-cycle/run-naive.sh <run>/naive-<n> "<scenario>"`. It copies the docs (generated when step 0.4 ran),
+the plugin READMEs and the local build to `<run>/naive-<n>`, maps the user's JDKs in an isolated JeKa home, and writes
+the report to `<run>/naive-<n>/report.md`.
+
+Launch one per scenario, in the background (Bash `run_in_background`), in parallel, and wait for all of them.
 
 ## 2. Sort the findings
 
@@ -52,9 +54,9 @@ Launch **one** `doc-writer` agent, in the foreground: several would edit the sam
 
 ## 4. Check
 
-Generate the docs again (step 0.4). Launch `naive` again, on the scenarios that had findings, with new scratch
-directories, and the list of the findings it should no longer meet. A real newcomer reads the fixed pages: don't tell
-it what changed, only which scenario to follow.
+Generate the docs again (step 0.4). Run `run-naive.sh` again, on the scenarios that had findings, with new run
+directories. A real newcomer reads the fixed pages: don't tell it what changed, only which scenario to follow. Then
+compare its report with the findings of step 1 yourself.
 
 If findings remain, run steps 3 and 4 once more, for those only. Then stop, whatever the result: two rounds at most.
 
@@ -65,5 +67,7 @@ If findings remain, run steps 3 and 4 once more, for those only. Then stop, what
 3. **Remaining**: findings still there after the last round, and those doc-writer could not fix, with the reason.
 4. **Code fixes and decisions** handed over by the agents, in one list.
 5. The uncommitted changes the user had in these files before the cycle, if any.
+
+Delete the run directories (`<run>/naive-<n>` hold JeKa caches), unless the user may need them: then list them.
 
 End with `KNOWN_BUGS.md: <what changed>`.

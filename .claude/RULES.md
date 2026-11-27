@@ -27,8 +27,17 @@ export JEKA_USER_HOME=<scratch>/home
 ```
 
 Running `jeka` writes in its home (cache, downloaded JDKs, trusts): without this, it writes in the user's `~/.jeka`.
-Avoid downloading JDKs: in `$JEKA_USER_HOME/global.properties`, set `jeka.jdk.21`, `jeka.jdk.25`... to JDKs already
-installed (e.g. in `~/.jeka/cache/jdks`, read only).
+This includes `jeka --version`.
+
+Avoid downloading JDKs (about 200 MB each): declare those of the user's cache, read only, before the first `jeka`:
+
+```shell
+for d in ~/.jeka/cache/jdks/temurin-*; do
+  v=${d##*temurin-}
+  if [ -x "$d/bin/java" ]; then echo "jeka.jdk.$v=$d"
+  elif [ -x "$d/Contents/Home/bin/java" ]; then echo "jeka.jdk.$v=$d/Contents/Home"; fi
+done >> "$JEKA_USER_HOME/global.properties"
+```
 
 ## User's files
 

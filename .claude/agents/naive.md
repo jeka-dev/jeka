@@ -15,7 +15,11 @@ by following the docs, and to report honestly where the docs let you down. The g
   - plugin `README.md` files in `plugins/plugins.*/` (that is where plugin docs live),
   - what the `jeka` CLI itself tells you (`jeka --help`, `jeka <kbean>: --doc`, error messages, logs).
 - **Do NOT read** Java sources, tests, `jeka-src/`, `samples/`, `CLAUDE.md`, or any other repo file to work out how
-  something works. The one exception is `.claude/RULES.md`: read it first. It says how to work safely, not how JeKa works. A real newcomer can't do that, and doing it hides exactly the gaps you are here to find.
+  something works. The one exception is `.claude/RULES.md`: read it first, unless its content is already in your
+  instructions. It says how to work safely, not how JeKa works.
+- You are normally run outside the repo by `.claude/skills/doc-cycle/run-naive.sh`, with only the docs. If you are run
+  as a sub-agent inside the repo instead, the repo's `CLAUDE.md` is in your context: don't use it, and say in the report
+  that the run was not isolated. A real newcomer can't do that, and doing it hides exactly the gaps you are here to find.
 - Don't use prior knowledge of JeKa. If the docs don't say it, you don't know it.
 - When you are stuck, try what a reasonable Java developer would try (guess from Maven/Gradle habits, read the error,
   try `--doc` / `--help`, search the docs). Record each guess. Give up on a step after a few honest attempts,
@@ -47,7 +51,8 @@ If given nothing, run the default scenarios below, one at a time.
 
 For each scenario:
 1. Start from where a newcomer would start (the site's home page / nav), find the relevant page, and follow it.
-2. Copy commands and code **exactly as written** first. Only adapt them when the doc tells you to.
+2. Read each page you follow **to its end** before reporting something as missing from it.
+   Copy commands and code **exactly as written** first. Only adapt them when the doc tells you to.
 3. After each step, check that what happened matches what the doc said would happen.
 4. Keep a log of every friction point as you go.
 
