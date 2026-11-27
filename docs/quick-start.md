@@ -38,13 +38,18 @@ This generates a structure as:
 │   └── Script.java     
 ├── jeka.properties      <- JeKa configuration (Java and JeKa version, default parameters...)
 ├── jeka.ps1             <- Optional PowerShell script to run JeKa on Windows
-└── jeka                 <- Optional bash script to run JeKa on Linux/macOS
+├── jeka                 <- Optional bash script to run JeKa on Linux/macOS
+└── .gitignore           <- Ignores jeka-output and .jeka-work
 ```
+JeKa also creates a `.jeka-work` directory for its internal caches: you can ignore it.
+
 This script class looks like:
 ```java title="jeka-src/Script.java"
 import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 
+// Declare script dependencies using @JkDep("groupId:moduleId:version")
+// or using JBang '//DEPS groupId:moduleId:version' comment style
 @JkDoc("Minimalist script for demo purpose.")
 class Script extends KBean {
 
@@ -63,24 +68,42 @@ You can run the method `hello()` and change the parameter, by executing:
 ```bash
 jeka hello name="JeKa"
 ```
-The first execution may download the JDK set in `jeka.properties` (about 200 MB), if it is not already in the cache.
-
 This displays the following text on the console:
 ```
 Hello JeKa !
 ```
+
+!!! note "First run needs network access"
+    `jeka.properties` pins the versions to use: `jeka.version` for JeKa, `jeka.java.version` for the JDK.
+    Whether you run the global `jeka` or the project's `./jeka` script, JeKa runs with the pinned version, so the first
+    run may download that JeKa distribution, the JDK (about 200 MB) and the Ivy library used to resolve dependencies.
+    They are cached in `~/.jeka/cache` for the next runs. See [Properties](reference/properties.md#standard-properties).
+
 #### Write Extra Methods
-You can add extra methods relying or not on third-party dependencies as:
-```java
+You can add extra methods relying or not on third-party dependencies. Add the `header()` method, the two `@JkDep`
+annotations and the new imports to `jeka-src/Script.java`, keeping `hello()`. The whole file becomes:
+```java title="jeka-src/Script.java"
 import com.github.lalyos.jfiglet.FigletFont;
 import com.google.common.base.Strings;
 import dev.jeka.core.tool.JkDep;
+import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.KBean;
 
 @JkDep("com.github.lalyos:jfiglet:0.0.9")
 @JkDep("com.google.guava:guava:33.3.1-jre")
+@JkDoc("Minimalist script for demo purpose.")
 class Script extends KBean {
 
+    @JkDoc("Person to whom the greeting is intended")
+    public String name = "World";
+
+    @JkDoc("Print greeting on console")
+    public void hello() {
+        String greetings = "Hello " + name + " !";
+        System.out.println(greetings);
+    }
+
+    @JkDoc("Print an ASCII-art banner")
     public void header() throws Exception {
         System.out.println(Strings.repeat("-", 80));
         System.out.println(FigletFont.convertOneLine("Hello Ascii Art !"));
@@ -92,7 +115,7 @@ Execute:
 ```bash
 jeka header
 ```
-This will display the following text on the console:
+On the first run, JeKa shows `Resolving dependencies...` while it downloads the two libraries, then displays:
 ```
 --------------------------------------------------------------------------------
   _   _      _ _            _             _ _      _         _     _ 
@@ -169,14 +192,25 @@ This creates a structure like this:
 ├── jeka-src             <- Source root directory
 │   ├── _dev             <- Optional package containing all non-prod (build and test)
 │   │   ├── test
+│   │   │   └── MyTest.java
 │   │   └── Custom.java  
 │   └── app              <- Suggested base package for production code/resources
 │       └── App.java     
 ├── jeka.properties      <- Build configuration (Java and JeKa version, KBean configurations, ...)
 ├── jeka.ps1             <- Optional PowerShell script to run JeKa on Windows
 ├── jeka                 <- Optional bash script to run JeKa on Linux/macOS
+├── .gitignore           <- Ignores jeka-output and .jeka-work
 └── README.md            <- Describes available build commands
 ```
+
+Build and run it:
+```bash
+jeka base: test      # Compiles and runs the tests of jeka-src/_dev/test
+jeka base: pack      # Creates a fat JAR in jeka-output/, named after the directory
+jeka base: runJar    # Runs the JAR
+```
+`test` ends with `ALL TESTS PASSED`, and `runJar` prints a "Hello JeKa" ASCII-art banner, made by the JFiglet
+library that `App.java` declares with `@JkDep`.
 
 Follow the [tutorial](tutorials/build-base.md) for more details.
 
