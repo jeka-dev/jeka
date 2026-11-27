@@ -48,6 +48,14 @@ class PicocliHelp {
         commandLine.usage(printStream, colorScheme());
     }
 
+    /*
+     * The parent is the context classloader, which already loaded the classes of the classpath: none is loaded twice.
+     * Otherwise, a static initializer mixing classes of both would fail.
+     */
+    static ClassLoader helpClassLoader(Iterable<java.nio.file.Path> classpath) {
+        return JkUrlClassLoader.of(classpath, Thread.currentThread().getContextClassLoader()).get();
+    }
+
     static void printVersionHelp(PrintStream printStream) {
         printStream.println(JkInfo.getJekaVersion());  // no need of carriage return
     }
@@ -85,8 +93,7 @@ class PicocliHelp {
 
         String defaultKBeanClassName = kbeanResolution.defaultKbeanClassName;
 
-        // Parent is the context classloader, which already loaded these classes: no class is loaded twice
-        ClassLoader classLoader = JkUrlClassLoader.of(classpath, Thread.currentThread().getContextClassLoader()).get();
+        ClassLoader classLoader = helpClassLoader(classpath);
 
         // Add commands and options from default KBean
         final CommandLine.Model.CommandSpec main;
@@ -257,8 +264,7 @@ class PicocliHelp {
         if (kbeanClassName == null) {
             return null;
         }
-        // Parent is the context classloader, which already loaded these classes: no class is loaded twice
-        ClassLoader classLoader = JkUrlClassLoader.of(classpath, Thread.currentThread().getContextClassLoader()).get();
+        ClassLoader classLoader = helpClassLoader(classpath);
         Class<? extends KBean> defaultKBeanClass = JkClassLoader.of(classLoader).load(kbeanClassName);
         return JkBeanDescription.ofWithDefaultValues(defaultKBeanClass, runbase);
     }

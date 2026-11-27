@@ -56,6 +56,20 @@ class PicocliHelpTest {
     }
 
     @Test
+    void printKBeanHelp_standardKBean_listsFields(@org.junit.jupiter.api.io.TempDir java.nio.file.Path dir)
+            throws Exception {
+        JkRunbase runbase = KBeanTestLoader.load(dir.toRealPath(),
+                dev.jeka.core.tool.builtins.base.BaseKBean.class).getRunbase();
+        List<String> kbeans = List.of(dev.jeka.core.tool.builtins.base.BaseKBean.class.getName());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        assertTrue(PicocliHelp.printKBeanHelp(JkPathSequence.of(), kbeans, "base", runbase, new PrintStream(out, true)));
+        assertTrue(out.toString().contains("jarType"), out.toString());
+        assertFalse(PicocliHelp.printKBeanHelp(JkPathSequence.of(), kbeans, "unknown", runbase,
+                new PrintStream(new ByteArrayOutputStream(), true)));
+    }
+
+    @Test
     void printCmdHelp_defaultKBeanDocWithDollarBraces_displayedAsIs() {
         KBeanResolution resolution = new KBeanResolution(List.of(DocVariablesKBean.class.getName()), List.of(),
                 DocVariablesKBean.class.getName(), true);
