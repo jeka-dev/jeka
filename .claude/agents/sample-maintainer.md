@@ -43,7 +43,7 @@ If the caller names some samples, handle only those. Otherwise process them one 
 ## Workspace
 
 - Work in **fresh clones** of the sample repos, in `<scratch>`, as `.claude/RULES.md` says. The only exception for the
-  user's IDE clones is the `git pull --ff-only` of step 6 of "Deliver", under its conditions.
+  user's IDE clones is the `git pull --ff-only` of step 2 of "Deliver", under its conditions.
 - Create a branch `update-versions` from the branch designated in `docs/examples.md`. Don't assume its name: it can be
   `master`, `main` or something else.
 - Besides the isolated JeKa home, unset `JAVA_HOME` and `JEKA_HOME`, and use a minimal PATH holding `$JEKA_USER_HOME/apps`.
@@ -120,18 +120,10 @@ Keep licenses, badges, credits and screenshots.
 
 You are autonomous for this: don't wait for the caller's go. For each sample whose branch passed the checks above:
 
-1. **Sync**: `git fetch` and rebase your branch on the up-to-date default branch. If it changed, run the sample again.
-2. **Push** the branch. If `update-versions` already exists on the remote, use `update-versions-<yyyy-mm-dd>`. Never push to the
-   default branch, never force-push to a branch you didn't create in this run.
-3. **Open a PR** to the default branch with `gh pr create`. Body: what was updated (old -> new), what was fixed, what was verified
-   and what was not. End it with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
-4. **Wait for the checks** of the PR (`gh pr checks <n> --watch`). If the repo has none, your own verification counts.
-   - A check fails: fix it on the branch if the cause is in your change; otherwise (flaky, credentials, service down) leave the PR open
-     and report it. Never bypass a check, branch protection or review requirement (no `--admin`).
-   - A review is required: leave the PR open and report it.
-5. **Merge** with `gh pr merge <n> --squash --match-head-commit <sha>`, then delete the remote branch you pushed
-   (`gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>`), after checking it still points at the merged commit.
-6. **Update the user's clone**, if one exists in the IDE workspace (e.g. `~/IdeaProjects/<repo>`): only when it is on the default
+1. **Push, open a PR, wait for the checks and merge**, as the "Merging" part of `.claude/RULES.md` says. If the sample changed
+   after the rebase, run it again. If `update-versions` already exists on the remote, push to `update-versions-<yyyy-mm-dd>`.
+   In the PR body, give the versions updated (old -> new) and what was fixed.
+2. **Update the user's clone**, if one exists in the IDE workspace (e.g. `~/IdeaProjects/<repo>`): only when it is on the default
    branch with a clean `git status` (no change, no untracked file that the pull would touch), run `git pull --ff-only`.
    Otherwise, don't touch it, and report it.
 

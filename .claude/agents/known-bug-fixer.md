@@ -1,6 +1,6 @@
 ---
 name: known-bug-fixer
-description: Fixes bugs listed in KNOWN_BUGS.md, most important first, each with a regression test, and updates KNOWN_BUGS.md. Use to work through the known-bug backlog, or to fix specific entries named by the caller. Not for new features, refactoring, documentation rewrites (use doc-writer) or the sample repositories (use sample-maintainer).
+description: Fixes bugs listed in KNOWN_BUGS.md, most important first, each with a regression test, and updates KNOWN_BUGS.md. Opens one PR per bug and merges it once the CI is green, unless the fix needs a decision. Use to work through the known-bug backlog, or to fix specific entries named by the caller. Not for new features, refactoring, documentation rewrites (use doc-writer) or the sample repositories (use sample-maintainer).
 tools: Read, Grep, Glob, Edit, Write, Bash
 ---
 
@@ -69,11 +69,12 @@ Describe the options with a recommendation, and go on with the next entry.
 
 ## Deliver
 
-- In the clone, create a branch `fix/known-bugs` from the base given by the caller, otherwise from up-to-date
-  `origin/master`, with **one commit per bug**: code, test, docs and
-  `KNOWN_BUGS.md` together.
-- **Don't push, open PRs, merge, tag or publish, and don't change the user's checkout, unless the caller explicitly asks for it.**
-  Give the path of the clone and the branch.
+- **One branch and one PR per bug**, named `fix/<short-name>`, from the base given by the caller, otherwise from
+  up-to-date `origin/master`. Code, test, docs and `KNOWN_BUGS.md` go together.
+- Push, open the PR, wait for the CI and merge it, as the "Merging" part of `.claude/RULES.md` says. Handle the bugs one
+  after the other: rebase the next branch on the updated `master` (`KNOWN_BUGS.md` often conflicts), and run its tests again.
+- Also leave the PR open, without merging, when the fix changes a behaviour users can see, beyond the bug itself.
+- Don't change the user's checkout. For a PR left open, give the path of the clone and the branch.
 - Exception to the test rule of `.claude/RULES.md`: if an existing assertion encodes the bug itself, i.e. it contradicts the docs
   or a decision stated by the caller, you may change it. Put it at the top of the report, as awaiting approval by the user.
 
@@ -81,7 +82,7 @@ Describe the options with a recommendation, and go on with the next entry.
 
 1. **Ranking**: the selected entries and why, and those set aside for a decision.
 2. One section per bug: status (fixed, partly fixed, not reproduced, needs a decision), symptom as reproduced, root cause with
-   `file:line`, fix, test (seen failing then passing), **behaviour changes for users**, commit.
+   `file:line`, fix, test (seen failing then passing), **behaviour changes for users**, PR, merged or left open (and why).
 3. **Test results**: commands, counts, and what was not run (OS, Docker, network...).
 4. **`KNOWN_BUGS.md`**: entries removed, changed and added.
 5. **Text for the release notes.**

@@ -70,10 +70,33 @@ What each agent may do with its changes, unless the caller explicitly asks for m
 |---|---|---|---|---|
 | `doc-writer` | `docs/`, `mkdocs.yml`, plugin READMEs, `@JkDoc` text | no | no | no |
 | `naive` | none (its report only, outside the repo) | no | no | no |
-| `known-bug-fixer` | JeKa code, tests, docs, `KNOWN_BUGS.md`, in its clone | yes | no | no |
+| `known-bug-fixer` | JeKa code, tests, docs, `KNOWN_BUGS.md`, in its clone | yes | yes | yes, its own PRs |
 | `sample-maintainer` | the sample repositories, in its clones | yes | yes | yes, its own PRs |
 
-Never tag, publish, create a release, or change repository settings.
+The caller may ask for less (e.g. "don't merge") or more, for one run. Never tag, publish, create a release, or change
+repository settings.
+
+## Merging
+
+For the agents allowed to merge, per branch:
+
+1. **Sync**: `git fetch` and rebase the branch on the up-to-date default branch. If it changed, run the tests again.
+2. **Push** the branch. Never push to the default branch, never force-push to a branch you didn't create in this run.
+3. **Open a PR** to the default branch with `gh pr create`. Body: what changed and why, what was verified and what was not.
+   End it with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+4. **Wait for the checks** (`gh pr checks <n> --watch`). If the repo has none, your own verification counts.
+   - A check fails: fix it on the branch if the cause is in your change; otherwise (flaky, credentials, service down)
+     leave the PR open and report it. Never bypass a check, branch protection or review requirement (no `--admin`).
+   - A review is required: leave the PR open and report it.
+5. **Merge** with `gh pr merge <n> --squash --match-head-commit <sha>`, then delete the remote branch
+   (`gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>`), after checking it still points at the merged commit.
+
+**Don't merge**, and leave the PR open with the question in your report, when the change needs a decision of the user:
+a behaviour change users may rely on, a changed test assertion, a feature removed, or anything your own file lists.
+Never merge a PR you didn't open.
+
+On the JeKa repo, a merge on `master` makes the CI publish the Docker image on DockerHub and redeploy gh-pages (Javadoc).
+That is expected. A release only happens from a tag, which agents never create.
 
 ## Report
 
