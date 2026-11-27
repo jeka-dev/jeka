@@ -1,6 +1,6 @@
 # Known Bugs
 
-Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 2026-11-27, after running the samples on 0.11.70 and fixing #293 to #297.
+Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 2026-11-28, after fixing #308 to #315.
 
 - Read this before diagnosing a failure or documenting a feature: the problem may already be known.
 - Don't fix an entry as a side effect of another task. Report it instead.
