@@ -52,6 +52,15 @@ class AppKBeanTest {
     }
 
     @Test
+    void install_fragmentDifferingFromTag_failsBeforeGit(@TempDir Path tempDir) throws Exception {
+        AppKBean appKBean = KBeanTestLoader.load(tempDir.toRealPath(), AppKBean.class);
+        appKBean.repo = "https://github.com/jeka-dev/demo-cowsay#0.0.9";
+        appKBean.tag = "0.0.8";
+        JkException e = Assertions.assertThrows(JkException.class, appKBean::install);
+        Assertions.assertTrue(e.getMessage().contains("set the tag only once"), e.getMessage());
+    }
+
+    @Test
     void splitTagFragment_conflictingTag_fails() {
         JkException e = Assertions.assertThrows(JkException.class,
                 () -> AppKBean.splitTagFragment("https://github.com/jeka-dev/demo-cowsay#0.0.9", "0.0.8"));

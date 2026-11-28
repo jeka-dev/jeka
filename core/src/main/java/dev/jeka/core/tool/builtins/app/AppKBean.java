@@ -86,7 +86,7 @@ public class AppKBean extends KBean {
         }
         String[] repoAndTagOption = splitTagFragment(this.repo, this.tag);
         String remoteUrl = repoAndTagOption[0];
-        String requestedTag = repoAndTagOption[1];
+        tag = repoAndTagOption[1];
         String suggestedAppName = name;
         boolean shouldAskAppName = JkUtilsString.isBlank(name);
         if (!remoteUrl.contains(":")) {
@@ -110,7 +110,7 @@ public class AppKBean extends KBean {
 
 
         List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
-        if (!installedAppsForRepo.isEmpty() && JkUtilsString.isBlank(requestedTag)) {
+        if (!installedAppsForRepo.isEmpty() && JkUtilsString.isBlank(tag)) {
             JkLog.info("This repository has been already installed for following app/versions:");
             installedAppsForRepo.forEach(System.out::println);
             String response = ask("Do you want to install another version? %s:", JkAnsi.yellow("[N,y]")).trim();
@@ -145,8 +145,8 @@ public class AppKBean extends KBean {
         final RepoAndTag repoAndTag;
 
         // Tag set from options
-        if (!JkUtilsString.isBlank(requestedTag)) {
-            repoAndTag = repoAndTagFromOption(requestedTag, remoteUrl, tagBucket, branch);
+        if (!JkUtilsString.isBlank(tag)) {
+            repoAndTag = repoAndTagFromOption(tag, remoteUrl, tagBucket, branch);
 
         // No tag available
         } else if (tagBucket.tags.isEmpty()) {
