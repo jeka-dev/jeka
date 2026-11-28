@@ -40,12 +40,31 @@ class AppKBeanTest {
     }
 
     @Test
-    void install_repoWithFragment_failsSuggestingTag(@TempDir Path tempDir) throws Exception {
+    void splitTagFragment_ok() {
+        String url = "https://github.com/jeka-dev/demo-cowsay";
+        Assertions.assertArrayEquals(new String[] {url, null}, AppKBean.splitTagFragment(" " + url + " ", null));
+        Assertions.assertArrayEquals(new String[] {url, "0.0.9"}, AppKBean.splitTagFragment(url, "0.0.9"));
+        Assertions.assertArrayEquals(new String[] {url, "0.0.9"}, AppKBean.splitTagFragment(url + "#0.0.9", null));
+        Assertions.assertArrayEquals(new String[] {url, "0.0.9"}, AppKBean.splitTagFragment(url + "#0.0.9", " 0.0.9"));
+        Assertions.assertArrayEquals(new String[] {url, "1.0"}, AppKBean.splitTagFragment(url + "#", "1.0"));
+        Assertions.assertArrayEquals(new String[] {"cowsay@my-catalog", "0.0.9"},
+                AppKBean.splitTagFragment("cowsay@my-catalog#0.0.9", ""));
+    }
+
+    @Test
+    void install_fragmentDifferingFromTag_failsBeforeGit(@TempDir Path tempDir) throws Exception {
         AppKBean appKBean = KBeanTestLoader.load(tempDir.toRealPath(), AppKBean.class);
         appKBean.repo = "https://github.com/jeka-dev/demo-cowsay#0.0.9";
+        appKBean.tag = "0.0.8";
         JkException e = Assertions.assertThrows(JkException.class, appKBean::install);
-        Assertions.assertTrue(e.getMessage().contains(
-                "jeka app: install repo=https://github.com/jeka-dev/demo-cowsay tag=0.0.9"), e.getMessage());
+        Assertions.assertTrue(e.getMessage().contains("set the tag only once"), e.getMessage());
+    }
+
+    @Test
+    void splitTagFragment_conflictingTag_fails() {
+        JkException e = Assertions.assertThrows(JkException.class,
+                () -> AppKBean.splitTagFragment("https://github.com/jeka-dev/demo-cowsay#0.0.9", "0.0.8"));
+        Assertions.assertTrue(e.getMessage().contains("'#0.0.9' while 'tag' is '0.0.8'"), e.getMessage());
     }
 
     private static void assertUnknownApp(Executable executable) {
