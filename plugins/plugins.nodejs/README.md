@@ -26,7 +26,7 @@ Node.js is automatically downloaded and installed on first use, so no manual set
 |version [String] |The version of NodeJs to use. |
 |cmdLine [String] |Command-line to run when `exec` is called, e.g., 'npx cowsay'. |
 |buildCmd [String] |Comma separated, command-lines to execute for building js application or in conjunction with #exec method. This can be similar to something like 'npx ..., npm ...'. |
-|testCmd [String] |Comma separated, command-lines to execute for testing when 'configureProject'=true. |
+|testCmd [String] |Comma separated, command-lines to execute for testing when 'configureProject'=true. They run before 'buildCmd', so they must install the dependencies themselves, e.g. 'npm install, npm test'. |
 |appDir [String] |Path of js project root. It is expected to be relative to the base directory. |
 |buildDir [String] |Path to the built app (usually contains an index.html file). Relative to the JS app directory. |
 |targetResourceDir [String] |If set, copies the client build output to this directory, relative to the generated class directory (e.g., 'static'). |
@@ -64,8 +64,11 @@ jeka.classpath=dev.jeka:nodejs-plugin
 @nodeJs.configureProject=true
 @nodeJs.buildDir=dist
 @nodeJs.targetResourceDir=static
-@nodeJs.testCmd=npm run test-headless
+@nodeJs.testCmd=npm install, npm run test-headless
 ```
+
+With `@nodeJs.configureProject=true`, `project: test` runs `testCmd` and `project: pack` then runs `buildCmd`.
+As the tests run first, `testCmd` starts with `npm install`: on a fresh clone, the dependencies are not installed yet.
 
 ## Run a Command
 

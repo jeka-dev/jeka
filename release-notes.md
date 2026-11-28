@@ -15,6 +15,10 @@
 - **`app: install repo=<url>#<tag>`** failed with a bare `Process has returned with error code 128`: git rejects the `#` fragment. It now fails at once, telling to use `tag=<tag>`, and that only the default branch can be installed.
 - **`jeka --doc` footer:** the last line was wrapped inside a colour code, leaving `[m)` at the start of the next line. It is now wrapped between words, and has no colour codes when the output is not a terminal.
 
+## Documentation
+
+- **nodejs plugin:** the README and the `testCmd` doc say that the JS tests run before `buildCmd`, so `testCmd` must install the dependencies itself, e.g. `npm install, npm run test-headless`.
+
 ## API
 
 All additions:
