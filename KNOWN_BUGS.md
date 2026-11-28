@@ -9,14 +9,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## Build and packaging
 
-### nodejs plugin: JS tests run before the dependency install
-- **Symptom:** with the configuration of the plugin README (`@nodeJs.buildCmd=npm install, npm run build`, `@nodeJs.testCmd=npm run test-headless`, `@nodeJs.configureProject=true`), `project: test pack` on a fresh clone runs the JS tests before `npm install`, and they fail.
-- **Cause:** `JkNodeJsProject.registerIn` appends the JS tests to `project.test.postActions`, while the build commands, which hold `npm install`, run in `project.pack.actions`, after the tests.
-- **Where:** `plugins/plugins.nodejs/src/dev/jeka/plugins/nodejs/JkNodeJsProject.java`, `registerIn`.
-- **Workaround:** put the install in the test commands too: `@nodeJs.testCmd=npm install, npm run test-headless`.
-- **Decision needed:** document the workaround in the README, run the build commands before the tests, or install the dependencies before the tests when `node_modules` is missing (`npm` only, while `buildCmd` may use another tool).
-- **Evidence:** sample-maintainer agent; order of the actions from source.
-
 ## Publication and Maven
 
 ## Versioning (Git)

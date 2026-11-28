@@ -63,7 +63,8 @@ public class NodeJsKBean extends KBean {
             "This can be similar to something like 'npx ..., npm ...'")
     public String buildCmd;
 
-    @JkDoc("Comma separated, command-lines to execute for testing when 'configureProject'=true")
+    @JkDoc("Comma separated, command-lines to execute for testing when 'configureProject'=true. " +
+            "They run before 'buildCmd', so they must install the dependencies themselves, e.g. 'npm install, npm test'")
     public String testCmd;
 
     @JkDoc("Path of js project root. It is expected to be relative to the base directory.")
