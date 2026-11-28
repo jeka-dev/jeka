@@ -262,7 +262,9 @@ public final class DockerKBean extends KBean {
     private static String computeImageName(JkModuleId moduleId, JkVersion version, Path baseDir) {
         String name;
         String versionTag = computeVersion(version);
-        if (moduleId != null) {
+        if (moduleId != null && moduleId.getGroup().equals(moduleId.getName())) {
+            name = moduleId.getName();  // module ID without group, as 'my-app'
+        } else if (moduleId != null) {
             name = moduleId.toString().replace(":", "-");
         } else {
             name =  baseDir.toAbsolutePath().getFileName().toString();

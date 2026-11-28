@@ -30,7 +30,7 @@ When the image is built, the console displays the command to run it, as `docker 
 
 **Image Name**
 
-By default, the name is `<group>-<artifact>:<version>` (e.g. `com.acme-shop:1.0.0`), or the directory name if the project has no module ID. 
+By default, the name is `<group>-<artifact>:<version>` (e.g. `com.acme-shop:1.0.0`), `<artifact>:<version>` if the module ID has no group (e.g. `shop`), or the directory name if the project has no module ID. 
 Native image names are prefixed with `native-`. 
 The tag is `latest` when the version is a SNAPSHOT or not specified.
 To use another name:
