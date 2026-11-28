@@ -14,6 +14,7 @@
 - **`intellij: sync` when the JDK of the project can't be downloaded:** with `@project.javaVersion=8` on macOS aarch64, where no Temurin 8 exists, it failed with a `FileNotFoundException` on the foojay URL, leaving the project `.iml` unwritten. It now warns, telling to define the SDK in IntelliJ or to set `jeka.jdk.<version>`, and writes the `.iml`.
 - **`app: install repo=<url>#<tag>`** failed with a bare `Process has returned with error code 128`: git rejects the `#` fragment. It now installs that tag, as `repo=<url> tag=<tag>` does.
 - **`jeka --doc` footer:** the last line was wrapped inside a colour code, leaving `[m)` at the start of the next line. It is now wrapped between words, and has no colour codes when the output is not a terminal.
+- **`intellij: sync` in single-module mode** (the default) ignored the `IntellijKBean` customizers (e.g. `replaceLibByModule`) and the SDK chosen in IntelliJ: it wrote the `.iml` before applying them. `@intellij.splitModule=true` is no longer needed as a workaround.
 
 ## Documentation
 

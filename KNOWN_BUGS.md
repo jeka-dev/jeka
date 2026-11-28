@@ -17,13 +17,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 
 ## KBeans
 
-### `intellij: sync` drops the SDK and the iml customizers in the default, single-module mode
-- **Symptom:** the `.iml` written misses what `IntellijKBean` customizers add. E.g. in `plugins/plugins.protobuf`, `ProtobufCustom` calls `replaceLibByModule("dev.jeka.jeka-core.jar", "core")`, but `jeka intellij: iml` writes a `module-library` on `dev.jeka.jeka-core.jar` instead of the `core` module dependency of the committed `.idea/plugins.protobuf.iml`.
-- **Cause:** `IntellijKBean.generateSingleIml` writes the file, then sets the SDK (`computeImlJdk`, which reads the existing `.iml`) and runs `imlCustomizers` on the iml object, after it was written. Only the split mode (`splitModule=true`, or a project Java version other than the running one) writes after them.
-- **Where:** `IntellijKBean.generateSingleIml`.
-- **Workaround:** `@intellij.splitModule=true`: the project `.iml` then holds the customizations.
-- **Evidence:** reproduced on master (2026-11-27) in `plugins/plugins.protobuf`; order of the calls from source; workaround run there.
-
 ## Tests and CI
 
 - **Outdated samples:** `samples/samples.baseapp` and `samples/samples.project-api` set `jeka.java.version=17`, below the Java 21 JeKa needs to run. `samples/samples.project-flat-facade-api` has no command running its test, and outdated dependencies. *sample-maintainer agent.*
