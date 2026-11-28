@@ -304,7 +304,6 @@ public final class IntellijKBean extends KBean {
         if (projectJavaVersion == null) {
             return false;
         }
-        System.out.println("project jvm = " + projectJavaVersion);
         return !JkJavaVersion.ofCurrent().equals(projectJavaVersion);
     }
 
@@ -321,12 +320,12 @@ public final class IntellijKBean extends KBean {
     // IML containing both jeka-src and project (or IdeSupport)
     private void generateSingleIml(Path imlPath, SdkResolver resolver) {
         JkIntellijIml iml = imlGenerator().computeIml2(true, true);
+        iml.component.setSdk(resolver.computeImlJdk(imlPath, false));  // reads the SDK of the existing iml
+        imlCustomizers.accept(iml);
         JkPathFile.of(imlPath)
                 .deleteIfExist()
                 .createIfNotExist()
                 .write(iml.toDoc().toXml().getBytes(StandardCharsets.UTF_8));
-        iml.component.setSdk(resolver.computeImlJdk(imlPath, false));
-        imlCustomizers.accept(iml);
         JkLog.info("Iml file generated at " + Paths.get("").toAbsolutePath().relativize(imlPath.toAbsolutePath()).normalize());
     }
 
