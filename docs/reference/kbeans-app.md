@@ -21,7 +21,7 @@ jeka app: install repo=REPO_URL
 ```
 
 JeKa may ask to trust the URL, to choose a version if the repository has tags, and to choose a name if neither `name` nor a catalog application is specified. 
-These questions need a terminal: without it, the command fails. The version cannot be set with a `#tag` suffix: use `tag=`.
+These questions need a terminal: without it, the command fails. `repo=REPO_URL#1.2.0` is the same as `repo=REPO_URL tag=1.2.0`. Only tags can be installed, not branches.
 
 To install without any question, as in a script or CI, trust the URL first, then pass the tag and the name:
 

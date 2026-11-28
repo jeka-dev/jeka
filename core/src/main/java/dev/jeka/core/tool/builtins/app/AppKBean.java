@@ -84,13 +84,9 @@ public class AppKBean extends KBean {
             JkLog.info("You must specify the git url using 'repo=[Git URL]'.");
             return;
         }
-        String remoteUrl = this.repo.trim();
-        if (remoteUrl.contains("#")) {  // git rejects it with a bare error
-            String suggestedTag = JkUtilsString.substringAfterLast(remoteUrl, "#");
-            throw new JkException("'repo' can not hold a '#' fragment: %s%nTo install a given tag, use: "
-                    + "jeka app: install repo=%s tag=%s%nOnly the default branch can be installed.", remoteUrl,
-                    JkUtilsString.substringBeforeLast(remoteUrl, "#"), suggestedTag);
-        }
+        String[] repoAndTagOption = splitTagFragment(this.repo, this.tag);
+        String remoteUrl = repoAndTagOption[0];
+        String requestedTag = repoAndTagOption[1];
         String suggestedAppName = name;
         boolean shouldAskAppName = JkUtilsString.isBlank(name);
         if (!remoteUrl.contains(":")) {
@@ -114,7 +110,7 @@ public class AppKBean extends KBean {
 
 
         List<AppManager.AppVersion> installedAppsForRepo = appManager.getAppVersionsForRepo(remoteUrl);
-        if (!installedAppsForRepo.isEmpty() && JkUtilsString.isBlank(tag)) {
+        if (!installedAppsForRepo.isEmpty() && JkUtilsString.isBlank(requestedTag)) {
             JkLog.info("This repository has been already installed for following app/versions:");
             installedAppsForRepo.forEach(System.out::println);
             String response = ask("Do you want to install another version? %s:", JkAnsi.yellow("[N,y]")).trim();
@@ -149,8 +145,8 @@ public class AppKBean extends KBean {
         final RepoAndTag repoAndTag;
 
         // Tag set from options
-        if (!JkUtilsString.isBlank(tag)) {
-            repoAndTag = repoAndTagFromOption(tag, remoteUrl, tagBucket, branch);
+        if (!JkUtilsString.isBlank(requestedTag)) {
+            repoAndTag = repoAndTagFromOption(requestedTag, remoteUrl, tagBucket, branch);
 
         // No tag available
         } else if (tagBucket.tags.isEmpty()) {
@@ -496,6 +492,25 @@ public class AppKBean extends KBean {
         }
         JkLog.info("Version %s will be installed.", JkAnsi.magenta(requestedTag));
         return new RepoAndTag(remoteUrl, requestedTag);
+    }
+
+    // 'repo=<url>#<tag>' is the same as 'repo=<url> tag=<tag>', as with 'jeka -r <url>#<tag>'.
+    // Git rejects the fragment with a bare error, so it is removed from the URL. Non-private for testing.
+    static String[] splitTagFragment(String repo, String tagOption) {
+        String remoteUrl = repo.trim();
+        if (!remoteUrl.contains("#")) {
+            return new String[] {remoteUrl, tagOption};
+        }
+        String fragment = JkUtilsString.substringAfterLast(remoteUrl, "#").trim();
+        remoteUrl = JkUtilsString.substringBeforeLast(remoteUrl, "#").trim();
+        if (fragment.isEmpty()) {
+            return new String[] {remoteUrl, tagOption};
+        }
+        if (!JkUtilsString.isBlank(tagOption) && !tagOption.trim().equals(fragment)) {
+            throw new JkException("'repo' ends with '#%s' while 'tag' is '%s': set the tag only once.",
+                    fragment, tagOption.trim());
+        }
+        return new String[] {remoteUrl, fragment};
     }
 
     // JkPrompt returns null when the input is closed, as when no terminal is attached. Non-private for testing.
