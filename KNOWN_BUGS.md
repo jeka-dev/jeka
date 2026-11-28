@@ -1,6 +1,6 @@
 # Known Bugs
 
-Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 2026-11-27, after running the samples on 0.11.70 and fixing #293 to #297.
+Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 2026-11-28, after fixing #308 to #315.
 
 - Read this before diagnosing a failure or documenting a feature: the problem may already be known.
 - Don't fix an entry as a side effect of another task. Report it instead.
@@ -26,12 +26,6 @@ Bugs found but not fixed yet. Listed on 2026-11-24, after PR #261; updated on 20
 - **Evidence:** reproduced on master (2026-11-27).
 
 ## Publication and Maven
-
-### Ivy messages shown as errors
-- **Symptom:** `Error: [Ivy] unknown resolver https://...` lines show at the normal log level.
-- **Cause:** `IvyMessageLogger` only hides messages starting with `unknown resolver url`, and the resolver names changed.
-- **Evidence:** sample-maintainer agent; filter from source. Not reproduced on master (2026-11-27): resolver names are `url:https://...`, so the cached `ivydata-*.properties` hold `resolver=url:https://...`, which the filter hides. Resolving `commons-text:1.12.0` from `repo1.maven.org`, then `repo.maven.apache.org`, then `repo1` again, logged nothing. The exact message and the command that shows it are needed; otherwise, candidate for removal.
-
 
 ## Versioning (Git)
 
